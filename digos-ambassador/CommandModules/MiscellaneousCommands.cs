@@ -23,6 +23,8 @@
 using System.Threading.Tasks;
 using Discord.Commands;
 
+// ReSharper disable UnusedMember.Global
+
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
