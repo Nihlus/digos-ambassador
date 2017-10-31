@@ -26,6 +26,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Discord.WebSocket;
 using log4net;
 
 namespace DIGOS.Ambassador

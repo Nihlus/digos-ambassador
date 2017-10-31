@@ -6,9 +6,11 @@
       <e p=".travis.yml" t="Include" />
       <e p="README.md" t="Include" />
       <e p="digos-ambassador" t="IncludeRecursive">
+        <e p="AmbassadorClient.cs" t="Include" />
         <e p="Content" t="Include">
           <e p="bot.token" t="Include" />
         </e>
+        <e p="ContentManager.cs" t="Include" />
         <e p="Program.cs" t="Include" />
         <e p="app.config" t="Include" />
         <e p="bin" t="ExcludeRecursive" />

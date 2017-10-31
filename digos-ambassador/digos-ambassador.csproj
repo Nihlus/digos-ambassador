@@ -24,6 +24,11 @@
     </AdditionalFiles>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Discord.Net" Version="1.0.2" />
     <PackageReference Include="Discord.Net.Commands" Version="1.0.2" />
     <PackageReference Include="log4net" Version="2.0.8" />
