@@ -59,13 +59,14 @@ namespace DIGOS.Ambassador
 
 			// Initialize
 
+			var ambassadorClient = new AmbassadorClient();
+			await ambassadorClient.LoginAsync();
+			await ambassadorClient.StartAsync();
+
 			// Connect to database
 
-			// Enumerate joined servers
-
-			// Connect to joined servers
-
-			// Message event loop
+			// Wait for shutdown
+			await Task.Delay(-1);
 		}
 
 		/// <summary>

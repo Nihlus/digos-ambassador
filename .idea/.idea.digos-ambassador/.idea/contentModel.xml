@@ -7,6 +7,9 @@
       <e p="README.md" t="Include" />
       <e p="digos-ambassador" t="IncludeRecursive">
         <e p="AmbassadorClient.cs" t="Include" />
+        <e p="CommandModules" t="Include">
+          <e p="MiscellaneousCommands.cs" t="Include" />
+        </e>
         <e p="Content" t="Include">
           <e p="bot.token" t="Include" />
         </e>

@@ -21,10 +21,13 @@
 //
 
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 using log4net;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador
 {
@@ -40,6 +43,10 @@ namespace DIGOS.Ambassador
 
 		private readonly DiscordSocketClient Client;
 
+		private readonly CommandService Commands;
+
+		private readonly IServiceProvider Services;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AmbassadorClient"/> class.
 		/// </summary>
@@ -47,6 +54,15 @@ namespace DIGOS.Ambassador
 		{
 			this.Client = new DiscordSocketClient();
 			this.Client.Log += OnDiscordLogEvent;
+
+			this.Commands = new CommandService();
+
+			this.Services = new ServiceCollection()
+				.AddSingleton(this.Client)
+				.AddSingleton(this.Commands)
+				.BuildServiceProvider();
+
+			this.Client.MessageReceived += OnMessageReceived;
 		}
 
 		/// <summary>
@@ -64,7 +80,36 @@ namespace DIGOS.Ambassador
 		/// <returns>A task representing the start action.</returns>
 		public async Task StartAsync()
 		{
+			await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly());
 			await this.Client.StartAsync();
+		}
+
+		/// <summary>
+		/// Handles incoming messages, passing them to the command context handler.
+		/// </summary>
+		/// <param name="arg">The message coming in from the socket client.</param>
+		/// <returns>A task representing the message handling.</returns>
+		private async Task OnMessageReceived(SocketMessage arg)
+		{
+			var message = arg as SocketUserMessage;
+			if (message == null)
+			{
+				return;
+			}
+
+			int argumentPos = 0;
+			if (!(message.HasCharPrefix('!', ref argumentPos) || message.HasMentionPrefix(this.Client.CurrentUser, ref argumentPos)))
+			{
+				return;
+			}
+
+			var context = new SocketCommandContext(this.Client, message);
+			var result = await this.Commands.ExecuteAsync(context, argumentPos, this.Services);
+
+			if (!result.IsSuccess)
+			{
+				await context.Channel.SendMessageAsync(result.ErrorReason);
+			}
 		}
 
 		/// <summary>
