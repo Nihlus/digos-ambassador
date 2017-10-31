@@ -91,8 +91,7 @@ namespace DIGOS.Ambassador
 		/// <returns>A task representing the message handling.</returns>
 		private async Task OnMessageReceived(SocketMessage arg)
 		{
-			var message = arg as SocketUserMessage;
-			if (message == null)
+			if (!(arg is SocketUserMessage message))
 			{
 				return;
 			}
