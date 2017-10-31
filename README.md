@@ -14,4 +14,4 @@ If you want to contribute, please open an issue on Github and/or contact the aut
 See the AUTHORS file.
 
 ### Licensing
-This project is licensed under the GPLv3 license. See the LICENSE.md file for the complete text.
+This project is licensed under the GPLv3 license. See the LICENSE file for the complete text.
