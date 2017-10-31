@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Threading.Tasks;
 
 namespace DIGOS.Ambassador
 {
@@ -33,7 +34,8 @@ namespace DIGOS.Ambassador
 		/// The main entry point of the program.
 		/// </summary>
 		/// <param name="args">The command-line arguments passed to the program.</param>
-		public static void Main(string[] args)
+		/// <returns>A task.</returns>
+		public static async Task Main(string[] args)
 		{
 			Console.WriteLine("Uplink established @.=.@");
 
