@@ -108,7 +108,7 @@ namespace DIGOS.Ambassador
 
 			if (!result.IsSuccess)
 			{
-				await context.Channel.SendMessageAsync(result.ErrorReason);
+				await context.Channel.SendMessageAsync($"Bzzt. Looks like we've had a wardrobe malfunction: {result.ErrorReason}");
 			}
 		}
 
