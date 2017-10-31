@@ -87,9 +87,7 @@ namespace DIGOS.Ambassador
 			Log.Fatal("Please report this to <jarl.gullberg@gmail.com> or via GitHub. Include the full log and a " +
 					  "description of what you were doing when it happened.");
 
-			var unhandledException = unhandledExceptionEventArgs.ExceptionObject as Exception;
-
-			if (unhandledException == null)
+			if (!(unhandledExceptionEventArgs.ExceptionObject is Exception unhandledException))
 			{
 				Log.Fatal("The unhandled exception was null. Call a priest.");
 				return;
