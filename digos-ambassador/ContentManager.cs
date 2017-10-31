@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador
 		/// <summary>
 		/// Loads
 		/// </summary>
-		public void LoadContent()
+		private void LoadContent()
 		{
 			LoadBotToken();
 			LoadSass();
