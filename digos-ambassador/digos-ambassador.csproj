@@ -18,6 +18,9 @@
         <AdditionalFiles Include="$(SolutionDir)\README.md">
             <Link>README.md</Link>
         </AdditionalFiles>
+        <AdditionalFiles Include="$(SolutionDir)\.travis.yml">
+            <Link>.travis.yml</Link>
+        </AdditionalFiles>
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004"/>
