@@ -10,8 +10,10 @@
           <e p="bot.token" t="Include" />
         </e>
         <e p="Program.cs" t="Include" />
+        <e p="app.config" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="digos-ambassador.csproj" t="IncludeRecursive" />
+        <e p="digos-ambassador.log" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netcoreapp2.0" t="Include">

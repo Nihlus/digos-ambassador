@@ -21,7 +21,12 @@
 //
 
 using System;
+using System.Globalization;
+using System.IO;
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using log4net;
 
 namespace DIGOS.Ambassador
 {
@@ -31,13 +36,25 @@ namespace DIGOS.Ambassador
 	internal static class Program
 	{
 		/// <summary>
+		/// Logger instance for this class.
+		/// </summary>
+		private static readonly ILog Log = LogManager.GetLogger(typeof(Program));
+
+		/// <summary>
 		/// The main entry point of the program.
 		/// </summary>
 		/// <param name="args">The command-line arguments passed to the program.</param>
 		/// <returns>A task.</returns>
 		public static async Task Main(string[] args)
 		{
-			Console.WriteLine("Uplink established @.=.@");
+			Log.Debug($"Starting up. Running on {RuntimeInformation.OSDescription}");
+
+			// Connect to uncaught exceptions for logging
+			AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+
+			// Configure logging
+			var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+			log4net.Config.XmlConfigurator.Configure(logRepository, new FileInfo("app.config"));
 
 			// Initialize
 
@@ -48,6 +65,48 @@ namespace DIGOS.Ambassador
 			// Connect to joined servers
 
 			// Message event loop
+		}
+
+		/// <summary>
+		/// Event handler for all unhandled exceptions that may be encountered during runtime. While there should never
+		/// be any unhandled exceptions in an ideal program, unexpected issues can and will arise. This handler logs
+		/// the exception and all relevant information to a logfile and prints it to the console for debugging purposes.
+		/// </summary>
+		/// <param name="sender">The sending object.</param>
+		/// <param name="unhandledExceptionEventArgs">The event object containing the information about the exception.</param>
+		private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
+		{
+			// Force english exception output
+			System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+			System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+			Log.Fatal("----------------");
+			Log.Fatal("FATAL UNHANDLED EXCEPTION!");
+			Log.Fatal("Something has gone terribly, terribly wrong during runtime.");
+			Log.Fatal("The following is what information could be gathered by the program before crashing.");
+			Log.Fatal("Please report this to <jarl.gullberg@gmail.com> or via GitHub. Include the full log and a " +
+					  "description of what you were doing when it happened.");
+
+			var unhandledException = unhandledExceptionEventArgs.ExceptionObject as Exception;
+
+			if (unhandledException == null)
+			{
+				Log.Fatal("The unhandled exception was null. Call a priest.");
+				return;
+			}
+
+			Log.Fatal($"Exception type: {unhandledException.GetType().FullName}");
+			Log.Fatal($"Exception Message: {unhandledException.Message}");
+			Log.Fatal($"Exception Stacktrace: {unhandledException.StackTrace}");
+
+			if (unhandledException.InnerException == null)
+			{
+				return;
+			}
+
+			Log.Fatal($"Inner exception type: {unhandledException.InnerException.GetType().FullName}");
+			Log.Fatal($"Inner exception Message: {unhandledException.InnerException.Message}");
+			Log.Fatal($"Inner exception Stacktrace: {unhandledException.InnerException.StackTrace}");
 		}
 	}
 }
