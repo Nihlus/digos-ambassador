@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[Summary("Sasses the user in a DIGOS fashion.")]
 		public async Task SassAsync()
 		{
-			string sass = this.Context.Channel.IsNsfw ? ContentManager.Instance.GetSass(true) : ContentManager.Instance.GetSass();
+			string sass = ContentManager.Instance.GetSass(this.Context.Channel.IsNsfw);
 
 			await this.Context.Channel.SendMessageAsync(sass);
 		}
