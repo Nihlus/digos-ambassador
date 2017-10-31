@@ -26,7 +26,6 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Discord.WebSocket;
 using log4net;
 
 namespace DIGOS.Ambassador
@@ -44,9 +43,8 @@ namespace DIGOS.Ambassador
 		/// <summary>
 		/// The main entry point of the program.
 		/// </summary>
-		/// <param name="args">The command-line arguments passed to the program.</param>
 		/// <returns>A task.</returns>
-		public static async Task Main(string[] args)
+		public static async Task Main()
 		{
 			Log.Debug($"Starting up. Running on {RuntimeInformation.OSDescription}");
 
