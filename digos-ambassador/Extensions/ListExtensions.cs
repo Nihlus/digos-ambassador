@@ -1,5 +1,5 @@
 ﻿//
-//  MiscellaneousCommands.cs
+//  ListExtensions.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,27 +20,26 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Threading.Tasks;
-using Discord.Commands;
+using System;
+using System.Collections.Generic;
 
-namespace DIGOS.Ambassador.CommandModules
+namespace DIGOS.Ambassador.Extensions
 {
 	/// <summary>
-	/// Miscellaneous commands - just for fun, testing, etc.
+	/// Extension methods for lists.
 	/// </summary>
-	public class MiscellaneousCommands : ModuleBase<SocketCommandContext>
+	public static class ListExtensions
 	{
 		/// <summary>
-		/// Sasses the user in a DIGOS fashion.
+		/// Picks a random value from the list.
 		/// </summary>
-		/// <returns>A task wrapping the command.</returns>
-		[Command("sass")]
-		[Summary("Sasses the user in a DIGOS fashion.")]
-		public async Task SassAsync()
+		/// <param name="list">The list to pick from.</param>
+		/// <typeparam name="T">The type contained in the list.</typeparam>
+		/// <returns>A random value.</returns>
+		public static T PickRandom<T>(this IList<T> list)
 		{
-			string sass = this.Context.Channel.IsNsfw ? ContentManager.Instance.GetSass(true) : ContentManager.Instance.GetSass();
-
-			await this.Context.Channel.SendMessageAsync(sass);
+			var random = new Random();
+			return list[random.Next(0, list.Count)];
 		}
 	}
 }

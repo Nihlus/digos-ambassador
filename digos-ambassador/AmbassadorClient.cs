@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador
 		/// <returns>A task representing the login action.</returns>
 		public async Task LoginAsync()
 		{
-			await this.Client.LoginAsync(TokenType.Bot, ContentManager.GetBotToken());
+			await this.Client.LoginAsync(TokenType.Bot, ContentManager.Instance.BotToken);
 		}
 
 		/// <summary>
