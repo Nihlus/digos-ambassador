@@ -61,8 +61,6 @@ namespace DIGOS.Ambassador
 			await ambassadorClient.LoginAsync();
 			await ambassadorClient.StartAsync();
 
-			// Connect to database
-
 			// Wait for shutdown
 			await Task.Delay(-1);
 		}
