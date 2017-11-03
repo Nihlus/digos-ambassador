@@ -31,6 +31,11 @@ namespace DIGOS.Ambassador.Database.UserInfo
 	public class User
 	{
 		/// <summary>
+		/// Gets or sets the unique ID of the user.
+		/// </summary>
+		public uint UserID { get; set; }
+
+		/// <summary>
 		/// Gets or sets the Discord ID of the user.
 		/// </summary>
 		public uint DiscordID { get; set; }
@@ -46,9 +51,9 @@ namespace DIGOS.Ambassador.Database.UserInfo
 		public string Bio { get; set; }
 
 		/// <summary>
-		/// Gets or sets the current timezone of the user.
+		/// Gets or sets the current timezone of the user. This is an hour offset ( + or - ) to UTC/GMT.
 		/// </summary>
-		public TimeZoneInfo Timezone { get; set; }
+		public int Timezone { get; set; }
 
 		/// <summary>
 		/// Gets or sets the characters that the user has.

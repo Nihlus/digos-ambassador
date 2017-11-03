@@ -21,6 +21,7 @@
 //
 
 using System;
+using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 
 namespace DIGOS.Ambassador.Database.UserInfo
 {
@@ -29,6 +30,11 @@ namespace DIGOS.Ambassador.Database.UserInfo
 	/// </summary>
 	public class Character
 	{
+		/// <summary>
+		/// Gets or sets the character's unique key.
+		/// </summary>
+		public uint CharacterID { get; set; }
+
 		/// <summary>
 		/// Gets or sets the user that owns this character.
 		/// </summary>
@@ -42,7 +48,7 @@ namespace DIGOS.Ambassador.Database.UserInfo
 		/// <summary>
 		/// Gets or sets a URL pointing to the character's avatar.
 		/// </summary>
-		public Uri Avatar { get; set; }
+		public string Avatar { get; set; }
 
 		/// <summary>
 		/// Gets or sets the nickname that a user should have when playing as the character.

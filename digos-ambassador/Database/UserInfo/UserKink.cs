@@ -28,6 +28,11 @@ namespace DIGOS.Ambassador.Database.UserInfo
 	public class UserKink
 	{
 		/// <summary>
+		/// Gets or sets the unique ID for this user's kink.
+		/// </summary>
+		public uint UserKinkID { get; set; }
+
+		/// <summary>
 		/// Gets or sets the kink.
 		/// </summary>
 		public Kink Kink { get; set; }
