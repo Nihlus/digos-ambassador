@@ -31,6 +31,11 @@ namespace DIGOS.Ambassador.Database.UserInfo
 	public class User
 	{
 		/// <summary>
+		/// Gets or sets the Discord ID of the user.
+		/// </summary>
+		public uint DiscordID { get; set; }
+
+		/// <summary>
 		/// Gets or sets the class of the user within the DIGOS 'verse.
 		/// </summary>
 		public UserClass Class { get; set; }

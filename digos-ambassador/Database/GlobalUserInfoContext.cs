@@ -21,6 +21,7 @@
 //
 
 using System;
+using DIGOS.Ambassador.Database.UserInfo;
 using Microsoft.EntityFrameworkCore;
 
 namespace DIGOS.Ambassador.Database
@@ -30,6 +31,16 @@ namespace DIGOS.Ambassador.Database
 	/// </summary>
 	public class GlobalUserInfoContext : DbContext
 	{
+		/// <summary>
+		/// Gets or sets the database where the user information is stored.
+		/// </summary>
+		public DbSet<User> Users { get; set; }
+
+		/// <summary>
+		/// Gets or sets the database where characters are stored.
+		/// </summary>
+		public DbSet<Character> Characters { get; set; }
+
 		/// <inheritdoc />
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{

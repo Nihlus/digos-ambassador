@@ -30,6 +30,11 @@ namespace DIGOS.Ambassador.Database.UserInfo
 	public class Character
 	{
 		/// <summary>
+		/// Gets or sets the user that owns this character.
+		/// </summary>
+		public User Owner { get; set; }
+
+		/// <summary>
 		/// Gets or sets the user-unique name of the character.
 		/// </summary>
 		public string Name { get; set; }
