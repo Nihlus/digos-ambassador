@@ -21,6 +21,9 @@
         <e p="ContentManager.cs" t="Include" />
         <e p="Database" t="Include">
           <e p="GlobalUserInfoContext.cs" t="Include" />
+          <e p="Permissions" t="Include">
+            <e p="UserPermission.cs" t="Include" />
+          </e>
           <e p="UserInfo" t="Include">
             <e p="Character.cs" t="Include" />
             <e p="Kink.cs" t="Include" />
@@ -40,6 +43,14 @@
           <e p="20171103171610_AddNewUserClass.Designer.cs" t="Include" />
           <e p="20171103171610_AddNewUserClass.cs" t="Include" />
           <e p="GlobalUserInfoContextModelSnapshot.cs" t="Include" />
+        </e>
+        <e p="Permissions" t="Include">
+          <e p="DIGOSPermission.cs" t="Include" />
+          <e p="DIGOSPermissionScope.cs" t="Include" />
+          <e p="DIGOSPermissionTarget.cs" t="Include" />
+          <e p="Preconditions" t="Include">
+            <e p="RequireDIGOSPermissionAttribute.cs" t="Include" />
+          </e>
         </e>
         <e p="Program.cs" t="Include" />
         <e p="app.config" t="Include" />

@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Discord;
 using DIGOS.Ambassador.Database.UserInfo;
 using Microsoft.EntityFrameworkCore;
@@ -63,11 +64,11 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns>Stored information about the user.</returns>
-		public User GetOrRegisterUser(IUser discordUser)
+		public async Task<User> GetOrRegisterUserAsync(IUser discordUser)
 		{
 			if (!IsUserKnown(discordUser))
 			{
-				return AddUser(discordUser);
+				return await AddUserAsync(discordUser);
 			}
 
 			return GetUser(discordUser);
@@ -89,7 +90,7 @@ namespace DIGOS.Ambassador.Database
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns>The freshly created information about the user.</returns>
 		/// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
-		public User AddUser(IUser discordUser)
+		public async Task<User> AddUserAsync(IUser discordUser)
 		{
 			if (IsUserKnown(discordUser))
 			{
@@ -106,7 +107,7 @@ namespace DIGOS.Ambassador.Database
 
 			this.Users.Add(newUser);
 
-			SaveChanges();
+			await SaveChangesAsync();
 
 			return newUser;
 		}
