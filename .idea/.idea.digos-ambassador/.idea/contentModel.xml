@@ -18,6 +18,17 @@
           <e p="bot.token" t="Include" />
         </e>
         <e p="ContentManager.cs" t="Include" />
+        <e p="Database" t="Include">
+          <e p="GlobalUserInfoContext.cs" t="Include" />
+          <e p="UserInfo" t="Include">
+            <e p="Character.cs" t="Include" />
+            <e p="Kink.cs" t="Include" />
+            <e p="KinkCategory.cs" t="Include" />
+            <e p="KinkPreference.cs" t="Include" />
+            <e p="User.cs" t="Include" />
+            <e p="UserClass.cs" t="Include" />
+          </e>
+        </e>
         <e p="Extensions" t="Include">
           <e p="ListExtensions.cs" t="Include" />
         </e>
