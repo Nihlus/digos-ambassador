@@ -84,7 +84,7 @@
     <Rule Id="SA1205" Action="Error" /> <!-- Partial elements must declare access -->
     <Rule Id="SA1206" Action="Error" /> <!-- Declaration keywords must follow order -->
     <Rule Id="SA1207" Action="Error" /> <!-- Protected must come before internal -->
-    <Rule Id="SA1208" Action="Error" /> <!-- System using directives must be placed before other using directives -->
+    <Rule Id="SA1208" Action="Warning" /> <!-- System using directives must be placed before other using directives -->
     <Rule Id="SA1209" Action="Error" /> <!-- Using alias directives must be placed after other using directives -->
     <Rule Id="SA1210" Action="Error" /> <!-- Using directives must be ordered alphabetically by namespace -->
     <Rule Id="SA1211" Action="Error" /> <!-- Using alias directives must be ordered alphabetically by alias name -->
@@ -151,7 +151,7 @@
     <Rule Id="SA1520" Action="Error" /> <!-- Use braces consistently -->
 
     <!-- Documentation rules -->
-    <Rule Id="SA1600" Action="Error" /> <!-- Elements must be documented -->
+    <Rule Id="SA1600" Action="Warning" /> <!-- Elements must be documented -->
     <Rule Id="SA1601" Action="None" Intentional="true" /> <!-- Partial elements must be documented -->
     <Rule Id="SA1602" Action="Error" /> <!-- Enumeration items must be documented -->
     <Rule Id="SA1604" Action="Error" /> <!-- Element documentation must have summary -->

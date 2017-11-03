@@ -41,6 +41,11 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		public DbSet<Character> Characters { get; set; }
 
+		/// <summary>
+		/// Gets or sets the database where kinks are stored.
+		/// </summary>
+		public DbSet<Kink> Kinks { get; set; }
+
 		/// <inheritdoc />
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{

@@ -33,12 +33,17 @@
         <e p="Extensions" t="Include">
           <e p="ListExtensions.cs" t="Include" />
         </e>
+        <e p="Migrations" t="Include">
+          <e p="20171103161726_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171103161726_InitialCreate.cs" t="Include" />
+          <e p="GlobalUserInfoContextModelSnapshot.cs" t="Include" />
+        </e>
         <e p="Program.cs" t="Include" />
         <e p="app.config" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="digos-ambassador.csproj" t="IncludeRecursive" />
-        <e p="digos-ambassador.csproj___jb_tmp___" t="Include" />
         <e p="digos-ambassador.log" t="Include" />
+        <e p="global_userinfo.db" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netcoreapp2.0" t="Include">
