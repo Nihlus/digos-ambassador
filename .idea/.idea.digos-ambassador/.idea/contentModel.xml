@@ -37,6 +37,8 @@
         <e p="Migrations" t="Include">
           <e p="20171103163700_InitialCreate.Designer.cs" t="Include" />
           <e p="20171103163700_InitialCreate.cs" t="Include" />
+          <e p="20171103171610_AddNewUserClass.Designer.cs" t="Include" />
+          <e p="20171103171610_AddNewUserClass.cs" t="Include" />
           <e p="GlobalUserInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Program.cs" t="Include" />

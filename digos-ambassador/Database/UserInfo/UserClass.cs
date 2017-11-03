@@ -33,6 +33,11 @@ namespace DIGOS.Ambassador.Database.UserInfo
 		Other,
 
 		/// <summary>
+		/// The user is part of the DIGOS infrastructure. Reserved for bots.
+		/// </summary>
+		DIGOSInfrastructure,
+
+		/// <summary>
 		/// The user is a DIGOS dronie, linked to a unit.
 		/// </summary>
 		DIGOSDronie,

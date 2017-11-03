@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
+using Humanizer;
 
 namespace DIGOS.Ambassador.CommandModules
 {
@@ -59,7 +60,7 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			var eb = new EmbedBuilder();
 
-			eb.WithAuthor(this.Context.User);
+			eb.WithAuthor(discordUser);
 			eb.WithThumbnailUrl(discordUser.GetAvatarUrl());
 
 			switch (user.Class)
@@ -69,6 +70,11 @@ namespace DIGOS.Ambassador.CommandModules
 					eb.WithColor(1.0f, 1.0f, 1.0f); // White
 					break;
 				}
+				case UserClass.DIGOSInfrastructure:
+				{
+					eb.WithColor(Color.Purple);
+					break;
+				}
 				case UserClass.DIGOSDronie:
 				{
 					eb.WithColor(Color.DarkOrange);
@@ -76,7 +82,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 				case UserClass.DIGOSUnit:
 				{
-					eb.WithColor(Color.Purple);
+					eb.WithColor(Color.DarkPurple);
 					break;
 				}
 				default:
@@ -86,7 +92,7 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 
 			eb.AddField("Name", discordUser.Username);
-			eb.AddField("Class", user.Class);
+			eb.AddField("Class", user.Class.Humanize().Transform(To.TitleCase));
 
 			string timezoneValue;
 			if (user.Timezone == null)
