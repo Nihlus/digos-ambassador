@@ -42,9 +42,16 @@
         <e p="Extensions" t="Include">
           <e p="ListExtensions.cs" t="Include" />
         </e>
+        <e p="FList" t="Include">
+          <e p="Kinks" t="Include">
+            <e p="FListKink.cs" t="Include" />
+            <e p="FListKinkCategory.cs" t="Include" />
+            <e p="KinkCollection.cs" t="Include" />
+          </e>
+        </e>
         <e p="Migrations" t="Include">
-          <e p="20171103192904_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171103192904_InitialCreate.cs" t="Include" />
+          <e p="20171103220023_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171103220023_InitialCreate.cs" t="Include" />
           <e p="GlobalUserInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Permissions" t="Include">

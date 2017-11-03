@@ -20,12 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+
 namespace DIGOS.Ambassador.Database.UserInfo
 {
 	/// <summary>
 	/// Represents a sexual kink or fetish.
 	/// </summary>
-	public class Kink
+	public class Kink : IEquatable<Kink>
 	{
 		/// <summary>
 		/// Gets or sets the unique ID of the kink.
@@ -51,5 +53,65 @@ namespace DIGOS.Ambassador.Database.UserInfo
 		/// Gets or sets the full description of the kink.
 		/// </summary>
 		public string Description { get; set; }
+
+		/// <inheritdoc />
+		public bool Equals(Kink other)
+		{
+			if (ReferenceEquals(null, other))
+			{
+				return false;
+			}
+
+			if (ReferenceEquals(this, other))
+			{
+				return true;
+			}
+
+			return this.Category == other.Category && this.FListID == other.FListID && string.Equals(this.Name, other.Name) && string.Equals(this.Description, other.Description);
+		}
+
+		/// <inheritdoc />
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj))
+			{
+				return false;
+			}
+
+			if (ReferenceEquals(this, obj))
+			{
+				return true;
+			}
+
+			if (obj.GetType() != this.GetType())
+			{
+				return false;
+			}
+
+			return Equals((Kink)obj);
+		}
+
+		/// <inheritdoc />
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				int hashCode = (int)this.Category;
+				hashCode = (hashCode * 397) ^ (int)this.FListID;
+				hashCode = (hashCode * 397) ^ (this.Name != null ? this.Name.GetHashCode() : 0);
+				hashCode = (hashCode * 397) ^ (this.Description != null ? this.Description.GetHashCode() : 0);
+				return hashCode;
+			}
+		}
+
+		public static bool operator ==(Kink left, Kink right)
+		{
+			return Equals(left, right);
+		}
+
+		public static bool operator !=(Kink left, Kink right)
+		{
+			return !Equals(left, right);
+		}
 	}
 }

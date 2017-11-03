@@ -96,13 +96,31 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
+		/// Updates the kink database, adding in new entries. Duplicates are not added.
+		/// </summary>
+		/// <param name="newKinks">The new kinks.</param>
+		/// <returns>The number of updated kinks.</returns>
+		public async Task<int> UpdateKinksAsync(IEnumerable<Kink> newKinks)
+		{
+			foreach (var kink in newKinks)
+			{
+				if (!await this.Kinks.ContainsAsync(kink))
+				{
+					await this.Kinks.AddAsync(kink);
+				}
+			}
+
+			return await SaveChangesAsync();
+		}
+
+		/// <summary>
 		/// Determines whether or not a Discord user is stored in the database.
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns><value>true</value> if the user is stored; otherwise, <value>false</value>.</returns>
-		public bool IsUserKnown(IUser discordUser)
+		public async Task<bool> IsUserKnown(IUser discordUser)
 		{
-			return this.Users.Any(u => u.DiscordID == discordUser.Id);
+			return await this.Users.AnyAsync(u => u.DiscordID == discordUser.Id);
 		}
 
 		/// <summary>
@@ -112,12 +130,12 @@ namespace DIGOS.Ambassador.Database
 		/// <returns>Stored information about the user.</returns>
 		public async Task<User> GetOrRegisterUserAsync(IUser discordUser)
 		{
-			if (!IsUserKnown(discordUser))
+			if (!await IsUserKnown(discordUser))
 			{
 				return await AddUserAsync(discordUser);
 			}
 
-			return GetUser(discordUser);
+			return await GetUser(discordUser);
 		}
 
 		/// <summary>
@@ -125,13 +143,13 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns>Stored information about the user.</returns>
-		public User GetUser(IUser discordUser)
+		public async Task<User> GetUser(IUser discordUser)
 		{
-			return this.Users
+			return await this.Users
 				.Include(u => u.Characters)
 				.Include(u => u.Kinks)
 				.Include(u => u.Permissions)
-				.First(u => u.DiscordID == discordUser.Id);
+				.FirstAsync(u => u.DiscordID == discordUser.Id);
 		}
 
 		/// <summary>
@@ -142,7 +160,7 @@ namespace DIGOS.Ambassador.Database
 		/// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
 		public async Task<User> AddUserAsync(IUser discordUser)
 		{
-			if (IsUserKnown(discordUser))
+			if (await IsUserKnown(discordUser))
 			{
 				throw new ArgumentException($"A user with the ID {discordUser.Id} has already been added to the database.", nameof(discordUser));
 			}
@@ -184,7 +202,7 @@ namespace DIGOS.Ambassador.Database
 				Permissions = defaultPermissions
 			};
 
-			this.Users.Add(newUser);
+			await this.Users.AddAsync(newUser);
 
 			await SaveChangesAsync();
 
