@@ -29,7 +29,9 @@ using Discord.Commands;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Permissions;
+using DIGOS.Ambassador.Permissions.Preconditions;
 using Humanizer;
+using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionScope;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
@@ -146,6 +148,17 @@ namespace DIGOS.Ambassador.CommandModules
 			return eb;
 		}
 
+		private static async Task<bool> CheckIsBotOwnerAsync(SocketCommandContext context)
+		{
+			var ownerId = (await context.Client.GetApplicationInfoAsync()).Owner.Id;
+			if (context.Message.Author.Id != ownerId)
+			{
+				return false;
+			}
+
+			return true;
+		}
+
 		[Group("grant")]
 		public class GrantCommands : ModuleBase<SocketCommandContext>
 		{
@@ -155,12 +168,13 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <returns>A task wrapping the command.</returns>
 			[Command]
 			[Summary("Grant the targeted user the given permission.")]
+			[RequirePermission(ManagePermissions, Other)]
 			public async Task Default(IUser discordUser, Permission grantedPermission, PermissionTarget grantedTarget = Self, PermissionScope grantedScope = Local)
 			{
 				// Check that only the bot owner can grant global permissions
 				if (grantedScope == Global)
 				{
-					if (!await CheckIsBotOwnerAsync())
+					if (!await CheckIsBotOwnerAsync(this.Context))
 					{
 						await this.Context.Channel.SendMessageAsync("Only the bot owner can grant global permissions.");
 						return;
@@ -182,24 +196,14 @@ namespace DIGOS.Ambassador.CommandModules
 				await this.Context.Channel.SendMessageAsync("Permission granted.");
 			}
 
-			private async Task<bool> CheckIsBotOwnerAsync()
-			{
-				var ownerId = (await this.Context.Client.GetApplicationInfoAsync()).Owner.Id;
-				if (this.Context.Message.Author.Id != ownerId)
-				{
-					return false;
-				}
-
-				return true;
-			}
-
 			/// <summary>
 			/// Grant the targeted user the given target permission.
 			/// </summary>
 			/// <returns>A task wrapping the command.</returns>
 			[Command("target")]
 			[Summary("Grant the targeted user the given target permission.")]
-			public async Task GrantTargetAsync()
+			[RequirePermission(ManagePermissions, Other)]
+			public async Task GrantTargetAsync(IUser discordUser, Permission grantedPermission, PermissionTarget grantedTarget)
 			{
 
 			}
@@ -210,9 +214,18 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <returns>A task wrapping the command.</returns>
 			[Command("scope")]
 			[Summary("Grant the targeted user the given scope permission.")]
-			public async Task GrantScopeAsync()
+			[RequirePermission(ManagePermissions, Other)]
+			public async Task GrantScopeAsync(IUser discordUser, Permission grantedPermission, PermissionScope grantedScope)
 			{
-
+				// Check that only the bot owner can grant global permissions
+				if (grantedScope == Global)
+				{
+					if (!await CheckIsBotOwnerAsync(this.Context))
+					{
+						await this.Context.Channel.SendMessageAsync("Only the bot owner can grant global permissions.");
+						return;
+					}
+				}
 			}
 		}
 
@@ -225,6 +238,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <returns>A task wrapping the command.</returns>
 			[Command]
 			[Summary("Revoke the given permission from the targeted user.")]
+			[RequirePermission(ManagePermissions, Other)]
 			public async Task Default(IUser discordUser, Permission revokedPermission)
 			{
 
@@ -236,7 +250,8 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <returns>A task wrapping the command.</returns>
 			[Command("target")]
 			[Summary("Revoke the given target permission from the targeted user.")]
-			public async Task RevokeTargetAsync()
+			[RequirePermission(ManagePermissions, Other)]
+			public async Task RevokeTargetAsync(IUser discordUser, PermissionTarget revokedTarget)
 			{
 
 			}
@@ -247,9 +262,18 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <returns>A task wrapping the command.</returns>
 			[Command("scope")]
 			[Summary("Revoke the given scope permission from the targeted user.")]
-			public async Task RevokeScopeAsync()
+			[RequirePermission(ManagePermissions, Other)]
+			public async Task RevokeScopeAsync(IUser discordUser, PermissionScope revokedScope)
 			{
-
+				// Check that only the bot owner can grant global permissions
+				if (revokedScope == Global)
+				{
+					if (!await CheckIsBotOwnerAsync(this.Context))
+					{
+						await this.Context.Channel.SendMessageAsync("Only the bot owner can grant global permissions.");
+						return;
+					}
+				}
 			}
 		}
 	}

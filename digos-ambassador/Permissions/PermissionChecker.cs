@@ -40,21 +40,29 @@ namespace DIGOS.Ambassador.Permissions
 		public static bool HasPermission(User user, UserPermission permission)
 		{
 			// Find any matching permissions
-			var matchingPerms = user.Permissions.Where(p => p.Permission == permission.Permission).ToList();
+			var matchingPerm = user.Permissions.FirstOrDefault(p => p.Permission == permission.Permission);
 
-			if (!matchingPerms.Any())
+			if (matchingPerm is null)
 			{
 				return false;
 			}
 
-			if (!matchingPerms.Any(p => p.Target >= permission.Target))
+			if (!(matchingPerm.Target >= permission.Target))
 			{
 				return false;
 			}
 
-			if (!matchingPerms.Any(p => p.Scope >= permission.Scope))
+			if (!(matchingPerm.Scope >= permission.Scope))
 			{
 				return false;
+			}
+
+			if (matchingPerm.Scope == PermissionScope.Local)
+			{
+				if (matchingPerm.ServerID != permission.ServerID)
+				{
+					return false;
+				}
 			}
 
 			return true;
