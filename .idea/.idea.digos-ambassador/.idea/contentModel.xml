@@ -11,6 +11,7 @@
       <e p="digos-ambassador" t="IncludeRecursive">
         <e p="AmbassadorClient.cs" t="Include" />
         <e p="CommandModules" t="Include">
+          <e p="AdminCommands.cs" t="Include" />
           <e p="MiscellaneousCommands.cs" t="Include" />
           <e p="PermissionCommands.cs" t="Include" />
           <e p="UserCommands.cs" t="Include" />

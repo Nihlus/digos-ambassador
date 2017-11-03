@@ -23,133 +23,133 @@
 namespace DIGOS.Ambassador.Database.UserInfo
 {
 	/// <summary>
-	/// Represents kink categories.
+	/// Represents kink categories. Values are taken from the F-list API.
 	/// </summary>
 	public enum KinkCategory
 	{
 		/// <summary>
 		/// Kinks that don't really belong to one specific category.
 		/// </summary>
-		General,
+		General = 27,
 
 		/// <summary>
 		/// Kinks that relate to the physical appearance of characters.
 		/// </summary>
-		Character,
+		Character = 28,
 
 		/// <summary>
 		/// Kinks that relate to the gender of a character.
 		/// </summary>
-		Gender,
+		Gender = 29,
 
 		/// <summary>
 		/// Kinks that relate to the species of a character.
 		/// </summary>
-		Species,
+		Species = 30,
 
 		/// <summary>
 		/// Kinks that relate to the age of a character.
 		/// </summary>
-		Age,
+		Age = 31,
 
 		/// <summary>
 		/// Kinks that relate to anal sex and play.
 		/// </summary>
-		AnalPlay,
+		AnalPlay = 32,
 
 		/// <summary>
 		/// Kinks that relate to vaginal sex and play.
 		/// </summary>
-		VaginalPlay,
+		VaginalPlay = 33,
 
 		/// <summary>
 		/// Kinks that relate to oral sex and play.
 		/// </summary>
-		OralPlay,
+		OralPlay = 34,
 
 		/// <summary>
 		/// Kinks that relate to penile sex and play.
 		/// </summary>
-		CockPlay,
+		CockPlay = 35,
 
 		/// <summary>
 		/// Kinks that relate to semen and its various uses.
 		/// </summary>
-		Cum,
+		Cum = 36,
 
 		/// <summary>
 		/// Kinks that relate to different types of sexual penetration.
 		/// </summary>
-		SexualPenetration,
+		SexualPenetration = 37,
 
 		/// <summary>
 		/// Kinks that relate to how roleplay is approached or performed.
 		/// </summary>
-		Roleplay,
+		Roleplay = 38,
 
 		/// <summary>
 		/// Kinks that relate to roleplaying themes or settings.
 		/// </summary>
-		ThemesAndSettings,
+		ThemesAndSettings = 39,
 
 		/// <summary>
 		/// Kinks that relate to worship or play targeting specific body parts.
 		/// </summary>
-		BodyWorship,
+		BodyWorship = 40,
 
 		/// <summary>
 		/// Kinks that relate to clothing or the materials they are made of.
 		/// </summary>
-		DressUpAndMaterials,
+		DressUpAndMaterials = 41,
 
 		/// <summary>
 		/// Kinks that relate to the psychologial relationship between characters.
 		/// </summary>
-		DomSubAndPsyche,
+		DomSubAndPsyche = 42,
 
 		/// <summary>
 		/// Kinks that relate to bondage, domination, and sadomasochism.
 		/// </summary>
-		BDSM,
+		BDSM = 43,
 
 		/// <summary>
 		/// Kinks that relate to the roughness or painfulness of sexual acts.
 		/// </summary>
-		Roughness,
+		Roughness = 44,
 
 		/// <summary>
 		/// Kinks that relate to violence, gore, or torture.
 		/// </summary>
-		GoreAndTorture,
+		GoreAndTorture = 45,
 
 		/// <summary>
 		/// Kinks that relate to character size.
 		/// </summary>
-		InflationGrowthAndSize,
+		InflationGrowthAndSize = 46,
 
 		/// <summary>
 		/// Kinks that relate to transformation of characters.
 		/// </summary>
-		Transformation,
+		Transformation = 47,
 
 		/// <summary>
 		/// Kinks that relate to impregnation or breeding.
 		/// </summary>
-		Pregnancy,
+		Pregnancy = 48,
 
 		/// <summary>
 		/// Kinks that relate to vore or unbirth.
 		/// </summary>
-		VoreAndUnbirth,
+		VoreAndUnbirth = 49,
 
 		/// <summary>
 		/// Kinks that relate to unclean behaviour.
 		/// </summary>
-		UncleanPlay,
+		UncleanPlay = 50,
 
 		/// <summary>
 		/// Kinks that relate to bodily waste.
 		/// </summary>
-		WatersportsAndScat,
+		WatersportsAndScat = 51,
 	}
 }
