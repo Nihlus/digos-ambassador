@@ -86,7 +86,8 @@
     <Rule Id="SA1207" Action="Error" /> <!-- Protected must come before internal -->
     <Rule Id="SA1208" Action="Warning" /> <!-- System using directives must be placed before other using directives -->
     <Rule Id="SA1209" Action="Error" /> <!-- Using alias directives must be placed after other using directives -->
-    <Rule Id="SA1210" Action="Error" /> <!-- Using directives must be ordered alphabetically by namespace -->
+    <Rule Id="SA1210" Action="Warning" /> <!-- Using directives must be ordered alphabetically by namespace -->
+    <Rule Id="SA1210" Action="Warning" /> <!-- Using directives must be ordered alphabetically by namespace -->
     <Rule Id="SA1211" Action="Error" /> <!-- Using alias directives must be ordered alphabetically by alias name -->
     <Rule Id="SA1212" Action="Error" /> <!-- Property accessors must follow order -->
     <Rule Id="SA1213" Action="Error" /> <!-- Event accessors must follow order -->
@@ -161,7 +162,7 @@
     <Rule Id="SA1608" Action="Error" /> <!-- Element documentation must not have default summary -->
     <Rule Id="SA1609" Action="None" Intentional="true" /> <!-- Property documentation must have value -->
     <Rule Id="SA1610" Action="None" Intentional="true "/> <!-- Property documentation must have value text -->
-    <Rule Id="SA1611" Action="Error" /> <!-- Element parameters must be documented -->
+    <Rule Id="SA1611" Action="Warning" /> <!-- Element parameters must be documented -->
     <Rule Id="SA1612" Action="Error" /> <!-- Element parameter documentation must match element parameters -->
     <Rule Id="SA1613" Action="Error" /> <!-- Element parameter documentation must declare parameter name -->
     <Rule Id="SA1614" Action="Error" /> <!-- Element parameter documentation must have text -->

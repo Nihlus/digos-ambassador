@@ -9,6 +9,7 @@
         <e p="AmbassadorClient.cs" t="Include" />
         <e p="CommandModules" t="Include">
           <e p="MiscellaneousCommands.cs" t="Include" />
+          <e p="UserCommands.cs" t="Include" />
         </e>
         <e p="Content" t="Include">
           <e p="Sass" t="Include">
@@ -34,8 +35,8 @@
           <e p="ListExtensions.cs" t="Include" />
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171103161726_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171103161726_InitialCreate.cs" t="Include" />
+          <e p="20171103163700_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171103163700_InitialCreate.cs" t="Include" />
           <e p="GlobalUserInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Program.cs" t="Include" />
