@@ -57,13 +57,14 @@ namespace DIGOS.Ambassador.Permissions
 				return false;
 			}
 
-			if (matchingPerm.Scope == PermissionScope.Local)
+			// TODO: Implement proper local permissions
+			/*if (matchingPerm.Scope == PermissionScope.Local)
 			{
 				if (matchingPerm.ServerID != permission.ServerID)
 				{
 					return false;
 				}
-			}
+			}*/
 
 			return true;
 		}
