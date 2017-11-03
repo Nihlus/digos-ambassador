@@ -248,7 +248,7 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 
 			/// <summary>
-			/// Sets the invoking user's timezone hour offset..
+			/// Sets the invoking user's timezone hour offset.
 			/// </summary>
 			/// <returns>A task wrapping the command.</returns>
 			[Priority(1)]
