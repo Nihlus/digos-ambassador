@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.0.0
 MinimumVisualStudioVersion = 10.0.0.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos_ambassador", "digos-ambassador/digos-ambassador.csproj", "{D44A340E-6344-4E42-827C-E63C12C603BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos-ambassador.Tests", "digos-ambassador.Tests\digos-ambassador.Tests.csproj", "{60C5B2AC-336F-45FA-87CC-B18265F073F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{D44A340E-6344-4E42-827C-E63C12C603BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D44A340E-6344-4E42-827C-E63C12C603BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D44A340E-6344-4E42-827C-E63C12C603BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60C5B2AC-336F-45FA-87CC-B18265F073F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60C5B2AC-336F-45FA-87CC-B18265F073F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60C5B2AC-336F-45FA-87CC-B18265F073F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60C5B2AC-336F-45FA-87CC-B18265F073F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

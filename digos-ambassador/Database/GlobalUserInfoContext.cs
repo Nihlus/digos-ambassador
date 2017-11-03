@@ -21,11 +21,15 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
+using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.UserInfo;
+using DIGOS.Ambassador.Permissions;
 using Microsoft.EntityFrameworkCore;
+using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
 namespace DIGOS.Ambassador.Database
 {
@@ -48,6 +52,48 @@ namespace DIGOS.Ambassador.Database
 		/// Gets or sets the database where kinks are stored.
 		/// </summary>
 		public DbSet<Kink> Kinks { get; set; }
+
+		/// <summary>
+		/// Gets or sets the database where granted user permissions are stored.
+		/// </summary>
+		public DbSet<UserPermission> UserPermissions { get; set; }
+
+		/// <summary>
+		/// Grants the specified user the given permission. If the user already has the permission, it is augmented with
+		/// the new scope and target (if they are more permissive than the existing ones).
+		/// </summary>
+		/// <param name="discordUser">The user.</param>
+		/// <param name="grantedPermission">The granted permission.</param>
+		/// <returns>A task wrapping the granting of the permission.</returns>
+		public async Task GrantPermissionAsync(IUser discordUser, UserPermission grantedPermission)
+		{
+			var user = await GetOrRegisterUserAsync(discordUser);
+
+			var existingPermission = user.Permissions.FirstOrDefault(p => p.Permission == grantedPermission.Permission);
+			if (existingPermission is null)
+			{
+				user.Permissions.Add(grantedPermission);
+			}
+			else
+			{
+				if (existingPermission.Target < grantedPermission.Target)
+				{
+					existingPermission.Target = grantedPermission.Target;
+				}
+
+				if (existingPermission.Scope < grantedPermission.Scope)
+				{
+					existingPermission.Scope = grantedPermission.Scope;
+				}
+			}
+
+			await SaveChangesAsync();
+		}
+
+		public async Task RevokePermission(IUser discordUser, Permission revokedPermission)
+		{
+
+		}
 
 		/// <summary>
 		/// Determines whether or not a Discord user is stored in the database.
@@ -81,7 +127,11 @@ namespace DIGOS.Ambassador.Database
 		/// <returns>Stored information about the user.</returns>
 		public User GetUser(IUser discordUser)
 		{
-			return this.Users.First(u => u.DiscordID == discordUser.Id);
+			return this.Users
+				.Include(u => u.Characters)
+				.Include(u => u.Kinks)
+				.Include(u => u.Permissions)
+				.First(u => u.DiscordID == discordUser.Id);
 		}
 
 		/// <summary>
@@ -97,12 +147,41 @@ namespace DIGOS.Ambassador.Database
 				throw new ArgumentException($"A user with the ID {discordUser.Id} has already been added to the database.", nameof(discordUser));
 			}
 
+			var defaultPermissions = new List<UserPermission>
+			{
+				new UserPermission
+				{
+					Permission = Permission.EditUser,
+					Target = PermissionTarget.Self,
+					Scope = PermissionScope.Local
+				},
+				new UserPermission
+				{
+					Permission = Permission.CreateCharacter,
+					Target = PermissionTarget.Self,
+					Scope = PermissionScope.Local
+				},
+				new UserPermission
+				{
+					Permission = Permission.DeleteCharacter,
+					Target = PermissionTarget.Self,
+					Scope = PermissionScope.Local
+				},
+				new UserPermission
+				{
+					Permission = Permission.ImportCharacter,
+					Target = PermissionTarget.Self,
+					Scope = PermissionScope.Local
+				},
+			};
+
 			var newUser = new User
 			{
 				DiscordID = discordUser.Id,
 				Class = UserClass.Other,
-				Bio = string.Empty,
-				Timezone = null
+				Bio = null,
+				Timezone = null,
+				Permissions = defaultPermissions
 			};
 
 			this.Users.Add(newUser);

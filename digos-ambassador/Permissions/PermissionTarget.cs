@@ -1,5 +1,5 @@
 ﻿//
-//  DIGOSPermissionTarget.cs
+//  PermissionTarget.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -25,7 +25,7 @@ namespace DIGOS.Ambassador.Permissions
 	/// <summary>
 	/// Represents target permissions for commands.
 	/// </summary>
-	public enum DIGOSPermissionTarget
+	public enum PermissionTarget
 	{
 		/// <summary>
 		/// Allows execution of a command exclusively on the invoking user.

@@ -1,5 +1,5 @@
 ﻿//
-//  DIGOSPermission.cs
+//  Permission.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,41 +20,49 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel;
+
 namespace DIGOS.Ambassador.Permissions
 {
 	/// <summary>
 	/// Represents different permissions specific to the ambassador.
 	/// </summary>
-	public enum DIGOSPermission
+	public enum Permission
 	{
 		/// <summary>
-		/// Allows the user to grant permissions. This is a dangerous permission to have.
+		/// Allows the user to grant and revoke permissions. This is a dangerous permission to have.
 		/// </summary>
-		GrantPermission,
+		[Description("Allows the user to grant and revoke permissions. This is a dangerous permission to have.")]
+		ManagePermissions,
 
 		/// <summary>
 		/// Allows the user to set classes.
 		/// </summary>
+		[Description("Allows the user to set classes.")]
 		SetClass,
 
 		/// <summary>
 		/// Allows the user to create characters.
 		/// </summary>
+		[Description("Allows the user to create characters.")]
 		CreateCharacter,
 
 		/// <summary>
-		/// Allows the user to import characters.
+		/// Allows the user to import characters from supported services.
 		/// </summary>
+		[Description("Allows the user to import characters from supported services.")]
 		ImportCharacter,
 
 		/// <summary>
 		/// Allows the user to delete characters.
 		/// </summary>
+		[Description("Allows the user to delete characters.")]
 		DeleteCharacter,
 
 		/// <summary>
 		/// Allows the user to edit user information.
 		/// </summary>
+		[Description("Allows the user to edit user information.")]
 		EditUser,
 	}
 }

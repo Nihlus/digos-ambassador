@@ -1,5 +1,5 @@
 ﻿//
-//  DIGOSPermissionScope.cs
+//  PermissionScope.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -25,7 +25,7 @@ namespace DIGOS.Ambassador.Permissions
 	/// <summary>
 	/// Represents the scope of a permission.
 	/// </summary>
-	public enum DIGOSPermissionScope
+	public enum PermissionScope
 	{
 		/// <summary>
 		/// The permission is only granted on a specific server.

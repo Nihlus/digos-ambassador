@@ -38,17 +38,17 @@ namespace DIGOS.Ambassador.Database.Permissions
 		/// <summary>
 		/// Gets or sets the granted permission.
 		/// </summary>
-		public DIGOSPermission Permission { get; set; }
+		public Permission Permission { get; set; }
 
 		/// <summary>
 		/// Gets or sets the allowed targets.
 		/// </summary>
-		public DIGOSPermissionTarget Target { get; set; }
+		public PermissionTarget Target { get; set; }
 
 		/// <summary>
 		/// Gets or sets the scope of the permission.
 		/// </summary>
-		public DIGOSPermissionScope Scope { get; set; }
+		public PermissionScope Scope { get; set; }
 
 		/// <summary>
 		/// Gets or sets the ID of the server that this permission was granted on.

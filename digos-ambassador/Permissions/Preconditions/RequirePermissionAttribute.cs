@@ -1,5 +1,5 @@
 ﻿//
-//  RequireDIGOSPermissionAttribute.cs
+//  RequirePermissionAttribute.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -28,17 +28,23 @@ using DIGOS.Ambassador.Database.Permissions;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
-	public class RequireDIGOSPermissionAttribute : PreconditionAttribute
+	public class RequirePermissionAttribute : PreconditionAttribute
 	{
-		private DIGOSPermission Permission;
-		private DIGOSPermissionTarget Target;
+		private readonly Permission Permission;
+		private readonly PermissionTarget Target;
 
-		public RequireDIGOSPermissionAttribute(DIGOSPermission permission, DIGOSPermissionTarget target = DIGOSPermissionTarget.Self)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="RequirePermissionAttribute"/> class.
+		/// </summary>
+		/// <param name="permission">The required permission.</param>
+		/// <param name="target">The required target scope.</param>
+		public RequirePermissionAttribute(Permission permission, PermissionTarget target = PermissionTarget.Self)
 		{
 			this.Permission = permission;
 			this.Target = target;
 		}
 
+		/// <inheritdoc />
 		public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
 		{
 			using (var db = new GlobalUserInfoContext())
@@ -52,7 +58,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 					ServerID = context.Guild.Id
 				};
 
-				if (user.HasPermission(permission))
+				if (PermissionChecker.HasPermission(user, permission))
 				{
 					return PreconditionResult.FromSuccess();
 				}

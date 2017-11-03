@@ -72,15 +72,5 @@ namespace DIGOS.Ambassador.Database.UserInfo
 		/// Gets or sets the bot permissions granted to this user.
 		/// </summary>
 		public List<UserPermission> Permissions { get; set; }
-
-		/// <summary>
-		/// Determines whether or not the user has the given permission.
-		/// </summary>
-		/// <param name="permission">The permission.</param>
-		/// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
-		public bool HasPermission(UserPermission permission)
-		{
-			return this.Permissions.Any(p => p == permission);
-		}
 	}
 }

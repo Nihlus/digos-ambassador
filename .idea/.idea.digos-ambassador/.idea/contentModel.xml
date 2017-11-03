@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="$USER_HOME$/.Rider2017.2/system/resharper-host/local/Transient/ReSharperHost/v10/SolutionCaches/_digos-ambassador.233808278.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.2.0/build/netcoreapp1.0/xunit.runner.reporters.netstandard15.dll" t="Include" />
+    <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.2.0/build/netcoreapp1.0/xunit.runner.utility.netstandard15.dll" t="Include" />
+    <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.2.0/build/netcoreapp1.0/xunit.runner.visualstudio.dotnetcore.testadapter.dll" t="Include" />
     <e p="$PROJECT_DIR$" t="IncludeFlat">
       <e p=".travis.yml" t="Include" />
       <e p="README.md" t="Include" />
@@ -9,6 +12,7 @@
         <e p="AmbassadorClient.cs" t="Include" />
         <e p="CommandModules" t="Include">
           <e p="MiscellaneousCommands.cs" t="Include" />
+          <e p="PermissionCommands.cs" t="Include" />
           <e p="UserCommands.cs" t="Include" />
         </e>
         <e p="Content" t="Include">
@@ -38,18 +42,17 @@
           <e p="ListExtensions.cs" t="Include" />
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171103163700_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171103163700_InitialCreate.cs" t="Include" />
-          <e p="20171103171610_AddNewUserClass.Designer.cs" t="Include" />
-          <e p="20171103171610_AddNewUserClass.cs" t="Include" />
+          <e p="20171103192904_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171103192904_InitialCreate.cs" t="Include" />
           <e p="GlobalUserInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Permissions" t="Include">
-          <e p="DIGOSPermission.cs" t="Include" />
-          <e p="DIGOSPermissionScope.cs" t="Include" />
-          <e p="DIGOSPermissionTarget.cs" t="Include" />
+          <e p="Permission.cs" t="Include" />
+          <e p="PermissionChecker.cs" t="Include" />
+          <e p="PermissionScope.cs" t="Include" />
+          <e p="PermissionTarget.cs" t="Include" />
           <e p="Preconditions" t="Include">
-            <e p="RequireDIGOSPermissionAttribute.cs" t="Include" />
+            <e p="RequirePermissionAttribute.cs" t="Include" />
           </e>
         </e>
         <e p="Program.cs" t="Include" />
@@ -62,6 +65,19 @@
           <e p="Debug" t="Include">
             <e p="netcoreapp2.0" t="Include">
               <e p="digos-ambassador.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
+      <e p="digos-ambassador.Tests" t="IncludeRecursive">
+        <e p="PermissionTests.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="digos-ambassador.Tests.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.0" t="Include">
+              <e p="digos-ambassador.Tests.AssemblyInfo.cs" t="Include" />
+              <e p="digos-ambassador.Tests.Program.cs" t="Include" />
             </e>
           </e>
         </e>
