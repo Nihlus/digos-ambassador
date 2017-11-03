@@ -104,7 +104,7 @@ namespace DIGOS.Ambassador.Database
 		{
 			foreach (var kink in newKinks)
 			{
-				if (!await this.Kinks.ContainsAsync(kink))
+				if (!await this.Kinks.AnyAsync(k => k.FListID == kink.FListID))
 				{
 					await this.Kinks.AddAsync(kink);
 				}
