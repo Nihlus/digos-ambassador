@@ -58,6 +58,6 @@ namespace DIGOS.Ambassador.Database.UserInfo
 		/// <summary>
 		/// Gets or sets the kinks or fetishes of a user, as well as their preferences for each.
 		/// </summary>
-		public Dictionary<Kink, KinkPreference> Kinks { get; set; }
+		public List<UserKink> Kinks { get; set; }
 	}
 }

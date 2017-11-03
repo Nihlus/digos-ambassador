@@ -27,6 +27,7 @@
             <e p="KinkPreference.cs" t="Include" />
             <e p="User.cs" t="Include" />
             <e p="UserClass.cs" t="Include" />
+            <e p="UserKink.cs" t="Include" />
           </e>
         </e>
         <e p="Extensions" t="Include">
