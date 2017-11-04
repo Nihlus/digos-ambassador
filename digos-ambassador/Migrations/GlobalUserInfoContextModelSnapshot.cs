@@ -29,8 +29,6 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<int>("Scope");
 
-                    b.Property<ulong>("ServerID");
-
                     b.Property<int>("Target");
 
                     b.Property<uint?>("UserID");
@@ -40,6 +38,24 @@ namespace DIGOS.Ambassador.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("UserPermissions");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Database.ServerInfo.Server", b =>
+                {
+                    b.Property<uint>("ServerID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<ulong>("DiscordGuildID");
+
+                    b.Property<bool>("IsNSFW");
+
+                    b.Property<uint?>("UserPermissionID");
+
+                    b.HasKey("ServerID");
+
+                    b.HasIndex("UserPermissionID");
+
+                    b.ToTable("Servers");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.UserInfo.Character", b =>
@@ -127,6 +143,13 @@ namespace DIGOS.Ambassador.Migrations
                     b.HasOne("DIGOS.Ambassador.Database.UserInfo.User")
                         .WithMany("Permissions")
                         .HasForeignKey("UserID");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Database.ServerInfo.Server", b =>
+                {
+                    b.HasOne("DIGOS.Ambassador.Database.Permissions.UserPermission")
+                        .WithMany("Servers")
+                        .HasForeignKey("UserPermissionID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.UserInfo.Character", b =>

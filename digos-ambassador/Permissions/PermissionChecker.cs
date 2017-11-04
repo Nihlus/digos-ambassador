@@ -21,6 +21,7 @@
 //
 
 using System.Linq;
+using Discord;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.UserInfo;
 
@@ -34,10 +35,11 @@ namespace DIGOS.Ambassador.Permissions
 		/// <summary>
 		/// Determines whether or not the user has the given permission.
 		/// </summary>
+		/// <param name="discordServer">The Discord server that the command was executed on.</param>
 		/// <param name="user">The user.</param>
 		/// <param name="permission">The permission.</param>
 		/// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
-		public static bool HasPermission(User user, UserPermission permission)
+		public static bool HasPermission(IGuild discordServer, User user, UserPermission permission)
 		{
 			// Find any matching permissions
 			var matchingPerm = user.Permissions.FirstOrDefault(p => p.Permission == permission.Permission);
@@ -57,14 +59,13 @@ namespace DIGOS.Ambassador.Permissions
 				return false;
 			}
 
-			// TODO: Implement proper local permissions
-			/*if (matchingPerm.Scope == PermissionScope.Local)
+			if (matchingPerm.Scope == PermissionScope.Local)
 			{
-				if (matchingPerm.ServerID != permission.ServerID)
+				if (!matchingPerm.Servers.Any(s => s.DiscordGuildID == discordServer.Id))
 				{
 					return false;
 				}
-			}*/
+			}
 
 			return true;
 		}

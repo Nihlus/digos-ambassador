@@ -17,6 +17,9 @@
           <e p="UserCommands.cs" t="Include" />
         </e>
         <e p="Content" t="Include">
+          <e p="Databases" t="Include">
+            <e p="global_userinfo.db" t="Include" />
+          </e>
           <e p="Sass" t="Include">
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
@@ -28,6 +31,9 @@
           <e p="GlobalUserInfoContext.cs" t="Include" />
           <e p="Permissions" t="Include">
             <e p="UserPermission.cs" t="Include" />
+          </e>
+          <e p="ServerInfo" t="Include">
+            <e p="Server.cs" t="Include" />
           </e>
           <e p="UserInfo" t="Include">
             <e p="Character.cs" t="Include" />
@@ -50,8 +56,8 @@
           </e>
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171103221108_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171103221108_InitialCreate.cs" t="Include" />
+          <e p="20171104171518_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171104171518_InitialCreate.cs" t="Include" />
           <e p="GlobalUserInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Permissions" t="Include">
@@ -68,7 +74,6 @@
         <e p="bin" t="ExcludeRecursive" />
         <e p="digos-ambassador.csproj" t="IncludeRecursive" />
         <e p="digos-ambassador.log" t="Include" />
-        <e p="global_userinfo.db" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netcoreapp2.0" t="Include">
@@ -78,6 +83,7 @@
         </e>
       </e>
       <e p="digos-ambassador.Tests" t="IncludeRecursive">
+        <e p="Mocks" t="Include" />
         <e p="PermissionTests.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="digos-ambassador.Tests.csproj" t="IncludeRecursive" />

@@ -22,10 +22,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using DIGOS.Ambassador.Database.Permissions;
+using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
 using Microsoft.EntityFrameworkCore;
@@ -52,6 +54,11 @@ namespace DIGOS.Ambassador.Database
 		/// Gets or sets the database where kinks are stored.
 		/// </summary>
 		public DbSet<Kink> Kinks { get; set; }
+
+		/// <summary>
+		/// Gets or sets the database where global server-specific settings are stored.
+		/// </summary>
+		public DbSet<Server> Servers { get; set; }
 
 		/// <summary>
 		/// Gets or sets the database where granted user permissions are stored.
@@ -212,7 +219,7 @@ namespace DIGOS.Ambassador.Database
 		/// <inheritdoc />
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-			optionsBuilder.UseSqlite("Data Source=global_userinfo.db");
+			optionsBuilder.UseSqlite($"Data Source={Path.Combine("Content", "Databases", "global_userinfo.db")}");
 		}
 	}
 }

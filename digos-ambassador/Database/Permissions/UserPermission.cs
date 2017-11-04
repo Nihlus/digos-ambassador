@@ -21,6 +21,9 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Permissions;
 
 namespace DIGOS.Ambassador.Database.Permissions
@@ -51,9 +54,9 @@ namespace DIGOS.Ambassador.Database.Permissions
 		public PermissionScope Scope { get; set; }
 
 		/// <summary>
-		/// Gets or sets the ID of the server that this permission was granted on.
+		/// Gets or sets the ID of the servers that this permission has been granted on.
 		/// </summary>
-		public ulong ServerID { get; set; }
+		public List<Server> Servers { get; set; }
 
 		/// <inheritdoc />
 		public bool Equals(UserPermission other)
@@ -68,7 +71,11 @@ namespace DIGOS.Ambassador.Database.Permissions
 				return true;
 			}
 
-			return this.Permission == other.Permission && this.Target == other.Target && this.Scope == other.Scope && this.ServerID == other.ServerID;
+			return
+				this.Permission == other.Permission &&
+				this.Target == other.Target &&
+				this.Scope == other.Scope &&
+				this.Servers.OrderBy(x => x).SequenceEqual(other.Servers.OrderBy(x => x));
 		}
 
 		/// <inheritdoc />
@@ -100,7 +107,7 @@ namespace DIGOS.Ambassador.Database.Permissions
 				int hashCode = (int)this.Permission;
 				hashCode = (hashCode * 397) ^ (int)this.Target;
 				hashCode = (hashCode * 397) ^ (int)this.Scope;
-				hashCode = (hashCode * 397) ^ this.ServerID.GetHashCode();
+				hashCode = (hashCode * 397) ^ (this.Servers != null ? this.Servers.GetHashCode() : 0);
 				return hashCode;
 			}
 		}

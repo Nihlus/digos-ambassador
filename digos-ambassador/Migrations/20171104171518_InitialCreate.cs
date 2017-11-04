@@ -99,7 +99,6 @@ namespace DIGOS.Ambassador.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Permission = table.Column<int>(type: "INTEGER", nullable: false),
                     Scope = table.Column<int>(type: "INTEGER", nullable: false),
-                    ServerID = table.Column<ulong>(type: "INTEGER", nullable: false),
                     Target = table.Column<int>(type: "INTEGER", nullable: false),
                     UserID = table.Column<uint>(type: "INTEGER", nullable: true)
                 },
@@ -114,10 +113,36 @@ namespace DIGOS.Ambassador.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Servers",
+                columns: table => new
+                {
+                    ServerID = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    DiscordGuildID = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
+                    UserPermissionID = table.Column<uint>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Servers", x => x.ServerID);
+                    table.ForeignKey(
+                        name: "FK_Servers_UserPermissions_UserPermissionID",
+                        column: x => x.UserPermissionID,
+                        principalTable: "UserPermissions",
+                        principalColumn: "UserPermissionID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Characters_OwnerUserID",
                 table: "Characters",
                 column: "OwnerUserID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Servers_UserPermissionID",
+                table: "Servers",
+                column: "UserPermissionID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserKink_KinkID",
@@ -139,6 +164,9 @@ namespace DIGOS.Ambassador.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Characters");
+
+            migrationBuilder.DropTable(
+                name: "Servers");
 
             migrationBuilder.DropTable(
                 name: "UserKink");

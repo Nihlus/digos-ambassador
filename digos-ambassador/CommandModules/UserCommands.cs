@@ -31,6 +31,7 @@ using Humanizer;
 
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
+// ReSharper disable UnusedMember.Global
 
 namespace DIGOS.Ambassador.CommandModules
 {

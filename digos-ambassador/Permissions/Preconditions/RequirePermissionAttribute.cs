@@ -21,10 +21,12 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord.Commands;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Permissions;
+using DIGOS.Ambassador.Database.ServerInfo;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
@@ -55,10 +57,10 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 				{
 					Permission = this.Permission,
 					Target = this.Target,
-					ServerID = context.Guild.Id
+					Servers = new List<Server> { Server.CreateDefault(context.Guild) }
 				};
 
-				if (PermissionChecker.HasPermission(user, permission))
+				if (PermissionChecker.HasPermission(context.Guild, user, permission))
 				{
 					return PreconditionResult.FromSuccess();
 				}
