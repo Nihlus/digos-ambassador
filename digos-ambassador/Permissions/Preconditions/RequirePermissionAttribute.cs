@@ -30,6 +30,10 @@ using DIGOS.Ambassador.Database.ServerInfo;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
+	/// <summary>
+	/// This attribute can be attached to Discord.Net.Commands module commands to restrict them to certain predefined
+	/// permissions.
+	/// </summary>
 	public class RequirePermissionAttribute : PreconditionAttribute
 	{
 		private readonly Permission Permission;
