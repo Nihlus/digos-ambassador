@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Database
 			await SaveChangesAsync();
 		}
 
-		public async Task RevokePermission(IUser discordUser, Permission revokedPermission)
+		public async Task RevokePermissionAsync(IUser discordUser, Permission revokedPermission)
 		{
 
 		}
