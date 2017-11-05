@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Database
 		public DbSet<Kink> Kinks { get; set; }
 
 		/// <summary>
-		/// Gets or sets the database where global server-specific settings are stored.
+		/// Gets or sets the database where server-specific settings are stored.
 		/// </summary>
 		public DbSet<Server> Servers { get; set; }
 
@@ -69,10 +69,11 @@ namespace DIGOS.Ambassador.Database
 		/// Grants the specified user the given permission. If the user already has the permission, it is augmented with
 		/// the new scope and target (if they are more permissive than the existing ones).
 		/// </summary>
-		/// <param name="discordUser">The user.</param>
+		/// <param name="discordServer">The Discord server the permission was granted on.</param>
+		/// <param name="discordUser">The Discord user.</param>
 		/// <param name="grantedPermission">The granted permission.</param>
 		/// <returns>A task wrapping the granting of the permission.</returns>
-		public async Task GrantPermissionAsync(IUser discordUser, UserPermission grantedPermission)
+		public async Task GrantPermissionAsync(IGuild discordServer, IUser discordUser, UserPermission grantedPermission)
 		{
 			var user = await GetOrRegisterUserAsync(discordUser);
 
@@ -91,6 +92,11 @@ namespace DIGOS.Ambassador.Database
 				if (existingPermission.Scope < grantedPermission.Scope)
 				{
 					existingPermission.Scope = grantedPermission.Scope;
+				}
+
+				if (!existingPermission.Servers.Any(p => p.DiscordGuildID == discordServer.Id))
+				{
+					existingPermission.Servers.Add(Server.CreateDefault(discordServer));
 				}
 			}
 

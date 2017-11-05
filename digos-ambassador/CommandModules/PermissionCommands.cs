@@ -190,7 +190,7 @@ namespace DIGOS.Ambassador.CommandModules
 
 				using (var db = new GlobalInfoContext())
 				{
-					await db.GrantPermissionAsync(discordUser, newPermission);
+					await db.GrantPermissionAsync(this.Context.Guild, discordUser, newPermission);
 				}
 
 				await this.Context.Channel.SendMessageAsync("Permission granted.");
