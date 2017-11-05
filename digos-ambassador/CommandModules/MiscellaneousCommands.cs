@@ -20,7 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 
 // ReSharper disable UnusedMember.Global
@@ -32,6 +34,17 @@ namespace DIGOS.Ambassador.CommandModules
 	/// </summary>
 	public class MiscellaneousCommands : ModuleBase<SocketCommandContext>
 	{
+		private readonly CommandService Commands;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MiscellaneousCommands"/> class.
+		/// </summary>
+		/// <param name="commands">The command service</param>
+		public MiscellaneousCommands(CommandService commands)
+		{
+			this.Commands = commands;
+		}
+
 		/// <summary>
 		/// Sasses the user in a DIGOS fashion.
 		/// </summary>
@@ -43,6 +56,41 @@ namespace DIGOS.Ambassador.CommandModules
 			string sass = ContentManager.Instance.GetSass(this.Context.Channel.IsNsfw);
 
 			await this.Context.Channel.SendMessageAsync(sass);
+		}
+
+		/// <summary>
+		/// Lists available commands.
+		/// </summary>
+		/// <returns>A task wrapping the command.</returns>
+		[Command("help")]
+		[Summary("Lists available commands")]
+		public async Task HelpAsync()
+		{
+			var userChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
+			foreach (var module in this.Commands.Modules.Where(m => !m.IsSubmodule))
+			{
+				var eb = new EmbedBuilder();
+
+				eb.WithColor(Color.Blue);
+				eb.WithDescription($"Available commands in {module.Name}");
+
+				foreach (var command in module.Commands.Union(module.Submodules.SelectMany(sm => sm.Commands)))
+				{
+					var hasPermission = await command.CheckPreconditionsAsync(this.Context);
+					if (hasPermission.IsSuccess)
+					{
+						eb.AddField(command.Aliases.First(), command.Summary);
+					}
+				}
+
+				if (eb.Fields.Count > 0)
+				{
+					await userChannel.SendMessageAsync(string.Empty, false, eb);
+				}
+			}
+
+			await this.Context.Channel.SendMessageAsync($"{userChannel.Recipient.Mention}, please check your private messages.");
+			await userChannel.CloseAsync();
 		}
 	}
 }

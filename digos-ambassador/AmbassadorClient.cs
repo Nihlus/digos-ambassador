@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -28,6 +29,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
 using log4net;
 using Microsoft.Extensions.DependencyInjection;
@@ -113,6 +115,11 @@ namespace DIGOS.Ambassador
 				{
 					var user = await db.GetOrRegisterUserAsync(arg.Author);
 					var server = await db.GetOrRegisterServerAsync(guild);
+
+					if (server.KnownUsers == null)
+					{
+						server.KnownUsers = new List<User>();
+					}
 
 					// Grant permissions to new users
 					if (!server.KnownUsers.Any(u => u.UserID == user.UserID))

@@ -17,6 +17,9 @@
           <e p="UserCommands.cs" t="Include" />
         </e>
         <e p="Content" t="Include">
+          <e p="Databases" t="Include">
+            <e p="global.db" t="Include" />
+          </e>
           <e p="Sass" t="Include">
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
@@ -52,6 +55,11 @@
             <e p="FListKinkCategory.cs" t="Include" />
             <e p="KinkCollection.cs" t="Include" />
           </e>
+        </e>
+        <e p="Migrations" t="Include">
+          <e p="20171105182804_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171105182804_InitialCreate.cs" t="Include" />
+          <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Permissions" t="Include">
           <e p="DefaultPermissions.cs" t="Include" />
