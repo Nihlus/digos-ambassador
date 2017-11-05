@@ -166,7 +166,6 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="userClass">The user's new class.</param>
 			/// <returns>A task wrapping the command.</returns>
-			[Priority(1)]
 			[Command("class")]
 			[Summary("Sets the invoking user's class.")]
 			[RequirePermission(SetClass)]
@@ -214,7 +213,6 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="bio">The user's new bio.</param>
 			/// <returns>A task wrapping the command.</returns>
-			[Priority(1)]
 			[Command("bio")]
 			[Summary("Sets the invoking user's bio.")]
 			[RequirePermission(EditUser)]
@@ -262,7 +260,6 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="timezone">The user's new timezone hour offset.</param>
 			/// <returns>A task wrapping the command.</returns>
-			[Priority(1)]
 			[Command("timezone")]
 			[Summary("Sets the invoking user's timezone hour offset.")]
 			[RequirePermission(EditUser)]
