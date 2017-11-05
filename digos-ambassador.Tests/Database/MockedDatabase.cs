@@ -1,5 +1,5 @@
 ﻿//
-//  PermissionChecker.cs
+//  MockedDatabase.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
