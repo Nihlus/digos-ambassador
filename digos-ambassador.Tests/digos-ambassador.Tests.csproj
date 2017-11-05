@@ -9,14 +9,14 @@
         <CodeAnalysisRuleSet>..\stylecop.ruleset</CodeAnalysisRuleSet>
         <LangVersion>7.1</LangVersion>
     </PropertyGroup>
-    <PropertyGroup>
+    <ItemGroup>
         <AdditionalFiles Include="$(SolutionDir)\stylecop.json">
             <Link>stylecop.json</Link>
         </AdditionalFiles>
         <AdditionalFiles Include="$(SolutionDir)\stylecop.ruleset">
             <Link>stylecop.ruleset</Link>
         </AdditionalFiles>
-    </PropertyGroup>
+    </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170628-02"/>
         <PackageReference Include="Moq" Version="4.7.142"/>
