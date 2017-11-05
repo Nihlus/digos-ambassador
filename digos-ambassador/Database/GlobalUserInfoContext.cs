@@ -97,9 +97,24 @@ namespace DIGOS.Ambassador.Database
 			await SaveChangesAsync();
 		}
 
+		/// <summary>
+		/// Revokes the given permission from the given Discord user. If the user does not have the permission, no
+		/// changes are made.
+		/// </summary>
+		/// <param name="discordUser">The Discord user.</param>
+		/// <param name="revokedPermission">The revoked permission.</param>
+		/// <returns>A task wrapping the revoking of the permission.</returns>
 		public async Task RevokePermissionAsync(IUser discordUser, Permission revokedPermission)
 		{
+			var user = await GetOrRegisterUserAsync(discordUser);
 
+			if (user.Permissions.Any(p => p.Permission == revokedPermission))
+			{
+				// Remove the granted permission from the user's permission set
+				user.Permissions = user.Permissions.Where(p => p.Permission != revokedPermission).ToList();
+
+				await SaveChangesAsync();
+			}
 		}
 
 		/// <summary>
