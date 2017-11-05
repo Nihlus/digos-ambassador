@@ -34,6 +34,7 @@ namespace DIGOS.Ambassador.Tests.Database
 	{
 		private readonly SqliteConnection Connection;
 		private readonly DbContextOptions<GlobalInfoContext> DatabaseOptions;
+
 		public MockedDatabase()
 		{
 			this.Connection = new SqliteConnection("DataSource=:memory:");
@@ -87,7 +88,7 @@ namespace DIGOS.Ambassador.Tests.Database
 
 		public void Dispose()
 		{
-			this.Connection.Close();
+			this.Connection?.Close();
 			this.Connection?.Dispose();
 		}
 	}
