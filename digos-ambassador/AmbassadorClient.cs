@@ -107,7 +107,38 @@ namespace DIGOS.Ambassador
 
 			if (!result.IsSuccess)
 			{
-				await context.Channel.SendMessageAsync($"Bzzt. Looks like we've had a wardrobe malfunction: {result.ErrorReason}");
+				switch (result.Error)
+				{
+					case CommandError.UnknownCommand:
+					{
+						await context.Channel.SendMessageAsync("Unknown command.");
+						break;
+					}
+					case CommandError.UnmetPrecondition:
+					{
+						await context.Channel.SendMessageAsync("You are not authorized to run that command.");
+						break;
+					}
+					case CommandError.ParseFailed:
+					case CommandError.BadArgCount:
+					case CommandError.ObjectNotFound:
+					case CommandError.MultipleMatches:
+					case CommandError.Exception:
+					case CommandError.Unsuccessful:
+					{
+						await context.Channel.SendMessageAsync($"Bzzt. Looks like we've had a wardrobe malfunction: {result.ErrorReason}");
+						break;
+					}
+					case null:
+					{
+						await context.Channel.SendMessageAsync("Unknown error. Please contact maintenance.");
+						break;
+					}
+					default:
+					{
+						throw new ArgumentOutOfRangeException();
+					}
+				}
 			}
 		}
 
