@@ -32,7 +32,6 @@ using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using Humanizer;
 using static DIGOS.Ambassador.Permissions.Permission;
-using static DIGOS.Ambassador.Permissions.PermissionScope;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
@@ -69,7 +68,7 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				var user = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
 
-				var embed = CreateHumanizedPermissionEmbed(user.Permissions);
+				var embed = CreateHumanizedPermissionEmbed(user.LocalPermissions);
 				embed.WithAuthor(this.Context.Message.Author);
 
 				await this.Context.Channel.SendMessageAsync(string.Empty, false, embed);
@@ -88,7 +87,7 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				var user = await db.GetOrRegisterUserAsync(discordUser);
 
-				var embed = CreateHumanizedPermissionEmbed(user.Permissions);
+				var embed = CreateHumanizedPermissionEmbed(user.LocalPermissions);
 				embed.WithAuthor(discordUser);
 
 				await this.Context.Channel.SendMessageAsync(string.Empty, false, embed);
@@ -119,10 +118,10 @@ namespace DIGOS.Ambassador.CommandModules
 			return eb;
 		}
 
-		private static EmbedBuilder CreateHumanizedPermissionEmbed(IEnumerable<UserPermission> userPermissions)
+		private static EmbedBuilder CreateHumanizedPermissionEmbed(IEnumerable<LocalPermission> userPermissions)
 		{
 			var eb = new EmbedBuilder();
-			var humanizedPermissions = new List<(string Name, string Description, string Target, string Scope)>();
+			var humanizedPermissions = new List<(string Name, string Description, string Target)>();
 			foreach (var userPermission in userPermissions)
 			{
 				var permission = userPermission.Permission;
@@ -131,8 +130,7 @@ namespace DIGOS.Ambassador.CommandModules
 					(
 						permission.ToString().Humanize().Transform(To.TitleCase),
 						permission.Humanize(),
-						userPermission.Target.Humanize(),
-						userPermission.Scope.Humanize()
+						userPermission.Target.Humanize()
 					)
 				);
 			}
@@ -142,7 +140,6 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				eb.AddField(permission.Name, permission.Description);
 				eb.AddInlineField("Allowed targets", permission.Target);
-				eb.AddInlineField("Scope", permission.Scope);
 			}
 
 			return eb;
@@ -159,6 +156,9 @@ namespace DIGOS.Ambassador.CommandModules
 			return true;
 		}
 
+		/// <summary>
+		/// Commands for granting users permissions.
+		/// </summary>
 		[Group("grant")]
 		public class GrantCommands : ModuleBase<SocketCommandContext>
 		{
@@ -169,28 +169,17 @@ namespace DIGOS.Ambassador.CommandModules
 			[Command]
 			[Summary("Grant the targeted user the given permission.")]
 			[RequirePermission(ManagePermissions, Other)]
-			public async Task Default(IUser discordUser, Permission grantedPermission, PermissionTarget grantedTarget = Self, PermissionScope grantedScope = Local)
+			public async Task Default(IUser discordUser, Permission grantedPermission, PermissionTarget grantedTarget = Self)
 			{
-				// Check that only the bot owner can grant global permissions
-				if (grantedScope == Global)
-				{
-					if (!await CheckIsBotOwnerAsync(this.Context))
-					{
-						await this.Context.Channel.SendMessageAsync("Only the bot owner can grant global permissions.");
-						return;
-					}
-				}
-
-				var newPermission = new UserPermission
+				var newPermission = new LocalPermission
 				{
 					Permission = grantedPermission,
 					Target = grantedTarget,
-					Scope = grantedScope
 				};
 
 				using (var db = new GlobalInfoContext())
 				{
-					await db.GrantPermissionAsync(this.Context.Guild, discordUser, newPermission);
+					await db.GrantLocalPermissionAsync(this.Context.Guild, discordUser, newPermission);
 				}
 
 				await this.Context.Channel.SendMessageAsync("Permission granted.");
@@ -207,28 +196,11 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 
 			}
-
-			/// <summary>
-			/// Grant the targeted user the given scope permission.
-			/// </summary>
-			/// <returns>A task wrapping the command.</returns>
-			[Command("scope")]
-			[Summary("Grant the targeted user the given scope permission.")]
-			[RequirePermission(ManagePermissions, Other)]
-			public async Task GrantScopeAsync(IUser discordUser, Permission grantedPermission, PermissionScope grantedScope)
-			{
-				// Check that only the bot owner can grant global permissions
-				if (grantedScope == Global)
-				{
-					if (!await CheckIsBotOwnerAsync(this.Context))
-					{
-						await this.Context.Channel.SendMessageAsync("Only the bot owner can grant global permissions.");
-						return;
-					}
-				}
-			}
 		}
 
+		/// <summary>
+		/// Commands for revoking permissions from users.
+		/// </summary>
 		[Group("revoke")]
 		public class RevokeCommands : ModuleBase<SocketCommandContext>
 		{
@@ -241,7 +213,12 @@ namespace DIGOS.Ambassador.CommandModules
 			[RequirePermission(ManagePermissions, Other)]
 			public async Task Default(IUser discordUser, Permission revokedPermission)
 			{
+				using (var db = new GlobalInfoContext())
+				{
+					await db.RevokeLocalPermissionAsync(this.Context.Guild, discordUser, revokedPermission);
+				}
 
+				await this.Context.Channel.SendMessageAsync("Permission revoked.");
 			}
 
 			/// <summary>
@@ -254,26 +231,6 @@ namespace DIGOS.Ambassador.CommandModules
 			public async Task RevokeTargetAsync(IUser discordUser, PermissionTarget revokedTarget)
 			{
 
-			}
-
-			/// <summary>
-			/// Revoke the given scope permission from the targeted user.
-			/// </summary>
-			/// <returns>A task wrapping the command.</returns>
-			[Command("scope")]
-			[Summary("Revoke the given scope permission from the targeted user.")]
-			[RequirePermission(ManagePermissions, Other)]
-			public async Task RevokeScopeAsync(IUser discordUser, PermissionScope revokedScope)
-			{
-				// Check that only the bot owner can grant global permissions
-				if (revokedScope == Global)
-				{
-					if (!await CheckIsBotOwnerAsync(this.Context))
-					{
-						await this.Context.Channel.SendMessageAsync("Only the bot owner can grant global permissions.");
-						return;
-					}
-				}
 			}
 		}
 	}

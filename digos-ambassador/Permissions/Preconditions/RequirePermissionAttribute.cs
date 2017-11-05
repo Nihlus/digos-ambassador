@@ -21,12 +21,9 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord.Commands;
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.Permissions;
-using DIGOS.Ambassador.Database.ServerInfo;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
@@ -36,8 +33,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 	/// </summary>
 	public class RequirePermissionAttribute : PreconditionAttribute
 	{
-		private readonly Permission Permission;
-		private readonly PermissionTarget Target;
+		private readonly RequiredPermission RequiredPermission;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RequirePermissionAttribute"/> class.
@@ -46,8 +42,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 		/// <param name="target">The required target scope.</param>
 		public RequirePermissionAttribute(Permission permission, PermissionTarget target = PermissionTarget.Self)
 		{
-			this.Permission = permission;
-			this.Target = target;
+			this.RequiredPermission = new RequiredPermission(permission, target);
 		}
 
 		/// <inheritdoc />
@@ -57,14 +52,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 			{
 				var user = await db.GetOrRegisterUserAsync(context.User);
 
-				var permission = new UserPermission
-				{
-					Permission = this.Permission,
-					Target = this.Target,
-					Servers = new List<Server> { Server.CreateDefault(context.Guild) }
-				};
-
-				if (PermissionChecker.HasPermission(context.Guild, user, permission))
+				if (await PermissionChecker.HasPermissionAsync(context.Guild, user, this.RequiredPermission))
 				{
 					return PreconditionResult.FromSuccess();
 				}

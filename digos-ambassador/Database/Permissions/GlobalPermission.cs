@@ -1,5 +1,5 @@
 ﻿//
-//  UserPermission.cs
+//  GlobalPermission.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,22 +21,20 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using DIGOS.Ambassador.Database.ServerInfo;
+using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
 
 namespace DIGOS.Ambassador.Database.Permissions
 {
 	/// <summary>
-	/// Represents a granted permission with its specified target.
+	/// Represents a globally granted permission.
 	/// </summary>
-	public class UserPermission : IEquatable<UserPermission>
+	public class GlobalPermission : IEquatable<GlobalPermission>
 	{
 		/// <summary>
 		/// Gets or sets the unique ID for this permission.
 		/// </summary>
-		public uint UserPermissionID { get; set; }
+		public uint GlobalPermissionID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the granted permission.
@@ -49,17 +47,12 @@ namespace DIGOS.Ambassador.Database.Permissions
 		public PermissionTarget Target { get; set; }
 
 		/// <summary>
-		/// Gets or sets the scope of the permission.
+		/// Gets or sets the user that this permission has been granted to.
 		/// </summary>
-		public PermissionScope Scope { get; set; }
-
-		/// <summary>
-		/// Gets or sets the ID of the servers that this permission has been granted on.
-		/// </summary>
-		public List<Server> Servers { get; set; }
+		public User User { get; set; }
 
 		/// <inheritdoc />
-		public bool Equals(UserPermission other)
+		public bool Equals(GlobalPermission other)
 		{
 			if (ReferenceEquals(null, other))
 			{
@@ -74,8 +67,7 @@ namespace DIGOS.Ambassador.Database.Permissions
 			return
 				this.Permission == other.Permission &&
 				this.Target == other.Target &&
-				this.Scope == other.Scope &&
-				this.Servers.OrderBy(x => x).SequenceEqual(other.Servers.OrderBy(x => x));
+				this.User == other.User;
 		}
 
 		/// <inheritdoc />
@@ -96,7 +88,7 @@ namespace DIGOS.Ambassador.Database.Permissions
 				return false;
 			}
 
-			return Equals((UserPermission)obj);
+			return Equals((GlobalPermission)obj);
 		}
 
 		/// <inheritdoc />
@@ -106,18 +98,17 @@ namespace DIGOS.Ambassador.Database.Permissions
 			{
 				int hashCode = (int)this.Permission;
 				hashCode = (hashCode * 397) ^ (int)this.Target;
-				hashCode = (hashCode * 397) ^ (int)this.Scope;
-				hashCode = (hashCode * 397) ^ (this.Servers != null ? this.Servers.GetHashCode() : 0);
+				hashCode = (hashCode * 397) ^ (this.User != null ? this.User.GetHashCode() : 0);
 				return hashCode;
 			}
 		}
 
-		public static bool operator ==(UserPermission left, UserPermission right)
+		public static bool operator ==(GlobalPermission left, GlobalPermission right)
 		{
 			return Equals(left, right);
 		}
 
-		public static bool operator !=(UserPermission left, UserPermission right)
+		public static bool operator !=(GlobalPermission left, GlobalPermission right)
 		{
 			return !Equals(left, right);
 		}

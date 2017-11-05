@@ -1,5 +1,5 @@
 ﻿//
-//  GlobalUserInfoContext.cs
+//  GlobalInfoContext.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -61,9 +61,30 @@ namespace DIGOS.Ambassador.Database
 		public DbSet<Server> Servers { get; set; }
 
 		/// <summary>
-		/// Gets or sets the database where granted user permissions are stored.
+		/// Gets or sets the database where granted local permissions are stored.
 		/// </summary>
-		public DbSet<UserPermission> UserPermissions { get; set; }
+		public DbSet<LocalPermission> LocalPermissions { get; set; }
+
+		/// <summary>
+		/// Gets or sets the database where granted global permissions are stored.
+		/// </summary>
+		public DbSet<GlobalPermission> GlobalPermissions { get; set; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
+		/// </summary>
+		public GlobalInfoContext()
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
+		/// </summary>
+		/// <param name="options">The context options.</param>
+		public GlobalInfoContext(DbContextOptions<GlobalInfoContext> options)
+			: base(options)
+		{
+		}
 
 		/// <summary>
 		/// Grants the specified user the given permission. If the user already has the permission, it is augmented with
@@ -73,30 +94,27 @@ namespace DIGOS.Ambassador.Database
 		/// <param name="discordUser">The Discord user.</param>
 		/// <param name="grantedPermission">The granted permission.</param>
 		/// <returns>A task wrapping the granting of the permission.</returns>
-		public async Task GrantPermissionAsync(IGuild discordServer, IUser discordUser, UserPermission grantedPermission)
+		public async Task GrantLocalPermissionAsync(IGuild discordServer, IUser discordUser, LocalPermission grantedPermission)
 		{
 			var user = await GetOrRegisterUserAsync(discordUser);
 
-			var existingPermission = user.Permissions.FirstOrDefault(p => p.Permission == grantedPermission.Permission);
+			var existingPermission = user.LocalPermissions.FirstOrDefault
+			(
+				p =>
+				p.Permission == grantedPermission.Permission &&
+				p.Server.DiscordGuildID == discordServer.Id
+			);
+
 			if (existingPermission is null)
 			{
-				user.Permissions.Add(grantedPermission);
+				user.LocalPermissions.Add(grantedPermission);
 			}
 			else
 			{
+				// Elevate the target permission, if required
 				if (existingPermission.Target < grantedPermission.Target)
 				{
 					existingPermission.Target = grantedPermission.Target;
-				}
-
-				if (existingPermission.Scope < grantedPermission.Scope)
-				{
-					existingPermission.Scope = grantedPermission.Scope;
-				}
-
-				if (!existingPermission.Servers.Any(p => p.DiscordGuildID == discordServer.Id))
-				{
-					existingPermission.Servers.Add(Server.CreateDefault(discordServer));
 				}
 			}
 
@@ -107,18 +125,24 @@ namespace DIGOS.Ambassador.Database
 		/// Revokes the given permission from the given Discord user. If the user does not have the permission, no
 		/// changes are made.
 		/// </summary>
+		/// <param name="discordServer">The Discord server the permission was revoked on.</param>
 		/// <param name="discordUser">The Discord user.</param>
 		/// <param name="revokedPermission">The revoked permission.</param>
 		/// <returns>A task wrapping the revoking of the permission.</returns>
-		public async Task RevokePermissionAsync(IUser discordUser, Permission revokedPermission)
+		public async Task RevokeLocalPermissionAsync(IGuild discordServer, IUser discordUser, Permission revokedPermission)
 		{
 			var user = await GetOrRegisterUserAsync(discordUser);
 
-			if (user.Permissions.Any(p => p.Permission == revokedPermission))
-			{
-				// Remove the granted permission from the user's permission set
-				user.Permissions = user.Permissions.Where(p => p.Permission != revokedPermission).ToList();
+			var existingPermission = user.LocalPermissions.FirstOrDefault
+			(
+				p =>
+				p.Permission == revokedPermission &&
+				p.Server.DiscordGuildID == discordServer.Id
+			);
 
+			if (existingPermission != null)
+			{
+				user.LocalPermissions = user.LocalPermissions.Except(new[] { existingPermission }).ToList();
 				await SaveChangesAsync();
 			}
 		}
@@ -176,7 +200,7 @@ namespace DIGOS.Ambassador.Database
 			return await this.Users
 				.Include(u => u.Characters)
 				.Include(u => u.Kinks)
-				.Include(u => u.Permissions)
+				.Include(u => u.LocalPermissions)
 				.FirstAsync(u => u.DiscordID == discordUser.Id);
 		}
 
@@ -193,31 +217,28 @@ namespace DIGOS.Ambassador.Database
 				throw new ArgumentException($"A user with the ID {discordUser.Id} has already been added to the database.", nameof(discordUser));
 			}
 
-			var defaultPermissions = new List<UserPermission>
+			// TODO: Create better system for default permissions
+			var defaultPermissions = new List<LocalPermission>
 			{
-				new UserPermission
+				new LocalPermission
 				{
 					Permission = Permission.EditUser,
 					Target = PermissionTarget.Self,
-					Scope = PermissionScope.Local
 				},
-				new UserPermission
+				new LocalPermission
 				{
 					Permission = Permission.CreateCharacter,
 					Target = PermissionTarget.Self,
-					Scope = PermissionScope.Local
 				},
-				new UserPermission
+				new LocalPermission
 				{
 					Permission = Permission.DeleteCharacter,
 					Target = PermissionTarget.Self,
-					Scope = PermissionScope.Local
 				},
-				new UserPermission
+				new LocalPermission
 				{
 					Permission = Permission.ImportCharacter,
 					Target = PermissionTarget.Self,
-					Scope = PermissionScope.Local
 				},
 			};
 
@@ -227,20 +248,23 @@ namespace DIGOS.Ambassador.Database
 				Class = UserClass.Other,
 				Bio = null,
 				Timezone = null,
-				Permissions = defaultPermissions
+				LocalPermissions = defaultPermissions
 			};
 
 			await this.Users.AddAsync(newUser);
 
 			await SaveChangesAsync();
 
-			return newUser;
+			return await this.Users.FirstAsync(u => u.DiscordID == discordUser.Id);
 		}
 
 		/// <inheritdoc />
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-			optionsBuilder.UseSqlite($"Data Source={Path.Combine("Content", "Databases", "global_userinfo.db")}");
+			if (!optionsBuilder.IsConfigured)
+			{
+				optionsBuilder.UseSqlite($"Data Source={Path.Combine("Content", "Databases", "global.db")}");
+			}
 		}
 	}
 }

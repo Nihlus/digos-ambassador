@@ -20,11 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using DIGOS.Ambassador.Database.Permissions;
-using DIGOS.Ambassador.Permissions;
 
 namespace DIGOS.Ambassador.Database.UserInfo
 {
@@ -71,6 +68,6 @@ namespace DIGOS.Ambassador.Database.UserInfo
 		/// <summary>
 		/// Gets or sets the bot permissions granted to this user.
 		/// </summary>
-		public List<UserPermission> Permissions { get; set; }
+		public List<LocalPermission> LocalPermissions { get; set; }
 	}
 }

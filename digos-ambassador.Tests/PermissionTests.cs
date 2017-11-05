@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using digos_ambassador.Tests.Database;
 using Discord;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.ServerInfo;
@@ -8,7 +8,6 @@ using DIGOS.Ambassador.Permissions;
 using Moq;
 using Xunit;
 using static DIGOS.Ambassador.Permissions.Permission;
-using static DIGOS.Ambassador.Permissions.PermissionScope;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
 
 namespace digos_ambassador.Tests
@@ -16,241 +15,331 @@ namespace digos_ambassador.Tests
 	public class PermissionTests
 	{
 		[Fact]
-		public void EmptyPermissionSetReturnsFalse()
+		public async void EmptyPermissionSetReturnsFalse()
 		{
-			var requiredPermission = new UserPermission
+			// Set up mocked permissions
+			var requiredPermission = new RequiredPermission()
 			{
 				Permission = SetClass,
 				Target = Other,
-				Scope = Global
+			};
+
+			// Set up mocked users
+			var user = new User
+			{
+				LocalPermissions = new List<LocalPermission>()
+			};
+
+			// Set up the mocked discord server
+			var guildMock = new Mock<IGuild>();
+
+			using (var mockDbConnection = new MockedDatabase())
+			{
+				// Add mocked data
+				mockDbConnection.AddMockedUser(user);
+
+				using (var db = mockDbConnection.GetDatabaseContext())
+				{
+					Assert.False(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+				}
+			}
+		}
+
+		[Fact]
+		public async void ExactlyMatchingLocalPermissionSetReturnsTrue()
+		{
+			const ulong serverID = 1;
+			var server = new Server { DiscordGuildID = serverID };
+
+			var requiredPermission = new RequiredPermission
+			{
+				Permission = SetClass,
+				Target = Other,
+			};
+
+			var grantedPermission = new LocalPermission
+			{
+				Permission = SetClass,
+				Target = Other,
+				Server = server
 			};
 
 			var user = new User
 			{
-				Permissions = new List<UserPermission>()
+				LocalPermissions = new List<LocalPermission> { grantedPermission }
 			};
 
-			const ulong serverID = 1;
+			// Set up the mocked discord server
 			var guildMock = new Mock<IGuild>();
 			guildMock.Setup(s => s.Id).Returns(serverID);
 
-			Assert.False(PermissionChecker.HasPermission(guildMock.Object, user, requiredPermission));
+			using (var mockDbConnection = new MockedDatabase())
+			{
+				// Add mocked data
+				mockDbConnection.AddMockedUser(user);
+
+				using (var db = mockDbConnection.GetDatabaseContext())
+				{
+					Assert.True(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+				}
+			}
 		}
 
 		[Fact]
-		public void ExactlyMatchingPermissionSetReturnsTrue()
+		public async void GrantedOtherTargetReturnsFalseForMatchingAndSelfTarget()
 		{
-			var requiredPermission = new UserPermission
-			{
-				Permission = SetClass,
-				Target = Other,
-				Scope = Global
-			};
-
-			var user = new User
-			{
-				Permissions = new List<UserPermission> { requiredPermission }
-			};
-
 			const ulong serverID = 1;
-			var guildMock = new Mock<IGuild>();
-			guildMock.Setup(s => s.Id).Returns(serverID);
+			var server = new Server { DiscordGuildID = serverID };
 
-			Assert.True(PermissionChecker.HasPermission(guildMock.Object, user, requiredPermission));
-		}
-
-		[Fact]
-		public void GrantedOtherTargetReturnsTrueForMatchingAndSelfTarget()
-		{
-			var requiredPermission = new UserPermission
+			var requiredPermission = new RequiredPermission
 			{
 				Permission = SetClass,
 				Target = Self,
-				Scope = Global
 			};
 
-			var grantedPermission = new UserPermission
+			var grantedPermission = new LocalPermission
 			{
 				Permission = SetClass,
 				Target = Other,
-				Scope = Global
+				Server = server
 			};
 
 			var user = new User
 			{
-				Permissions = new List<UserPermission> { grantedPermission }
+				LocalPermissions = new List<LocalPermission> { grantedPermission }
 			};
 
-			const ulong serverID = 1;
+			// Set up the mocked discord server
 			var guildMock = new Mock<IGuild>();
 			guildMock.Setup(s => s.Id).Returns(serverID);
 
-			Assert.True(PermissionChecker.HasPermission(guildMock.Object, user, requiredPermission));
+			using (var mockDbConnection = new MockedDatabase())
+			{
+				// Add mocked data
+				mockDbConnection.AddMockedUser(user);
+
+				using (var db = mockDbConnection.GetDatabaseContext())
+				{
+					Assert.False(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+				}
+			}
 		}
 
 		[Fact]
-		public void GrantedGlobalScopeReturnsTrueForMatchingAndLocalScope()
+		public async void GrantedSelfTargetReturnsFalseForMatchingAndOtherTarget()
 		{
-			var requiredPermission = new UserPermission
-			{
-				Permission = SetClass,
-				Target = Other,
-				Scope = Local
-			};
-
-			var grantedPermission = new UserPermission
-			{
-				Permission = SetClass,
-				Target = Other,
-				Scope = Global
-			};
-
-			var user = new User
-			{
-				Permissions = new List<UserPermission> { grantedPermission }
-			};
-
 			const ulong serverID = 1;
-			var guildMock = new Mock<IGuild>();
-			guildMock.Setup(s => s.Id).Returns(serverID);
+			var server = new Server { DiscordGuildID = serverID };
 
-			Assert.True(PermissionChecker.HasPermission(guildMock.Object, user, requiredPermission));
-		}
-
-		[Fact]
-		public void GrantedSelfTargetReturnsFalseForMatchingAndOtherTarget()
-		{
-			var requiredPermission = new UserPermission
+			var requiredPermission = new RequiredPermission
 			{
 				Permission = SetClass,
 				Target = Other,
-				Scope = Global
 			};
 
-			var grantedPermission = new UserPermission
+			var grantedPermission = new LocalPermission
 			{
 				Permission = SetClass,
 				Target = Self,
-				Scope = Global
+				Server = server
 			};
 
 			var user = new User
 			{
-				Permissions = new List<UserPermission> { grantedPermission }
+				LocalPermissions = new List<LocalPermission> { grantedPermission }
 			};
 
-			const ulong serverID = 1;
+			// Set up the mocked discord server
 			var guildMock = new Mock<IGuild>();
 			guildMock.Setup(s => s.Id).Returns(serverID);
 
-			Assert.False(PermissionChecker.HasPermission(guildMock.Object, user, requiredPermission));
+			using (var mockDbConnection = new MockedDatabase())
+			{
+				// Add mocked data
+				mockDbConnection.AddMockedUser(user);
+
+				using (var db = mockDbConnection.GetDatabaseContext())
+				{
+					Assert.False(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+				}
+			}
 		}
 
 		[Fact]
-		public void GrantedLocalScopeReturnsFalseForMatchingAndGlobalScope()
-		{
-			var requiredPermission = new UserPermission
-			{
-				Permission = SetClass,
-				Target = Other,
-				Scope = Global
-			};
-
-			var grantedPermission = new UserPermission
-			{
-				Permission = SetClass,
-				Target = Other,
-				Scope = Local
-			};
-
-			var user = new User
-			{
-				Permissions = new List<UserPermission> { grantedPermission }
-			};
-
-			const ulong serverID = 1;
-			var guildMock = new Mock<IGuild>();
-			guildMock.Setup(s => s.Id).Returns(serverID);
-
-			Assert.False(PermissionChecker.HasPermission(guildMock.Object, user, requiredPermission));
-		}
-
-		[Fact]
-		public void GrantedGlobalPermissionReturnsTrueEvenIfServerIDsDiffer()
+		public async void GrantedLocalPermissionReturnsFalseIfServerIDsDiffer()
 		{
 			const ulong server1ID = 1;
 			const ulong server2ID = 2;
 
-			var server1Mock = new Mock<Server>();
-			server1Mock.Setup(s => s.DiscordGuildID).Returns(server1ID);
+			var server1 = new Server { DiscordGuildID = server1ID };
+			var server2 = new Server { DiscordGuildID = server2ID };
 
-			var server2Mock = new Mock<Server>();
-			server2Mock.Setup(s => s.DiscordGuildID).Returns(server2ID);
-
-			var requiredPermission = new UserPermission
+			var requiredPermission = new RequiredPermission
 			{
 				Permission = SetClass,
-				Target = Other,
-				Scope = Local,
-				Servers = new List<Server> { server1Mock.Object }
+				Target = Self,
 			};
 
-			var grantedPermission = new UserPermission
+			var grantedPermission = new LocalPermission
 			{
 				Permission = SetClass,
 				Target = Other,
-				Scope = Global,
-				Servers = new List<Server> { server2Mock.Object }
+				Server = server2
 			};
 
 			var user = new User
 			{
-				Permissions = new List<UserPermission> { grantedPermission }
+				LocalPermissions = new List<LocalPermission> { grantedPermission }
 			};
 
-			var guildMock = new Mock<IGuild>();
-			guildMock.Setup(s => s.Id).Returns(server2ID);
-
-			Assert.True(PermissionChecker.HasPermission(guildMock.Object, user, requiredPermission));
-		}
-
-		[Fact]
-		public void GrantedLocalPermissionReturnsFalseIfServerIDsDiffer()
-		{
-			const ulong server1ID = 1;
-			const ulong server2ID = 2;
-
-			var server1Mock = new Mock<Server>();
-			server1Mock.Setup(s => s.DiscordGuildID).Returns(server1ID);
-
-			var server2Mock = new Mock<Server>();
-			server2Mock.Setup(s => s.DiscordGuildID).Returns(server2ID);
-
-			var requiredPermission = new UserPermission
-			{
-				Permission = SetClass,
-				Target = Other,
-				Scope = Local,
-				Servers = new List<Server> { server1Mock.Object }
-			};
-
-			var grantedPermission = new UserPermission
-			{
-				Permission = SetClass,
-				Target = Other,
-				Scope = Local,
-				Servers = new List<Server> { server2Mock.Object }
-			};
-
-			var user = new User
-			{
-				Permissions = new List<UserPermission> { grantedPermission }
-			};
-
+			// Set up the mocked discord server
 			var guildMock = new Mock<IGuild>();
 			guildMock.Setup(s => s.Id).Returns(server1ID);
 
-			Assert.False(PermissionChecker.HasPermission(guildMock.Object, user, requiredPermission));
+			using (var mockDbConnection = new MockedDatabase())
+			{
+				// Add mocked data (this method cascades through the sub-entities)
+				mockDbConnection.AddMockedUser(user);
+				mockDbConnection.AddMockedServer(server1);
+
+				using (var db = mockDbConnection.GetDatabaseContext())
+				{
+					Assert.False(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+				}
+			}
+		}
+
+		[Fact]
+		public async void GrantedGlobalPermissionReturnsTrueForGrantedLocal()
+		{
+			const ulong serverID = 1;
+			var server1 = new Server { DiscordGuildID = serverID };
+
+			var requiredPermission = new RequiredPermission
+			{
+				Permission = SetClass,
+				Target = Self,
+			};
+
+			var grantedLocalPermission = new LocalPermission
+			{
+				Permission = SetClass,
+				Target = Self,
+				Server = server1
+			};
+
+			var user = new User
+			{
+				LocalPermissions = new List<LocalPermission> { grantedLocalPermission }
+			};
+
+			var grantedGlobalPermission = new GlobalPermission
+			{
+				Permission = SetClass,
+				Target = Self,
+				User = user
+			};
+
+			// Set up the mocked discord server
+			var guildMock = new Mock<IGuild>();
+			guildMock.Setup(s => s.Id).Returns(serverID);
+
+			using (var mockDbConnection = new MockedDatabase())
+			{
+				// Add mocked data (this method cascades through the sub-entities)
+				mockDbConnection.AddMockedGlobalPermission(grantedGlobalPermission);
+
+				using (var db = mockDbConnection.GetDatabaseContext())
+				{
+					Assert.True(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+				}
+			}
+		}
+
+		[Fact]
+		public async void GrantedGlobalPermissionReturnsTrueForNonGrantedLocal()
+		{
+			const ulong serverID = 1;
+
+			var requiredPermission = new RequiredPermission
+			{
+				Permission = SetClass,
+				Target = Self,
+			};
+
+			var user = new User
+			{
+				LocalPermissions = new List<LocalPermission>()
+			};
+
+			var grantedGlobalPermission = new GlobalPermission
+			{
+				Permission = SetClass,
+				Target = Self,
+				User = user
+			};
+
+			// Set up the mocked current discord server
+			var guildMock = new Mock<IGuild>();
+			guildMock.Setup(s => s.Id).Returns(serverID);
+
+			using (var mockDbConnection = new MockedDatabase())
+			{
+				// Add mocked data (this method cascades through the sub-entities)
+				mockDbConnection.AddMockedGlobalPermission(grantedGlobalPermission);
+
+				using (var db = mockDbConnection.GetDatabaseContext())
+				{
+					Assert.True(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+				}
+			}
+		}
+
+		[Fact]
+		public async void GrantedGlobalPermissionReturnsTrueForGrantedLocalWithDifferingTarget()
+		{
+			const ulong serverID = 1;
+			var server = new Server { DiscordGuildID = serverID };
+
+			var requiredPermission = new RequiredPermission
+			{
+				Permission = SetClass,
+				Target = Self,
+			};
+
+			var grantedLocalPermission = new LocalPermission
+			{
+				Permission = SetClass,
+				Target = Self,
+				Server = server
+			};
+
+			var user = new User
+			{
+				LocalPermissions = new List<LocalPermission> { grantedLocalPermission }
+			};
+
+			var grantedGlobalPermission = new GlobalPermission
+			{
+				Permission = SetClass,
+				Target = Other,
+				User = user
+			};
+
+			// Set up the mocked current discord server
+			var guildMock = new Mock<IGuild>();
+			guildMock.Setup(s => s.Id).Returns(serverID);
+
+			using (var mockDbConnection = new MockedDatabase())
+			{
+				// Add mocked data (this method cascades through the sub-entities)
+				mockDbConnection.AddMockedGlobalPermission(grantedGlobalPermission);
+
+				using (var db = mockDbConnection.GetDatabaseContext())
+				{
+					Assert.True(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+				}
+			}
 		}
 	}
 }

@@ -21,9 +21,11 @@
 //
 
 using System.Linq;
+using System.Threading.Tasks;
 using Discord;
-using DIGOS.Ambassador.Database.Permissions;
+using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
+using Microsoft.EntityFrameworkCore;
 
 namespace DIGOS.Ambassador.Permissions
 {
@@ -37,37 +39,49 @@ namespace DIGOS.Ambassador.Permissions
 		/// </summary>
 		/// <param name="discordServer">The Discord server that the command was executed on.</param>
 		/// <param name="user">The user.</param>
-		/// <param name="permission">The permission.</param>
+		/// <param name="requiredPermission">The permission.</param>
 		/// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
-		public static bool HasPermission(IGuild discordServer, User user, UserPermission permission)
+		public static async Task<bool> HasPermissionAsync(IGuild discordServer, User user, RequiredPermission requiredPermission)
 		{
-			// Find any matching permissions
-			var matchingPerm = user.Permissions.FirstOrDefault(p => p.Permission == permission.Permission);
-
-			if (matchingPerm is null)
+			// First, check if the user has the permission on a global level
+			using (var db = new GlobalInfoContext())
 			{
-				return false;
+				return await HasPermissionAsync(db, discordServer, user, requiredPermission);
+			}
+		}
+
+		/// <summary>
+		/// Determines whether or not the user has the given permission.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="discordServer">The Discord server that the command was executed on.</param>
+		/// <param name="user">The user.</param>
+		/// <param name="requiredPermission">The permission.</param>
+		/// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
+		public static async Task<bool> HasPermissionAsync(GlobalInfoContext db, IGuild discordServer, User user, RequiredPermission requiredPermission)
+		{
+			// First, check if the user has the permission on a global level
+			var hasGlobalPermission = await db.GlobalPermissions.AnyAsync
+			(
+				gp =>
+					gp.User.UserID == user.UserID &&
+					gp.Permission == requiredPermission.Permission &&
+					gp.Target.HasFlag(requiredPermission.Target)
+			);
+
+			if (hasGlobalPermission)
+			{
+				return true;
 			}
 
-			if (!(matchingPerm.Target >= permission.Target))
-			{
-				return false;
-			}
-
-			if (!(matchingPerm.Scope >= permission.Scope))
-			{
-				return false;
-			}
-
-			if (matchingPerm.Scope == PermissionScope.Local)
-			{
-				if (!matchingPerm.Servers.Any(s => s.DiscordGuildID == discordServer.Id))
-				{
-					return false;
-				}
-			}
-
-			return true;
+			// Then, check the user's local permissions
+			return user.LocalPermissions.Any
+			(
+				lp =>
+					lp.Permission == requiredPermission.Permission &&
+					lp.Target.HasFlag(requiredPermission.Target) &&
+					lp.Server.DiscordGuildID == discordServer.Id
+			);
 		}
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.FList.Kinks;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Kink = DIGOS.Ambassador.Database.UserInfo.Kink;
 
 namespace DIGOS.Ambassador.CommandModules
@@ -21,12 +19,16 @@ namespace DIGOS.Ambassador.CommandModules
 	[Group("admin")]
 	public class AdminCommands : ModuleBase<SocketCommandContext>
 	{
+		/// <summary>
+		/// Updates the kink database with data from F-list.
+		/// </summary>
+		/// <returns>A task wrapping the update action.</returns>
 		[Command("update-kinks")]
 		[Summary("Updates the kink list with data from F-list.")]
 		[RequireOwner]
 		public async Task UpdateKinkDatabaseAsync()
 		{
-			int updatedKinks;
+			int updatedKinkCount;
 			// Get the latest JSON from F-list
 
 			string json;
@@ -35,7 +37,7 @@ namespace DIGOS.Ambassador.CommandModules
 				web.Timeout = TimeSpan.FromSeconds(3);
 
 				var cts = new CancellationTokenSource();
-				cts.CancelAfter(3000);
+				cts.CancelAfter(web.Timeout);
 
 				try
 				{
@@ -75,10 +77,10 @@ namespace DIGOS.Ambassador.CommandModules
 
 			using (var db = new GlobalInfoContext())
 			{
-				updatedKinks = await db.UpdateKinksAsync(kinks);
+				updatedKinkCount = await db.UpdateKinksAsync(kinks);
 			}
 
-			await this.Context.Channel.SendMessageAsync($"Done. {updatedKinks} kinks updated.");
+			await this.Context.Channel.SendMessageAsync($"Done. {updatedKinkCount} kinks updated.");
 		}
 	}
 }

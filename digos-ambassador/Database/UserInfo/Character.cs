@@ -20,9 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
-
 namespace DIGOS.Ambassador.Database.UserInfo
 {
 	/// <summary>
