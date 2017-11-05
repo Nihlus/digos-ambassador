@@ -171,30 +171,19 @@ namespace DIGOS.Ambassador.CommandModules
 			[RequirePermission(ManagePermissions, Other)]
 			public async Task Default(IUser discordUser, Permission grantedPermission, PermissionTarget grantedTarget = Self)
 			{
-				var newPermission = new LocalPermission
-				{
-					Permission = grantedPermission,
-					Target = grantedTarget,
-				};
-
 				using (var db = new GlobalInfoContext())
 				{
+					var newPermission = new LocalPermission
+					{
+						Permission = grantedPermission,
+						Target = grantedTarget,
+						Server = await db.GetOrRegisterServerAsync(this.Context.Guild)
+					};
+
 					await db.GrantLocalPermissionAsync(this.Context.Guild, discordUser, newPermission);
 				}
 
 				await this.Context.Channel.SendMessageAsync("Permission granted.");
-			}
-
-			/// <summary>
-			/// Grant the targeted user the given target permission.
-			/// </summary>
-			/// <returns>A task wrapping the command.</returns>
-			[Command("target")]
-			[Summary("Grant the targeted user the given target permission.")]
-			[RequirePermission(ManagePermissions, Other)]
-			public async Task GrantTargetAsync(IUser discordUser, Permission grantedPermission, PermissionTarget grantedTarget)
-			{
-
 			}
 		}
 
@@ -228,9 +217,14 @@ namespace DIGOS.Ambassador.CommandModules
 			[Command("target")]
 			[Summary("Revoke the given target permission from the targeted user.")]
 			[RequirePermission(ManagePermissions, Other)]
-			public async Task RevokeTargetAsync(IUser discordUser, PermissionTarget revokedTarget)
+			public async Task RevokeTargetAsync(IUser discordUser, Permission permission, PermissionTarget revokedTarget)
 			{
+				using (var db = new GlobalInfoContext())
+				{
+					await db.RevokeLocalPermissionTargetAsync(this.Context.Guild, discordUser, permission, revokedTarget);
+				}
 
+				await this.Context.Channel.SendMessageAsync("Permission target revoked.");
 			}
 		}
 	}
