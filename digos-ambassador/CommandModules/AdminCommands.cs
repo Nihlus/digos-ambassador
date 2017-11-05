@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[RequireOwner]
 		public async Task UpdateKinkDatabaseAsync()
 		{
-			int updatedKinkCount;
+			int updatedKinkCount = 0;
 
 			// Get the latest JSON from F-list
 			string json;
@@ -79,31 +79,28 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 			}
 
-			var kinks = new List<Kink>();
 			var kinkCollection = JsonConvert.DeserializeObject<KinkCollection>(json);
-			foreach (var kinkSection in kinkCollection.KinkCategories)
-			{
-				if (!Enum.TryParse<KinkCategory>(kinkSection.Key, out var kinkCategory))
-				{
-					await this.Context.Channel.SendMessageAsync("Failed to parse kink category.");
-					return;
-				}
-
-				kinks.AddRange(kinkSection.Value.Kinks.Select
-				(
-					k => new Kink
-					{
-						Category = kinkCategory,
-						Name = k.Name,
-						Description = k.Description,
-						FListID = k.KinkId
-					}
-				));
-			}
-
 			using (var db = new GlobalInfoContext())
 			{
-				updatedKinkCount = await db.UpdateKinksAsync(kinks);
+				foreach (var kinkSection in kinkCollection.KinkCategories)
+				{
+					if (!Enum.TryParse<KinkCategory>(kinkSection.Key, out var kinkCategory))
+					{
+						await this.Context.Channel.SendMessageAsync("Failed to parse kink category.");
+						return;
+					}
+
+					updatedKinkCount += await db.UpdateKinksAsync(kinkSection.Value.Kinks.Select
+					(
+						k => new Kink
+						{
+							Category = kinkCategory,
+							Name = k.Name,
+							Description = k.Description,
+							FListID = k.KinkId
+						}
+					));
+				}
 			}
 
 			await this.Context.Channel.SendMessageAsync($"Done. {updatedKinkCount} kinks updated.");

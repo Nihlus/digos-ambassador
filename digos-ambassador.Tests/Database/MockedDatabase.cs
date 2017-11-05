@@ -30,11 +30,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DIGOS.Ambassador.Tests.Database
 {
+	/// <summary>
+	/// Represents a mocked connection to the ambassador's database.
+	/// </summary>
 	public class MockedDatabase : IDisposable
 	{
 		private readonly SqliteConnection Connection;
 		private readonly DbContextOptions<GlobalInfoContext> DatabaseOptions;
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MockedDatabase"/> class.
+		/// </summary>
 		public MockedDatabase()
 		{
 			this.Connection = new SqliteConnection("DataSource=:memory:");
@@ -48,11 +54,19 @@ namespace DIGOS.Ambassador.Tests.Database
 			}
 		}
 
+		/// <summary>
+		/// Gets a new instance of the database context.
+		/// </summary>
+		/// <returns>The database context.</returns>
 		public GlobalInfoContext GetDatabaseContext()
 		{
 			return new GlobalInfoContext(this.DatabaseOptions);
 		}
 
+		/// <summary>
+		/// Adds a mocked user to the database.
+		/// </summary>
+		/// <param name="user">The user to add.</param>
 		public void AddMockedUser(User user)
 		{
 			using (var db = GetDatabaseContext())
@@ -62,12 +76,20 @@ namespace DIGOS.Ambassador.Tests.Database
 			}
 		}
 
+		/// <summary>
+		/// Adds a mocked server to the database, creating it from the given ID.
+		/// </summary>
+		/// <param name="discordServerID">The ID of the server.</param>
 		public void AddMockedServer(ulong discordServerID)
 		{
 			var server = new Server { DiscordGuildID = discordServerID };
 			AddMockedServer(server);
 		}
 
+		/// <summary>
+		/// Adds a mocked server to the database.
+		/// </summary>
+		/// <param name="server">The server to add.</param>
 		public void AddMockedServer(Server server)
 		{
 			using (var db = GetDatabaseContext())
@@ -77,6 +99,10 @@ namespace DIGOS.Ambassador.Tests.Database
 			}
 		}
 
+		/// <summary>
+		/// Adds a mocked global permission to the database.
+		/// </summary>
+		/// <param name="globalPermission">The permission to add.</param>
 		public void AddMockedGlobalPermission(GlobalPermission globalPermission)
 		{
 			using (var db = GetDatabaseContext())
@@ -86,6 +112,7 @@ namespace DIGOS.Ambassador.Tests.Database
 			}
 		}
 
+		/// <inheritdoc />
 		public void Dispose()
 		{
 			this.Connection?.Close();

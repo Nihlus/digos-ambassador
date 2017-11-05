@@ -20,17 +20,20 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-
 using System.Collections.Generic;
-using Discord;
+
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Tests.Database;
+
+using Discord;
 using Moq;
 using Xunit;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
+
+#pragma warning disable SA1600
 
 namespace DIGOS.Ambassador.Tests
 {
