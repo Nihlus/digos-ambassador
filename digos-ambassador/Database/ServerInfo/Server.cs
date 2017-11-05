@@ -20,7 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Collections.Generic;
 using Discord;
+using DIGOS.Ambassador.Database.UserInfo;
 
 namespace DIGOS.Ambassador.Database.ServerInfo
 {
@@ -43,6 +45,11 @@ namespace DIGOS.Ambassador.Database.ServerInfo
 		/// Gets or sets a value indicating whether or not the server allows NSFW content globally.
 		/// </summary>
 		public bool IsNSFW { get; set; }
+
+		/// <summary>
+		/// Gets or sets the users known to the bot on this server.
+		/// </summary>
+		public List<User> KnownUsers { get; set; }
 
 		/// <summary>
 		/// Creates a default server entity based on a Discord guild.

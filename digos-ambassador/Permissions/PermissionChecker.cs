@@ -43,6 +43,12 @@ namespace DIGOS.Ambassador.Permissions
 		/// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
 		public static async Task<bool> HasPermissionAsync(IGuild discordServer, User user, RequiredPermission requiredPermission)
 		{
+			// The server owner always has all permissions by default
+			if (discordServer.OwnerId == user.DiscordID)
+			{
+				return true;
+			}
+
 			// First, check if the user has the permission on a global level
 			using (var db = new GlobalInfoContext())
 			{

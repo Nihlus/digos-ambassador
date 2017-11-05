@@ -21,11 +21,14 @@
 //
 
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Permissions;
 using log4net;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -100,6 +103,26 @@ namespace DIGOS.Ambassador
 			if (!(message.HasCharPrefix('!', ref argumentPos) || message.HasMentionPrefix(this.Client.CurrentUser, ref argumentPos)))
 			{
 				return;
+			}
+
+			// Perform first-time user checks, making sure the user has their default permissions
+			using (var db = new GlobalInfoContext())
+			{
+				var guild = (message.Channel as SocketGuildChannel)?.Guild;
+				if (guild != null)
+				{
+					var user = await db.GetOrRegisterUserAsync(arg.Author);
+					var server = await db.GetOrRegisterServerAsync(guild);
+
+					// Grant permissions to new users
+					if (!server.KnownUsers.Any(u => u.UserID == user.UserID))
+					{
+						DefaultPermissions.Grant(server, user);
+						server.KnownUsers.Add(user);
+
+						await db.SaveChangesAsync();
+					}
+				}
 			}
 
 			var context = new SocketCommandContext(this.Client, message);

@@ -151,6 +151,7 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordServer">The Discord server the permission was revoked on.</param>
 		/// <param name="discordUser">The Discord user.</param>
+		/// <param name="permission">The permission to alter.</param>
 		/// <param name="revokedTarget">The revoked permission.</param>
 		/// <returns>A task wrapping the revoking of the permission.</returns>
 		public async Task RevokeLocalPermissionTargetAsync(IGuild discordServer, IUser discordUser, Permission permission, PermissionTarget revokedTarget)
@@ -246,7 +247,6 @@ namespace DIGOS.Ambassador.Database
 			return await this.Servers.FirstAsync(u => u.DiscordGuildID == discordServer.Id);
 		}
 
-
 		/// <summary>
 		/// Determines whether or not a Discord user is stored in the database.
 		/// </summary>
@@ -299,38 +299,12 @@ namespace DIGOS.Ambassador.Database
 				throw new ArgumentException($"A user with the ID {discordUser.Id} has already been added to the database.", nameof(discordUser));
 			}
 
-			// TODO: Create better system for default permissions
-			var defaultPermissions = new List<LocalPermission>
-			{
-				new LocalPermission
-				{
-					Permission = Permission.EditUser,
-					Target = PermissionTarget.Self,
-				},
-				new LocalPermission
-				{
-					Permission = Permission.CreateCharacter,
-					Target = PermissionTarget.Self,
-				},
-				new LocalPermission
-				{
-					Permission = Permission.DeleteCharacter,
-					Target = PermissionTarget.Self,
-				},
-				new LocalPermission
-				{
-					Permission = Permission.ImportCharacter,
-					Target = PermissionTarget.Self,
-				},
-			};
-
 			var newUser = new User
 			{
 				DiscordID = discordUser.Id,
 				Class = UserClass.Other,
 				Bio = null,
-				Timezone = null,
-				LocalPermissions = defaultPermissions
+				Timezone = null
 			};
 
 			await this.Users.AddAsync(newUser);
