@@ -22,9 +22,12 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
+
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
+
+using Discord;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace DIGOS.Ambassador.Permissions

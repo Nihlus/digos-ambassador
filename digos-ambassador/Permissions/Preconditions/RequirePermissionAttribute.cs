@@ -22,8 +22,10 @@
 
 using System;
 using System.Threading.Tasks;
-using Discord.Commands;
+
 using DIGOS.Ambassador.Database;
+
+using Discord.Commands;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {

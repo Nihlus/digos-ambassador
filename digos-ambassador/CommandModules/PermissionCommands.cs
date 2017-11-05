@@ -24,15 +24,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
+
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
+
+using Discord;
+using Discord.Commands;
+
 using Humanizer;
+
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
+
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
 namespace DIGOS.Ambassador.CommandModules
@@ -78,6 +83,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Lists all permissions that have been granted to target user.
 		/// </summary>
+		/// <param name="discordUser">The Discord user.</param>
 		/// <returns>A task wrapping the command.</returns>
 		[Command("list-granted")]
 		[Summary("Lists all permissions that have been granted to target user.")]
@@ -165,6 +171,9 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <summary>
 			/// Grant the targeted user the given permission.
 			/// </summary>
+			/// <param name="discordUser">The Discord user.</param>
+			/// <param name="grantedPermission">The permission that is to be granted.</param>
+			/// <param name="grantedTarget">The target that the permission should be valid for.</param>
 			/// <returns>A task wrapping the command.</returns>
 			[Command]
 			[Summary("Grant the targeted user the given permission.")]
@@ -196,6 +205,8 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <summary>
 			/// Revoke the given permission from the targeted user.
 			/// </summary>
+			/// <param name="discordUser">The Discord user.</param>
+			/// <param name="revokedPermission">The permission that is to be revoked.</param>
 			/// <returns>A task wrapping the command.</returns>
 			[Command]
 			[Summary("Revoke the given permission from the targeted user.")]
@@ -213,6 +224,9 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <summary>
 			/// Revoke the given target permission from the targeted user.
 			/// </summary>
+			/// <param name="discordUser">The Discord user.</param>
+			/// <param name="permission">The permission to revoke the target from.</param>
+			/// <param name="revokedTarget">The permission target to revoke.</param>
 			/// <returns>A task wrapping the command.</returns>
 			[Command("target")]
 			[Summary("Revoke the given target permission from the targeted user.")]

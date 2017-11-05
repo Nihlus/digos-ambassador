@@ -1,20 +1,46 @@
-﻿using System;
+﻿//
+//  AdminCommands.cs
+//
+//  Author:
+//       Jarl Gullberg <jarl.gullberg@gmail.com>
+//
+//  Copyright (c) 2017 Jarl Gullberg
+//
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord.Commands;
+
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.FList.Kinks;
+
+using Discord.Commands;
+
 using Newtonsoft.Json;
+
 using Kink = DIGOS.Ambassador.Database.UserInfo.Kink;
 
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
-	/// Admin & owner-only commands. These directly affect the bot on a global scale.
+	/// Admin and owner-only commands. These directly affect the bot on a global scale.
 	/// </summary>
 	[Group("admin")]
 	public class AdminCommands : ModuleBase<SocketCommandContext>
@@ -29,8 +55,8 @@ namespace DIGOS.Ambassador.CommandModules
 		public async Task UpdateKinkDatabaseAsync()
 		{
 			int updatedKinkCount;
-			// Get the latest JSON from F-list
 
+			// Get the latest JSON from F-list
 			string json;
 			using (var web = new HttpClient())
 			{

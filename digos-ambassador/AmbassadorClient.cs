@@ -25,12 +25,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
+
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
+
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
+
 using log4net;
 using Microsoft.Extensions.DependencyInjection;
 

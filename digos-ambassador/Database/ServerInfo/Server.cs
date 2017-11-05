@@ -21,8 +21,10 @@
 //
 
 using System.Collections.Generic;
-using Discord;
+
 using DIGOS.Ambassador.Database.UserInfo;
+
+using Discord;
 
 namespace DIGOS.Ambassador.Database.ServerInfo
 {

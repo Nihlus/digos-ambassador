@@ -56,7 +56,6 @@ namespace DIGOS.Ambassador
 			log4net.Config.XmlConfigurator.Configure(logRepository, new FileInfo("app.config"));
 
 			// Initialize
-
 			var ambassadorClient = new AmbassadorClient();
 			await ambassadorClient.LoginAsync();
 			await ambassadorClient.StartAsync();

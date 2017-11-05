@@ -103,11 +103,23 @@ namespace DIGOS.Ambassador.Database.Permissions
 			}
 		}
 
+		/// <summary>
+		/// Compares the equality of two <see cref="LocalPermission"/> objects.
+		/// </summary>
+		/// <param name="left">The first object.</param>
+		/// <param name="right">The second object.</param>
+		/// <returns>true if the objects are equal; otherwise, false.</returns>
 		public static bool operator ==(LocalPermission left, LocalPermission right)
 		{
 			return Equals(left, right);
 		}
 
+		/// <summary>
+		/// Compares the inequality of two <see cref="LocalPermission"/> objects.
+		/// </summary>
+		/// <param name="left">The first object.</param>
+		/// <param name="right">The second object.</param>
+		/// <returns>true if the objects are equal; otherwise, false.</returns>
 		public static bool operator !=(LocalPermission left, LocalPermission right)
 		{
 			return !Equals(left, right);
