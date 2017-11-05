@@ -33,7 +33,7 @@
     <Rule Id="SA1024" Action="Error" /> <!-- Colons must be spaced correctly -->
     <Rule Id="SA1025" Action="Error" /> <!-- Code must not contain multiple whitespace in a row -->
     <Rule Id="SA1026" Action="Error" /> <!-- Code must not contain space after new keyword in implicitly typed array allocation -->
-    <Rule Id="SA1027" Action="Error" /> <!-- Use tabs correctly -->
+    <Rule Id="SA1027" Action="Warning" /> <!-- Use tabs correctly -->
     <Rule Id="SA1028" Action="Error" /> <!-- Code must not contain trailing whitespace -->
 
     <!-- Readability rules -->
@@ -76,7 +76,7 @@
     <Rule Id="SA1139" Action="Error" /> <!-- Use literals suffix notation instead of casting -->
 
     <!-- Ordering rules -->
-    <Rule Id="SA1200" Action="Error" /> <!-- Using directives must be placed correctly -->
+    <Rule Id="SA1200" Action="Warning" /> <!-- Using directives must be placed correctly -->
     <Rule Id="SA1201" Action="None" Intentional="true" /> <!-- Elements must appear in the correct order -->
     <Rule Id="SA1202" Action="None" Intentional="true" /> <!-- Elements must be ordered by access -->
     <Rule Id="SA1203" Action="Error" /> <!-- Constants must appear before fields -->
@@ -84,7 +84,7 @@
     <Rule Id="SA1205" Action="Error" /> <!-- Partial elements must declare access -->
     <Rule Id="SA1206" Action="Error" /> <!-- Declaration keywords must follow order -->
     <Rule Id="SA1207" Action="Error" /> <!-- Protected must come before internal -->
-    <Rule Id="SA1208" Action="Error" /> <!-- System using directives must be placed before other using directives -->
+    <Rule Id="SA1208" Action="Warning" /> <!-- System using directives must be placed before other using directives -->
     <Rule Id="SA1209" Action="Error" /> <!-- Using alias directives must be placed after other using directives -->
     <Rule Id="SA1210" Action="Error" /> <!-- Using directives must be ordered alphabetically by namespace -->
     <Rule Id="SA1210" Action="Error" /> <!-- Using directives must be ordered alphabetically by namespace -->
@@ -152,7 +152,7 @@
     <Rule Id="SA1520" Action="Error" /> <!-- Use braces consistently -->
 
     <!-- Documentation rules -->
-    <Rule Id="SA1600" Action="Error" /> <!-- Elements must be documented -->
+    <Rule Id="SA1600" Action="Warning" /> <!-- Elements must be documented -->
     <Rule Id="SA1601" Action="None" Intentional="true" /> <!-- Partial elements must be documented -->
     <Rule Id="SA1602" Action="Error" /> <!-- Enumeration items must be documented -->
     <Rule Id="SA1604" Action="Error" /> <!-- Element documentation must have summary -->
@@ -180,7 +180,7 @@
     <Rule Id="SA1626" Action="Error" /> <!-- Single-line comments must not use documentation style slashes -->
     <Rule Id="SA1627" Action="Error" /> <!-- Documentation text must not be empty -->
     <Rule Id="SA1629" Action="Error" /> <!-- Documentation text must end with a period -->
-    <Rule Id="SA1633" Action="Error" /> <!-- File must have header -->
+    <Rule Id="SA1633" Action="Warning" /> <!-- File must have header -->
     <Rule Id="SA1634" Action="Error" /> <!-- File header must show copyright -->
     <Rule Id="SA1635" Action="Error" /> <!-- File header must have copyright text -->
     <Rule Id="SA1636" Action="Error" Intentional="true" /> <!-- File header copyright text must match -->
