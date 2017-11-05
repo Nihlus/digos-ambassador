@@ -11,7 +11,7 @@ using System;
 
 namespace DIGOS.Ambassador.Migrations
 {
-    [DbContext(typeof(GlobalUserInfoContext))]
+    [DbContext(typeof(GlobalInfoContext))]
     partial class GlobalUserInfoContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

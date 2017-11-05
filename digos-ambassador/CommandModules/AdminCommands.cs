@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.CommandModules
 				));
 			}
 
-			using (var db = new GlobalUserInfoContext())
+			using (var db = new GlobalInfoContext())
 			{
 				updatedKinks = await db.UpdateKinksAsync(kinks);
 			}

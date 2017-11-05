@@ -11,7 +11,7 @@ using System;
 
 namespace DIGOS.Ambassador.Migrations
 {
-    [DbContext(typeof(GlobalUserInfoContext))]
+    [DbContext(typeof(GlobalInfoContext))]
     [Migration("20171104171518_InitialCreate")]
     partial class InitialCreate
     {

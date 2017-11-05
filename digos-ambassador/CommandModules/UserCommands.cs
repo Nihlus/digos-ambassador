@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.CommandModules
 		public async Task ShowInfoAsync()
 		{
 			User user;
-			using (var db = new GlobalUserInfoContext())
+			using (var db = new GlobalInfoContext())
 			{
 				user = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
 			}
@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.CommandModules
 		public async Task ShowInfoAsync(IUser discordUser)
 		{
 			User user;
-			using (var db = new GlobalUserInfoContext())
+			using (var db = new GlobalInfoContext())
 			{
 				user = await db.GetOrRegisterUserAsync(discordUser);
 			}
@@ -168,7 +168,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[RequirePermission(SetClass)]
 			public async Task SetUserClassAsync(UserClass userClass)
 			{
-				using (var db = new GlobalUserInfoContext())
+				using (var db = new GlobalInfoContext())
 				{
 					// Add the user to the user database if they're not already in it
 					var user = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
@@ -190,7 +190,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[RequirePermission(SetClass, Other)]
 			public async Task SetUserClassAsync(UserClass userClass, IUser discordUser)
 			{
-				using (var db = new GlobalUserInfoContext())
+				using (var db = new GlobalInfoContext())
 				{
 					// Add the user to the user database if they're not already in it
 					var user = await db.GetOrRegisterUserAsync(discordUser);
@@ -213,7 +213,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[RequirePermission(EditUser)]
 			public async Task SetUserBioAsync(string bio)
 			{
-				using (var db = new GlobalUserInfoContext())
+				using (var db = new GlobalInfoContext())
 				{
 					// Add the user to the user database if they're not already in it
 					var user = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
@@ -235,7 +235,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[RequirePermission(EditUser, Other)]
 			public async Task SetUserBioAsync(string bio, IUser discordUser)
 			{
-				using (var db = new GlobalUserInfoContext())
+				using (var db = new GlobalInfoContext())
 				{
 					// Add the user to the user database if they're not already in it
 					var user = await db.GetOrRegisterUserAsync(discordUser);
@@ -258,7 +258,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[RequirePermission(EditUser)]
 			public async Task SetUserTimezoneAsync(int timezone)
 			{
-				using (var db = new GlobalUserInfoContext())
+				using (var db = new GlobalInfoContext())
 				{
 					// Add the user to the user database if they're not already in it
 					var user = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
@@ -280,7 +280,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[RequirePermission(EditUser, Other)]
 			public async Task SetUserTimezoneAsync(int timezone, IUser discordUser)
 			{
-				using (var db = new GlobalUserInfoContext())
+				using (var db = new GlobalInfoContext())
 				{
 					// Add the user to the user database if they're not already in it
 					var user = await db.GetOrRegisterUserAsync(discordUser);

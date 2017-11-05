@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[Summary("Lists all permissions that have been granted to the invoking user.")]
 		public async Task ListGrantedPermissionsAsync()
 		{
-			using (var db = new GlobalUserInfoContext())
+			using (var db = new GlobalInfoContext())
 			{
 				var user = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
 
@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[Summary("Lists all permissions that have been granted to target user.")]
 		public async Task ListGrantedPermissionsAsync(IUser discordUser)
 		{
-			using (var db = new GlobalUserInfoContext())
+			using (var db = new GlobalInfoContext())
 			{
 				var user = await db.GetOrRegisterUserAsync(discordUser);
 
@@ -188,7 +188,7 @@ namespace DIGOS.Ambassador.CommandModules
 					Scope = grantedScope
 				};
 
-				using (var db = new GlobalUserInfoContext())
+				using (var db = new GlobalInfoContext())
 				{
 					await db.GrantPermissionAsync(discordUser, newPermission);
 				}

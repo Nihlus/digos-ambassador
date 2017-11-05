@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 		/// <inheritdoc />
 		public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
 		{
-			using (var db = new GlobalUserInfoContext())
+			using (var db = new GlobalInfoContext())
 			{
 				var user = await db.GetOrRegisterUserAsync(context.User);
 

@@ -36,9 +36,9 @@ using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 namespace DIGOS.Ambassador.Database
 {
 	/// <summary>
-	/// Database context for global user information.
+	/// Database context for global information.
 	/// </summary>
-	public class GlobalUserInfoContext : DbContext
+	public class GlobalInfoContext : DbContext
 	{
 		/// <summary>
 		/// Gets or sets the database where the user information is stored.

@@ -28,7 +28,7 @@
         </e>
         <e p="ContentManager.cs" t="Include" />
         <e p="Database" t="Include">
-          <e p="GlobalUserInfoContext.cs" t="Include" />
+          <e p="GlobalInfoContext.cs" t="Include" />
           <e p="Permissions" t="Include">
             <e p="UserPermission.cs" t="Include" />
           </e>
