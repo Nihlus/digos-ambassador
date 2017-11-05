@@ -1,16 +1,15 @@
 using System.Collections.Generic;
-using digos_ambassador.Tests.Database;
 using Discord;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
+using DIGOS.Ambassador.Tests.Database;
 using Moq;
 using Xunit;
-using static DIGOS.Ambassador.Permissions.Permission;
-using static DIGOS.Ambassador.Permissions.PermissionTarget;
+using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
-namespace digos_ambassador.Tests
+namespace DIGOS.Ambassador.Tests
 {
 	public class PermissionTests
 	{
@@ -20,8 +19,8 @@ namespace digos_ambassador.Tests
 			// Set up mocked permissions
 			var requiredPermission = new RequiredPermission()
 			{
-				Permission = SetClass,
-				Target = Other,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Other,
 			};
 
 			// Set up mocked users
@@ -53,14 +52,14 @@ namespace digos_ambassador.Tests
 
 			var requiredPermission = new RequiredPermission
 			{
-				Permission = SetClass,
-				Target = Other,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Other,
 			};
 
 			var grantedPermission = new LocalPermission
 			{
-				Permission = SetClass,
-				Target = Other,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Other,
 				Server = server
 			};
 
@@ -93,14 +92,14 @@ namespace digos_ambassador.Tests
 
 			var requiredPermission = new RequiredPermission
 			{
-				Permission = SetClass,
-				Target = Self,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Self,
 			};
 
 			var grantedPermission = new LocalPermission
 			{
-				Permission = SetClass,
-				Target = Other,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Other,
 				Server = server
 			};
 
@@ -133,14 +132,14 @@ namespace digos_ambassador.Tests
 
 			var requiredPermission = new RequiredPermission
 			{
-				Permission = SetClass,
-				Target = Other,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Other,
 			};
 
 			var grantedPermission = new LocalPermission
 			{
-				Permission = SetClass,
-				Target = Self,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Self,
 				Server = server
 			};
 
@@ -176,14 +175,14 @@ namespace digos_ambassador.Tests
 
 			var requiredPermission = new RequiredPermission
 			{
-				Permission = SetClass,
-				Target = Self,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Self,
 			};
 
 			var grantedPermission = new LocalPermission
 			{
-				Permission = SetClass,
-				Target = Other,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Other,
 				Server = server2
 			};
 
@@ -217,14 +216,14 @@ namespace digos_ambassador.Tests
 
 			var requiredPermission = new RequiredPermission
 			{
-				Permission = SetClass,
-				Target = Self,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Self,
 			};
 
 			var grantedLocalPermission = new LocalPermission
 			{
-				Permission = SetClass,
-				Target = Self,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Self,
 				Server = server1
 			};
 
@@ -235,8 +234,8 @@ namespace digos_ambassador.Tests
 
 			var grantedGlobalPermission = new GlobalPermission
 			{
-				Permission = SetClass,
-				Target = Self,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Self,
 				User = user
 			};
 
@@ -263,8 +262,8 @@ namespace digos_ambassador.Tests
 
 			var requiredPermission = new RequiredPermission
 			{
-				Permission = SetClass,
-				Target = Self,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Self,
 			};
 
 			var user = new User
@@ -274,8 +273,8 @@ namespace digos_ambassador.Tests
 
 			var grantedGlobalPermission = new GlobalPermission
 			{
-				Permission = SetClass,
-				Target = Self,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Self,
 				User = user
 			};
 
@@ -303,14 +302,14 @@ namespace digos_ambassador.Tests
 
 			var requiredPermission = new RequiredPermission
 			{
-				Permission = SetClass,
-				Target = Self,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Self,
 			};
 
 			var grantedLocalPermission = new LocalPermission
 			{
-				Permission = SetClass,
-				Target = Self,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Self,
 				Server = server
 			};
 
@@ -321,8 +320,8 @@ namespace digos_ambassador.Tests
 
 			var grantedGlobalPermission = new GlobalPermission
 			{
-				Permission = SetClass,
-				Target = Other,
+				Permission = Permission.SetClass,
+				Target = PermissionTarget.Other,
 				User = user
 			};
 
