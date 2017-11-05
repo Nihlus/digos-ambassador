@@ -192,7 +192,7 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.GrantLocalPermissionAsync(this.Context.Guild, discordUser, newPermission);
 				}
 
-				await this.Context.Channel.SendMessageAsync("Permission granted.");
+				await this.Context.Channel.SendMessageAsync($"{grantedPermission.ToString().Humanize().Transform(To.TitleCase)} granted to {discordUser.Mention}.");
 			}
 		}
 
@@ -218,7 +218,7 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.RevokeLocalPermissionAsync(this.Context.Guild, discordUser, revokedPermission);
 				}
 
-				await this.Context.Channel.SendMessageAsync("Permission revoked.");
+				await this.Context.Channel.SendMessageAsync($"${revokedPermission.ToString().Humanize().Transform(To.TitleCase)} revoked from {discordUser.Mention}.");
 			}
 
 			/// <summary>
@@ -238,7 +238,10 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.RevokeLocalPermissionTargetAsync(this.Context.Guild, discordUser, permission, revokedTarget);
 				}
 
-				await this.Context.Channel.SendMessageAsync("Permission target revoked.");
+				await this.Context.Channel.SendMessageAsync
+				(
+					$"{permission.ToString().Humanize().Transform(To.TitleCase)} ({revokedTarget.ToString().Humanize().Transform(To.TitleCase)}) revoked from {discordUser.Mention}."
+				);
 			}
 		}
 	}

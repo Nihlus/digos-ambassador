@@ -2,6 +2,9 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="$USER_HOME$/.Rider2017.2/system/resharper-host/local/Transient/ReSharperHost/v10/SolutionCaches/_digos-ambassador.233808278.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.2.0/build/netcoreapp1.0/xunit.runner.reporters.netstandard15.dll" t="Include" />
+    <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.2.0/build/netcoreapp1.0/xunit.runner.utility.netstandard15.dll" t="Include" />
+    <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.2.0/build/netcoreapp1.0/xunit.runner.visualstudio.dotnetcore.testadapter.dll" t="Include" />
     <e p="$PROJECT_DIR$" t="IncludeFlat">
       <e p=".travis.yml" t="Include" />
       <e p="README.md" t="Include" />
@@ -81,7 +84,22 @@
           </e>
         </e>
       </e>
-      <e p="digos-ambassador.Tests/digos-ambassador.Tests.csproj" t="IncludeRecursive" />
+      <e p="digos-ambassador.Tests" t="IncludeRecursive">
+        <e p="Database" t="Include">
+          <e p="MockedDatabase.cs" t="Include" />
+        </e>
+        <e p="PermissionTests.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="digos-ambassador.Tests.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.0" t="Include">
+              <e p="digos-ambassador.Tests.AssemblyInfo.cs" t="Include" />
+              <e p="digos-ambassador.Tests.Program.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
       <e p="digos-ambassador.sln" t="IncludeFlat" />
       <e p="packages" t="ExcludeRecursive" />
       <e p="stylecop.json" t="Include" />
