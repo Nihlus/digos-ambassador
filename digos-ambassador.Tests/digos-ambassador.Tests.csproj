@@ -12,7 +12,4 @@
   <ItemGroup>
     <ProjectReference Include="..\digos-ambassador\digos-ambassador.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Mocks" />
-  </ItemGroup>
 </Project>

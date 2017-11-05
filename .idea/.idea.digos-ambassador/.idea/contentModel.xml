@@ -83,7 +83,6 @@
         </e>
       </e>
       <e p="digos-ambassador.Tests" t="IncludeRecursive">
-        <e p="Mocks" t="Include" />
         <e p="PermissionTests.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="digos-ambassador.Tests.csproj" t="IncludeRecursive" />
