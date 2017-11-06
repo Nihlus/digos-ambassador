@@ -21,7 +21,6 @@
 //
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.UserInfo;
 
 namespace DIGOS.Ambassador.Database.Roleplaying

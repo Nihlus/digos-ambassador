@@ -24,7 +24,6 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.UserInfo;
 using Discord;
-using Discord.WebSocket;
 
 namespace DIGOS.Ambassador.Database.Roleplaying
 {
