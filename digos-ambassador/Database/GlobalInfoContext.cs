@@ -27,6 +27,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database.Permissions;
+using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
@@ -74,6 +75,11 @@ namespace DIGOS.Ambassador.Database
 		/// Gets or sets the database where granted global permissions are stored.
 		/// </summary>
 		public DbSet<GlobalPermission> GlobalPermissions { get; set; }
+
+		/// <summary>
+		/// Gets or sets the database where roleplays are stored.
+		/// </summary>
+		public DbSet<Roleplay> Roleplays { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
@@ -199,7 +205,7 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordServer">The Discord server.</param>
 		/// <returns><value>true</value> if the server is stored; otherwise, <value>false</value>.</returns>
-		public async Task<bool> IsServerKnown(IGuild discordServer)
+		public async Task<bool> IsServerKnownAsync(IGuild discordServer)
 		{
 			return await this.Servers.AnyAsync(u => u.DiscordGuildID == discordServer.Id);
 		}
@@ -211,12 +217,12 @@ namespace DIGOS.Ambassador.Database
 		/// <returns>Stored information about the server.</returns>
 		public async Task<Server> GetOrRegisterServerAsync(SocketGuild discordServer)
 		{
-			if (!await IsServerKnown(discordServer))
+			if (!await IsServerKnownAsync(discordServer))
 			{
 				return await AddServerAsync(discordServer);
 			}
 
-			return await GetServer(discordServer);
+			return await GetServerAsync(discordServer);
 		}
 
 		/// <summary>
@@ -224,7 +230,7 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordServer">The Discord server.</param>
 		/// <returns>Stored information about the server.</returns>
-		public async Task<Server> GetServer(IGuild discordServer)
+		public async Task<Server> GetServerAsync(IGuild discordServer)
 		{
 			return await this.Servers.FirstAsync(u => u.DiscordGuildID == discordServer.Id);
 		}
@@ -237,7 +243,7 @@ namespace DIGOS.Ambassador.Database
 		/// <exception cref="ArgumentException">Thrown if the server already exists in the database.</exception>
 		public async Task<Server> AddServerAsync(IGuild discordServer)
 		{
-			if (await IsServerKnown(discordServer))
+			if (await IsServerKnownAsync(discordServer))
 			{
 				throw new ArgumentException($"A server with the ID {discordServer.Id} has already been added to the database.", nameof(discordServer));
 			}
@@ -248,7 +254,7 @@ namespace DIGOS.Ambassador.Database
 
 			await SaveChangesAsync();
 
-			return await this.Servers.FirstAsync(u => u.DiscordGuildID == discordServer.Id);
+			return await GetServerAsync(discordServer);
 		}
 
 		/// <summary>
@@ -256,7 +262,7 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns><value>true</value> if the user is stored; otherwise, <value>false</value>.</returns>
-		public async Task<bool> IsUserKnown(IUser discordUser)
+		public async Task<bool> IsUserKnownAsync(IUser discordUser)
 		{
 			return await this.Users.AnyAsync(u => u.DiscordID == discordUser.Id);
 		}
@@ -268,7 +274,7 @@ namespace DIGOS.Ambassador.Database
 		/// <returns>Stored information about the user.</returns>
 		public async Task<User> GetOrRegisterUserAsync(IUser discordUser)
 		{
-			if (!await IsUserKnown(discordUser))
+			if (!await IsUserKnownAsync(discordUser))
 			{
 				return await AddUserAsync(discordUser);
 			}
@@ -298,7 +304,7 @@ namespace DIGOS.Ambassador.Database
 		/// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
 		public async Task<User> AddUserAsync(IUser discordUser)
 		{
-			if (await IsUserKnown(discordUser))
+			if (await IsUserKnownAsync(discordUser))
 			{
 				throw new ArgumentException($"A user with the ID {discordUser.Id} has already been added to the database.", nameof(discordUser));
 			}
@@ -315,7 +321,82 @@ namespace DIGOS.Ambassador.Database
 
 			await SaveChangesAsync();
 
-			return await this.Users.FirstAsync(u => u.DiscordID == discordUser.Id);
+			return await GetUser(discordUser);
+		}
+
+		/// <summary>
+		/// Gets the current active roleplay in the given channel.
+		/// </summary>
+		/// <param name="channel">The channel to get the roleplay from.</param>
+		/// <returns>The active roleplay.</returns>
+		public async Task<Roleplay> GetActiveRoleplayAsync(IChannel channel)
+		{
+			return await this.Roleplays
+				.Include(rp => rp.Owner)
+				.Include(rp => rp.Participants)
+				.Include(rp => rp.Messages)
+				.FirstAsync(rp => rp.IsActive && rp.ActiveChannelID == channel.Id);
+		}
+
+		/// <summary>
+		/// Determines whether or not there is an active roleplay in the given channel.
+		/// </summary>
+		/// <param name="channel">The channel to check.</param>
+		/// <returns>true if there is an active roleplay; otherwise, false.</returns>
+		public async Task<bool> HasActiveRoleplayAsync(IChannel channel)
+		{
+			return await this.Roleplays.AnyAsync(rp => rp.IsActive && rp.ActiveChannelID == channel.Id);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given roleplay name is unique for a given user.
+		/// </summary>
+		/// <param name="discordUser">The user to check.</param>
+		/// <param name="roleplayName">The roleplay name to check.</param>
+		/// <returns>true if the name is unique; otherwise, false.</returns>
+		public async Task<bool> IsRoleplayNameUniqueForUserAsync(IUser discordUser, string roleplayName)
+		{
+			var userRoleplays = GetUserRoleplays(discordUser);
+			if (await userRoleplays.CountAsync() <= 0)
+			{
+				return true;
+			}
+
+			return await userRoleplays.AnyAsync(rp => rp.Name == roleplayName);
+		}
+
+		/// <summary>
+		/// Get the roleplays owned by the given user.
+		/// </summary>
+		/// <param name="discordUser">The user to get the roleplays of.</param>
+		/// <returns>A queryable list of roleplays belonging to the user.</returns>
+		public IQueryable<Roleplay> GetUserRoleplays(IUser discordUser)
+		{
+			return this.Roleplays
+				.Include(rp => rp.Owner)
+				.Include(rp => rp.Participants)
+				.Include(rp => rp.Messages)
+				.Where(rp => rp.Owner.DiscordID == discordUser.Id);
+		}
+
+		/// <summary>
+		/// Gets a roleplay belonging to a given user by a given name.
+		/// </summary>
+		/// <param name="discordUser">The user to get the roleplay from.</param>
+		/// <param name="roleplayName">The name of the roleplay.</param>
+		/// <returns>A roleplay with the given name belonging to the given user, or null if none was found.</returns>
+		public async Task<Roleplay> GetUserRoleplayByNameAsync(IUser discordUser, string roleplayName)
+		{
+			return await this.Roleplays
+			.Include(rp => rp.Owner)
+			.Include(rp => rp.Participants)
+			.Include(rp => rp.Messages)
+			.FirstOrDefaultAsync
+			(
+				rp =>
+					rp.Name == roleplayName &&
+					rp.Owner.DiscordID == discordUser.Id
+			);
 		}
 
 		/// <inheritdoc />

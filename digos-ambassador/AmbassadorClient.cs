@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
+using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
@@ -53,6 +54,8 @@ namespace DIGOS.Ambassador
 
 		private readonly CommandService Commands;
 
+		private readonly RoleplayService Roleplays;
+
 		private readonly IServiceProvider Services;
 
 		/// <summary>
@@ -64,10 +67,12 @@ namespace DIGOS.Ambassador
 			this.Client.Log += OnDiscordLogEvent;
 
 			this.Commands = new CommandService();
+			this.Roleplays = new RoleplayService();
 
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)
 				.AddSingleton(this.Commands)
+				.AddSingleton(this.Roleplays)
 				.BuildServiceProvider();
 
 			this.Client.MessageReceived += OnMessageReceived;
@@ -107,6 +112,7 @@ namespace DIGOS.Ambassador
 			int argumentPos = 0;
 			if (!(message.HasCharPrefix('!', ref argumentPos) || message.HasMentionPrefix(this.Client.CurrentUser, ref argumentPos)))
 			{
+				this.Roleplays.ConsumeMessage(arg);
 				return;
 			}
 

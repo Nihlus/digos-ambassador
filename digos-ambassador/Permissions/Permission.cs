@@ -64,5 +64,35 @@ namespace DIGOS.Ambassador.Permissions
 		/// </summary>
 		[Description("Allows the user to edit user information.")]
 		EditUser,
+
+		/// <summary>
+		/// Allows the user to create roleplays.
+		/// </summary>
+		[Description("Allows the user to create roleplays.")]
+		CreateRoleplay,
+
+		/// <summary>
+		/// Allows the user to delete roleplays.
+		/// </summary>
+		[Description("Allows the user to delete roleplays.")]
+		DeleteRoleplay,
+
+		/// <summary>
+		/// Allows the user to join roleplays.
+		/// </summary>
+		[Description("Allows the user to join roleplays.")]
+		JoinRoleplay,
+
+		/// <summary>
+		/// Allows the user to replay roleplays.
+		/// </summary>
+		[Description("Allows the user to replay roleplays.")]
+		ReplayRoleplay,
+
+		/// <summary>
+		/// Allows the user to edit roleplay information.
+		/// </summary>
+		[Description("Allows the user to edit roleplay information.")]
+		EditRoleplay
 	}
 }

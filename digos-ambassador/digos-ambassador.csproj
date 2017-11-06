@@ -1,45 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp2.0</TargetFramework>
-        <RootNamespace>DIGOS.Ambassador</RootNamespace>
-        <AssemblyName>DIGOS.Ambassador</AssemblyName>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <RunCodeAnalysis>true</RunCodeAnalysis>
-        <CodeAnalysisRuleSet>..\stylecop.ruleset</CodeAnalysisRuleSet>
-        <LangVersion>7.1</LangVersion>
-    </PropertyGroup>
-    <ItemGroup>
-        <AdditionalFiles Include="$(SolutionDir)\stylecop.json">
-            <Link>stylecop.json</Link>
-        </AdditionalFiles>
-        <AdditionalFiles Include="$(SolutionDir)\stylecop.ruleset">
-            <Link>stylecop.ruleset</Link>
-        </AdditionalFiles>
-        <AdditionalFiles Include="$(SolutionDir)\README.md">
-            <Link>README.md</Link>
-        </AdditionalFiles>
-        <AdditionalFiles Include="$(SolutionDir)\.travis.yml">
-            <Link>.travis.yml</Link>
-        </AdditionalFiles>
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Content\*">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Discord.Net" Version="1.0.2"/>
-        <PackageReference Include="Discord.Net.Commands" Version="1.0.2"/>
-        <PackageReference Include="Humanizer" Version="2.2.0"/>
-        <PackageReference Include="log4net" Version="2.0.8"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.0"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0"/>
-        <PackageReference Include="Newtonsoft.Json" Version="10.0.3"/>
-        <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004"/>
-    </ItemGroup>
-    <ItemGroup>
-        <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0"/>
-    </ItemGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RootNamespace>DIGOS.Ambassador</RootNamespace>
+    <AssemblyName>DIGOS.Ambassador</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\stylecop.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="$(SolutionDir)\stylecop.json">
+      <Link>stylecop.json</Link>
+    </AdditionalFiles>
+    <AdditionalFiles Include="$(SolutionDir)\stylecop.ruleset">
+      <Link>stylecop.ruleset</Link>
+    </AdditionalFiles>
+    <AdditionalFiles Include="$(SolutionDir)\README.md">
+      <Link>README.md</Link>
+    </AdditionalFiles>
+    <AdditionalFiles Include="$(SolutionDir)\.travis.yml">
+      <Link>.travis.yml</Link>
+    </AdditionalFiles>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="1.0.2" />
+    <PackageReference Include="Discord.Net.Commands" Version="1.0.2" />
+    <PackageReference Include="Humanizer" Version="2.2.0" />
+    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" />
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
+  </ItemGroup>
 </Project>

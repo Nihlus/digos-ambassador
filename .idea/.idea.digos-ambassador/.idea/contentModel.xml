@@ -14,9 +14,13 @@
           <e p="AdminCommands.cs" t="Include" />
           <e p="MiscellaneousCommands.cs" t="Include" />
           <e p="PermissionCommands.cs" t="Include" />
+          <e p="RoleplayCommands.cs" t="Include" />
           <e p="UserCommands.cs" t="Include" />
         </e>
         <e p="Content" t="Include">
+          <e p="Databases" t="Include">
+            <e p="global.db" t="Include" />
+          </e>
           <e p="Sass" t="Include">
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
@@ -29,6 +33,10 @@
           <e p="Permissions" t="Include">
             <e p="GlobalPermission.cs" t="Include" />
             <e p="LocalPermission.cs" t="Include" />
+          </e>
+          <e p="Roleplaying" t="Include">
+            <e p="Roleplay.cs" t="Include" />
+            <e p="UserMessage.cs" t="Include" />
           </e>
           <e p="ServerInfo" t="Include">
             <e p="Server.cs" t="Include" />
@@ -54,8 +62,8 @@
           </e>
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171105221608_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171105221608_InitialCreate.cs" t="Include" />
+          <e p="20171106201345_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171106201345_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Permissions" t="Include">
@@ -64,11 +72,15 @@
           <e p="PermissionChecker.cs" t="Include" />
           <e p="PermissionTarget.cs" t="Include" />
           <e p="Preconditions" t="Include">
+            <e p="RequireActiveRoleplayAttribute.cs" t="Include" />
             <e p="RequirePermissionAttribute.cs" t="Include" />
           </e>
           <e p="RequiredPermission.cs" t="Include" />
         </e>
         <e p="Program.cs" t="Include" />
+        <e p="Services" t="Include">
+          <e p="RoleplayService.cs" t="Include" />
+        </e>
         <e p="app.config" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="digos-ambassador.csproj" t="IncludeRecursive" />
