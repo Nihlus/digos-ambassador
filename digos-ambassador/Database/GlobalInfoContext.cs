@@ -293,6 +293,7 @@ namespace DIGOS.Ambassador.Database
 				.Include(u => u.Characters)
 				.Include(u => u.Kinks)
 				.Include(u => u.LocalPermissions)
+				.ThenInclude(lp => lp.Server)
 				.FirstAsync(u => u.DiscordID == discordUser.Id);
 		}
 

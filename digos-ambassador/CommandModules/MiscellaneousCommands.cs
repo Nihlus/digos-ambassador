@@ -24,6 +24,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Humanizer;
 
 // ReSharper disable UnusedMember.Global
 namespace DIGOS.Ambassador.CommandModules
@@ -61,6 +62,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Lists available commands.
 		/// </summary>
 		/// <returns>A task wrapping the command.</returns>
+		[Alias("help", "halp", "hlep", "commands")]
 		[Command("help")]
 		[Summary("Lists available commands")]
 		public async Task HelpAsync()
