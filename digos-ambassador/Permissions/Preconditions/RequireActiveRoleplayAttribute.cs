@@ -23,7 +23,9 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Services.Roleplaying;
 using Discord.Commands;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
@@ -47,17 +49,18 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 		/// <inheritdoc />
 		public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
 		{
+			var roleplayService = services.GetService<RoleplayService>();
 			using (var db = new GlobalInfoContext())
 			{
-				if (!await db.HasActiveRoleplayAsync(context.Channel))
+				var result = await roleplayService.GetActiveRoleplayAsync(db, context.Channel);
+				if (!result.IsSuccess)
 				{
-					return PreconditionResult.FromError(
-						"No roleplay is currently active in this channel. Please make one active, or specify the name of one.");
+					return PreconditionResult.FromError(result);
 				}
 
 				if (this.RequireOwner)
 				{
-					var roleplay = await db.GetActiveRoleplayAsync(context.Channel);
+					var roleplay = result.Entity;
 					if (roleplay.Owner.DiscordID != context.User.Id)
 					{
 						return PreconditionResult.FromError("Only the roleplay owner can do that.");

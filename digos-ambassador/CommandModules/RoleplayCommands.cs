@@ -30,11 +30,12 @@ using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Roleplaying;
 
 using Discord;
 using Discord.Commands;
 using Humanizer;
-using Microsoft.EntityFrameworkCore;
+
 using static DIGOS.Ambassador.Permissions.Permission;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -52,16 +53,20 @@ namespace DIGOS.Ambassador.CommandModules
 	{
 		private readonly CommandService Commands;
 
+		private readonly RoleplayService Roleplays;
+
 		private readonly UserFeedbackService Feedback;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RoleplayCommands"/> class.
 		/// </summary>
 		/// <param name="commands">The command service.</param>
+		/// <param name="roleplays">The roleplay service.</param>
 		/// <param name="feedback">The user feedback service.</param>
-		public RoleplayCommands(CommandService commands, UserFeedbackService feedback)
+		public RoleplayCommands(CommandService commands, RoleplayService roleplays, UserFeedbackService feedback)
 		{
 			this.Commands = commands;
+			this.Roleplays = roleplays;
 			this.Feedback = feedback;
 		}
 
@@ -82,13 +87,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				if (!await db.HasActiveRoleplayAsync(this.Context.Channel))
+				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+				if (!result.IsSuccess)
 				{
-					await this.Feedback.SendWarningAsync(this.Context, "There is no roleplay that is currently active in this channel.");
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
 
-				var roleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
+				var roleplay = result.Entity;
 				await ShowRoleplayAsync(roleplay);
 			}
 		}
@@ -103,11 +109,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await GetNamedRoleplayAsync(db, roleplayName);
-				if (roleplay is null)
+				var result = await this.Roleplays.GetNamedRoleplayAsync(db, roleplayName);
+				if (!result.IsSuccess)
 				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
+
+				var roleplay = result.Entity;
 
 				await ShowRoleplayAsync(roleplay);
 			}
@@ -122,12 +131,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetUserRoleplayByNameAsync(discordUser, roleplayName);
-				if (roleplay is null)
+				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, discordUser, roleplayName);
+				if (!result.IsSuccess)
 				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
 
+				var roleplay = result.Entity;
 				await ShowRoleplayAsync(roleplay);
 			}
 		}
@@ -183,7 +194,7 @@ namespace DIGOS.Ambassador.CommandModules
 
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplays = db.GetUserRoleplays(discordUser);
+				var roleplays = this.Roleplays.GetUserRoleplays(db, discordUser);
 
 				foreach (var roleplay in roleplays)
 				{
@@ -217,7 +228,7 @@ namespace DIGOS.Ambassador.CommandModules
 					return;
 				}
 
-				if (!await db.IsRoleplayNameUniqueForUserAsync(this.Context.Message.Author, roleplayName))
+				if (!await this.Roleplays.IsRoleplayNameUniqueForUserAsync(db, this.Context.Message.Author, roleplayName))
 				{
 					await this.Feedback.SendErrorAsync
 					(
@@ -280,12 +291,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
-				if (roleplay is null)
+				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+				if (!result.IsSuccess)
 				{
-					await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
+
+				var roleplay = result.Entity;
 
 				db.Roleplays.Remove(roleplay);
 				await db.SaveChangesAsync();
@@ -305,8 +318,8 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
-				await JoinRoleplayAsync(db, roleplay);
+				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+				await JoinRoleplayAsync(db, result.Entity);
 			}
 		}
 
@@ -321,37 +334,17 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await GetNamedRoleplayAsync(db, roleplayName);
-				if (roleplay is null)
+				var result = await this.Roleplays.GetNamedRoleplayAsync(db, roleplayName);
+				if (!result.IsSuccess)
 				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
 
+				var roleplay = result.Entity;
+
 				await JoinRoleplayAsync(db, roleplay);
 			}
-		}
-
-		private async Task<Roleplay> GetNamedRoleplayAsync(GlobalInfoContext db, string roleplayName)
-		{
-			if (await db.Roleplays.CountAsync(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase)) > 1)
-			{
-				await this.Feedback.SendWarningAsync(this.Context, "There's more than one roleplay with that name. Please specify which user it belongs to.");
-
-				return null;
-			}
-
-			var roleplay = db.Roleplays
-				.Include(rp => rp.Owner)
-				.Include(rp => rp.Participants)
-				.Include(rp => rp.Messages)
-				.FirstOrDefault(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase));
-
-			if (roleplay is null)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, "No roleplay with that name found.");
-			}
-
-			return roleplay;
 		}
 
 		/// <summary>
@@ -366,20 +359,21 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetUserRoleplayByNameAsync(roleplayOwner, roleplayName);
+				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, roleplayOwner, roleplayName);
+				if (!result.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					return;
+				}
+
+				var roleplay = result.Entity;
 				await JoinRoleplayAsync(db, roleplay);
 			}
 		}
 
 		private async Task JoinRoleplayAsync(GlobalInfoContext db, Roleplay roleplay)
 		{
-			if (roleplay is null)
-			{
-				await this.Feedback.SendWarningAsync(this.Context, "There is no roleplay with that name.");
-				return;
-			}
-
-			var result = await AddUserToRoleplayAsync(db, roleplay, this.Context.Message.Author);
+			var result = await this.Roleplays.AddUserToRoleplayAsync(db, this.Context, roleplay, this.Context.Message.Author);
 			if (!result.IsSuccess)
 			{
 				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -400,8 +394,8 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
-				await LeaveRoleplayAsync(db, roleplay);
+				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+				await LeaveRoleplayAsync(db, result.Entity);
 			}
 		}
 
@@ -415,11 +409,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await GetNamedRoleplayAsync(db, roleplayName);
-				if (roleplay is null)
+				var result = await this.Roleplays.GetNamedRoleplayAsync(db, roleplayName);
+				if (!result.IsSuccess)
 				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
+
+				var roleplay = result.Entity;
 
 				await LeaveRoleplayAsync(db, roleplay);
 			}
@@ -436,14 +433,21 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetUserRoleplayByNameAsync(roleplayOwner, roleplayName);
+				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, roleplayOwner, roleplayName);
+				if (!result.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					return;
+				}
+
+				var roleplay = result.Entity;
 				await LeaveRoleplayAsync(db, roleplay);
 			}
 		}
 
 		private async Task LeaveRoleplayAsync(GlobalInfoContext db, Roleplay roleplay)
 		{
-			var result = await RemoveUserFromRoleplayAsync(db, roleplay, this.Context.Message.Author);
+			var result = await this.Roleplays.RemoveUserFromRoleplayAsync(db, this.Context, roleplay, this.Context.Message.Author);
 			if (!result.IsSuccess)
 			{
 				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -465,8 +469,8 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
-				await KickRoleplayParticipantAsync(db, discordUser, roleplay);
+				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+				await KickRoleplayParticipantAsync(db, discordUser, result.Entity);
 			}
 		}
 
@@ -481,13 +485,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
-
-				if (roleplay is null)
+				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+				if (!result.IsSuccess)
 				{
-					await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
+
+				var roleplay = result.Entity;
 
 				await KickRoleplayParticipantAsync(db, discordUser, roleplay);
 			}
@@ -495,7 +500,7 @@ namespace DIGOS.Ambassador.CommandModules
 
 		private async Task KickRoleplayParticipantAsync(GlobalInfoContext db, IUser discordUser, Roleplay roleplay)
 		{
-			var result = await RemoveUserFromRoleplayAsync(db, roleplay, discordUser);
+			var result = await this.Roleplays.RemoveUserFromRoleplayAsync(db, this.Context, roleplay, discordUser);
 			if (!result.IsSuccess)
 			{
 				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -509,51 +514,6 @@ namespace DIGOS.Ambassador.CommandModules
 			);
 		}
 
-		private async Task<ExecuteResult> RemoveUserFromRoleplayAsync(GlobalInfoContext db, Roleplay roleplay, IUser discordUser)
-		{
-			var isCurrentUser = this.Context.Message.Author.Id == discordUser.Id;
-			if (!roleplay.Participants.Any(p => p.DiscordID == discordUser.Id))
-			{
-				var errorMessage = isCurrentUser
-					? "You're not in that roleplay."
-					: "No matching user found in the roleplay.";
-
-				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
-			}
-
-			if (roleplay.Owner.DiscordID == discordUser.Id)
-			{
-				var errorMessage = isCurrentUser
-					? "You can't leave a roleplay you own."
-					: "The owner of a roleplay can't be removed from it.";
-
-				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
-			}
-
-			roleplay.Participants = roleplay.Participants.Where(p => p.DiscordID != discordUser.Id).ToList();
-			await db.SaveChangesAsync();
-
-			return ExecuteResult.FromSuccess();
-		}
-
-		private async Task<ExecuteResult> AddUserToRoleplayAsync(GlobalInfoContext db, Roleplay roleplay, IUser discordUser)
-		{
-			var isCurrentUser = this.Context.Message.Author.Id == discordUser.Id;
-			if (roleplay.Participants.Any(p => p.DiscordID == discordUser.Id))
-			{
-				var errorMessage = isCurrentUser
-					? "You're already in that roleplay."
-					: "The user is aleady in that roleplay.";
-
-				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
-			}
-
-			roleplay.Participants.Add(await db.GetOrRegisterUserAsync(discordUser));
-			await db.SaveChangesAsync();
-
-			return ExecuteResult.FromSuccess();
-		}
-
 		/// <summary>
 		/// Makes the roleplay with the given name current in the current channel.
 		/// </summary>
@@ -564,13 +524,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
-				if (roleplay is null)
+				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+				if (!result.IsSuccess)
 				{
-					await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
 
+				var roleplay = result.Entity;
 				if (roleplay.IsNSFW && !this.Context.Channel.IsNsfw)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, "This channel is not marked as NSFW, while your roleplay is... naughty!");
@@ -594,12 +555,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
-				if (roleplay is null)
+				var newRoleplayResult = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+				if (!newRoleplayResult.IsSuccess)
 				{
-					await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
+					await this.Feedback.SendErrorAsync(this.Context, newRoleplayResult.ErrorReason);
 					return;
 				}
+
+				var roleplay = newRoleplayResult.Entity;
 
 				if (roleplay.IsNSFW && !this.Context.Channel.IsNsfw)
 				{
@@ -607,11 +570,18 @@ namespace DIGOS.Ambassador.CommandModules
 					return;
 				}
 
-				if (await db.HasActiveRoleplayAsync(this.Context.Channel))
+				if (await this.Roleplays.HasActiveRoleplayAsync(db, this.Context.Channel))
 				{
 					await this.Feedback.SendWarningAsync(this.Context, "There's already a roleplay active in this channel.");
 
-					var currentRoleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
+					var currentRoleplayResult = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+					if (!currentRoleplayResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, currentRoleplayResult.ErrorReason);
+						return;
+					}
+
+					var currentRoleplay = currentRoleplayResult.Entity;
 					var timeOfLastMessage = currentRoleplay.Messages.Last().Timestamp;
 					var currentTime = DateTimeOffset.Now;
 					if (timeOfLastMessage < currentTime.AddHours(-6))
@@ -647,14 +617,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				if (!await db.HasActiveRoleplayAsync(this.Context.Channel))
+				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+				if (!result.IsSuccess)
 				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
 
-				var roleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
-
-				roleplay.IsActive = false;
+				var roleplay = result.Entity;
 				await db.SaveChangesAsync();
 
 				await this.Feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplay.Name}\" has been stopped.");
@@ -672,8 +642,8 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
-				await TransferRoleplayOwnershipAsync(db, newOwner, roleplay);
+				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+				await TransferRoleplayOwnershipAsync(db, newOwner, result.Entity);
 			}
 		}
 
@@ -688,20 +658,21 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
+				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+				if (!result.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					return;
+				}
+
+				var roleplay = result.Entity;
 				await TransferRoleplayOwnershipAsync(db, newOwner, roleplay);
 			}
 		}
 
 		private async Task TransferRoleplayOwnershipAsync(GlobalInfoContext db, IUser newOwner, Roleplay roleplay)
 		{
-			if (roleplay is null)
-			{
-				await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
-				return;
-			}
-
-			if (db.GetUserRoleplays(newOwner).Any(rp => rp.Name.Equals(roleplay.Name, StringComparison.OrdinalIgnoreCase)))
+			if (this.Roleplays.GetUserRoleplays(db, newOwner).Any(rp => rp.Name.Equals(roleplay.Name, StringComparison.OrdinalIgnoreCase)))
 			{
 				await this.Feedback.SendErrorAsync(this.Context, $"That user already owns a roleplay named {roleplay.Name}. Please rename it first.");
 				return;
@@ -727,13 +698,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				if (!await db.HasActiveRoleplayAsync(this.Context.Channel))
+				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+				if (!result.IsSuccess)
 				{
-					await this.Feedback.SendWarningAsync(this.Context, "There's no active roleplay in this channel.");
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
 
-				var roleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
+				var roleplay = result.Entity;
 
 				await ReplayRoleplayAsync(roleplay, from, to);
 			}
@@ -752,11 +724,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await GetNamedRoleplayAsync(db, roleplayName);
-				if (roleplay is null)
+				var result = await this.Roleplays.GetNamedRoleplayAsync(db, roleplayName);
+				if (!result.IsSuccess)
 				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
+
+				var roleplay = result.Entity;
 
 				await ReplayRoleplayAsync(roleplay, from, to);
 			}
@@ -776,19 +751,20 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplay = await db.GetUserRoleplayByNameAsync(roleplayOwner, roleplayName);
+				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, roleplayOwner, roleplayName);
+				if (!result.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					return;
+				}
+
+				var roleplay = result.Entity;
 				await ReplayRoleplayAsync(roleplay, from, to);
 			}
 		}
 
 		private async Task ReplayRoleplayAsync(Roleplay roleplay, DateTimeOffset from = default, DateTimeOffset to = default)
 		{
-			if (roleplay is null)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, "No roleplay with that name found.");
-				return;
-			}
-
 			if (from == default)
 			{
 				from = DateTimeOffset.MinValue;
@@ -825,14 +801,18 @@ namespace DIGOS.Ambassador.CommandModules
 		[Group("set")]
 		public class SetCommands : ModuleBase<SocketCommandContext>
 		{
+			private readonly RoleplayService Roleplays;
+
 			private readonly UserFeedbackService Feedback;
 
 			/// <summary>
 			/// Initializes a new instance of the <see cref="SetCommands"/> class.
 			/// </summary>
+			/// <param name="roleplays">The roleplay service.</param>
 			/// <param name="feedback">The user feedback service.</param>
-			public SetCommands(UserFeedbackService feedback)
+			public SetCommands(RoleplayService roleplays, UserFeedbackService feedback)
 			{
+				this.Roleplays = roleplays;
 				this.Feedback = feedback;
 			}
 
@@ -847,8 +827,8 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var roleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
-					await SetRoleplayNameAsync(db, roleplay, newRoleplayName);
+					var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+					await SetRoleplayNameAsync(db, result.Entity, newRoleplayName);
 				}
 			}
 
@@ -863,12 +843,14 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, oldRoleplayName);
-					if (roleplay is null)
+					var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, oldRoleplayName);
+					if (!result.IsSuccess)
 					{
-						await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
+						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 						return;
 					}
+
+					var roleplay = result.Entity;
 
 					await SetRoleplayNameAsync(db, roleplay, newRoleplayName);
 				}
@@ -882,7 +864,7 @@ namespace DIGOS.Ambassador.CommandModules
 					return;
 				}
 
-				if (!await db.IsRoleplayNameUniqueForUserAsync(this.Context.Message.Author, newRoleplayName))
+				if (!await this.Roleplays.IsRoleplayNameUniqueForUserAsync(db, this.Context.Message.Author, newRoleplayName))
 				{
 					await this.Feedback.SendErrorAsync(this.Context, "You already have a roleplay with that name.");
 				}
@@ -904,8 +886,8 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var roleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
-					await SetRoleplaySummaryAsync(db, roleplay, newRoleplaySummary);
+					var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+					await SetRoleplaySummaryAsync(db, result.Entity, newRoleplaySummary);
 				}
 			}
 
@@ -920,12 +902,14 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
-					if (roleplay is null)
+					var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+					if (!result.IsSuccess)
 					{
-						await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
+						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 						return;
 					}
+
+					var roleplay = result.Entity;
 
 					await SetRoleplaySummaryAsync(db, roleplay, newRoleplaySummary);
 				}
@@ -958,8 +942,8 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var roleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
-					await SetRoleplayIsNSFW(db, roleplay, isNSFW);
+					var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+					await SetRoleplayIsNSFW(db, result.Entity, isNSFW);
 				}
 			}
 
@@ -976,12 +960,14 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
-					if (roleplay is null)
+					var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+					if (!result.IsSuccess)
 					{
-						await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
+						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 						return;
 					}
+
+					var roleplay = result.Entity;
 
 					await SetRoleplayIsNSFW(db, roleplay, isNSFW);
 				}
@@ -1012,8 +998,8 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var roleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
-					await SetRoleplayIsPublic(db, roleplay, isPublic);
+					var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+					await SetRoleplayIsPublic(db, result.Entity, isPublic);
 				}
 			}
 
@@ -1028,12 +1014,14 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
-					if (roleplay is null)
+					var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+					if (!result.IsSuccess)
 					{
-						await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
+						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 						return;
 					}
+
+					var roleplay = result.Entity;
 
 					await SetRoleplayIsPublic(db, roleplay, isPublic);
 				}

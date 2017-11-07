@@ -79,7 +79,10 @@
         </e>
         <e p="Program.cs" t="Include" />
         <e p="Services" t="Include">
-          <e p="RoleplayService.cs" t="Include" />
+          <e p="RetrieveEntityResult.cs" t="Include" />
+          <e p="Roleplaying" t="Include">
+            <e p="RoleplayService.cs" t="Include" />
+          </e>
           <e p="UserFeedbackService.cs" t="Include" />
         </e>
         <e p="app.config" t="Include" />

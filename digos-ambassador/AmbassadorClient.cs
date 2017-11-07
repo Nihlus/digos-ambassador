@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Roleplaying;
 
 using Discord;
 using Discord.Commands;

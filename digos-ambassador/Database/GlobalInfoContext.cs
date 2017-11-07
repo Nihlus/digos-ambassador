@@ -34,7 +34,6 @@ using DIGOS.Ambassador.Permissions;
 
 using Discord;
 using Discord.WebSocket;
-
 using Microsoft.EntityFrameworkCore;
 
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
@@ -323,81 +322,6 @@ namespace DIGOS.Ambassador.Database
 			await SaveChangesAsync();
 
 			return await GetUser(discordUser);
-		}
-
-		/// <summary>
-		/// Gets the current active roleplay in the given channel.
-		/// </summary>
-		/// <param name="channel">The channel to get the roleplay from.</param>
-		/// <returns>The active roleplay.</returns>
-		public async Task<Roleplay> GetActiveRoleplayAsync(IChannel channel)
-		{
-			return await this.Roleplays
-				.Include(rp => rp.Owner)
-				.Include(rp => rp.Participants)
-				.Include(rp => rp.Messages)
-				.FirstAsync(rp => rp.IsActive && rp.ActiveChannelID == channel.Id);
-		}
-
-		/// <summary>
-		/// Determines whether or not there is an active roleplay in the given channel.
-		/// </summary>
-		/// <param name="channel">The channel to check.</param>
-		/// <returns>true if there is an active roleplay; otherwise, false.</returns>
-		public async Task<bool> HasActiveRoleplayAsync(IChannel channel)
-		{
-			return await this.Roleplays.AnyAsync(rp => rp.IsActive && rp.ActiveChannelID == channel.Id);
-		}
-
-		/// <summary>
-		/// Determines whether or not the given roleplay name is unique for a given user.
-		/// </summary>
-		/// <param name="discordUser">The user to check.</param>
-		/// <param name="roleplayName">The roleplay name to check.</param>
-		/// <returns>true if the name is unique; otherwise, false.</returns>
-		public async Task<bool> IsRoleplayNameUniqueForUserAsync(IUser discordUser, string roleplayName)
-		{
-			var userRoleplays = GetUserRoleplays(discordUser);
-			if (await userRoleplays.CountAsync() <= 0)
-			{
-				return true;
-			}
-
-			return !await userRoleplays.AnyAsync(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase));
-		}
-
-		/// <summary>
-		/// Get the roleplays owned by the given user.
-		/// </summary>
-		/// <param name="discordUser">The user to get the roleplays of.</param>
-		/// <returns>A queryable list of roleplays belonging to the user.</returns>
-		public IQueryable<Roleplay> GetUserRoleplays(IUser discordUser)
-		{
-			return this.Roleplays
-				.Include(rp => rp.Owner)
-				.Include(rp => rp.Participants)
-				.Include(rp => rp.Messages)
-				.Where(rp => rp.Owner.DiscordID == discordUser.Id);
-		}
-
-		/// <summary>
-		/// Gets a roleplay belonging to a given user by a given name.
-		/// </summary>
-		/// <param name="discordUser">The user to get the roleplay from.</param>
-		/// <param name="roleplayName">The name of the roleplay.</param>
-		/// <returns>A roleplay with the given name belonging to the given user, or null if none was found.</returns>
-		public async Task<Roleplay> GetUserRoleplayByNameAsync(IUser discordUser, string roleplayName)
-		{
-			return await this.Roleplays
-			.Include(rp => rp.Owner)
-			.Include(rp => rp.Participants)
-			.Include(rp => rp.Messages)
-			.FirstOrDefaultAsync
-			(
-				rp =>
-					rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase) &&
-					rp.Owner.DiscordID == discordUser.Id
-			);
 		}
 
 		/// <inheritdoc />
