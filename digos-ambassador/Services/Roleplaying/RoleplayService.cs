@@ -84,6 +84,31 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		}
 
 		/// <summary>
+		/// This method searches for the best matching roleplay given an owner and a name. If no owner is provided, then
+		/// the global list is searched for a unique name. If neither are provided, the currently active roleplay is
+		/// returned. If no match can be found, a failed result is returned.
+		/// </summary>
+		/// <param name="db">The database where the roleplays are stored.</param>
+		/// <param name="context">The command context.</param>
+		/// <param name="roleplayOwner">The owner of the roleplay, if any.</param>
+		/// <param name="roleplayName">The name of the roleplay, if any.</param>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync(GlobalInfoContext db, SocketCommandContext context, IUser roleplayOwner, string roleplayName)
+		{
+			if (roleplayOwner is null && roleplayName is null)
+			{
+				return await GetActiveRoleplayAsync(db, context.Channel);
+			}
+
+			if (roleplayOwner is null)
+			{
+				return await GetNamedRoleplayAsync(db, roleplayName);
+			}
+
+			return await GetUserRoleplayByNameAsync(db, context, roleplayOwner, roleplayName);
+		}
+
+		/// <summary>
 		/// Gets a roleplay by its given name.
 		/// </summary>
 		/// <param name="db">The database context where the data is stored.</param>
@@ -221,7 +246,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="context">The context of the user.</param>
 		/// <param name="roleplay">The roleplay to remove the user from.</param>
 		/// <param name="discordUser">The user to remove from the roleplay.</param>
-		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ExecuteResult> RemoveUserFromRoleplayAsync(GlobalInfoContext db, SocketCommandContext context, Roleplay roleplay, IUser discordUser)
 		{
 			var isCurrentUser = context.Message.Author.Id == discordUser.Id;
@@ -256,7 +281,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="context">The context of the user.</param>
 		/// <param name="roleplay">The roleplay to add the user to.</param>
 		/// <param name="discordUser">The user to add to the roleplay.</param>
-		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ExecuteResult> AddUserToRoleplayAsync(GlobalInfoContext db, SocketCommandContext context, Roleplay roleplay, IUser discordUser)
 		{
 			var isCurrentUser = context.Message.Author.Id == discordUser.Id;
@@ -270,6 +295,33 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			}
 
 			roleplay.Participants.Add(await db.GetOrRegisterUserAsync(discordUser));
+			await db.SaveChangesAsync();
+
+			return ExecuteResult.FromSuccess();
+		}
+
+		/// <summary>
+		/// Transfers ownership of the named roleplay to the specified user.
+		/// </summary>
+		/// <param name="db">The database where the roleplays are stored.</param>
+		/// <param name="newOwner">The new owner.</param>
+		/// <param name="roleplay">The roleplay to transfer.</param>
+		/// <returns>An execution result which may or may not have succeeded.</returns>
+		public async Task<ExecuteResult> TransferRoleplayOwnershipAsync(GlobalInfoContext db, IUser newOwner, Roleplay roleplay)
+		{
+			if (roleplay.Owner.DiscordID == newOwner.Id)
+			{
+				return ExecuteResult.FromError(CommandError.Unsuccessful, "That person already owns the roleplay.");
+			}
+
+			if (GetUserRoleplays(db, newOwner).Any(rp => rp.Name.Equals(roleplay.Name, StringComparison.OrdinalIgnoreCase)))
+			{
+				return ExecuteResult.FromError(CommandError.MultipleMatches, $"That user already owns a roleplay named {roleplay.Name}. Please rename it first.");
+			}
+
+			var newUser = await db.GetOrRegisterUserAsync(newOwner);
+			roleplay.Owner = newUser;
+
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();

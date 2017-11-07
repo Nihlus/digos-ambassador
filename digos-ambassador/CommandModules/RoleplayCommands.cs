@@ -76,62 +76,20 @@ namespace DIGOS.Ambassador.CommandModules
 		[Priority(-1)]
 		[Command]
 		[Summary("Shows information about the currently active roleplay in the channel.")]
-		public async Task Default() => await ShowCurrentRoleplayAsync();
-
-		/// <summary>
-		/// Shows information about the currently active roleplay in the channel.
-		/// </summary>
-		[Command("show")]
-		[Summary("Shows information about the currently active roleplay in the channel.")]
-		public async Task ShowCurrentRoleplayAsync()
-		{
-			using (var db = new GlobalInfoContext())
-			{
-				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
-				if (!result.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-					return;
-				}
-
-				var roleplay = result.Entity;
-				await ShowRoleplayAsync(roleplay);
-			}
-		}
-
-		/// <summary>
-		/// Shows information about the named roleplay.
-		/// </summary>
-		/// <param name="roleplayName">The name of the roleplay.</param>
-		[Command("show")]
-		[Summary("Shows information about the named roleplay.")]
-		public async Task ShowRoleplayAsync(string roleplayName)
-		{
-			using (var db = new GlobalInfoContext())
-			{
-				var result = await this.Roleplays.GetNamedRoleplayAsync(db, roleplayName);
-				if (!result.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-					return;
-				}
-
-				var roleplay = result.Entity;
-
-				await ShowRoleplayAsync(roleplay);
-			}
-		}
+		public async Task Default() => await ShowRoleplayAsync();
 
 		/// <summary>
 		/// Shows information about the named roleplay owned by the specified user.
 		/// </summary>
-		/// <param name="discordUser">The user that owns the roleplay.</param>
 		/// <param name="roleplayName">The name of the roleplay.</param>
-		public async Task ShowRoleplayAsync(IUser discordUser, string roleplayName)
+		/// <param name="discordUser">The user that owns the roleplay.</param>
+		[Command("show")]
+		[Summary("Shows information about the specified roleplay.")]
+		public async Task ShowRoleplayAsync(string roleplayName = null, IUser discordUser = null)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, discordUser, roleplayName);
+				var result = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, discordUser, roleplayName);
 				if (!result.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -139,14 +97,10 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 
 				var roleplay = result.Entity;
-				await ShowRoleplayAsync(roleplay);
-			}
-		}
 
-		private async Task ShowRoleplayAsync(Roleplay roleplay)
-		{
-			var eb = CreateRoleplayInfoEmbed(roleplay);
-			await this.Context.Channel.SendMessageAsync(string.Empty, false, eb);
+				var eb = CreateRoleplayInfoEmbed(roleplay);
+				await this.Context.Channel.SendMessageAsync(string.Empty, false, eb);
+			}
 		}
 
 		private EmbedBuilder CreateRoleplayInfoEmbed(Roleplay roleplay)
@@ -169,24 +123,15 @@ namespace DIGOS.Ambassador.CommandModules
 		}
 
 		/// <summary>
-		/// Lists the roleplays that the user owns.
-		/// </summary>
-		[Command("list-owned")]
-		[Summary("Lists the roleplays that the user owns.")]
-		[RequirePermission(CreateRoleplay)]
-		public async Task ListOwnedRoleplaysAsync()
-		{
-			await ListOwnedRoleplaysAsync(this.Context.Message.Author);
-		}
-
-		/// <summary>
 		/// Lists the roleplays that the given user owns.
 		/// </summary>
 		/// <param name="discordUser">The user to show the roleplays of.</param>
 		[Command("list-owned")]
 		[Summary("Lists the roleplays that the given user owns.")]
-		public async Task ListOwnedRoleplaysAsync(IUser discordUser)
+		public async Task ListOwnedRoleplaysAsync(IUser discordUser = null)
 		{
+			discordUser = discordUser ?? this.Context.Message.Author;
+
 			var eb = new EmbedBuilder();
 			eb.WithAuthor(discordUser);
 			eb.WithColor(Color.DarkPurple);
@@ -259,28 +204,6 @@ namespace DIGOS.Ambassador.CommandModules
 		}
 
 		/// <summary>
-		/// Builds a list of the command names and aliases in this module, and checks that the given roleplay name is
-		/// not one of them.
-		/// </summary>
-		/// <param name="roleplayName">The name of the roleplay.</param>
-		/// <returns>true if the name is valid; otherwise, false.</returns>
-		private bool IsRoleplayNameValid(string roleplayName)
-		{
-			var commandModule = this.Commands.Modules.First(m => m.Name == "roleplay");
-			var submodules = commandModule.Submodules;
-
-			var commandNames = commandModule.Commands.SelectMany(c => c.Aliases);
-			commandNames = commandNames.Union(commandModule.Commands.Select(c => c.Name));
-
-			var submoduleCommandNames = submodules.SelectMany(s => s.Commands.SelectMany(c => c.Aliases));
-			submoduleCommandNames = submoduleCommandNames.Union(submodules.SelectMany(s => s.Commands.Select(c => c.Name)));
-
-			commandNames = commandNames.Union(submoduleCommandNames);
-
-			return !commandNames.Contains(roleplayName);
-		}
-
-		/// <summary>
 		/// Deletes the roleplay with the specified name.
 		/// </summary>
 		/// <param name="roleplayName">The user-unique name of the roleplay.</param>
@@ -308,58 +231,18 @@ namespace DIGOS.Ambassador.CommandModules
 		}
 
 		/// <summary>
-		/// Joins the current roleplay.
-		/// </summary>
-		[Command("join")]
-		[Summary("Joins the current roleplay.")]
-		[RequirePermission(JoinRoleplay)]
-		[RequireActiveRoleplay]
-		public async Task JoinRoleplayAsync()
-		{
-			using (var db = new GlobalInfoContext())
-			{
-				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
-				await JoinRoleplayAsync(db, result.Entity);
-			}
-		}
-
-		/// <summary>
-		/// Joins the roleplay with the given name.
-		/// </summary>
-		/// <param name="roleplayName">The name of the roleplay to join.</param>
-		[Command("join")]
-		[Summary("Joins the roleplay with the given name.")]
-		[RequirePermission(JoinRoleplay)]
-		public async Task JoinRoleplayAsync(string roleplayName)
-		{
-			using (var db = new GlobalInfoContext())
-			{
-				var result = await this.Roleplays.GetNamedRoleplayAsync(db, roleplayName);
-				if (!result.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-					return;
-				}
-
-				var roleplay = result.Entity;
-
-				await JoinRoleplayAsync(db, roleplay);
-			}
-		}
-
-		/// <summary>
 		/// Joins the roleplay owned by the given person with the given name.
 		/// </summary>
-		/// <param name="roleplayOwner">The owner of the roleplay to join.</param>
 		/// <param name="roleplayName">The name of the roleplay to join.</param>
+		/// <param name="roleplayOwner">The owner of the roleplay to join.</param>
 		[Command("join")]
 		[Summary("Joins the roleplay owned by the given person with the given name.")]
 		[RequirePermission(JoinRoleplay)]
-		public async Task JoinRoleplayAsync(IUser roleplayOwner, string roleplayName)
+		public async Task JoinRoleplayAsync(string roleplayName = null, IUser roleplayOwner = null)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, roleplayOwner, roleplayName);
+				var result = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, roleplayOwner, roleplayName);
 				if (!result.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -367,73 +250,30 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 
 				var roleplay = result.Entity;
-				await JoinRoleplayAsync(db, roleplay);
-			}
-		}
-
-		private async Task JoinRoleplayAsync(GlobalInfoContext db, Roleplay roleplay)
-		{
-			var result = await this.Roleplays.AddUserToRoleplayAsync(db, this.Context, roleplay, this.Context.Message.Author);
-			if (!result.IsSuccess)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-				return;
-			}
-
-			var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
-			await this.Feedback.SendConfirmationAsync(this.Context, $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
-		}
-
-		/// <summary>
-		/// Leaves the current roleplay.
-		/// </summary>
-		[Command("leave")]
-		[Summary("Leaves the current roleplay.")]
-		[RequireActiveRoleplay]
-		public async Task LeaveRoleplayAsync()
-		{
-			using (var db = new GlobalInfoContext())
-			{
-				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
-				await LeaveRoleplayAsync(db, result.Entity);
-			}
-		}
-
-		/// <summary>
-		/// Leaves the roleplay with the given name.
-		/// </summary>
-		/// <param name="roleplayName">The name of the roleplay to leave.</param>
-		[Command("leave")]
-		[Summary("Leaves the roleplay with the given name.")]
-		public async Task LeaveRoleplayAsync(string roleplayName)
-		{
-			using (var db = new GlobalInfoContext())
-			{
-				var result = await this.Roleplays.GetNamedRoleplayAsync(db, roleplayName);
-				if (!result.IsSuccess)
+				var addUserResult = await this.Roleplays.AddUserToRoleplayAsync(db, this.Context, roleplay, this.Context.Message.Author);
+				if (!addUserResult.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					await this.Feedback.SendErrorAsync(this.Context, addUserResult.ErrorReason);
 					return;
 				}
 
-				var roleplay = result.Entity;
-
-				await LeaveRoleplayAsync(db, roleplay);
+				var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
 			}
 		}
 
 		/// <summary>
 		/// Leaves the roleplay owned by the given person with the given name.
 		/// </summary>
-		/// <param name="roleplayOwner">The owner of the roleplay to leave.</param>
 		/// <param name="roleplayName">The name of the roleplay to leave.</param>
+		/// <param name="roleplayOwner">The owner of the roleplay to leave.</param>
 		[Command("leave")]
 		[Summary("Leaves the roleplay owned by the given person with the given name.")]
-		public async Task LeaveRoleplayAsync(IUser roleplayOwner, string roleplayName)
+		public async Task LeaveRoleplayAsync(string roleplayName = null, IUser roleplayOwner = null)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, roleplayOwner, roleplayName);
+				var result = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, roleplayOwner, roleplayName);
 				if (!result.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -441,36 +281,15 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 
 				var roleplay = result.Entity;
-				await LeaveRoleplayAsync(db, roleplay);
-			}
-		}
+				var removeUserResult = await this.Roleplays.RemoveUserFromRoleplayAsync(db, this.Context, roleplay, this.Context.Message.Author);
+				if (!removeUserResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, removeUserResult.ErrorReason);
+					return;
+				}
 
-		private async Task LeaveRoleplayAsync(GlobalInfoContext db, Roleplay roleplay)
-		{
-			var result = await this.Roleplays.RemoveUserFromRoleplayAsync(db, this.Context, roleplay, this.Context.Message.Author);
-			if (!result.IsSuccess)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-				return;
-			}
-
-			var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
-			await this.Feedback.SendConfirmationAsync(this.Context, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
-		}
-
-		/// <summary>
-		/// Kicks the given user from the current roleplay.
-		/// </summary>
-		/// <param name="discordUser">The user to kick.</param>
-		[Command("kick")]
-		[Summary("Kicks the given user from the current roleplay.")]
-		[RequireActiveRoleplay(requireOwner: true)]
-		public async Task KickRoleplayParticipantAsync(IUser discordUser)
-		{
-			using (var db = new GlobalInfoContext())
-			{
-				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
-				await KickRoleplayParticipantAsync(db, discordUser, result.Entity);
+				var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
 			}
 		}
 
@@ -481,11 +300,11 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="roleplayName">The roleplay to kick them from.</param>
 		[Command("kick")]
 		[Summary("Kicks the given user from the named roleplay.")]
-		public async Task KickRoleplayParticipantAsync(IUser discordUser, string roleplayName)
+		public async Task KickRoleplayParticipantAsync(IUser discordUser, string roleplayName = null)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+				var result = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, this.Context.Message.Author, roleplayName);
 				if (!result.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -494,24 +313,19 @@ namespace DIGOS.Ambassador.CommandModules
 
 				var roleplay = result.Entity;
 
-				await KickRoleplayParticipantAsync(db, discordUser, roleplay);
-			}
-		}
+				var kickUserResult = await this.Roleplays.RemoveUserFromRoleplayAsync(db, this.Context, roleplay, discordUser);
+				if (!kickUserResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, kickUserResult.ErrorReason);
+					return;
+				}
 
-		private async Task KickRoleplayParticipantAsync(GlobalInfoContext db, IUser discordUser, Roleplay roleplay)
-		{
-			var result = await this.Roleplays.RemoveUserFromRoleplayAsync(db, this.Context, roleplay, discordUser);
-			if (!result.IsSuccess)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-				return;
+				var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
+				await userDMChannel.SendMessageAsync
+				(
+					$"You've been removed from the \"{roleplay.Name}\" by {this.Context.Message.Author.Username}."
+				);
 			}
-
-			var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
-			await userDMChannel.SendMessageAsync
-			(
-				$"You've been removed from the \"{roleplay.Name}\" by {this.Context.Message.Author.Username}."
-			);
 		}
 
 		/// <summary>
@@ -632,33 +446,17 @@ namespace DIGOS.Ambassador.CommandModules
 		}
 
 		/// <summary>
-		/// Transfers ownership of the current roleplay to the specified user.
-		/// </summary>
-		/// <param name="newOwner">The new owner.</param>
-		[Command("transfer-ownership")]
-		[Summary("Transfers ownership of the current roleplay to the specified user.")]
-		[RequireActiveRoleplay(requireOwner: true)]
-		public async Task TransferRoleplayOwnershipAsync(IUser newOwner)
-		{
-			using (var db = new GlobalInfoContext())
-			{
-				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
-				await TransferRoleplayOwnershipAsync(db, newOwner, result.Entity);
-			}
-		}
-
-		/// <summary>
 		/// Transfers ownership of the named roleplay to the specified user.
 		/// </summary>
 		/// <param name="newOwner">The new owner.</param>
 		/// <param name="roleplayName">The name of the roleplay to transfer.</param>
 		[Command("transfer-ownership")]
 		[Summary("Transfers ownership of the named roleplay to the specified user.")]
-		public async Task TransferRoleplayOwnershipAsync(IUser newOwner, string roleplayName)
+		public async Task TransferRoleplayOwnershipAsync(IUser newOwner, string roleplayName = null)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+				var result = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, this.Context.Message.Author, roleplayName);
 				if (!result.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -666,92 +464,32 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 
 				var roleplay = result.Entity;
-				await TransferRoleplayOwnershipAsync(db, newOwner, roleplay);
-			}
-		}
-
-		private async Task TransferRoleplayOwnershipAsync(GlobalInfoContext db, IUser newOwner, Roleplay roleplay)
-		{
-			if (this.Roleplays.GetUserRoleplays(db, newOwner).Any(rp => rp.Name.Equals(roleplay.Name, StringComparison.OrdinalIgnoreCase)))
-			{
-				await this.Feedback.SendErrorAsync(this.Context, $"That user already owns a roleplay named {roleplay.Name}. Please rename it first.");
-				return;
-			}
-
-			var newUser = await db.GetOrRegisterUserAsync(newOwner);
-			roleplay.Owner = newUser;
-
-			await db.SaveChangesAsync();
-
-			await this.Feedback.SendConfirmationAsync(this.Context, "Ownership transferred.");
-		}
-
-		/// <summary>
-		/// Replays the current roleplay to you.
-		/// </summary>
-		/// <param name="from">The time from which you want to replay,</param>
-		/// <param name="to">The time until you want to replay.</param>
-		[Command("replay")]
-		[Summary("Replays the current roleplay to you.")]
-		[RequirePermission(ReplayRoleplay)]
-		public async Task ReplayRoleplayAsync(DateTimeOffset from = default, DateTimeOffset to = default)
-		{
-			using (var db = new GlobalInfoContext())
-			{
-				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+				var transferResult = await this.Roleplays.TransferRoleplayOwnershipAsync(db, newOwner, roleplay);
 				if (!result.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					await this.Feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);
 					return;
 				}
 
-				var roleplay = result.Entity;
-
-				await ReplayRoleplayAsync(roleplay, from, to);
-			}
-		}
-
-		/// <summary>
-		/// Replays the named roleplay to you.
-		/// </summary>
-		/// <param name="roleplayName">The name of the roleplay.</param>
-		/// <param name="from">The time from which you want to replay,</param>
-		/// <param name="to">The time until you want to replay.</param>
-		[Command("replay")]
-		[Summary("Replays the named roleplay to you.")]
-		[RequirePermission(ReplayRoleplay)]
-		public async Task ReplayRoleplayAsync(string roleplayName, DateTimeOffset from = default, DateTimeOffset to = default)
-		{
-			using (var db = new GlobalInfoContext())
-			{
-				var result = await this.Roleplays.GetNamedRoleplayAsync(db, roleplayName);
-				if (!result.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-					return;
-				}
-
-				var roleplay = result.Entity;
-
-				await ReplayRoleplayAsync(roleplay, from, to);
+				await this.Feedback.SendConfirmationAsync(this.Context, "Ownership transferred.");
 			}
 		}
 
 		/// <summary>
 		/// Replays the named roleplay owned by the given user to you.
 		/// </summary>
-		/// <param name="roleplayOwner">The owner of the roleplay.</param>
 		/// <param name="roleplayName">The name of the roleplay.</param>
+		/// <param name="roleplayOwner">The owner of the roleplay.</param>
 		/// <param name="from">The time from which you want to replay,</param>
 		/// <param name="to">The time until you want to replay.</param>
 		[Command("replay")]
 		[Summary("Replays the named roleplay owned by the given user to you.")]
 		[RequirePermission(ReplayRoleplay)]
-		public async Task ReplayRoleplayAsync(IUser roleplayOwner, string roleplayName, DateTimeOffset from = default, DateTimeOffset to = default)
+		public async Task ReplayRoleplayAsync(string roleplayName = null, IUser roleplayOwner = null, DateTimeOffset from = default, DateTimeOffset to = default)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, roleplayOwner, roleplayName);
+				var result = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, roleplayOwner, roleplayName);
 				if (!result.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -759,40 +497,57 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 
 				var roleplay = result.Entity;
-				await ReplayRoleplayAsync(roleplay, from, to);
+				if (from == default)
+				{
+					from = DateTimeOffset.MinValue;
+				}
+
+				if (to == default)
+				{
+					to = DateTimeOffset.Now;
+				}
+
+				var userDMChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
+				var eb = CreateRoleplayInfoEmbed(roleplay);
+				await userDMChannel.SendMessageAsync(string.Empty, false, eb);
+
+				var messages = roleplay.Messages.Where(m => m.Timestamp > from && m.Timestamp < to).ToList();
+
+				if (messages.Count <= 0)
+				{
+					await userDMChannel.SendMessageAsync("No messages found in the specified timeframe.");
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Replaying \"{roleplay.Name}\". Please check your private messages.");
+
+				foreach (var message in messages)
+				{
+					await userDMChannel.SendMessageAsync($"{message.AuthorNickname}: {message.Contents}");
+				}
 			}
 		}
 
-		private async Task ReplayRoleplayAsync(Roleplay roleplay, DateTimeOffset from = default, DateTimeOffset to = default)
+		/// <summary>
+		/// Builds a list of the command names and aliases in this module, and checks that the given roleplay name is
+		/// not one of them.
+		/// </summary>
+		/// <param name="roleplayName">The name of the roleplay.</param>
+		/// <returns>true if the name is valid; otherwise, false.</returns>
+		private bool IsRoleplayNameValid(string roleplayName)
 		{
-			if (from == default)
-			{
-				from = DateTimeOffset.MinValue;
-			}
+			var commandModule = this.Commands.Modules.First(m => m.Name == "roleplay");
+			var submodules = commandModule.Submodules;
 
-			if (to == default)
-			{
-				to = DateTimeOffset.Now;
-			}
+			var commandNames = commandModule.Commands.SelectMany(c => c.Aliases);
+			commandNames = commandNames.Union(commandModule.Commands.Select(c => c.Name));
 
-			var userDMChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
-			var eb = CreateRoleplayInfoEmbed(roleplay);
-			await userDMChannel.SendMessageAsync(string.Empty, false, eb);
+			var submoduleCommandNames = submodules.SelectMany(s => s.Commands.SelectMany(c => c.Aliases));
+			submoduleCommandNames = submoduleCommandNames.Union(submodules.SelectMany(s => s.Commands.Select(c => c.Name)));
 
-			var messages = roleplay.Messages.Where(m => m.Timestamp > from && m.Timestamp < to).ToList();
+			commandNames = commandNames.Union(submoduleCommandNames);
 
-			if (messages.Count <= 0)
-			{
-				await userDMChannel.SendMessageAsync("No messages found in the specified timeframe.");
-				return;
-			}
-
-			await this.Feedback.SendConfirmationAsync(this.Context, $"Replaying \"{roleplay.Name}\". Please check your private messages.");
-
-			foreach (var message in messages)
-			{
-				await userDMChannel.SendMessageAsync($"{message.AuthorNickname}: {message.Contents}");
-			}
+			return !commandNames.Contains(roleplayName);
 		}
 
 		/// <summary>
