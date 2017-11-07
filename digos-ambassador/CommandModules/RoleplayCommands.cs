@@ -166,6 +166,7 @@ namespace DIGOS.Ambassador.CommandModules
 		public async Task ListOwnedRoleplaysAsync()
 		{
 			var eb = new EmbedBuilder();
+			eb.WithAuthor(this.Context.Message.Author);
 			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle("Your roleplays");
 
