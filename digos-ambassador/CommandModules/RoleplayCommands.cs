@@ -451,14 +451,7 @@ namespace DIGOS.Ambassador.CommandModules
 				return;
 			}
 
-			if (roleplay.Owner.DiscordID == this.Context.Message.Author.Id)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, "You can't leave a roleplay that you own.");
-				return;
-			}
-
-			roleplay.Participants = roleplay.Participants.Where(p => p.DiscordID != this.Context.Message.Author.Id).ToList();
-			await db.SaveChangesAsync();
+			await RemoveUserFromRoleplayAsync(db, roleplay, this.Context.Message.Author);
 
 			var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
 			await this.Feedback.SendConfirmationAsync(this.Context, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
@@ -504,20 +497,26 @@ namespace DIGOS.Ambassador.CommandModules
 				return;
 			}
 
-			if (roleplay.Owner.DiscordID == discordUser.Id)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, "You can't leave a roleplay that you own.");
-				return;
-			}
-
-			roleplay.Participants = roleplay.Participants.Where(p => p.DiscordID != discordUser.Id).ToList();
-			await db.SaveChangesAsync();
+			await RemoveUserFromRoleplayAsync(db, roleplay, discordUser);
 
 			var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
 			await userDMChannel.SendMessageAsync
 			(
 				$"You've been removed from the \"{roleplay.Name}\" by {this.Context.Message.Author.Username}."
 			);
+		}
+
+
+		private async Task RemoveUserFromRoleplayAsync(GlobalInfoContext db, Roleplay roleplay, IUser discordUser)
+		{
+			if (roleplay.Owner.DiscordID == discordUser.Id)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, "The owner of a roleplay can't be removed from it.");
+				return;
+			}
+
+			roleplay.Participants = roleplay.Participants.Where(p => p.DiscordID != discordUser.Id).ToList();
+			await db.SaveChangesAsync();
 		}
 
 		/// <summary>
