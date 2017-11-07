@@ -379,14 +379,12 @@ namespace DIGOS.Ambassador.CommandModules
 				return;
 			}
 
-			if (roleplay.Participants.Any(p => p.DiscordID == this.Context.Message.Author.Id))
+			var result = await AddUserToRoleplayAsync(db, roleplay, this.Context.Message.Author);
+			if (!result.IsSuccess)
 			{
-				await this.Feedback.SendWarningAsync(this.Context, "You're already in that roleplay.");
+				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 				return;
 			}
-
-			roleplay.Participants.Add(await db.GetOrRegisterUserAsync(this.Context.Message.Author));
-			await db.SaveChangesAsync();
 
 			var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
 			await this.Feedback.SendConfirmationAsync(this.Context, $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
@@ -445,13 +443,12 @@ namespace DIGOS.Ambassador.CommandModules
 
 		private async Task LeaveRoleplayAsync(GlobalInfoContext db, Roleplay roleplay)
 		{
-			if (!roleplay.Participants.Any(p => p.DiscordID == this.Context.Message.Author.Id))
+			var result = await RemoveUserFromRoleplayAsync(db, roleplay, this.Context.Message.Author);
+			if (!result.IsSuccess)
 			{
-				await this.Feedback.SendWarningAsync(this.Context, "You're not in that roleplay.");
+				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 				return;
 			}
-
-			await RemoveUserFromRoleplayAsync(db, roleplay, this.Context.Message.Author);
 
 			var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
 			await this.Feedback.SendConfirmationAsync(this.Context, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
@@ -485,19 +482,25 @@ namespace DIGOS.Ambassador.CommandModules
 			using (var db = new GlobalInfoContext())
 			{
 				var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
+
+				if (roleplay is null)
+				{
+					await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
+					return;
+				}
+
 				await KickRoleplayParticipantAsync(db, discordUser, roleplay);
 			}
 		}
 
 		private async Task KickRoleplayParticipantAsync(GlobalInfoContext db, IUser discordUser, Roleplay roleplay)
 		{
-			if (roleplay is null)
+			var result = await RemoveUserFromRoleplayAsync(db, roleplay, discordUser);
+			if (!result.IsSuccess)
 			{
-				await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
+				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 				return;
 			}
-
-			await RemoveUserFromRoleplayAsync(db, roleplay, discordUser);
 
 			var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
 			await userDMChannel.SendMessageAsync
@@ -506,17 +509,49 @@ namespace DIGOS.Ambassador.CommandModules
 			);
 		}
 
-
-		private async Task RemoveUserFromRoleplayAsync(GlobalInfoContext db, Roleplay roleplay, IUser discordUser)
+		private async Task<ExecuteResult> RemoveUserFromRoleplayAsync(GlobalInfoContext db, Roleplay roleplay, IUser discordUser)
 		{
+			var isCurrentUser = this.Context.Message.Author.Id == discordUser.Id;
+			if (!roleplay.Participants.Any(p => p.DiscordID == discordUser.Id))
+			{
+				var errorMessage = isCurrentUser
+					? "You're not in that roleplay."
+					: "No matching user found in the roleplay.";
+
+				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
+			}
+
 			if (roleplay.Owner.DiscordID == discordUser.Id)
 			{
-				await this.Feedback.SendErrorAsync(this.Context, "The owner of a roleplay can't be removed from it.");
-				return;
+				var errorMessage = isCurrentUser
+					? "You can't leave a roleplay you own."
+					: "The owner of a roleplay can't be removed from it.";
+
+				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
 			}
 
 			roleplay.Participants = roleplay.Participants.Where(p => p.DiscordID != discordUser.Id).ToList();
 			await db.SaveChangesAsync();
+
+			return ExecuteResult.FromSuccess();
+		}
+
+		private async Task<ExecuteResult> AddUserToRoleplayAsync(GlobalInfoContext db, Roleplay roleplay, IUser discordUser)
+		{
+			var isCurrentUser = this.Context.Message.Author.Id == discordUser.Id;
+			if (roleplay.Participants.Any(p => p.DiscordID == discordUser.Id))
+			{
+				var errorMessage = isCurrentUser
+					? "You're already in that roleplay."
+					: "The user is aleady in that roleplay.";
+
+				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
+			}
+
+			roleplay.Participants.Add(await db.GetOrRegisterUserAsync(discordUser));
+			await db.SaveChangesAsync();
+
+			return ExecuteResult.FromSuccess();
 		}
 
 		/// <summary>
