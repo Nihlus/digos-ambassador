@@ -159,7 +159,7 @@ namespace DIGOS.Ambassador
 					}
 					case CommandError.UnmetPrecondition:
 					{
-						await this.Feedback.SendErrorAsync(context, "You are not authorized to run that command.");
+						await this.Feedback.SendErrorAsync(context, result.ErrorReason);
 						break;
 					}
 					case CommandError.ParseFailed:

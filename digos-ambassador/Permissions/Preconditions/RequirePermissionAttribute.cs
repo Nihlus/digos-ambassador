@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 				}
 			}
 
-			return PreconditionResult.FromError("Access denied.");
+			return PreconditionResult.FromError("You don't have permission to run that command.");
 		}
 	}
 }

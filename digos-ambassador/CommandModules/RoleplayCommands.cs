@@ -574,6 +574,11 @@ namespace DIGOS.Ambassador.CommandModules
 					}
 				}
 
+				if (roleplay.ActiveChannelID != this.Context.Channel.Id)
+				{
+					roleplay.ActiveChannelID = this.Context.Channel.Id;
+				}
+
 				roleplay.IsActive = true;
 				await db.SaveChangesAsync();
 			}
@@ -894,6 +899,8 @@ namespace DIGOS.Ambassador.CommandModules
 			/// can be made active in.
 			/// </summary>
 			/// <param name="isNSFW">true if the roleplay is NSFW; otherwise, false.</param>
+			[Command("nsfw")]
+			[Summary("Sets a value indicating whether or not the current roleplay is NSFW. This restricts which channels it can be made active in.")]
 			[RequireNsfw]
 			[RequireActiveRoleplay(requireOwner: true)]
 			public async Task SetRoleplayIsNSFW(bool isNSFW)
@@ -911,6 +918,8 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="roleplayName">The name of the roleplay.</param>
 			/// <param name="isNSFW">true if the roleplay is NSFW; otherwise, false.</param>
+			[Command("nsfw")]
+			[Summary("Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.")]
 			[RequireNsfw]
 			public async Task SetRoleplayIsNSFW(string roleplayName, bool isNSFW)
 			{
@@ -942,10 +951,11 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 
 			/// <summary>
-			/// Sets a value indicating whether or not the current roleplay is public. This restricts which users can
-			/// view replays of it.
+			/// Sets a value indicating whether or not the current roleplay is public. This restricts replays to participants.
 			/// </summary>
 			/// <param name="isPublic">true if the roleplay is public; otherwise, false.</param>
+			[Command("public")]
+			[Summary("Sets a value indicating whether or not the current roleplay is public. This restricts replays to participants.")]
 			[RequireActiveRoleplay(requireOwner: true)]
 			public async Task SetRoleplayIsPublic(bool isPublic)
 			{
@@ -957,11 +967,12 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 
 			/// <summary>
-			/// Sets a value indicating whether or not the named roleplay is publíc. This restricts which users can
-			/// view replays of it.
+			/// Sets a value indicating whether or not the named roleplay is publíc. This restricts replays to participants.
 			/// </summary>
 			/// <param name="roleplayName">The name of the roleplay.</param>
 			/// <param name="isPublic">true if the roleplay is public; otherwise, false.</param>
+			[Command("public")]
+			[Summary("Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.")]
 			public async Task SetRoleplayIsPublic(string roleplayName, bool isPublic)
 			{
 				using (var db = new GlobalInfoContext())
