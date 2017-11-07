@@ -165,14 +165,25 @@ namespace DIGOS.Ambassador.CommandModules
 		[RequirePermission(CreateRoleplay)]
 		public async Task ListOwnedRoleplaysAsync()
 		{
+			await ListOwnedRoleplaysAsync(this.Context.Message.Author);
+		}
+
+		/// <summary>
+		/// Lists the roleplays that the given user owns.
+		/// </summary>
+		/// <param name="discordUser">The user to show the roleplays of.</param>
+		[Command("list-owned")]
+		[Summary("Lists the roleplays that the given user owns.")]
+		public async Task ListOwnedRoleplaysAsync(IUser discordUser)
+		{
 			var eb = new EmbedBuilder();
-			eb.WithAuthor(this.Context.Message.Author);
+			eb.WithAuthor(discordUser);
 			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle("Your roleplays");
 
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplays = db.GetUserRoleplays(this.Context.Message.Author);
+				var roleplays = db.GetUserRoleplays(discordUser);
 
 				foreach (var roleplay in roleplays)
 				{
@@ -490,6 +501,12 @@ namespace DIGOS.Ambassador.CommandModules
 			if (roleplay is null)
 			{
 				await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
+				return;
+			}
+
+			if (roleplay.Owner.DiscordID == discordUser.Id)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, "You can't leave a roleplay that you own.");
 				return;
 			}
 
