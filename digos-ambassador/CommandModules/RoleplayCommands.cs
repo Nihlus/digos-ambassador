@@ -232,7 +232,7 @@ namespace DIGOS.Ambassador.CommandModules
 				await db.Roleplays.AddAsync(roleplay);
 				await db.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Roleplay created.");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Roleplay \"{roleplay.Name}\" created.");
 			}
 		}
 

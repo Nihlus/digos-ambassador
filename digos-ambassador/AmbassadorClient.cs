@@ -80,6 +80,7 @@ namespace DIGOS.Ambassador
 				.BuildServiceProvider();
 
 			this.Client.MessageReceived += OnMessageReceived;
+			this.Client.MessageUpdated += OnMessageUpdated;
 		}
 
 		/// <summary>
@@ -183,6 +184,22 @@ namespace DIGOS.Ambassador
 					}
 				}
 			}
+		}
+
+		/// <summary>
+		/// Handles reparsing of edited messages.
+		/// </summary>
+		/// <param name="oldMessage">The old message.</param>
+		/// <param name="updatedMessage">The new message.</param>
+		/// <param name="messageChannel">The channel of the message.</param>
+		private async Task OnMessageUpdated(Cacheable<IMessage, ulong> oldMessage, SocketMessage updatedMessage, ISocketMessageChannel messageChannel)
+		{
+			if (updatedMessage is null)
+			{
+				return;
+			}
+
+			await OnMessageReceived(updatedMessage);
 		}
 
 		/// <summary>

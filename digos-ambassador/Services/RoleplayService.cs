@@ -60,8 +60,17 @@ namespace DIGOS.Ambassador.Services
 					userNick = guildUser.Nickname;
 				}
 
-				var roleplayMessage = await UserMessage.FromDiscordMessageAsync(message, userNick);
-				roleplay.Messages.Add(roleplayMessage);
+				if (roleplay.Messages.Any(m => m.DiscordMessageID == message.Id))
+				{
+					// Edit the existing message
+					var existingMessage = roleplay.Messages.Find(m => m.DiscordMessageID == message.Id);
+					existingMessage.Contents = message.Content;
+				}
+				else
+				{
+					var roleplayMessage = await UserMessage.FromDiscordMessageAsync(message, userNick);
+					roleplay.Messages.Add(roleplayMessage);
+				}
 
 				await db.SaveChangesAsync();
 			}
