@@ -402,9 +402,9 @@ namespace DIGOS.Ambassador.CommandModules
 					var currentRoleplay = currentRoleplayResult.Entity;
 					var timeOfLastMessage = currentRoleplay.Messages.Last().Timestamp;
 					var currentTime = DateTimeOffset.Now;
-					if (timeOfLastMessage < currentTime.AddHours(-6))
+					if (timeOfLastMessage < currentTime.AddHours(-4))
 					{
-						await this.Feedback.SendConfirmationAsync(this.Context, "However, that roleplay has been inactive for over six hours.");
+						await this.Feedback.SendConfirmationAsync(this.Context, "However, that roleplay has been inactive for over four hours.");
 						currentRoleplay.IsActive = false;
 					}
 					else
@@ -420,9 +420,14 @@ namespace DIGOS.Ambassador.CommandModules
 
 				roleplay.IsActive = true;
 				await db.SaveChangesAsync();
-			}
 
-			await this.Feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplayName}\" is now active in {this.Context.Channel.Name}.");
+				var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p.DiscordID));
+				var participantMentions = participantUsers.Select(u => u.Mention);
+
+				var participantList = participantMentions.Humanize();
+				await this.Feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplayName}\" is now active in {MentionUtils.MentionChannel(this.Context.Channel.Id)}.");
+				await this.Context.Channel.SendMessageAsync($"Calling {participantList}!");
+			}
 		}
 
 		/// <summary>
@@ -443,6 +448,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 
 				var roleplay = result.Entity;
+				roleplay.IsActive = false;
 				await db.SaveChangesAsync();
 
 				await this.Feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplay.Name}\" has been stopped.");
