@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord;
@@ -35,13 +36,17 @@ namespace DIGOS.Ambassador.CommandModules
 	{
 		private readonly CommandService Commands;
 
+		private readonly IServiceProvider Services;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MiscellaneousCommands"/> class.
 		/// </summary>
 		/// <param name="commands">The command service</param>
-		public MiscellaneousCommands(CommandService commands)
+		/// <param name="services">The service provider.</param>
+		public MiscellaneousCommands(CommandService commands, IServiceProvider services)
 		{
 			this.Commands = commands;
+			this.Services = services;
 		}
 
 		/// <summary>
@@ -76,7 +81,7 @@ namespace DIGOS.Ambassador.CommandModules
 
 				foreach (var command in module.Commands.Union(module.Submodules.SelectMany(sm => sm.Commands)))
 				{
-					var hasPermission = await command.CheckPreconditionsAsync(this.Context);
+					var hasPermission = await command.CheckPreconditionsAsync(this.Context, this.Services);
 					if (hasPermission.IsSuccess)
 					{
 						eb.AddField(command.Aliases.First(), command.Summary);
