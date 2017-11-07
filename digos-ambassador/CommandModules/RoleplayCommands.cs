@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Services.Roleplaying;
 
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Humanizer;
 
 using static DIGOS.Ambassador.Permissions.Permission;
@@ -111,6 +112,9 @@ namespace DIGOS.Ambassador.CommandModules
 			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle(roleplay.Name);
 			eb.WithDescription(roleplay.Summary);
+
+			eb.AddInlineField("Currently", $"{(roleplay.IsActive ? "Active" : "Inactive")}");
+			eb.AddInlineField("Channel", MentionUtils.MentionChannel(this.Context.Channel.Id));
 
 			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p.DiscordID));
 			var participantMentions = participantUsers.Select(u => u.Mention);
