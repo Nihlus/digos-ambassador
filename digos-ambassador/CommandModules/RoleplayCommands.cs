@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				if (!await db.HasActiveRoleplayAsync(this.Context.Channel))
 				{
-					await this.Feedback.SendWarningAsync(this.Context.Channel, "There is no roleplay that is currently active in this channel.");
+					await this.Feedback.SendWarningAsync(this.Context, "There is no roleplay that is currently active in this channel.");
 					return;
 				}
 
@@ -199,7 +199,7 @@ namespace DIGOS.Ambassador.CommandModules
 				{
 					await this.Feedback.SendErrorAsync
 					(
-						this.Context.Channel,
+						this.Context,
 						"That isn't a valid name for a roleplay."
 					);
 					return;
@@ -209,7 +209,7 @@ namespace DIGOS.Ambassador.CommandModules
 				{
 					await this.Feedback.SendErrorAsync
 					(
-						this.Context.Channel,
+						this.Context,
 						"You're already using that name for one of your RPs. Please pick another one, or delete the old one."
 					);
 					return;
@@ -231,7 +231,7 @@ namespace DIGOS.Ambassador.CommandModules
 				await db.Roleplays.AddAsync(roleplay);
 				await db.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context.Channel, "Roleplay created.");
+				await this.Feedback.SendConfirmationAsync(this.Context, "Roleplay created.");
 			}
 		}
 
@@ -271,14 +271,14 @@ namespace DIGOS.Ambassador.CommandModules
 				var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
 				if (roleplay is null)
 				{
-					await this.Feedback.SendWarningAsync(this.Context.Channel, "You don't own a roleplay with that name.");
+					await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
 					return;
 				}
 
 				db.Roleplays.Remove(roleplay);
 				await db.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context.Channel, "Roleplay deleted.");
+				await this.Feedback.SendConfirmationAsync(this.Context, "Roleplay deleted.");
 			}
 		}
 
@@ -323,7 +323,7 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			if (await db.Roleplays.CountAsync(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase)) > 1)
 			{
-				await this.Feedback.SendWarningAsync(this.Context.Channel, "There's more than one roleplay with that name. Please specify which user it belongs to.");
+				await this.Feedback.SendWarningAsync(this.Context, "There's more than one roleplay with that name. Please specify which user it belongs to.");
 
 				return null;
 			}
@@ -332,11 +332,11 @@ namespace DIGOS.Ambassador.CommandModules
 				.Include(rp => rp.Owner)
 				.Include(rp => rp.Participants)
 				.Include(rp => rp.Messages)
-				.FirstOrDefault(rp => rp.Name == roleplayName);
+				.FirstOrDefault(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase));
 
 			if (roleplay is null)
 			{
-				await this.Feedback.SendErrorAsync(this.Context.Channel, "No roleplay with that name found.");
+				await this.Feedback.SendErrorAsync(this.Context, "No roleplay with that name found.");
 			}
 
 			return roleplay;
@@ -363,13 +363,13 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			if (roleplay is null)
 			{
-				await this.Feedback.SendWarningAsync(this.Context.Channel, "There is no roleplay with that name.");
+				await this.Feedback.SendWarningAsync(this.Context, "There is no roleplay with that name.");
 				return;
 			}
 
 			if (roleplay.Participants.Any(p => p.DiscordID == this.Context.Message.Author.Id))
 			{
-				await this.Feedback.SendWarningAsync(this.Context.Channel, "You're already in that roleplay.");
+				await this.Feedback.SendWarningAsync(this.Context, "You're already in that roleplay.");
 				return;
 			}
 
@@ -377,7 +377,7 @@ namespace DIGOS.Ambassador.CommandModules
 			await db.SaveChangesAsync();
 
 			var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
-			await this.Feedback.SendConfirmationAsync(this.Context.Channel, $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
+			await this.Feedback.SendConfirmationAsync(this.Context, $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
 		}
 
 		/// <summary>
@@ -435,13 +435,13 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			if (!roleplay.Participants.Any(p => p.DiscordID == this.Context.Message.Author.Id))
 			{
-				await this.Feedback.SendWarningAsync(this.Context.Channel, "You're not in that roleplay.");
+				await this.Feedback.SendWarningAsync(this.Context, "You're not in that roleplay.");
 				return;
 			}
 
 			if (roleplay.Owner.DiscordID == this.Context.Message.Author.Id)
 			{
-				await this.Feedback.SendErrorAsync(this.Context.Channel, "You can't leave a roleplay that you own.");
+				await this.Feedback.SendErrorAsync(this.Context, "You can't leave a roleplay that you own.");
 				return;
 			}
 
@@ -449,7 +449,7 @@ namespace DIGOS.Ambassador.CommandModules
 			await db.SaveChangesAsync();
 
 			var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
-			await this.Feedback.SendConfirmationAsync(this.Context.Channel, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
+			await this.Feedback.SendConfirmationAsync(this.Context, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
 		}
 
 		/// <summary>
@@ -488,7 +488,7 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			if (roleplay is null)
 			{
-				await this.Feedback.SendWarningAsync(this.Context.Channel, "You don't own a roleplay with that name.");
+				await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
 				return;
 			}
 
@@ -515,13 +515,13 @@ namespace DIGOS.Ambassador.CommandModules
 				var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
 				if (roleplay is null)
 				{
-					await this.Feedback.SendWarningAsync(this.Context.Channel, "You don't own a roleplay with that name.");
+					await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
 					return;
 				}
 
 				if (roleplay.IsNSFW && !this.Context.Channel.IsNsfw)
 				{
-					await this.Feedback.SendErrorAsync(this.Context.Channel, "This channel is not marked as NSFW, while your roleplay is... naughty!");
+					await this.Feedback.SendErrorAsync(this.Context, "This channel is not marked as NSFW, while your roleplay is... naughty!");
 					return;
 				}
 
@@ -529,7 +529,7 @@ namespace DIGOS.Ambassador.CommandModules
 				await db.SaveChangesAsync();
 			}
 
-			await this.Feedback.SendConfirmationAsync(this.Context.Channel, $"The roleplay \"{roleplayName}\" is now current in #{this.Context.Channel.Name}.");
+			await this.Feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplayName}\" is now current in #{this.Context.Channel.Name}.");
 		}
 
 		/// <summary>
@@ -545,26 +545,26 @@ namespace DIGOS.Ambassador.CommandModules
 				var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
 				if (roleplay is null)
 				{
-					await this.Feedback.SendWarningAsync(this.Context.Channel, "You don't own a roleplay with that name.");
+					await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
 					return;
 				}
 
 				if (roleplay.IsNSFW && !this.Context.Channel.IsNsfw)
 				{
-					await this.Feedback.SendErrorAsync(this.Context.Channel, "This channel is not marked as NSFW, while your roleplay is... naughty!");
+					await this.Feedback.SendErrorAsync(this.Context, "This channel is not marked as NSFW, while your roleplay is... naughty!");
 					return;
 				}
 
 				if (await db.HasActiveRoleplayAsync(this.Context.Channel))
 				{
-					await this.Feedback.SendWarningAsync(this.Context.Channel, "There's already a roleplay active in this channel.");
+					await this.Feedback.SendWarningAsync(this.Context, "There's already a roleplay active in this channel.");
 
 					var currentRoleplay = await db.GetActiveRoleplayAsync(this.Context.Channel);
 					var timeOfLastMessage = currentRoleplay.Messages.Last().Timestamp;
 					var currentTime = DateTimeOffset.Now;
 					if (timeOfLastMessage < currentTime.AddHours(-6))
 					{
-						await this.Feedback.SendConfirmationAsync(this.Context.Channel, "However, that roleplay has been inactive for over six hours.");
+						await this.Feedback.SendConfirmationAsync(this.Context, "However, that roleplay has been inactive for over six hours.");
 						currentRoleplay.IsActive = false;
 					}
 					else
@@ -577,7 +577,7 @@ namespace DIGOS.Ambassador.CommandModules
 				await db.SaveChangesAsync();
 			}
 
-			await this.Feedback.SendConfirmationAsync(this.Context.Channel, $"The roleplay \"{roleplayName}\" is now active in {this.Context.Channel.Name}.");
+			await this.Feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplayName}\" is now active in {this.Context.Channel.Name}.");
 		}
 
 		/// <summary>
@@ -600,7 +600,7 @@ namespace DIGOS.Ambassador.CommandModules
 				roleplay.IsActive = false;
 				await db.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context.Channel, $"The roleplay \"{roleplay.Name}\" has been stopped.");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplay.Name}\" has been stopped.");
 			}
 		}
 
@@ -640,13 +640,13 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			if (roleplay is null)
 			{
-				await this.Feedback.SendWarningAsync(this.Context.Channel, "You don't own a roleplay with that name.");
+				await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
 				return;
 			}
 
 			if (db.GetUserRoleplays(newOwner).Any(rp => rp.Name.Equals(roleplay.Name, StringComparison.OrdinalIgnoreCase)))
 			{
-				await this.Feedback.SendErrorAsync(this.Context.Channel, $"That user already owns a roleplay named {roleplay.Name}. Please rename it first.");
+				await this.Feedback.SendErrorAsync(this.Context, $"That user already owns a roleplay named {roleplay.Name}. Please rename it first.");
 				return;
 			}
 
@@ -655,7 +655,7 @@ namespace DIGOS.Ambassador.CommandModules
 
 			await db.SaveChangesAsync();
 
-			await this.Feedback.SendConfirmationAsync(this.Context.Channel, "Ownership transferred.");
+			await this.Feedback.SendConfirmationAsync(this.Context, "Ownership transferred.");
 		}
 
 		/// <summary>
@@ -672,7 +672,7 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				if (!await db.HasActiveRoleplayAsync(this.Context.Channel))
 				{
-					await this.Feedback.SendWarningAsync(this.Context.Channel, "There's no active roleplay in this channel.");
+					await this.Feedback.SendWarningAsync(this.Context, "There's no active roleplay in this channel.");
 					return;
 				}
 
@@ -728,7 +728,7 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			if (roleplay is null)
 			{
-				await this.Feedback.SendErrorAsync(this.Context.Channel, "No roleplay with that name found.");
+				await this.Feedback.SendErrorAsync(this.Context, "No roleplay with that name found.");
 				return;
 			}
 
@@ -754,7 +754,7 @@ namespace DIGOS.Ambassador.CommandModules
 				return;
 			}
 
-			await this.Feedback.SendConfirmationAsync(this.Context.Channel, $"Replaying \"{roleplay.Name}\". Please check your private messages.");
+			await this.Feedback.SendConfirmationAsync(this.Context, $"Replaying \"{roleplay.Name}\". Please check your private messages.");
 
 			foreach (var message in messages)
 			{
@@ -809,7 +809,7 @@ namespace DIGOS.Ambassador.CommandModules
 					var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, oldRoleplayName);
 					if (roleplay is null)
 					{
-						await this.Feedback.SendWarningAsync(this.Context.Channel, "You don't own a roleplay with that name.");
+						await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
 						return;
 					}
 
@@ -821,19 +821,19 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				if (string.IsNullOrWhiteSpace(newRoleplayName))
 				{
-					await this.Feedback.SendErrorAsync(this.Context.Channel, "You need to provide a new name.");
+					await this.Feedback.SendErrorAsync(this.Context, "You need to provide a new name.");
 					return;
 				}
 
 				if (!await db.IsRoleplayNameUniqueForUserAsync(this.Context.Message.Author, newRoleplayName))
 				{
-					await this.Feedback.SendErrorAsync(this.Context.Channel, "You already have a roleplay with that name.");
+					await this.Feedback.SendErrorAsync(this.Context, "You already have a roleplay with that name.");
 				}
 
 				roleplay.Name = newRoleplayName;
 				await db.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context.Channel, "Roleplay name set.");
+				await this.Feedback.SendConfirmationAsync(this.Context, "Roleplay name set.");
 			}
 
 			/// <summary>
@@ -866,7 +866,7 @@ namespace DIGOS.Ambassador.CommandModules
 					var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
 					if (roleplay is null)
 					{
-						await this.Feedback.SendWarningAsync(this.Context.Channel, "You don't own a roleplay with that name.");
+						await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
 						return;
 					}
 
@@ -878,14 +878,14 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				if (string.IsNullOrWhiteSpace(newRoleplaySummary))
 				{
-					await this.Feedback.SendErrorAsync(this.Context.Channel, "You need to provide a summary.");
+					await this.Feedback.SendErrorAsync(this.Context, "You need to provide a summary.");
 					return;
 				}
 
 				roleplay.Summary = newRoleplaySummary;
 				await db.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context.Channel, "Roleplay summary set.");
+				await this.Feedback.SendConfirmationAsync(this.Context, "Roleplay summary set.");
 			}
 
 			/// <summary>
@@ -918,7 +918,7 @@ namespace DIGOS.Ambassador.CommandModules
 					var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
 					if (roleplay is null)
 					{
-						await this.Feedback.SendWarningAsync(this.Context.Channel, "You don't own a roleplay with that name.");
+						await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
 						return;
 					}
 
@@ -930,14 +930,14 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				if (roleplay.Messages.Count > 0 && roleplay.IsNSFW && !isNSFW)
 				{
-					await this.Feedback.SendErrorAsync(this.Context.Channel, "You can't mark a NSFW roleplay with messages in it as non-NSFW.");
+					await this.Feedback.SendErrorAsync(this.Context, "You can't mark a NSFW roleplay with messages in it as non-NSFW.");
 					return;
 				}
 
 				roleplay.IsNSFW = isNSFW;
 				await db.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context.Channel, $"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}");
 			}
 
 			/// <summary>
@@ -968,7 +968,7 @@ namespace DIGOS.Ambassador.CommandModules
 					var roleplay = await db.GetUserRoleplayByNameAsync(this.Context.Message.Author, roleplayName);
 					if (roleplay is null)
 					{
-						await this.Feedback.SendWarningAsync(this.Context.Channel, "You don't own a roleplay with that name.");
+						await this.Feedback.SendWarningAsync(this.Context, "You don't own a roleplay with that name.");
 						return;
 					}
 
@@ -981,7 +981,7 @@ namespace DIGOS.Ambassador.CommandModules
 				roleplay.IsNSFW = isPublic;
 				await db.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context.Channel, $"Roleplay set to {(isPublic ? "public" : "private")}");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Roleplay set to {(isPublic ? "public" : "private")}");
 			}
 		}
 	}

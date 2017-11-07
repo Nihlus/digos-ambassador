@@ -154,12 +154,12 @@ namespace DIGOS.Ambassador
 				{
 					case CommandError.UnknownCommand:
 					{
-						await this.Feedback.SendWarningAsync(context.Channel, "Unknown command.");
+						await this.Feedback.SendWarningAsync(context, "Unknown command.");
 						break;
 					}
 					case CommandError.UnmetPrecondition:
 					{
-						await this.Feedback.SendErrorAsync(context.Channel, "You are not authorized to run that command.");
+						await this.Feedback.SendErrorAsync(context, "You are not authorized to run that command.");
 						break;
 					}
 					case CommandError.ParseFailed:
@@ -169,12 +169,12 @@ namespace DIGOS.Ambassador
 					case CommandError.Exception:
 					case CommandError.Unsuccessful:
 					{
-						await this.Feedback.SendErrorAsync(context.Channel, $"Bzzt. Looks like we've had a wardrobe malfunction: {result.ErrorReason}");
+						await this.Feedback.SendErrorAsync(context, $"Bzzt. Looks like we've had a wardrobe malfunction: {result.ErrorReason}");
 						break;
 					}
 					case null:
 					{
-						await this.Feedback.SendErrorAsync(context.Channel, "Unknown error. Please contact maintenance.");
+						await this.Feedback.SendErrorAsync(context, "Unknown error. Please contact maintenance.");
 						break;
 					}
 					default:

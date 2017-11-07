@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using Discord;
+using Discord.Commands;
 using Discord.WebSocket;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -36,54 +37,54 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Send a positive confirmation message.
 		/// </summary>
-		/// <param name="channel">The channel to send to.</param>
+		/// <param name="context">The context to send to.</param>
 		/// <param name="contents">The contents of the message.</param>
-		public async Task SendConfirmationAsync(ISocketMessageChannel channel, string contents)
+		public async Task SendConfirmationAsync(SocketCommandContext context, string contents)
 		{
-			await SendEmbedAsync(channel, Color.DarkPurple, contents);
+			await SendEmbedAsync(context, Color.DarkPurple, contents);
 		}
 
 		/// <summary>
 		/// Send a negative error message.
 		/// </summary>
-		/// <param name="channel">The channel to send to.</param>
+		/// <param name="context">The context to send to.</param>
 		/// <param name="contents">The contents of the message.</param>
-		public async Task SendErrorAsync(ISocketMessageChannel channel, string contents)
+		public async Task SendErrorAsync(SocketCommandContext context, string contents)
 		{
-			await SendEmbedAsync(channel, Color.Red, contents);
+			await SendEmbedAsync(context, Color.Red, contents);
 		}
 
 		/// <summary>
 		/// Send an alerting warning message.
 		/// </summary>
-		/// <param name="channel">The channel to send to.</param>
+		/// <param name="context">The context to send to.</param>
 		/// <param name="contents">The contents of the message.</param>
-		public async Task SendWarningAsync(ISocketMessageChannel channel, string contents)
+		public async Task SendWarningAsync(SocketCommandContext context, string contents)
 		{
-			await SendEmbedAsync(channel, Color.Orange, contents);
+			await SendEmbedAsync(context, Color.Orange, contents);
 		}
 
 		/// <summary>
 		/// Send an informational message.
 		/// </summary>
-		/// <param name="channel">The channel to send to.</param>
+		/// <param name="context">The context to send to.</param>
 		/// <param name="contents">The contents of the message.</param>
-		public async Task SendInfoAsync(ISocketMessageChannel channel, string contents)
+		public async Task SendInfoAsync(SocketCommandContext context, string contents)
 		{
-			await SendEmbedAsync(channel, Color.Blue, contents);
+			await SendEmbedAsync(context, Color.Blue, contents);
 		}
 
-		private async Task SendEmbedAsync(ISocketMessageChannel channel, Color color, string contents)
+		private async Task SendEmbedAsync(SocketCommandContext context, Color color, string contents)
 		{
-			var eb = CreateFeedbackEmbed(color, contents);
-			await channel.SendMessageAsync(string.Empty, false, eb);
+			var eb = CreateFeedbackEmbed(context.Message.Author, color, contents);
+			await context.Channel.SendMessageAsync(string.Empty, false, eb);
 		}
 
-		private EmbedBuilder CreateFeedbackEmbed(Color color, string contents)
+		private EmbedBuilder CreateFeedbackEmbed(IMentionable invoker, Color color, string contents)
 		{
 			var eb = new EmbedBuilder();
 			eb.WithColor(color);
-			eb.WithDescription(contents);
+			eb.WithDescription($"{invoker.Mention} | {contents}");
 
 			return eb;
 		}
