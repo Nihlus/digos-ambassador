@@ -321,7 +321,7 @@ namespace DIGOS.Ambassador.CommandModules
 
 		private async Task<Roleplay> GetNamedRoleplayAsync(GlobalInfoContext db, string roleplayName)
 		{
-			if (await db.Roleplays.CountAsync(rp => rp.Name == roleplayName) > 1)
+			if (await db.Roleplays.CountAsync(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase)) > 1)
 			{
 				await this.Feedback.SendWarningAsync(this.Context.Channel, "There's more than one roleplay with that name. Please specify which user it belongs to.");
 
@@ -644,7 +644,7 @@ namespace DIGOS.Ambassador.CommandModules
 				return;
 			}
 
-			if (db.GetUserRoleplays(newOwner).Any(rp => rp.Name == roleplay.Name))
+			if (db.GetUserRoleplays(newOwner).Any(rp => rp.Name.Equals(roleplay.Name, StringComparison.OrdinalIgnoreCase)))
 			{
 				await this.Feedback.SendErrorAsync(this.Context.Channel, $"That user already owns a roleplay named {roleplay.Name}. Please rename it first.");
 				return;

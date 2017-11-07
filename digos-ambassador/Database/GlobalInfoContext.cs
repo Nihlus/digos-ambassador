@@ -363,7 +363,7 @@ namespace DIGOS.Ambassador.Database
 				return true;
 			}
 
-			return !await userRoleplays.AnyAsync(rp => rp.Name == roleplayName);
+			return !await userRoleplays.AnyAsync(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase));
 		}
 
 		/// <summary>
@@ -395,7 +395,7 @@ namespace DIGOS.Ambassador.Database
 			.FirstOrDefaultAsync
 			(
 				rp =>
-					rp.Name == roleplayName &&
+					rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase) &&
 					rp.Owner.DiscordID == discordUser.Id
 			);
 		}

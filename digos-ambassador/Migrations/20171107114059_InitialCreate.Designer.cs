@@ -13,7 +13,7 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    [Migration("20171107111952_InitialCreate")]
+    [Migration("20171107114059_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
