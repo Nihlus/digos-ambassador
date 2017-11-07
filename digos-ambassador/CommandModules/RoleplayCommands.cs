@@ -72,14 +72,6 @@ namespace DIGOS.Ambassador.CommandModules
 		}
 
 		/// <summary>
-		/// Shows information about the currently active roleplay in the channel.
-		/// </summary>
-		[Priority(-1)]
-		[Command]
-		[Summary("Shows information about the currently active roleplay in the channel.")]
-		public async Task Default() => await ShowRoleplayAsync();
-
-		/// <summary>
 		/// Shows information about the named roleplay owned by the specified user.
 		/// </summary>
 		/// <param name="roleplayName">The name of the roleplay.</param>
