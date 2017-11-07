@@ -279,7 +279,7 @@ namespace DIGOS.Ambassador.CommandModules
 				db.Roleplays.Remove(roleplay);
 				await db.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Roleplay deleted.");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Roleplay \"{roleplay.Name}\" deleted.");
 			}
 		}
 
