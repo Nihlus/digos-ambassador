@@ -56,6 +56,8 @@ namespace DIGOS.Ambassador
 
 		private readonly RoleplayService Roleplays;
 
+		private readonly UserFeedbackService Feedback;
+
 		private readonly IServiceProvider Services;
 
 		/// <summary>
@@ -68,11 +70,13 @@ namespace DIGOS.Ambassador
 
 			this.Commands = new CommandService();
 			this.Roleplays = new RoleplayService();
+			this.Feedback = new UserFeedbackService();
 
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)
 				.AddSingleton(this.Commands)
 				.AddSingleton(this.Roleplays)
+				.AddSingleton(this.Feedback)
 				.BuildServiceProvider();
 
 			this.Client.MessageReceived += OnMessageReceived;
@@ -150,12 +154,12 @@ namespace DIGOS.Ambassador
 				{
 					case CommandError.UnknownCommand:
 					{
-						await context.Channel.SendMessageAsync("Unknown command.");
+						await this.Feedback.SendWarningAsync(context.Channel, "Unknown command.");
 						break;
 					}
 					case CommandError.UnmetPrecondition:
 					{
-						await context.Channel.SendMessageAsync("You are not authorized to run that command.");
+						await this.Feedback.SendErrorAsync(context.Channel, "You are not authorized to run that command.");
 						break;
 					}
 					case CommandError.ParseFailed:
@@ -165,12 +169,12 @@ namespace DIGOS.Ambassador
 					case CommandError.Exception:
 					case CommandError.Unsuccessful:
 					{
-						await context.Channel.SendMessageAsync($"Bzzt. Looks like we've had a wardrobe malfunction: {result.ErrorReason}");
+						await this.Feedback.SendErrorAsync(context.Channel, $"Bzzt. Looks like we've had a wardrobe malfunction: {result.ErrorReason}");
 						break;
 					}
 					case null:
 					{
-						await context.Channel.SendMessageAsync("Unknown error. Please contact maintenance.");
+						await this.Feedback.SendErrorAsync(context.Channel, "Unknown error. Please contact maintenance.");
 						break;
 					}
 					default:

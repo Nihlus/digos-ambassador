@@ -363,7 +363,7 @@ namespace DIGOS.Ambassador.Database
 				return true;
 			}
 
-			return await userRoleplays.AnyAsync(rp => rp.Name == roleplayName);
+			return !await userRoleplays.AnyAsync(rp => rp.Name == roleplayName);
 		}
 
 		/// <summary>

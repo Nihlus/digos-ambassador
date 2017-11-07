@@ -41,6 +41,7 @@ namespace DIGOS.Ambassador.Permissions
 			DeleteCharacter,
 			ImportCharacter,
 			CreateRoleplay,
+			DeleteRoleplay,
 			JoinRoleplay,
 			EditRoleplay,
 			ReplayRoleplay
