@@ -10,10 +10,10 @@
         <LangVersion>7.1</LangVersion>
     </PropertyGroup>
     <ItemGroup>
-        <AdditionalFiles Include="$(SolutionDir)\stylecop.json">
+        <AdditionalFiles Include="$(ProjectDir)\..\stylecop.json">
             <Link>stylecop.json</Link>
         </AdditionalFiles>
-        <AdditionalFiles Include="$(SolutionDir)\stylecop.ruleset">
+        <AdditionalFiles Include="$(ProjectDir)\..\stylecop.ruleset">
             <Link>stylecop.ruleset</Link>
         </AdditionalFiles>
     </ItemGroup>
