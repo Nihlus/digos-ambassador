@@ -34,6 +34,7 @@ using Xunit;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
 #pragma warning disable SA1600
+#pragma warning disable CS1591
 
 namespace DIGOS.Ambassador.Tests
 {
