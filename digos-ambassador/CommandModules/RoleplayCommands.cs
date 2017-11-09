@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
@@ -31,10 +32,10 @@ using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Roleplaying;
+using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using Humanizer;
 
 using static DIGOS.Ambassador.Permissions.Permission;
@@ -448,6 +449,61 @@ namespace DIGOS.Ambassador.CommandModules
 		}
 
 		/// <summary>
+		/// Includes previous messages into the roleplay, starting at the given time.
+		/// </summary>
+		/// <param name="startMessage">The earliest message to start adding from.</param>
+		/// <param name="finalMessage">The final message in the range.</param>
+		[Command("include-previous")]
+		[Summary("Includes previous messages into the roleplay, starting at the given message.")]
+		[RequireActiveRoleplay(requireOwner: true)]
+		public async Task IncludePreviousMessagesAsync
+		(
+			[OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))] IMessage startMessage,
+			[OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))] IMessage finalMessage = null
+		)
+		{
+			finalMessage = finalMessage ?? this.Context.Message;
+
+			using (var db = new GlobalInfoContext())
+			{
+				var result = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+				if (!result.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					return;
+				}
+
+				int addedOrUpdatedMessageCount = 0;
+				var roleplay = result.Entity;
+				IMessage latestMessage = startMessage;
+				while (latestMessage.Timestamp < finalMessage.Timestamp)
+				{
+					var messages = (await this.Context.Channel.GetMessagesAsync(latestMessage, Direction.After).Flatten()).OrderBy(m => m.Timestamp).ToList();
+					// Get the messages in ascending order by time
+
+					latestMessage = messages.Last();
+
+					foreach (var message in messages)
+					{
+						// Jump out if we've passed the final message
+						if (message.Timestamp > finalMessage.Timestamp)
+						{
+							break;
+						}
+
+						var modifyResult = await this.Roleplays.AddToOrUpdateMessageInRoleplay(db, roleplay, message);
+						if (modifyResult.IsSuccess)
+						{
+							++addedOrUpdatedMessageCount;
+						}
+					}
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, $"{addedOrUpdatedMessageCount} messages added to \"{roleplay.Name}\".");
+			}
+		}
+
+		/// <summary>
 		/// Transfers ownership of the named roleplay to the specified user.
 		/// </summary>
 		/// <param name="newOwner">The new owner.</param>
@@ -513,7 +569,7 @@ namespace DIGOS.Ambassador.CommandModules
 				var eb = CreateRoleplayInfoEmbed(roleplay);
 				await userDMChannel.SendMessageAsync(string.Empty, false, eb);
 
-				var messages = roleplay.Messages.Where(m => m.Timestamp > from && m.Timestamp < to).ToList();
+				var messages = roleplay.Messages.Where(m => m.Timestamp > from && m.Timestamp < to).OrderBy(msg => msg.Timestamp).ToList();
 
 				if (messages.Count <= 0)
 				{
@@ -523,9 +579,24 @@ namespace DIGOS.Ambassador.CommandModules
 
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Replaying \"{roleplay.Name}\". Please check your private messages.");
 
+				const int MESSAGE_CHARACTER_LIMIT = 2000;
+				var sb = new StringBuilder(MESSAGE_CHARACTER_LIMIT);
+
 				foreach (var message in messages)
 				{
-					await userDMChannel.SendMessageAsync($"{message.AuthorNickname}: {message.Contents}");
+					if (sb.Length + message.Contents.Length > MESSAGE_CHARACTER_LIMIT)
+					{
+						await userDMChannel.SendMessageAsync(sb.ToString());
+						sb.Clear();
+						sb.AppendLine();
+					}
+
+					sb.AppendLine($"**{message.AuthorNickname}** {message.Contents}");
+
+					if (message == messages.Last())
+					{
+						await userDMChannel.SendMessageAsync(sb.ToString());
+					}
 				}
 			}
 		}

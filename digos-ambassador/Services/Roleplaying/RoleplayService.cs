@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// Consumes a message, adding it to the active roleplay in its channel if the author is a participant.
 		/// </summary>
 		/// <param name="message">The message to consume.</param>
-		public async void ConsumeMessage(SocketMessage message)
+		public async void ConsumeMessage(IMessage message)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -56,31 +56,51 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 
 				var roleplay = result.Entity;
 
-				if (roleplay.Participants == null || !roleplay.Participants.Any(p => p.DiscordID == message.Author.Id))
+				await AddToOrUpdateMessageInRoleplay(db, roleplay, message);
+			}
+		}
+
+		/// <summary>
+		/// Adds a new message to the given roleplay, or edits it if there is an existing one.
+		/// </summary>
+		/// <param name="db">The database where the roleplays are stored.</param>
+		/// <param name="roleplay">The roleplay to modify.</param>
+		/// <param name="message">The message to add or update.</param>
+		/// <returns>A task wrapping the update action.</returns>
+		public async Task<ModifyEntityResult> AddToOrUpdateMessageInRoleplay(GlobalInfoContext db, Roleplay roleplay, IMessage message)
+		{
+			if (roleplay.Participants == null || !roleplay.Participants.Any(p => p.DiscordID == message.Author.Id))
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The given message was not authored by a participant of the roleplay.");
+			}
+
+			string userNick = message.Author.Username;
+			if (message.Author is SocketGuildUser guildUser && !string.IsNullOrEmpty(guildUser.Nickname))
+			{
+				userNick = guildUser.Nickname;
+			}
+
+			if (roleplay.Messages.Any(m => m.DiscordMessageID == message.Id))
+			{
+				// Edit the existing message
+				var existingMessage = roleplay.Messages.Find(m => m.DiscordMessageID == message.Id);
+
+				if (existingMessage.Contents.Equals(message.Content))
 				{
-					return;
+					return ModifyEntityResult.FromError(CommandError.Unsuccessful, "Nothing to do; message content match.");
 				}
 
-				string userNick = message.Author.Username;
-				if (message.Author is SocketGuildUser guildUser && !string.IsNullOrEmpty(guildUser.Nickname))
-				{
-					userNick = guildUser.Nickname;
-				}
-
-				if (roleplay.Messages.Any(m => m.DiscordMessageID == message.Id))
-				{
-					// Edit the existing message
-					var existingMessage = roleplay.Messages.Find(m => m.DiscordMessageID == message.Id);
-					existingMessage.Contents = message.Content;
-				}
-				else
-				{
-					var roleplayMessage = await UserMessage.FromDiscordMessageAsync(message, userNick);
-					roleplay.Messages.Add(roleplayMessage);
-				}
+				existingMessage.Contents = message.Content;
 
 				await db.SaveChangesAsync();
+				return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 			}
+
+			var roleplayMessage = await UserMessage.FromDiscordMessageAsync(message, userNick);
+			roleplay.Messages.Add(roleplayMessage);
+
+			await db.SaveChangesAsync();
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Added);
 		}
 
 		/// <summary>

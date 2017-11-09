@@ -18,7 +18,9 @@
           <e p="UserCommands.cs" t="Include" />
         </e>
         <e p="Content" t="Include">
-          <e p="Databases" t="Include" />
+          <e p="Databases" t="Include">
+            <e p="global.db" t="Include" />
+          </e>
           <e p="Sass" t="Include">
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
@@ -63,6 +65,11 @@
             <e p="KinkCollection.cs" t="Include" />
           </e>
         </e>
+        <e p="Migrations" t="Include">
+          <e p="20171108202507_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171108202507_InitialCreate.cs" t="Include" />
+          <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
+        </e>
         <e p="Permissions" t="Include">
           <e p="DefaultPermissions.cs" t="Include" />
           <e p="Permission.cs" t="Include" />
@@ -76,11 +83,16 @@
         </e>
         <e p="Program.cs" t="Include" />
         <e p="Services" t="Include">
+          <e p="ModifyEntityAction.cs" t="Include" />
+          <e p="ModifyEntityResult.cs" t="Include" />
           <e p="RetrieveEntityResult.cs" t="Include" />
           <e p="Roleplaying" t="Include">
             <e p="RoleplayService.cs" t="Include" />
           </e>
           <e p="UserFeedbackService.cs" t="Include" />
+        </e>
+        <e p="TypeReaders" t="Include">
+          <e p="UncachedMessageTypeReader.cs" t="Include" />
         </e>
         <e p="app.config" t="Include" />
         <e p="bin" t="ExcludeRecursive" />

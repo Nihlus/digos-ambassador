@@ -31,11 +31,11 @@ using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Roleplaying;
+using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
 using log4net;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -100,6 +100,8 @@ namespace DIGOS.Ambassador
 		public async Task StartAsync()
 		{
 			await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly());
+			this.Commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
+
 			await this.Client.StartAsync();
 		}
 
