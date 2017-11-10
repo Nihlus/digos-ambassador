@@ -166,7 +166,7 @@ namespace DIGOS.Ambassador.CommandModules
 
 			eb.AddField("Bio", bioValue);
 
-			await this.Context.Channel.SendMessageAsync(string.Empty, false, eb);
+			await this.Feedback.SendEmbedAsync(this.Context, eb);
 		}
 
 		/// <summary>
