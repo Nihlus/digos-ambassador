@@ -30,7 +30,8 @@ using DIGOS.Ambassador.Database.Roleplaying;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
+using DIGOS.Ambassador.Extensions;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace DIGOS.Ambassador.Services.Roleplaying
@@ -44,7 +45,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// Consumes a message, adding it to the active roleplay in its channel if the author is a participant.
 		/// </summary>
 		/// <param name="message">The message to consume.</param>
-		public async void ConsumeMessage(IMessage message)
+		public async void ConsumeMessage([NotNull]IMessage message)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -67,7 +68,12 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="roleplay">The roleplay to modify.</param>
 		/// <param name="message">The message to add or update.</param>
 		/// <returns>A task wrapping the update action.</returns>
-		public async Task<ModifyEntityResult> AddToOrUpdateMessageInRoleplay(GlobalInfoContext db, Roleplay roleplay, IMessage message)
+		public async Task<ModifyEntityResult> AddToOrUpdateMessageInRoleplay
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] Roleplay roleplay,
+			[NotNull] IMessage message
+		)
 		{
 			if (roleplay.Participants == null || !roleplay.Participants.Any(p => p.DiscordID == message.Author.Id))
 			{
@@ -113,7 +119,13 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="roleplayOwner">The owner of the roleplay, if any.</param>
 		/// <param name="roleplayName">The name of the roleplay, if any.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync(GlobalInfoContext db, SocketCommandContext context, IUser roleplayOwner, string roleplayName)
+		public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] SocketCommandContext context,
+			[CanBeNull] IUser roleplayOwner,
+			[CanBeNull] string roleplayName
+		)
 		{
 			if (roleplayOwner is null && roleplayName is null)
 			{
@@ -125,6 +137,11 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				return await GetNamedRoleplayAsync(db, roleplayName);
 			}
 
+			if (roleplayName.IsNullOrWhitespace())
+			{
+				return RetrieveEntityResult<Roleplay>.FromError(CommandError.ObjectNotFound, "Roleplays can't have empty or null names.");
+			}
+
 			return await GetUserRoleplayByNameAsync(db, context, roleplayOwner, roleplayName);
 		}
 
@@ -134,7 +151,11 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="db">The database context where the data is stored.</param>
 		/// <param name="roleplayName">The name of the roleplay.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync(GlobalInfoContext db, string roleplayName)
+		public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] string roleplayName
+		)
 		{
 			if (await db.Roleplays.CountAsync(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase)) > 1)
 			{
@@ -165,7 +186,11 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="db">The database where the roleplays are stored.</param>
 		/// <param name="channel">The channel to get the roleplay from.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public async Task<RetrieveEntityResult<Roleplay>> GetActiveRoleplayAsync(GlobalInfoContext db, IChannel channel)
+		public async Task<RetrieveEntityResult<Roleplay>> GetActiveRoleplayAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IChannel channel
+		)
 		{
 			var roleplay = await db.Roleplays
 				.Include(rp => rp.Owner)
@@ -187,7 +212,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="db">The database where the roleplays are stored.</param>
 		/// <param name="channel">The channel to check.</param>
 		/// <returns>true if there is an active roleplay; otherwise, false.</returns>
-		public async Task<bool> HasActiveRoleplayAsync(GlobalInfoContext db, IChannel channel)
+		public async Task<bool> HasActiveRoleplayAsync([NotNull] GlobalInfoContext db, [NotNull] IChannel channel)
 		{
 			return await db.Roleplays.AnyAsync(rp => rp.IsActive && rp.ActiveChannelID == channel.Id);
 		}
@@ -199,7 +224,12 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="discordUser">The user to check.</param>
 		/// <param name="roleplayName">The roleplay name to check.</param>
 		/// <returns>true if the name is unique; otherwise, false.</returns>
-		public async Task<bool> IsRoleplayNameUniqueForUserAsync(GlobalInfoContext db, IUser discordUser, string roleplayName)
+		public async Task<bool> IsRoleplayNameUniqueForUserAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser,
+			[NotNull] string roleplayName
+		)
 		{
 			var userRoleplays = GetUserRoleplays(db, discordUser);
 			if (await userRoleplays.CountAsync() <= 0)
@@ -216,7 +246,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="db">The database where the roleplays are stored.</param>
 		/// <param name="discordUser">The user to get the roleplays of.</param>
 		/// <returns>A queryable list of roleplays belonging to the user.</returns>
-		public IQueryable<Roleplay> GetUserRoleplays(GlobalInfoContext db, IUser discordUser)
+		public IQueryable<Roleplay> GetUserRoleplays([NotNull]GlobalInfoContext db, [NotNull]IUser discordUser)
 		{
 			return db.Roleplays
 				.Include(rp => rp.Owner)
@@ -233,7 +263,13 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="discordUser">The user to get the roleplay from.</param>
 		/// <param name="roleplayName">The name of the roleplay.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync(GlobalInfoContext db, SocketCommandContext context, IUser discordUser, string roleplayName)
+		public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] SocketCommandContext context,
+			[NotNull] IUser discordUser,
+			[NotNull] string roleplayName
+		)
 		{
 			var roleplay = await db.Roleplays
 			.Include(rp => rp.Owner)
@@ -267,7 +303,13 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="roleplay">The roleplay to remove the user from.</param>
 		/// <param name="discordUser">The user to remove from the roleplay.</param>
 		/// <returns>An execution result which may or may not have succeeded.</returns>
-		public async Task<ExecuteResult> RemoveUserFromRoleplayAsync(GlobalInfoContext db, SocketCommandContext context, Roleplay roleplay, IUser discordUser)
+		public async Task<ExecuteResult> RemoveUserFromRoleplayAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] SocketCommandContext context,
+			[NotNull] Roleplay roleplay,
+			[NotNull] IUser discordUser
+		)
 		{
 			var isCurrentUser = context.Message.Author.Id == discordUser.Id;
 			if (!roleplay.Participants.Any(p => p.DiscordID == discordUser.Id))
@@ -302,7 +344,13 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="roleplay">The roleplay to add the user to.</param>
 		/// <param name="discordUser">The user to add to the roleplay.</param>
 		/// <returns>An execution result which may or may not have succeeded.</returns>
-		public async Task<ExecuteResult> AddUserToRoleplayAsync(GlobalInfoContext db, SocketCommandContext context, Roleplay roleplay, IUser discordUser)
+		public async Task<ExecuteResult> AddUserToRoleplayAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] SocketCommandContext context,
+			[NotNull] Roleplay roleplay,
+			[NotNull] IUser discordUser
+		)
 		{
 			var isCurrentUser = context.Message.Author.Id == discordUser.Id;
 			if (roleplay.Participants.Any(p => p.DiscordID == discordUser.Id))
@@ -327,7 +375,12 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="newOwner">The new owner.</param>
 		/// <param name="roleplay">The roleplay to transfer.</param>
 		/// <returns>An execution result which may or may not have succeeded.</returns>
-		public async Task<ExecuteResult> TransferRoleplayOwnershipAsync(GlobalInfoContext db, IUser newOwner, Roleplay roleplay)
+		public async Task<ExecuteResult> TransferRoleplayOwnershipAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser newOwner,
+			[NotNull] Roleplay roleplay
+		)
 		{
 			if (roleplay.Owner.DiscordID == newOwner.Id)
 			{
