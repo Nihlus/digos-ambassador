@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Permissions;
 
 using Discord;
 using Discord.WebSocket;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
@@ -48,37 +49,37 @@ namespace DIGOS.Ambassador.Database
 		/// <summary>
 		/// Gets or sets the database where the user information is stored.
 		/// </summary>
-		public DbSet<User> Users { get; set; }
+		public DbSet<User> Users { get; [UsedImplicitly] set; }
 
 		/// <summary>
 		/// Gets or sets the database where characters are stored.
 		/// </summary>
-		public DbSet<Character> Characters { get; set; }
+		public DbSet<Character> Characters { get; [UsedImplicitly] set; }
 
 		/// <summary>
 		/// Gets or sets the database where kinks are stored.
 		/// </summary>
-		public DbSet<Kink> Kinks { get; set; }
+		public DbSet<Kink> Kinks { get; [UsedImplicitly] set; }
 
 		/// <summary>
 		/// Gets or sets the database where server-specific settings are stored.
 		/// </summary>
-		public DbSet<Server> Servers { get; set; }
+		public DbSet<Server> Servers { get; [UsedImplicitly] set; }
 
 		/// <summary>
 		/// Gets or sets the database where granted local permissions are stored.
 		/// </summary>
-		public DbSet<LocalPermission> LocalPermissions { get; set; }
+		public DbSet<LocalPermission> LocalPermissions { get; [UsedImplicitly] set; }
 
 		/// <summary>
 		/// Gets or sets the database where granted global permissions are stored.
 		/// </summary>
-		public DbSet<GlobalPermission> GlobalPermissions { get; set; }
+		public DbSet<GlobalPermission> GlobalPermissions { get; [UsedImplicitly] set; }
 
 		/// <summary>
 		/// Gets or sets the database where roleplays are stored.
 		/// </summary>
-		public DbSet<Roleplay> Roleplays { get; set; }
+		public DbSet<Roleplay> Roleplays { get; [UsedImplicitly] set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
@@ -104,7 +105,12 @@ namespace DIGOS.Ambassador.Database
 		/// <param name="discordUser">The Discord user.</param>
 		/// <param name="grantedPermission">The granted permission.</param>
 		/// <returns>A task wrapping the granting of the permission.</returns>
-		public async Task GrantLocalPermissionAsync(IGuild discordServer, IUser discordUser, LocalPermission grantedPermission)
+		public async Task GrantLocalPermissionAsync
+		(
+			[NotNull] IGuild discordServer,
+			[NotNull] IUser discordUser,
+			[NotNull] LocalPermission grantedPermission
+		)
 		{
 			var user = await GetOrRegisterUserAsync(discordUser);
 
@@ -136,7 +142,12 @@ namespace DIGOS.Ambassador.Database
 		/// <param name="discordUser">The Discord user.</param>
 		/// <param name="revokedPermission">The revoked permission.</param>
 		/// <returns>A task wrapping the revoking of the permission.</returns>
-		public async Task RevokeLocalPermissionAsync(IGuild discordServer, IUser discordUser, Permission revokedPermission)
+		public async Task RevokeLocalPermissionAsync
+		(
+			[NotNull] IGuild discordServer,
+			[NotNull] IUser discordUser,
+			Permission revokedPermission
+		)
 		{
 			var user = await GetOrRegisterUserAsync(discordUser);
 
@@ -163,7 +174,13 @@ namespace DIGOS.Ambassador.Database
 		/// <param name="permission">The permission to alter.</param>
 		/// <param name="revokedTarget">The revoked permission.</param>
 		/// <returns>A task wrapping the revoking of the permission.</returns>
-		public async Task RevokeLocalPermissionTargetAsync(IGuild discordServer, IUser discordUser, Permission permission, PermissionTarget revokedTarget)
+		public async Task RevokeLocalPermissionTargetAsync
+		(
+			[NotNull] IGuild discordServer,
+			[NotNull] IUser discordUser,
+			Permission permission,
+			PermissionTarget revokedTarget
+		)
 		{
 			var user = await GetOrRegisterUserAsync(discordUser);
 
@@ -186,7 +203,7 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="newKinks">The new kinks.</param>
 		/// <returns>The number of updated kinks.</returns>
-		public async Task<int> UpdateKinksAsync(IEnumerable<Kink> newKinks)
+		public async Task<int> UpdateKinksAsync([NotNull] [ItemNotNull] IEnumerable<Kink> newKinks)
 		{
 			foreach (var kink in newKinks)
 			{
@@ -204,7 +221,7 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordServer">The Discord server.</param>
 		/// <returns><value>true</value> if the server is stored; otherwise, <value>false</value>.</returns>
-		public async Task<bool> IsServerKnownAsync(IGuild discordServer)
+		public async Task<bool> IsServerKnownAsync([NotNull] IGuild discordServer)
 		{
 			return await this.Servers.AnyAsync(u => u.DiscordGuildID == discordServer.Id);
 		}
@@ -214,7 +231,8 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordServer">The Discord server.</param>
 		/// <returns>Stored information about the server.</returns>
-		public async Task<Server> GetOrRegisterServerAsync(SocketGuild discordServer)
+		[ItemNotNull]
+		public async Task<Server> GetOrRegisterServerAsync([NotNull] SocketGuild discordServer)
 		{
 			if (!await IsServerKnownAsync(discordServer))
 			{
@@ -229,7 +247,8 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordServer">The Discord server.</param>
 		/// <returns>Stored information about the server.</returns>
-		public async Task<Server> GetServerAsync(IGuild discordServer)
+		[ItemNotNull]
+		public async Task<Server> GetServerAsync([NotNull] IGuild discordServer)
 		{
 			return await this.Servers.FirstAsync(u => u.DiscordGuildID == discordServer.Id);
 		}
@@ -240,7 +259,8 @@ namespace DIGOS.Ambassador.Database
 		/// <param name="discordServer">The Discord server.</param>
 		/// <returns>The freshly created information about the server.</returns>
 		/// <exception cref="ArgumentException">Thrown if the server already exists in the database.</exception>
-		public async Task<Server> AddServerAsync(IGuild discordServer)
+		[ItemNotNull]
+		public async Task<Server> AddServerAsync([NotNull] IGuild discordServer)
 		{
 			if (await IsServerKnownAsync(discordServer))
 			{
@@ -261,7 +281,7 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns><value>true</value> if the user is stored; otherwise, <value>false</value>.</returns>
-		public async Task<bool> IsUserKnownAsync(IUser discordUser)
+		public async Task<bool> IsUserKnownAsync([NotNull] IUser discordUser)
 		{
 			return await this.Users.AnyAsync(u => u.DiscordID == discordUser.Id);
 		}
@@ -271,7 +291,8 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns>Stored information about the user.</returns>
-		public async Task<User> GetOrRegisterUserAsync(IUser discordUser)
+		[ItemNotNull]
+		public async Task<User> GetOrRegisterUserAsync([NotNull] IUser discordUser)
 		{
 			if (!await IsUserKnownAsync(discordUser))
 			{
@@ -286,7 +307,8 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns>Stored information about the user.</returns>
-		public async Task<User> GetUser(IUser discordUser)
+		[ItemNotNull]
+		public async Task<User> GetUser([NotNull] IUser discordUser)
 		{
 			return await this.Users
 				.Include(u => u.Characters)
@@ -302,7 +324,8 @@ namespace DIGOS.Ambassador.Database
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns>The freshly created information about the user.</returns>
 		/// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
-		public async Task<User> AddUserAsync(IUser discordUser)
+		[ItemNotNull]
+		public async Task<User> AddUserAsync([NotNull] IUser discordUser)
 		{
 			if (await IsUserKnownAsync(discordUser))
 			{
