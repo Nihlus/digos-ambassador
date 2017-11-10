@@ -25,13 +25,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using JetBrains.Annotations;
 
-// ReSharper disable UnusedMember.Global
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
 	/// Miscellaneous commands - just for fun, testing, etc.
 	/// </summary>
+	[UsedImplicitly]
 	public class MiscellaneousCommands : ModuleBase<SocketCommandContext>
 	{
 		private readonly CommandService Commands;
@@ -53,6 +54,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Sasses the user in a DIGOS fashion.
 		/// </summary>
 		/// <returns>A task wrapping the command.</returns>
+		[UsedImplicitly]
 		[Command("sass")]
 		[Summary("Sasses the user in a DIGOS fashion.")]
 		public async Task SassAsync()
@@ -66,6 +68,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Lists available commands.
 		/// </summary>
 		/// <returns>A task wrapping the command.</returns>
+		[UsedImplicitly]
 		[Alias("help", "halp", "hlep", "commands")]
 		[Command("help")]
 		[Summary("Lists available commands")]

@@ -31,7 +31,7 @@ using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.FList.Kinks;
 
 using Discord.Commands;
-
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 using Kink = DIGOS.Ambassador.Database.UserInfo.Kink;
@@ -41,6 +41,7 @@ namespace DIGOS.Ambassador.CommandModules
 	/// <summary>
 	/// Admin and owner-only commands. These directly affect the bot on a global scale.
 	/// </summary>
+	[UsedImplicitly]
 	[Group("admin")]
 	public class AdminCommands : ModuleBase<SocketCommandContext>
 	{
@@ -48,6 +49,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Updates the kink database with data from F-list.
 		/// </summary>
 		/// <returns>A task wrapping the update action.</returns>
+		[UsedImplicitly]
 		[Command("update-kinks")]
 		[Summary("Updates the kink list with data from F-list.")]
 		[RequireOwner]

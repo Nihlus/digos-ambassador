@@ -34,7 +34,7 @@ using Discord;
 using Discord.Commands;
 
 using Humanizer;
-
+using JetBrains.Annotations;
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
 
@@ -45,6 +45,7 @@ namespace DIGOS.Ambassador.CommandModules
 	/// <summary>
 	/// Permission-related commands.
 	/// </summary>
+	[UsedImplicitly]
 	[Group("permission")]
 	public class PermissionCommands : ModuleBase<SocketCommandContext>
 	{
@@ -52,6 +53,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Lists all available permissions.
 		/// </summary>
 		/// <returns>A task wrapping the command.</returns>
+		[UsedImplicitly]
 		[Command("list")]
 		[Summary("Lists all available permissions.")]
 		public async Task ListPermissionsAsync()
@@ -65,6 +67,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Lists all permissions that have been granted to the invoking user.
 		/// </summary>
 		/// <returns>A task wrapping the command.</returns>
+		[UsedImplicitly]
 		[Command("list-granted")]
 		[Summary("Lists all permissions that have been granted to the invoking user.")]
 		public async Task ListGrantedPermissionsAsync()
@@ -85,6 +88,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns>A task wrapping the command.</returns>
+		[UsedImplicitly]
 		[Command("list-granted")]
 		[Summary("Lists all permissions that have been granted to target user.")]
 		public async Task ListGrantedPermissionsAsync(IUser discordUser)
@@ -165,6 +169,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Commands for granting users permissions.
 		/// </summary>
+		[UsedImplicitly]
 		[Group("grant")]
 		public class GrantCommands : ModuleBase<SocketCommandContext>
 		{
@@ -175,6 +180,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="grantedPermission">The permission that is to be granted.</param>
 			/// <param name="grantedTarget">The target that the permission should be valid for.</param>
 			/// <returns>A task wrapping the command.</returns>
+			[UsedImplicitly]
 			[Command]
 			[Summary("Grant the targeted user the given permission.")]
 			[RequirePermission(ManagePermissions, Other)]
@@ -199,6 +205,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Commands for revoking permissions from users.
 		/// </summary>
+		[UsedImplicitly]
 		[Group("revoke")]
 		public class RevokeCommands : ModuleBase<SocketCommandContext>
 		{
@@ -208,6 +215,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="discordUser">The Discord user.</param>
 			/// <param name="revokedPermission">The permission that is to be revoked.</param>
 			/// <returns>A task wrapping the command.</returns>
+			[UsedImplicitly]
 			[Command]
 			[Summary("Revoke the given permission from the targeted user.")]
 			[RequirePermission(ManagePermissions, Other)]
@@ -228,6 +236,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="permission">The permission to revoke the target from.</param>
 			/// <param name="revokedTarget">The permission target to revoke.</param>
 			/// <returns>A task wrapping the command.</returns>
+			[UsedImplicitly]
 			[Command("target")]
 			[Summary("Revoke the given target permission from the targeted user.")]
 			[RequirePermission(ManagePermissions, Other)]

@@ -1,29 +1,30 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>netcoreapp2.0</TargetFramework>
-        <IsPackable>false</IsPackable>
-        <RootNamespace>DIGOS.Ambassador.Tests</RootNamespace>
-        <AssemblyName>DIGOS.Ambassador.Tests</AssemblyName>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <RunCodeAnalysis>true</RunCodeAnalysis>
-        <CodeAnalysisRuleSet>..\stylecop.ruleset</CodeAnalysisRuleSet>
-        <LangVersion>7.1</LangVersion>
-    </PropertyGroup>
-    <ItemGroup>
-        <AdditionalFiles Include="$(ProjectDir)\..\stylecop.json">
-            <Link>stylecop.json</Link>
-        </AdditionalFiles>
-        <AdditionalFiles Include="$(ProjectDir)\..\stylecop.ruleset">
-            <Link>stylecop.ruleset</Link>
-        </AdditionalFiles>
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170628-02"/>
-        <PackageReference Include="Moq" Version="4.7.142"/>
-        <PackageReference Include="xunit" Version="2.2.0"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0"/>
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\digos-ambassador\digos-ambassador.csproj"/>
-    </ItemGroup>
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>DIGOS.Ambassador.Tests</RootNamespace>
+    <AssemblyName>DIGOS.Ambassador.Tests</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\stylecop.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="$(ProjectDir)\..\stylecop.json">
+      <Link>stylecop.json</Link>
+    </AdditionalFiles>
+    <AdditionalFiles Include="$(ProjectDir)\..\stylecop.ruleset">
+      <Link>stylecop.ruleset</Link>
+    </AdditionalFiles>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170628-02" />
+    <PackageReference Include="Moq" Version="4.7.142" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\digos-ambassador\digos-ambassador.csproj" />
+  </ItemGroup>
 </Project>

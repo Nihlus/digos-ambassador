@@ -31,16 +31,16 @@ using Discord;
 using Discord.Commands;
 
 using Humanizer;
-
+using JetBrains.Annotations;
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
 
-// ReSharper disable UnusedMember.Global
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
 	/// User-related commands.
 	/// </summary>
+	[UsedImplicitly]
 	[Group("user")]
 	public class UserCommands : ModuleBase<SocketCommandContext>
 	{
@@ -48,6 +48,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Shows known information about the invoking user.
 		/// </summary>
 		/// <returns>A task wrapping the command.</returns>
+		[UsedImplicitly]
 		[Command("info")]
 		[Summary("Shows known information about the invoking user.")]
 		public async Task ShowInfoAsync()
@@ -66,6 +67,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="discordUser">The Discord user to show the info of.</param>
 		/// <returns>A task wrapping the command.</returns>
+		[UsedImplicitly]
 		[Command("info")]
 		[Summary("Shows known information about the mentioned user.")]
 		public async Task ShowInfoAsync(IUser discordUser)
@@ -158,6 +160,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// User info edit and set commands
 		/// </summary>
+		[UsedImplicitly]
 		[Group("set")]
 		public class SetCommands : ModuleBase<SocketCommandContext>
 		{
@@ -166,6 +169,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="userClass">The user's new class.</param>
 			/// <returns>A task wrapping the command.</returns>
+			[UsedImplicitly]
 			[Command("class")]
 			[Summary("Sets the invoking user's class.")]
 			[RequirePermission(SetClass)]
@@ -190,6 +194,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="discordUser">The Discord user to change the class of.</param>
 			/// <param name="userClass">The user's new class.</param>
 			/// <returns>A task wrapping the command.</returns>
+			[UsedImplicitly]
 			[Command("class")]
 			[Summary("Sets the target user's class.")]
 			[RequirePermission(SetClass, Other)]
@@ -213,6 +218,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="bio">The user's new bio.</param>
 			/// <returns>A task wrapping the command.</returns>
+			[UsedImplicitly]
 			[Command("bio")]
 			[Summary("Sets the invoking user's bio.")]
 			[RequirePermission(EditUser)]
@@ -237,6 +243,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="discordUser">The Discord user to change the bio of.</param>
 			/// <param name="bio">The user's new bio.</param>
 			/// <returns>A task wrapping the command.</returns>
+			[UsedImplicitly]
 			[Command("bio")]
 			[Summary("Sets the target user's bio.")]
 			[RequirePermission(EditUser, Other)]
@@ -260,6 +267,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="timezone">The user's new timezone hour offset.</param>
 			/// <returns>A task wrapping the command.</returns>
+			[UsedImplicitly]
 			[Command("timezone")]
 			[Summary("Sets the invoking user's timezone hour offset.")]
 			[RequirePermission(EditUser)]
@@ -284,6 +292,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="discordUser">The Discord user to change the timezone of.</param>
 			/// <param name="timezone">The user's new timezone hour offset.</param>
 			/// <returns>A task wrapping the command.</returns>
+			[UsedImplicitly]
 			[Command("timezone")]
 			[Summary("Sets the target user's timezone hour offset.")]
 			[RequirePermission(EditUser, Other)]
