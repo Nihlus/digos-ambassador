@@ -26,11 +26,12 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
+using DIGOS.Ambassador.Extensions;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DIGOS.Ambassador.Extensions;
+
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 

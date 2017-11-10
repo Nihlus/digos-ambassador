@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Services
 		public bool IsSuccess => !this.Error.HasValue;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="RetrieveEntityResult{T}"/> class.
+		/// Initializes a new instance of the <see cref="RetrieveEntityResult{T}"/> struct.
 		/// </summary>
 		/// <param name="entity">The entity.</param>
 		/// <param name="error">The error (if any).</param>

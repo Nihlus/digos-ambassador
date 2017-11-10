@@ -27,7 +27,7 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 
 using Discord;
-
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace DIGOS.Ambassador.Permissions
@@ -44,7 +44,12 @@ namespace DIGOS.Ambassador.Permissions
 		/// <param name="user">The user.</param>
 		/// <param name="requiredPermission">The permission.</param>
 		/// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
-		public static async Task<bool> HasPermissionAsync(IGuild discordServer, User user, RequiredPermission requiredPermission)
+		public static async Task<bool> HasPermissionAsync
+		(
+			[NotNull] IGuild discordServer,
+			[NotNull] User user,
+			[NotNull] RequiredPermission requiredPermission
+		)
 		{
 			// The server owner always has all permissions by default
 			if (discordServer.OwnerId == user.DiscordID)
@@ -67,7 +72,13 @@ namespace DIGOS.Ambassador.Permissions
 		/// <param name="user">The user.</param>
 		/// <param name="requiredPermission">The permission.</param>
 		/// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
-		public static async Task<bool> HasPermissionAsync(GlobalInfoContext db, IGuild discordServer, User user, RequiredPermission requiredPermission)
+		public static async Task<bool> HasPermissionAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IGuild discordServer,
+			[NotNull] User user,
+			[NotNull] RequiredPermission requiredPermission
+		)
 		{
 			// First, check if the user has the permission on a global level
 			var hasGlobalPermission = await db.GlobalPermissions.AnyAsync

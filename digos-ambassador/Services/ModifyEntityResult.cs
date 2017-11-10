@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Services
 		public bool WasModified => this.ActionTaken.HasValue;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ModifyEntityResult"/> class.
+		/// Initializes a new instance of the <see cref="ModifyEntityResult"/> struct.
 		/// </summary>
 		/// <param name="actionTaken">The action that was taken on the entity.</param>
 		/// <param name="error">The error (if any).</param>
