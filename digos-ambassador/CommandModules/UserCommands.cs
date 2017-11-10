@@ -87,7 +87,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="discordUser">The Discord user to show the info of.</param>
 		/// <param name="user">The stored information about the user.</param>
 		/// <returns>A task wrapping the command.</returns>
-		private async Task ShowUserInfoAsync(IUser discordUser, User user)
+		private async Task ShowUserInfoAsync([NotNull] IUser discordUser, [NotNull] User user)
 		{
 			var eb = new EmbedBuilder();
 

@@ -104,7 +104,8 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 		}
 
-		private static EmbedBuilder CreateHumanizedPermissionEmbed(IEnumerable<Permission> permissions)
+		[NotNull]
+		private static EmbedBuilder CreateHumanizedPermissionEmbed([NotNull] IEnumerable<Permission> permissions)
 		{
 			var eb = new EmbedBuilder();
 			var humanizedPermissions = new List<(string Name, string Description)>();
@@ -128,7 +129,8 @@ namespace DIGOS.Ambassador.CommandModules
 			return eb;
 		}
 
-		private static EmbedBuilder CreateHumanizedPermissionEmbed(IEnumerable<LocalPermission> userPermissions)
+		[NotNull]
+		private static EmbedBuilder CreateHumanizedPermissionEmbed([NotNull][ItemNotNull] IEnumerable<LocalPermission> userPermissions)
 		{
 			var eb = new EmbedBuilder();
 			var humanizedPermissions = new List<(string Name, string Description, string Target)>();
@@ -153,17 +155,6 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 
 			return eb;
-		}
-
-		private static async Task<bool> CheckIsBotOwnerAsync(SocketCommandContext context)
-		{
-			var ownerId = (await context.Client.GetApplicationInfoAsync()).Owner.Id;
-			if (context.Message.Author.Id != ownerId)
-			{
-				return false;
-			}
-
-			return true;
 		}
 
 		/// <summary>

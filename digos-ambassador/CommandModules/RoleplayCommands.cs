@@ -36,6 +36,7 @@ using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
+using DIGOS.Ambassador.Extensions;
 using Humanizer;
 using JetBrains.Annotations;
 using static DIGOS.Ambassador.Permissions.Permission;
@@ -98,7 +99,8 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 		}
 
-		private EmbedBuilder CreateRoleplayInfoEmbed(Roleplay roleplay)
+		[NotNull]
+		private EmbedBuilder CreateRoleplayInfoEmbed([NotNull] Roleplay roleplay)
 		{
 			var eb = new EmbedBuilder();
 
@@ -620,8 +622,14 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="roleplayName">The name of the roleplay.</param>
 		/// <returns>true if the name is valid; otherwise, false.</returns>
-		private bool IsRoleplayNameValid(string roleplayName)
+		[ContractAnnotation("roleplayName:null => false")]
+		private bool IsRoleplayNameValid([CanBeNull] string roleplayName)
 		{
+			if (roleplayName.IsNullOrWhitespace())
+			{
+				return false;
+			}
+
 			var commandModule = this.Commands.Modules.First(m => m.Name == "roleplay");
 			var submodules = commandModule.Submodules;
 
@@ -700,7 +708,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 			}
 
-			private async Task SetRoleplayNameAsync(GlobalInfoContext db, Roleplay roleplay, string newRoleplayName)
+			private async Task SetRoleplayNameAsync([NotNull] GlobalInfoContext db, [NotNull] Roleplay roleplay, [NotNull] string newRoleplayName)
 			{
 				if (string.IsNullOrWhiteSpace(newRoleplayName))
 				{
@@ -761,7 +769,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 			}
 
-			private async Task SetRoleplaySummaryAsync(GlobalInfoContext db, Roleplay roleplay, string newRoleplaySummary)
+			private async Task SetRoleplaySummaryAsync([NotNull] GlobalInfoContext db, [NotNull] Roleplay roleplay, [NotNull] string newRoleplaySummary)
 			{
 				if (string.IsNullOrWhiteSpace(newRoleplaySummary))
 				{
@@ -821,7 +829,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 			}
 
-			private async Task SetRoleplayIsNSFW(GlobalInfoContext db, Roleplay roleplay, bool isNSFW)
+			private async Task SetRoleplayIsNSFW([NotNull] GlobalInfoContext db, [NotNull] Roleplay roleplay, bool isNSFW)
 			{
 				if (roleplay.Messages.Count > 0 && roleplay.IsNSFW && !isNSFW)
 				{
@@ -877,7 +885,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 			}
 
-			private async Task SetRoleplayIsPublic(GlobalInfoContext db, Roleplay roleplay, bool isPublic)
+			private async Task SetRoleplayIsPublic([NotNull] GlobalInfoContext db, [NotNull] Roleplay roleplay, [NotNull] bool isPublic)
 			{
 				roleplay.IsNSFW = isPublic;
 				await db.SaveChangesAsync();
