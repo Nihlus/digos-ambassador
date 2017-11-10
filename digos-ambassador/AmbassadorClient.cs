@@ -173,7 +173,7 @@ namespace DIGOS.Ambassador
 						var searchResult = this.Commands.Search(context, argumentPos);
 
 						var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
-						await userDMChannel.SendMessageAsync(string.Empty, false, BuildCommandUsageEmbed(searchResult.Commands));
+						await userDMChannel.SendMessageAsync(string.Empty, false, this.Feedback.CreateCommandUsageEmbed(searchResult.Commands));
 						break;
 					}
 					case CommandError.ObjectNotFound:
@@ -195,35 +195,6 @@ namespace DIGOS.Ambassador
 					}
 				}
 			}
-		}
-
-		private EmbedBuilder BuildCommandUsageEmbed(IReadOnlyList<CommandMatch> matchingCommands)
-		{
-			var eb = new EmbedBuilder();
-			eb.WithColor(Color.DarkPurple);
-			eb.WithTitle("Perhaps you meant one of the following?");
-
-			foreach (var matchingCommand in matchingCommands)
-			{
-				var parameterList = matchingCommand.Command.Parameters.Select
-				(
-					p =>
-					{
-						var parameterInfo = $"{(p.Type.IsPrimitive || p.Type == typeof(string) ? p.Type.Name.ToLowerInvariant() : p.Type.Name)} {p.Name}";
-						if (p.IsOptional)
-						{
-							parameterInfo = $"[{parameterInfo}]";
-						}
-
-						return parameterInfo;
-					}
-				)
-				.Aggregate((a, b) => $"{a}, {b}");
-
-				eb.AddField($"{matchingCommand.Alias}", parameterList);
-			}
-
-			return eb;
 		}
 
 		/// <summary>

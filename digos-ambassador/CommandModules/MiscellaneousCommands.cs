@@ -133,7 +133,7 @@ namespace DIGOS.Ambassador.CommandModules
 					var hasPermission = await command.CheckPreconditionsAsync(this.Context, this.Services);
 					if (hasPermission.IsSuccess)
 					{
-						eb.AddField(command.Aliases.First(), command.Summary);
+						eb.AddField(command.Aliases.First(), $"{command.Summary}\n{this.Feedback.BuildParameterList(command)}");
 					}
 				}
 

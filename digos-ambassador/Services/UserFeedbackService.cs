@@ -21,6 +21,8 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -99,6 +101,50 @@ namespace DIGOS.Ambassador.Services
 			eb.WithDescription($"{invoker.Mention} | {contents}");
 
 			return eb;
+		}
+
+		/// <summary>
+		/// Creates an embed that verbosely describes a set of commands.
+		/// </summary>
+		/// <param name="matchingCommands">A set of commands that should be included in the embed.</param>
+		/// <returns>An embed.</returns>
+		[NotNull]
+		public EmbedBuilder CreateCommandUsageEmbed([NotNull] IReadOnlyList<CommandMatch> matchingCommands)
+		{
+			var eb = new EmbedBuilder();
+			eb.WithColor(Color.DarkPurple);
+			eb.WithTitle("Perhaps you meant one of the following?");
+
+			foreach (var matchingCommand in matchingCommands)
+			{
+				eb.AddField($"{matchingCommand.Alias}", BuildParameterList(matchingCommand.Command));
+			}
+
+			return eb;
+		}
+
+		/// <summary>
+		/// Builds a human-readable parameter list for a command.
+		/// </summary>
+		/// <param name="commandInfo">The command to get the parameters from.</param>
+		/// <returns>A humanized parameter list.</returns>
+		[NotNull]
+		public string BuildParameterList([NotNull] CommandInfo commandInfo)
+		{
+			return commandInfo.Parameters.Select
+			(
+				p =>
+				{
+					var parameterInfo = $"{(p.Type.IsPrimitive || p.Type == typeof(string) ? p.Type.Name.ToLowerInvariant() : p.Type.Name)} {p.Name}";
+					if (p.IsOptional)
+					{
+						parameterInfo = $"[{parameterInfo}]";
+					}
+
+					return parameterInfo;
+				}
+			)
+			.Aggregate((a, b) => $"{a}, {b}");
 		}
 	}
 }
