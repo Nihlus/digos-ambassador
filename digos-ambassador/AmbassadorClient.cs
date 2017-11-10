@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador
 			this.Client.Log += OnDiscordLogEvent;
 
 			this.Commands = new CommandService();
-			this.Roleplays = new RoleplayService();
+			this.Roleplays = new RoleplayService(this.Commands);
 			this.Feedback = new UserFeedbackService();
 
 			this.Services = new ServiceCollection()

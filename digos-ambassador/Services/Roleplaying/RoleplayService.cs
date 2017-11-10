@@ -42,6 +42,17 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 	/// </summary>
 	public class RoleplayService
 	{
+		private readonly CommandService Commands;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="RoleplayService"/> class.
+		/// </summary>
+		/// <param name="commands">The application's command service.</param>
+		public RoleplayService(CommandService commands)
+		{
+			this.Commands = commands;
+		}
+
 		/// <summary>
 		/// Consumes a message, adding it to the active roleplay in its channel if the author is a participant.
 		/// </summary>
@@ -401,6 +412,145 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
+		}
+
+		/// <summary>
+		/// Sets the name of the given roleplay.
+		/// </summary>
+		/// <param name="db">The database containing the roleplays.</param>
+		/// <param name="context">The context of the operation.</param>
+		/// <param name="roleplay">The roleplay to set the name of.</param>
+		/// <param name="newRoleplayName">The new name.</param>
+		/// <returns>A modification result which may or may not have succeeded.</returns>
+		public async Task<ModifyEntityResult> SetRoleplayNameAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] SocketCommandContext context,
+			[NotNull] Roleplay roleplay,
+			[NotNull] string newRoleplayName
+		)
+		{
+			var isCurrentUser = context.Message.Author.Id == roleplay.Owner.DiscordID;
+			if (string.IsNullOrWhiteSpace(newRoleplayName))
+			{
+				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new name.");
+			}
+
+			if (!await IsRoleplayNameUniqueForUserAsync(db, context.Message.Author, newRoleplayName))
+			{
+				var errorMessage = isCurrentUser
+					? "You already have a roleplay with that name."
+					: "The owner already has a roleplay with that name.";
+				return ModifyEntityResult.FromError(CommandError.MultipleMatches, errorMessage);
+			}
+
+			if (!IsRoleplayNameValid(newRoleplayName))
+			{
+				return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "The given name is not valid.");
+			}
+
+			roleplay.Name = newRoleplayName;
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+		}
+
+		/// <summary>
+		/// Sets the summary of the given roleplay.
+		/// </summary>
+		/// <param name="db">The database containing the roleplays.</param>
+		/// <param name="roleplay">The roleplay to set the summary of.</param>
+		/// <param name="newRoleplaySummary">The new summary.</param>
+		/// <returns>A modification result which may or may not have succeeded.</returns>
+		public async Task<ModifyEntityResult> SetRoleplaySummaryAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] Roleplay roleplay,
+			[NotNull] string newRoleplaySummary
+		)
+		{
+			if (string.IsNullOrWhiteSpace(newRoleplaySummary))
+			{
+				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new summary.");
+			}
+
+			roleplay.Summary = newRoleplaySummary;
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+		}
+
+		/// <summary>
+		/// Sets whether or not a roleplay is NSFW.
+		/// </summary>
+		/// <param name="db">The database containing the roleplays.</param>
+		/// <param name="roleplay">The roleplay to set the value in.</param>
+		/// <param name="isNSFW">The new value.</param>
+		/// <returns>A modification result which may or may not have succeeded.</returns>
+		public async Task<ModifyEntityResult> SetRoleplayIsNSFWAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] Roleplay roleplay,
+			bool isNSFW
+		)
+		{
+			if (roleplay.Messages.Count > 0 && roleplay.IsNSFW && !isNSFW)
+			{
+				return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "You can't mark a NSFW roleplay with messages in it as non-NSFW.");
+			}
+
+			roleplay.IsNSFW = isNSFW;
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+		}
+
+		/// <summary>
+		/// Sets whether or not a roleplay is public.
+		/// </summary>
+		/// <param name="db">The database containing the roleplays.</param>
+		/// <param name="roleplay">The roleplay to set the value in.</param>
+		/// <param name="isPublic">The new value.</param>
+		/// <returns>A modification result which may or may not have succeeded.</returns>
+		public async Task<ModifyEntityResult> SetRoleplayIsPublicAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] Roleplay roleplay,
+			bool isPublic
+		)
+		{
+			roleplay.IsPublic = isPublic;
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+		}
+
+		/// <summary>
+		/// Builds a list of the command names and aliases in this module, and checks that the given roleplay name is
+		/// not one of them.
+		/// </summary>
+		/// <param name="roleplayName">The name of the roleplay.</param>
+		/// <returns>true if the name is valid; otherwise, false.</returns>
+		[ContractAnnotation("roleplayName:null => false")]
+		public bool IsRoleplayNameValid([CanBeNull] string roleplayName)
+		{
+			if (roleplayName.IsNullOrWhitespace())
+			{
+				return false;
+			}
+
+			var commandModule = this.Commands.Modules.First(m => m.Name == "roleplay");
+			var submodules = commandModule.Submodules;
+
+			var commandNames = commandModule.Commands.SelectMany(c => c.Aliases);
+			commandNames = commandNames.Union(commandModule.Commands.Select(c => c.Name));
+
+			var submoduleCommandNames = submodules.SelectMany(s => s.Commands.SelectMany(c => c.Aliases));
+			submoduleCommandNames = submoduleCommandNames.Union(submodules.SelectMany(s => s.Commands.Select(c => c.Name)));
+
+			commandNames = commandNames.Union(submoduleCommandNames);
+
+			return !commandNames.Contains(roleplayName);
 		}
 	}
 }

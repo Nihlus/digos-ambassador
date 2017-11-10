@@ -55,8 +55,6 @@ namespace DIGOS.Ambassador.CommandModules
 	[Group("roleplay")]
 	public class RoleplayCommands : ModuleBase<SocketCommandContext>
 	{
-		private readonly CommandService Commands;
-
 		private readonly RoleplayService Roleplays;
 
 		private readonly UserFeedbackService Feedback;
@@ -64,12 +62,10 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RoleplayCommands"/> class.
 		/// </summary>
-		/// <param name="commands">The command service.</param>
 		/// <param name="roleplays">The roleplay service.</param>
 		/// <param name="feedback">The user feedback service.</param>
-		public RoleplayCommands(CommandService commands, RoleplayService roleplays, UserFeedbackService feedback)
+		public RoleplayCommands(RoleplayService roleplays, UserFeedbackService feedback)
 		{
-			this.Commands = commands;
 			this.Roleplays = roleplays;
 			this.Feedback = feedback;
 		}
@@ -86,14 +82,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, discordUser, roleplayName);
-				if (!result.IsSuccess)
+				var getRoleplayResult = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, discordUser, roleplayName);
+				if (!getRoleplayResult.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					await this.Feedback.SendErrorAsync(this.Context, getRoleplayResult.ErrorReason);
 					return;
 				}
 
-				var roleplay = result.Entity;
+				var roleplay = getRoleplayResult.Entity;
 
 				var eb = CreateRoleplayInfoEmbed(roleplay);
 				await this.Context.Channel.SendMessageAsync(string.Empty, false, eb);
@@ -166,7 +162,7 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				if (!IsRoleplayNameValid(roleplayName))
+				if (!this.Roleplays.IsRoleplayNameValid(roleplayName))
 				{
 					await this.Feedback.SendErrorAsync
 					(
@@ -218,14 +214,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
-				if (!result.IsSuccess)
+				var getRoleplayResult = await this.Roleplays.GetUserRoleplayByNameAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+				if (!getRoleplayResult.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					await this.Feedback.SendErrorAsync(this.Context, getRoleplayResult.ErrorReason);
 					return;
 				}
 
-				var roleplay = result.Entity;
+				var roleplay = getRoleplayResult.Entity;
 
 				db.Roleplays.Remove(roleplay);
 				await db.SaveChangesAsync();
@@ -247,14 +243,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, roleplayOwner, roleplayName);
-				if (!result.IsSuccess)
+				var getRoleplayResult = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, roleplayOwner, roleplayName);
+				if (!getRoleplayResult.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					await this.Feedback.SendErrorAsync(this.Context, getRoleplayResult.ErrorReason);
 					return;
 				}
 
-				var roleplay = result.Entity;
+				var roleplay = getRoleplayResult.Entity;
 				var addUserResult = await this.Roleplays.AddUserToRoleplayAsync(db, this.Context, roleplay, this.Context.Message.Author);
 				if (!addUserResult.IsSuccess)
 				{
@@ -279,14 +275,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, roleplayOwner, roleplayName);
-				if (!result.IsSuccess)
+				var getRoleplayResult = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, roleplayOwner, roleplayName);
+				if (!getRoleplayResult.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					await this.Feedback.SendErrorAsync(this.Context, getRoleplayResult.ErrorReason);
 					return;
 				}
 
-				var roleplay = result.Entity;
+				var roleplay = getRoleplayResult.Entity;
 				var removeUserResult = await this.Roleplays.RemoveUserFromRoleplayAsync(db, this.Context, roleplay, this.Context.Message.Author);
 				if (!removeUserResult.IsSuccess)
 				{
@@ -311,14 +307,14 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, this.Context.Message.Author, roleplayName);
-				if (!result.IsSuccess)
+				var getRoleplayResult = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, this.Context.Message.Author, roleplayName);
+				if (!getRoleplayResult.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					await this.Feedback.SendErrorAsync(this.Context, getRoleplayResult.ErrorReason);
 					return;
 				}
 
-				var roleplay = result.Entity;
+				var roleplay = getRoleplayResult.Entity;
 
 				var kickUserResult = await this.Roleplays.RemoveUserFromRoleplayAsync(db, this.Context, roleplay, discordUser);
 				if (!kickUserResult.IsSuccess)
@@ -616,34 +612,6 @@ namespace DIGOS.Ambassador.CommandModules
 		}
 
 		/// <summary>
-		/// Builds a list of the command names and aliases in this module, and checks that the given roleplay name is
-		/// not one of them.
-		/// </summary>
-		/// <param name="roleplayName">The name of the roleplay.</param>
-		/// <returns>true if the name is valid; otherwise, false.</returns>
-		[ContractAnnotation("roleplayName:null => false")]
-		private bool IsRoleplayNameValid([CanBeNull] string roleplayName)
-		{
-			if (roleplayName.IsNullOrWhitespace())
-			{
-				return false;
-			}
-
-			var commandModule = this.Commands.Modules.First(m => m.Name == "roleplay");
-			var submodules = commandModule.Submodules;
-
-			var commandNames = commandModule.Commands.SelectMany(c => c.Aliases);
-			commandNames = commandNames.Union(commandModule.Commands.Select(c => c.Name));
-
-			var submoduleCommandNames = submodules.SelectMany(s => s.Commands.SelectMany(c => c.Aliases));
-			submoduleCommandNames = submoduleCommandNames.Union(submodules.SelectMany(s => s.Commands.Select(c => c.Name)));
-
-			commandNames = commandNames.Union(submoduleCommandNames);
-
-			return !commandNames.Contains(roleplayName);
-		}
-
-		/// <summary>
 		/// Setter commands for roleplay properties.
 		/// </summary>
 		[UsedImplicitly]
@@ -709,19 +677,12 @@ namespace DIGOS.Ambassador.CommandModules
 
 			private async Task SetRoleplayNameAsync([NotNull] GlobalInfoContext db, [NotNull] Roleplay roleplay, [NotNull] string newRoleplayName)
 			{
-				if (string.IsNullOrWhiteSpace(newRoleplayName))
+				var result = await this.Roleplays.SetRoleplayNameAsync(db, this.Context, roleplay, newRoleplayName);
+				if (!result.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, "You need to provide a new name.");
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
-
-				if (!await this.Roleplays.IsRoleplayNameUniqueForUserAsync(db, this.Context.Message.Author, newRoleplayName))
-				{
-					await this.Feedback.SendErrorAsync(this.Context, "You already have a roleplay with that name.");
-				}
-
-				roleplay.Name = newRoleplayName;
-				await db.SaveChangesAsync();
 
 				await this.Feedback.SendConfirmationAsync(this.Context, "Roleplay name set.");
 			}
@@ -770,14 +731,12 @@ namespace DIGOS.Ambassador.CommandModules
 
 			private async Task SetRoleplaySummaryAsync([NotNull] GlobalInfoContext db, [NotNull] Roleplay roleplay, [NotNull] string newRoleplaySummary)
 			{
-				if (string.IsNullOrWhiteSpace(newRoleplaySummary))
+				var result = await this.Roleplays.SetRoleplaySummaryAsync(db, roleplay, newRoleplaySummary);
+				if (!result.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, "You need to provide a summary.");
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
-
-				roleplay.Summary = newRoleplaySummary;
-				await db.SaveChangesAsync();
 
 				await this.Feedback.SendConfirmationAsync(this.Context, "Roleplay summary set.");
 			}
@@ -830,14 +789,12 @@ namespace DIGOS.Ambassador.CommandModules
 
 			private async Task SetRoleplayIsNSFW([NotNull] GlobalInfoContext db, [NotNull] Roleplay roleplay, bool isNSFW)
 			{
-				if (roleplay.Messages.Count > 0 && roleplay.IsNSFW && !isNSFW)
+				var result = await this.Roleplays.SetRoleplayIsNSFWAsync(db, roleplay, isNSFW);
+				if (!result.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, "You can't mark a NSFW roleplay with messages in it as non-NSFW.");
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
-
-				roleplay.IsNSFW = isNSFW;
-				await db.SaveChangesAsync();
 
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}");
 			}
@@ -886,8 +843,12 @@ namespace DIGOS.Ambassador.CommandModules
 
 			private async Task SetRoleplayIsPublic([NotNull] GlobalInfoContext db, [NotNull] Roleplay roleplay, bool isPublic)
 			{
-				roleplay.IsNSFW = isPublic;
-				await db.SaveChangesAsync();
+				var result = await this.Roleplays.SetRoleplayIsPublicAsync(db, roleplay, isPublic);
+				if (!result.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					return;
+				}
 
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Roleplay set to {(isPublic ? "public" : "private")}");
 			}
