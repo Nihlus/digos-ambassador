@@ -33,9 +33,12 @@ using DIGOS.Ambassador.Services;
 
 using Discord.Commands;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 using Kink = DIGOS.Ambassador.Database.UserInfo.Kink;
+
+#pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
 namespace DIGOS.Ambassador.CommandModules
 {
@@ -117,6 +120,25 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 
 			await this.Feedback.SendConfirmationAsync(this.Context, $"Done. {updatedKinkCount} kinks updated.");
+		}
+
+		/// <summary>
+		/// Wipes the database, resetting it to its initial state.
+		/// </summary>
+		[UsedImplicitly]
+		[Alias("wipe-db", "reset-db")]
+		[Command("wipe-db")]
+		[Summary("Wipes the database, resetting it to its initial state.")]
+		[RequireOwner]
+		public async Task ResetDatabase()
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				await db.Database.EnsureDeletedAsync();
+				await db.Database.MigrateAsync();
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Database reset.");
+			}
 		}
 	}
 }
