@@ -130,20 +130,24 @@ namespace DIGOS.Ambassador.Services
 		[NotNull]
 		public string BuildParameterList([NotNull] CommandInfo commandInfo)
 		{
-			return commandInfo.Parameters.Select
+			return string.Join
 			(
-				p =>
-				{
-					var parameterInfo = $"{(p.Type.IsPrimitive || p.Type == typeof(string) ? p.Type.Name.ToLowerInvariant() : p.Type.Name)} {p.Name}";
-					if (p.IsOptional)
+				", ",
+				commandInfo.Parameters.Select
+				(
+					p =>
 					{
-						parameterInfo = $"[{parameterInfo}]";
-					}
+						var parameterInfo =
+							$"{(p.Type.IsPrimitive || p.Type == typeof(string) ? p.Type.Name.ToLowerInvariant() : p.Type.Name)} {p.Name}";
+						if (p.IsOptional)
+						{
+							parameterInfo = $"[{parameterInfo}]";
+						}
 
-					return parameterInfo;
-				}
-			)
-			.Aggregate((a, b) => $"{a}, {b}");
+						return parameterInfo;
+					}
+				)
+			);
 		}
 	}
 }
