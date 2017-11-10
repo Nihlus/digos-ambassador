@@ -23,7 +23,6 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using JetBrains.Annotations;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks

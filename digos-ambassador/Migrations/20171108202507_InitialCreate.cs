@@ -2,7 +2,6 @@
 #pragma warning disable CS1591
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
-using System.Collections.Generic;
 
 namespace DIGOS.Ambassador.Migrations
 {
