@@ -21,14 +21,12 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Roleplaying;
@@ -153,51 +151,23 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="roleplayName">The user-unique name of the roleplay.</param>
 		/// <param name="roleplaySummary">A summary of the roleplay.</param>
 		/// <param name="isNSFW">Whether or not the roleplay is NSFW.</param>
+		/// <param name="isPublic">Whether or not the roleplay is public.</param>
 		[UsedImplicitly]
 		[Command("create")]
 		[Summary("Creates a new roleplay with the specified name.")]
 		[RequirePermission(CreateRoleplay)]
-		public async Task CreateRoleplayAsync(string roleplayName, string roleplaySummary = "No summary set.", bool isNSFW = false)
+		public async Task CreateRoleplayAsync(string roleplayName, string roleplaySummary = "No summary set.", bool isNSFW = false, bool isPublic = true)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				if (!this.Roleplays.IsRoleplayNameValid(roleplayName))
+				var result = await this.Roleplays.CreateRoleplayAsync(db, this.Context, roleplayName, roleplaySummary, isNSFW, isPublic);
+				if (!result.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync
-					(
-						this.Context,
-						"That isn't a valid name for a roleplay."
-					);
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
 
-				if (!await this.Roleplays.IsRoleplayNameUniqueForUserAsync(db, this.Context.Message.Author, roleplayName))
-				{
-					await this.Feedback.SendErrorAsync
-					(
-						this.Context,
-						"You're already using that name for one of your RPs. Please pick another one, or delete the old one."
-					);
-					return;
-				}
-
-				var owner = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
-				var roleplay = new Roleplay
-				{
-					IsActive = false,
-					IsNSFW = isNSFW,
-					IsPublic = true,
-					ActiveChannelID = this.Context.Channel.Id,
-					Owner = owner,
-					Participants = new List<User> { owner },
-					Name = roleplayName,
-					Summary = roleplaySummary
-				};
-
-				await db.Roleplays.AddAsync(roleplay);
-				await db.SaveChangesAsync();
-
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Roleplay \"{roleplay.Name}\" created.");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Roleplay \"{result.Entity.Name}\" created.");
 			}
 		}
 

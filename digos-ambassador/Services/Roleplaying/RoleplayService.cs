@@ -21,17 +21,19 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
+using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Extensions;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -71,6 +73,64 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 
 				await AddToOrUpdateMessageInRoleplay(db, roleplay, message);
 			}
+		}
+
+		/// <summary>
+		/// Creates a roleplay with the given parameters.
+		/// </summary>
+		/// <param name="db">The database where the roleplays are stored.</param>
+		/// <param name="context">The context of the command.</param>
+		/// <param name="roleplayName">The name of the roleplay.</param>
+		/// <param name="roleplaySummary">The summary of the roleplay.</param>
+		/// <param name="isNSFW">Whether or not the roleplay is NSFW.</param>
+		/// <param name="isPublic">Whether or not the roleplay is public.</param>
+		/// <returns>A creation result which may or may not have been successful.</returns>
+		public async Task<CreateEntityResult<Roleplay>> CreateRoleplayAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] SocketCommandContext context,
+			[NotNull] string roleplayName,
+			[NotNull] string roleplaySummary,
+			bool isNSFW,
+			bool isPublic)
+		{
+			var owner = await db.GetOrRegisterUserAsync(context.Message.Author);
+			var roleplay = new Roleplay
+			{
+				IsActive = false,
+				ActiveChannelID = context.Channel.Id,
+				Owner = owner,
+				Participants = new List<User> { owner },
+			};
+
+			var setNameResult = await SetRoleplayNameAsync(db, context, roleplay, roleplayName);
+			if (!setNameResult.IsSuccess)
+			{
+				return CreateEntityResult<Roleplay>.FromError(setNameResult);
+			}
+
+			var setSummaryResult = await SetRoleplaySummaryAsync(db, roleplay, roleplaySummary);
+			if (!setSummaryResult.IsSuccess)
+			{
+				return CreateEntityResult<Roleplay>.FromError(setSummaryResult);
+			}
+
+			var setIsNSFWResult = await SetRoleplayIsNSFWAsync(db, roleplay, isNSFW);
+			if (!setIsNSFWResult.IsSuccess)
+			{
+				return CreateEntityResult<Roleplay>.FromError(setIsNSFWResult);
+			}
+
+			var setIsPublicResult = await SetRoleplayIsPublicAsync(db, roleplay, isPublic);
+			if (!setIsPublicResult.IsSuccess)
+			{
+				return CreateEntityResult<Roleplay>.FromError(setIsPublicResult);
+			}
+
+			await db.Roleplays.AddAsync(roleplay);
+			await db.SaveChangesAsync();
+
+			return CreateEntityResult<Roleplay>.FromSuccess(roleplay);
 		}
 
 		/// <summary>
@@ -433,14 +493,14 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			var isCurrentUser = context.Message.Author.Id == roleplay.Owner.DiscordID;
 			if (string.IsNullOrWhiteSpace(newRoleplayName))
 			{
-				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new name.");
+				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
 			}
 
 			if (!await IsRoleplayNameUniqueForUserAsync(db, context.Message.Author, newRoleplayName))
 			{
 				var errorMessage = isCurrentUser
 					? "You already have a roleplay with that name."
-					: "The owner already has a roleplay with that name.";
+					: "The user already has a roleplay with that name.";
 				return ModifyEntityResult.FromError(CommandError.MultipleMatches, errorMessage);
 			}
 

@@ -84,6 +84,7 @@
         </e>
         <e p="Program.cs" t="Include" />
         <e p="Services" t="Include">
+          <e p="CreateEntityResult.cs" t="Include" />
           <e p="ModifyEntityAction.cs" t="Include" />
           <e p="ModifyEntityResult.cs" t="Include" />
           <e p="RetrieveEntityResult.cs" t="Include" />
