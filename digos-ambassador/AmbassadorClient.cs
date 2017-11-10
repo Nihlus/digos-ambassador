@@ -168,12 +168,20 @@ namespace DIGOS.Ambassador
 					}
 					case CommandError.ParseFailed:
 					case CommandError.BadArgCount:
+					{
+						await this.Feedback.SendErrorAsync(context, $"Command failed: {result.ErrorReason}");
+						var searchResult = this.Commands.Search(context, argumentPos);
+
+						var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
+						await userDMChannel.SendMessageAsync(string.Empty, false, BuildCommandUsageEmbed(searchResult.Commands));
+						break;
+					}
 					case CommandError.ObjectNotFound:
 					case CommandError.MultipleMatches:
 					case CommandError.Exception:
 					case CommandError.Unsuccessful:
 					{
-						await this.Feedback.SendErrorAsync(context, $"Bzzt. Looks like we've had a wardrobe malfunction: {result.ErrorReason}");
+						await this.Feedback.SendErrorAsync(context, $"Bzzt: {result.ErrorReason}");
 						break;
 					}
 					case null:
@@ -187,6 +195,35 @@ namespace DIGOS.Ambassador
 					}
 				}
 			}
+		}
+
+		private EmbedBuilder BuildCommandUsageEmbed(IReadOnlyList<CommandMatch> matchingCommands)
+		{
+			var eb = new EmbedBuilder();
+			eb.WithColor(Color.DarkPurple);
+			eb.WithTitle("Perhaps you meant one of the following?");
+
+			foreach (var matchingCommand in matchingCommands)
+			{
+				var parameterList = matchingCommand.Command.Parameters.Select
+				(
+					p =>
+					{
+						var parameterInfo = $"{(p.Type.IsPrimitive || p.Type == typeof(string) ? p.Type.Name.ToLowerInvariant() : p.Type.Name)} {p.Name}";
+						if (p.IsOptional)
+						{
+							parameterInfo = $"[{parameterInfo}]";
+						}
+
+						return parameterInfo;
+					}
+				)
+				.Aggregate((a, b) => $"{a}, {b}");
+
+				eb.AddField($"{matchingCommand.Alias}", parameterList);
+			}
+
+			return eb;
 		}
 
 		/// <summary>
