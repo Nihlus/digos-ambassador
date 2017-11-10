@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace DIGOS.Ambassador.FList.Kinks
@@ -47,7 +48,7 @@ namespace DIGOS.Ambassador.FList.Kinks
 		/// </summary>
 		/// <param name="json">The serialized kink collection.</param>
 		/// <returns>A deserialized kink collection.</returns>
-		public static KinkCollection FromJson(string json)
+		public static KinkCollection FromJson([NotNull] string json)
 		{
 			var settings = new JsonSerializerSettings
 			{
