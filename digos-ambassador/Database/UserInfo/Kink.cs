@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace DIGOS.Ambassador.Database.UserInfo
 {
@@ -71,6 +72,7 @@ namespace DIGOS.Ambassador.Database.UserInfo
 		}
 
 		/// <inheritdoc />
+		[SuppressMessage("ReSharper", "ArrangeThisQualifier", Justification = "Used for explicit differentiation between compared objects.")]
 		public override bool Equals(object obj)
 		{
 			if (ReferenceEquals(null, obj))
@@ -92,6 +94,7 @@ namespace DIGOS.Ambassador.Database.UserInfo
 		}
 
 		/// <inheritdoc />
+		[SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Class is an entity.")]
 		public override int GetHashCode()
 		{
 			unchecked

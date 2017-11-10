@@ -49,37 +49,79 @@ namespace DIGOS.Ambassador.Database
 		/// <summary>
 		/// Gets or sets the database where the user information is stored.
 		/// </summary>
-		public DbSet<User> Users { get; [UsedImplicitly] set; }
+		public DbSet<User> Users
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
 
 		/// <summary>
 		/// Gets or sets the database where characters are stored.
 		/// </summary>
-		public DbSet<Character> Characters { get; [UsedImplicitly] set; }
+		public DbSet<Character> Characters
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
 
 		/// <summary>
 		/// Gets or sets the database where kinks are stored.
 		/// </summary>
-		public DbSet<Kink> Kinks { get; [UsedImplicitly] set; }
+		public DbSet<Kink> Kinks
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
 
 		/// <summary>
 		/// Gets or sets the database where server-specific settings are stored.
 		/// </summary>
-		public DbSet<Server> Servers { get; [UsedImplicitly] set; }
+		public DbSet<Server> Servers
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
 
 		/// <summary>
 		/// Gets or sets the database where granted local permissions are stored.
 		/// </summary>
-		public DbSet<LocalPermission> LocalPermissions { get; [UsedImplicitly] set; }
+		public DbSet<LocalPermission> LocalPermissions
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
 
 		/// <summary>
 		/// Gets or sets the database where granted global permissions are stored.
 		/// </summary>
-		public DbSet<GlobalPermission> GlobalPermissions { get; [UsedImplicitly] set; }
+		public DbSet<GlobalPermission> GlobalPermissions
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
 
 		/// <summary>
 		/// Gets or sets the database where roleplays are stored.
 		/// </summary>
-		public DbSet<Roleplay> Roleplays { get; [UsedImplicitly] set; }
+		public DbSet<Roleplay> Roleplays
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.

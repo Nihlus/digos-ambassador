@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.UserInfo;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Roleplaying;
@@ -36,7 +37,7 @@ using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
-using DIGOS.Ambassador.Extensions;
+
 using Humanizer;
 using JetBrains.Annotations;
 using static DIGOS.Ambassador.Permissions.Permission;
@@ -492,8 +493,6 @@ namespace DIGOS.Ambassador.CommandModules
 				while (latestMessage.Timestamp < finalMessage.Timestamp)
 				{
 					var messages = (await this.Context.Channel.GetMessagesAsync(latestMessage, Direction.After).Flatten()).OrderBy(m => m.Timestamp).ToList();
-					// Get the messages in ascending order by time
-
 					latestMessage = messages.Last();
 
 					foreach (var message in messages)
@@ -594,12 +593,12 @@ namespace DIGOS.Ambassador.CommandModules
 
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Replaying \"{roleplay.Name}\". Please check your private messages.");
 
-				const int MESSAGE_CHARACTER_LIMIT = 2000;
-				var sb = new StringBuilder(MESSAGE_CHARACTER_LIMIT);
+				const int messageCharacterLimit = 2000;
+				var sb = new StringBuilder(messageCharacterLimit);
 
 				foreach (var message in messages)
 				{
-					if (sb.Length + message.Contents.Length > MESSAGE_CHARACTER_LIMIT)
+					if (sb.Length + message.Contents.Length > messageCharacterLimit)
 					{
 						await userDMChannel.SendMessageAsync(sb.ToString());
 						sb.Clear();
@@ -885,7 +884,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 			}
 
-			private async Task SetRoleplayIsPublic([NotNull] GlobalInfoContext db, [NotNull] Roleplay roleplay, [NotNull] bool isPublic)
+			private async Task SetRoleplayIsPublic([NotNull] GlobalInfoContext db, [NotNull] Roleplay roleplay, bool isPublic)
 			{
 				roleplay.IsNSFW = isPublic;
 				await db.SaveChangesAsync();
