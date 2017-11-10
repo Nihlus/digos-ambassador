@@ -501,6 +501,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				var errorMessage = isCurrentUser
 					? "You already have a roleplay with that name."
 					: "The user already has a roleplay with that name.";
+
 				return ModifyEntityResult.FromError(CommandError.MultipleMatches, errorMessage);
 			}
 
