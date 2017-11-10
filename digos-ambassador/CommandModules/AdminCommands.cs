@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.FList.Kinks;
+using DIGOS.Ambassador.Services;
 
 using Discord.Commands;
 using JetBrains.Annotations;
@@ -45,6 +46,17 @@ namespace DIGOS.Ambassador.CommandModules
 	[Group("admin")]
 	public class AdminCommands : ModuleBase<SocketCommandContext>
 	{
+		private readonly UserFeedbackService Feedback;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AdminCommands"/> class.
+		/// </summary>
+		/// <param name="feedback">The user feedback service.</param>
+		public AdminCommands(UserFeedbackService feedback)
+		{
+			this.Feedback = feedback;
+		}
+
 		/// <summary>
 		/// Updates the kink database with data from F-list.
 		/// </summary>
@@ -75,7 +87,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 				catch (OperationCanceledException)
 				{
-					await this.Context.Channel.SendMessageAsync("Could not connect to F-list: Operation timed out.");
+					await this.Feedback.SendErrorAsync(this.Context, "Could not connect to F-list: Operation timed out.");
 					return;
 				}
 			}
@@ -87,7 +99,7 @@ namespace DIGOS.Ambassador.CommandModules
 				{
 					if (!Enum.TryParse<KinkCategory>(kinkSection.Key, out var kinkCategory))
 					{
-						await this.Context.Channel.SendMessageAsync("Failed to parse kink category.");
+						await this.Feedback.SendErrorAsync(this.Context, "Failed to parse kink category.");
 						return;
 					}
 
@@ -104,7 +116,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 			}
 
-			await this.Context.Channel.SendMessageAsync($"Done. {updatedKinkCount} kinks updated.");
+			await this.Feedback.SendConfirmationAsync(this.Context, $"Done. {updatedKinkCount} kinks updated.");
 		}
 	}
 }

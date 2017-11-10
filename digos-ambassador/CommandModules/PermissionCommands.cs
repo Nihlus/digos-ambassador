@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
+using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
@@ -49,6 +50,17 @@ namespace DIGOS.Ambassador.CommandModules
 	[Group("permission")]
 	public class PermissionCommands : ModuleBase<SocketCommandContext>
 	{
+		private readonly UserFeedbackService Feedback;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PermissionCommands"/> class.
+		/// </summary>
+		/// <param name="feedback">The user feedback service.</param>
+		public PermissionCommands(UserFeedbackService feedback)
+		{
+			this.Feedback = feedback;
+		}
+
 		/// <summary>
 		/// Lists all available permissions.
 		/// </summary>
@@ -79,7 +91,7 @@ namespace DIGOS.Ambassador.CommandModules
 				var embed = CreateHumanizedPermissionEmbed(user.LocalPermissions);
 				embed.WithAuthor(this.Context.Message.Author);
 
-				await this.Context.Channel.SendMessageAsync(string.Empty, false, embed);
+				await this.Feedback.SendEmbedAsync(this.Context, embed);
 			}
 		}
 
@@ -100,7 +112,7 @@ namespace DIGOS.Ambassador.CommandModules
 				var embed = CreateHumanizedPermissionEmbed(user.LocalPermissions);
 				embed.WithAuthor(discordUser);
 
-				await this.Context.Channel.SendMessageAsync(string.Empty, false, embed);
+				await this.Feedback.SendEmbedAsync(this.Context, embed);
 			}
 		}
 
@@ -164,6 +176,17 @@ namespace DIGOS.Ambassador.CommandModules
 		[Group("grant")]
 		public class GrantCommands : ModuleBase<SocketCommandContext>
 		{
+			private readonly UserFeedbackService Feedback;
+
+			/// <summary>
+			/// Initializes a new instance of the <see cref="GrantCommands"/> class.
+			/// </summary>
+			/// <param name="feedback">The user feedback service.</param>
+			public GrantCommands(UserFeedbackService feedback)
+			{
+				this.Feedback = feedback;
+			}
+
 			/// <summary>
 			/// Grant the targeted user the given permission.
 			/// </summary>
@@ -189,7 +212,7 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.GrantLocalPermissionAsync(this.Context.Guild, discordUser, newPermission);
 				}
 
-				await this.Context.Channel.SendMessageAsync($"{grantedPermission.ToString().Humanize().Transform(To.TitleCase)} granted to {discordUser.Mention}.");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"{grantedPermission.ToString().Humanize().Transform(To.TitleCase)} granted to {discordUser.Mention}.");
 			}
 		}
 
@@ -200,6 +223,17 @@ namespace DIGOS.Ambassador.CommandModules
 		[Group("revoke")]
 		public class RevokeCommands : ModuleBase<SocketCommandContext>
 		{
+			private readonly UserFeedbackService Feedback;
+
+			/// <summary>
+			/// Initializes a new instance of the <see cref="RevokeCommands"/> class.
+			/// </summary>
+			/// <param name="feedback">The user feedback service.</param>
+			public RevokeCommands(UserFeedbackService feedback)
+			{
+				this.Feedback = feedback;
+			}
+
 			/// <summary>
 			/// Revoke the given permission from the targeted user.
 			/// </summary>
@@ -217,7 +251,7 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.RevokeLocalPermissionAsync(this.Context.Guild, discordUser, revokedPermission);
 				}
 
-				await this.Context.Channel.SendMessageAsync($"${revokedPermission.ToString().Humanize().Transform(To.TitleCase)} revoked from {discordUser.Mention}.");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"${revokedPermission.ToString().Humanize().Transform(To.TitleCase)} revoked from {discordUser.Mention}.");
 			}
 
 			/// <summary>
@@ -238,8 +272,9 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.RevokeLocalPermissionTargetAsync(this.Context.Guild, discordUser, permission, revokedTarget);
 				}
 
-				await this.Context.Channel.SendMessageAsync
+				await this.Feedback.SendConfirmationAsync
 				(
+					this.Context,
 					$"{permission.ToString().Humanize().Transform(To.TitleCase)} ({revokedTarget.ToString().Humanize().Transform(To.TitleCase)}) revoked from {discordUser.Mention}."
 				);
 			}

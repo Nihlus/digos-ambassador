@@ -23,8 +23,12 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+
+using DIGOS.Ambassador.Services;
+
 using Discord;
 using Discord.Commands;
+
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.CommandModules
@@ -39,14 +43,18 @@ namespace DIGOS.Ambassador.CommandModules
 
 		private readonly IServiceProvider Services;
 
+		private readonly UserFeedbackService Feedback;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MiscellaneousCommands"/> class.
 		/// </summary>
 		/// <param name="commands">The command service</param>
+		/// <param name="feedback">The user feedback service.</param>
 		/// <param name="services">The service provider.</param>
-		public MiscellaneousCommands(CommandService commands, IServiceProvider services)
+		public MiscellaneousCommands(CommandService commands, UserFeedbackService feedback, IServiceProvider services)
 		{
 			this.Commands = commands;
+			this.Feedback = feedback;
 			this.Services = services;
 		}
 
@@ -97,7 +105,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 			}
 
-			await this.Context.Channel.SendMessageAsync($"{userChannel.Recipient.Mention}, please check your private messages.");
+			await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
 			await userChannel.CloseAsync();
 		}
 	}

@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions.Preconditions;
+using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
@@ -44,6 +45,17 @@ namespace DIGOS.Ambassador.CommandModules
 	[Group("user")]
 	public class UserCommands : ModuleBase<SocketCommandContext>
 	{
+		private readonly UserFeedbackService Feedback;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="UserCommands"/> class.
+		/// </summary>
+		/// <param name="feedback">The user feedback service.</param>
+		public UserCommands(UserFeedbackService feedback)
+		{
+			this.Feedback = feedback;
+		}
+
 		/// <summary>
 		/// Shows known information about the invoking user.
 		/// </summary>
@@ -164,6 +176,17 @@ namespace DIGOS.Ambassador.CommandModules
 		[Group("set")]
 		public class SetCommands : ModuleBase<SocketCommandContext>
 		{
+			private readonly UserFeedbackService Feedback;
+
+			/// <summary>
+			/// Initializes a new instance of the <see cref="SetCommands"/> class.
+			/// </summary>
+			/// <param name="feedback">The user feedback service.</param>
+			public SetCommands(UserFeedbackService feedback)
+			{
+				this.Feedback = feedback;
+			}
+
 			/// <summary>
 			/// Sets the invoking user's class.
 			/// </summary>
@@ -185,7 +208,7 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.SaveChangesAsync();
 				}
 
-				await this.Context.Channel.SendMessageAsync("Class updated.");
+				await this.Feedback.SendConfirmationAsync(this.Context, "Class updated.");
 			}
 
 			/// <summary>
@@ -210,7 +233,7 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.SaveChangesAsync();
 				}
 
-				await this.Context.Channel.SendMessageAsync($"Class of {discordUser.Mention} updated.");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Class of {discordUser.Mention} updated.");
 			}
 
 			/// <summary>
@@ -234,7 +257,7 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.SaveChangesAsync();
 				}
 
-				await this.Context.Channel.SendMessageAsync("Bio updated.");
+				await this.Feedback.SendConfirmationAsync(this.Context, "Bio updated.");
 			}
 
 			/// <summary>
@@ -259,7 +282,7 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.SaveChangesAsync();
 				}
 
-				await this.Context.Channel.SendMessageAsync($"Bio of {discordUser.Mention} updated.");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Bio of {discordUser.Mention} updated.");
 			}
 
 			/// <summary>
@@ -283,7 +306,7 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.SaveChangesAsync();
 				}
 
-				await this.Context.Channel.SendMessageAsync("Timezone updated.");
+				await this.Feedback.SendConfirmationAsync(this.Context, "Timezone updated.");
 			}
 
 			/// <summary>
@@ -308,7 +331,7 @@ namespace DIGOS.Ambassador.CommandModules
 					await db.SaveChangesAsync();
 				}
 
-				await this.Context.Channel.SendMessageAsync($"Timezone of {discordUser.Mention} updated.");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Timezone of {discordUser.Mention} updated.");
 			}
 		}
 	}

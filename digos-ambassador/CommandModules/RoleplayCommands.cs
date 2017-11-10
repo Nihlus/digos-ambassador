@@ -90,7 +90,7 @@ namespace DIGOS.Ambassador.CommandModules
 				var roleplay = getRoleplayResult.Entity;
 
 				var eb = CreateRoleplayInfoEmbed(roleplay);
-				await this.Context.Channel.SendMessageAsync(string.Empty, false, eb);
+				await this.Feedback.SendEmbedAsync(this.Context, eb);
 			}
 		}
 
@@ -146,7 +146,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 			}
 
-			await this.Context.Channel.SendMessageAsync(string.Empty, false, eb);
+			await this.Feedback.SendEmbedAsync(this.Context, eb);
 		}
 
 		/// <summary>

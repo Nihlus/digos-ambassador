@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -74,10 +75,20 @@ namespace DIGOS.Ambassador.Services
 			await SendEmbedAsync(context, Color.Blue, contents);
 		}
 
+		/// <summary>
+		/// Sends an embed.
+		/// </summary>
+		/// <param name="context">The context of the send operation.</param>
+		/// <param name="eb">The embed to send.</param>
+		public async Task SendEmbedAsync([NotNull] SocketCommandContext context, [NotNull] EmbedBuilder eb)
+		{
+			await context.Channel.SendMessageAsync(string.Empty, false, eb);
+		}
+
 		private async Task SendEmbedAsync([NotNull] SocketCommandContext context, Color color, [NotNull] string contents)
 		{
 			var eb = CreateFeedbackEmbed(context.Message.Author, color, contents);
-			await context.Channel.SendMessageAsync(string.Empty, false, eb);
+			await SendEmbedAsync(context, eb);
 		}
 
 		[NotNull]
