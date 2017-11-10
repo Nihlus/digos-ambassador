@@ -68,6 +68,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="roleplay">The roleplay to modify.</param>
 		/// <param name="message">The message to add or update.</param>
 		/// <returns>A task wrapping the update action.</returns>
+		[ItemNotNull]
 		public async Task<ModifyEntityResult> AddToOrUpdateMessageInRoleplay
 		(
 			[NotNull] GlobalInfoContext db,
@@ -119,6 +120,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="roleplayOwner">The owner of the roleplay, if any.</param>
 		/// <param name="roleplayName">The name of the roleplay, if any.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[ItemNotNull]
 		public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -151,6 +153,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="db">The database context where the data is stored.</param>
 		/// <param name="roleplayName">The name of the roleplay.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[ItemNotNull]
 		public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -186,6 +189,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="db">The database where the roleplays are stored.</param>
 		/// <param name="channel">The channel to get the roleplay from.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[ItemNotNull]
 		public async Task<RetrieveEntityResult<Roleplay>> GetActiveRoleplayAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -246,6 +250,8 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="db">The database where the roleplays are stored.</param>
 		/// <param name="discordUser">The user to get the roleplays of.</param>
 		/// <returns>A queryable list of roleplays belonging to the user.</returns>
+		[NotNull]
+		[ItemNotNull]
 		public IQueryable<Roleplay> GetUserRoleplays([NotNull]GlobalInfoContext db, [NotNull]IUser discordUser)
 		{
 			return db.Roleplays
@@ -263,6 +269,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="discordUser">The user to get the roleplay from.</param>
 		/// <param name="roleplayName">The name of the roleplay.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[ItemNotNull]
 		public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync
 		(
 			[NotNull] GlobalInfoContext db,
