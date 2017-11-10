@@ -21,6 +21,7 @@
 //
 
 using Discord.Commands;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
@@ -50,7 +51,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="entity">The entity.</param>
 		/// <param name="error">The error (if any).</param>
 		/// <param name="errorReason">A more detailed error description.</param>
-		public RetrieveEntityResult(T entity, CommandError? error, string errorReason)
+		public RetrieveEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
 		{
 			this.Entity = entity;
 			this.Error = error;
@@ -62,7 +63,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="entity">The roleplay that was retrieved.</param>
 		/// <returns>A successful result.</returns>
-		public static RetrieveEntityResult<T> FromSuccess(T entity)
+		public static RetrieveEntityResult<T> FromSuccess([NotNull] T entity)
 		{
 			return new RetrieveEntityResult<T>(entity, null, null);
 		}
@@ -73,7 +74,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="error">The error that caused the failure.</param>
 		/// <param name="reason">A more detailed error reason.</param>
 		/// <returns>A failed result.</returns>
-		public static RetrieveEntityResult<T> FromError(CommandError error, string reason)
+		public static RetrieveEntityResult<T> FromError(CommandError error, [NotNull] string reason)
 		{
 			return new RetrieveEntityResult<T>(null, error, reason);
 		}
@@ -83,7 +84,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="result">The result to base this result off of.</param>
 		/// <returns>A failed result.</returns>
-		public static RetrieveEntityResult<T> FromError(IResult result)
+		public static RetrieveEntityResult<T> FromError([NotNull] IResult result)
 		{
 			return new RetrieveEntityResult<T>(null, result.Error, result.ErrorReason);
 		}

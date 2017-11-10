@@ -21,7 +21,7 @@
 //
 
 using Discord.Commands;
-using static DIGOS.Ambassador.Services.ModifyEntityAction;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
@@ -42,7 +42,12 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Gets the action that was taken on the entity.
 		/// </summary>
-		public ModifyEntityAction ActionTaken { get; }
+		public ModifyEntityAction? ActionTaken { get; }
+
+		/// <summary>
+		/// Gets a value indicating whether or not any entity was modified.
+		/// </summary>
+		public bool WasModified => this.ActionTaken.HasValue;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ModifyEntityResult"/> class.
@@ -50,7 +55,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="actionTaken">The action that was taken on the entity.</param>
 		/// <param name="error">The error (if any).</param>
 		/// <param name="errorReason">A more detailed error description.</param>
-		public ModifyEntityResult(ModifyEntityAction actionTaken, CommandError? error, string errorReason)
+		public ModifyEntityResult([CanBeNull] ModifyEntityAction? actionTaken, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
 		{
 			this.ActionTaken = actionTaken;
 			this.Error = error;
@@ -73,9 +78,9 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="error">The error that caused the failure.</param>
 		/// <param name="reason">A more detailed error reason.</param>
 		/// <returns>A failed result.</returns>
-		public static ModifyEntityResult FromError(CommandError error, string reason)
+		public static ModifyEntityResult FromError(CommandError error, [NotNull] string reason)
 		{
-			return new ModifyEntityResult(None, error, reason);
+			return new ModifyEntityResult(null, error, reason);
 		}
 
 		/// <summary>
@@ -83,9 +88,9 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="result">The result to base this result off of.</param>
 		/// <returns>A failed result.</returns>
-		public static ModifyEntityResult FromError(IResult result)
+		public static ModifyEntityResult FromError([NotNull] IResult result)
 		{
-			return new ModifyEntityResult(None, result.Error, result.ErrorReason);
+			return new ModifyEntityResult(null, result.Error, result.ErrorReason);
 		}
 	}
 }
