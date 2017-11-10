@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using DIGOS.Ambassador.Database.UserInfo;
 
 using Discord;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.ServerInfo
 {
@@ -58,7 +59,8 @@ namespace DIGOS.Ambassador.Database.ServerInfo
 		/// </summary>
 		/// <param name="discordServer">The Discord server.</param>
 		/// <returns>A default server entity with some information filled in.</returns>
-		public static Server CreateDefault(IGuild discordServer)
+		[NotNull]
+		public static Server CreateDefault([NotNull] IGuild discordServer)
 		{
 			return new Server
 			{

@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.UserInfo;
 using Discord;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Roleplaying
 {
@@ -68,7 +69,12 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <param name="message">The message to create from.</param>
 		/// <param name="authorNickname">The current display name of the author.</param>
 		/// <returns>A new UserMessage.</returns>
-		public static async Task<UserMessage> FromDiscordMessageAsync(IMessage message, string authorNickname)
+		[ItemNotNull]
+		public static async Task<UserMessage> FromDiscordMessageAsync
+		(
+			[NotNull] IMessage message,
+			[NotNull] string authorNickname
+		)
 		{
 			using (var db = new GlobalInfoContext())
 			{
