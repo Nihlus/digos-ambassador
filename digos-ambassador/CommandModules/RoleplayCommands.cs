@@ -684,7 +684,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="newRoleplaySummary">The roleplay's new summary.</param>
 			[UsedImplicitly]
 			[Command("summary")]
-			[Summary("Sets the summary of the current roleplay.")]
+			[Summary("Sets the summary of the named roleplay.")]
 			public async Task SetRoleplaySummaryAsync(string roleplayName, string newRoleplaySummary)
 			{
 				using (var db = new GlobalInfoContext())

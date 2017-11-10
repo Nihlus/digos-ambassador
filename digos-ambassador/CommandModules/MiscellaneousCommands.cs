@@ -21,9 +21,11 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 
 using Discord;
@@ -75,22 +77,58 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Lists available commands.
 		/// </summary>
+		/// <param name="searchText">The text to search the command handler for.</param>
 		/// <returns>A task wrapping the command.</returns>
 		[UsedImplicitly]
 		[Alias("help", "halp", "hlep", "commands")]
 		[Command("help")]
 		[Summary("Lists available commands")]
-		public async Task HelpAsync()
+		public async Task HelpAsync(string searchText = null)
 		{
+			IReadOnlyList<CommandInfo> searchResults;
+			if (searchText.IsNullOrEmpty())
+			{
+				searchResults = this.Commands.Modules.SelectMany(m => m.Commands).ToList();
+			}
+			else
+			{
+				searchResults = this.Commands.Commands.Where
+				(
+					c =>
+					c.Aliases.Any
+					(
+						a =>
+						a.Contains(searchText)
+					)
+					|| c.Parameters.Any
+					(
+						p => p.Name.Contains(searchText)
+					)
+				)
+				.ToList();
+			}
+
 			var userChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
-			foreach (var module in this.Commands.Modules.Where(m => !m.IsSubmodule))
+
+			var modules = GetTopLevelModules(searchResults.Select(ci => ci.Module)).Distinct();
+
+			foreach (var module in modules.Where(m => !m.IsSubmodule))
 			{
 				var eb = new EmbedBuilder();
 
 				eb.WithColor(Color.Blue);
 				eb.WithDescription($"Available commands in {module.Name}");
 
-				foreach (var command in module.Commands.Union(module.Submodules.SelectMany(sm => sm.Commands)))
+				var matchingCommandsInModule = module.Commands.Union
+				(
+					module.Submodules.SelectMany
+					(
+						sm => sm.Commands
+					)
+				)
+				.Where(c => searchResults.Contains(c));
+
+				foreach (var command in matchingCommandsInModule)
 				{
 					var hasPermission = await command.CheckPreconditionsAsync(this.Context, this.Services);
 					if (hasPermission.IsSuccess)
@@ -107,6 +145,24 @@ namespace DIGOS.Ambassador.CommandModules
 
 			await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
 			await userChannel.CloseAsync();
+		}
+
+		private IEnumerable<ModuleInfo> GetTopLevelModules(IEnumerable<ModuleInfo> childModules)
+		{
+			foreach (var childModule in childModules)
+			{
+				if (childModule.IsSubmodule)
+				{
+					foreach (var parentModule in GetTopLevelModules(new List<ModuleInfo> { childModule.Parent }))
+					{
+						yield return parentModule;
+					}
+				}
+				else
+				{
+					yield return childModule;
+				}
+			}
 		}
 	}
 }
