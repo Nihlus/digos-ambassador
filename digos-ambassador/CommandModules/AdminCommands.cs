@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[Command("wipe-db")]
 		[Summary("Wipes the database, resetting it to its initial state.")]
 		[RequireOwner]
-		public async Task ResetDatabase()
+		public async Task ResetDatabaseAsync()
 		{
 			using (var db = new GlobalInfoContext())
 			{
