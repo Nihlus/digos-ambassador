@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -101,6 +100,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				ActiveChannelID = context.Channel.Id,
 				Owner = owner,
 				Participants = new List<User> { owner },
+				Messages = new List<UserMessage>()
 			};
 
 			var setNameResult = await SetRoleplayNameAsync(db, context, roleplay, roleplayName);

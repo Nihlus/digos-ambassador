@@ -73,6 +73,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="roleplayName">The name of the roleplay.</param>
 		/// <param name="discordUser">The user that owns the roleplay.</param>
 		[UsedImplicitly]
+		[Alias("show", "info")]
 		[Command("show")]
 		[Summary("Shows information about the specified roleplay.")]
 		public async Task ShowRoleplayAsync(string roleplayName = null, IUser discordUser = null)
@@ -105,6 +106,9 @@ namespace DIGOS.Ambassador.CommandModules
 
 			eb.AddInlineField("Currently", $"{(roleplay.IsActive ? "Active" : "Inactive")}");
 			eb.AddInlineField("Channel", MentionUtils.MentionChannel(this.Context.Channel.Id));
+
+			eb.AddField("NSFW", roleplay.IsNSFW ? "Yes" : "No");
+			eb.AddInlineField("Public", roleplay.IsPublic ? "Yes" : "No");
 
 			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p.DiscordID));
 			var participantMentions = participantUsers.Select(u => u.Mention);
