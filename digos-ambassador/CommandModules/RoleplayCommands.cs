@@ -29,7 +29,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.UserInfo;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Roleplaying;
