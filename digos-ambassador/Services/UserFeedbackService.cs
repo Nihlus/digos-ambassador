@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using JetBrains.Annotations;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -39,7 +40,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="context">The context to send to.</param>
 		/// <param name="contents">The contents of the message.</param>
-		public async Task SendConfirmationAsync(SocketCommandContext context, string contents)
+		public async Task SendConfirmationAsync([NotNull] SocketCommandContext context, [NotNull] string contents)
 		{
 			await SendEmbedAsync(context, Color.DarkPurple, contents);
 		}
@@ -49,7 +50,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="context">The context to send to.</param>
 		/// <param name="contents">The contents of the message.</param>
-		public async Task SendErrorAsync(SocketCommandContext context, string contents)
+		public async Task SendErrorAsync([NotNull] SocketCommandContext context, [NotNull] string contents)
 		{
 			await SendEmbedAsync(context, Color.Red, contents);
 		}
@@ -59,7 +60,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="context">The context to send to.</param>
 		/// <param name="contents">The contents of the message.</param>
-		public async Task SendWarningAsync(SocketCommandContext context, string contents)
+		public async Task SendWarningAsync([NotNull] SocketCommandContext context, [NotNull] string contents)
 		{
 			await SendEmbedAsync(context, Color.Orange, contents);
 		}
@@ -69,18 +70,19 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="context">The context to send to.</param>
 		/// <param name="contents">The contents of the message.</param>
-		public async Task SendInfoAsync(SocketCommandContext context, string contents)
+		public async Task SendInfoAsync([NotNull] SocketCommandContext context, [NotNull] string contents)
 		{
 			await SendEmbedAsync(context, Color.Blue, contents);
 		}
 
-		private async Task SendEmbedAsync(SocketCommandContext context, Color color, string contents)
+		private async Task SendEmbedAsync([NotNull] SocketCommandContext context, Color color, [NotNull] string contents)
 		{
 			var eb = CreateFeedbackEmbed(context.Message.Author, color, contents);
 			await context.Channel.SendMessageAsync(string.Empty, false, eb);
 		}
 
-		private EmbedBuilder CreateFeedbackEmbed(IMentionable invoker, Color color, string contents)
+		[NotNull]
+		private EmbedBuilder CreateFeedbackEmbed([NotNull] IMentionable invoker, Color color, [NotNull] string contents)
 		{
 			var eb = new EmbedBuilder();
 			eb.WithColor(color);
