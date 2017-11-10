@@ -28,7 +28,7 @@ namespace DIGOS.Ambassador.Services
 	/// Represents an attempt to retrieve a roleplay from the database.
 	/// </summary>
 	/// <typeparam name="T">The entity type to encapsulate.</typeparam>
-	public class RetrieveEntityResult<T> : IResult where T : class
+	public struct RetrieveEntityResult<T> : IResult where T : class
 	{
 		/// <summary>
 		/// Gets the entity that was retrieved.

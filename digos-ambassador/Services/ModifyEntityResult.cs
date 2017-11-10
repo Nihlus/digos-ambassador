@@ -28,7 +28,7 @@ namespace DIGOS.Ambassador.Services
 	/// <summary>
 	/// Encapsulates the result of an attempt to add or edit an entity.
 	/// </summary>
-	public class ModifyEntityResult : IResult
+	public struct ModifyEntityResult : IResult
 	{
 		/// <inheritdoc />
 		public CommandError? Error { get; }
