@@ -26,6 +26,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Services;
 using log4net;
 
 namespace DIGOS.Ambassador
@@ -56,7 +57,18 @@ namespace DIGOS.Ambassador
 			log4net.Config.XmlConfigurator.Configure(logRepository, new FileInfo("app.config"));
 
 			// Initialize
-			var ambassadorClient = new AmbassadorClient();
+			var contentService = new ContentService();
+			try
+			{
+				await contentService.LoadContent();
+			}
+			catch (FileNotFoundException fex)
+			{
+				Log.Error("Could not initialize content service.", fex);
+				return;
+			}
+
+			var ambassadorClient = new AmbassadorClient(contentService);
 			await ambassadorClient.LoginAsync();
 			await ambassadorClient.StartAsync();
 

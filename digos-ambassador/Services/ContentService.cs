@@ -1,5 +1,5 @@
 ﻿//
-//  ContentManager.cs
+//  ContentService.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -23,50 +23,38 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Extensions;
 
-namespace DIGOS.Ambassador
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Management class for content that comes bundled with the bot. Responsible for loading and providing access to
 	/// the content.
 	/// </summary>
-	public sealed class ContentManager
+	public sealed class ContentService
 	{
 		/// <summary>
-		/// Gets the singleton instance of the content manager.
-		/// </summary>
-		public static ContentManager Instance { get; } = new ContentManager();
-
-		/// <summary>
 		/// Gets the Discord bot OAuth token.
-		/// </summary>
+		/// </summary>o
 		public string BotToken { get; private set; }
 
 		private List<string> Sass;
 		private List<string> SassNSFW;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ContentManager"/> class.
+		/// Loads the default content.
 		/// </summary>
-		private ContentManager()
+		public async Task LoadContent()
 		{
-			LoadContent();
-		}
-
-		/// <summary>
-		/// Loads
-		/// </summary>
-		private void LoadContent()
-		{
-			LoadBotToken();
-			LoadSass();
+			await LoadSassAsync();
+			await LoadBotTokenAsync();
 		}
 
 		/// <summary>
 		/// Loads the sass from disk.
 		/// </summary>
-		private void LoadSass()
+		private async Task LoadSassAsync()
 		{
 			var sassPath = Path.Combine("Content", "Sass", "sass.txt");
 			var sassNSFWPath = Path.Combine("Content", "Sass", "sass-nsfw.txt");
@@ -81,8 +69,8 @@ namespace DIGOS.Ambassador
 				this.SassNSFW = new List<string>();
 			}
 
-			this.Sass = File.ReadAllLines(sassPath).ToList();
-			this.SassNSFW = File.ReadAllLines(sassNSFWPath).ToList();
+			this.Sass = (await File.ReadAllLinesAsync(sassPath)).ToList();
+			this.SassNSFW = (await File.ReadAllLinesAsync(sassNSFWPath)).ToList();
 		}
 
 		/// <summary>
@@ -90,7 +78,7 @@ namespace DIGOS.Ambassador
 		/// </summary>
 		/// <exception cref="FileNotFoundException">Thrown if the bot token file can't be found.</exception>
 		/// <exception cref="InvalidDataException">Thrown if no token exists in the file.</exception>
-		private void LoadBotToken()
+		private async Task LoadBotTokenAsync()
 		{
 			var tokenPath = Path.Combine("Content", "bot.token");
 
@@ -99,7 +87,7 @@ namespace DIGOS.Ambassador
 				throw new FileNotFoundException("The bot token file could not be found.", tokenPath);
 			}
 
-			var token = File.ReadAllText(tokenPath);
+			var token = await File.ReadAllTextAsync(tokenPath);
 
 			if (string.IsNullOrEmpty(token))
 			{

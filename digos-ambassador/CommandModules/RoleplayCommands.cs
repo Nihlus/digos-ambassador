@@ -443,7 +443,6 @@ namespace DIGOS.Ambassador.CommandModules
 		(
 			[OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
 			IMessage startMessage,
-
 			[CanBeNull]
 			[OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
 			IMessage finalMessage = null

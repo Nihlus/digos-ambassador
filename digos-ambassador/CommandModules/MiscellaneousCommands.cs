@@ -44,6 +44,8 @@ namespace DIGOS.Ambassador.CommandModules
 	{
 		private readonly CommandService Commands;
 
+		private readonly ContentService Content;
+
 		private readonly IServiceProvider Services;
 
 		private readonly UserFeedbackService Feedback;
@@ -51,12 +53,14 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MiscellaneousCommands"/> class.
 		/// </summary>
-		/// <param name="commands">The command service</param>
+		/// <param name="commands">The command service.</param>
+		/// <param name="content">The content service.</param>
 		/// <param name="feedback">The user feedback service.</param>
 		/// <param name="services">The service provider.</param>
-		public MiscellaneousCommands(CommandService commands, UserFeedbackService feedback, IServiceProvider services)
+		public MiscellaneousCommands(CommandService commands, ContentService content, UserFeedbackService feedback, IServiceProvider services)
 		{
 			this.Commands = commands;
+			this.Content = content;
 			this.Feedback = feedback;
 			this.Services = services;
 		}
@@ -70,7 +74,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[Summary("Sasses the user in a DIGOS fashion.")]
 		public async Task SassAsync()
 		{
-			string sass = ContentManager.Instance.GetSass(this.Context.Channel.IsNsfw);
+			string sass = this.Content.GetSass(this.Context.Channel.IsNsfw);
 
 			await this.Context.Channel.SendMessageAsync(sass);
 		}

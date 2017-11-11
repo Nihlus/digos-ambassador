@@ -36,6 +36,7 @@ using DIGOS.Ambassador.TypeReaders;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using JetBrains.Annotations;
 using log4net;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -53,6 +54,8 @@ namespace DIGOS.Ambassador
 
 		private readonly DiscordSocketClient Client;
 
+		private readonly ContentService Content;
+
 		private readonly CommandService Commands;
 
 		private readonly RoleplayService Roleplays;
@@ -64,17 +67,20 @@ namespace DIGOS.Ambassador
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AmbassadorClient"/> class.
 		/// </summary>
-		public AmbassadorClient()
+		/// <param name="content">The content service.</param>
+		public AmbassadorClient([NotNull] ContentService content)
 		{
 			this.Client = new DiscordSocketClient();
 			this.Client.Log += OnDiscordLogEvent;
 
+			this.Content = content;
 			this.Commands = new CommandService();
 			this.Roleplays = new RoleplayService(this.Commands);
 			this.Feedback = new UserFeedbackService();
 
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)
+				.AddSingleton(this.Content)
 				.AddSingleton(this.Commands)
 				.AddSingleton(this.Roleplays)
 				.AddSingleton(this.Feedback)
@@ -90,7 +96,7 @@ namespace DIGOS.Ambassador
 		/// <returns>A task representing the login action.</returns>
 		public async Task LoginAsync()
 		{
-			await this.Client.LoginAsync(TokenType.Bot, ContentManager.Instance.BotToken);
+			await this.Client.LoginAsync(TokenType.Bot, this.Content.BotToken);
 		}
 
 		/// <summary>
