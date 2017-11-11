@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[Alias("show", "info")]
 		[Command("show")]
 		[Summary("Shows information about the specified roleplay.")]
-		public async Task ShowRoleplayAsync(string roleplayName = null, IUser discordUser = null)
+		public async Task ShowRoleplayAsync([CanBeNull] string roleplayName = null, [CanBeNull] IUser discordUser = null)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -127,7 +127,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("list-owned")]
 		[Summary("Lists the roleplays that the given user owns.")]
-		public async Task ListOwnedRoleplaysAsync(IUser discordUser = null)
+		public async Task ListOwnedRoleplaysAsync([CanBeNull] IUser discordUser = null)
 		{
 			discordUser = discordUser ?? this.Context.Message.Author;
 
@@ -212,7 +212,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[Command("join")]
 		[Summary("Joins the roleplay owned by the given person with the given name.")]
 		[RequirePermission(JoinRoleplay)]
-		public async Task JoinRoleplayAsync(string roleplayName = null, IUser roleplayOwner = null)
+		public async Task JoinRoleplayAsync([CanBeNull] string roleplayName = null, [CanBeNull] IUser roleplayOwner = null)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -244,7 +244,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("leave")]
 		[Summary("Leaves the roleplay owned by the given person with the given name.")]
-		public async Task LeaveRoleplayAsync(string roleplayName = null, IUser roleplayOwner = null)
+		public async Task LeaveRoleplayAsync([CanBeNull] string roleplayName = null, [CanBeNull] IUser roleplayOwner = null)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -276,7 +276,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("kick")]
 		[Summary("Kicks the given user from the named roleplay.")]
-		public async Task KickRoleplayParticipantAsync(IUser discordUser, string roleplayName = null)
+		public async Task KickRoleplayParticipantAsync(IUser discordUser, [CanBeNull] string roleplayName = null)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -441,8 +441,12 @@ namespace DIGOS.Ambassador.CommandModules
 		[RequireActiveRoleplay(requireOwner: true)]
 		public async Task IncludePreviousMessagesAsync
 		(
-			[OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))] IMessage startMessage,
-			[OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))] IMessage finalMessage = null
+			[OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
+			IMessage startMessage,
+
+			[CanBeNull]
+			[OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
+			IMessage finalMessage = null
 		)
 		{
 			finalMessage = finalMessage ?? this.Context.Message;
@@ -492,7 +496,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("transfer-ownership")]
 		[Summary("Transfers ownership of the named roleplay to the specified user.")]
-		public async Task TransferRoleplayOwnershipAsync(IUser newOwner, string roleplayName = null)
+		public async Task TransferRoleplayOwnershipAsync(IUser newOwner, [CanBeNull] string roleplayName = null)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -526,7 +530,13 @@ namespace DIGOS.Ambassador.CommandModules
 		[Command("replay")]
 		[Summary("Replays the named roleplay owned by the given user to you.")]
 		[RequirePermission(ReplayRoleplay)]
-		public async Task ReplayRoleplayAsync(string roleplayName = null, IUser roleplayOwner = null, DateTimeOffset from = default, DateTimeOffset to = default)
+		public async Task ReplayRoleplayAsync
+		(
+			[CanBeNull] string roleplayName = null,
+			[CanBeNull] IUser roleplayOwner = null,
+			DateTimeOffset from = default,
+			DateTimeOffset to = default
+		)
 		{
 			using (var db = new GlobalInfoContext())
 			{

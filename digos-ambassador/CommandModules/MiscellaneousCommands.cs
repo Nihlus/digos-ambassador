@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[Alias("help", "halp", "hlep", "commands")]
 		[Command("help")]
 		[Summary("Lists available commands")]
-		public async Task HelpAsync(string searchText = null)
+		public async Task HelpAsync([CanBeNull] string searchText = null)
 		{
 			IReadOnlyList<CommandInfo> searchResults;
 			if (searchText.IsNullOrEmpty())
