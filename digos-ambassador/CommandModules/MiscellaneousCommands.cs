@@ -39,6 +39,7 @@ namespace DIGOS.Ambassador.CommandModules
 	/// Miscellaneous commands - just for fun, testing, etc.
 	/// </summary>
 	[UsedImplicitly]
+	[Name("miscellaneous")]
 	public class MiscellaneousCommands : ModuleBase<SocketCommandContext>
 	{
 		private readonly CommandService Commands;
@@ -112,7 +113,7 @@ namespace DIGOS.Ambassador.CommandModules
 
 			var modules = GetTopLevelModules(searchResults.Select(ci => ci.Module)).Distinct();
 
-			foreach (var module in modules.Where(m => !m.IsSubmodule))
+			foreach (var module in modules)
 			{
 				var eb = new EmbedBuilder();
 
