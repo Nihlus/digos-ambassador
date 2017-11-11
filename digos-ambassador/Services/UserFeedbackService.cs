@@ -23,8 +23,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
+using DIGOS.Ambassador.Extensions;
+
 using Discord;
 using Discord.Commands;
+
 using JetBrains.Annotations;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -137,8 +141,7 @@ namespace DIGOS.Ambassador.Services
 				(
 					p =>
 					{
-						var parameterInfo =
-							$"{(p.Type.IsPrimitive || p.Type == typeof(string) ? p.Type.Name.ToLowerInvariant() : p.Type.Name)} {p.Name}";
+						var parameterInfo = $"{p.Type.Humanize()} {p.Name}";
 						if (p.IsOptional)
 						{
 							parameterInfo = $"[{parameterInfo}]";

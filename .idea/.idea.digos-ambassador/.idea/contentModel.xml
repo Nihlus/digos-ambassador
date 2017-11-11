@@ -58,6 +58,7 @@
         <e p="Extensions" t="Include">
           <e p="ListExtensions.cs" t="Include" />
           <e p="StringExtensions.cs" t="Include" />
+          <e p="TypeExtensions.cs" t="Include" />
         </e>
         <e p="FList" t="Include">
           <e p="Kinks" t="Include">
