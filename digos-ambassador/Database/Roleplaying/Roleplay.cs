@@ -21,6 +21,8 @@
 //
 
 using System.Collections.Generic;
+using System.Linq;
+using Discord;
 using DIGOS.Ambassador.Database.UserInfo;
 
 namespace DIGOS.Ambassador.Database.Roleplaying
@@ -89,5 +91,125 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// Gets or sets the saved messages in the roleplay.
 		/// </summary>
 		public List<UserMessage> Messages { get; set; }
+
+		/// <summary>
+		/// Determines whether or not the given user is the owner of the roleplay.
+		/// </summary>
+		/// <param name="user">The user.</param>
+		/// <returns>true if the user is the owner; otherwise, false.</returns>
+		public bool IsOwner(User user)
+		{
+			return IsOwner(user.DiscordID);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user is the owner of the roleplay.
+		/// </summary>
+		/// <param name="user">The user.</param>
+		/// <returns>true if the user is the owner; otherwise, false.</returns>
+		public bool IsOwner(IUser user)
+		{
+			return IsOwner(user.Id);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user ID is the owner of the roleplay.
+		/// </summary>
+		/// <param name="userID">The ID of the user.</param>
+		/// <returns>true if the user is the owner; otherwise, false.</returns>
+		public bool IsOwner(ulong userID)
+		{
+			return this.Owner.DiscordID == userID;
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user is a participant of the roleplay.
+		/// </summary>
+		/// <param name="user">The user.</param>
+		/// <returns>true if the user is a participant; otherwise, false.</returns>
+		public bool IsParticipant(User user)
+		{
+			return IsParticipant(user.DiscordID);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user is a participant of the roleplay.
+		/// </summary>
+		/// <param name="user">The user.</param>
+		/// <returns>true if the user is a participant; otherwise, false.</returns>
+		public bool IsParticipant(IUser user)
+		{
+			return IsParticipant(user.Id);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user ID is a participant of the roleplay.
+		/// </summary>
+		/// <param name="userID">The ID of the user.</param>
+		/// <returns>true if the user is a participant; otherwise, false.</returns>
+		public bool IsParticipant(ulong userID)
+		{
+			return this.Participants.Any(p => p.DiscordID == userID);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user is invited to the roleplay.
+		/// </summary>
+		/// <param name="user">The user.</param>
+		/// <returns>true if the user is invited; otherwise, false.</returns>
+		public bool IsInvited(User user)
+		{
+			return IsInvited(user.DiscordID);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user is invited to the roleplay.
+		/// </summary>
+		/// <param name="user">The user.</param>
+		/// <returns>true if the user is invited; otherwise, false.</returns>
+		public bool IsInvited(IUser user)
+		{
+			return IsInvited(user.Id);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user ID is invited to the roleplay.
+		/// </summary>
+		/// <param name="userID">The ID of the user.</param>
+		/// <returns>true if the user is invited; otherwise, false.</returns>
+		public bool IsInvited(ulong userID)
+		{
+			return this.InvitedUsers.Any(iu => iu.DiscordID == userID);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user is kicked from the roleplay.
+		/// </summary>
+		/// <param name="user">The user.</param>
+		/// <returns>true if the user is kicked; otherwise, false.</returns>
+		public bool IsKicked(User user)
+		{
+			return IsKicked(user.DiscordID);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user is kicked from the roleplay.
+		/// </summary>
+		/// <param name="user">The user.</param>
+		/// <returns>true if the user is kicked; otherwise, false.</returns>
+		public bool IsKicked(IUser user)
+		{
+			return IsKicked(user.Id);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user ID is kicked from the roleplay.
+		/// </summary>
+		/// <param name="userID">The ID of the user.</param>
+		/// <returns>true if the user is kicked; otherwise, false.</returns>
+		public bool IsKicked(ulong userID)
+		{
+			return this.KickedUsers.Any(ku => ku.DiscordID == userID);
+		}
 	}
 }

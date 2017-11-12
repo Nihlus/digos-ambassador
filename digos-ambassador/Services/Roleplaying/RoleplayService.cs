@@ -153,7 +153,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			[NotNull] IMessage message
 		)
 		{
-			if (roleplay.Participants == null || !roleplay.Participants.Any(p => p.DiscordID == message.Author.Id))
+			if (roleplay.Participants == null || !roleplay.IsParticipant(message.Author))
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The given message was not authored by a participant of the roleplay.");
 			}
@@ -399,13 +399,28 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			[NotNull] IUser kickedUser
 		)
 		{
-			var removeUserResult = await RemoveUserFromRoleplayAsync(db, context, roleplay, kickedUser);
-			if (!removeUserResult.IsSuccess)
+			if (!roleplay.IsParticipant(kickedUser) && !roleplay.IsInvited(kickedUser))
 			{
-				return removeUserResult;
+				return ExecuteResult.FromError(CommandError.ObjectNotFound, "That user is neither invited to or a participant of the roleplay.");
 			}
 
-			roleplay.KickedUsers.RemoveAll(ku => ku.DiscordID == kickedUser.Id);
+			if (!roleplay.IsParticipant(kickedUser))
+			{
+				var removeUserResult = await RemoveUserFromRoleplayAsync(db, context, roleplay, kickedUser);
+				if (!removeUserResult.IsSuccess)
+				{
+					return removeUserResult;
+				}
+			}
+
+			roleplay.InvitedUsers.RemoveAll(ku => ku.DiscordID == kickedUser.Id);
+
+			if (!roleplay.IsKicked(kickedUser))
+			{
+				var user = await db.GetOrRegisterUserAsync(kickedUser);
+				roleplay.KickedUsers.Add(user);
+			}
+
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -428,7 +443,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		)
 		{
 			var isCurrentUser = context.Message.Author.Id == removedUser.Id;
-			if (!roleplay.Participants.Any(p => p.DiscordID == removedUser.Id))
+			if (!roleplay.IsParticipant(removedUser))
 			{
 				var errorMessage = isCurrentUser
 					? "You're not in that roleplay."
@@ -437,7 +452,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
 			}
 
-			if (roleplay.Owner.DiscordID == removedUser.Id)
+			if (roleplay.IsOwner(removedUser))
 			{
 				var errorMessage = isCurrentUser
 					? "You can't leave a roleplay you own."
@@ -446,7 +461,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
 			}
 
-			roleplay.Participants = roleplay.Participants.Where(p => p.DiscordID != removedUser.Id).ToList();
+			roleplay.Participants.RemoveAll(p => p.DiscordID == removedUser.Id);
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -469,7 +484,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		)
 		{
 			var isCurrentUser = context.Message.Author.Id == newUser.Id;
-			if (roleplay.Participants.Any(p => p.DiscordID == newUser.Id))
+			if (roleplay.IsParticipant(newUser))
 			{
 				var errorMessage = isCurrentUser
 					? "You're already in that roleplay."
@@ -478,7 +493,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
 			}
 
-			if (roleplay.KickedUsers.Any(ku => ku.DiscordID == newUser.Id))
+			if (roleplay.IsKicked(newUser))
 			{
 				var errorMessage = isCurrentUser
 					? "You've been kicked from that roleplay, and can't rejoin unless invited."
@@ -488,7 +503,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			}
 
 			// Check the invite list for nonpublic roleplays.
-			if (!roleplay.IsPublic && !roleplay.InvitedUsers.Any(iu => iu.DiscordID == newUser.Id))
+			if (!roleplay.IsPublic && !roleplay.IsInvited(newUser))
 			{
 				var errorMessage = isCurrentUser
 					? "You haven't been invited to that roleplay."
@@ -555,7 +570,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			[NotNull] Roleplay roleplay
 		)
 		{
-			if (roleplay.Owner.DiscordID == newOwner.Id)
+			if (roleplay.IsOwner(newOwner))
 			{
 				return ExecuteResult.FromError(CommandError.Unsuccessful, "That person already owns the roleplay.");
 			}

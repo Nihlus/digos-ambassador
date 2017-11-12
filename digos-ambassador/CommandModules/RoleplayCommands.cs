@@ -266,7 +266,7 @@ namespace DIGOS.Ambassador.CommandModules
 				}
 
 				var userDMChannel = await playerToInvite.GetOrCreateDMChannelAsync();
-				await userDMChannel.SendMessageAsync($"You've been invited to join {roleplay.Name}.");
+				await userDMChannel.SendMessageAsync($"You've been invited to join {roleplay.Name}. Use \"!rp join {roleplay.Name}\" to join.");
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Invited {playerToInvite.Mention} to {roleplay.Name}.");
 
 				await userDMChannel.CloseAsync();
@@ -338,6 +338,8 @@ namespace DIGOS.Ambassador.CommandModules
 				(
 					$"You've been removed from the \"{roleplay.Name}\" by {this.Context.Message.Author.Username}."
 				);
+
+				await this.Feedback.SendConfirmationAsync(this.Context, $"{discordUser.Mention} has been kicked from {roleplay.Name}.");
 			}
 		}
 
