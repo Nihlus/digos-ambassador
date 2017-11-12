@@ -130,7 +130,13 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			await db.Roleplays.AddAsync(roleplay);
 			await db.SaveChangesAsync();
 
-			return CreateEntityResult<Roleplay>.FromSuccess(roleplay);
+			var roleplayResult = await GetUserRoleplayByNameAsync(db, context, context.Message.Author, roleplayName);
+			if (!roleplayResult.IsSuccess)
+			{
+				return CreateEntityResult<Roleplay>.FromError(roleplayResult);
+			}
+
+			return CreateEntityResult<Roleplay>.FromSuccess(roleplayResult.Entity);
 		}
 
 		/// <summary>
@@ -242,6 +248,8 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				.Include(rp => rp.Owner)
 				.Include(rp => rp.Participants)
 				.Include(rp => rp.Messages)
+				.Include(rp => rp.KickedUsers)
+				.Include(rp => rp.InvitedUsers)
 				.FirstOrDefault(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase));
 
 			if (roleplay is null)
@@ -268,6 +276,8 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				.Include(rp => rp.Owner)
 				.Include(rp => rp.Participants)
 				.Include(rp => rp.Messages)
+				.Include(rp => rp.KickedUsers)
+				.Include(rp => rp.InvitedUsers)
 				.FirstOrDefaultAsync(rp => rp.IsActive && rp.ActiveChannelID == channel.Id);
 
 			if (roleplay is null)
@@ -326,6 +336,8 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				.Include(rp => rp.Owner)
 				.Include(rp => rp.Participants)
 				.Include(rp => rp.Messages)
+				.Include(rp => rp.KickedUsers)
+				.Include(rp => rp.InvitedUsers)
 				.Where(rp => rp.Owner.DiscordID == discordUser.Id);
 		}
 
@@ -349,6 +361,8 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			.Include(rp => rp.Owner)
 			.Include(rp => rp.Participants)
 			.Include(rp => rp.Messages)
+			.Include(rp => rp.KickedUsers)
+			.Include(rp => rp.InvitedUsers)
 			.FirstOrDefaultAsync
 			(
 				rp =>
