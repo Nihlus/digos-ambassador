@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Loads the default content.
 		/// </summary>
-		public async Task LoadContent()
+		public async Task LoadContentAsync()
 		{
 			await LoadSassAsync();
 			await LoadBotTokenAsync();

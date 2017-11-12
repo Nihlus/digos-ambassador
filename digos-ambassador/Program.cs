@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador
 			var contentService = new ContentService();
 			try
 			{
-				await contentService.LoadContent();
+				await contentService.LoadContentAsync();
 			}
 			catch (FileNotFoundException fex)
 			{
