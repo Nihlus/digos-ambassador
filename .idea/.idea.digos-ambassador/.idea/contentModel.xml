@@ -25,7 +25,7 @@
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
           </e>
-          <e p="bot.token.bak" t="Include" />
+          <e p="bot.token" t="Include" />
         </e>
         <e p="Database" t="Include">
           <e p="GlobalInfoContext.cs" t="Include" />
