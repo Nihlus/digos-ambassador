@@ -75,7 +75,7 @@ namespace DIGOS.Ambassador
 
 			using (var db = new GlobalInfoContext())
 			{
-				if (!((RelationalDatabaseCreator) db.Database.GetService<IDatabaseCreator>()).Exists())
+				if (!((RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>()).Exists())
 				{
 					Log.Error("The database doesn't exist.");
 					return;
