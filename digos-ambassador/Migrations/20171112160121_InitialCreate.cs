@@ -4,6 +4,7 @@
 // ReSharper disable PartialTypeWithSinglePart
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
+using System.Collections.Generic;
 
 namespace DIGOS.Ambassador.Migrations
 {
@@ -90,6 +91,8 @@ namespace DIGOS.Ambassador.Migrations
                     Class = table.Column<int>(type: "INTEGER", nullable: false),
                     DiscordID = table.Column<ulong>(type: "INTEGER", nullable: false),
                     RoleplayID = table.Column<uint>(type: "INTEGER", nullable: true),
+                    RoleplayID1 = table.Column<uint>(type: "INTEGER", nullable: true),
+                    RoleplayID2 = table.Column<uint>(type: "INTEGER", nullable: true),
                     ServerID = table.Column<uint>(type: "INTEGER", nullable: true),
                     Timezone = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -253,6 +256,16 @@ namespace DIGOS.Ambassador.Migrations
                 column: "RoleplayID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_RoleplayID1",
+                table: "Users",
+                column: "RoleplayID1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_RoleplayID2",
+                table: "Users",
+                column: "RoleplayID2");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_ServerID",
                 table: "Users",
                 column: "ServerID");
@@ -285,6 +298,22 @@ namespace DIGOS.Ambassador.Migrations
                 name: "FK_Users_Roleplays_RoleplayID",
                 table: "Users",
                 column: "RoleplayID",
+                principalTable: "Roleplays",
+                principalColumn: "RoleplayID",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Users_Roleplays_RoleplayID1",
+                table: "Users",
+                column: "RoleplayID1",
+                principalTable: "Roleplays",
+                principalColumn: "RoleplayID",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Users_Roleplays_RoleplayID2",
+                table: "Users",
+                column: "RoleplayID2",
                 principalTable: "Roleplays",
                 principalColumn: "RoleplayID",
                 onDelete: ReferentialAction.Restrict);

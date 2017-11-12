@@ -61,6 +61,16 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		public User Owner { get; set; }
 
 		/// <summary>
+		/// Gets or sets the users that have been invited to join the roleplay.
+		/// </summary>
+		public List<User> InvitedUsers { get; set; }
+
+		/// <summary>
+		/// Gets or sets the users that have been kicked from the roleplay.
+		/// </summary>
+		public List<User> KickedUsers { get; set; }
+
+		/// <summary>
 		/// Gets or sets the participants of the roleplay.
 		/// </summary>
 		public List<User> Participants { get; set; }

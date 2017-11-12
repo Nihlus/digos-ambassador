@@ -3,8 +3,14 @@
 // ReSharper disable RedundantArgumentDefaultValue
 // ReSharper disable PartialTypeWithSinglePart
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.UserInfo;
+using DIGOS.Ambassador.Permissions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
 
 namespace DIGOS.Ambassador.Migrations
@@ -179,6 +185,10 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<uint?>("RoleplayID");
 
+                    b.Property<uint?>("RoleplayID1");
+
+                    b.Property<uint?>("RoleplayID2");
+
                     b.Property<uint?>("ServerID");
 
                     b.Property<int?>("Timezone");
@@ -186,6 +196,10 @@ namespace DIGOS.Ambassador.Migrations
                     b.HasKey("UserID");
 
                     b.HasIndex("RoleplayID");
+
+                    b.HasIndex("RoleplayID1");
+
+                    b.HasIndex("RoleplayID2");
 
                     b.HasIndex("ServerID");
 
@@ -258,8 +272,16 @@ namespace DIGOS.Ambassador.Migrations
             modelBuilder.Entity("DIGOS.Ambassador.Database.UserInfo.User", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
-                        .WithMany("Participants")
+                        .WithMany("InvitedUsers")
                         .HasForeignKey("RoleplayID");
+
+                    b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
+                        .WithMany("KickedUsers")
+                        .HasForeignKey("RoleplayID1");
+
+                    b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
+                        .WithMany("Participants")
+                        .HasForeignKey("RoleplayID2");
 
                     b.HasOne("DIGOS.Ambassador.Database.ServerInfo.Server")
                         .WithMany("KnownUsers")

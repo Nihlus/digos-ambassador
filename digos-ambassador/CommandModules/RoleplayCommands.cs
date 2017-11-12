@@ -237,6 +237,43 @@ namespace DIGOS.Ambassador.CommandModules
 		}
 
 		/// <summary>
+		/// Invites the specified user to the given roleplay.
+		/// </summary>
+		/// <param name="playerToInvite">The player to invite.</param>
+		/// <param name="roleplayName">The name of the roleplay.</param>
+		/// <param name="roleplayOwner">The owner of the roleplay.</param>
+		[UsedImplicitly]
+		[Command("invite")]
+		[Summary("Invites the specified user to the given roleplay.")]
+		[RequirePermission(EditRoleplay)]
+		public async Task InvitePlayerAsync([NotNull] IUser playerToInvite, [CanBeNull] string roleplayName = null, [CanBeNull] IUser roleplayOwner = null)
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				var roleplayResult = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, roleplayOwner, roleplayName);
+				if (!roleplayResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, roleplayResult.ErrorReason);
+					return;
+				}
+
+				var roleplay = roleplayResult.Entity;
+				var invitePlayerResult = await this.Roleplays.InviteUserAsync(db, roleplay, playerToInvite);
+				if (!invitePlayerResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, invitePlayerResult.ErrorReason);
+					return;
+				}
+
+				var userDMChannel = await playerToInvite.GetOrCreateDMChannelAsync();
+				await userDMChannel.SendMessageAsync($"You've been invited to join {roleplay.Name}.");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Invited {playerToInvite.Mention} to {roleplay.Name}.");
+
+				await userDMChannel.CloseAsync();
+			}
+		}
+
+		/// <summary>
 		/// Leaves the roleplay owned by the given person with the given name.
 		/// </summary>
 		/// <param name="roleplayName">The name of the roleplay to leave.</param>
@@ -289,7 +326,7 @@ namespace DIGOS.Ambassador.CommandModules
 
 				var roleplay = getRoleplayResult.Entity;
 
-				var kickUserResult = await this.Roleplays.RemoveUserFromRoleplayAsync(db, this.Context, roleplay, discordUser);
+				var kickUserResult = await this.Roleplays.KickUserFromRoleplayAsync(db, this.Context, roleplay, discordUser);
 				if (!kickUserResult.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, kickUserResult.ErrorReason);

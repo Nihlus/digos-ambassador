@@ -334,14 +334,14 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// </summary>
 		/// <param name="db">The database where the roleplays are stored.</param>
 		/// <param name="context">The context of the user.</param>
-		/// <param name="discordUser">The user to get the roleplay from.</param>
+		/// <param name="roleplayOwner">The user to get the roleplay from.</param>
 		/// <param name="roleplayName">The name of the roleplay.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] SocketCommandContext context,
-			[NotNull] IUser discordUser,
+			[NotNull] IUser roleplayOwner,
 			[NotNull] string roleplayName
 		)
 		{
@@ -353,12 +353,12 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			(
 				rp =>
 					rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase) &&
-					rp.Owner.DiscordID == discordUser.Id
+					rp.Owner.DiscordID == roleplayOwner.Id
 			);
 
 			if (roleplay is null)
 			{
-				var isCurrentUser = context.Message.Author.Id == discordUser.Id;
+				var isCurrentUser = context.Message.Author.Id == roleplayOwner.Id;
 				var errorMessage = isCurrentUser
 					? "You don't own a roleplay with that name."
 					: "The user doesn't own a roleplay with that name.";
@@ -370,23 +370,51 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		}
 
 		/// <summary>
+		/// Kicks the given user from the given roleplay.
+		/// </summary>
+		/// <param name="db">The database where the roleplays are stored.</param>
+		/// <param name="context">The context of the user.</param>
+		/// <param name="roleplay">The roleplay to remove the user from.</param>
+		/// <param name="kickedUser">The user to remove from the roleplay.</param>
+		/// <returns>An execution result which may or may not have succeeded.</returns>
+		public async Task<ExecuteResult> KickUserFromRoleplayAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] SocketCommandContext context,
+			[NotNull] Roleplay roleplay,
+			[NotNull] IUser kickedUser
+		)
+		{
+			var removeUserResult = await RemoveUserFromRoleplayAsync(db, context, roleplay, kickedUser);
+			if (!removeUserResult.IsSuccess)
+			{
+				return removeUserResult;
+			}
+
+			roleplay.KickedUsers.RemoveAll(ku => ku.DiscordID == kickedUser.Id);
+			await db.SaveChangesAsync();
+
+			return ExecuteResult.FromSuccess();
+		}
+
+		/// <summary>
 		/// Removes the given user from the given roleplay.
 		/// </summary>
 		/// <param name="db">The database where the roleplays are stored.</param>
 		/// <param name="context">The context of the user.</param>
 		/// <param name="roleplay">The roleplay to remove the user from.</param>
-		/// <param name="discordUser">The user to remove from the roleplay.</param>
+		/// <param name="removedUser">The user to remove from the roleplay.</param>
 		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ExecuteResult> RemoveUserFromRoleplayAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] SocketCommandContext context,
 			[NotNull] Roleplay roleplay,
-			[NotNull] IUser discordUser
+			[NotNull] IUser removedUser
 		)
 		{
-			var isCurrentUser = context.Message.Author.Id == discordUser.Id;
-			if (!roleplay.Participants.Any(p => p.DiscordID == discordUser.Id))
+			var isCurrentUser = context.Message.Author.Id == removedUser.Id;
+			if (!roleplay.Participants.Any(p => p.DiscordID == removedUser.Id))
 			{
 				var errorMessage = isCurrentUser
 					? "You're not in that roleplay."
@@ -395,7 +423,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
 			}
 
-			if (roleplay.Owner.DiscordID == discordUser.Id)
+			if (roleplay.Owner.DiscordID == removedUser.Id)
 			{
 				var errorMessage = isCurrentUser
 					? "You can't leave a roleplay you own."
@@ -404,7 +432,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
 			}
 
-			roleplay.Participants = roleplay.Participants.Where(p => p.DiscordID != discordUser.Id).ToList();
+			roleplay.Participants = roleplay.Participants.Where(p => p.DiscordID != removedUser.Id).ToList();
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -416,18 +444,18 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="db">The database where the roleplays are stored.</param>
 		/// <param name="context">The context of the user.</param>
 		/// <param name="roleplay">The roleplay to add the user to.</param>
-		/// <param name="discordUser">The user to add to the roleplay.</param>
+		/// <param name="newUser">The user to add to the roleplay.</param>
 		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ExecuteResult> AddUserToRoleplayAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] SocketCommandContext context,
 			[NotNull] Roleplay roleplay,
-			[NotNull] IUser discordUser
+			[NotNull] IUser newUser
 		)
 		{
-			var isCurrentUser = context.Message.Author.Id == discordUser.Id;
-			if (roleplay.Participants.Any(p => p.DiscordID == discordUser.Id))
+			var isCurrentUser = context.Message.Author.Id == newUser.Id;
+			if (roleplay.Participants.Any(p => p.DiscordID == newUser.Id))
 			{
 				var errorMessage = isCurrentUser
 					? "You're already in that roleplay."
@@ -436,7 +464,64 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
 			}
 
-			roleplay.Participants.Add(await db.GetOrRegisterUserAsync(discordUser));
+			if (roleplay.KickedUsers.Any(ku => ku.DiscordID == newUser.Id))
+			{
+				var errorMessage = isCurrentUser
+					? "You've been kicked from that roleplay, and can't rejoin unless invited."
+					: "The user has been kicked from that roleplay, and can't rejoin unless invited.";
+
+				return ExecuteResult.FromError(CommandError.UnmetPrecondition, errorMessage);
+			}
+
+			// Check the invite list for nonpublic roleplays.
+			if (!roleplay.IsPublic && !roleplay.InvitedUsers.Any(iu => iu.DiscordID == newUser.Id))
+			{
+				var errorMessage = isCurrentUser
+					? "You haven't been invited to that roleplay."
+					: "The user hasn't been invited to that roleplay.";
+
+				return ExecuteResult.FromError(CommandError.UnmetPrecondition, errorMessage);
+			}
+
+			if (!roleplay.IsPublic)
+			{
+				// Remove the user from the invite list
+				roleplay.InvitedUsers.RemoveAll(iu => iu.DiscordID == newUser.Id);
+			}
+
+			roleplay.Participants.Add(await db.GetOrRegisterUserAsync(newUser));
+			await db.SaveChangesAsync();
+
+			return ExecuteResult.FromSuccess();
+		}
+
+		/// <summary>
+		/// Invites the user to the given roleplay.
+		/// </summary>
+		/// <param name="db">The database where the roleplays are stored.</param>
+		/// <param name="roleplay">The roleplay to invite the user to.</param>
+		/// <param name="invitedUser">The user to invite.</param>
+		/// <returns>An execution result which may or may not have succeeded.</returns>
+		public async Task<ExecuteResult> InviteUserAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] Roleplay roleplay,
+			[NotNull] IUser invitedUser
+		)
+		{
+			if (roleplay.IsPublic)
+			{
+				return ExecuteResult.FromError(CommandError.UnmetPrecondition, "The roleplay is not set to private.");
+			}
+
+			if (roleplay.InvitedUsers.Any(p => p.DiscordID == invitedUser.Id))
+			{
+				return ExecuteResult.FromError(CommandError.Unsuccessful, "The user has already been invited to that roleplay.");
+			}
+
+			// Remove the invited user from the kick list, if they're on it
+			roleplay.KickedUsers.RemoveAll(ku => ku.DiscordID == invitedUser.Id);
+			roleplay.InvitedUsers.Add(await db.GetOrRegisterUserAsync(invitedUser));
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();

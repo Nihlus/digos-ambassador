@@ -16,7 +16,7 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    [Migration("20171110114642_InitialCreate")]
+    [Migration("20171112160121_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -186,6 +186,10 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<uint?>("RoleplayID");
 
+                    b.Property<uint?>("RoleplayID1");
+
+                    b.Property<uint?>("RoleplayID2");
+
                     b.Property<uint?>("ServerID");
 
                     b.Property<int?>("Timezone");
@@ -193,6 +197,10 @@ namespace DIGOS.Ambassador.Migrations
                     b.HasKey("UserID");
 
                     b.HasIndex("RoleplayID");
+
+                    b.HasIndex("RoleplayID1");
+
+                    b.HasIndex("RoleplayID2");
 
                     b.HasIndex("ServerID");
 
@@ -265,8 +273,16 @@ namespace DIGOS.Ambassador.Migrations
             modelBuilder.Entity("DIGOS.Ambassador.Database.UserInfo.User", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
-                        .WithMany("Participants")
+                        .WithMany("InvitedUsers")
                         .HasForeignKey("RoleplayID");
+
+                    b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
+                        .WithMany("KickedUsers")
+                        .HasForeignKey("RoleplayID1");
+
+                    b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
+                        .WithMany("Participants")
+                        .HasForeignKey("RoleplayID2");
 
                     b.HasOne("DIGOS.Ambassador.Database.ServerInfo.Server")
                         .WithMany("KnownUsers")

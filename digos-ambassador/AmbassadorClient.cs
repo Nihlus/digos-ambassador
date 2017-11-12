@@ -112,6 +112,24 @@ namespace DIGOS.Ambassador
 		}
 
 		/// <summary>
+		/// Logs the ambassador out of Discord.
+		/// </summary>
+		/// <returns>A task representing the login action.</returns>
+		public async Task LogoutAsync()
+		{
+			await this.Client.LogoutAsync();
+		}
+
+		/// <summary>
+		/// Stops the ambassador, releasing its Discord resources.
+		/// </summary>
+		/// <returns>A task representing the stop action.</returns>
+		public async Task StopAsync()
+		{
+			await this.Client.StopAsync();
+		}
+
+		/// <summary>
 		/// Handles incoming messages, passing them to the command context handler.
 		/// </summary>
 		/// <param name="arg">The message coming in from the socket client.</param>
