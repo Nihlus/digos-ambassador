@@ -84,15 +84,21 @@
         </e>
         <e p="Program.cs" t="Include" />
         <e p="Services" t="Include">
-          <e p="ContentService.cs" t="Include" />
-          <e p="CreateEntityResult.cs" t="Include" />
-          <e p="ModifyEntityAction.cs" t="Include" />
-          <e p="ModifyEntityResult.cs" t="Include" />
-          <e p="RetrieveEntityResult.cs" t="Include" />
+          <e p="Content" t="Include">
+            <e p="ContentService.cs" t="Include" />
+          </e>
+          <e p="Entity" t="Include">
+            <e p="CreateEntityResult.cs" t="Include" />
+            <e p="ModifyEntityAction.cs" t="Include" />
+            <e p="ModifyEntityResult.cs" t="Include" />
+            <e p="RetrieveEntityResult.cs" t="Include" />
+          </e>
+          <e p="Feedback" t="Include">
+            <e p="UserFeedbackService.cs" t="Include" />
+          </e>
           <e p="Roleplaying" t="Include">
             <e p="RoleplayService.cs" t="Include" />
           </e>
-          <e p="UserFeedbackService.cs" t="Include" />
         </e>
         <e p="TypeReaders" t="Include">
           <e p="UncachedMessageTypeReader.cs" t="Include" />

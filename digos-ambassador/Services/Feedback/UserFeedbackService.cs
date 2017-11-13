@@ -33,7 +33,7 @@ using JetBrains.Annotations;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Services.Feedback
 {
 	/// <summary>
 	/// Handles sending formatted messages to the users.

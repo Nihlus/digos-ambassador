@@ -29,7 +29,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.FList.Kinks;
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Feedback;
 
 using Discord.Commands;
 using JetBrains.Annotations;

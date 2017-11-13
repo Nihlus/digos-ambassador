@@ -26,7 +26,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Extensions;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Services.Content
 {
 	/// <summary>
 	/// Management class for content that comes bundled with the bot. Responsible for loading and providing access to

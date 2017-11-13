@@ -29,13 +29,15 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Content;
+using DIGOS.Ambassador.Services.Feedback;
 using DIGOS.Ambassador.Services.Roleplaying;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+
 using JetBrains.Annotations;
 using log4net;
 using Microsoft.Extensions.DependencyInjection;

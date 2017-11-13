@@ -1,5 +1,5 @@
 ﻿//
-//  RetrieveEntityResult.cs
+//  ModifyEntityResult.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -23,19 +23,13 @@
 using Discord.Commands;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Services.Entity
 {
 	/// <summary>
-	/// Represents an attempt to retrieve a roleplay from the database.
+	/// Encapsulates the result of an attempt to add or edit an entity.
 	/// </summary>
-	/// <typeparam name="T">The entity type to encapsulate.</typeparam>
-	public struct RetrieveEntityResult<T> : IResult where T : class
+	public struct ModifyEntityResult : IResult
 	{
-		/// <summary>
-		/// Gets the entity that was retrieved.
-		/// </summary>
-		public T Entity { get; }
-
 		/// <inheritdoc />
 		public CommandError? Error { get; }
 
@@ -46,14 +40,24 @@ namespace DIGOS.Ambassador.Services
 		public bool IsSuccess => !this.Error.HasValue;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="RetrieveEntityResult{T}"/> struct.
+		/// Gets the action that was taken on the entity.
 		/// </summary>
-		/// <param name="entity">The entity.</param>
+		public ModifyEntityAction? ActionTaken { get; }
+
+		/// <summary>
+		/// Gets a value indicating whether or not any entity was modified.
+		/// </summary>
+		public bool WasModified => this.ActionTaken.HasValue;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ModifyEntityResult"/> struct.
+		/// </summary>
+		/// <param name="actionTaken">The action that was taken on the entity.</param>
 		/// <param name="error">The error (if any).</param>
 		/// <param name="errorReason">A more detailed error description.</param>
-		public RetrieveEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
+		public ModifyEntityResult([CanBeNull] ModifyEntityAction? actionTaken, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
 		{
-			this.Entity = entity;
+			this.ActionTaken = actionTaken;
 			this.Error = error;
 			this.ErrorReason = errorReason;
 		}
@@ -61,11 +65,11 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Creates a new successful result.
 		/// </summary>
-		/// <param name="entity">The roleplay that was retrieved.</param>
+		/// <param name="actionTaken">The action that was taken on the entity.</param>
 		/// <returns>A successful result.</returns>
-		public static RetrieveEntityResult<T> FromSuccess([NotNull] T entity)
+		public static ModifyEntityResult FromSuccess(ModifyEntityAction actionTaken)
 		{
-			return new RetrieveEntityResult<T>(entity, null, null);
+			return new ModifyEntityResult(actionTaken, null, null);
 		}
 
 		/// <summary>
@@ -74,9 +78,9 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="error">The error that caused the failure.</param>
 		/// <param name="reason">A more detailed error reason.</param>
 		/// <returns>A failed result.</returns>
-		public static RetrieveEntityResult<T> FromError(CommandError error, [NotNull] string reason)
+		public static ModifyEntityResult FromError(CommandError error, [NotNull] string reason)
 		{
-			return new RetrieveEntityResult<T>(null, error, reason);
+			return new ModifyEntityResult(null, error, reason);
 		}
 
 		/// <summary>
@@ -84,15 +88,9 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="result">The result to base this result off of.</param>
 		/// <returns>A failed result.</returns>
-		public static RetrieveEntityResult<T> FromError([NotNull] IResult result)
+		public static ModifyEntityResult FromError([NotNull] IResult result)
 		{
-			return new RetrieveEntityResult<T>(null, result.Error, result.ErrorReason);
-		}
-
-		/// <inheritdoc />
-		public override string ToString()
-		{
-			return this.IsSuccess ? "Success" : $"{this.Error}: {this.ErrorReason}";
+			return new ModifyEntityResult(null, result.Error, result.ErrorReason);
 		}
 	}
 }
