@@ -16,7 +16,7 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    [Migration("20171112160121_InitialCreate")]
+    [Migration("20171113195651_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,22 @@ namespace DIGOS.Ambassador.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.0.0-rtm-26452");
+
+            modelBuilder.Entity("DIGOS.Ambassador.Database.Dossiers.Dossier", b =>
+                {
+                    b.Property<uint>("DossierID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Path");
+
+                    b.Property<string>("Summary");
+
+                    b.Property<string>("Title");
+
+                    b.HasKey("DossierID");
+
+                    b.ToTable("Dossiers");
+                });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Permissions.GlobalPermission", b =>
                 {

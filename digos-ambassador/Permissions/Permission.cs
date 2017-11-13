@@ -93,6 +93,6 @@ namespace DIGOS.Ambassador.Permissions
 		/// Allows the user to edit roleplay information.
 		/// </summary>
 		[Description("Allows the user to edit roleplay information.")]
-		EditRoleplay
+		EditRoleplay,
 	}
 }

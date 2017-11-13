@@ -4,6 +4,7 @@
 // ReSharper disable PartialTypeWithSinglePart
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
+using System.Collections.Generic;
 
 namespace DIGOS.Ambassador.Migrations
 {
@@ -11,6 +12,21 @@ namespace DIGOS.Ambassador.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Dossiers",
+                columns: table => new
+                {
+                    DossierID = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Path = table.Column<string>(type: "TEXT", nullable: true),
+                    Summary = table.Column<string>(type: "TEXT", nullable: true),
+                    Title = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Dossiers", x => x.DossierID);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Kinks",
                 columns: table => new
@@ -326,6 +342,9 @@ namespace DIGOS.Ambassador.Migrations
 
             migrationBuilder.DropTable(
                 name: "Characters");
+
+            migrationBuilder.DropTable(
+                name: "Dossiers");
 
             migrationBuilder.DropTable(
                 name: "GlobalPermissions");

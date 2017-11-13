@@ -3,8 +3,14 @@
 // ReSharper disable RedundantArgumentDefaultValue
 // ReSharper disable PartialTypeWithSinglePart
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.UserInfo;
+using DIGOS.Ambassador.Permissions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
 
 namespace DIGOS.Ambassador.Migrations
@@ -17,6 +23,22 @@ namespace DIGOS.Ambassador.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.0.0-rtm-26452");
+
+            modelBuilder.Entity("DIGOS.Ambassador.Database.Dossiers.Dossier", b =>
+                {
+                    b.Property<uint>("DossierID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Path");
+
+                    b.Property<string>("Summary");
+
+                    b.Property<string>("Title");
+
+                    b.HasKey("DossierID");
+
+                    b.ToTable("Dossiers");
+                });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Permissions.GlobalPermission", b =>
                 {

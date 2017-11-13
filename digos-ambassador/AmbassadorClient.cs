@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services.Content;
+using DIGOS.Ambassador.Services.Dossiers;
 using DIGOS.Ambassador.Services.Feedback;
 using DIGOS.Ambassador.Services.Roleplaying;
 using DIGOS.Ambassador.TypeReaders;
@@ -37,7 +38,6 @@ using DIGOS.Ambassador.TypeReaders;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
 using JetBrains.Annotations;
 using log4net;
 using Microsoft.Extensions.DependencyInjection;
@@ -64,6 +64,8 @@ namespace DIGOS.Ambassador
 
 		private readonly UserFeedbackService Feedback;
 
+		private readonly DossierService Dossiers;
+
 		private readonly IServiceProvider Services;
 
 		/// <summary>
@@ -79,6 +81,7 @@ namespace DIGOS.Ambassador
 			this.Commands = new CommandService();
 			this.Roleplays = new RoleplayService(this.Commands);
 			this.Feedback = new UserFeedbackService();
+			this.Dossiers = new DossierService(this.Content);
 
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)
@@ -86,6 +89,7 @@ namespace DIGOS.Ambassador
 				.AddSingleton(this.Commands)
 				.AddSingleton(this.Roleplays)
 				.AddSingleton(this.Feedback)
+				.AddSingleton(this.Dossiers)
 				.BuildServiceProvider();
 
 			this.Client.MessageReceived += OnMessageReceived;

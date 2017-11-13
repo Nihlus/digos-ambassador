@@ -40,6 +40,8 @@ using static DIGOS.Ambassador.Permissions.PermissionTarget;
 
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
+#pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
+
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
@@ -63,7 +65,6 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Lists all available permissions.
 		/// </summary>
-		/// <returns>A task wrapping the command.</returns>
 		[UsedImplicitly]
 		[Command("list")]
 		[Summary("Lists all available permissions.")]
@@ -77,7 +78,6 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Lists all permissions that have been granted to the invoking user.
 		/// </summary>
-		/// <returns>A task wrapping the command.</returns>
 		[UsedImplicitly]
 		[Command("list-granted")]
 		[Summary("Lists all permissions that have been granted to the invoking user.")]
@@ -98,7 +98,6 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Lists all permissions that have been granted to target user.
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
-		/// <returns>A task wrapping the command.</returns>
 		[UsedImplicitly]
 		[Command("list-granted")]
 		[Summary("Lists all permissions that have been granted to target user.")]
@@ -192,7 +191,6 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="discordUser">The Discord user.</param>
 			/// <param name="grantedPermission">The permission that is to be granted.</param>
 			/// <param name="grantedTarget">The target that the permission should be valid for.</param>
-			/// <returns>A task wrapping the command.</returns>
 			[UsedImplicitly]
 			[Command]
 			[Summary("Grant the targeted user the given permission.")]
@@ -238,7 +236,6 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="discordUser">The Discord user.</param>
 			/// <param name="revokedPermission">The permission that is to be revoked.</param>
-			/// <returns>A task wrapping the command.</returns>
 			[UsedImplicitly]
 			[Command]
 			[Summary("Revoke the given permission from the targeted user.")]
@@ -259,7 +256,6 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="discordUser">The Discord user.</param>
 			/// <param name="permission">The permission to revoke the target from.</param>
 			/// <param name="revokedTarget">The permission target to revoke.</param>
-			/// <returns>A task wrapping the command.</returns>
 			[UsedImplicitly]
 			[Command("target")]
 			[Summary("Revoke the given target permission from the targeted user.")]

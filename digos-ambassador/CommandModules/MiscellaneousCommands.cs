@@ -33,6 +33,8 @@ using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
 
+#pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
+
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
@@ -68,7 +70,6 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Sasses the user in a DIGOS fashion.
 		/// </summary>
-		/// <returns>A task wrapping the command.</returns>
 		[UsedImplicitly]
 		[Command("sass")]
 		[Summary("Sasses the user in a DIGOS fashion.")]
@@ -83,7 +84,6 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Lists available commands.
 		/// </summary>
 		/// <param name="searchText">The text to search the command handler for.</param>
-		/// <returns>A task wrapping the command.</returns>
 		[UsedImplicitly]
 		[Alias("help", "halp", "hlep", "commands")]
 		[Command("help")]

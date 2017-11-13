@@ -20,11 +20,19 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+
+using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Services.Entity;
+
+using Discord.Commands;
+
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services.Content
 {
@@ -43,13 +51,24 @@ namespace DIGOS.Ambassador.Services.Content
 		private List<string> SassNSFW;
 
 		/// <summary>
+		/// Gets the base content path.
+		/// </summary>
+		public string BaseContentPath { get; } = Path.GetFullPath(Path.Combine("Content"));
+
+		/// <summary>
 		/// Loads the default content.
 		/// </summary>
 		/// <returns>A task wrapping the content load operation.</returns>
-		public async Task LoadContentAsync()
+		public async Task InitializeAsync()
 		{
 			await LoadSassAsync();
 			await LoadBotTokenAsync();
+
+			var dossierPath = Path.Combine(this.BaseContentPath, "Dossiers");
+			if (!Directory.Exists(dossierPath))
+			{
+				Directory.CreateDirectory(dossierPath);
+			}
 		}
 
 		/// <summary>
@@ -57,8 +76,8 @@ namespace DIGOS.Ambassador.Services.Content
 		/// </summary>
 		private async Task LoadSassAsync()
 		{
-			var sassPath = Path.Combine("Content", "Sass", "sass.txt");
-			var sassNSFWPath = Path.Combine("Content", "Sass", "sass-nsfw.txt");
+			var sassPath = Path.Combine(this.BaseContentPath, "Sass", "sass.txt");
+			var sassNSFWPath = Path.Combine(this.BaseContentPath, "Sass", "sass-nsfw.txt");
 
 			if (!File.Exists(sassPath))
 			{
@@ -81,7 +100,7 @@ namespace DIGOS.Ambassador.Services.Content
 		/// <exception cref="InvalidDataException">Thrown if no token exists in the file.</exception>
 		private async Task LoadBotTokenAsync()
 		{
-			var tokenPath = Path.Combine("Content", "bot.token");
+			var tokenPath = Path.Combine(this.BaseContentPath, "bot.token");
 
 			if (!File.Exists(tokenPath))
 			{
@@ -96,6 +115,75 @@ namespace DIGOS.Ambassador.Services.Content
 			}
 
 			this.BotToken = token;
+		}
+
+		/// <summary>
+		/// Gets the paths of stored dossiers.
+		/// </summary>
+		/// <returns>A set of paths to stored dossiers.</returns>
+		[NotNull]
+		[ItemNotNull]
+		public IEnumerable<string> GetDossierPaths()
+		{
+			var dossiersPath = Path.Combine(this.BaseContentPath, "Dossiers");
+			return Directory.EnumerateFiles(dossiersPath, "*.pdf");
+		}
+
+		/// <summary>
+		/// Gets a given dossier's data.
+		/// </summary>
+		/// <param name="dossier">The dossier to get the data for.</param>
+		/// <returns>A <see cref="FileStream"/> containing the dossier data.</returns>
+		public RetrieveEntityResult<FileStream> GetDossierStream([NotNull] Dossier dossier)
+		{
+			if (!File.Exists(dossier.Path) || dossier.Path.IsNullOrWhitespace())
+			{
+				return RetrieveEntityResult<FileStream>.FromError(CommandError.ObjectNotFound, "No file data set.");
+			}
+
+			var dossiersPath = Path.Combine(this.BaseContentPath, "Dossiers");
+			if (Directory.GetParent(dossier.Path).FullName != dossiersPath)
+			{
+				return RetrieveEntityResult<FileStream>.FromError(CommandError.Unsuccessful, "The dossier path pointed to something that wasn't in the dossier folder.");
+			}
+
+			return RetrieveEntityResult<FileStream>.FromSuccess(File.OpenRead(dossier.Path));
+		}
+
+		/// <summary>
+		/// Deletes the content data associated with a given dossier.
+		/// </summary>
+		/// <param name="dossier">The dossier.</param>
+		/// <returns>A deletion result which may or may not have succeeded.</returns>
+		public Task<DeleteEntityResult> DeleteDossierDataAsync([NotNull] Dossier dossier)
+		{
+			var dataPath = GetDossierDataPath(dossier);
+			if (!File.Exists(dataPath))
+			{
+				return Task.FromResult(DeleteEntityResult.FromSuccess());
+			}
+
+			try
+			{
+				File.Delete(dataPath);
+			}
+			catch (Exception e)
+			{
+				return Task.FromResult(DeleteEntityResult.FromError(CommandError.Exception, e.Message));
+			}
+
+			return Task.FromResult(DeleteEntityResult.FromSuccess());
+		}
+
+		/// <summary>
+		/// Gets the absolute path to where the data of the dossier is stored.
+		/// </summary>
+		/// <param name="dossier">The dossier.</param>
+		/// <returns>The path.</returns>
+		[NotNull]
+		public string GetDossierDataPath([NotNull] Dossier dossier)
+		{
+			return Path.GetFullPath(Path.Combine(this.BaseContentPath, "Dossiers", $"{dossier.Title}.pdf"));
 		}
 
 		/// <summary>

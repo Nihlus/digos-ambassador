@@ -26,6 +26,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.ServerInfo;
@@ -116,6 +117,17 @@ namespace DIGOS.Ambassador.Database
 		/// Gets or sets the database where roleplays are stored.
 		/// </summary>
 		public DbSet<Roleplay> Roleplays
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets the database where dossier metadata is stored.
+		/// </summary>
+		public DbSet<Dossier> Dossiers
 		{
 			get;
 
