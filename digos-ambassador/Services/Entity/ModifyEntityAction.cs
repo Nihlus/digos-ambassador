@@ -28,11 +28,6 @@ namespace DIGOS.Ambassador.Services.Entity
 	public enum ModifyEntityAction
 	{
 		/// <summary>
-		/// No changes were made.
-		/// </summary>
-		None,
-
-		/// <summary>
 		/// A new entity was added.
 		/// </summary>
 		Added,
