@@ -12,6 +12,7 @@
         <e p="AmbassadorClient.cs" t="Include" />
         <e p="CommandModules" t="Include">
           <e p="AdminCommands.cs" t="Include" />
+          <e p="DossierCommands.cs" t="Include" />
           <e p="MiscellaneousCommands.cs" t="Include" />
           <e p="PermissionCommands.cs" t="Include" />
           <e p="RoleplayCommands.cs" t="Include" />
@@ -21,6 +22,7 @@
           <e p="Databases" t="Include">
             <e p="global.db" t="Include" />
           </e>
+          <e p="Dossiers" t="Include" />
           <e p="Sass" t="Include">
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
@@ -28,6 +30,9 @@
           <e p="bot.token" t="Include" />
         </e>
         <e p="Database" t="Include">
+          <e p="Dossiers" t="Include">
+            <e p="Dossier.cs" t="Include" />
+          </e>
           <e p="GlobalInfoContext.cs" t="Include" />
           <e p="Permissions" t="Include">
             <e p="GlobalPermission.cs" t="Include" />
@@ -67,8 +72,8 @@
           </e>
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171112160121_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171112160121_InitialCreate.cs" t="Include" />
+          <e p="20171113195651_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171113195651_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Permissions" t="Include">
@@ -87,8 +92,12 @@
           <e p="Content" t="Include">
             <e p="ContentService.cs" t="Include" />
           </e>
+          <e p="Dossiers" t="Include">
+            <e p="DossierService.cs" t="Include" />
+          </e>
           <e p="Entity" t="Include">
             <e p="CreateEntityResult.cs" t="Include" />
+            <e p="DeleteEntityResult.cs" t="Include" />
             <e p="ModifyEntityAction.cs" t="Include" />
             <e p="ModifyEntityResult.cs" t="Include" />
             <e p="RetrieveEntityResult.cs" t="Include" />
@@ -114,6 +123,7 @@
             </e>
           </e>
         </e>
+        <e p="regenerate-ef.sh" t="Include" />
       </e>
       <e p="digos-ambassador.Tests" t="IncludeRecursive">
         <e p="Database" t="Include">
