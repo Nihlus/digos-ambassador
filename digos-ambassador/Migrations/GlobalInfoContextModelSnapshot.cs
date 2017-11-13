@@ -2,6 +2,7 @@
 #pragma warning disable CS1591
 // ReSharper disable RedundantArgumentDefaultValue
 // ReSharper disable PartialTypeWithSinglePart
+// ReSharper disable RedundantUsingDirective
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;

@@ -44,7 +44,8 @@ namespace DIGOS.Ambassador.Design
 		private string WarningDisablers =>
 			$"#pragma warning disable CS1591{Environment.NewLine}" +
 			$"// ReSharper disable RedundantArgumentDefaultValue{Environment.NewLine}" +
-			$"// ReSharper disable PartialTypeWithSinglePart{Environment.NewLine}";
+			$"// ReSharper disable PartialTypeWithSinglePart{Environment.NewLine}" +
+			$"// ReSharper disable RedundantUsingDirective{Environment.NewLine}";
 
 		/// <inheritdoc />
 		public override string GenerateMigration

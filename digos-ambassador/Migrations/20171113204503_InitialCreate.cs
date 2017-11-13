@@ -2,6 +2,7 @@
 #pragma warning disable CS1591
 // ReSharper disable RedundantArgumentDefaultValue
 // ReSharper disable PartialTypeWithSinglePart
+// ReSharper disable RedundantUsingDirective
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
