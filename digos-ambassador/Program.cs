@@ -27,7 +27,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Content;
 using log4net;
 using Microsoft.EntityFrameworkCore.Infrastructure;
