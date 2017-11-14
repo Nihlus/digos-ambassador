@@ -24,6 +24,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
@@ -51,7 +52,7 @@ namespace DIGOS.Ambassador.Services.Dossiers
 		/// Initializes a new instance of the <see cref="DossierService"/> class.
 		/// </summary>
 		/// <param name="contentService">The content service.</param>
-		public DossierService(ContentService contentService)
+		public DossierService([NotNull] ContentService contentService)
 		{
 			this.Content = contentService;
 		}
@@ -166,10 +167,21 @@ namespace DIGOS.Ambassador.Services.Dossiers
 			[NotNull] string newTitle
 		)
 		{
+			var isNewNameUnique = await IsDossierTitleUniqueAsync(db, newTitle);
+
 			// If the only thing that has changed is casing, let it through
-			if (!dossier.Title.Equals(newTitle, StringComparison.OrdinalIgnoreCase) && !await IsDossierTitleUniqueAsync(db, newTitle))
+			if (!isNewNameUnique)
 			{
-				return ModifyEntityResult.FromError(CommandError.MultipleMatches, "A dossier with that title already exists.");
+				bool isOnlyCaseChange = false;
+				if (!(dossier.Title is null))
+				{
+					isOnlyCaseChange = dossier.Title.Equals(newTitle, StringComparison.OrdinalIgnoreCase);
+				}
+
+				if (!isOnlyCaseChange)
+				{
+					return ModifyEntityResult.FromError(CommandError.MultipleMatches, "A dossier with that title already exists.");
+				}
 			}
 
 			if (newTitle.IndexOfAny(Path.GetInvalidPathChars()) > -1)
