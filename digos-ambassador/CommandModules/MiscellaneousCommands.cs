@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.CommandModules
 		{
 			string sass = this.Content.GetSass(this.Context.Channel.IsNsfw);
 
-			await this.Context.Channel.SendMessageAsync(sass);
+			await this.Feedback.SendConfirmationAsync(this.Context, sass);
 		}
 
 		/// <summary>
