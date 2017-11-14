@@ -22,7 +22,9 @@
           <e p="Databases" t="Include">
             <e p="global.db" t="Include" />
           </e>
-          <e p="Dossiers" t="Include" />
+          <e p="Dossiers" t="Include">
+            <e p="DIGOS-██.pdf" t="Include" />
+          </e>
           <e p="Sass" t="Include">
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
