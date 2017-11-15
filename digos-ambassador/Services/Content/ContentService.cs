@@ -50,10 +50,31 @@ namespace DIGOS.Ambassador.Services.Content
 		private List<string> Sass;
 		private List<string> SassNSFW;
 
+		private Uri BaseRemoteContentUri { get; }
+
 		/// <summary>
 		/// Gets the base content path.
 		/// </summary>
 		public string BaseContentPath { get; } = Path.GetFullPath(Path.Combine("Content"));
+
+		/// <summary>
+		/// Gets the base dossier path.
+		/// </summary>
+		public string BaseDossierPath { get; } = Path.GetFullPath(Path.Combine("Content", "Dossiers"));
+
+		/// <summary>
+		/// Gets the <see cref="Uri"/> pointing to the default avatar used by the bot for characters.
+		/// </summary>
+		public Uri DefaultAvatarUri { get; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ContentService"/> class.
+		/// </summary>
+		public ContentService()
+		{
+			this.BaseRemoteContentUri = new Uri("https://github.com/Nihlus/digos-ambassador/raw/master/digos-ambassador/Content/");
+			this.DefaultAvatarUri = new Uri(this.BaseRemoteContentUri, "Avatars/Default/Discord_DIGOS.png");
+		}
 
 		/// <summary>
 		/// Loads the default content.
@@ -64,10 +85,9 @@ namespace DIGOS.Ambassador.Services.Content
 			await LoadSassAsync();
 			await LoadBotTokenAsync();
 
-			var dossierPath = Path.Combine(this.BaseContentPath, "Dossiers");
-			if (!Directory.Exists(dossierPath))
+			if (!Directory.Exists(this.BaseDossierPath))
 			{
-				Directory.CreateDirectory(dossierPath);
+				Directory.CreateDirectory(this.BaseDossierPath);
 			}
 		}
 
@@ -118,18 +138,6 @@ namespace DIGOS.Ambassador.Services.Content
 		}
 
 		/// <summary>
-		/// Gets the paths of stored dossiers.
-		/// </summary>
-		/// <returns>A set of paths to stored dossiers.</returns>
-		[NotNull]
-		[ItemNotNull]
-		public IEnumerable<string> GetDossierPaths()
-		{
-			var dossiersPath = Path.Combine(this.BaseContentPath, "Dossiers");
-			return Directory.EnumerateFiles(dossiersPath, "*.pdf");
-		}
-
-		/// <summary>
 		/// Gets a given dossier's data.
 		/// </summary>
 		/// <param name="dossier">The dossier to get the data for.</param>
@@ -141,8 +149,7 @@ namespace DIGOS.Ambassador.Services.Content
 				return RetrieveEntityResult<FileStream>.FromError(CommandError.ObjectNotFound, "No file data set.");
 			}
 
-			var dossiersPath = Path.Combine(this.BaseContentPath, "Dossiers");
-			if (Directory.GetParent(dossier.Path).FullName != dossiersPath)
+			if (Directory.GetParent(dossier.Path).FullName != this.BaseDossierPath)
 			{
 				return RetrieveEntityResult<FileStream>.FromError(CommandError.Unsuccessful, "The dossier path pointed to something that wasn't in the dossier folder.");
 			}

@@ -30,7 +30,6 @@ using DIGOS.Ambassador.Extensions;
 
 using Discord;
 using Discord.Commands;
-
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -43,7 +42,7 @@ namespace DIGOS.Ambassador.Services.Entity
 	public class OwnedEntityService
 	{
 		/// <summary>
-		/// Determines whether or not the given entity name is unique for a given set of user entities..
+		/// Determines whether or not the given entity name is unique for a given set of user entities.
 		/// </summary>
 		/// <param name="userEntities">The entities to check.</param>
 		/// <param name="entityName">The entity name to check.</param>

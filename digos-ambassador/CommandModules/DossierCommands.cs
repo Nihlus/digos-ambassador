@@ -171,7 +171,14 @@ namespace DIGOS.Ambassador.CommandModules
 				var modifyResult = await this.Dossiers.SetDossierDataAsync(db, dossier, this.Context);
 				if (!modifyResult.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
+					if (modifyResult.Error == CommandError.Exception)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
+						await this.Dossiers.DeleteDossierAsync(db, dossier);
+						return;
+					}
+
+					await this.Feedback.SendWarningAsync(this.Context, modifyResult.ErrorReason);
 				}
 
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" added.");

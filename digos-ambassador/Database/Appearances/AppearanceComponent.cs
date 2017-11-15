@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations;
+
 namespace DIGOS.Ambassador.Database.Appearances
 {
 	/// <summary>
@@ -31,6 +33,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// <summary>
 		/// Gets or sets the component's unique ID.
 		/// </summary>
+		[Key]
 		public uint AppearanceComponentID { get; set; }
 
 		/// <summary>

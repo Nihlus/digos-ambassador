@@ -26,6 +26,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Database.Kinks;
@@ -368,7 +369,6 @@ namespace DIGOS.Ambassador.Database
 		public async Task<User> GetUser([NotNull] IUser discordUser)
 		{
 			return await this.Users
-				.Include(u => u.Characters)
 				.Include(u => u.Kinks)
 				.Include(u => u.LocalPermissions)
 				.ThenInclude(lp => lp.Server)
@@ -411,6 +411,14 @@ namespace DIGOS.Ambassador.Database
 			{
 				optionsBuilder.UseSqlite($"Data Source={Path.Combine("Content", "Databases", "global.db")}");
 			}
+		}
+
+		/// <inheritdoc />
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.Entity<User>().HasOne(u => u.CurrentCharacter);
+			modelBuilder.Entity<User>().HasOne(u => u.DefaultCharacter);
+			modelBuilder.Entity<Character>().HasOne(c => c.Owner);
 		}
 	}
 }

@@ -24,7 +24,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
@@ -240,7 +239,12 @@ namespace DIGOS.Ambassador.Services.Dossiers
 		)
 		{
 			var originalDossierPath = dossier.Path;
-			var newDossierPath = Path.GetFullPath(Path.Combine(this.Content.BaseContentPath, "Dossiers", $"{dossier.Title}.pdf"));
+			var newDossierPath = Path.GetFullPath(Path.Combine(this.Content.BaseDossierPath, $"{dossier.Title}.pdf"));
+			if (Directory.GetParent(dossier.Path).FullName != this.Content.BaseDossierPath)
+			{
+				return ModifyEntityResult.FromError(CommandError.Exception, "Invalid data path.");
+			}
+
 			if (originalDossierPath.IsNullOrWhitespace() || !File.Exists(originalDossierPath) || originalDossierPath == newDossierPath)
 			{
 				return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
@@ -276,6 +280,11 @@ namespace DIGOS.Ambassador.Services.Dossiers
 		)
 		{
 			var dossierPath = Path.GetFullPath(Path.Combine(this.Content.BaseContentPath, "Dossiers", $"{dossier.Title}.pdf"));
+
+			if (Directory.GetParent(dossier.Path).FullName != this.Content.BaseDossierPath)
+			{
+				return ModifyEntityResult.FromError(CommandError.Exception, "Invalid data path.");
+			}
 
 			if (context.Message.Attachments.Count <= 0)
 			{

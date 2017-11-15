@@ -60,6 +60,12 @@ namespace DIGOS.Ambassador.Permissions
 		DeleteCharacter,
 
 		/// <summary>
+		/// Allows the user to edit characters.
+		/// </summary>
+		[Description("Allows the user to edit characters.")]
+		EditCharacter,
+
+		/// <summary>
 		/// Allows the user to edit user information.
 		/// </summary>
 		[Description("Allows the user to edit user information.")]

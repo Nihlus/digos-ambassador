@@ -70,16 +70,20 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Shows information about the named roleplay owned by the specified user.
 		/// </summary>
 		/// <param name="roleplayName">The name of the roleplay.</param>
-		/// <param name="discordUser">The user that owns the roleplay.</param>
+		/// <param name="roleplayOwner">The user that owns the roleplay.</param>
 		[UsedImplicitly]
 		[Alias("show", "info")]
 		[Command("show")]
 		[Summary("Shows information about the specified roleplay.")]
-		public async Task ShowRoleplayAsync([CanBeNull] string roleplayName = null, [CanBeNull] IUser discordUser = null)
+		public async Task ShowRoleplayAsync
+		(
+			[CanBeNull] string roleplayName = null,
+			[CanBeNull] IUser roleplayOwner = null
+		)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var getRoleplayResult = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, discordUser, roleplayName);
+				var getRoleplayResult = await this.Roleplays.GetBestMatchingRoleplayAsync(db, this.Context, roleplayOwner, roleplayName);
 				if (!getRoleplayResult.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, getRoleplayResult.ErrorReason);
@@ -552,7 +556,7 @@ namespace DIGOS.Ambassador.CommandModules
 					return;
 				}
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Ownership transferred.");
+				await this.Feedback.SendConfirmationAsync(this.Context, "Roleplay ownership transferred.");
 			}
 		}
 

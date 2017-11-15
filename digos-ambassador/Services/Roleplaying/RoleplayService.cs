@@ -612,7 +612,8 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 				return ModifyEntityResult.FromError(CommandError.MultipleMatches, errorMessage);
 			}
 
-			if (!IsRoleplayNameValid(newRoleplayName))
+			var commandModule = this.Commands.Modules.First(m => m.Name == "roleplay");
+			if (!this.OwnedEntities.IsEntityNameValid(commandModule, newRoleplayName))
 			{
 				return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "The given name is not valid.");
 			}
@@ -691,34 +692,6 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			await db.SaveChangesAsync();
 
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
-		}
-
-		/// <summary>
-		/// Builds a list of the command names and aliases in this module, and checks that the given roleplay name is
-		/// not one of them.
-		/// </summary>
-		/// <param name="roleplayName">The name of the roleplay.</param>
-		/// <returns>true if the name is valid; otherwise, false.</returns>
-		[ContractAnnotation("roleplayName:null => false")]
-		public bool IsRoleplayNameValid([CanBeNull] string roleplayName)
-		{
-			if (roleplayName.IsNullOrWhitespace())
-			{
-				return false;
-			}
-
-			var commandModule = this.Commands.Modules.First(m => m.Name == "roleplay");
-			var submodules = commandModule.Submodules;
-
-			var commandNames = commandModule.Commands.SelectMany(c => c.Aliases);
-			commandNames = commandNames.Union(commandModule.Commands.Select(c => c.Name));
-
-			var submoduleCommandNames = submodules.SelectMany(s => s.Commands.SelectMany(c => c.Aliases));
-			submoduleCommandNames = submoduleCommandNames.Union(submodules.SelectMany(s => s.Commands.Select(c => c.Name)));
-
-			commandNames = commandNames.Union(submoduleCommandNames);
-
-			return !commandNames.Contains(roleplayName);
 		}
 	}
 }

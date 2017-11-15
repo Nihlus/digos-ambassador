@@ -57,6 +57,66 @@ namespace DIGOS.Ambassador.Services.Characters
 		}
 
 		/// <summary>
+		/// This method searches for the best matching character given an owner and a name. If no owner is provided, then
+		/// the global list is searched for a unique name. If no match can be found, a failed result is returned.
+		/// </summary>
+		/// <param name="db">The database where the characters are stored.</param>
+		/// <param name="context">The command context.</param>
+		/// <param name="characterOwner">The owner of the character, if any.</param>
+		/// <param name="characterName">The name of the character.</param>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacter
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] SocketCommandContext context,
+			[CanBeNull] IUser characterOwner,
+			[NotNull] string characterName
+		)
+		{
+			if (characterOwner is null)
+			{
+				return await GetNamedCharacterAsync(db, characterName);
+			}
+
+			return await GetUserCharacterByNameAsync(db, context, characterOwner, characterName);
+		}
+
+		/// <summary>
+		/// Gets a character by its given name.
+		/// </summary>
+		/// <param name="db">The database context where the data is stored.</param>
+		/// <param name="characterName">The name of the character.</param>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public async Task<RetrieveEntityResult<Character>> GetNamedCharacterAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] string characterName
+		)
+		{
+			if (await db.Characters.CountAsync(ch => ch.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase)) > 1)
+			{
+				return RetrieveEntityResult<Character>.FromError
+				(
+					CommandError.MultipleMatches,
+					"There's more than one character with that name. Please specify which user it belongs to."
+				);
+			}
+
+			var character = db.Characters
+				.Include(c => c.Owner)
+				.Include(c => c.DefaultAppearance)
+				.Include(c => c.TransformedAppearance)
+				.FirstOrDefault(rp => rp.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase));
+
+			if (character is null)
+			{
+				return RetrieveEntityResult<Character>.FromError(CommandError.ObjectNotFound, "No character with that name found.");
+			}
+
+			return RetrieveEntityResult<Character>.FromSuccess(character);
+		}
+
+		/// <summary>
 		/// Gets a character belonging to a given user by a given name.
 		/// </summary>
 		/// <param name="db">The database where the characters are stored.</param>
@@ -108,7 +168,7 @@ namespace DIGOS.Ambassador.Services.Characters
 			[NotNull] SocketCommandContext context,
 			[NotNull] string characterName,
 			[NotNull] string characterAvatarUrl,
-			[NotNull] string characterNickname,
+			[CanBeNull] string characterNickname,
 			[NotNull] string characterSummary,
 			[NotNull] string characterDescription
 		)
@@ -131,10 +191,13 @@ namespace DIGOS.Ambassador.Services.Characters
 				return CreateEntityResult<Character>.FromError(modifyEntityResult);
 			}
 
-			modifyEntityResult = await SetCharacterNicknameAsync(db, character, characterNickname);
-			if (!modifyEntityResult.IsSuccess)
+			if (!(characterNickname is null))
 			{
-				return CreateEntityResult<Character>.FromError(modifyEntityResult);
+				modifyEntityResult = await SetCharacterNicknameAsync(db, character, characterNickname);
+				if (!modifyEntityResult.IsSuccess)
+				{
+					return CreateEntityResult<Character>.FromError(modifyEntityResult);
+				}
 			}
 
 			modifyEntityResult = await SetCharacterSummaryAsync(db, character, characterSummary);

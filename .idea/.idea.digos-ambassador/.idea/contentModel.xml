@@ -12,6 +12,7 @@
         <e p="AmbassadorClient.cs" t="Include" />
         <e p="CommandModules" t="Include">
           <e p="AdminCommands.cs" t="Include" />
+          <e p="CharacterCommands.cs" t="Include" />
           <e p="DossierCommands.cs" t="Include" />
           <e p="MiscellaneousCommands.cs" t="Include" />
           <e p="PermissionCommands.cs" t="Include" />
@@ -19,6 +20,11 @@
           <e p="UserCommands.cs" t="Include" />
         </e>
         <e p="Content" t="Include">
+          <e p="Avatars" t="Include">
+            <e p="Default" t="Include">
+              <e p="Discord_DIGOS.png" t="Include" />
+            </e>
+          </e>
           <e p="Databases" t="Include">
             <e p="global.db" t="Include" />
           </e>
@@ -87,8 +93,8 @@
           </e>
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171113204503_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171113204503_InitialCreate.cs" t="Include" />
+          <e p="20171115160337_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171115160337_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Permissions" t="Include">
@@ -109,6 +115,9 @@
           </e>
           <e p="Content" t="Include">
             <e p="ContentService.cs" t="Include" />
+          </e>
+          <e p="Discord" t="Include">
+            <e p="DiscordService.cs" t="Include" />
           </e>
           <e p="Dossiers" t="Include">
             <e p="DossierService.cs" t="Include" />
