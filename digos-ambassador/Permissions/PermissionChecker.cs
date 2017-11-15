@@ -24,9 +24,8 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.UserInfo;
-
 using Discord;
+using DIGOS.Ambassador.Database.Users;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 

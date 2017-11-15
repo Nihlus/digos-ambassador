@@ -21,9 +21,10 @@
 //
 
 using System.Collections.Generic;
+using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Permissions;
 
-namespace DIGOS.Ambassador.Database.UserInfo
+namespace DIGOS.Ambassador.Database.Users
 {
 	/// <summary>
 	/// Represents globally accessible information about a user.

@@ -27,16 +27,17 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.FList.Kinks;
 using DIGOS.Ambassador.Services.Feedback;
 
 using Discord.Commands;
+using DIGOS.Ambassador.Database.Kinks;
+using DIGOS.Ambassador.Database.Users;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
-using Kink = DIGOS.Ambassador.Database.UserInfo.Kink;
+using Kink = DIGOS.Ambassador.Database.Kinks.Kink;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 

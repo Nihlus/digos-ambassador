@@ -22,8 +22,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using DIGOS.Ambassador.Database.UserInfo;
 using Discord;
+using DIGOS.Ambassador.Database.Users;
 
 namespace DIGOS.Ambassador.Database.Roleplaying
 {

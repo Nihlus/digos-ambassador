@@ -22,7 +22,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using DIGOS.Ambassador.Database.UserInfo;
+using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
 
 namespace DIGOS.Ambassador.Database.Permissions

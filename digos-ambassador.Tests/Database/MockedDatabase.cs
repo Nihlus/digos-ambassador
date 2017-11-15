@@ -24,7 +24,7 @@ using System;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.ServerInfo;
-using DIGOS.Ambassador.Database.UserInfo;
+using DIGOS.Ambassador.Database.Users;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 

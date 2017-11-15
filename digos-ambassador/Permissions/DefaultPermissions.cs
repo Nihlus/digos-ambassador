@@ -23,7 +23,7 @@
 using System.Collections.Generic;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.ServerInfo;
-using DIGOS.Ambassador.Database.UserInfo;
+using DIGOS.Ambassador.Database.Users;
 using JetBrains.Annotations;
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;

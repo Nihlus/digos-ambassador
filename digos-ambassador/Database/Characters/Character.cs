@@ -20,7 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Database.UserInfo
+using DIGOS.Ambassador.Database.Users;
+
+namespace DIGOS.Ambassador.Database.Characters
 {
 	/// <summary>
 	/// Represents a user's character.

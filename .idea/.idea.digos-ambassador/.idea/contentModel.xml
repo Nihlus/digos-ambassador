@@ -38,10 +38,18 @@
             <e p="GenitaliaType.cs" t="Include" />
             <e p="SurfaceType.cs" t="Include" />
           </e>
+          <e p="Characters" t="Include">
+            <e p="Character.cs" t="Include" />
+          </e>
           <e p="Dossiers" t="Include">
             <e p="Dossier.cs" t="Include" />
           </e>
           <e p="GlobalInfoContext.cs" t="Include" />
+          <e p="Kinks" t="Include">
+            <e p="Kink.cs" t="Include" />
+            <e p="KinkCategory.cs" t="Include" />
+            <e p="KinkPreference.cs" t="Include" />
+          </e>
           <e p="Permissions" t="Include">
             <e p="GlobalPermission.cs" t="Include" />
             <e p="LocalPermission.cs" t="Include" />
@@ -53,11 +61,7 @@
           <e p="ServerInfo" t="Include">
             <e p="Server.cs" t="Include" />
           </e>
-          <e p="UserInfo" t="Include">
-            <e p="Character.cs" t="Include" />
-            <e p="Kink.cs" t="Include" />
-            <e p="KinkCategory.cs" t="Include" />
-            <e p="KinkPreference.cs" t="Include" />
+          <e p="Users" t="Include">
             <e p="User.cs" t="Include" />
             <e p="UserClass.cs" t="Include" />
             <e p="UserKink.cs" t="Include" />

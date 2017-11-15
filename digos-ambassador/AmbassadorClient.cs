@@ -27,7 +27,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.UserInfo;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services.Content;
 using DIGOS.Ambassador.Services.Dossiers;
@@ -38,6 +37,7 @@ using DIGOS.Ambassador.TypeReaders;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DIGOS.Ambassador.Database.Users;
 using JetBrains.Annotations;
 using log4net;
 using Microsoft.Extensions.DependencyInjection;

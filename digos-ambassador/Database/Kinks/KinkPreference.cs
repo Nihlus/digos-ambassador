@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Database.UserInfo
+namespace DIGOS.Ambassador.Database.Kinks
 {
 	/// <summary>
 	/// Represents a user's preference for a certain sexual kink or fetish.

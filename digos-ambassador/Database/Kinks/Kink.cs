@@ -23,7 +23,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace DIGOS.Ambassador.Database.UserInfo
+namespace DIGOS.Ambassador.Database.Kinks
 {
 	/// <summary>
 	/// Represents a sexual kink or fetish.

@@ -1,5 +1,5 @@
 ﻿//
-//  UserClass.cs
+//  UserKink.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,31 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Database.UserInfo
+using DIGOS.Ambassador.Database.Kinks;
+
+namespace DIGOS.Ambassador.Database.Users
 {
 	/// <summary>
-	/// Represents a user's class within the DIGOS 'verse.
+	/// Represents a user's kink, along with their preference for it.
 	/// </summary>
-	public enum UserClass
+	public class UserKink
 	{
 		/// <summary>
-		/// The user does not have a specific class.
+		/// Gets or sets the unique ID for this user's kink.
 		/// </summary>
-		Other,
+		public uint UserKinkID { get; set; }
 
 		/// <summary>
-		/// The user is part of the DIGOS infrastructure. Reserved for bots.
+		/// Gets or sets the kink.
 		/// </summary>
-		DIGOSInfrastructure,
+		public Kink Kink { get; set; }
 
 		/// <summary>
-		/// The user is a DIGOS dronie, linked to a unit.
+		/// Gets or sets the user's preference for the kink.
 		/// </summary>
-		DIGOSDronie,
-
-		/// <summary>
-		/// The user is a DIGOS unit with a canon character.
-		/// </summary>
-		DIGOSUnit,
+		public KinkPreference Preference { get; set; }
 	}
 }
