@@ -105,7 +105,8 @@ namespace DIGOS.Ambassador.Migrations
                     ServerID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     DiscordGuildID = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false)
+                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
+                    SuppressPermissonWarnings = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

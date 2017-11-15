@@ -36,7 +36,9 @@ using Discord;
 using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
+
 using static DIGOS.Ambassador.Permissions.Permission;
+using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -73,7 +75,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="roleplayOwner">The user that owns the roleplay.</param>
 		[UsedImplicitly]
 		[Alias("show", "info")]
-		[Command("show")]
+		[Command("show", RunMode = Async)]
 		[Summary("Shows information about the specified roleplay.")]
 		public async Task ShowRoleplayAsync
 		(
@@ -128,7 +130,8 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="discordUser">The user to show the roleplays of.</param>
 		[UsedImplicitly]
-		[Command("list-owned")]
+		[Alias("list-owned", "list")]
+		[Command("list-owned", RunMode = Async)]
 		[Summary("Lists the roleplays that the given user owns.")]
 		public async Task ListOwnedRoleplaysAsync([CanBeNull] IUser discordUser = null)
 		{
@@ -147,6 +150,11 @@ namespace DIGOS.Ambassador.CommandModules
 				{
 					eb.AddField(roleplay.Name, roleplay.Summary);
 				}
+
+				if (eb.Fields.Count <= 0)
+				{
+					eb.WithDescription("You don't have any roleplays.");
+				}
 			}
 
 			await this.Feedback.SendEmbedAsync(this.Context, eb);
@@ -160,7 +168,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="isNSFW">Whether or not the roleplay is NSFW.</param>
 		/// <param name="isPublic">Whether or not the roleplay is public.</param>
 		[UsedImplicitly]
-		[Command("create")]
+		[Command("create", RunMode = Async)]
 		[Summary("Creates a new roleplay with the specified name.")]
 		[RequirePermission(CreateRoleplay)]
 		public async Task CreateRoleplayAsync(string roleplayName, string roleplaySummary = "No summary set.", bool isNSFW = false, bool isPublic = true)
@@ -212,7 +220,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="roleplayName">The name of the roleplay to join.</param>
 		/// <param name="roleplayOwner">The owner of the roleplay to join.</param>
 		[UsedImplicitly]
-		[Command("join")]
+		[Command("join", RunMode = Async)]
 		[Summary("Joins the roleplay owned by the given person with the given name.")]
 		[RequirePermission(JoinRoleplay)]
 		public async Task JoinRoleplayAsync([CanBeNull] string roleplayName = null, [CanBeNull] IUser roleplayOwner = null)
@@ -246,7 +254,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="roleplayName">The name of the roleplay.</param>
 		/// <param name="roleplayOwner">The owner of the roleplay.</param>
 		[UsedImplicitly]
-		[Command("invite")]
+		[Command("invite", RunMode = Async)]
 		[Summary("Invites the specified user to the given roleplay.")]
 		[RequirePermission(EditRoleplay)]
 		public async Task InvitePlayerAsync([NotNull] IUser playerToInvite, [CanBeNull] string roleplayName = null, [CanBeNull] IUser roleplayOwner = null)
@@ -282,7 +290,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="roleplayName">The name of the roleplay to leave.</param>
 		/// <param name="roleplayOwner">The owner of the roleplay to leave.</param>
 		[UsedImplicitly]
-		[Command("leave")]
+		[Command("leave", RunMode = Async)]
 		[Summary("Leaves the roleplay owned by the given person with the given name.")]
 		public async Task LeaveRoleplayAsync([CanBeNull] string roleplayName = null, [CanBeNull] IUser roleplayOwner = null)
 		{
@@ -450,7 +458,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Stops the current roleplay.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("stop")]
+		[Command("stop", RunMode = Async)]
 		[Summary("Stops the current roleplay.")]
 		[RequireActiveRoleplay(requireOwner: true)]
 		public async Task StopRoleplayAsync()
@@ -478,7 +486,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="startMessage">The earliest message to start adding from.</param>
 		/// <param name="finalMessage">The final message in the range.</param>
 		[UsedImplicitly]
-		[Command("include-previous")]
+		[Command("include-previous", RunMode = Async)]
 		[Summary("Includes previous messages into the roleplay, starting at the given message.")]
 		[RequireActiveRoleplay(requireOwner: true)]
 		public async Task IncludePreviousMessagesAsync
@@ -568,7 +576,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="from">The time from which you want to replay,</param>
 		/// <param name="to">The time until you want to replay.</param>
 		[UsedImplicitly]
-		[Command("replay")]
+		[Command("replay", RunMode = Async)]
 		[Summary("Replays the named roleplay owned by the given user to you.")]
 		[RequirePermission(ReplayRoleplay)]
 		public async Task ReplayRoleplayAsync
@@ -662,7 +670,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="newRoleplayName">The roleplay's new name.</param>
 			[UsedImplicitly]
-			[Command("name")]
+			[Command("name", RunMode = Async)]
 			[Summary("Sets the new name of the named roleplay.")]
 			[RequireActiveRoleplay(requireOwner: true)]
 			public async Task SetRoleplayNameAsync(string newRoleplayName)
@@ -680,7 +688,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="oldRoleplayName">The name of the old roleplay.</param>
 			/// <param name="newRoleplayName">The roleplay's new name.</param>
 			[UsedImplicitly]
-			[Command("name")]
+			[Command("name", RunMode = Async)]
 			[Summary("Sets the new name of the named roleplay.")]
 			public async Task SetRoleplayNameAsync(string oldRoleplayName, string newRoleplayName)
 			{
@@ -716,7 +724,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="newRoleplaySummary">The roleplay's new summary.</param>
 			[UsedImplicitly]
-			[Command("summary")]
+			[Command("summary", RunMode = Async)]
 			[Summary("Sets the summary of the current roleplay.")]
 			[RequireActiveRoleplay(requireOwner: true)]
 			public async Task SetRoleplaySummaryAsync(string newRoleplaySummary)
@@ -734,7 +742,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="roleplayName">The name of the roleplay</param>
 			/// <param name="newRoleplaySummary">The roleplay's new summary.</param>
 			[UsedImplicitly]
-			[Command("summary")]
+			[Command("summary", RunMode = Async)]
 			[Summary("Sets the summary of the named roleplay.")]
 			public async Task SetRoleplaySummaryAsync(string roleplayName, string newRoleplaySummary)
 			{
@@ -771,7 +779,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="isNSFW">true if the roleplay is NSFW; otherwise, false.</param>
 			[UsedImplicitly]
-			[Command("nsfw")]
+			[Command("nsfw", RunMode = Async)]
 			[Summary("Sets a value indicating whether or not the current roleplay is NSFW. This restricts which channels it can be made active in.")]
 			[RequireNsfw]
 			[RequireActiveRoleplay(requireOwner: true)]
@@ -791,7 +799,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="roleplayName">The name of the roleplay.</param>
 			/// <param name="isNSFW">true if the roleplay is NSFW; otherwise, false.</param>
 			[UsedImplicitly]
-			[Command("nsfw")]
+			[Command("nsfw", RunMode = Async)]
 			[Summary("Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.")]
 			[RequireNsfw]
 			public async Task SetRoleplayIsNSFW(string roleplayName, bool isNSFW)
@@ -828,7 +836,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="isPublic">true if the roleplay is public; otherwise, false.</param>
 			[UsedImplicitly]
-			[Command("public")]
+			[Command("public", RunMode = Async)]
 			[Summary("Sets a value indicating whether or not the current roleplay is public. This restricts replays to participants.")]
 			[RequireActiveRoleplay(requireOwner: true)]
 			public async Task SetRoleplayIsPublic(bool isPublic)
@@ -846,7 +854,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="roleplayName">The name of the roleplay.</param>
 			/// <param name="isPublic">true if the roleplay is public; otherwise, false.</param>
 			[UsedImplicitly]
-			[Command("public")]
+			[Command("public", RunMode = Async)]
 			[Summary("Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.")]
 			public async Task SetRoleplayIsPublic(string roleplayName, bool isPublic)
 			{

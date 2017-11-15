@@ -314,6 +314,8 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<bool>("IsNSFW");
 
+                    b.Property<bool>("SuppressPermissonWarnings");
+
                     b.HasKey("ServerID");
 
                     b.ToTable("Servers");

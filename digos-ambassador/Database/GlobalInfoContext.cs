@@ -369,6 +369,8 @@ namespace DIGOS.Ambassador.Database
 		public async Task<User> GetUser([NotNull] IUser discordUser)
 		{
 			return await this.Users
+				.Include(u => u.CurrentCharacter)
+				.Include(u => u.DefaultCharacter)
 				.Include(u => u.Kinks)
 				.Include(u => u.LocalPermissions)
 				.ThenInclude(lp => lp.Server)

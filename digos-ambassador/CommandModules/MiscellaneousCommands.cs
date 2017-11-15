@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Sasses the user in a DIGOS fashion.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("sass")]
+		[Command("sass", RunMode = RunMode.Async)]
 		[Summary("Sasses the user in a DIGOS fashion.")]
 		public async Task SassAsync()
 		{
@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="searchText">The text to search the command handler for.</param>
 		[UsedImplicitly]
 		[Alias("help", "halp", "hlep", "commands")]
-		[Command("help")]
+		[Command("help", RunMode = RunMode.Async)]
 		[Summary("Lists available commands")]
 		public async Task HelpAsync([CanBeNull] string searchText = null)
 		{

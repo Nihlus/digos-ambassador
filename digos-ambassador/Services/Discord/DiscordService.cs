@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Services.Entity;
@@ -66,6 +67,51 @@ namespace DIGOS.Ambassador.Services.Discord
 			{
 				return RetrieveEntityResult<Stream>.FromError(CommandError.Unsuccessful, "The download operation timed out.");
 			}
+		}
+
+		/// <summary>
+		/// Sets the nickname of the given user.
+		/// </summary>
+		/// <param name="context">The context in which the user is.</param>
+		/// <param name="guildUser">The guild user to set the nick of.</param>
+		/// <param name="nickname">The nickname to set.</param>
+		/// <returns>A modification result which may or may not have succeeded.</returns>
+		public async Task<ModifyEntityResult> SetUserNicknameAsync
+		(
+			[NotNull] SocketCommandContext context,
+			[NotNull] IGuildUser guildUser,
+			[CanBeNull] string nickname
+		)
+		{
+			if (!HasPermission(context, GuildPermission.ManageNicknames))
+			{
+				return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I'm not allowed to set nicknames on this server.");
+			}
+
+			if (context.Guild.OwnerId == guildUser.Id)
+			{
+				return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I can't set the nickname of the server's owner.");
+			}
+
+			await guildUser.ModifyAsync(u => u.Nickname = nickname);
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+		}
+
+		/// <summary>
+		/// Determines whether or not the ambassador has the given permission in the given context.
+		/// </summary>
+		/// <param name="context">The command context.</param>
+		/// <param name="guildPermission">The permission to check.</param>
+		/// <returns>true if she has permission; otherwise, false.</returns>
+		public bool HasPermission([NotNull] SocketCommandContext context, GuildPermission guildPermission)
+		{
+			var amby = context.Guild.GetUser(context.Client.CurrentUser.Id) as IGuildUser;
+			if (amby is null)
+			{
+				return false;
+			}
+
+			return amby.GuildPermissions.Has(guildPermission);
 		}
 	}
 }

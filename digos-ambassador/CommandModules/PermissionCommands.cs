@@ -35,8 +35,10 @@ using Discord;
 using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
+
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
+using static Discord.Commands.RunMode;
 
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
@@ -66,7 +68,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Lists all available permissions.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("list")]
+		[Command("list", RunMode = Async)]
 		[Summary("Lists all available permissions.")]
 		public async Task ListPermissionsAsync()
 		{
@@ -79,7 +81,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Lists all permissions that have been granted to the invoking user.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("list-granted")]
+		[Command("list-granted", RunMode = Async)]
 		[Summary("Lists all permissions that have been granted to the invoking user.")]
 		public async Task ListGrantedPermissionsAsync()
 		{
@@ -99,7 +101,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		[UsedImplicitly]
-		[Command("list-granted")]
+		[Command("list-granted", RunMode = Async)]
 		[Summary("Lists all permissions that have been granted to target user.")]
 		public async Task ListGrantedPermissionsAsync(IUser discordUser)
 		{

@@ -48,6 +48,11 @@ namespace DIGOS.Ambassador.Database.ServerInfo
 		public bool IsNSFW { get; set; }
 
 		/// <summary>
+		/// Gets or sets a value indicating whether or not the server should suppress permission warnings.
+		/// </summary>
+		public bool SuppressPermissonWarnings { get; set; }
+
+		/// <summary>
 		/// Gets or sets the users known to the bot on this server.
 		/// </summary>
 		public List<User> KnownUsers { get; set; }

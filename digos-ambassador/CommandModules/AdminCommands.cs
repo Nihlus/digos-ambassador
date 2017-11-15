@@ -35,7 +35,7 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-
+using static Discord.Commands.RunMode;
 using Kink = DIGOS.Ambassador.Database.Kinks.Kink;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <returns>A task wrapping the update action.</returns>
 		[UsedImplicitly]
-		[Command("update-kinks")]
+		[Command("update-kinks", RunMode = Async)]
 		[Summary("Updates the kink list with data from F-list.")]
 		[RequireOwner]
 		public async Task UpdateKinkDatabaseAsync()

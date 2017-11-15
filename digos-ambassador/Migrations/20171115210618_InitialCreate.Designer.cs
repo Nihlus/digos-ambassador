@@ -19,7 +19,7 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    [Migration("20171115160337_InitialCreate")]
+    [Migration("20171115210618_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -314,6 +314,8 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<ulong>("DiscordGuildID");
 
                     b.Property<bool>("IsNSFW");
+
+                    b.Property<bool>("SuppressPermissonWarnings");
 
                     b.HasKey("ServerID");
 

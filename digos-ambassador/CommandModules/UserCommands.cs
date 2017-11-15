@@ -33,8 +33,10 @@ using Discord.Commands;
 
 using Humanizer;
 using JetBrains.Annotations;
+
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
+using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -62,7 +64,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Shows known information about the invoking user.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("info")]
+		[Command("info", RunMode = Async)]
 		[Summary("Shows known information about the invoking user.")]
 		public async Task ShowInfoAsync()
 		{
@@ -80,7 +82,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="discordUser">The Discord user to show the info of.</param>
 		[UsedImplicitly]
-		[Command("info")]
+		[Command("info", RunMode = Async)]
 		[Summary("Shows known information about the mentioned user.")]
 		public async Task ShowInfoAsync(IUser discordUser)
 		{
@@ -191,7 +193,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="userClass">The user's new class.</param>
 			[UsedImplicitly]
-			[Command("class")]
+			[Command("class", RunMode = Async)]
 			[Summary("Sets the invoking user's class.")]
 			[RequirePermission(SetClass)]
 			public async Task SetUserClassAsync(UserClass userClass)
@@ -215,7 +217,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="discordUser">The Discord user to change the class of.</param>
 			/// <param name="userClass">The user's new class.</param>
 			[UsedImplicitly]
-			[Command("class")]
+			[Command("class", RunMode = Async)]
 			[Summary("Sets the target user's class.")]
 			[RequirePermission(SetClass, Other)]
 			public async Task SetUserClassAsync(IUser discordUser, UserClass userClass)
@@ -238,7 +240,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="bio">The user's new bio.</param>
 			[UsedImplicitly]
-			[Command("bio")]
+			[Command("bio", RunMode = Async)]
 			[Summary("Sets the invoking user's bio.")]
 			[RequirePermission(EditUser)]
 			public async Task SetUserBioAsync(string bio)
@@ -262,7 +264,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="discordUser">The Discord user to change the bio of.</param>
 			/// <param name="bio">The user's new bio.</param>
 			[UsedImplicitly]
-			[Command("bio")]
+			[Command("bio", RunMode = Async)]
 			[Summary("Sets the target user's bio.")]
 			[RequirePermission(EditUser, Other)]
 			public async Task SetUserBioAsync(IUser discordUser, string bio)
@@ -285,7 +287,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="timezone">The user's new timezone hour offset.</param>
 			[UsedImplicitly]
-			[Command("timezone")]
+			[Command("timezone", RunMode = Async)]
 			[Summary("Sets the invoking user's timezone hour offset.")]
 			[RequirePermission(EditUser)]
 			public async Task SetUserTimezoneAsync(int timezone)
@@ -309,7 +311,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="discordUser">The Discord user to change the timezone of.</param>
 			/// <param name="timezone">The user's new timezone hour offset.</param>
 			[UsedImplicitly]
-			[Command("timezone")]
+			[Command("timezone", RunMode = Async)]
 			[Summary("Sets the target user's timezone hour offset.")]
 			[RequirePermission(EditUser, Other)]
 			public async Task SetUserTimezoneAsync(IUser discordUser, int timezone)

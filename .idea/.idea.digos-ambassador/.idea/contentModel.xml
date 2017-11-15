@@ -28,10 +28,6 @@
           <e p="Databases" t="Include">
             <e p="global.db" t="Include" />
           </e>
-          <e p="Dossiers" t="Include">
-            <e p="DIGOS-██.pdf" t="Include" />
-            <e p="NotNasty.pdf" t="Include" />
-          </e>
           <e p="Sass" t="Include">
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
@@ -47,6 +43,9 @@
           </e>
           <e p="Characters" t="Include">
             <e p="Character.cs" t="Include" />
+          </e>
+          <e p="Data" t="Include">
+            <e p="Image.cs" t="Include" />
           </e>
           <e p="Dossiers" t="Include">
             <e p="Dossier.cs" t="Include" />
@@ -94,8 +93,8 @@
           </e>
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171115160337_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171115160337_InitialCreate.cs" t="Include" />
+          <e p="20171115210618_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171115210618_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Permissions" t="Include">

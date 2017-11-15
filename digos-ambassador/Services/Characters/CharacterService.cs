@@ -26,11 +26,11 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services.Entity;
 
 using Discord;
 using Discord.Commands;
-
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,15 +70,53 @@ namespace DIGOS.Ambassador.Services.Characters
 			[NotNull] GlobalInfoContext db,
 			[NotNull] SocketCommandContext context,
 			[CanBeNull] IUser characterOwner,
-			[NotNull] string characterName
+			[CanBeNull] string characterName
 		)
 		{
+			if (characterOwner is null && characterName is null)
+			{
+				return await GetCurrentCharacterAsync(db, context, context.Message.Author);
+			}
+
 			if (characterOwner is null)
 			{
 				return await GetNamedCharacterAsync(db, characterName);
 			}
 
+			if (characterName.IsNullOrWhitespace())
+			{
+				return await GetCurrentCharacterAsync(db, context, characterOwner);
+			}
+
 			return await GetUserCharacterByNameAsync(db, context, characterOwner, characterName);
+		}
+
+		/// <summary>
+		/// Gets the current character a user has assumed the form of.
+		/// </summary>
+		/// <param name="db">The database where the characters are stored.</param>
+		/// <param name="context">The context of the user.</param>
+		/// <param name="discordUser">The user to get the current character of.</param>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] SocketCommandContext context,
+			[NotNull] IUser discordUser
+		)
+		{
+			var user = await db.GetOrRegisterUserAsync(discordUser);
+			if (user.CurrentCharacter is null)
+			{
+				var isCurrentUser = context.Message.Author.Id == discordUser.Id;
+				var errorMessage = isCurrentUser
+					? "You haven't assumed a character."
+					: "The user hasn't assumed a character.";
+
+				return RetrieveEntityResult<Character>.FromError(CommandError.ObjectNotFound, errorMessage);
+			}
+
+			return RetrieveEntityResult<Character>.FromSuccess(user.CurrentCharacter);
 		}
 
 		/// <summary>

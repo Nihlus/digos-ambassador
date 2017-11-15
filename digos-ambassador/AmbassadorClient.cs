@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services.Characters;
 using DIGOS.Ambassador.Services.Content;
+using DIGOS.Ambassador.Services.Discord;
 using DIGOS.Ambassador.Services.Dossiers;
 using DIGOS.Ambassador.Services.Entity;
 using DIGOS.Ambassador.Services.Feedback;
@@ -40,6 +41,7 @@ using DIGOS.Ambassador.TypeReaders;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+
 using JetBrains.Annotations;
 using log4net;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,6 +59,8 @@ namespace DIGOS.Ambassador
 		private static readonly ILog Log = LogManager.GetLogger(typeof(AmbassadorClient));
 
 		private readonly DiscordSocketClient Client;
+
+		private readonly DiscordService DiscordIntegration;
 
 		private readonly OwnedEntityService OwnedEntities;
 
@@ -83,6 +87,7 @@ namespace DIGOS.Ambassador
 			this.Client = new DiscordSocketClient();
 			this.Client.Log += OnDiscordLogEvent;
 
+			this.DiscordIntegration = new DiscordService();
 			this.Content = content;
 			this.Commands = new CommandService();
 			this.OwnedEntities = new OwnedEntityService();
@@ -93,6 +98,7 @@ namespace DIGOS.Ambassador
 
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)
+				.AddSingleton(this.DiscordIntegration)
 				.AddSingleton(this.Content)
 				.AddSingleton(this.Commands)
 				.AddSingleton(this.Roleplays)
