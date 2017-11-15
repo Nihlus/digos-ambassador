@@ -32,6 +32,12 @@
           <e p="bot.token" t="Include" />
         </e>
         <e p="Database" t="Include">
+          <e p="Appearance" t="Include">
+            <e p="Appearance.cs" t="Include" />
+            <e p="AppearanceComponent.cs" t="Include" />
+            <e p="GenitaliaType.cs" t="Include" />
+            <e p="SurfaceType.cs" t="Include" />
+          </e>
           <e p="Dossiers" t="Include">
             <e p="Dossier.cs" t="Include" />
           </e>
