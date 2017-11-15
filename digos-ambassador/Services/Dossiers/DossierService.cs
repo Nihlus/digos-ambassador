@@ -45,6 +45,8 @@ namespace DIGOS.Ambassador.Services.Dossiers
 	/// </summary>
 	public class DossierService
 	{
+		private readonly byte[] PDFSignature = { 0x25, 0x50, 0x44, 0x46 };
+
 		private readonly ContentService Content;
 
 		/// <summary>
@@ -240,7 +242,7 @@ namespace DIGOS.Ambassador.Services.Dossiers
 		{
 			var originalDossierPath = dossier.Path;
 			var newDossierPath = Path.GetFullPath(Path.Combine(this.Content.BaseDossierPath, $"{dossier.Title}.pdf"));
-			if (Directory.GetParent(dossier.Path).FullName != this.Content.BaseDossierPath)
+			if (Directory.GetParent(newDossierPath).FullName != this.Content.BaseDossierPath)
 			{
 				return ModifyEntityResult.FromError(CommandError.Exception, "Invalid data path.");
 			}
@@ -281,7 +283,7 @@ namespace DIGOS.Ambassador.Services.Dossiers
 		{
 			var dossierPath = Path.GetFullPath(Path.Combine(this.Content.BaseContentPath, "Dossiers", $"{dossier.Title}.pdf"));
 
-			if (Directory.GetParent(dossier.Path).FullName != this.Content.BaseDossierPath)
+			if (Directory.GetParent(dossierPath).FullName != this.Content.BaseDossierPath)
 			{
 				return ModifyEntityResult.FromError(CommandError.Exception, "Invalid data path.");
 			}
@@ -310,6 +312,15 @@ namespace DIGOS.Ambassador.Services.Dossiers
 							using (var dataFile = File.Create(dossierPath))
 							{
 								await dataStream.CopyToAsync(dataFile);
+
+								dataFile.Seek(0, SeekOrigin.Begin);
+								byte[] signature = new byte[4];
+								await dataFile.ReadAsync(signature, 0, 4);
+
+								if (!signature.SequenceEqual(this.PDFSignature))
+								{
+									return ModifyEntityResult.FromError(CommandError.Exception, "Invalid dossier format. PDF files are accepted.");
+								}
 							}
 						}
 						catch (Exception e)

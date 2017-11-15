@@ -30,6 +30,7 @@
           </e>
           <e p="Dossiers" t="Include">
             <e p="DIGOS-██.pdf" t="Include" />
+            <e p="NotNasty.pdf" t="Include" />
           </e>
           <e p="Sass" t="Include">
             <e p="sass-nsfw.txt" t="Include" />
