@@ -27,13 +27,14 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
+using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services.Entity;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using DIGOS.Ambassador.Database.Users;
+
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -46,13 +47,17 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 	{
 		private readonly CommandService Commands;
 
+		private readonly OwnedEntityService OwnedEntities;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="RoleplayService"/> class.
 		/// </summary>
 		/// <param name="commands">The application's command service.</param>
-		public RoleplayService(CommandService commands)
+		/// <param name="entityService">The application's owned entity service.</param>
+		public RoleplayService(CommandService commands, OwnedEntityService entityService)
 		{
 			this.Commands = commands;
+			this.OwnedEntities = entityService;
 		}
 
 		/// <summary>
@@ -315,12 +320,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		)
 		{
 			var userRoleplays = GetUserRoleplays(db, discordUser);
-			if (await userRoleplays.CountAsync() <= 0)
-			{
-				return true;
-			}
-
-			return !await userRoleplays.AnyAsync(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase));
+			return await this.OwnedEntities.IsEntityNameUniqueForUserAsync(userRoleplays, roleplayName);
 		}
 
 		/// <summary>
@@ -564,29 +564,21 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		/// <param name="newOwner">The new owner.</param>
 		/// <param name="roleplay">The roleplay to transfer.</param>
 		/// <returns>An execution result which may or may not have succeeded.</returns>
-		public async Task<ExecuteResult> TransferRoleplayOwnershipAsync
+		public async Task<ModifyEntityResult> TransferRoleplayOwnershipAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] IUser newOwner,
 			[NotNull] Roleplay roleplay
 		)
 		{
-			if (roleplay.IsOwner(newOwner))
-			{
-				return ExecuteResult.FromError(CommandError.Unsuccessful, "That person already owns the roleplay.");
-			}
-
-			if (GetUserRoleplays(db, newOwner).Any(rp => rp.Name.Equals(roleplay.Name, StringComparison.OrdinalIgnoreCase)))
-			{
-				return ExecuteResult.FromError(CommandError.MultipleMatches, $"That user already owns a roleplay named {roleplay.Name}. Please rename it first.");
-			}
-
-			var newUser = await db.GetOrRegisterUserAsync(newOwner);
-			roleplay.Owner = newUser;
-
-			await db.SaveChangesAsync();
-
-			return ExecuteResult.FromSuccess();
+			var newOwnerRoleplays = GetUserRoleplays(db, newOwner);
+			return await this.OwnedEntities.TransferEntityOwnershipAsync
+			(
+				db,
+				newOwner,
+				newOwnerRoleplays,
+				roleplay
+			);
 		}
 
 		/// <summary>

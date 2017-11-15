@@ -24,12 +24,13 @@ using System;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services.Feedback;
 
 using Discord;
 using Discord.Commands;
-using DIGOS.Ambassador.Database.Users;
+
 using Humanizer;
 using JetBrains.Annotations;
 using static DIGOS.Ambassador.Permissions.Permission;

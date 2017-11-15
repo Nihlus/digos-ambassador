@@ -24,11 +24,11 @@ using System.Collections.Generic;
 
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.ServerInfo;
+using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Tests.Database;
 
 using Discord;
-using DIGOS.Ambassador.Database.Users;
 using Moq;
 using Xunit;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;

@@ -20,34 +20,37 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Database.Appearances;
+using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
+
+using Discord;
 
 namespace DIGOS.Ambassador.Database.Characters
 {
 	/// <summary>
 	/// Represents a user's character.
 	/// </summary>
-	public class Character
+	public class Character : IOwnedNamedEntity
 	{
 		/// <summary>
 		/// Gets or sets the character's unique key.
 		/// </summary>
 		public uint CharacterID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the user that owns this character.
-		/// </summary>
+		/// <inheritdoc />
 		public User Owner { get; set; }
 
-		/// <summary>
-		/// Gets or sets the user-unique name of the character.
-		/// </summary>
+		/// <inheritdoc />
 		public string Name { get; set; }
+
+		/// <inheritdoc />
+		public string EntityTypeDisplayName => nameof(Character);
 
 		/// <summary>
 		/// Gets or sets a URL pointing to the character's avatar.
 		/// </summary>
-		public string Avatar { get; set; }
+		public string AvatarUrl { get; set; }
 
 		/// <summary>
 		/// Gets or sets the nickname that a user should have when playing as the character.
@@ -63,5 +66,33 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// Gets or sets the full description of the character.
 		/// </summary>
 		public string Description { get; set; }
+
+		/// <summary>
+		/// Gets or sets the character's default appearance.
+		/// </summary>
+		public Appearance DefaultAppearance { get; set; }
+
+		/// <summary>
+		/// Gets or sets the character's transformed appearance.
+		/// </summary>
+		public Appearance TransformedAppearance { get; set; }
+
+		/// <inheritdoc />
+		public bool IsOwner(User user)
+		{
+			return IsOwner(user.DiscordID);
+		}
+
+		/// <inheritdoc />
+		public bool IsOwner(IUser user)
+		{
+			return IsOwner(user.Id);
+		}
+
+		/// <inheritdoc />
+		public bool IsOwner(ulong userID)
+		{
+			return this.Owner.DiscordID == userID;
+		}
 	}
 }

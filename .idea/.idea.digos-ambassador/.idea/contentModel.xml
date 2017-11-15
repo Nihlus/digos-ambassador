@@ -32,7 +32,7 @@
           <e p="bot.token" t="Include" />
         </e>
         <e p="Database" t="Include">
-          <e p="Appearance" t="Include">
+          <e p="Appearances" t="Include">
             <e p="Appearance.cs" t="Include" />
             <e p="AppearanceComponent.cs" t="Include" />
             <e p="GenitaliaType.cs" t="Include" />
@@ -45,6 +45,9 @@
             <e p="Dossier.cs" t="Include" />
           </e>
           <e p="GlobalInfoContext.cs" t="Include" />
+          <e p="Interfaces" t="Include">
+            <e p="IOwnedNamedEntity.cs" t="Include" />
+          </e>
           <e p="Kinks" t="Include">
             <e p="Kink.cs" t="Include" />
             <e p="KinkCategory.cs" t="Include" />
@@ -101,6 +104,9 @@
         </e>
         <e p="Program.cs" t="Include" />
         <e p="Services" t="Include">
+          <e p="Characters" t="Include">
+            <e p="CharacterService.cs" t="Include" />
+          </e>
           <e p="Content" t="Include">
             <e p="ContentService.cs" t="Include" />
           </e>
@@ -112,6 +118,7 @@
             <e p="DeleteEntityResult.cs" t="Include" />
             <e p="ModifyEntityAction.cs" t="Include" />
             <e p="ModifyEntityResult.cs" t="Include" />
+            <e p="OwnedEntityService.cs" t="Include" />
             <e p="RetrieveEntityResult.cs" t="Include" />
           </e>
           <e p="Feedback" t="Include">

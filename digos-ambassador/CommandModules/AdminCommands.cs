@@ -27,12 +27,11 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.FList.Kinks;
 using DIGOS.Ambassador.Services.Feedback;
 
 using Discord.Commands;
-using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.Database.Users;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;

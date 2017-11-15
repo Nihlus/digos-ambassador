@@ -22,8 +22,8 @@
 
 using System;
 using System.Threading.Tasks;
-using Discord;
 using DIGOS.Ambassador.Database.Users;
+using Discord;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Roleplaying

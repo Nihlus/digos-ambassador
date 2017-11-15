@@ -22,15 +22,18 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Discord;
+
+using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
+
+using Discord;
 
 namespace DIGOS.Ambassador.Database.Roleplaying
 {
 	/// <summary>
 	/// Represents a saved roleplay.
 	/// </summary>
-	public class Roleplay
+	public class Roleplay : IOwnedNamedEntity
 	{
 		/// <summary>
 		/// Gets or sets the unique ID of the roleplay.
@@ -57,9 +60,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		public ulong ActiveChannelID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the owner of the roleplay.
-		/// </summary>
+		/// <inheritdoc />
 		public User Owner { get; set; }
 
 		/// <summary>
@@ -77,10 +78,11 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		public List<User> Participants { get; set; }
 
-		/// <summary>
-		/// Gets or sets the name of the roleplay.
-		/// </summary>
+		/// <inheritdoc />
 		public string Name { get; set; }
+
+		/// <inheritdoc />
+		public string EntityTypeDisplayName => nameof(Roleplay);
 
 		/// <summary>
 		/// Gets or sets the summary of the roleplay.
@@ -92,31 +94,19 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		public List<UserMessage> Messages { get; set; }
 
-		/// <summary>
-		/// Determines whether or not the given user is the owner of the roleplay.
-		/// </summary>
-		/// <param name="user">The user.</param>
-		/// <returns>true if the user is the owner; otherwise, false.</returns>
+		/// <inheritdoc />
 		public bool IsOwner(User user)
 		{
 			return IsOwner(user.DiscordID);
 		}
 
-		/// <summary>
-		/// Determines whether or not the given user is the owner of the roleplay.
-		/// </summary>
-		/// <param name="user">The user.</param>
-		/// <returns>true if the user is the owner; otherwise, false.</returns>
+		/// <inheritdoc />
 		public bool IsOwner(IUser user)
 		{
 			return IsOwner(user.Id);
 		}
 
-		/// <summary>
-		/// Determines whether or not the given user ID is the owner of the roleplay.
-		/// </summary>
-		/// <param name="userID">The ID of the user.</param>
-		/// <returns>true if the user is the owner; otherwise, false.</returns>
+		/// <inheritdoc />
 		public bool IsOwner(ulong userID)
 		{
 			return this.Owner.DiscordID == userID;

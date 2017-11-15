@@ -22,7 +22,7 @@
 
 using System;
 
-namespace DIGOS.Ambassador.Database.Appearance
+namespace DIGOS.Ambassador.Database.Appearances
 {
 	/// <summary>
 	/// Represents different types of genitalia a character can have.

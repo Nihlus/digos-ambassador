@@ -21,8 +21,8 @@
 //
 
 using System.Collections.Generic;
-using Discord;
 using DIGOS.Ambassador.Database.Users;
+using Discord;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.ServerInfo

@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Database.Appearance
+namespace DIGOS.Ambassador.Database.Appearances
 {
 	/// <summary>
 	/// Represents a distinct part of a character's appearance.
