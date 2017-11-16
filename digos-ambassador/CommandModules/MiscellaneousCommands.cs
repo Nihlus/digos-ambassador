@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Services.Feedback;
 
 using Discord;
 using Discord.Commands;
+using Discord.Rest;
 using JetBrains.Annotations;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -65,6 +66,29 @@ namespace DIGOS.Ambassador.CommandModules
 			this.Content = content;
 			this.Feedback = feedback;
 			this.Services = services;
+		}
+
+		/// <summary>
+		/// Instructs Amby to contact a user over DM.
+		/// </summary>
+		/// <param name="discordUser">The user to contact.</param>
+		[UsedImplicitly]
+		[Command("contact", RunMode = RunMode.Async)]
+		[Summary("Instructs Amby to contact a user over DM.")]
+		public async Task ContactUserAsync([NotNull] IUser discordUser)
+		{
+			var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
+
+			var eb = this.Feedback.CreateFeedbackEmbed
+			(
+				discordUser,
+				Color.DarkPurple,
+				$"Hello there, {discordUser.Mention}. I've been instructed to initiate... negotiations... with you. \nA good place to start would be the \"!help <topic>\" command."
+			);
+
+			await userDMChannel.SendMessageAsync(string.Empty, false, eb);
+			await userDMChannel.CloseAsync();
+			await this.Feedback.SendConfirmationAsync(this.Context, "User contacted.");
 		}
 
 		/// <summary>

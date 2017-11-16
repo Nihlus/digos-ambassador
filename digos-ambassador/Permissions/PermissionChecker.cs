@@ -45,11 +45,21 @@ namespace DIGOS.Ambassador.Permissions
 		/// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
 		public static async Task<bool> HasPermissionAsync
 		(
-			[NotNull] IGuild discordServer,
+			[CanBeNull] IGuild discordServer,
 			[NotNull] User user,
 			[NotNull] RequiredPermission requiredPermission
 		)
 		{
+			if (discordServer is null)
+			{
+				return DefaultPermissions.DefaultPermissionSet.Any
+				(
+					dp =>
+						dp.Permission == requiredPermission.Permission &&
+						dp.Target.HasFlag(requiredPermission.Target)
+				);
+			}
+
 			// The server owner always has all permissions by default
 			if (discordServer.OwnerId == user.DiscordID)
 			{

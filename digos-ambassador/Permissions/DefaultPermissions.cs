@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.Linq;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
@@ -48,6 +49,11 @@ namespace DIGOS.Ambassador.Permissions
 			EditRoleplay,
 			ReplayRoleplay
 		};
+
+		/// <summary>
+		/// Gets the default set of local permissions.
+		/// </summary>
+		public static IReadOnlyList<LocalPermission> DefaultPermissionSet => Permissions.Select(p => new LocalPermission { Permission = p, Target = Self }).ToList();
 
 		/// <summary>
 		/// Grants the specified user their default permissions on the given server.

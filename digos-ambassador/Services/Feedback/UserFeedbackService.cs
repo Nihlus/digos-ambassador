@@ -96,8 +96,15 @@ namespace DIGOS.Ambassador.Services.Feedback
 			await SendEmbedAsync(context, eb);
 		}
 
+		/// <summary>
+		/// Creates a feedback embed.
+		/// </summary>
+		/// <param name="invoker">The invoking mentionable.</param>
+		/// <param name="color">The colour of the embed.</param>
+		/// <param name="contents">The contents of the embed.</param>
+		/// <returns>A feedback embed.</returns>
 		[NotNull]
-		private EmbedBuilder CreateFeedbackEmbed([NotNull] IMentionable invoker, Color color, [NotNull] string contents)
+		public EmbedBuilder CreateFeedbackEmbed([NotNull] IMentionable invoker, Color color, [NotNull] string contents)
 		{
 			var eb = new EmbedBuilder();
 			eb.WithColor(color);
