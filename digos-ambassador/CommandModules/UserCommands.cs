@@ -36,6 +36,7 @@ using JetBrains.Annotations;
 
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
+using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -43,10 +44,11 @@ using static Discord.Commands.RunMode;
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
-	/// User-related commands.
+	/// User-related commands, such as viewing or editing info about a specific user.
 	/// </summary>
 	[UsedImplicitly]
 	[Group("user")]
+	[Summary("User-related commands, such as viewing or editing info about a specific user.")]
 	public class UserCommands : ModuleBase<SocketCommandContext>
 	{
 		private readonly UserFeedbackService Feedback;
@@ -83,7 +85,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="discordUser">The Discord user to show the info of.</param>
 		[UsedImplicitly]
 		[Command("info", RunMode = Async)]
-		[Summary("Shows known information about the mentioned user.")]
+		[Summary("Shows known information about the target user.")]
 		public async Task ShowInfoAsync(IUser discordUser)
 		{
 			User user;
@@ -219,6 +221,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[UsedImplicitly]
 			[Command("class", RunMode = Async)]
 			[Summary("Sets the target user's class.")]
+			[RequireContext(Guild)]
 			[RequirePermission(SetClass, Other)]
 			public async Task SetUserClassAsync(IUser discordUser, UserClass userClass)
 			{
@@ -266,6 +269,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[UsedImplicitly]
 			[Command("bio", RunMode = Async)]
 			[Summary("Sets the target user's bio.")]
+			[RequireContext(Guild)]
 			[RequirePermission(EditUser, Other)]
 			public async Task SetUserBioAsync(IUser discordUser, string bio)
 			{
@@ -283,12 +287,12 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 
 			/// <summary>
-			/// Sets the invoking user's timezone hour offset.
+			/// Sets the invoking user's UTC timezone hour offset.
 			/// </summary>
 			/// <param name="timezone">The user's new timezone hour offset.</param>
 			[UsedImplicitly]
 			[Command("timezone", RunMode = Async)]
-			[Summary("Sets the invoking user's timezone hour offset.")]
+			[Summary("Sets the invoking user's UTC timezone hour offset.")]
 			[RequirePermission(EditUser)]
 			public async Task SetUserTimezoneAsync(int timezone)
 			{
@@ -306,13 +310,14 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 
 			/// <summary>
-			/// Sets the target user's timezone hour offset.
+			/// Sets the target user's UTC timezone hour offset.
 			/// </summary>
 			/// <param name="discordUser">The Discord user to change the timezone of.</param>
 			/// <param name="timezone">The user's new timezone hour offset.</param>
 			[UsedImplicitly]
 			[Command("timezone", RunMode = Async)]
-			[Summary("Sets the target user's timezone hour offset.")]
+			[Summary("Sets the target user's UTC timezone hour offset.")]
+			[RequireContext(Guild)]
 			[RequirePermission(EditUser, Other)]
 			public async Task SetUserTimezoneAsync(IUser discordUser, int timezone)
 			{

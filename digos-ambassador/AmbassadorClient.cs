@@ -197,6 +197,7 @@ namespace DIGOS.Ambassador
 			}
 
 			var context = new SocketCommandContext(this.Client, message);
+
 			var result = await this.Commands.ExecuteAsync(context, argumentPos, this.Services);
 
 			if (!result.IsSuccess)

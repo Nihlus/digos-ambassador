@@ -41,6 +41,7 @@ using Discord.Commands;
 using JetBrains.Annotations;
 
 using static DIGOS.Ambassador.Permissions.Permission;
+using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -48,11 +49,12 @@ using static Discord.Commands.RunMode;
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
-	/// Commands for interacting with characters.
+	/// Commands for creating, editing, and interacting with user characters.
 	/// </summary>
 	[UsedImplicitly]
 	[Alias("character", "char", "ch")]
 	[Group("character")]
+	[Summary("Commands for creating, editing, and interacting with user characters.")]
 	public class CharacterCommands : ModuleBase<SocketCommandContext>
 	{
 		private readonly DiscordService Discord;
@@ -146,7 +148,10 @@ namespace DIGOS.Ambassador.CommandModules
 					await userDMChannel.SendFileAsync(ds, $"{character.Name}_description.txt");
 				}
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
+				if (!this.Context.IsPrivate)
+				{
+					await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
+				}
 			}
 			else
 			{
@@ -290,7 +295,8 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Alias("assume", "become", "transform", "active")]
 		[Command("assume", RunMode = Async)]
-		[Summary("Sets the named characters as the user's current character.")]
+		[Summary("Sets the named character as the user's current character.")]
+		[RequireContext(Guild)]
 		public async Task AssumeCharacterFormAsync([NotNull] string characterName)
 		{
 			using (var db = new GlobalInfoContext())
@@ -330,6 +336,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[Alias("clear", "drop", "default")]
 		[Command("clear", RunMode = Async)]
 		[Summary("Clears any active characters from you, restoring your default form.")]
+		[RequireContext(Guild)]
 		public async Task ClearCharacterFormAsync()
 		{
 			using (var db = new GlobalInfoContext())

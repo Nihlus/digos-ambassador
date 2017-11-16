@@ -41,9 +41,10 @@ using static Discord.Commands.RunMode;
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
-	/// Dossier-related commands.
+	/// Commands for viewing, adding, and editing dossier entries.
 	/// </summary>
 	[Group("dossier")]
+	[Summary("Commands for viewing, adding, and editing dossier entries.")]
 	public class DossierCommands : ModuleBase<SocketCommandContext>
 	{
 		private readonly UserFeedbackService Feedback;

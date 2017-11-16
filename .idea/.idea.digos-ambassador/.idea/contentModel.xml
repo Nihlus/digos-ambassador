@@ -105,6 +105,7 @@
           <e p="PermissionChecker.cs" t="Include" />
           <e p="PermissionTarget.cs" t="Include" />
           <e p="Preconditions" t="Include">
+            <e p="PrioritizedPreconditionAttribute.cs" t="Include" />
             <e p="RequireActiveRoleplayAttribute.cs" t="Include" />
             <e p="RequirePermissionAttribute.cs" t="Include" />
           </e>

@@ -66,7 +66,6 @@ namespace DIGOS.Ambassador.Permissions
 				return true;
 			}
 
-			// First, check if the user has the permission on a global level
 			using (var db = new GlobalInfoContext())
 			{
 				return await HasPermissionAsync(db, discordServer, user, requiredPermission);

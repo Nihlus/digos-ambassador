@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 	/// This attribute can be attached to Discord.Net.Commands module commands to restrict them to certain predefined
 	/// permissions.
 	/// </summary>
-	public class RequirePermissionAttribute : PreconditionAttribute
+	public class RequirePermissionAttribute : PrioritizedPreconditionAttribute
 	{
 		private readonly RequiredPermission RequiredPermission;
 
@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 		}
 
 		/// <inheritdoc />
-		public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+		protected override async Task<PreconditionResult> CheckPrioritizedPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
 		{
 			using (var db = new GlobalInfoContext())
 			{

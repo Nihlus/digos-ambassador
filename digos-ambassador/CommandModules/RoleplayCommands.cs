@@ -38,6 +38,7 @@ using Humanizer;
 using JetBrains.Annotations;
 
 using static DIGOS.Ambassador.Permissions.Permission;
+using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -46,11 +47,12 @@ using static Discord.Commands.RunMode;
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
-	/// Commands for interacting with channel roleplays.
+	/// Commands for interacting with and managing channel roleplays.
 	/// </summary>
 	[UsedImplicitly]
 	[Alias("roleplay", "rp")]
 	[Group("roleplay")]
+	[Summary("Commands for interacting with and managing channel roleplays.")]
 	public class RoleplayCommands : ModuleBase<SocketCommandContext>
 	{
 		private readonly RoleplayService Roleplays;
@@ -222,6 +224,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("join", RunMode = Async)]
 		[Summary("Joins the roleplay owned by the given person with the given name.")]
+		[RequireContext(Guild)]
 		[RequirePermission(JoinRoleplay)]
 		public async Task JoinRoleplayAsync([CanBeNull] string roleplayName = null, [CanBeNull] IUser roleplayOwner = null)
 		{
@@ -361,6 +364,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("make-current")]
 		[Summary("Makes the roleplay with the given name current in the current channel.")]
+		[RequireContext(Guild)]
 		public async Task MakeRoleplayCurrentAsync(string roleplayName)
 		{
 			using (var db = new GlobalInfoContext())
@@ -393,6 +397,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("start")]
 		[Summary("Starts the roleplay with the given name.")]
+		[RequireContext(Guild)]
 		public async Task StartRoleplayAsync(string roleplayName)
 		{
 			using (var db = new GlobalInfoContext())
@@ -460,6 +465,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("stop", RunMode = Async)]
 		[Summary("Stops the current roleplay.")]
+		[RequireContext(Guild)]
 		[RequireActiveRoleplay(requireOwner: true)]
 		public async Task StopRoleplayAsync()
 		{
@@ -488,6 +494,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("include-previous", RunMode = Async)]
 		[Summary("Includes previous messages into the roleplay, starting at the given message.")]
+		[RequireContext(Guild)]
 		[RequireActiveRoleplay(requireOwner: true)]
 		public async Task IncludePreviousMessagesAsync
 		(
@@ -671,7 +678,8 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="newRoleplayName">The roleplay's new name.</param>
 			[UsedImplicitly]
 			[Command("name", RunMode = Async)]
-			[Summary("Sets the new name of the named roleplay.")]
+			[Summary("Sets the new name of the current roleplay.")]
+			[RequireContext(Guild)]
 			[RequireActiveRoleplay(requireOwner: true)]
 			public async Task SetRoleplayNameAsync(string newRoleplayName)
 			{
@@ -726,6 +734,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[UsedImplicitly]
 			[Command("summary", RunMode = Async)]
 			[Summary("Sets the summary of the current roleplay.")]
+			[RequireContext(Guild)]
 			[RequireActiveRoleplay(requireOwner: true)]
 			public async Task SetRoleplaySummaryAsync(string newRoleplaySummary)
 			{
@@ -781,7 +790,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[UsedImplicitly]
 			[Command("nsfw", RunMode = Async)]
 			[Summary("Sets a value indicating whether or not the current roleplay is NSFW. This restricts which channels it can be made active in.")]
-			[RequireNsfw]
+			[RequireContext(Guild)]
 			[RequireActiveRoleplay(requireOwner: true)]
 			public async Task SetRoleplayIsNSFW(bool isNSFW)
 			{
@@ -801,7 +810,6 @@ namespace DIGOS.Ambassador.CommandModules
 			[UsedImplicitly]
 			[Command("nsfw", RunMode = Async)]
 			[Summary("Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.")]
-			[RequireNsfw]
 			public async Task SetRoleplayIsNSFW(string roleplayName, bool isNSFW)
 			{
 				using (var db = new GlobalInfoContext())
@@ -838,6 +846,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[UsedImplicitly]
 			[Command("public", RunMode = Async)]
 			[Summary("Sets a value indicating whether or not the current roleplay is public. This restricts replays to participants.")]
+			[RequireContext(Guild)]
 			[RequireActiveRoleplay(requireOwner: true)]
 			public async Task SetRoleplayIsPublic(bool isPublic)
 			{

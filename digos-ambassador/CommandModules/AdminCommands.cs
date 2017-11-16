@@ -35,6 +35,7 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 using Kink = DIGOS.Ambassador.Database.Kinks.Kink;
 
@@ -43,10 +44,11 @@ using Kink = DIGOS.Ambassador.Database.Kinks.Kink;
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
-	/// Admin and owner-only commands. These directly affect the bot on a global scale.
+	/// Administrative commands that directly affect the bot on a global scale.
 	/// </summary>
 	[UsedImplicitly]
 	[Group("admin")]
+	[Summary("Administrative commands that directly affect the bot on a global scale.")]
 	public class AdminCommands : ModuleBase<SocketCommandContext>
 	{
 		private readonly UserFeedbackService Feedback;
@@ -67,6 +69,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("update-kinks", RunMode = Async)]
 		[Summary("Updates the kink list with data from F-list.")]
+		[RequireContext(DM)]
 		[RequireOwner]
 		public async Task UpdateKinkDatabaseAsync()
 		{
@@ -129,6 +132,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[Alias("wipe-db", "reset-db")]
 		[Command("wipe-db")]
 		[Summary("Wipes the database, resetting it to its initial state.")]
+		[RequireContext(DM)]
 		[RequireOwner]
 		public async Task ResetDatabaseAsync()
 		{

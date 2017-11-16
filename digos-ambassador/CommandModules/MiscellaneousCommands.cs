@@ -39,10 +39,11 @@ using JetBrains.Annotations;
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
-	/// Miscellaneous commands - just for fun, testing, etc.
+	/// Assorted commands that don't really fit anywhere - just for fun, testing, etc.
 	/// </summary>
 	[UsedImplicitly]
 	[Name("miscellaneous")]
+	[Summary("Assorted commands that don't really fit anywhere - just for fun, testing, etc.")]
 	public class MiscellaneousCommands : ModuleBase<SocketCommandContext>
 	{
 		private readonly CommandService Commands;
@@ -77,6 +78,18 @@ namespace DIGOS.Ambassador.CommandModules
 		[Summary("Instructs Amby to contact a user over DM.")]
 		public async Task ContactUserAsync([NotNull] IUser discordUser)
 		{
+			if (discordUser.Id == this.Context.Client.CurrentUser.Id)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, "That's a splendid idea - at least then, I'd get an intelligent reply.");
+				return;
+			}
+
+			if (discordUser.IsBot)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, "I could do that, but I doubt I'd get a reply.");
+				return;
+			}
+
 			var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
 
 			var eb = this.Feedback.CreateFeedbackEmbed
@@ -105,14 +118,49 @@ namespace DIGOS.Ambassador.CommandModules
 		}
 
 		/// <summary>
-		/// Lists available commands.
+		/// Lists available commands modules.
+		/// </summary>
+		[UsedImplicitly]
+		[Alias("help", "halp", "hlep", "commands")]
+		[Command("help", RunMode = RunMode.Async)]
+		[Summary("Lists available command modules.")]
+		public async Task HelpAsync()
+		{
+			var eb = new EmbedBuilder();
+
+			eb.WithColor(Color.DarkPurple);
+			eb.WithTitle("Available command modules");
+			eb.WithDescription
+			(
+				"To view commands in a specific module, use \"!help <topic>\", where the topic is a search string.\n" +
+				"\n" +
+				"Each command (in bold) can take zero or more parameters. These are listed after the short description " +
+				"that follows each command. Parameters in brackets are optional."
+			);
+
+			foreach (var module in this.Commands.Modules.Where(m => !m.IsSubmodule))
+			{
+				eb.AddField(module.Name, module.Summary);
+			}
+
+			var userChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
+			await userChannel.SendMessageAsync(string.Empty, false, eb);
+
+			if (!this.Context.IsPrivate)
+			{
+				await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
+			}
+		}
+
+		/// <summary>
+		/// Lists available commands based on a search string.
 		/// </summary>
 		/// <param name="searchText">The text to search the command handler for.</param>
 		[UsedImplicitly]
 		[Alias("help", "halp", "hlep", "commands")]
 		[Command("help", RunMode = RunMode.Async)]
-		[Summary("Lists available commands")]
-		public async Task HelpAsync([CanBeNull] string searchText = null)
+		[Summary("Lists available commands that match the given search text.")]
+		public async Task HelpAsync([CanBeNull] string searchText)
 		{
 			IReadOnlyList<CommandInfo> searchResults;
 			if (searchText.IsNullOrEmpty())
@@ -127,26 +175,33 @@ namespace DIGOS.Ambassador.CommandModules
 					c.Aliases.Any
 					(
 						a =>
-						a.Contains(searchText)
+						a.Contains(searchText, StringComparison.OrdinalIgnoreCase)
 					)
-					|| c.Parameters.Any
-					(
-						p => p.Name.Contains(searchText)
-					)
+					|| c.Module.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
 				)
-				.ToList();
+				.Distinct().ToList();
 			}
 
 			var userChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
+			if (searchResults.Count <= 0)
+			{
+				await this.Feedback.SendWarningAsync(this.Context, "No matching commands found.");
+				return;
+			}
 
 			var modules = GetTopLevelModules(searchResults.Select(ci => ci.Module)).Distinct();
 
 			foreach (var module in modules)
 			{
-				var eb = new EmbedBuilder();
+				var availableEmbed = new EmbedBuilder();
 
-				eb.WithColor(Color.Blue);
-				eb.WithDescription($"Available commands in {module.Name}");
+				availableEmbed.WithColor(Color.Blue);
+				availableEmbed.WithDescription($"Available commands in {module.Name}");
+
+				var unavailableEmbed = new EmbedBuilder();
+
+				unavailableEmbed.WithColor(Color.Red);
+				unavailableEmbed.WithDescription($"Unavailable commands in {module.Name}");
 
 				var matchingCommandsInModule = module.Commands.Union
 				(
@@ -162,17 +217,30 @@ namespace DIGOS.Ambassador.CommandModules
 					var hasPermission = await command.CheckPreconditionsAsync(this.Context, this.Services);
 					if (hasPermission.IsSuccess)
 					{
-						eb.AddField(command.Aliases.First(), $"{command.Summary}\n{this.Feedback.BuildParameterList(command)}");
+						availableEmbed.AddField(command.Aliases.First(), $"{command.Summary}\n{this.Feedback.BuildParameterList(command)}");
+					}
+					else
+					{
+						unavailableEmbed.AddField(command.Aliases.First(), $"*{hasPermission.ErrorReason}*\n\n{command.Summary} \n{this.Feedback.BuildParameterList(command)}");
 					}
 				}
 
-				if (eb.Fields.Count > 0)
+				if (availableEmbed.Fields.Count > 0)
 				{
-					await userChannel.SendMessageAsync(string.Empty, false, eb);
+					await userChannel.SendMessageAsync(string.Empty, false, availableEmbed);
+				}
+
+				if (unavailableEmbed.Fields.Count > 0)
+				{
+					await userChannel.SendMessageAsync(string.Empty, false, unavailableEmbed);
 				}
 			}
 
-			await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
+			if (!this.Context.IsPrivate)
+			{
+				await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
+			}
+
 			await userChannel.CloseAsync();
 		}
 

@@ -47,10 +47,11 @@ using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 namespace DIGOS.Ambassador.CommandModules
 {
 	/// <summary>
-	/// Permission-related commands.
+	/// Permission-related commands for granting, revoking and checking user permissions.
 	/// </summary>
 	[UsedImplicitly]
 	[Group("permission")]
+	[Summary("Permission-related commands for granting, revoking and checking user permissions.")]
 	public class PermissionCommands : ModuleBase<SocketCommandContext>
 	{
 		private readonly UserFeedbackService Feedback;
