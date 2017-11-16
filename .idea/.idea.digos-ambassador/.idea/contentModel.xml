@@ -28,6 +28,7 @@
           <e p="Databases" t="Include">
             <e p="global.db" t="Include" />
           </e>
+          <e p="FileSignatures.cs" t="Include" />
           <e p="Sass" t="Include">
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
@@ -82,6 +83,7 @@
         </e>
         <e p="Extensions" t="Include">
           <e p="ListExtensions.cs" t="Include" />
+          <e p="StreamExtensions.cs" t="Include" />
           <e p="StringExtensions.cs" t="Include" />
           <e p="TypeExtensions.cs" t="Include" />
         </e>
