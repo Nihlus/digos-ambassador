@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Services.Content
 		/// </summary>
 		public ContentService()
 		{
-			this.BaseRemoteContentUri = new Uri("https://github.com/Nihlus/digos-ambassador/raw/master/digos-ambassador/Content/");
+			this.BaseRemoteContentUri = new Uri("https://raw.githubusercontent.com/Nihlus/digos-ambassador/master/digos-ambassador/Content/");
 			this.DefaultAvatarUri = new Uri(this.BaseRemoteContentUri, "Avatars/Default/Discord_DIGOS.png");
 
 			this.AmbyPortraitUri = new Uri(this.BaseRemoteContentUri, "Portraits/amby-irbynx-3.png");
