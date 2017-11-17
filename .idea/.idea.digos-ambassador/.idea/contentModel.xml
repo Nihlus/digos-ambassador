@@ -29,6 +29,9 @@
             <e p="global.db" t="Include" />
           </e>
           <e p="FileSignatures.cs" t="Include" />
+          <e p="Portraits" t="Include">
+            <e p="amby-irbynx-3.png" t="Include" />
+          </e>
           <e p="Sass" t="Include">
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />

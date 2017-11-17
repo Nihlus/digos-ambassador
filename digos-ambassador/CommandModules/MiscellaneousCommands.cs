@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Services.Feedback;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
+using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -73,7 +74,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="discordUser">The user to contact.</param>
 		[UsedImplicitly]
-		[Command("contact", RunMode = RunMode.Async)]
+		[Command("contact", RunMode = Async)]
 		[Summary("Instructs Amby to contact a user over DM.")]
 		public async Task ContactUserAsync([NotNull] IUser discordUser)
 		{
@@ -107,7 +108,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Sasses the user in a DIGOS fashion.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("sass", RunMode = RunMode.Async)]
+		[Command("sass", RunMode = Async)]
 		[Summary("Sasses the user in a DIGOS fashion.")]
 		public async Task SassAsync()
 		{
@@ -117,11 +118,56 @@ namespace DIGOS.Ambassador.CommandModules
 		}
 
 		/// <summary>
+		/// Shows some information about Amby's metaworkings.
+		/// </summary>
+		[UsedImplicitly]
+		[Alias("info", "information", "about")]
+		[Command("info", RunMode = Async)]
+		[Summary("Shows some information about Amby's metaworkings.")]
+		public async Task InfoAsync()
+		{
+			var eb = new EmbedBuilder();
+
+			eb.WithAuthor(this.Context.Client.CurrentUser);
+			eb.WithColor(Color.DarkPurple);
+			eb.WithTitle("The DIGOS Ambassador (\"Amby\")");
+			eb.WithImageUrl(this.Content.AmbyPortraitUri.ToString());
+
+			eb.WithDescription
+			(
+				"Amby is a Discord bot written in C# using the Discord.Net and EF Core frameworks. As an ambassador for " +
+				"the DIGOS community, she provides a number of useful services for communities with similar interests - " +
+				"namely, roleplaying, transformation, weird and wonderful sexual kinks, and much more.\n" +
+				"\n" +
+				"Amby is free and open source software, licensed under the GPLv3. All of her source code can be freely " +
+				"viewed and improved on Github at https://github.com/Nihlus/digos-ambassador. You are free to " +
+				"run your own instance of Amby, redistribute her code, and modify it to your heart's content. If you're " +
+				"not familiar with the GPL, an excellent summary is available here: " +
+				"https://choosealicense.com/licenses/gpl-3.0/.\n" +
+				"\n" +
+				"Any bugs you encounter should be reported on Github, following the issue template provided there. The " +
+				"same holds for feature requests, for which a separate template is provided. Contributions in the form " +
+				"of code, artwork, bug triaging, or quality control testing is always greatly appreciated!\n" +
+				"\n" +
+				"Stay sharky~\n" +
+				"- Amby"
+			);
+
+			var userChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
+			await userChannel.SendMessageAsync(string.Empty, false, eb);
+
+			if (!this.Context.IsPrivate)
+			{
+				await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
+			}
+		}
+
+		/// <summary>
 		/// Lists available commands modules.
 		/// </summary>
 		[UsedImplicitly]
 		[Alias("help", "halp", "hlep", "commands")]
-		[Command("help", RunMode = RunMode.Async)]
+		[Command("help", RunMode = Async)]
 		[Summary("Lists available command modules.")]
 		public async Task HelpAsync()
 		{
@@ -157,7 +203,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="searchText">The text to search the command handler for.</param>
 		[UsedImplicitly]
 		[Alias("help", "halp", "hlep", "commands")]
-		[Command("help", RunMode = RunMode.Async)]
+		[Command("help", RunMode = Async)]
 		[Summary("Lists available commands that match the given search text.")]
 		public async Task HelpAsync([CanBeNull] string searchText)
 		{

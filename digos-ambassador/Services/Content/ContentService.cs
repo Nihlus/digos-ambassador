@@ -68,12 +68,19 @@ namespace DIGOS.Ambassador.Services.Content
 		public Uri DefaultAvatarUri { get; }
 
 		/// <summary>
+		/// Gets the <see cref="Uri"/> pointing to a portrait of Amby.
+		/// </summary>
+		public Uri AmbyPortraitUri { get; }
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="ContentService"/> class.
 		/// </summary>
 		public ContentService()
 		{
 			this.BaseRemoteContentUri = new Uri("https://github.com/Nihlus/digos-ambassador/raw/master/digos-ambassador/Content/");
 			this.DefaultAvatarUri = new Uri(this.BaseRemoteContentUri, "Avatars/Default/Discord_DIGOS.png");
+
+			this.AmbyPortraitUri = new Uri(this.BaseRemoteContentUri, "Portraits/amby-irbynx-3.png");
 		}
 
 		/// <summary>
