@@ -165,6 +165,11 @@ namespace DIGOS.Ambassador
 				return;
 			}
 
+			if (arg.Author.IsBot)
+			{
+				return;
+			}
+
 			int argumentPos = 0;
 			if (!(message.HasCharPrefix('!', ref argumentPos) || message.HasMentionPrefix(this.Client.CurrentUser, ref argumentPos)))
 			{
