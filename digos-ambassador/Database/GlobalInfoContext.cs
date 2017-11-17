@@ -25,8 +25,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
-using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Database.Kinks;

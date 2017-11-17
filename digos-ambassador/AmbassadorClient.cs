@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -41,7 +40,6 @@ using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
-using Discord.Rest;
 using Discord.WebSocket;
 
 using JetBrains.Annotations;
@@ -88,6 +86,9 @@ namespace DIGOS.Ambassador
 		{
 			this.Client = new DiscordSocketClient();
 			this.Client.Log += OnDiscordLogEvent;
+
+			this.Commands = new CommandService();
+			this.Commands.Log += OnDiscordLogEvent;
 
 			this.DiscordIntegration = new DiscordService();
 			this.Content = content;

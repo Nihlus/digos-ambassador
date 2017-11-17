@@ -31,7 +31,6 @@ using DIGOS.Ambassador.Services.Feedback;
 
 using Discord;
 using Discord.Commands;
-using Discord.Rest;
 using JetBrains.Annotations;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
