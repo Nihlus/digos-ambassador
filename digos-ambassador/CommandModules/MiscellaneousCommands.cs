@@ -7,16 +7,16 @@
 //  Copyright (c) 2017 Jarl Gullberg
 //
 //  This program is free software: you can redistribute it and/or modify
-//  it under the terms of the GNU General Public License as published by
+//  it under the terms of the GNU Affero General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
 //
 //  This program is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
+//  GNU Affero General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License
+//  You should have received a copy of the GNU Affero General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
@@ -139,11 +139,11 @@ namespace DIGOS.Ambassador.CommandModules
 				"the DIGOS community, she provides a number of useful services for communities with similar interests - " +
 				"namely, roleplaying, transformation, weird and wonderful sexual kinks, and much more.\n" +
 				"\n" +
-				"Amby is free and open source software, licensed under the GPLv3. All of her source code can be freely " +
+				"Amby is free and open source software, licensed under the AGPLv3. All of her source code can be freely " +
 				"viewed and improved on Github at https://github.com/Nihlus/digos-ambassador. You are free to " +
 				"run your own instance of Amby, redistribute her code, and modify it to your heart's content. If you're " +
-				"not familiar with the GPL, an excellent summary is available here: " +
-				"https://choosealicense.com/licenses/gpl-3.0/.\n" +
+				"not familiar with the AGPL, an excellent summary is available here: " +
+				"https://choosealicense.com/licenses/agpl-3.0/.\n" +
 				"\n" +
 				"Any bugs you encounter should be reported on Github, following the issue template provided there. The " +
 				"same holds for feature requests, for which a separate template is provided. Contributions in the form " +
