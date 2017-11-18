@@ -186,7 +186,7 @@ namespace DIGOS.Ambassador
 					var user = await db.GetOrRegisterUserAsync(arg.Author);
 					var server = await db.GetOrRegisterServerAsync(guild);
 
-					if (server.KnownUsers == null)
+					if (server.KnownUsers is null)
 					{
 						server.KnownUsers = new List<User>();
 					}

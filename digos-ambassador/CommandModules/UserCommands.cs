@@ -141,7 +141,7 @@ namespace DIGOS.Ambassador.CommandModules
 			eb.AddField("Class", user.Class.Humanize().Transform(To.TitleCase));
 
 			string timezoneValue;
-			if (user.Timezone == null)
+			if (user.Timezone is null)
 			{
 				timezoneValue = "No timezone set.";
 			}

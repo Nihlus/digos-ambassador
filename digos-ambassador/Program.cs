@@ -118,7 +118,7 @@ namespace DIGOS.Ambassador
 			Log.Fatal($"Exception Message: {unhandledException.Message}");
 			Log.Fatal($"Exception Stacktrace: {unhandledException.StackTrace}");
 
-			if (unhandledException.InnerException == null)
+			if (unhandledException.InnerException is null)
 			{
 				return;
 			}

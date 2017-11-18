@@ -159,7 +159,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			[NotNull] IMessage message
 		)
 		{
-			if (roleplay.Participants == null || !roleplay.IsParticipant(message.Author))
+			if (roleplay.Participants is null || !roleplay.IsParticipant(message.Author))
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The given message was not authored by a participant of the roleplay.");
 			}
