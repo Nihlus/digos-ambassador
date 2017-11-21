@@ -36,6 +36,7 @@ using DIGOS.Ambassador.Services.Entity;
 using DIGOS.Ambassador.Services.Feedback;
 
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 
 using JetBrains.Annotations;
@@ -55,7 +56,7 @@ namespace DIGOS.Ambassador.CommandModules
 	[Alias("character", "char", "ch")]
 	[Group("character")]
 	[Summary("Commands for creating, editing, and interacting with user characters.")]
-	public class CharacterCommands : ModuleBase<SocketCommandContext>
+	public class CharacterCommands : InteractiveBase<SocketCommandContext>
 	{
 		private readonly DiscordService Discord;
 
