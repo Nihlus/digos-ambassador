@@ -288,7 +288,7 @@ namespace DIGOS.Ambassador.Database
 		/// <param name="discordServer">The Discord server.</param>
 		/// <returns>Stored information about the server.</returns>
 		[ItemNotNull]
-		public async Task<Server> GetOrRegisterServerAsync([NotNull] SocketGuild discordServer)
+		public async Task<Server> GetOrRegisterServerAsync([NotNull] IGuild discordServer)
 		{
 			if (!await IsServerKnownAsync(discordServer))
 			{
@@ -367,8 +367,8 @@ namespace DIGOS.Ambassador.Database
 		public async Task<User> GetUser([NotNull] IUser discordUser)
 		{
 			return await this.Users
-				.Include(u => u.CurrentCharacter)
 				.Include(u => u.DefaultCharacter)
+				.Include(u => u.Characters)
 				.Include(u => u.Kinks)
 				.Include(u => u.LocalPermissions)
 				.ThenInclude(lp => lp.Server)
@@ -416,9 +416,9 @@ namespace DIGOS.Ambassador.Database
 		/// <inheritdoc />
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<User>().HasOne(u => u.CurrentCharacter);
 			modelBuilder.Entity<User>().HasOne(u => u.DefaultCharacter);
-			modelBuilder.Entity<Character>().HasOne(c => c.Owner);
+			modelBuilder.Entity<User>().HasMany(u => u.Characters);
+			modelBuilder.Entity<Character>().HasOne(ch => ch.Owner);
 		}
 	}
 }

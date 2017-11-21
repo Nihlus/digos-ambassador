@@ -99,21 +99,6 @@ namespace DIGOS.Ambassador.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Servers",
-                columns: table => new
-                {
-                    ServerID = table.Column<uint>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    DiscordGuildID = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
-                    SuppressPermissonWarnings = table.Column<bool>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Servers", x => x.ServerID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Appearance",
                 columns: table => new
                 {
@@ -201,11 +186,13 @@ namespace DIGOS.Ambassador.Migrations
                     AvatarUrl = table.Column<string>(type: "TEXT", nullable: true),
                     DefaultAppearanceAppearanceID = table.Column<uint>(type: "INTEGER", nullable: true),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
+                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     Nickname = table.Column<string>(type: "TEXT", nullable: true),
                     OwnerUserID = table.Column<uint>(type: "INTEGER", nullable: true),
                     Summary = table.Column<string>(type: "TEXT", nullable: true),
-                    TransformedAppearanceAppearanceID = table.Column<uint>(type: "INTEGER", nullable: true)
+                    TransformedAppearanceAppearanceID = table.Column<uint>(type: "INTEGER", nullable: true),
+                    UserID = table.Column<uint>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -225,6 +212,28 @@ namespace DIGOS.Ambassador.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Servers",
+                columns: table => new
+                {
+                    ServerID = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    CharacterID = table.Column<uint>(type: "INTEGER", nullable: true),
+                    DiscordGuildID = table.Column<ulong>(type: "INTEGER", nullable: false),
+                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
+                    SuppressPermissonWarnings = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Servers", x => x.ServerID);
+                    table.ForeignKey(
+                        name: "FK_Servers_Characters_CharacterID",
+                        column: x => x.CharacterID,
+                        principalTable: "Characters",
+                        principalColumn: "CharacterID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -232,7 +241,6 @@ namespace DIGOS.Ambassador.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Bio = table.Column<string>(type: "TEXT", nullable: true),
                     Class = table.Column<int>(type: "INTEGER", nullable: false),
-                    CurrentCharacterCharacterID = table.Column<uint>(type: "INTEGER", nullable: true),
                     DefaultCharacterCharacterID = table.Column<uint>(type: "INTEGER", nullable: true),
                     DiscordID = table.Column<ulong>(type: "INTEGER", nullable: false),
                     RoleplayID = table.Column<uint>(type: "INTEGER", nullable: true),
@@ -244,12 +252,6 @@ namespace DIGOS.Ambassador.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.UserID);
-                    table.ForeignKey(
-                        name: "FK_Users_Characters_CurrentCharacterCharacterID",
-                        column: x => x.CurrentCharacterCharacterID,
-                        principalTable: "Characters",
-                        principalColumn: "CharacterID",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Users_Characters_DefaultCharacterCharacterID",
                         column: x => x.DefaultCharacterCharacterID,
@@ -456,6 +458,11 @@ namespace DIGOS.Ambassador.Migrations
                 column: "TransformedAppearanceAppearanceID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Characters_UserID",
+                table: "Characters",
+                column: "UserID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GlobalPermissions_UserID",
                 table: "GlobalPermissions",
                 column: "UserID");
@@ -476,6 +483,11 @@ namespace DIGOS.Ambassador.Migrations
                 column: "OwnerUserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Servers_CharacterID",
+                table: "Servers",
+                column: "CharacterID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserKink_KinkID",
                 table: "UserKink",
                 column: "KinkID");
@@ -494,11 +506,6 @@ namespace DIGOS.Ambassador.Migrations
                 name: "IX_UserMessage_RoleplayID",
                 table: "UserMessage",
                 column: "RoleplayID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_CurrentCharacterCharacterID",
-                table: "Users",
-                column: "CurrentCharacterCharacterID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_DefaultCharacterCharacterID",
@@ -529,6 +536,14 @@ namespace DIGOS.Ambassador.Migrations
                 name: "FK_Characters_Users_OwnerUserID",
                 table: "Characters",
                 column: "OwnerUserID",
+                principalTable: "Users",
+                principalColumn: "UserID",
+                onDelete: ReferentialAction.Restrict);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Characters_Users_UserID",
+                table: "Characters",
+                column: "UserID",
                 principalTable: "Users",
                 principalColumn: "UserID",
                 onDelete: ReferentialAction.Restrict);
@@ -609,6 +624,10 @@ namespace DIGOS.Ambassador.Migrations
                 table: "Characters");
 
             migrationBuilder.DropForeignKey(
+                name: "FK_Characters_Users_UserID",
+                table: "Characters");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_Roleplays_Users_OwnerUserID",
                 table: "Roleplays");
 
@@ -646,13 +665,13 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Characters");
-
-            migrationBuilder.DropTable(
                 name: "Roleplays");
 
             migrationBuilder.DropTable(
                 name: "Servers");
+
+            migrationBuilder.DropTable(
+                name: "Characters");
         }
     }
 }

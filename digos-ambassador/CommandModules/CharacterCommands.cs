@@ -170,7 +170,7 @@ namespace DIGOS.Ambassador.CommandModules
 			eb.WithTitle(character.Name);
 			eb.WithDescription(character.Summary);
 
-			eb.WithImageUrl
+			eb.WithThumbnailUrl
 			(
 				!character.AvatarUrl.IsNullOrWhitespace()
 					? character.AvatarUrl
@@ -308,10 +308,9 @@ namespace DIGOS.Ambassador.CommandModules
 					return;
 				}
 
-				var user = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
 				var character = getCharacterResult.Entity;
 
-				user.CurrentCharacter = character;
+				await this.Characters.MakeCharacterCurrentOnServerAsync(db, this.Context, this.Context.Guild, character);
 
 				if (!character.Nickname.IsNullOrWhitespace() && this.Context.Message.Author is IGuildUser guildUser)
 				{
@@ -343,7 +342,7 @@ namespace DIGOS.Ambassador.CommandModules
 			{
 				var user = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
 
-				user.CurrentCharacter = user.DefaultCharacter;
+				await this.Characters.ClearCurrentCharacterOnServerAsync(db, this.Context.Message.Author, this.Context.Guild);
 
 				if (this.Context.Message.Author is IGuildUser guildUser)
 				{
@@ -628,6 +627,34 @@ namespace DIGOS.Ambassador.CommandModules
 					}
 
 					await this.Feedback.SendConfirmationAsync(this.Context, "Character description set.");
+				}
+			}
+
+			/// <summary>
+			/// Sets whether or not a character is NSFW.
+			/// </summary>
+			/// <param name="characterName">The name of the character.</param>
+			/// <param name="isNSFW">Whether or not the character is NSFW</param>
+			[UsedImplicitly]
+			[Command("nsfw", RunMode = Async)]
+			[Summary("Sets whether or not a character is NSFW.")]
+			[RequirePermission(EditCharacter)]
+			public async Task SetCharacterIsNSFWAsync([NotNull] string characterName, bool isNSFW)
+			{
+				using (var db = new GlobalInfoContext())
+				{
+					var result = await this.Characters.GetUserCharacterByNameAsync(db, this.Context, this.Context.Message.Author, characterName);
+					if (!result.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+						return;
+					}
+
+					var character = result.Entity;
+
+					await this.Characters.SetCharacterIsNSFWAsync(db, character, isNSFW);
+
+					await this.Feedback.SendConfirmationAsync(this.Context, $"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
 				}
 			}
 		}

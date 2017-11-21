@@ -20,11 +20,15 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
 
 using Discord;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Characters
 {
@@ -36,6 +40,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// <summary>
 		/// Gets or sets the character's unique key.
 		/// </summary>
+		[UsedImplicitly]
 		public uint CharacterID { get; set; }
 
 		/// <inheritdoc />
@@ -46,6 +51,11 @@ namespace DIGOS.Ambassador.Database.Characters
 
 		/// <inheritdoc />
 		public string EntityTypeDisplayName => nameof(Character);
+
+		/// <summary>
+		/// Gets or sets the server that the character is currently in use on.
+		/// </summary>
+		public List<Server> CurrentServers { get; set; }
 
 		/// <summary>
 		/// Gets or sets a URL pointing to the character's avatar.
@@ -66,6 +76,11 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// Gets or sets the full description of the character.
 		/// </summary>
 		public string Description { get; set; }
+
+		/// <summary>
+		/// Gets or sets a value indicating whether the character is NSFW.
+		/// </summary>
+		public bool IsNSFW { get; set; }
 
 		/// <summary>
 		/// Gets or sets the character's default appearance.

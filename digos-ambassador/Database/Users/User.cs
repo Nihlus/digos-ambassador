@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Permissions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Users
 {
@@ -54,6 +55,7 @@ namespace DIGOS.Ambassador.Database.Users
 		/// <summary>
 		/// Gets or sets the current timezone of the user. This is an hour offset ( + or - ) to UTC/GMT.
 		/// </summary>
+		[CanBeNull]
 		public int? Timezone { get; set; }
 
 		/// <summary>
@@ -62,9 +64,9 @@ namespace DIGOS.Ambassador.Database.Users
 		public Character DefaultCharacter { get; set; }
 
 		/// <summary>
-		/// Gets or sets the user's current character.
+		/// Gets or sets the characters that the user owns.
 		/// </summary>
-		public Character CurrentCharacter { get; set; }
+		public List<Character> Characters { get; set; }
 
 		/// <summary>
 		/// Gets or sets the kinks or fetishes of a user, as well as their preferences for each.

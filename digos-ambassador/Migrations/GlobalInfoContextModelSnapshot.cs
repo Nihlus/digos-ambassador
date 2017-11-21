@@ -158,6 +158,8 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<string>("Description");
 
+                    b.Property<bool>("IsNSFW");
+
                     b.Property<string>("Name");
 
                     b.Property<string>("Nickname");
@@ -168,6 +170,8 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<uint?>("TransformedAppearanceAppearanceID");
 
+                    b.Property<uint?>("UserID");
+
                     b.HasKey("CharacterID");
 
                     b.HasIndex("DefaultAppearanceAppearanceID");
@@ -175,6 +179,8 @@ namespace DIGOS.Ambassador.Migrations
                     b.HasIndex("OwnerUserID");
 
                     b.HasIndex("TransformedAppearanceAppearanceID");
+
+                    b.HasIndex("UserID");
 
                     b.ToTable("Characters");
                 });
@@ -310,6 +316,8 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<uint>("ServerID")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<uint?>("CharacterID");
+
                     b.Property<ulong>("DiscordGuildID");
 
                     b.Property<bool>("IsNSFW");
@@ -317,6 +325,8 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<bool>("SuppressPermissonWarnings");
 
                     b.HasKey("ServerID");
+
+                    b.HasIndex("CharacterID");
 
                     b.ToTable("Servers");
                 });
@@ -329,8 +339,6 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<string>("Bio");
 
                     b.Property<int>("Class");
-
-                    b.Property<uint?>("CurrentCharacterCharacterID");
 
                     b.Property<uint?>("DefaultCharacterCharacterID");
 
@@ -347,8 +355,6 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<int?>("Timezone");
 
                     b.HasKey("UserID");
-
-                    b.HasIndex("CurrentCharacterCharacterID");
 
                     b.HasIndex("DefaultCharacterCharacterID");
 
@@ -435,6 +441,10 @@ namespace DIGOS.Ambassador.Migrations
                     b.HasOne("DIGOS.Ambassador.Database.Appearances.Appearance", "TransformedAppearance")
                         .WithMany()
                         .HasForeignKey("TransformedAppearanceAppearanceID");
+
+                    b.HasOne("DIGOS.Ambassador.Database.Users.User")
+                        .WithMany("Characters")
+                        .HasForeignKey("UserID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Permissions.GlobalPermission", b =>
@@ -473,12 +483,15 @@ namespace DIGOS.Ambassador.Migrations
                         .HasForeignKey("RoleplayID");
                 });
 
+            modelBuilder.Entity("DIGOS.Ambassador.Database.ServerInfo.Server", b =>
+                {
+                    b.HasOne("DIGOS.Ambassador.Database.Characters.Character")
+                        .WithMany("CurrentServers")
+                        .HasForeignKey("CharacterID");
+                });
+
             modelBuilder.Entity("DIGOS.Ambassador.Database.Users.User", b =>
                 {
-                    b.HasOne("DIGOS.Ambassador.Database.Characters.Character", "CurrentCharacter")
-                        .WithMany()
-                        .HasForeignKey("CurrentCharacterCharacterID");
-
                     b.HasOne("DIGOS.Ambassador.Database.Characters.Character", "DefaultCharacter")
                         .WithMany()
                         .HasForeignKey("DefaultCharacterCharacterID");

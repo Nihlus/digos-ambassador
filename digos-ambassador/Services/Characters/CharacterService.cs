@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -105,8 +106,7 @@ namespace DIGOS.Ambassador.Services.Characters
 			[NotNull] IUser discordUser
 		)
 		{
-			var user = await db.GetOrRegisterUserAsync(discordUser);
-			if (user.CurrentCharacter is null)
+			if (!await HasActiveCharacterOnServerAsync(db, discordUser, context.Guild))
 			{
 				var isCurrentUser = context.Message.Author.Id == discordUser.Id;
 				var errorMessage = isCurrentUser
@@ -116,7 +116,18 @@ namespace DIGOS.Ambassador.Services.Characters
 				return RetrieveEntityResult<Character>.FromError(CommandError.ObjectNotFound, errorMessage);
 			}
 
-			return RetrieveEntityResult<Character>.FromSuccess(user.CurrentCharacter);
+			var currentCharacter = await GetUserCharacters(db, discordUser)
+			.FirstOrDefaultAsync
+			(
+				ch => ch.CurrentServers.Any(s => s.DiscordGuildID == context.Guild.Id)
+			);
+
+			if (currentCharacter is null)
+			{
+				return RetrieveEntityResult<Character>.FromError(CommandError.Unsuccessful, "Failed to retrieve a current character.");
+			}
+
+			return RetrieveEntityResult<Character>.FromSuccess(currentCharacter);
 		}
 
 		/// <summary>
@@ -142,6 +153,7 @@ namespace DIGOS.Ambassador.Services.Characters
 
 			var character = db.Characters
 				.Include(c => c.Owner)
+				.Include(c => c.CurrentServers)
 				.Include(c => c.DefaultAppearance)
 				.Include(c => c.TransformedAppearance)
 				.FirstOrDefault(rp => rp.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase));
@@ -187,6 +199,88 @@ namespace DIGOS.Ambassador.Services.Characters
 			}
 
 			return RetrieveEntityResult<Character>.FromSuccess(character);
+		}
+
+		/// <summary>
+		/// Makes the given character current on the given server.
+		/// </summary>
+		/// <param name="db">The database where the characters are stored.</param>
+		/// <param name="context">The context of the user.</param>
+		/// <param name="discordServer">The server to make the character current on.</param>
+		/// <param name="character">The character to make current.</param>
+		/// <returns>A task that must be awaited.</returns>
+		public async Task MakeCharacterCurrentOnServerAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] SocketCommandContext context,
+			[NotNull] IGuild discordServer,
+			[NotNull] Character character
+		)
+		{
+			var server = await db.GetOrRegisterServerAsync(discordServer);
+			var user = context.Guild.GetUser(character.Owner.DiscordID);
+
+			await ClearCurrentCharacterOnServerAsync(db, user, discordServer);
+
+			character.CurrentServers.Add(server);
+
+			await db.SaveChangesAsync();
+		}
+
+		/// <summary>
+		/// Clears any current characters in the server from the given user.
+		/// </summary>
+		/// <param name="db">The database where the characters are stored.</param>
+		/// <param name="discordUser">The user to clear the characters from.</param>
+		/// <param name="discordServer">The server to clear the characters on.</param>
+		/// <returns>A task that must be awaited.</returns>
+		public async Task ClearCurrentCharacterOnServerAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser,
+			[NotNull] IGuild discordServer
+		)
+		{
+			if (!await HasActiveCharacterOnServerAsync(db, discordUser, discordServer))
+			{
+				return;
+			}
+
+			var currentCharactersOnServer = GetUserCharacters(db, discordUser)
+				.Where(ch => ch.CurrentServers.Any(s => s.DiscordGuildID == discordServer.Id));
+
+			await currentCharactersOnServer.ForEachAsync
+			(
+				ch => ch.CurrentServers
+					.RemoveAll(s => s.DiscordGuildID == discordServer.Id)
+			);
+
+			await db.SaveChangesAsync();
+		}
+
+		/// <summary>
+		/// Determines whether or not the given user has an active character on the given server.
+		/// </summary>
+		/// <param name="db">The database where the characters are stored.</param>
+		/// <param name="discordUser">The user to check.</param>
+		/// <param name="discordServer">The server to check.</param>
+		/// <returns>true if the user has an active character on the server; otherwise, false.</returns>
+		public async Task<bool> HasActiveCharacterOnServerAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser,
+			[NotNull] IGuild discordServer
+		)
+		{
+			var userCharacters = GetUserCharacters(db, discordUser);
+
+			return await userCharacters
+				.Where(ch => ch.CurrentServers.Any())
+				.AnyAsync
+				(
+					c => c.CurrentServers
+						.Any(s => s.DiscordGuildID == discordServer.Id)
+				);
 		}
 
 		/// <summary>
@@ -250,6 +344,7 @@ namespace DIGOS.Ambassador.Services.Characters
 				return CreateEntityResult<Character>.FromError(modifyEntityResult);
 			}
 
+			owner.Characters.Add(character);
 			await db.Characters.AddAsync(character);
 			await db.SaveChangesAsync();
 
@@ -416,6 +511,24 @@ namespace DIGOS.Ambassador.Services.Characters
 		}
 
 		/// <summary>
+		/// Sets whether or not a character is NSFW.
+		/// </summary>
+		/// <param name="db">The database where the characters are stored.</param>
+		/// <param name="character">The character to edit.</param>
+		/// <param name="isNSFW">Whether or not the character is NSFW</param>
+		/// <returns>A task that must be awaited.</returns>
+		public async Task SetCharacterIsNSFWAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] Character character,
+			bool isNSFW
+		)
+		{
+			character.IsNSFW = isNSFW;
+			await db.SaveChangesAsync();
+		}
+
+		/// <summary>
 		/// Transfers ownership of the named character to the specified user.
 		/// </summary>
 		/// <param name="db">The database where the characters are stored.</param>
@@ -449,11 +562,14 @@ namespace DIGOS.Ambassador.Services.Characters
 		[ItemNotNull]
 		public IQueryable<Character> GetUserCharacters([NotNull]GlobalInfoContext db, [NotNull]IUser discordUser)
 		{
-			return db.Characters
+			var characters = db.Characters
 				.Include(ch => ch.Owner)
+				.Include(ch => ch.CurrentServers)
 				.Include(ch => ch.DefaultAppearance)
 				.Include(ch => ch.TransformedAppearance)
 				.Where(ch => ch.Owner.DiscordID == discordUser.Id);
+
+			return characters;
 		}
 
 		/// <summary>
