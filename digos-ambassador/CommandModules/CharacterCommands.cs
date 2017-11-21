@@ -369,6 +369,16 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 		}
 
+		public async Task AddImageAsync([NotNull] string characterName, [NotNull] string imageName, [CanBeNull] string imageCaption = null, bool isNSFW = false, [CanBeNull] string imageUrl = null)
+		{
+
+		}
+
+		public async Task RemoveImageAsync([NotNull] string characterName, [NotNull] string imageName, [CanBeNull] string imageCaption = null, bool isNSFW = false, [CanBeNull] string imageUrl = null)
+		{
+
+		}
+
 		/// <summary>
 		/// Transfers ownership of the named character to another user.
 		/// </summary>

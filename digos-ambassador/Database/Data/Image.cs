@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Database.Data
 {
 	/// <summary>
@@ -31,6 +33,11 @@ namespace DIGOS.Ambassador.Database.Data
 		/// Gets or sets the unique ID of the image.
 		/// </summary>
 		public uint ImageID { get; set; }
+
+		/// <summary>
+		/// Gets or sets the name of the image.
+		/// </summary>
+		public string Name { get; set; }
 
 		/// <summary>
 		/// Gets or sets the caption of the image.
@@ -45,6 +52,13 @@ namespace DIGOS.Ambassador.Database.Data
 		/// <summary>
 		/// Gets or sets the path to the image on disk.
 		/// </summary>
+		[CanBeNull]
 		public string Path { get; set; }
+
+		/// <summary>
+		/// Gets or sets the online URL of the image.
+		/// </summary>
+		[CanBeNull]
+		public string Url { get; set; }
 	}
 }

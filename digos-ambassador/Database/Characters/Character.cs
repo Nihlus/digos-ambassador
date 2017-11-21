@@ -83,6 +83,11 @@ namespace DIGOS.Ambassador.Database.Characters
 		public bool IsNSFW { get; set; }
 
 		/// <summary>
+		/// Gets or sets the images associated with the character.
+		/// </summary>
+		public List<Image> Images { get; set; }
+
+		/// <summary>
 		/// Gets or sets the character's default appearance.
 		/// </summary>
 		public Appearance DefaultAppearance { get; set; }

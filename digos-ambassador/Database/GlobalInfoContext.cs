@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Database.Kinks;
@@ -34,12 +35,9 @@ using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
 
-using Discord;
-using Discord.WebSocket;
-
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-
+using Image = DIGOS.Ambassador.Database.Data.Image;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
 namespace DIGOS.Ambassador.Database
@@ -130,6 +128,17 @@ namespace DIGOS.Ambassador.Database
 		/// Gets or sets the database where dossier metadata is stored.
 		/// </summary>
 		public DbSet<Dossier> Dossiers
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets the database where images are stored.
+		/// </summary>
+		public DbSet<Image> Images
 		{
 			get;
 
