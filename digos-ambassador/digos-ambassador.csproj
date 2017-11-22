@@ -42,12 +42,14 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" />
+    <PackageReference Include="YamlDotNet" Version="4.2.3-pre0454" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\Portraits" />
+    <Folder Include="Content\Transformations" />
     <Folder Include="Services\Dossiers" />
   </ItemGroup>
 </Project>

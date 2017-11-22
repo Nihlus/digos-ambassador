@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -30,7 +29,6 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Pagination;
-using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services.Characters;
 using DIGOS.Ambassador.Services.Content;

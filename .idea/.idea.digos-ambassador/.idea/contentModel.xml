@@ -36,6 +36,7 @@
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
           </e>
+          <e p="Transformations" t="Include" />
           <e p="bot.token" t="Include" />
         </e>
         <e p="Database" t="Include">
@@ -73,6 +74,9 @@
           </e>
           <e p="ServerInfo" t="Include">
             <e p="Server.cs" t="Include" />
+          </e>
+          <e p="Transformations" t="Include">
+            <e p="Transformation.cs" t="Include" />
           </e>
           <e p="Users" t="Include">
             <e p="User.cs" t="Include" />
@@ -147,6 +151,10 @@
           </e>
           <e p="Roleplaying" t="Include">
             <e p="RoleplayService.cs" t="Include" />
+          </e>
+          <e p="Transformations" t="Include">
+            <e p="Bodypart.cs" t="Include" />
+            <e p="CompositeParts.cs" t="Include" />
           </e>
         </e>
         <e p="TypeReaders" t="Include">
