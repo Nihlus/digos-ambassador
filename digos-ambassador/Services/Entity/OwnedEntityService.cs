@@ -45,12 +45,12 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Holds reserved characters which may not appear in names.
 		/// </summary>
-		private char[] ReservedNameCharacters = { ':' };
+		private readonly char[] ReservedNameCharacters = { ':' };
 
 		/// <summary>
 		/// Holds reserved names which entities may not have.
 		/// </summary>
-		private string[] ReservedNames = { "current" };
+		private readonly string[] ReservedNames = { "current" };
 
 		/// <summary>
 		/// Determines whether or not the given entity name is unique for a given set of user entities.
