@@ -32,11 +32,10 @@ using Discord;
 using Discord.Commands;
 
 using JetBrains.Annotations;
-using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.CommandModules
+namespace DIGOS.Ambassador.Modules
 {
 	/// <summary>
 	/// Commands for viewing, adding, and editing dossier entries.
@@ -66,7 +65,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Lists the available dossiers.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("list", RunMode = Async)]
+		[Command("list", RunMode = RunMode.Async)]
 		[Summary("Lists the available dossiers.")]
 		public async Task ListDossiersAsync()
 		{
@@ -103,7 +102,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="title">The title of the dossier to view.</param>
 		[UsedImplicitly]
 		[Alias("view", "show")]
-		[Command("view", RunMode = Async)]
+		[Command("view", RunMode = RunMode.Async)]
 		[Summary("Views the named dossier.")]
 		public async Task ViewDossierAsync([NotNull] string title)
 		{
@@ -152,7 +151,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="summary">The summary.</param>
 		[UsedImplicitly]
 		[Alias("add", "create")]
-		[Command("add", RunMode = Async)]
+		[Command("add", RunMode = RunMode.Async)]
 		[Summary("Adds a new dossier with the given title and summary. A PDF with the full dossier can be attached.")]
 		[RequireOwner]
 		public async Task AddDossierAsync(string title, string summary = "No summary set.")
@@ -243,7 +242,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="title">The title of the dossier to edit.</param>
 			/// <param name="newTitle">The new title of the dossier.</param>
 			[UsedImplicitly]
-			[Command("title", RunMode = Async)]
+			[Command("title", RunMode = RunMode.Async)]
 			[Summary("Sets the title of the given dossier.")]
 			[RequireOwner]
 			public async Task SetTitleAsync(string title, string newTitle)
@@ -276,7 +275,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="title">The title of the dossier to edit.</param>
 			/// <param name="newSummary">The new summary of the dossier.</param>
 			[UsedImplicitly]
-			[Command("summary", RunMode = Async)]
+			[Command("summary", RunMode = RunMode.Async)]
 			[Summary("Sets the summary of the given dossier.")]
 			[RequireOwner]
 			public async Task SetSummaryAsync(string title, string newSummary)
@@ -308,7 +307,7 @@ namespace DIGOS.Ambassador.CommandModules
 			/// </summary>
 			/// <param name="title">The title of the dossier to edit.</param>
 			[UsedImplicitly]
-			[Command("data", RunMode = Async)]
+			[Command("data", RunMode = RunMode.Async)]
 			[Summary("Sets the data of the given dossier. Attach a PDF to the command.")]
 			[RequireOwner]
 			public async Task SetFileAsync(string title)

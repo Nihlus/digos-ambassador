@@ -36,16 +36,11 @@ using Discord.Commands;
 
 using Humanizer;
 using JetBrains.Annotations;
-
-using static DIGOS.Ambassador.Permissions.Permission;
-using static DIGOS.Ambassador.Permissions.PermissionTarget;
-using static Discord.Commands.RunMode;
-
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.CommandModules
+namespace DIGOS.Ambassador.Modules
 {
 	/// <summary>
 	/// Permission-related commands for granting, revoking and checking user permissions.
@@ -70,7 +65,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Lists all available permissions.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("list", RunMode = Async)]
+		[Command("list", RunMode = RunMode.Async)]
 		[Summary("Lists all available permissions.")]
 		public async Task ListPermissionsAsync()
 		{
@@ -83,7 +78,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Lists all permissions that have been granted to the invoking user.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("list-granted", RunMode = Async)]
+		[Command("list-granted", RunMode = RunMode.Async)]
 		[Summary("Lists all permissions that have been granted to the invoking user.")]
 		public async Task ListGrantedPermissionsAsync()
 		{
@@ -103,7 +98,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		[UsedImplicitly]
-		[Command("list-granted", RunMode = Async)]
+		[Command("list-granted", RunMode = RunMode.Async)]
 		[Summary("Lists all permissions that have been granted to target user.")]
 		public async Task ListGrantedPermissionsAsync(IUser discordUser)
 		{
@@ -198,8 +193,8 @@ namespace DIGOS.Ambassador.CommandModules
 			[UsedImplicitly]
 			[Command]
 			[Summary("Grant the targeted user the given permission.")]
-			[RequirePermission(ManagePermissions, Other)]
-			public async Task Default(IUser discordUser, Permission grantedPermission, PermissionTarget grantedTarget = Self)
+			[RequirePermission(Permission.ManagePermissions, PermissionTarget.Other)]
+			public async Task Default(IUser discordUser, Permission grantedPermission, PermissionTarget grantedTarget = PermissionTarget.Self)
 			{
 				using (var db = new GlobalInfoContext())
 				{
@@ -243,7 +238,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[UsedImplicitly]
 			[Command]
 			[Summary("Revoke the given permission from the targeted user.")]
-			[RequirePermission(ManagePermissions, Other)]
+			[RequirePermission(Permission.ManagePermissions, PermissionTarget.Other)]
 			public async Task Default(IUser discordUser, Permission revokedPermission)
 			{
 				using (var db = new GlobalInfoContext())
@@ -263,7 +258,7 @@ namespace DIGOS.Ambassador.CommandModules
 			[UsedImplicitly]
 			[Command("target")]
 			[Summary("Revoke the given target permission from the targeted user.")]
-			[RequirePermission(ManagePermissions, Other)]
+			[RequirePermission(Permission.ManagePermissions, PermissionTarget.Other)]
 			public async Task RevokeTargetAsync(IUser discordUser, Permission permission, PermissionTarget revokedTarget)
 			{
 				using (var db = new GlobalInfoContext())

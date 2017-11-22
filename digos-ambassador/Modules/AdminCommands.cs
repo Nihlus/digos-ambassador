@@ -36,13 +36,11 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using static Discord.Commands.ContextType;
-using static Discord.Commands.RunMode;
 using Kink = DIGOS.Ambassador.Database.Kinks.Kink;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.CommandModules
+namespace DIGOS.Ambassador.Modules
 {
 	/// <summary>
 	/// Administrative commands that directly affect the bot on a global scale.
@@ -68,9 +66,9 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <returns>A task wrapping the update action.</returns>
 		[UsedImplicitly]
-		[Command("update-kinks", RunMode = Async)]
+		[Command("update-kinks", RunMode = RunMode.Async)]
 		[Summary("Updates the kink list with data from F-list.")]
-		[RequireContext(DM)]
+		[RequireContext(ContextType.DM)]
 		[RequireOwner]
 		public async Task UpdateKinkDatabaseAsync()
 		{
@@ -133,7 +131,7 @@ namespace DIGOS.Ambassador.CommandModules
 		[Alias("wipe-db", "reset-db")]
 		[Command("wipe-db")]
 		[Summary("Wipes the database, resetting it to its initial state.")]
-		[RequireContext(DM)]
+		[RequireContext(ContextType.DM)]
 		[RequireOwner]
 		public async Task ResetDatabaseAsync()
 		{

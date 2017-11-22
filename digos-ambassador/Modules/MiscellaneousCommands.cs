@@ -32,11 +32,10 @@ using Discord;
 using Discord.Commands;
 
 using JetBrains.Annotations;
-using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.CommandModules
+namespace DIGOS.Ambassador.Modules
 {
 	/// <summary>
 	/// Assorted commands that don't really fit anywhere - just for fun, testing, etc.
@@ -74,7 +73,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="discordUser">The user to contact.</param>
 		[UsedImplicitly]
-		[Command("contact", RunMode = Async)]
+		[Command("contact", RunMode = RunMode.Async)]
 		[Summary("Instructs Amby to contact a user over DM.")]
 		public async Task ContactUserAsync([NotNull] IUser discordUser)
 		{
@@ -108,7 +107,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// Sasses the user in a DIGOS fashion.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("sass", RunMode = Async)]
+		[Command("sass", RunMode = RunMode.Async)]
 		[Summary("Sasses the user in a DIGOS fashion.")]
 		public async Task SassAsync()
 		{
@@ -122,7 +121,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		[UsedImplicitly]
 		[Alias("info", "information", "about")]
-		[Command("info", RunMode = Async)]
+		[Command("info", RunMode = RunMode.Async)]
 		[Summary("Shows some information about Amby's metaworkings.")]
 		public async Task InfoAsync()
 		{
@@ -167,7 +166,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		[UsedImplicitly]
 		[Alias("help", "halp", "hlep", "commands")]
-		[Command("help", RunMode = Async)]
+		[Command("help", RunMode = RunMode.Async)]
 		[Summary("Lists available command modules.")]
 		public async Task HelpAsync()
 		{
@@ -203,7 +202,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="searchText">The text to search the command handler for.</param>
 		[UsedImplicitly]
 		[Alias("help", "halp", "hlep", "commands")]
-		[Command("help", RunMode = Async)]
+		[Command("help", RunMode = RunMode.Async)]
 		[Summary("Lists available commands that match the given search text.")]
 		public async Task HelpAsync([CanBeNull] string searchText)
 		{

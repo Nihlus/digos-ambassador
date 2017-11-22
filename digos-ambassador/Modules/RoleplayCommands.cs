@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
+using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.TypeReaders;
@@ -36,15 +37,12 @@ using Discord.Commands;
 
 using Humanizer;
 using JetBrains.Annotations;
+using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
-using static DIGOS.Ambassador.Permissions.Permission;
-using static DIGOS.Ambassador.Permissions.PermissionTarget;
-using static Discord.Commands.ContextType;
-using static Discord.Commands.RunMode;
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
 // ReSharper disable ArgumentsStyleLiteral
-namespace DIGOS.Ambassador.CommandModules
+namespace DIGOS.Ambassador.Modules
 {
 	/// <summary>
 	/// Commands for interacting with and managing channel roleplays.
@@ -87,7 +85,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="roleplay">The roleplay.</param>
 		[UsedImplicitly]
 		[Alias("show", "info")]
-		[Command("show", RunMode = Async)]
+		[Command("show", RunMode = RunMode.Async)]
 		[Summary("Shows information about the specified roleplay.")]
 		public async Task ShowRoleplayAsync([NotNull] Roleplay roleplay)
 		{
@@ -127,7 +125,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="discordUser">The user to show the roleplays of.</param>
 		[UsedImplicitly]
 		[Alias("list-owned", "list")]
-		[Command("list-owned", RunMode = Async)]
+		[Command("list-owned", RunMode = RunMode.Async)]
 		[Summary("Lists the roleplays that the given user owns.")]
 		public async Task ListOwnedRoleplaysAsync([CanBeNull] IUser discordUser = null)
 		{
@@ -164,9 +162,9 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="isNSFW">Whether or not the roleplay is NSFW.</param>
 		/// <param name="isPublic">Whether or not the roleplay is public.</param>
 		[UsedImplicitly]
-		[Command("create", RunMode = Async)]
+		[Command("create", RunMode = RunMode.Async)]
 		[Summary("Creates a new roleplay with the specified name.")]
-		[RequirePermission(CreateRoleplay)]
+		[RequirePermission(Permission.CreateRoleplay)]
 		public async Task CreateRoleplayAsync(string roleplayName, string roleplaySummary = "No summary set.", bool isNSFW = false, bool isPublic = true)
 		{
 			using (var db = new GlobalInfoContext())
@@ -189,11 +187,11 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("delete")]
 		[Summary("Deletes the specified roleplay.")]
-		[RequirePermission(DeleteRoleplay)]
+		[RequirePermission(Permission.DeleteRoleplay)]
 		public async Task DeleteRoleplayAsync
 		(
 			[NotNull]
-			[RequireEntityOwnerOrPermission(DeleteRoleplay, Other)]
+			[RequireEntityOwnerOrPermission(Permission.DeleteRoleplay, PermissionTarget.Other)]
 			Roleplay roleplay
 		)
 		{
@@ -211,10 +209,10 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="roleplay">The roleplay.</param>
 		[UsedImplicitly]
-		[Command("join", RunMode = Async)]
+		[Command("join", RunMode = RunMode.Async)]
 		[Summary("Joins the roleplay owned by the given person with the given name.")]
-		[RequireContext(Guild)]
-		[RequirePermission(JoinRoleplay)]
+		[RequireContext(ContextType.Guild)]
+		[RequirePermission(Permission.JoinRoleplay)]
 		public async Task JoinRoleplayAsync([NotNull] Roleplay roleplay)
 		{
 			using (var db = new GlobalInfoContext())
@@ -237,15 +235,15 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="playerToInvite">The player to invite.</param>
 		/// <param name="roleplay">The roleplay.</param>
 		[UsedImplicitly]
-		[Command("invite", RunMode = Async)]
+		[Command("invite", RunMode = RunMode.Async)]
 		[Summary("Invites the specified user to the given roleplay.")]
-		[RequirePermission(EditRoleplay)]
+		[RequirePermission(Permission.EditRoleplay)]
 		public async Task InvitePlayerAsync
 		(
 			[NotNull]
 			IUser playerToInvite,
 			[NotNull]
-			[RequireEntityOwnerOrPermission(EditRoleplay, Other)]
+			[RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
 			Roleplay roleplay
 		)
 		{
@@ -271,7 +269,7 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="roleplay">The roleplay.</param>
 		[UsedImplicitly]
-		[Command("leave", RunMode = Async)]
+		[Command("leave", RunMode = RunMode.Async)]
 		[Summary("Leaves the roleplay owned by the given person with the given name.")]
 		public async Task LeaveRoleplayAsync([NotNull] Roleplay roleplay)
 		{
@@ -297,13 +295,13 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("kick")]
 		[Summary("Kicks the given user from the named roleplay.")]
-		[RequirePermission(KickRoleplayMember)]
+		[RequirePermission(Permission.KickRoleplayMember)]
 		public async Task KickRoleplayParticipantAsync
 		(
 			[NotNull]
 			IUser discordUser,
 			[NotNull]
-			[RequireEntityOwnerOrPermission(KickRoleplayMember, Other)]
+			[RequireEntityOwnerOrPermission(Permission.KickRoleplayMember, PermissionTarget.Other)]
 			Roleplay roleplay
 		)
 		{
@@ -333,12 +331,12 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("make-current")]
 		[Summary("Makes the roleplay with the given name current in the current channel.")]
-		[RequireContext(Guild)]
-		[RequirePermission(StartStopRoleplay)]
+		[RequireContext(ContextType.Guild)]
+		[RequirePermission(Permission.StartStopRoleplay)]
 		public async Task MakeRoleplayCurrentAsync
 		(
 			[NotNull]
-			[RequireEntityOwnerOrPermission(StartStopRoleplay, Other)]
+			[RequireEntityOwnerOrPermission(Permission.StartStopRoleplay, PermissionTarget.Other)]
 			Roleplay roleplay
 		)
 		{
@@ -364,12 +362,12 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("start")]
 		[Summary("Starts the roleplay with the given name.")]
-		[RequireContext(Guild)]
-		[RequirePermission(StartStopRoleplay)]
+		[RequireContext(ContextType.Guild)]
+		[RequirePermission(Permission.StartStopRoleplay)]
 		public async Task StartRoleplayAsync
 		(
 			[NotNull]
-			[RequireEntityOwnerOrPermission(StartStopRoleplay, Other)]
+			[RequireEntityOwnerOrPermission(Permission.StartStopRoleplay, PermissionTarget.Other)]
 			Roleplay roleplay
 		)
 		{
@@ -428,14 +426,14 @@ namespace DIGOS.Ambassador.CommandModules
 		/// </summary>
 		/// <param name="roleplay">The roleplay.</param>
 		[UsedImplicitly]
-		[Command("stop", RunMode = Async)]
+		[Command("stop", RunMode = RunMode.Async)]
 		[Summary("Stops the given roleplay.")]
-		[RequireContext(Guild)]
-		[RequirePermission(StartStopRoleplay)]
+		[RequireContext(ContextType.Guild)]
+		[RequirePermission(Permission.StartStopRoleplay)]
 		public async Task StopRoleplayAsync
 		(
 			[NotNull]
-			[RequireEntityOwnerOrPermission(StartStopRoleplay, Other)]
+			[RequireEntityOwnerOrPermission(Permission.StartStopRoleplay, PermissionTarget.Other)]
 			Roleplay roleplay
 		)
 		{
@@ -455,14 +453,14 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="startMessage">The earliest message to start adding from.</param>
 		/// <param name="finalMessage">The final message in the range.</param>
 		[UsedImplicitly]
-		[Command("include-previous", RunMode = Async)]
+		[Command("include-previous", RunMode = RunMode.Async)]
 		[Summary("Includes previous messages into the roleplay, starting at the given message.")]
-		[RequireContext(Guild)]
-		[RequirePermission(EditRoleplay)]
+		[RequireContext(ContextType.Guild)]
+		[RequirePermission(Permission.EditRoleplay)]
 		public async Task IncludePreviousMessagesAsync
 		(
 			[NotNull]
-			[RequireEntityOwnerOrPermission(EditRoleplay, Other)]
+			[RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
 			Roleplay roleplay,
 			[OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
 			IMessage startMessage,
@@ -511,12 +509,12 @@ namespace DIGOS.Ambassador.CommandModules
 		[UsedImplicitly]
 		[Command("transfer-ownership")]
 		[Summary("Transfers ownership of the named roleplay to the specified user.")]
-		[RequirePermission(TransferRoleplay, Other)]
+		[RequirePermission(Permission.TransferRoleplay, PermissionTarget.Other)]
 		public async Task TransferRoleplayOwnershipAsync
 		(
 			IUser newOwner,
 			[NotNull]
-			[RequireEntityOwnerOrPermission(TransferRoleplay, Other)]
+			[RequireEntityOwnerOrPermission(Permission.TransferRoleplay, PermissionTarget.Other)]
 			Roleplay roleplay
 		)
 		{
@@ -540,9 +538,9 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <param name="from">The time from which you want to replay,</param>
 		/// <param name="to">The time until you want to replay.</param>
 		[UsedImplicitly]
-		[Command("replay", RunMode = Async)]
+		[Command("replay", RunMode = RunMode.Async)]
 		[Summary("Replays the named roleplay owned by the given user to you.")]
-		[RequirePermission(ReplayRoleplay)]
+		[RequirePermission(Permission.ReplayRoleplay)]
 		public async Task ReplayRoleplayAsync
 		(
 			[NotNull] Roleplay roleplay,
@@ -623,15 +621,15 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="newRoleplayName">The roleplay's new name.</param>
 			/// <param name="roleplay">The roleplay.</param>
 			[UsedImplicitly]
-			[Command("name", RunMode = Async)]
+			[Command("name", RunMode = RunMode.Async)]
 			[Summary("Sets the new name of the named roleplay.")]
-			[RequirePermission(EditRoleplay)]
+			[RequirePermission(Permission.EditRoleplay)]
 			public async Task SetRoleplayNameAsync
 			(
 				[NotNull]
 				string newRoleplayName,
 				[NotNull]
-				[RequireEntityOwnerOrPermission(EditRoleplay, Other)]
+				[RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
 				Roleplay roleplay
 			)
 			{
@@ -654,15 +652,15 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="newRoleplaySummary">The roleplay's new summary.</param>
 			/// <param name="roleplay">The roleplay</param>
 			[UsedImplicitly]
-			[Command("summary", RunMode = Async)]
+			[Command("summary", RunMode = RunMode.Async)]
 			[Summary("Sets the summary of the named roleplay.")]
-			[RequirePermission(EditRoleplay)]
+			[RequirePermission(Permission.EditRoleplay)]
 			public async Task SetRoleplaySummaryAsync
 			(
 				[NotNull]
 				string newRoleplaySummary,
 				[NotNull]
-				[RequireEntityOwnerOrPermission(EditRoleplay, Other)]
+				[RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
 				Roleplay roleplay
 			)
 			{
@@ -686,13 +684,13 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="isNSFW">true if the roleplay is NSFW; otherwise, false.</param>
 			/// <param name="roleplay">The roleplay.</param>
 			[UsedImplicitly]
-			[Command("nsfw", RunMode = Async)]
+			[Command("nsfw", RunMode = RunMode.Async)]
 			[Summary("Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.")]
 			public async Task SetRoleplayIsNSFW
 			(
 				bool isNSFW,
 				[NotNull]
-				[RequireEntityOwnerOrPermission(EditRoleplay, Other)]
+				[RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
 				Roleplay roleplay
 			)
 			{
@@ -715,13 +713,13 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <param name="isPublic">true if the roleplay is public; otherwise, false.</param>
 			/// <param name="roleplay">The roleplay.</param>
 			[UsedImplicitly]
-			[Command("public", RunMode = Async)]
+			[Command("public", RunMode = RunMode.Async)]
 			[Summary("Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.")]
 			public async Task SetRoleplayIsPublic
 			(
 				bool isPublic,
 				[NotNull]
-				[RequireEntityOwnerOrPermission(EditRoleplay, Other)]
+				[RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
 				Roleplay roleplay
 			)
 			{

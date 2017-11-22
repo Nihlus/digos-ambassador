@@ -10,15 +10,6 @@
       <e p="README.md" t="Include" />
       <e p="digos-ambassador" t="IncludeRecursive">
         <e p="AmbassadorClient.cs" t="Include" />
-        <e p="CommandModules" t="Include">
-          <e p="AdminCommands.cs" t="Include" />
-          <e p="CharacterCommands.cs" t="Include" />
-          <e p="DossierCommands.cs" t="Include" />
-          <e p="MiscellaneousCommands.cs" t="Include" />
-          <e p="PermissionCommands.cs" t="Include" />
-          <e p="RoleplayCommands.cs" t="Include" />
-          <e p="UserCommands.cs" t="Include" />
-        </e>
         <e p="Content" t="Include">
           <e p="Avatars" t="Include">
             <e p="Default" t="Include">
@@ -105,6 +96,15 @@
           <e p="20171121230056_InitialCreate.Designer.cs" t="Include" />
           <e p="20171121230056_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
+        </e>
+        <e p="Modules" t="Include">
+          <e p="AdminCommands.cs" t="Include" />
+          <e p="CharacterCommands.cs" t="Include" />
+          <e p="DossierCommands.cs" t="Include" />
+          <e p="MiscellaneousCommands.cs" t="Include" />
+          <e p="PermissionCommands.cs" t="Include" />
+          <e p="RoleplayCommands.cs" t="Include" />
+          <e p="UserCommands.cs" t="Include" />
         </e>
         <e p="Pagination" t="Include">
           <e p="PaginatedGallery.cs" t="Include" />
