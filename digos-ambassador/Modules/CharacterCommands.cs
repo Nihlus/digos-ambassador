@@ -187,8 +187,8 @@ namespace DIGOS.Ambassador.Modules
 		(
 			[NotNull] string characterName,
 			[CanBeNull] string characterNickname = null,
-			[NotNull] string characterSummary = "No summary set.",
-			[NotNull] string characterDescription = "No description set.",
+			[CanBeNull] string characterSummary = null,
+			[CanBeNull] string characterDescription = null,
 			[CanBeNull] string characterAvatarUrl = null
 		)
 		{

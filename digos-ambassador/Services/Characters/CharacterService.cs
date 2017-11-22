@@ -25,6 +25,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Extensions;
 
@@ -46,15 +47,19 @@ namespace DIGOS.Ambassador.Services
 
 		private readonly OwnedEntityService OwnedEntities;
 
+		private readonly ContentService Content;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CharacterService"/> class.
 		/// </summary>
 		/// <param name="commands">The application's command service.</param>
 		/// <param name="entityService">The application's owned entity service.</param>
-		public CharacterService(CommandService commands, OwnedEntityService entityService)
+		/// <param name="content">The content service.</param>
+		public CharacterService(CommandService commands, OwnedEntityService entityService, ContentService content)
 		{
 			this.Commands = commands;
 			this.OwnedEntities = entityService;
+			this.Content = content;
 		}
 
 		/// <summary>
@@ -284,6 +289,18 @@ namespace DIGOS.Ambassador.Services
 		}
 
 		/// <summary>
+		/// Creates a character with the given name and default settings.
+		/// </summary>
+		/// <param name="db">The database where the characters are stored.</param>
+		/// <param name="context">The context of the command.</param>
+		/// <param name="characterName">The name of the character.</param>
+		/// <returns>A creation result which may or may not have been successful.</returns>
+		public async Task<CreateEntityResult<Character>> CreateCharacterAsync(GlobalInfoContext db, ICommandContext context, string characterName)
+		{
+			return await CreateCharacterAsync(db, context, characterName, this.Content.DefaultAvatarUri.ToString(), null, null, null);
+		}
+
+		/// <summary>
 		/// Creates a character with the given parameters.
 		/// </summary>
 		/// <param name="db">The database where the characters are stored.</param>
@@ -297,12 +314,12 @@ namespace DIGOS.Ambassador.Services
 		public async Task<CreateEntityResult<Character>> CreateCharacterAsync
 		(
 			[NotNull] GlobalInfoContext db,
-			[NotNull] SocketCommandContext context,
+			[NotNull] ICommandContext context,
 			[NotNull] string characterName,
 			[NotNull] string characterAvatarUrl,
 			[CanBeNull] string characterNickname,
-			[NotNull] string characterSummary,
-			[NotNull] string characterDescription
+			[CanBeNull] string characterSummary,
+			[CanBeNull] string characterDescription
 		)
 		{
 			var owner = await db.GetOrRegisterUserAsync(context.Message.Author);
@@ -332,12 +349,14 @@ namespace DIGOS.Ambassador.Services
 				}
 			}
 
+			characterSummary = characterSummary ?? "No summary set.";
 			modifyEntityResult = await SetCharacterSummaryAsync(db, character, characterSummary);
 			if (!modifyEntityResult.IsSuccess)
 			{
 				return CreateEntityResult<Character>.FromError(modifyEntityResult);
 			}
 
+			characterDescription = characterDescription ?? "No description set.";
 			modifyEntityResult = await SetCharacterDescriptionAsync(db, character, characterDescription);
 			if (!modifyEntityResult.IsSuccess)
 			{
@@ -368,7 +387,7 @@ namespace DIGOS.Ambassador.Services
 		public async Task<ModifyEntityResult> SetCharacterNameAsync
 		(
 			[NotNull] GlobalInfoContext db,
-			[NotNull] SocketCommandContext context,
+			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			[NotNull] string newCharacterName
 		)
@@ -656,6 +675,36 @@ namespace DIGOS.Ambassador.Services
 			await db.SaveChangesAsync();
 
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Added);
+		}
+
+		/// <summary>
+		/// Creates a new template character with a given appearance.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="context">The context of the command.</param>
+		/// <param name="characterName">The name of the new character.</param>
+		/// <param name="appearance">The appearance that the new character should have.</param>
+		/// <returns>A creation result which may or may not have succeeded.</returns>
+		public async Task<CreateEntityResult<Character>> CreateCharacterFromAppearanceAsync(GlobalInfoContext db, ICommandContext context, string characterName, Appearance appearance)
+		{
+			var createCharacterResult = await CreateCharacterAsync(db, context, characterName);
+			if (!createCharacterResult.IsSuccess)
+			{
+				return createCharacterResult;
+			}
+
+			var newCharacter = createCharacterResult.Entity;
+			newCharacter.DefaultAppearance = appearance;
+
+			await db.SaveChangesAsync();
+
+			var getCharacterResult = await GetUserCharacterByNameAsync(db, context, context.Message.Author, characterName);
+			if (!getCharacterResult.IsSuccess)
+			{
+				return CreateEntityResult<Character>.FromError(getCharacterResult);
+			}
+
+			return CreateEntityResult<Character>.FromSuccess(getCharacterResult.Entity);
 		}
 	}
 }

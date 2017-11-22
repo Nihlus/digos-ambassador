@@ -48,6 +48,11 @@ namespace DIGOS.Ambassador.Database.Transformations
 		public string Species { get; set; }
 
 		/// <summary>
+		/// Gets or sets a short description of the transformation.
+		/// </summary>
+		public string Description { get; set; }
+
+		/// <summary>
 		/// Gets or sets the text of the message when an existing bodypart shifts into this one.
 		/// </summary>
 		public string ShiftMessage { get; set; }

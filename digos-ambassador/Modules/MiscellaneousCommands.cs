@@ -152,13 +152,7 @@ namespace DIGOS.Ambassador.Modules
 				"- Amby"
 			);
 
-			var userChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
-			await userChannel.SendMessageAsync(string.Empty, false, eb);
-
-			if (!this.Context.IsPrivate)
-			{
-				await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
-			}
+			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
 		}
 
 		/// <summary>
@@ -187,13 +181,7 @@ namespace DIGOS.Ambassador.Modules
 				eb.AddField(module.Name, module.Summary);
 			}
 
-			var userChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
-			await userChannel.SendMessageAsync(string.Empty, false, eb);
-
-			if (!this.Context.IsPrivate)
-			{
-				await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
-			}
+			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
 		}
 
 		/// <summary>

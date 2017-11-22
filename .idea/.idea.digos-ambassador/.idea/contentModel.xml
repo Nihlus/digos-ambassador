@@ -67,6 +67,7 @@
             <e p="Server.cs" t="Include" />
           </e>
           <e p="Transformations" t="Include">
+            <e p="Species.cs" t="Include" />
             <e p="Transformation.cs" t="Include" />
           </e>
           <e p="Users" t="Include">
@@ -157,6 +158,7 @@
             <e p="Bodypart.cs" t="Include" />
             <e p="CompositeParts.cs" t="Include" />
             <e p="ProtectionType.cs" t="Include" />
+            <e p="ShiftBodypartResult.cs" t="Include" />
             <e p="TransformationService.cs" t="Include" />
           </e>
         </e>

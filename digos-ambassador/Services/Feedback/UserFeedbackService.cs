@@ -97,6 +97,23 @@ namespace DIGOS.Ambassador.Services
 		}
 
 		/// <summary>
+		/// Sends a private embed to a given user, alerting them in their current context if they're not already in a
+		/// DM.
+		/// </summary>
+		/// <param name="context">The context of the command.</param>
+		/// <param name="user">The user to send the embed to.</param>
+		/// <param name="eb">The embed to send.</param>
+		public async Task SendPrivateEmbedAsync(SocketCommandContext context, IUser user, Embed eb)
+		{
+			await user.SendMessageAsync(string.Empty, false, eb);
+
+			if (!context.IsPrivate)
+			{
+				await SendConfirmationAsync(context, "Please check your private messages.");
+			}
+		}
+
+		/// <summary>
 		/// Creates a feedback embed.
 		/// </summary>
 		/// <param name="invoker">The invoking mentionable.</param>
