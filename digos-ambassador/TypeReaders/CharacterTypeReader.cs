@@ -46,6 +46,11 @@ namespace DIGOS.Ambassador.TypeReaders
 			var characterService = services.GetRequiredService<CharacterService>();
 			using (var db = new GlobalInfoContext())
 			{
+				if (entityName.Equals("current", StringComparison.OrdinalIgnoreCase))
+				{
+					return await characterService.GetCurrentCharacterAsync(db, context, context.User);
+				}
+
 				return await characterService.GetBestMatchingCharacterAsync(db, context, entityOwner, entityName);
 			}
 		}
