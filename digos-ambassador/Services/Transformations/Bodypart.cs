@@ -110,6 +110,31 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// The vagina.
 		/// </summary>
-		Vagina
+		Vagina,
+
+		/// <summary>
+		/// The head, composed of the face, the ears, the teeth, and the eyes.
+		/// </summary>
+		Head,
+
+		/// <summary>
+		/// The arms, composed of the left and right arms.
+		/// </summary>
+		Arms,
+
+		/// <summary>
+		/// The body, composed of the upper and lower body.
+		/// </summary>
+		Body,
+
+		/// <summary>
+		/// The legs, composed of the left and right legs.
+		/// </summary>
+		Legs,
+
+		/// <summary>
+		/// The wings, composed of the left and right wings.
+		/// </summary>
+		Wings
 	}
 }

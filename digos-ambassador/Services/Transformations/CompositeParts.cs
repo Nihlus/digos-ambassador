@@ -20,7 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using static DIGOS.Ambassador.Services.Bodypart;
 
 namespace DIGOS.Ambassador.Services
@@ -31,6 +33,8 @@ namespace DIGOS.Ambassador.Services
 	/// </summary>
 	public static class CompositeParts
 	{
+		private static IReadOnlyList<Bodypart> Composites { get; } = new[] { Bodypart.Head, Bodypart.Arms, Bodypart.Body, Bodypart.Legs, Bodypart.Wings };
+
 		/// <summary>
 		/// Gets the parts constituting the head.
 		/// </summary>
@@ -55,5 +59,68 @@ namespace DIGOS.Ambassador.Services
 		/// Gets the parts constituting the wings.
 		/// </summary>
 		public static IReadOnlyList<Bodypart> Wings { get; } = new[] { LeftWing, RightWing };
+
+		/// <summary>
+		/// Determines whether or not a given bodypart is a composite part.
+		/// </summary>
+		/// <param name="bodypart">The part to check.</param>
+		/// <returns>true if the part is a composite part; otherwise, false.</returns>
+		public static bool IsCompositePart(Bodypart bodypart)
+		{
+			return Composites.Contains(bodypart);
+		}
+
+		/// <summary>
+		/// Gets the bodyparts that a given part consists of.
+		/// </summary>
+		/// <param name="bodypart">The body part to decompose.</param>
+		/// <returns>An iterator over the bodyparts in the given bodypart.</returns>
+		public static IEnumerable<Bodypart> GetBodyparts(Bodypart bodypart)
+		{
+			if (!IsCompositePart(bodypart))
+			{
+				yield return bodypart;
+				yield break;
+			}
+
+			IEnumerable<Bodypart> parts;
+			switch (bodypart)
+			{
+				case Bodypart.Head:
+				{
+					parts = Head;
+					break;
+				}
+				case Bodypart.Arms:
+				{
+					parts = Arms;
+					break;
+				}
+				case Bodypart.Body:
+				{
+					parts = Body;
+					break;
+				}
+				case Bodypart.Legs:
+				{
+					parts = Legs;
+					break;
+				}
+				case Bodypart.Wings:
+				{
+					parts = Wings;
+					break;
+				}
+				default:
+				{
+					throw new ArgumentOutOfRangeException();
+				}
+			}
+
+			foreach (var part in parts)
+			{
+				yield return part;
+			}
+		}
 	}
 }

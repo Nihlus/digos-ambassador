@@ -75,6 +75,8 @@ namespace DIGOS.Ambassador
 
 		private readonly InteractiveService Interactive;
 
+		private readonly TransformationService Transformation;
+
 		private readonly IServiceProvider Services;
 
 		/// <summary>
@@ -98,6 +100,7 @@ namespace DIGOS.Ambassador
 			this.Feedback = new UserFeedbackService();
 			this.Dossiers = new DossierService(this.Content);
 			this.Interactive = new InteractiveService(this.Client);
+			this.Transformation = new TransformationService();
 
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)
@@ -109,6 +112,7 @@ namespace DIGOS.Ambassador
 				.AddSingleton(this.Feedback)
 				.AddSingleton(this.Dossiers)
 				.AddSingleton(this.Interactive)
+				.AddSingleton(this.Transformation)
 				.BuildServiceProvider();
 
 			this.Client.MessageReceived += OnMessageReceived;

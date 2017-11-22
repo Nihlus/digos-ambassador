@@ -104,6 +104,7 @@
           <e p="MiscellaneousCommands.cs" t="Include" />
           <e p="PermissionCommands.cs" t="Include" />
           <e p="RoleplayCommands.cs" t="Include" />
+          <e p="TransformationCommands.cs" t="Include" />
           <e p="UserCommands.cs" t="Include" />
         </e>
         <e p="Pagination" t="Include">
@@ -155,6 +156,8 @@
           <e p="Transformations" t="Include">
             <e p="Bodypart.cs" t="Include" />
             <e p="CompositeParts.cs" t="Include" />
+            <e p="ProtectionType.cs" t="Include" />
+            <e p="TransformationService.cs" t="Include" />
           </e>
         </e>
         <e p="TypeReaders" t="Include">
