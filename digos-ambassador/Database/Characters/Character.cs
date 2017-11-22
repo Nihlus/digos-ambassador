@@ -21,14 +21,16 @@
 //
 
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
 
 using Discord;
+
 using JetBrains.Annotations;
+using Image = DIGOS.Ambassador.Database.Data.Image;
 
 namespace DIGOS.Ambassador.Database.Characters
 {

@@ -42,6 +42,11 @@ namespace DIGOS.Ambassador.Services.Entity
 	public class OwnedEntityService
 	{
 		/// <summary>
+		/// Holds reserved characters which may not appear in names.
+		/// </summary>
+		private char[] ReservedNameCharacters = { ':' };
+
+		/// <summary>
 		/// Determines whether or not the given entity name is unique for a given set of user entities.
 		/// </summary>
 		/// <param name="userEntities">The entities to check.</param>
@@ -113,7 +118,7 @@ namespace DIGOS.Ambassador.Services.Entity
 		/// <param name="entityName">The name of the entity.</param>
 		/// <returns>true if the name is valid; otherwise, false.</returns>
 		[ContractAnnotation("entityName:null => false")]
-		public bool IsEntityNameValid
+		public CheckConditionResult IsEntityNameValid
 		(
 			[NotNull] ModuleInfo commandModule,
 			[CanBeNull] string entityName
@@ -121,7 +126,16 @@ namespace DIGOS.Ambassador.Services.Entity
 		{
 			if (entityName.IsNullOrWhitespace())
 			{
-				return false;
+				return CheckConditionResult.FromError(CommandError.ObjectNotFound, "Names cannot be empty.");
+			}
+
+			if (entityName.Any(c => this.ReservedNameCharacters.Contains(c)))
+			{
+				return CheckConditionResult.FromError
+				(
+					CommandError.UnmetPrecondition,
+					$"Names may not contain any of the following characters: {this.ReservedNameCharacters.Humanize()}"
+				);
 			}
 
 			var submodules = commandModule.Submodules;
@@ -134,7 +148,12 @@ namespace DIGOS.Ambassador.Services.Entity
 
 			commandNames = commandNames.Union(submoduleCommandNames);
 
-			return !commandNames.Contains(entityName);
+			if (commandNames.Contains(entityName))
+			{
+				return CheckConditionResult.FromError(CommandError.UnmetPrecondition, "Names may not be the same as a command.");
+			}
+
+			return CheckConditionResult.FromSuccess();
 		}
 	}
 }

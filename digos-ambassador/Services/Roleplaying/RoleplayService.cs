@@ -613,9 +613,10 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 			}
 
 			var commandModule = this.Commands.Modules.First(m => m.Name == "roleplay");
-			if (!this.OwnedEntities.IsEntityNameValid(commandModule, newRoleplayName))
+			var validNameResult = this.OwnedEntities.IsEntityNameValid(commandModule, newRoleplayName);
+			if (!validNameResult.IsSuccess)
 			{
-				return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "The given name is not valid.");
+				return ModifyEntityResult.FromError(validNameResult);
 			}
 
 			roleplay.Name = newRoleplayName;

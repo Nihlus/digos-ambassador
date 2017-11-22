@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -34,6 +33,8 @@ using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+
+using Image = DIGOS.Ambassador.Database.Data.Image;
 
 namespace DIGOS.Ambassador.Services.Characters
 {
@@ -66,10 +67,10 @@ namespace DIGOS.Ambassador.Services.Characters
 		/// <param name="characterOwner">The owner of the character, if any.</param>
 		/// <param name="characterName">The name of the character.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacter
+		public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
 		(
 			[NotNull] GlobalInfoContext db,
-			[NotNull] SocketCommandContext context,
+			[NotNull] ICommandContext context,
 			[CanBeNull] IUser characterOwner,
 			[CanBeNull] string characterName
 		)
@@ -102,7 +103,7 @@ namespace DIGOS.Ambassador.Services.Characters
 		public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync
 		(
 			[NotNull] GlobalInfoContext db,
-			[NotNull] SocketCommandContext context,
+			[NotNull] ICommandContext context,
 			[NotNull] IUser discordUser
 		)
 		{
@@ -177,7 +178,7 @@ namespace DIGOS.Ambassador.Services.Characters
 		public async Task<RetrieveEntityResult<Character>> GetUserCharacterByNameAsync
 		(
 			[NotNull] GlobalInfoContext db,
-			[NotNull] SocketCommandContext context,
+			[NotNull] ICommandContext context,
 			[NotNull] IUser characterOwner,
 			[NotNull] string characterName
 		)
@@ -389,9 +390,10 @@ namespace DIGOS.Ambassador.Services.Characters
 			}
 
 			var commandModule = this.Commands.Modules.First(m => m.Name == "character");
-			if (!this.OwnedEntities.IsEntityNameValid(commandModule, newCharacterName))
+			var validNameResult = this.OwnedEntities.IsEntityNameValid(commandModule, newCharacterName);
+			if (!validNameResult.IsSuccess)
 			{
-				return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "The given name is not valid.");
+				return ModifyEntityResult.FromError(validNameResult);
 			}
 
 			character.Name = newCharacterName;
@@ -564,6 +566,7 @@ namespace DIGOS.Ambassador.Services.Characters
 		{
 			var characters = db.Characters
 				.Include(ch => ch.Owner)
+				.Include(ch => ch.Images)
 				.Include(ch => ch.CurrentServers)
 				.Include(ch => ch.DefaultAppearance)
 				.Include(ch => ch.TransformedAppearance)
@@ -588,6 +591,72 @@ namespace DIGOS.Ambassador.Services.Characters
 		{
 			var userCharacters = GetUserCharacters(db, discordUser);
 			return await this.OwnedEntities.IsEntityNameUniqueForUserAsync(userCharacters, characterName);
+		}
+
+		/// <summary>
+		/// Adds the given image with the given metadata to the given character.
+		/// </summary>
+		/// <param name="db">The database where the characters and images are stored.</param>
+		/// <param name="character">The character to add the image to.</param>
+		/// <param name="imageName">The name of the image.</param>
+		/// <param name="imageUrl">The url of the image.</param>
+		/// <param name="imageCaption">The caption of the image.</param>
+		/// <param name="isNSFW">Whether or not the image is NSFW</param>
+		/// <returns>An execution result which may or may not have succeeded.</returns>
+		public async Task<ModifyEntityResult> AddImageToCharacterAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] Character character,
+			[NotNull] string imageName,
+			[NotNull] string imageUrl,
+			[CanBeNull] string imageCaption = null,
+			bool isNSFW = false
+		)
+		{
+			bool isImageNameUnique = !character.Images.Any(i => i.Name.Equals(imageName, StringComparison.OrdinalIgnoreCase));
+			if (!isImageNameUnique)
+			{
+				return ModifyEntityResult.FromError(CommandError.MultipleMatches, "The character already has an image with that name.");
+			}
+
+			var image = new Image
+			{
+				Name = imageName,
+				Caption = imageCaption,
+				Url = imageUrl,
+				IsNSFW = isNSFW
+			};
+
+			character.Images.Add(image);
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Added);
+		}
+
+		/// <summary>
+		/// Removes the named image from the given character.
+		/// </summary>
+		/// <param name="db">The database where the characters and images are stored.</param>
+		/// <param name="character">The character to remove the image from.</param>
+		/// <param name="imageName">The name of the image.</param>
+		/// <returns>An execution result which may or may not have succeeded.</returns>
+		public async Task<ModifyEntityResult> RemoveImageFromCharacterAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] Character character,
+			[NotNull] string imageName
+		)
+		{
+			bool hasNamedImage = character.Images.Any(i => i.Name.Equals(imageName, StringComparison.OrdinalIgnoreCase));
+			if (!hasNamedImage)
+			{
+				return ModifyEntityResult.FromError(CommandError.MultipleMatches, "The character has no image with that name.");
+			}
+
+			character.Images.RemoveAll(i => i.Name.Equals(imageName, StringComparison.OrdinalIgnoreCase));
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Added);
 		}
 	}
 }

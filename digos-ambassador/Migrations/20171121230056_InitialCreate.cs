@@ -212,6 +212,29 @@ namespace DIGOS.Ambassador.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Images",
+                columns: table => new
+                {
+                    ImageID = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Caption = table.Column<string>(type: "TEXT", nullable: true),
+                    CharacterID = table.Column<uint>(type: "INTEGER", nullable: true),
+                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    Url = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Images", x => x.ImageID);
+                    table.ForeignKey(
+                        name: "FK_Images_Characters_CharacterID",
+                        column: x => x.CharacterID,
+                        principalTable: "Characters",
+                        principalColumn: "CharacterID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Servers",
                 columns: table => new
                 {
@@ -468,6 +491,11 @@ namespace DIGOS.Ambassador.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Images_CharacterID",
+                table: "Images",
+                column: "CharacterID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_LocalPermissions_ServerID",
                 table: "LocalPermissions",
                 column: "ServerID");
@@ -636,6 +664,9 @@ namespace DIGOS.Ambassador.Migrations
 
             migrationBuilder.DropTable(
                 name: "GlobalPermissions");
+
+            migrationBuilder.DropTable(
+                name: "Images");
 
             migrationBuilder.DropTable(
                 name: "LocalPermissions");

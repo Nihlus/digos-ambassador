@@ -27,6 +27,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services.Characters;
@@ -39,6 +40,7 @@ using DIGOS.Ambassador.Services.Roleplaying;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 
@@ -76,6 +78,8 @@ namespace DIGOS.Ambassador
 
 		private readonly DossierService Dossiers;
 
+		private readonly InteractiveService Interactive;
+
 		private readonly IServiceProvider Services;
 
 		/// <summary>
@@ -98,6 +102,7 @@ namespace DIGOS.Ambassador
 			this.Characters = new CharacterService(this.Commands, this.OwnedEntities);
 			this.Feedback = new UserFeedbackService();
 			this.Dossiers = new DossierService(this.Content);
+			this.Interactive = new InteractiveService(this.Client);
 
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)
@@ -108,6 +113,7 @@ namespace DIGOS.Ambassador
 				.AddSingleton(this.Characters)
 				.AddSingleton(this.Feedback)
 				.AddSingleton(this.Dossiers)
+				.AddSingleton(this.Interactive)
 				.BuildServiceProvider();
 
 			this.Client.MessageReceived += OnMessageReceived;
@@ -129,8 +135,10 @@ namespace DIGOS.Ambassador
 		/// <returns>A task representing the start action.</returns>
 		public async Task StartAsync()
 		{
-			await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly());
 			this.Commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
+			this.Commands.AddTypeReader<Character>(new CharacterTypeReader());
+
+			await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly());
 
 			await this.Client.StartAsync();
 		}
@@ -215,6 +223,9 @@ namespace DIGOS.Ambassador
 						await this.Feedback.SendWarningAsync(context, "Unknown command.");
 						break;
 					}
+					case CommandError.ObjectNotFound:
+					case CommandError.MultipleMatches:
+					case CommandError.Unsuccessful:
 					case CommandError.UnmetPrecondition:
 					{
 						await this.Feedback.SendErrorAsync(context, result.ErrorReason);
@@ -230,10 +241,7 @@ namespace DIGOS.Ambassador
 						await userDMChannel.SendMessageAsync(string.Empty, false, this.Feedback.CreateCommandUsageEmbed(searchResult.Commands));
 						break;
 					}
-					case CommandError.ObjectNotFound:
-					case CommandError.MultipleMatches:
 					case CommandError.Exception:
-					case CommandError.Unsuccessful:
 					{
 						await this.Feedback.SendErrorAsync(context, $"Bzzt: {result.ErrorReason}");
 						break;

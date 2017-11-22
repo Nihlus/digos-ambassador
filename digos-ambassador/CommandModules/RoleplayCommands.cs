@@ -52,7 +52,16 @@ namespace DIGOS.Ambassador.CommandModules
 	[UsedImplicitly]
 	[Alias("roleplay", "rp")]
 	[Group("roleplay")]
-	[Summary("Commands for interacting with and managing channel roleplays.")]
+	[Summary
+	(
+		"Commands for interacting with and managing channel roleplays." +
+		"\n" +
+		"Parameters which take a roleplay can be specified in two ways - by just the name, which will search your " +
+		"roleplays, and by mention and name, which will search the given user's roleplays. For example,\n" +
+		"\n" +
+		"Your roleplay: ipsum\n" +
+		"Another user's roleplay: @DIGOS Ambassador:ipsum"
+	)]
 	public class RoleplayCommands : ModuleBase<SocketCommandContext>
 	{
 		private readonly RoleplayService Roleplays;

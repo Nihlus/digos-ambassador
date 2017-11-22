@@ -98,9 +98,13 @@
           </e>
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171121134540_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171121134540_InitialCreate.cs" t="Include" />
+          <e p="20171121230056_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171121230056_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
+        </e>
+        <e p="Pagination" t="Include">
+          <e p="PaginatedGallery.cs" t="Include" />
+          <e p="PaginatedGalleryCallback.cs" t="Include" />
         </e>
         <e p="Permissions" t="Include">
           <e p="DefaultPermissions.cs" t="Include" />
@@ -110,6 +114,7 @@
           <e p="Preconditions" t="Include">
             <e p="PrioritizedPreconditionAttribute.cs" t="Include" />
             <e p="RequireActiveRoleplayAttribute.cs" t="Include" />
+            <e p="RequireEntityOwnerOrPermissionAttribute.cs" t="Include" />
             <e p="RequirePermissionAttribute.cs" t="Include" />
           </e>
           <e p="RequiredPermission.cs" t="Include" />
@@ -129,6 +134,7 @@
             <e p="DossierService.cs" t="Include" />
           </e>
           <e p="Entity" t="Include">
+            <e p="CheckConditionResult.cs" t="Include" />
             <e p="CreateEntityResult.cs" t="Include" />
             <e p="DeleteEntityResult.cs" t="Include" />
             <e p="ModifyEntityAction.cs" t="Include" />
@@ -144,6 +150,8 @@
           </e>
         </e>
         <e p="TypeReaders" t="Include">
+          <e p="CharacterTypeReader.cs" t="Include" />
+          <e p="OwnedEntityTypeReader.cs" t="Include" />
           <e p="UncachedMessageTypeReader.cs" t="Include" />
         </e>
         <e p="app.config" t="Include" />

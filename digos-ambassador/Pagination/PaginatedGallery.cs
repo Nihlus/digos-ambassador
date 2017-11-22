@@ -1,5 +1,5 @@
 ﻿//
-//  Image.cs
+//  PaginatedGallery.cs
 //
 //  Author:
 //        Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,39 +20,38 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using JetBrains.Annotations;
+// Originally licensed under the ISC license; modified from https://github.com/foxbot/Discord.Addons.Interactive
 
-namespace DIGOS.Ambassador.Database.Data
+using System.Collections.Generic;
+using Discord;
+using Discord.Addons.Interactive;
+using Image = DIGOS.Ambassador.Database.Data.Image;
+
+namespace DIGOS.Ambassador.Pagination
 {
 	/// <summary>
-	/// Represents an image.
+	/// Represents a paginated gallery of images.
 	/// </summary>
-	public class Image
+	public class PaginatedGallery
 	{
 		/// <summary>
-		/// Gets or sets the unique ID of the image.
+		/// Gets or sets the images in the gallery.
 		/// </summary>
-		public uint ImageID { get; set; }
+		public IEnumerable<Image> Images { get; set; }
 
 		/// <summary>
-		/// Gets or sets the name of the image.
+		/// Gets or sets the colour of the gallery's embed.
 		/// </summary>
-		public string Name { get; set; }
+		public Color Color { get; set; } = Color.Default;
 
 		/// <summary>
-		/// Gets or sets the caption of the image.
+		/// Gets or sets the title of the gallery.
 		/// </summary>
-		public string Caption { get; set; }
+		public string Title { get; set; } = string.Empty;
 
 		/// <summary>
-		/// Gets or sets a value indicating whether or not the image is NSFW.
+		/// Gets the appearance options of the gallery.
 		/// </summary>
-		public bool IsNSFW { get; set; }
-
-		/// <summary>
-		/// Gets or sets the online URL of the image.
-		/// </summary>
-		[CanBeNull]
-		public string Url { get; set; }
+		public PaginatedAppearanceOptions Options { get; } = PaginatedAppearanceOptions.Default;
 	}
 }

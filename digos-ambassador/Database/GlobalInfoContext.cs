@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Discord;
+
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Database.Kinks;
@@ -34,6 +34,8 @@ using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
+
+using Discord;
 
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;

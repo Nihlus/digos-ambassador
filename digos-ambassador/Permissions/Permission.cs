@@ -66,6 +66,18 @@ namespace DIGOS.Ambassador.Permissions
 		EditCharacter,
 
 		/// <summary>
+		/// Allows the user to transfer ownership of characters.
+		/// </summary>
+		[Description("Allows the user to transfer ownership of characters.")]
+		TransferCharacter,
+
+		/// <summary>
+		/// Allows the user to assume the form of a character.
+		/// </summary>
+		[Description("Allows the user to assume the form of a character.")]
+		AssumeCharacter,
+
+		/// <summary>
 		/// Allows the user to edit user information.
 		/// </summary>
 		[Description("Allows the user to edit user information.")]

@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,8 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Pagination;
+using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services.Characters;
 using DIGOS.Ambassador.Services.Content;
@@ -42,6 +45,7 @@ using Discord.Commands;
 using JetBrains.Annotations;
 
 using static DIGOS.Ambassador.Permissions.Permission;
+using static DIGOS.Ambassador.Permissions.PermissionTarget;
 using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 
@@ -55,7 +59,16 @@ namespace DIGOS.Ambassador.CommandModules
 	[UsedImplicitly]
 	[Alias("character", "char", "ch")]
 	[Group("character")]
-	[Summary("Commands for creating, editing, and interacting with user characters.")]
+	[Summary
+	(
+		"Commands for creating, editing, and interacting with user characters.\n" +
+		"\n" +
+		"Parameters which take a character can be specified in two ways - by just the name, which will search your " +
+		"characters, and by mention and name, which will search the given user's characters. For example,\n" +
+		"\n" +
+		"Your character: Amby\n" +
+		"Another user's character: @DIGOS Ambassador:Amby"
+	)]
 	public class CharacterCommands : InteractiveBase<SocketCommandContext>
 	{
 		private readonly DiscordService Discord;
@@ -94,7 +107,7 @@ namespace DIGOS.Ambassador.CommandModules
 
 			using (var db = new GlobalInfoContext())
 			{
-				var getCharacterResult = await this.Characters.GetBestMatchingCharacter(db, this.Context, targetUser, null);
+				var getCharacterResult = await this.Characters.GetBestMatchingCharacterAsync(db, this.Context, targetUser, null);
 				if (!getCharacterResult.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, getCharacterResult.ErrorReason);
@@ -111,31 +124,15 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Shows quick information about a character.
 		/// </summary>
-		/// <param name="characterName">The name of the character.</param>
-		/// <param name="characterOwner">The owner of the character.</param>
+		/// <param name="character">The character.</param>
 		[UsedImplicitly]
 		[Command("show", RunMode = Async)]
 		[Summary("Shows quick information about a character.")]
-		public async Task ShowCharacterAsync
-		(
-			[NotNull] string characterName,
-			[CanBeNull] IUser characterOwner = null
-		)
+		public async Task ShowCharacterAsync([NotNull] Character character)
 		{
-			using (var db = new GlobalInfoContext())
-			{
-				var getCharacterResult = await this.Characters.GetBestMatchingCharacter(db, this.Context, characterOwner, characterName);
-				if (!getCharacterResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, getCharacterResult.ErrorReason);
-					return;
-				}
+			var eb = CreateCharacterInfoEmbed(character);
 
-				var character = getCharacterResult.Entity;
-				var eb = CreateCharacterInfoEmbed(character);
-
-				await ShowCharacterAsync(character, eb);
-			}
+			await ShowCharacterAsync(character, eb);
 		}
 
 		private async Task ShowCharacterAsync([NotNull] Character character, [NotNull] EmbedBuilder eb)
@@ -229,24 +226,20 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Deletes the named character.
 		/// </summary>
-		/// <param name="characterName">The name of the character to delete.</param>
+		/// <param name="character">The character to delete.</param>
 		[UsedImplicitly]
 		[Command("delete", RunMode = Async)]
 		[Summary("Deletes the named character.")]
 		[RequirePermission(DeleteCharacter)]
-		public async Task DeleteCharacterAsync([NotNull] string characterName)
+		public async Task DeleteCharacterAsync
+		(
+			[NotNull]
+			[RequireEntityOwnerOrPermission(DeleteCharacter, Other)]
+			Character character
+		)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var getCharacterResult = await this.Characters.GetUserCharacterByNameAsync(db, this.Context, this.Context.Message.Author, characterName);
-				if (!getCharacterResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, getCharacterResult.ErrorReason);
-					return;
-				}
-
-				var character = getCharacterResult.Entity;
-
 				db.Characters.Remove(character);
 				await db.SaveChangesAsync();
 
@@ -292,25 +285,20 @@ namespace DIGOS.Ambassador.CommandModules
 		/// <summary>
 		/// Sets the named character as the user's current character.
 		/// </summary>
-		/// <param name="characterName">The name of the character to become.</param>
+		/// <param name="character">The character to become.</param>
 		[UsedImplicitly]
 		[Alias("assume", "become", "transform", "active")]
 		[Command("assume", RunMode = Async)]
 		[Summary("Sets the named character as the user's current character.")]
 		[RequireContext(Guild)]
-		public async Task AssumeCharacterFormAsync([NotNull] string characterName)
+		public async Task AssumeCharacterFormAsync
+		(
+			[RequireEntityOwnerOrPermission(AssumeCharacter, Other)]
+			[NotNull] Character character
+		)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var getCharacterResult = await this.Characters.GetUserCharacterByNameAsync(db, this.Context, this.Context.Message.Author, characterName);
-				if (!getCharacterResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, getCharacterResult.ErrorReason);
-					return;
-				}
-
-				var character = getCharacterResult.Entity;
-
 				await this.Characters.MakeCharacterCurrentOnServerAsync(db, this.Context, this.Context.Guild, character);
 
 				if (!character.Nickname.IsNullOrWhitespace() && this.Context.Message.Author is IGuildUser guildUser)
@@ -369,39 +357,194 @@ namespace DIGOS.Ambassador.CommandModules
 			}
 		}
 
-		public async Task AddImageAsync([NotNull] string characterName, [NotNull] string imageName, [CanBeNull] string imageCaption = null, bool isNSFW = false, [CanBeNull] string imageUrl = null)
+		/// <summary>
+		/// View the images in a character's gallery.
+		/// </summary>
+		/// <param name="character">The character to view the gallery of.</param>
+		[UsedImplicitly]
+		[Command("view-gallery")]
+		[Summary("View the images in a character's gallery.")]
+		public async Task ViewCharacterGalleryAsync([NotNull] Character character)
 		{
+			if (character.Images.Count <= 0)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, "There are no images in that character's gallery.");
+				return;
+			}
 
+			var gallery = new PaginatedGallery
+			{
+				Images = character.Images,
+				Color = Color.DarkPurple,
+				Title = character.Name
+			};
+
+			gallery.Options.FooterFormat = "Image {0}/{1}";
+			gallery.Options.InformationText = "Use the reactions to navigate the gallery.";
+
+			var callback = new PaginatedGalleryCallback(this.Interactive, this.Feedback, this.Context, gallery);
+			await callback.DisplayAsync().ConfigureAwait(false);
 		}
 
-		public async Task RemoveImageAsync([NotNull] string characterName, [NotNull] string imageName, [CanBeNull] string imageCaption = null, bool isNSFW = false, [CanBeNull] string imageUrl = null)
+		/// <summary>
+		/// Lists the images in a character's gallery.
+		/// </summary>
+		/// <param name="character">The character.</param>
+		[UsedImplicitly]
+		[Command("list-images")]
+		[Summary("Lists the images in a character's gallery.")]
+		public async Task ListImagesAsync([NotNull] Character character)
 		{
+			var eb = new EmbedBuilder();
+			eb.WithColor(Color.DarkPurple);
+			eb.WithTitle("Images in character gallery");
 
+			foreach (var image in character.Images)
+			{
+				eb.AddField(image.Name, image.Caption ?? "No caption set.");
+			}
+
+			if (eb.Fields.Count <= 0)
+			{
+				eb.WithDescription("There are no images in the character's gallery.");
+			}
+
+			await this.Context.Channel.SendMessageAsync(string.Empty, false, eb);
+		}
+
+		/// <summary>
+		/// Adds an attached image to a character's gallery.
+		/// </summary>
+		/// <param name="character">The character to add the image to.</param>
+		/// <param name="imageName">The name of the image to add.</param>
+		/// <param name="imageCaption">The caption of the image.</param>
+		/// <param name="isNSFW">Whether or not the image is NSFW.</param>
+		[UsedImplicitly]
+		[Command("add-image", RunMode = Async)]
+		[Summary("Adds an attached image to a character's gallery.")]
+		[RequirePermission(EditCharacter)]
+		public async Task AddImageAsync
+		(
+			[NotNull]
+			[RequireEntityOwnerOrPermission(EditCharacter, Other)]
+			Character character,
+			[CanBeNull] string imageName = null,
+			[CanBeNull] string imageCaption = null,
+			bool isNSFW = false
+		)
+		{
+			bool hasAtLeastOneAttachment = this.Context.Message.Attachments.Any();
+			if (!hasAtLeastOneAttachment)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, "You need to attach an image.");
+				return;
+			}
+
+			// Check that it's an image
+			var firstAttachment = this.Context.Message.Attachments.First();
+			bool firstAttachmentIsImage = firstAttachment.Width.HasValue && firstAttachment.Height.HasValue;
+
+			if (!firstAttachmentIsImage)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, "You need to attach an image.");
+				return;
+			}
+			string imageUrl = firstAttachment.Url;
+
+			imageName = imageName ?? Path.GetFileNameWithoutExtension(firstAttachment.Filename);
+
+			await AddImageAsync(character, imageName, imageUrl, imageCaption, isNSFW);
+		}
+
+		/// <summary>
+		/// Adds a linked image to a character's gallery.
+		/// </summary>
+		/// <param name="character">The character to add the image to.</param>
+		/// <param name="imageName">The name of the image to add.</param>
+		/// <param name="imageUrl">The url to the image.</param>
+		/// <param name="imageCaption">The caption of the image.</param>
+		/// <param name="isNSFW">Whether or not the image is NSFW.</param>
+		[UsedImplicitly]
+		[Command("add-image", RunMode = Async)]
+		[Summary("Adds a linked image to a character's gallery.")]
+		[RequirePermission(EditCharacter)]
+		public async Task AddImageAsync
+		(
+			[NotNull]
+			[RequireEntityOwnerOrPermission(EditCharacter, Other)]
+			Character character,
+			[NotNull] string imageName,
+			[NotNull] string imageUrl,
+			[CanBeNull] string imageCaption = null,
+			bool isNSFW = false
+		)
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				var addImageResult = await this.Characters.AddImageToCharacterAsync(db, character, imageName, imageUrl, imageCaption, isNSFW);
+				if (!addImageResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, addImageResult.ErrorReason);
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Added \"{imageName}\" to {character.Name}'s gallery.");
+			}
+		}
+
+		/// <summary>
+		/// Removes the named image from the given character.
+		/// </summary>
+		/// <param name="character">The character to remove the image from.</param>
+		/// <param name="imageName">The name of the image to remove.</param>
+		[UsedImplicitly]
+		[Alias("remove-image", "delete-image")]
+		[Command("remove-image", RunMode = Async)]
+		[Summary("Removes an image from a character's gallery.")]
+		[RequirePermission(EditCharacter)]
+		public async Task RemoveImageAsync
+		(
+			[NotNull]
+			[RequireEntityOwnerOrPermission(EditCharacter, Other)]
+			Character character,
+			[NotNull] string imageName
+		)
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				var removeImageResult = await this.Characters.RemoveImageFromCharacterAsync(db, character, imageName);
+				if (!removeImageResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, removeImageResult.ErrorReason);
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Image removed.");
+			}
 		}
 
 		/// <summary>
 		/// Transfers ownership of the named character to another user.
 		/// </summary>
 		/// <param name="newOwner">The new owner of the character.</param>
-		/// <param name="characterName">The name of the character to transfer.</param>
+		/// <param name="character">The character to transfer.</param>
 		[UsedImplicitly]
 		[Alias("transfer-ownership", "transfer")]
 		[Command("transfer-ownership")]
 		[Summary("Transfers ownership of the named character to another user.")]
-		public async Task TransferCharacterOwnershipAsync([NotNull] IUser newOwner, [NotNull] string characterName)
+		[RequirePermission(TransferCharacter)]
+		public async Task TransferCharacterOwnershipAsync
+		(
+			[NotNull] IUser newOwner,
+			[NotNull]
+			[RequireEntityOwnerOrPermission(TransferCharacter, Other)]
+			Character character
+		)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await this.Characters.GetBestMatchingCharacter(db, this.Context, this.Context.Message.Author, characterName);
-				if (!result.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-					return;
-				}
-
-				var character = result.Entity;
 				var transferResult = await this.Characters.TransferCharacterOwnershipAsync(db, newOwner, character);
-				if (!result.IsSuccess)
+				if (!transferResult.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);
 					return;
@@ -444,25 +587,22 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <summary>
 			/// Sets the name of a character.
 			/// </summary>
-			/// <param name="oldCharacterName">The name of the character.</param>
+			/// <param name="character">The character.</param>
 			/// <param name="newCharacterName">The new name of the character.</param>
 			[UsedImplicitly]
 			[Command("name", RunMode = Async)]
 			[Summary("Sets the name of a character.")]
 			[RequirePermission(EditCharacter)]
-			public async Task SetCharacterNameAsync([NotNull] string oldCharacterName, [NotNull] string newCharacterName)
+			public async Task SetCharacterNameAsync
+			(
+				[NotNull]
+				[RequireEntityOwnerOrPermission(EditCharacter, Other)]
+				Character character,
+				[NotNull] string newCharacterName
+			)
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var result = await this.Characters.GetUserCharacterByNameAsync(db, this.Context, this.Context.Message.Author, oldCharacterName);
-					if (!result.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-						return;
-					}
-
-					var character = result.Entity;
-
 					var setNameResult = await this.Characters.SetCharacterNameAsync(db, this.Context, character, newCharacterName);
 					if (!setNameResult.IsSuccess)
 					{
@@ -470,30 +610,29 @@ namespace DIGOS.Ambassador.CommandModules
 						return;
 					}
 
-					await this.Feedback.SendConfirmationAsync(this.Context, "Roleplay name set.");
+					await this.Feedback.SendConfirmationAsync(this.Context, "Character name set.");
 				}
 			}
 
 			/// <summary>
 			/// Sets the avatar of a character.
 			/// </summary>
-			/// <param name="characterName">The name of the character.</param>
+			/// <param name="character">The character.</param>
 			/// <param name="newCharacterAvatarUrl">The url of the new avatar. Optional.</param>
 			[UsedImplicitly]
 			[Command("avatar", RunMode = Async)]
 			[Summary("Sets the avatar of a character. You can attach an image instead of passing a url as a parameter.")]
 			[RequirePermission(EditCharacter)]
-			public async Task SetCharacterAvatarAsync([NotNull] string characterName, [CanBeNull] string newCharacterAvatarUrl = null)
+			public async Task SetCharacterAvatarAsync
+			(
+				[NotNull]
+				[RequireEntityOwnerOrPermission(EditCharacter, Other)]
+				Character character,
+				[CanBeNull] string newCharacterAvatarUrl = null
+			)
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var result = await this.Characters.GetUserCharacterByNameAsync(db, this.Context, this.Context.Message.Author, characterName);
-					if (!result.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-						return;
-					}
-
 					if (newCharacterAvatarUrl is null)
 					{
 						if (!this.Context.Message.Attachments.Any())
@@ -506,7 +645,6 @@ namespace DIGOS.Ambassador.CommandModules
 						newCharacterAvatarUrl = newAvatar.Url;
 					}
 
-					var character = result.Entity;
 					character.AvatarUrl = newCharacterAvatarUrl;
 
 					await db.SaveChangesAsync();
@@ -518,26 +656,23 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <summary>
 			/// Sets the nickname that the user should have when a character is active.
 			/// </summary>
-			/// <param name="characterName">The name of the character.</param>
+			/// <param name="character">The character.</param>
 			/// <param name="newCharacterNickname">The new nickname of the character. Max 32 characters.</param>
 			[UsedImplicitly]
 			[Alias("nickname", "nick")]
 			[Command("nickname", RunMode = Async)]
 			[Summary("Sets the nickname that the user should have when the character is active.")]
 			[RequirePermission(EditCharacter)]
-			public async Task SetCharacterNicknameAsync([NotNull] string characterName, [NotNull] string newCharacterNickname)
+			public async Task SetCharacterNicknameAsync
+			(
+				[NotNull]
+				[RequireEntityOwnerOrPermission(EditCharacter, Other)]
+				Character character,
+				[NotNull] string newCharacterNickname
+			)
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var result = await this.Characters.GetUserCharacterByNameAsync(db, this.Context, this.Context.Message.Author, characterName);
-					if (!result.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-						return;
-					}
-
-					var character = result.Entity;
-
 					var setNickResult = await this.Characters.SetCharacterNicknameAsync(db, character, newCharacterNickname);
 					if (!setNickResult.IsSuccess)
 					{
@@ -552,25 +687,22 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <summary>
 			/// Sets the summary of a character.
 			/// </summary>
-			/// <param name="characterName">The name of the character.</param>
+			/// <param name="character">The character.</param>
 			/// <param name="newCharacterSummary">The new summary. Max 240 characters.</param>
 			[UsedImplicitly]
 			[Command("summary", RunMode = Async)]
 			[Summary("Sets the summary of a character.")]
 			[RequirePermission(EditCharacter)]
-			public async Task SetCharacterSummaryAsync([NotNull] string characterName, [NotNull] string newCharacterSummary)
+			public async Task SetCharacterSummaryAsync
+			(
+				[NotNull]
+				[RequireEntityOwnerOrPermission(EditCharacter, Other)]
+				Character character,
+				[NotNull] string newCharacterSummary
+			)
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var result = await this.Characters.GetUserCharacterByNameAsync(db, this.Context, this.Context.Message.Author, characterName);
-					if (!result.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-						return;
-					}
-
-					var character = result.Entity;
-
 					var setSummaryResult = await this.Characters.SetCharacterSummaryAsync(db, character, newCharacterSummary);
 					if (!setSummaryResult.IsSuccess)
 					{
@@ -585,50 +717,47 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <summary>
 			/// Sets the description of a character.
 			/// </summary>
-			/// <param name="characterName">The name of the character.</param>
+			/// <param name="character">The character.</param>
 			/// <param name="newCharacterDescription">The new description of the character. Optional.</param>
 			[UsedImplicitly]
 			[Alias("description", "desc")]
 			[Command("description", RunMode = Async)]
 			[Summary("Sets the description of a character. You can attach a plaintext document instead of passing it as a parameter.")]
 			[RequirePermission(EditCharacter)]
-			public async Task SetCharacterDescriptionAsync([NotNull] string characterName, [CanBeNull] string newCharacterDescription = null)
+			public async Task SetCharacterDescriptionAsync
+			(
+				[NotNull]
+				[RequireEntityOwnerOrPermission(EditCharacter, Other)]
+				Character character,
+				[CanBeNull] string newCharacterDescription = null
+			)
 			{
-				if (newCharacterDescription is null)
-				{
-					if (!this.Context.Message.Attachments.Any())
-					{
-						await this.Feedback.SendErrorAsync(this.Context, "You need to attach a plaintext document or provide an in-message description.");
-						return;
-					}
-
-					var newDescription = this.Context.Message.Attachments.First();
-					var getAttachmentStreamResult = await this.Discord.GetAttachmentStreamAsync(newDescription);
-					if (!getAttachmentStreamResult.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, getAttachmentStreamResult.ErrorReason);
-						return;
-					}
-
-					using (var s = getAttachmentStreamResult.Entity)
-					{
-						using (var sr = new StreamReader(s))
-						{
-							newCharacterDescription = sr.ReadToEnd();
-						}
-					}
-				}
-
 				using (var db = new GlobalInfoContext())
 				{
-					var result = await this.Characters.GetUserCharacterByNameAsync(db, this.Context, this.Context.Message.Author, characterName);
-					if (!result.IsSuccess)
+					if (newCharacterDescription is null)
 					{
-						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-						return;
-					}
+						if (!this.Context.Message.Attachments.Any())
+						{
+							await this.Feedback.SendErrorAsync(this.Context, "You need to attach a plaintext document or provide an in-message description.");
+							return;
+						}
 
-					var character = result.Entity;
+						var newDescription = this.Context.Message.Attachments.First();
+						var getAttachmentStreamResult = await this.Discord.GetAttachmentStreamAsync(newDescription);
+						if (!getAttachmentStreamResult.IsSuccess)
+						{
+							await this.Feedback.SendErrorAsync(this.Context, getAttachmentStreamResult.ErrorReason);
+							return;
+						}
+
+						using (var s = getAttachmentStreamResult.Entity)
+						{
+							using (var sr = new StreamReader(s))
+							{
+								newCharacterDescription = sr.ReadToEnd();
+							}
+						}
+					}
 
 					var setDescriptionResult = await this.Characters.SetCharacterDescriptionAsync(db, character, newCharacterDescription);
 					if (!setDescriptionResult.IsSuccess)
@@ -644,25 +773,22 @@ namespace DIGOS.Ambassador.CommandModules
 			/// <summary>
 			/// Sets whether or not a character is NSFW.
 			/// </summary>
-			/// <param name="characterName">The name of the character.</param>
+			/// <param name="character">The character.</param>
 			/// <param name="isNSFW">Whether or not the character is NSFW</param>
 			[UsedImplicitly]
 			[Command("nsfw", RunMode = Async)]
 			[Summary("Sets whether or not a character is NSFW.")]
 			[RequirePermission(EditCharacter)]
-			public async Task SetCharacterIsNSFWAsync([NotNull] string characterName, bool isNSFW)
+			public async Task SetCharacterIsNSFWAsync
+			(
+				[NotNull]
+				[RequireEntityOwnerOrPermission(EditCharacter, Other)]
+				Character character,
+				bool isNSFW
+			)
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					var result = await this.Characters.GetUserCharacterByNameAsync(db, this.Context, this.Context.Message.Author, characterName);
-					if (!result.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-						return;
-					}
-
-					var character = result.Entity;
-
 					await this.Characters.SetCharacterIsNSFWAsync(db, character, isNSFW);
 
 					await this.Feedback.SendConfirmationAsync(this.Context, $"Character set to {(isNSFW ? "NSFW" : "SFW")}.");

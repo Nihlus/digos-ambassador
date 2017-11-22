@@ -185,6 +185,28 @@ namespace DIGOS.Ambassador.Migrations
                     b.ToTable("Characters");
                 });
 
+            modelBuilder.Entity("DIGOS.Ambassador.Database.Data.Image", b =>
+                {
+                    b.Property<uint>("ImageID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Caption");
+
+                    b.Property<uint?>("CharacterID");
+
+                    b.Property<bool>("IsNSFW");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Url");
+
+                    b.HasKey("ImageID");
+
+                    b.HasIndex("CharacterID");
+
+                    b.ToTable("Images");
+                });
+
             modelBuilder.Entity("DIGOS.Ambassador.Database.Dossiers.Dossier", b =>
                 {
                     b.Property<uint>("DossierID")
@@ -445,6 +467,13 @@ namespace DIGOS.Ambassador.Migrations
                     b.HasOne("DIGOS.Ambassador.Database.Users.User")
                         .WithMany("Characters")
                         .HasForeignKey("UserID");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Database.Data.Image", b =>
+                {
+                    b.HasOne("DIGOS.Ambassador.Database.Characters.Character")
+                        .WithMany("Images")
+                        .HasForeignKey("CharacterID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Permissions.GlobalPermission", b =>

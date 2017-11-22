@@ -50,22 +50,6 @@ namespace DIGOS.Ambassador.Permissions
 			[NotNull] RequiredPermission requiredPermission
 		)
 		{
-			if (discordServer is null)
-			{
-				return DefaultPermissions.DefaultPermissionSet.Any
-				(
-					dp =>
-						dp.Permission == requiredPermission.Permission &&
-						dp.Target.HasFlag(requiredPermission.Target)
-				);
-			}
-
-			// The server owner always has all permissions by default
-			if (discordServer.OwnerId == user.DiscordID)
-			{
-				return true;
-			}
-
 			using (var db = new GlobalInfoContext())
 			{
 				return await HasPermissionAsync(db, discordServer, user, requiredPermission);
@@ -83,11 +67,27 @@ namespace DIGOS.Ambassador.Permissions
 		public static async Task<bool> HasPermissionAsync
 		(
 			[NotNull] GlobalInfoContext db,
-			[NotNull] IGuild discordServer,
+			[CanBeNull] IGuild discordServer,
 			[NotNull] User user,
 			[NotNull] RequiredPermission requiredPermission
 		)
 		{
+			if (discordServer is null)
+			{
+				return DefaultPermissions.DefaultPermissionSet.Any
+				(
+					dp =>
+						dp.Permission == requiredPermission.Permission &&
+						dp.Target.HasFlag(requiredPermission.Target)
+				);
+			}
+
+			// The server owner always has all permissions by default
+			if (discordServer.OwnerId == user.DiscordID)
+			{
+				return true;
+			}
+
 			// First, check if the user has the permission on a global level
 			var hasGlobalPermission = await db.GlobalPermissions.AnyAsync
 			(

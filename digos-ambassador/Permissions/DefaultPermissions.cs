@@ -43,6 +43,8 @@ namespace DIGOS.Ambassador.Permissions
 			DeleteCharacter,
 			ImportCharacter,
 			EditCharacter,
+			TransferCharacter,
+			AssumeCharacter,
 			CreateRoleplay,
 			DeleteRoleplay,
 			JoinRoleplay,
