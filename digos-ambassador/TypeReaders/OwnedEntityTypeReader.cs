@@ -29,7 +29,7 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services.Entity;
+using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;

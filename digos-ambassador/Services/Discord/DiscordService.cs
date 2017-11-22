@@ -24,15 +24,11 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-
-using DIGOS.Ambassador.Services.Entity;
-
 using Discord;
 using Discord.Commands;
-
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Services.Discord
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Handles integration with Discord.

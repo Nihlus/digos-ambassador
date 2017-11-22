@@ -30,11 +30,12 @@ using DIGOS.Ambassador.Extensions;
 
 using Discord;
 using Discord.Commands;
+
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
-namespace DIGOS.Ambassador.Services.Entity
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Acts as an interface for accessing and modifying named entities owned by users.

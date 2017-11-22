@@ -23,7 +23,7 @@
 using Discord.Commands;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Services.Entity
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Represents an attempt to create an entity and save it in the database.

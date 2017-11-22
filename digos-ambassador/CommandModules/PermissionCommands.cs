@@ -29,10 +29,11 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
-using DIGOS.Ambassador.Services.Feedback;
+using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
+
 using Humanizer;
 using JetBrains.Annotations;
 

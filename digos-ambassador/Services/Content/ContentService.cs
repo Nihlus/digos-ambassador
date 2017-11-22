@@ -28,13 +28,12 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services.Entity;
 
 using Discord.Commands;
 
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Services.Content
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Management class for content that comes bundled with the bot. Responsible for loading and providing access to

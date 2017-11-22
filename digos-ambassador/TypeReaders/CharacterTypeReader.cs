@@ -25,8 +25,7 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Services.Characters;
-using DIGOS.Ambassador.Services.Entity;
+using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;

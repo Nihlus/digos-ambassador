@@ -23,8 +23,9 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Services.Roleplaying;
+using DIGOS.Ambassador.Services;
 using Discord.Commands;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions

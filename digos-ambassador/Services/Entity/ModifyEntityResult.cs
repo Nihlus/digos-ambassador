@@ -23,7 +23,7 @@
 using Discord.Commands;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Services.Entity
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Encapsulates the result of an attempt to add or edit an entity.

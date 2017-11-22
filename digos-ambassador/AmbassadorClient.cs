@@ -31,13 +31,7 @@ using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
-using DIGOS.Ambassador.Services.Characters;
-using DIGOS.Ambassador.Services.Content;
-using DIGOS.Ambassador.Services.Discord;
-using DIGOS.Ambassador.Services.Dossiers;
-using DIGOS.Ambassador.Services.Entity;
-using DIGOS.Ambassador.Services.Feedback;
-using DIGOS.Ambassador.Services.Roleplaying;
+using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;

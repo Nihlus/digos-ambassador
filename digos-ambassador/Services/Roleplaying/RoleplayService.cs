@@ -29,7 +29,6 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services.Entity;
 
 using Discord;
 using Discord.Commands;
@@ -38,7 +37,7 @@ using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
-namespace DIGOS.Ambassador.Services.Roleplaying
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Acts as an interface for accessing, enabling, and disabling ongoing roleplays.

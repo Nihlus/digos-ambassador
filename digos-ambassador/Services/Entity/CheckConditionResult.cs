@@ -23,7 +23,7 @@
 using Discord.Commands;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Services.Entity
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Represents a condition check with an accompanying failure reason.

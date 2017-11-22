@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Services.Entity
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Enumerates which actions can be taken when an entity is modified.

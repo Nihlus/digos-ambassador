@@ -166,6 +166,7 @@
         <e p="app.config" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="digos-ambassador.csproj" t="IncludeRecursive" />
+        <e p="digos-ambassador.csproj.DotSettings" t="Include" />
         <e p="digos-ambassador.log" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">

@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Services.Transformations
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Represents a single transformable body part.

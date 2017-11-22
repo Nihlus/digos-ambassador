@@ -30,8 +30,6 @@ using DIGOS.Ambassador.Content;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services.Content;
-using DIGOS.Ambassador.Services.Entity;
 
 using Discord.Commands;
 
@@ -39,7 +37,7 @@ using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
-namespace DIGOS.Ambassador.Services.Dossiers
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Handles dossier management.

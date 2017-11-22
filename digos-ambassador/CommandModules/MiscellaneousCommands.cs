@@ -26,11 +26,11 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services.Content;
-using DIGOS.Ambassador.Services.Feedback;
+using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
+
 using JetBrains.Annotations;
 using static Discord.Commands.RunMode;
 

@@ -30,11 +30,7 @@ using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Permissions.Preconditions;
-using DIGOS.Ambassador.Services.Characters;
-using DIGOS.Ambassador.Services.Content;
-using DIGOS.Ambassador.Services.Discord;
-using DIGOS.Ambassador.Services.Entity;
-using DIGOS.Ambassador.Services.Feedback;
+using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Addons.Interactive;

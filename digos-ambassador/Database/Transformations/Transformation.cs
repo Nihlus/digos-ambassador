@@ -21,7 +21,7 @@
 //
 
 using DIGOS.Ambassador.Database.Appearances;
-using DIGOS.Ambassador.Services.Transformations;
+using DIGOS.Ambassador.Services;
 using YamlDotNet.Serialization;
 
 namespace DIGOS.Ambassador.Database.Transformations

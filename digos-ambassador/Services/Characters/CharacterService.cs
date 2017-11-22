@@ -27,16 +27,15 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services.Entity;
 
 using Discord;
 using Discord.Commands;
+
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-
 using Image = DIGOS.Ambassador.Database.Data.Image;
 
-namespace DIGOS.Ambassador.Services.Characters
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Acts as an interface for accessing and modifying user characters.

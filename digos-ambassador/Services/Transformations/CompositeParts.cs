@@ -21,9 +21,9 @@
 //
 
 using System.Collections.Generic;
-using static DIGOS.Ambassador.Services.Transformations.Bodypart;
+using static DIGOS.Ambassador.Services.Bodypart;
 
-namespace DIGOS.Ambassador.Services.Transformations
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Holds composite parts - that is, a body part that consists of a number of smaller parts, which should be
