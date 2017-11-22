@@ -47,6 +47,11 @@ namespace DIGOS.Ambassador.Services.Entity
 		private char[] ReservedNameCharacters = { ':' };
 
 		/// <summary>
+		/// Holds reserved names which entities may not have.
+		/// </summary>
+		private string[] ReservedNames = { "current" };
+
+		/// <summary>
 		/// Determines whether or not the given entity name is unique for a given set of user entities.
 		/// </summary>
 		/// <param name="userEntities">The entities to check.</param>
@@ -135,6 +140,15 @@ namespace DIGOS.Ambassador.Services.Entity
 				(
 					CommandError.UnmetPrecondition,
 					$"Names may not contain any of the following characters: {this.ReservedNameCharacters.Humanize()}"
+				);
+			}
+
+			if (this.ReservedNames.Any(n => n.Equals(entityName, StringComparison.OrdinalIgnoreCase)))
+			{
+				return CheckConditionResult.FromError
+				(
+					CommandError.UnmetPrecondition,
+					"That is a reserved name."
 				);
 			}
 

@@ -28,6 +28,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services.Entity;
 
 using Discord;
@@ -49,7 +50,7 @@ namespace DIGOS.Ambassador.TypeReaders
 		{
 			IUser owner = null;
 			string entityName;
-			if (input.Any(c => c == ':'))
+			if (!input.IsNullOrWhitespace() && input.Any(c => c == ':'))
 			{
 				// We have a mentioned owner and a name. Owners may have colons in the name, so let's check from the back.
 				int splitIndex = input.LastIndexOf(':');

@@ -206,7 +206,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync
 		(
 			[NotNull] GlobalInfoContext db,
-			[NotNull] SocketCommandContext context,
+			[NotNull] ICommandContext context,
 			[CanBeNull] IUser roleplayOwner,
 			[CanBeNull] string roleplayName
 		)
@@ -223,7 +223,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 
 			if (roleplayName.IsNullOrWhitespace())
 			{
-				return RetrieveEntityResult<Roleplay>.FromError(CommandError.ObjectNotFound, "Roleplays can't have empty or null names.");
+				return await GetActiveRoleplayAsync(db, context.Channel);
 			}
 
 			return await GetUserRoleplayByNameAsync(db, context, roleplayOwner, roleplayName);
@@ -353,7 +353,7 @@ namespace DIGOS.Ambassador.Services.Roleplaying
 		public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync
 		(
 			[NotNull] GlobalInfoContext db,
-			[NotNull] SocketCommandContext context,
+			[NotNull] ICommandContext context,
 			[NotNull] IUser roleplayOwner,
 			[NotNull] string roleplayName
 		)

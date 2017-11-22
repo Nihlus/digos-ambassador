@@ -112,5 +112,23 @@ namespace DIGOS.Ambassador.Permissions
 		/// </summary>
 		[Description("Allows the user to edit roleplay information.")]
 		EditRoleplay,
+
+		/// <summary>
+		/// Allows the user to kick members of roleplays.
+		/// </summary>
+		[Description("Allows the user to kick members of roleplays.")]
+		KickRoleplayMember,
+
+		/// <summary>
+		/// Allows the user to start and stop roleplays.
+		/// </summary>
+		[Description("Allows the user to start and stop roleplays.")]
+		StartStopRoleplay,
+
+		/// <summary>
+		/// Allows the user to transfer ownership of roleplays.
+		/// </summary>
+		[Description("Allows the user to transfer ownership of roleplays.")]
+		TransferRoleplay
 	}
 }

@@ -152,6 +152,7 @@
         <e p="TypeReaders" t="Include">
           <e p="CharacterTypeReader.cs" t="Include" />
           <e p="OwnedEntityTypeReader.cs" t="Include" />
+          <e p="RoleplayTypeReader.cs" t="Include" />
           <e p="UncachedMessageTypeReader.cs" t="Include" />
         </e>
         <e p="app.config" t="Include" />
