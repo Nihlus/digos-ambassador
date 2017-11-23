@@ -30,7 +30,7 @@ using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
-
+using Humanizer;
 using JetBrains.Annotations;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -227,13 +227,18 @@ namespace DIGOS.Ambassador.Modules
 			{
 				var availableEmbed = new EmbedBuilder();
 
+				var relevantModuleAliases = module.Aliases.Skip(1);
+				var moduleExtraAliases = module.Aliases.Count > 1
+					? $"(you can also use {relevantModuleAliases.Humanize("or")} instead of {module.Name})"
+					: string.Empty;
+
 				availableEmbed.WithColor(Color.Blue);
-				availableEmbed.WithDescription($"Available commands in {module.Name}");
+				availableEmbed.WithDescription($"Available commands in {module.Name} {moduleExtraAliases}");
 
 				var unavailableEmbed = new EmbedBuilder();
 
 				unavailableEmbed.WithColor(Color.Red);
-				unavailableEmbed.WithDescription($"Unavailable commands in {module.Name}");
+				unavailableEmbed.WithDescription($"Unavailable commands in {module.Name} {moduleExtraAliases}");
 
 				var matchingCommandsInModule = module.Commands.Union
 				(
@@ -246,14 +251,25 @@ namespace DIGOS.Ambassador.Modules
 
 				foreach (var command in matchingCommandsInModule)
 				{
+					var relevantAliases = command.Aliases.Skip(1).Where(a => a.StartsWith(command.Module.Aliases.First())).ToList();
+					var prefix = relevantAliases.Count > 1
+						? "as well as"
+						: "or";
+
+					var commandExtraAliases = relevantAliases.Any()
+						? $"({prefix} {relevantAliases.Humanize("or")})"
+						: string.Empty;
+
+					var commandDisplayAliases = $"{command.Aliases.First()} {commandExtraAliases}";
+
 					var hasPermission = await command.CheckPreconditionsAsync(this.Context, this.Services);
 					if (hasPermission.IsSuccess)
 					{
-						availableEmbed.AddField(command.Aliases.First(), $"{command.Summary}\n{this.Feedback.BuildParameterList(command)}");
+						availableEmbed.AddField(commandDisplayAliases, $"{command.Summary}\n{this.Feedback.BuildParameterList(command)}");
 					}
 					else
 					{
-						unavailableEmbed.AddField(command.Aliases.First(), $"*{hasPermission.ErrorReason}*\n\n{command.Summary} \n{this.Feedback.BuildParameterList(command)}");
+						unavailableEmbed.AddField(commandDisplayAliases, $"*{hasPermission.ErrorReason}*\n\n{command.Summary} \n{this.Feedback.BuildParameterList(command)}");
 					}
 				}
 

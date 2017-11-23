@@ -53,6 +53,11 @@ namespace DIGOS.Ambassador.Database.Transformations
 		public string Description { get; set; }
 
 		/// <summary>
+		/// Gets or sets a value indicating whether this transformation is NSFW.
+		/// </summary>
+		public bool IsNSFW { get; set; }
+
+		/// <summary>
 		/// Gets or sets the text of the message when an existing bodypart shifts into this one.
 		/// </summary>
 		public string ShiftMessage { get; set; }

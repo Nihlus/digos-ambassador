@@ -27,7 +27,18 @@
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
           </e>
-          <e p="Transformations" t="Include" />
+          <e p="Transformations" t="Include">
+            <e p="Species" t="Include">
+              <e p="shark" t="Include">
+                <e p="LeftArm.yml" t="Include" />
+                <e p="Species.yml" t="Include" />
+              </e>
+            </e>
+            <e p="Templates" t="Include">
+              <e p="Bodypart.yml" t="Include" />
+              <e p="Species.yml" t="Include" />
+            </e>
+          </e>
           <e p="bot.token" t="Include" />
         </e>
         <e p="Database" t="Include">
