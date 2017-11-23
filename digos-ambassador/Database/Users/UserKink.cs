@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Kinks;
 
 namespace DIGOS.Ambassador.Database.Users
@@ -27,12 +28,10 @@ namespace DIGOS.Ambassador.Database.Users
 	/// <summary>
 	/// Represents a user's kink, along with their preference for it.
 	/// </summary>
-	public class UserKink
+	public class UserKink : IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique ID for this user's kink.
-		/// </summary>
-		public uint UserKinkID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the kink.

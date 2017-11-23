@@ -33,12 +33,10 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 	/// <summary>
 	/// Represents a saved roleplay.
 	/// </summary>
-	public class Roleplay : IOwnedNamedEntity
+	public class Roleplay : IOwnedNamedEntity, IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique ID of the roleplay.
-		/// </summary>
-		public uint RoleplayID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether or not the roleplay is currently active in a channel.

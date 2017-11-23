@@ -200,7 +200,7 @@ namespace DIGOS.Ambassador
 					}
 
 					// Grant permissions to new users
-					if (!server.KnownUsers.Any(u => u.UserID == user.UserID))
+					if (!server.KnownUsers.Any(u => u.DiscordID == user.DiscordID))
 					{
 						DefaultPermissions.Grant(server, user);
 						server.KnownUsers.Add(user);

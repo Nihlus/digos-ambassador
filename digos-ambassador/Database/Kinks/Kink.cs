@@ -22,18 +22,17 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Database.Interfaces;
 
 namespace DIGOS.Ambassador.Database.Kinks
 {
 	/// <summary>
 	/// Represents a sexual kink or fetish.
 	/// </summary>
-	public class Kink : IEquatable<Kink>
+	public class Kink : IEquatable<Kink>, IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique ID of the kink.
-		/// </summary>
-		public uint KinkID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the category the kink belongs to.

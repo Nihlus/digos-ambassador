@@ -20,62 +20,23 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Collections.Generic;
+using DIGOS.Ambassador.Database.Interfaces;
+
 namespace DIGOS.Ambassador.Database.Appearances
 {
 	/// <summary>
 	/// Represents the physical appearance of a character.
 	/// </summary>
-	public class Appearance
+	public class Appearance : IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique ID of this appearance.
-		/// </summary>
-		public uint AppearanceID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
-		/// Gets or sets the current appearance of a character's surface (that is, skin, scales, fur, etc).
+		/// Gets or sets the parts that compose this appearance.
 		/// </summary>
-		public AppearanceComponent<SurfaceType> Surface { get; set; }
-
-		/// <summary>
-		/// Gets or sets the current appearance of a character's hair.
-		/// </summary>
-		public AppearanceComponent<string> Hair { get; set; }
-
-		/// <summary>
-		/// Gets or sets the current appearance of a character's head.
-		/// </summary>
-		public AppearanceComponent<string> Head { get; set; }
-
-		/// <summary>
-		/// Gets or sets the current appearance of a character's eyes.
-		/// </summary>
-		public AppearanceComponent<string> Eyes { get; set; }
-
-		/// <summary>
-		/// Gets or sets the current appearance of a character's body.
-		/// </summary>
-		public AppearanceComponent<string> Body { get; set; }
-
-		/// <summary>
-		/// Gets or sets the current appearance of a character's genitalia.
-		/// </summary>
-		public AppearanceComponent<GenitaliaType> Genitalia { get; set; }
-
-		/// <summary>
-		/// Gets or sets the current appearance of a character's tail.
-		/// </summary>
-		public AppearanceComponent<string> Tail { get; set; }
-
-		/// <summary>
-		/// Gets or sets the current appearance of a character's arms.
-		/// </summary>
-		public AppearanceComponent<string> Arms { get; set; }
-
-		/// <summary>
-		/// Gets or sets the current appearance of a character's legs.
-		/// </summary>
-		public AppearanceComponent<string> Legs { get; set; }
+		public List<AppearanceComponent> Components { get; set; }
 
 		/// <summary>
 		/// Gets or sets a character's height (in meters).

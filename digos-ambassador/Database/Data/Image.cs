@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Database.Interfaces;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Data
@@ -27,12 +28,10 @@ namespace DIGOS.Ambassador.Database.Data
 	/// <summary>
 	/// Represents an image.
 	/// </summary>
-	public class Image
+	public class Image : IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique ID of the image.
-		/// </summary>
-		public uint ImageID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the name of the image.

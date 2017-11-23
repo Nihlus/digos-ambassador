@@ -45,8 +45,6 @@
           <e p="Appearances" t="Include">
             <e p="Appearance.cs" t="Include" />
             <e p="AppearanceComponent.cs" t="Include" />
-            <e p="GenitaliaType.cs" t="Include" />
-            <e p="SurfaceType.cs" t="Include" />
           </e>
           <e p="Characters" t="Include">
             <e p="Character.cs" t="Include" />
@@ -59,6 +57,7 @@
           </e>
           <e p="GlobalInfoContext.cs" t="Include" />
           <e p="Interfaces" t="Include">
+            <e p="IEFEntity.cs" t="Include" />
             <e p="IOwnedNamedEntity.cs" t="Include" />
           </e>
           <e p="Kinks" t="Include">
@@ -106,8 +105,8 @@
           </e>
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171123130730_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171123130730_InitialCreate.cs" t="Include" />
+          <e p="20171123161608_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171123161608_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">

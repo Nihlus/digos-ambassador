@@ -92,7 +92,7 @@ namespace DIGOS.Ambassador.Permissions
 			var hasGlobalPermission = await db.GlobalPermissions.AnyAsync
 			(
 				gp =>
-					gp.User.UserID == user.UserID &&
+					gp.User.DiscordID == user.DiscordID &&
 					gp.Permission == requiredPermission.Permission &&
 					gp.Target.HasFlag(requiredPermission.Target)
 			);

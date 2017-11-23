@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="species">The species to transform it into.</param>
 		[UsedImplicitly]
 		[Command(RunMode = Async)]
-		[Summary("Transforms the given bodypart into the given species on yourself.")]
+		[Summary("Transforms the given bodypart into the given species on yourself. You can use \"remove\" instead of a species to remove the body part.")]
 		[RequirePermission(Transform)]
 		public async Task ShiftAsync(Bodypart bodyPart, [NotNull] string species) =>
 			await ShiftAsync(this.Context.User, bodyPart, species);
@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="species">The species to transform it into.</param>
 		[UsedImplicitly]
 		[Command(RunMode = Async)]
-		[Summary("Transforms the given bodypart of the target user into the given species.")]
+		[Summary("Transforms the given bodypart of the target user into the given species. You can use \"remove\" instead of a species to remove the body part.")]
 		[RequirePermission(Transform, Other)]
 		public async Task ShiftAsync([NotNull] IUser target, Bodypart bodyPart, [NotNull] string species)
 		{

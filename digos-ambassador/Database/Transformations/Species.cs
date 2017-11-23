@@ -21,6 +21,7 @@
 //
 
 using System;
+using DIGOS.Ambassador.Database.Interfaces;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 
@@ -29,13 +30,10 @@ namespace DIGOS.Ambassador.Database.Transformations
 	/// <summary>
 	/// Represents a single species (i.e, associated transformations)
 	/// </summary>
-	public class Species
+	public class Species : IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique ID of the species.
-		/// </summary>
-		[YamlIgnore]
-		public uint SpeciesID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the parent species.

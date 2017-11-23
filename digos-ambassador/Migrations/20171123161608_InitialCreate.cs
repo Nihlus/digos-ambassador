@@ -14,64 +14,26 @@ namespace DIGOS.Ambassador.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AppearanceComponent<GenitaliaType>",
+                name: "Appearance",
                 columns: table => new
                 {
-                    AppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    BaseColour = table.Column<string>(type: "TEXT", nullable: true),
-                    Description = table.Column<int>(type: "INTEGER", nullable: false),
-                    Exists = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Pattern = table.Column<string>(type: "TEXT", nullable: true),
-                    PatternColour = table.Column<string>(type: "TEXT", nullable: true),
-                    Size = table.Column<int>(type: "INTEGER", nullable: false)
+                    GenderScale = table.Column<float>(type: "REAL", nullable: false),
+                    Height = table.Column<float>(type: "REAL", nullable: false),
+                    Muscularity = table.Column<float>(type: "REAL", nullable: false),
+                    Weight = table.Column<float>(type: "REAL", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AppearanceComponent<GenitaliaType>", x => x.AppearanceComponentID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AppearanceComponent<string>",
-                columns: table => new
-                {
-                    AppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    BaseColour = table.Column<string>(type: "TEXT", nullable: true),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    Exists = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Pattern = table.Column<string>(type: "TEXT", nullable: true),
-                    PatternColour = table.Column<string>(type: "TEXT", nullable: true),
-                    Size = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AppearanceComponent<string>", x => x.AppearanceComponentID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AppearanceComponent<SurfaceType>",
-                columns: table => new
-                {
-                    AppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    BaseColour = table.Column<string>(type: "TEXT", nullable: true),
-                    Description = table.Column<int>(type: "INTEGER", nullable: false),
-                    Exists = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Pattern = table.Column<string>(type: "TEXT", nullable: true),
-                    PatternColour = table.Column<string>(type: "TEXT", nullable: true),
-                    Size = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AppearanceComponent<SurfaceType>", x => x.AppearanceComponentID);
+                    table.PrimaryKey("PK_Appearance", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Dossiers",
                 columns: table => new
                 {
-                    DossierID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Path = table.Column<string>(type: "TEXT", nullable: true),
                     Summary = table.Column<string>(type: "TEXT", nullable: true),
@@ -79,14 +41,14 @@ namespace DIGOS.Ambassador.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Dossiers", x => x.DossierID);
+                    table.PrimaryKey("PK_Dossiers", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Kinks",
                 columns: table => new
                 {
-                    KinkID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Category = table.Column<int>(type: "INTEGER", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
@@ -95,106 +57,27 @@ namespace DIGOS.Ambassador.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Kinks", x => x.KinkID);
+                    table.PrimaryKey("PK_Kinks", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Species",
                 columns: table => new
                 {
-                    SpeciesID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
-                    ParentSpeciesID = table.Column<uint>(type: "INTEGER", nullable: true)
+                    ParentID = table.Column<uint>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Species", x => x.SpeciesID);
+                    table.PrimaryKey("PK_Species", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Species_Species_ParentSpeciesID",
-                        column: x => x.ParentSpeciesID,
+                        name: "FK_Species_Species_ParentID",
+                        column: x => x.ParentID,
                         principalTable: "Species",
-                        principalColumn: "SpeciesID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Appearance",
-                columns: table => new
-                {
-                    AppearanceID = table.Column<uint>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ArmsAppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    BodyAppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    EyesAppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    GenderScale = table.Column<float>(type: "REAL", nullable: false),
-                    GenitaliaAppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    HairAppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    HeadAppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Height = table.Column<float>(type: "REAL", nullable: false),
-                    LegsAppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Muscularity = table.Column<float>(type: "REAL", nullable: false),
-                    SurfaceAppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    TailAppearanceComponentID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Weight = table.Column<float>(type: "REAL", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Appearance", x => x.AppearanceID);
-                    table.ForeignKey(
-                        name: "FK_Appearance_AppearanceComponent<string>_ArmsAppearanceComponentID",
-                        column: x => x.ArmsAppearanceComponentID,
-                        principalTable: "AppearanceComponent<string>",
-                        principalColumn: "AppearanceComponentID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Appearance_AppearanceComponent<string>_BodyAppearanceComponentID",
-                        column: x => x.BodyAppearanceComponentID,
-                        principalTable: "AppearanceComponent<string>",
-                        principalColumn: "AppearanceComponentID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Appearance_AppearanceComponent<string>_EyesAppearanceComponentID",
-                        column: x => x.EyesAppearanceComponentID,
-                        principalTable: "AppearanceComponent<string>",
-                        principalColumn: "AppearanceComponentID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Appearance_AppearanceComponent<GenitaliaType>_GenitaliaAppearanceComponentID",
-                        column: x => x.GenitaliaAppearanceComponentID,
-                        principalTable: "AppearanceComponent<GenitaliaType>",
-                        principalColumn: "AppearanceComponentID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Appearance_AppearanceComponent<string>_HairAppearanceComponentID",
-                        column: x => x.HairAppearanceComponentID,
-                        principalTable: "AppearanceComponent<string>",
-                        principalColumn: "AppearanceComponentID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Appearance_AppearanceComponent<string>_HeadAppearanceComponentID",
-                        column: x => x.HeadAppearanceComponentID,
-                        principalTable: "AppearanceComponent<string>",
-                        principalColumn: "AppearanceComponentID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Appearance_AppearanceComponent<string>_LegsAppearanceComponentID",
-                        column: x => x.LegsAppearanceComponentID,
-                        principalTable: "AppearanceComponent<string>",
-                        principalColumn: "AppearanceComponentID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Appearance_AppearanceComponent<SurfaceType>_SurfaceAppearanceComponentID",
-                        column: x => x.SurfaceAppearanceComponentID,
-                        principalTable: "AppearanceComponent<SurfaceType>",
-                        principalColumn: "AppearanceComponentID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Appearance_AppearanceComponent<string>_TailAppearanceComponentID",
-                        column: x => x.TailAppearanceComponentID,
-                        principalTable: "AppearanceComponent<string>",
-                        principalColumn: "AppearanceComponentID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -202,7 +85,7 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Transformations",
                 columns: table => new
                 {
-                    TransformationID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
                     GrowMessage = table.Column<string>(type: "TEXT", nullable: true),
@@ -215,12 +98,42 @@ namespace DIGOS.Ambassador.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Transformations", x => x.TransformationID);
+                    table.PrimaryKey("PK_Transformations", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Transformations_Species_SpeciesID",
                         column: x => x.SpeciesID,
                         principalTable: "Species",
-                        principalColumn: "SpeciesID",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AppearanceComponent",
+                columns: table => new
+                {
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    AppearanceID = table.Column<uint>(type: "INTEGER", nullable: true),
+                    BaseColour = table.Column<string>(type: "TEXT", nullable: true),
+                    Pattern = table.Column<string>(type: "TEXT", nullable: true),
+                    PatternColour = table.Column<string>(type: "TEXT", nullable: true),
+                    Size = table.Column<int>(type: "INTEGER", nullable: false),
+                    TransformationID = table.Column<uint>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppearanceComponent", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_AppearanceComponent_Appearance_AppearanceID",
+                        column: x => x.AppearanceID,
+                        principalTable: "Appearance",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AppearanceComponent_Transformations_TransformationID",
+                        column: x => x.TransformationID,
+                        principalTable: "Transformations",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -228,33 +141,33 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Characters",
                 columns: table => new
                 {
-                    CharacterID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     AvatarUrl = table.Column<string>(type: "TEXT", nullable: true),
-                    DefaultAppearanceAppearanceID = table.Column<uint>(type: "INTEGER", nullable: true),
+                    DefaultAppearanceID = table.Column<uint>(type: "INTEGER", nullable: true),
                     Description = table.Column<string>(type: "TEXT", nullable: true),
                     IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     Nickname = table.Column<string>(type: "TEXT", nullable: true),
-                    OwnerUserID = table.Column<uint>(type: "INTEGER", nullable: true),
+                    OwnerID = table.Column<uint>(type: "INTEGER", nullable: true),
                     Summary = table.Column<string>(type: "TEXT", nullable: true),
-                    TransformedAppearanceAppearanceID = table.Column<uint>(type: "INTEGER", nullable: true),
+                    TransformedAppearanceID = table.Column<uint>(type: "INTEGER", nullable: true),
                     UserID = table.Column<uint>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Characters", x => x.CharacterID);
+                    table.PrimaryKey("PK_Characters", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Characters_Appearance_DefaultAppearanceAppearanceID",
-                        column: x => x.DefaultAppearanceAppearanceID,
+                        name: "FK_Characters_Appearance_DefaultAppearanceID",
+                        column: x => x.DefaultAppearanceID,
                         principalTable: "Appearance",
-                        principalColumn: "AppearanceID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Characters_Appearance_TransformedAppearanceAppearanceID",
-                        column: x => x.TransformedAppearanceAppearanceID,
+                        name: "FK_Characters_Appearance_TransformedAppearanceID",
+                        column: x => x.TransformedAppearanceID,
                         principalTable: "Appearance",
-                        principalColumn: "AppearanceID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -262,7 +175,7 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Images",
                 columns: table => new
                 {
-                    ImageID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Caption = table.Column<string>(type: "TEXT", nullable: true),
                     CharacterID = table.Column<uint>(type: "INTEGER", nullable: true),
@@ -272,12 +185,12 @@ namespace DIGOS.Ambassador.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Images", x => x.ImageID);
+                    table.PrimaryKey("PK_Images", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Images_Characters_CharacterID",
                         column: x => x.CharacterID,
                         principalTable: "Characters",
-                        principalColumn: "CharacterID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -285,7 +198,7 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Servers",
                 columns: table => new
                 {
-                    ServerID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     CharacterID = table.Column<uint>(type: "INTEGER", nullable: true),
                     DiscordGuildID = table.Column<ulong>(type: "INTEGER", nullable: false),
@@ -294,12 +207,12 @@ namespace DIGOS.Ambassador.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Servers", x => x.ServerID);
+                    table.PrimaryKey("PK_Servers", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Servers_Characters_CharacterID",
                         column: x => x.CharacterID,
                         principalTable: "Characters",
-                        principalColumn: "CharacterID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -307,11 +220,11 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UserID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Bio = table.Column<string>(type: "TEXT", nullable: true),
                     Class = table.Column<int>(type: "INTEGER", nullable: false),
-                    DefaultCharacterCharacterID = table.Column<uint>(type: "INTEGER", nullable: true),
+                    DefaultCharacterID = table.Column<uint>(type: "INTEGER", nullable: true),
                     DiscordID = table.Column<ulong>(type: "INTEGER", nullable: false),
                     RoleplayID = table.Column<uint>(type: "INTEGER", nullable: true),
                     RoleplayID1 = table.Column<uint>(type: "INTEGER", nullable: true),
@@ -321,18 +234,18 @@ namespace DIGOS.Ambassador.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.UserID);
+                    table.PrimaryKey("PK_Users", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Users_Characters_DefaultCharacterCharacterID",
-                        column: x => x.DefaultCharacterCharacterID,
+                        name: "FK_Users_Characters_DefaultCharacterID",
+                        column: x => x.DefaultCharacterID,
                         principalTable: "Characters",
-                        principalColumn: "CharacterID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Users_Servers_ServerID",
                         column: x => x.ServerID,
                         principalTable: "Servers",
-                        principalColumn: "ServerID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -340,7 +253,7 @@ namespace DIGOS.Ambassador.Migrations
                 name: "GlobalPermissions",
                 columns: table => new
                 {
-                    GlobalPermissionID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Permission = table.Column<int>(type: "INTEGER", nullable: false),
                     Target = table.Column<int>(type: "INTEGER", nullable: false),
@@ -348,12 +261,12 @@ namespace DIGOS.Ambassador.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GlobalPermissions", x => x.GlobalPermissionID);
+                    table.PrimaryKey("PK_GlobalPermissions", x => x.ID);
                     table.ForeignKey(
                         name: "FK_GlobalPermissions_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
-                        principalColumn: "UserID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -361,7 +274,7 @@ namespace DIGOS.Ambassador.Migrations
                 name: "LocalPermissions",
                 columns: table => new
                 {
-                    LocalPermissionID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Permission = table.Column<int>(type: "INTEGER", nullable: false),
                     ServerID = table.Column<uint>(type: "INTEGER", nullable: true),
@@ -370,18 +283,18 @@ namespace DIGOS.Ambassador.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LocalPermissions", x => x.LocalPermissionID);
+                    table.PrimaryKey("PK_LocalPermissions", x => x.ID);
                     table.ForeignKey(
                         name: "FK_LocalPermissions_Servers_ServerID",
                         column: x => x.ServerID,
                         principalTable: "Servers",
-                        principalColumn: "ServerID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_LocalPermissions_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
-                        principalColumn: "UserID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -389,24 +302,24 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Roleplays",
                 columns: table => new
                 {
-                    RoleplayID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     ActiveChannelID = table.Column<ulong>(type: "INTEGER", nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
                     IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
                     IsPublic = table.Column<bool>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
-                    OwnerUserID = table.Column<uint>(type: "INTEGER", nullable: true),
+                    OwnerID = table.Column<uint>(type: "INTEGER", nullable: true),
                     Summary = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Roleplays", x => x.RoleplayID);
+                    table.PrimaryKey("PK_Roleplays", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Roleplays_Users_OwnerUserID",
-                        column: x => x.OwnerUserID,
+                        name: "FK_Roleplays_Users_OwnerID",
+                        column: x => x.OwnerID,
                         principalTable: "Users",
-                        principalColumn: "UserID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -414,7 +327,7 @@ namespace DIGOS.Ambassador.Migrations
                 name: "UserKink",
                 columns: table => new
                 {
-                    UserKinkID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     KinkID = table.Column<uint>(type: "INTEGER", nullable: true),
                     Preference = table.Column<int>(type: "INTEGER", nullable: false),
@@ -422,18 +335,18 @@ namespace DIGOS.Ambassador.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserKink", x => x.UserKinkID);
+                    table.PrimaryKey("PK_UserKink", x => x.ID);
                     table.ForeignKey(
                         name: "FK_UserKink_Kinks_KinkID",
                         column: x => x.KinkID,
                         principalTable: "Kinks",
-                        principalColumn: "KinkID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_UserKink_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
-                        principalColumn: "UserID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -441,10 +354,10 @@ namespace DIGOS.Ambassador.Migrations
                 name: "UserMessage",
                 columns: table => new
                 {
-                    UserMessageID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    AuthorID = table.Column<uint>(type: "INTEGER", nullable: true),
                     AuthorNickname = table.Column<string>(type: "TEXT", nullable: true),
-                    AuthorUserID = table.Column<uint>(type: "INTEGER", nullable: true),
                     Contents = table.Column<string>(type: "TEXT", nullable: true),
                     DiscordMessageID = table.Column<ulong>(type: "INTEGER", nullable: false),
                     RoleplayID = table.Column<uint>(type: "INTEGER", nullable: true),
@@ -452,80 +365,45 @@ namespace DIGOS.Ambassador.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserMessage", x => x.UserMessageID);
+                    table.PrimaryKey("PK_UserMessage", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_UserMessage_Users_AuthorUserID",
-                        column: x => x.AuthorUserID,
+                        name: "FK_UserMessage_Users_AuthorID",
+                        column: x => x.AuthorID,
                         principalTable: "Users",
-                        principalColumn: "UserID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_UserMessage_Roleplays_RoleplayID",
                         column: x => x.RoleplayID,
                         principalTable: "Roleplays",
-                        principalColumn: "RoleplayID",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Appearance_ArmsAppearanceComponentID",
-                table: "Appearance",
-                column: "ArmsAppearanceComponentID");
+                name: "IX_AppearanceComponent_AppearanceID",
+                table: "AppearanceComponent",
+                column: "AppearanceID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Appearance_BodyAppearanceComponentID",
-                table: "Appearance",
-                column: "BodyAppearanceComponentID");
+                name: "IX_AppearanceComponent_TransformationID",
+                table: "AppearanceComponent",
+                column: "TransformationID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Appearance_EyesAppearanceComponentID",
-                table: "Appearance",
-                column: "EyesAppearanceComponentID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appearance_GenitaliaAppearanceComponentID",
-                table: "Appearance",
-                column: "GenitaliaAppearanceComponentID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appearance_HairAppearanceComponentID",
-                table: "Appearance",
-                column: "HairAppearanceComponentID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appearance_HeadAppearanceComponentID",
-                table: "Appearance",
-                column: "HeadAppearanceComponentID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appearance_LegsAppearanceComponentID",
-                table: "Appearance",
-                column: "LegsAppearanceComponentID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appearance_SurfaceAppearanceComponentID",
-                table: "Appearance",
-                column: "SurfaceAppearanceComponentID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Appearance_TailAppearanceComponentID",
-                table: "Appearance",
-                column: "TailAppearanceComponentID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Characters_DefaultAppearanceAppearanceID",
+                name: "IX_Characters_DefaultAppearanceID",
                 table: "Characters",
-                column: "DefaultAppearanceAppearanceID");
+                column: "DefaultAppearanceID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Characters_OwnerUserID",
+                name: "IX_Characters_OwnerID",
                 table: "Characters",
-                column: "OwnerUserID");
+                column: "OwnerID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Characters_TransformedAppearanceAppearanceID",
+                name: "IX_Characters_TransformedAppearanceID",
                 table: "Characters",
-                column: "TransformedAppearanceAppearanceID");
+                column: "TransformedAppearanceID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Characters_UserID",
@@ -553,9 +431,9 @@ namespace DIGOS.Ambassador.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Roleplays_OwnerUserID",
+                name: "IX_Roleplays_OwnerID",
                 table: "Roleplays",
-                column: "OwnerUserID");
+                column: "OwnerID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Servers_CharacterID",
@@ -563,9 +441,9 @@ namespace DIGOS.Ambassador.Migrations
                 column: "CharacterID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Species_ParentSpeciesID",
+                name: "IX_Species_ParentID",
                 table: "Species",
-                column: "ParentSpeciesID");
+                column: "ParentID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transformations_SpeciesID",
@@ -583,9 +461,9 @@ namespace DIGOS.Ambassador.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserMessage_AuthorUserID",
+                name: "IX_UserMessage_AuthorID",
                 table: "UserMessage",
-                column: "AuthorUserID");
+                column: "AuthorID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserMessage_RoleplayID",
@@ -593,9 +471,9 @@ namespace DIGOS.Ambassador.Migrations
                 column: "RoleplayID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_DefaultCharacterCharacterID",
+                name: "IX_Users_DefaultCharacterID",
                 table: "Users",
-                column: "DefaultCharacterCharacterID");
+                column: "DefaultCharacterID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleplayID",
@@ -618,11 +496,11 @@ namespace DIGOS.Ambassador.Migrations
                 column: "ServerID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Characters_Users_OwnerUserID",
+                name: "FK_Characters_Users_OwnerID",
                 table: "Characters",
-                column: "OwnerUserID",
+                column: "OwnerID",
                 principalTable: "Users",
-                principalColumn: "UserID",
+                principalColumn: "ID",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
@@ -630,7 +508,7 @@ namespace DIGOS.Ambassador.Migrations
                 table: "Characters",
                 column: "UserID",
                 principalTable: "Users",
-                principalColumn: "UserID",
+                principalColumn: "ID",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
@@ -638,7 +516,7 @@ namespace DIGOS.Ambassador.Migrations
                 table: "Users",
                 column: "RoleplayID",
                 principalTable: "Roleplays",
-                principalColumn: "RoleplayID",
+                principalColumn: "ID",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
@@ -646,7 +524,7 @@ namespace DIGOS.Ambassador.Migrations
                 table: "Users",
                 column: "RoleplayID1",
                 principalTable: "Roleplays",
-                principalColumn: "RoleplayID",
+                principalColumn: "ID",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
@@ -654,58 +532,22 @@ namespace DIGOS.Ambassador.Migrations
                 table: "Users",
                 column: "RoleplayID2",
                 principalTable: "Roleplays",
-                principalColumn: "RoleplayID",
+                principalColumn: "ID",
                 onDelete: ReferentialAction.Restrict);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Appearance_AppearanceComponent<string>_ArmsAppearanceComponentID",
-                table: "Appearance");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Appearance_AppearanceComponent<string>_BodyAppearanceComponentID",
-                table: "Appearance");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Appearance_AppearanceComponent<string>_EyesAppearanceComponentID",
-                table: "Appearance");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Appearance_AppearanceComponent<string>_HairAppearanceComponentID",
-                table: "Appearance");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Appearance_AppearanceComponent<string>_HeadAppearanceComponentID",
-                table: "Appearance");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Appearance_AppearanceComponent<string>_LegsAppearanceComponentID",
-                table: "Appearance");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Appearance_AppearanceComponent<string>_TailAppearanceComponentID",
-                table: "Appearance");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Appearance_AppearanceComponent<GenitaliaType>_GenitaliaAppearanceComponentID",
-                table: "Appearance");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Appearance_AppearanceComponent<SurfaceType>_SurfaceAppearanceComponentID",
-                table: "Appearance");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Characters_Appearance_DefaultAppearanceAppearanceID",
+                name: "FK_Characters_Appearance_DefaultAppearanceID",
                 table: "Characters");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Characters_Appearance_TransformedAppearanceAppearanceID",
+                name: "FK_Characters_Appearance_TransformedAppearanceID",
                 table: "Characters");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Characters_Users_OwnerUserID",
+                name: "FK_Characters_Users_OwnerID",
                 table: "Characters");
 
             migrationBuilder.DropForeignKey(
@@ -713,8 +555,11 @@ namespace DIGOS.Ambassador.Migrations
                 table: "Characters");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Roleplays_Users_OwnerUserID",
+                name: "FK_Roleplays_Users_OwnerID",
                 table: "Roleplays");
+
+            migrationBuilder.DropTable(
+                name: "AppearanceComponent");
 
             migrationBuilder.DropTable(
                 name: "Dossiers");
@@ -729,28 +574,19 @@ namespace DIGOS.Ambassador.Migrations
                 name: "LocalPermissions");
 
             migrationBuilder.DropTable(
-                name: "Transformations");
-
-            migrationBuilder.DropTable(
                 name: "UserKink");
 
             migrationBuilder.DropTable(
                 name: "UserMessage");
 
             migrationBuilder.DropTable(
-                name: "Species");
+                name: "Transformations");
 
             migrationBuilder.DropTable(
                 name: "Kinks");
 
             migrationBuilder.DropTable(
-                name: "AppearanceComponent<string>");
-
-            migrationBuilder.DropTable(
-                name: "AppearanceComponent<GenitaliaType>");
-
-            migrationBuilder.DropTable(
-                name: "AppearanceComponent<SurfaceType>");
+                name: "Species");
 
             migrationBuilder.DropTable(
                 name: "Appearance");

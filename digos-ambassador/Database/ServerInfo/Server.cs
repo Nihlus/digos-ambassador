@@ -21,8 +21,12 @@
 //
 
 using System.Collections.Generic;
+
+using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
+
 using Discord;
+
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.ServerInfo
@@ -30,12 +34,10 @@ namespace DIGOS.Ambassador.Database.ServerInfo
 	/// <summary>
 	/// Represents stored settings for a Discord server.
 	/// </summary>
-	public class Server
+	public class Server : IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique ID of the server in the database.
-		/// </summary>
-		public uint ServerID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the globally unique guild ID of the server.

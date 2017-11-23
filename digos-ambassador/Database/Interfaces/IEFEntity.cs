@@ -1,5 +1,5 @@
 ﻿//
-//  SurfaceType.cs
+//  IEFEntity.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,26 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Database.Appearances
+using System.ComponentModel.DataAnnotations;
+using JetBrains.Annotations;
+
+namespace DIGOS.Ambassador.Database.Interfaces
 {
 	/// <summary>
-	/// Represents different types of appearance surfaces.
+	/// Simple interface for enforcing a unique ID in EF entity classes.
 	/// </summary>
-	public enum SurfaceType
+	public interface IEFEntity
 	{
 		/// <summary>
-		/// Plain skin.
+		/// Gets or sets the unique database ID for this entity.
 		/// </summary>
-		Skin,
-
-		/// <summary>
-		/// Furry skin or hide.
-		/// </summary>
-		Fur,
-
-		/// <summary>
-		/// Scaled skin or hide.
-		/// </summary>
-		Scales
+		[Key]
+		[UsedImplicitly]
+		uint ID { get; set; }
 	}
 }

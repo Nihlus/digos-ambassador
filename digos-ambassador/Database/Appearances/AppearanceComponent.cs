@@ -21,30 +21,31 @@
 //
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Services;
 
 namespace DIGOS.Ambassador.Database.Appearances
 {
 	/// <summary>
 	/// Represents a distinct part of a character's appearance.
 	/// </summary>
-	/// <typeparam name="T">The information type of the component.</typeparam>
-	public class AppearanceComponent<T>
+	public class AppearanceComponent : IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the component's unique ID.
-		/// </summary>
-		[Key]
-		public uint AppearanceComponentID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
-		/// Gets or sets a value indicating whether or not the component exists.
+		/// Gets the bodypart that the component is.
 		/// </summary>
-		public bool Exists { get; set; }
+		[NotMapped]
+		public Bodypart Bodypart => this.Transformation.Part;
 
 		/// <summary>
-		/// Gets or sets the component's description. This is used as a generic descriptor of the component.
+		/// Gets or sets the component's current transformation.
 		/// </summary>
-		public T Description { get; set; }
+		public Transformation Transformation { get; set; }
 
 		/// <summary>
 		/// Gets or sets the base colour of the component.

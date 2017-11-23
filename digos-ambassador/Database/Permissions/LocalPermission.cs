@@ -22,6 +22,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Permissions;
 
@@ -30,12 +31,10 @@ namespace DIGOS.Ambassador.Database.Permissions
 	/// <summary>
 	/// Represents a server-specific granted permission.
 	/// </summary>
-	public class LocalPermission : IEquatable<LocalPermission>
+	public class LocalPermission : IEquatable<LocalPermission>, IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique ID for this permission.
-		/// </summary>
-		public uint LocalPermissionID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the granted permission.

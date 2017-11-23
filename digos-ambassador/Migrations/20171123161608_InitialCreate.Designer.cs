@@ -4,7 +4,6 @@
 // ReSharper disable PartialTypeWithSinglePart
 // ReSharper disable RedundantUsingDirective
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
@@ -20,7 +19,7 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    [Migration("20171123130730_InitialCreate")]
+    [Migration("20171123161608_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,68 +30,30 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Appearances.Appearance", b =>
                 {
-                    b.Property<uint>("AppearanceID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
-
-                    b.Property<uint?>("ArmsAppearanceComponentID");
-
-                    b.Property<uint?>("BodyAppearanceComponentID");
-
-                    b.Property<uint?>("EyesAppearanceComponentID");
 
                     b.Property<float>("GenderScale");
 
-                    b.Property<uint?>("GenitaliaAppearanceComponentID");
-
-                    b.Property<uint?>("HairAppearanceComponentID");
-
-                    b.Property<uint?>("HeadAppearanceComponentID");
-
                     b.Property<float>("Height");
-
-                    b.Property<uint?>("LegsAppearanceComponentID");
 
                     b.Property<float>("Muscularity");
 
-                    b.Property<uint?>("SurfaceAppearanceComponentID");
-
-                    b.Property<uint?>("TailAppearanceComponentID");
-
                     b.Property<float>("Weight");
 
-                    b.HasKey("AppearanceID");
-
-                    b.HasIndex("ArmsAppearanceComponentID");
-
-                    b.HasIndex("BodyAppearanceComponentID");
-
-                    b.HasIndex("EyesAppearanceComponentID");
-
-                    b.HasIndex("GenitaliaAppearanceComponentID");
-
-                    b.HasIndex("HairAppearanceComponentID");
-
-                    b.HasIndex("HeadAppearanceComponentID");
-
-                    b.HasIndex("LegsAppearanceComponentID");
-
-                    b.HasIndex("SurfaceAppearanceComponentID");
-
-                    b.HasIndex("TailAppearanceComponentID");
+                    b.HasKey("ID");
 
                     b.ToTable("Appearance");
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<DIGOS.Ambassador.Database.Appearances.GenitaliaType>", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Database.Appearances.AppearanceComponent", b =>
                 {
-                    b.Property<uint>("AppearanceComponentID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<uint?>("AppearanceID");
+
                     b.Property<string>("BaseColour");
-
-                    b.Property<int>("Description");
-
-                    b.Property<bool>("Exists");
 
                     b.Property<string>("Pattern");
 
@@ -100,63 +61,25 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<int>("Size");
 
-                    b.HasKey("AppearanceComponentID");
+                    b.Property<uint?>("TransformationID");
 
-                    b.ToTable("AppearanceComponent<GenitaliaType>");
-                });
+                    b.HasKey("ID");
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<DIGOS.Ambassador.Database.Appearances.SurfaceType>", b =>
-                {
-                    b.Property<uint>("AppearanceComponentID")
-                        .ValueGeneratedOnAdd();
+                    b.HasIndex("AppearanceID");
 
-                    b.Property<string>("BaseColour");
+                    b.HasIndex("TransformationID");
 
-                    b.Property<int>("Description");
-
-                    b.Property<bool>("Exists");
-
-                    b.Property<string>("Pattern");
-
-                    b.Property<string>("PatternColour");
-
-                    b.Property<int>("Size");
-
-                    b.HasKey("AppearanceComponentID");
-
-                    b.ToTable("AppearanceComponent<SurfaceType>");
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<string>", b =>
-                {
-                    b.Property<uint>("AppearanceComponentID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("BaseColour");
-
-                    b.Property<string>("Description");
-
-                    b.Property<bool>("Exists");
-
-                    b.Property<string>("Pattern");
-
-                    b.Property<string>("PatternColour");
-
-                    b.Property<int>("Size");
-
-                    b.HasKey("AppearanceComponentID");
-
-                    b.ToTable("AppearanceComponent<string>");
+                    b.ToTable("AppearanceComponent");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.Character", b =>
                 {
-                    b.Property<uint>("CharacterID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("AvatarUrl");
 
-                    b.Property<uint?>("DefaultAppearanceAppearanceID");
+                    b.Property<uint?>("DefaultAppearanceID");
 
                     b.Property<string>("Description");
 
@@ -166,21 +89,21 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<string>("Nickname");
 
-                    b.Property<uint?>("OwnerUserID");
+                    b.Property<uint?>("OwnerID");
 
                     b.Property<string>("Summary");
 
-                    b.Property<uint?>("TransformedAppearanceAppearanceID");
+                    b.Property<uint?>("TransformedAppearanceID");
 
                     b.Property<uint?>("UserID");
 
-                    b.HasKey("CharacterID");
+                    b.HasKey("ID");
 
-                    b.HasIndex("DefaultAppearanceAppearanceID");
+                    b.HasIndex("DefaultAppearanceID");
 
-                    b.HasIndex("OwnerUserID");
+                    b.HasIndex("OwnerID");
 
-                    b.HasIndex("TransformedAppearanceAppearanceID");
+                    b.HasIndex("TransformedAppearanceID");
 
                     b.HasIndex("UserID");
 
@@ -189,7 +112,7 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Data.Image", b =>
                 {
-                    b.Property<uint>("ImageID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Caption");
@@ -202,7 +125,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<string>("Url");
 
-                    b.HasKey("ImageID");
+                    b.HasKey("ID");
 
                     b.HasIndex("CharacterID");
 
@@ -211,7 +134,7 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Dossiers.Dossier", b =>
                 {
-                    b.Property<uint>("DossierID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Path");
@@ -220,14 +143,14 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<string>("Title");
 
-                    b.HasKey("DossierID");
+                    b.HasKey("ID");
 
                     b.ToTable("Dossiers");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Kinks.Kink", b =>
                 {
-                    b.Property<uint>("KinkID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("Category");
@@ -238,14 +161,14 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<string>("Name");
 
-                    b.HasKey("KinkID");
+                    b.HasKey("ID");
 
                     b.ToTable("Kinks");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Permissions.GlobalPermission", b =>
                 {
-                    b.Property<uint>("GlobalPermissionID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("Permission");
@@ -254,7 +177,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<uint?>("UserID");
 
-                    b.HasKey("GlobalPermissionID");
+                    b.HasKey("ID");
 
                     b.HasIndex("UserID");
 
@@ -263,7 +186,7 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Permissions.LocalPermission", b =>
                 {
-                    b.Property<uint>("LocalPermissionID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("Permission");
@@ -274,7 +197,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<uint?>("UserID");
 
-                    b.HasKey("LocalPermissionID");
+                    b.HasKey("ID");
 
                     b.HasIndex("ServerID");
 
@@ -285,7 +208,7 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.Roleplay", b =>
                 {
-                    b.Property<uint>("RoleplayID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<ulong>("ActiveChannelID");
@@ -298,25 +221,25 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<string>("Name");
 
-                    b.Property<uint?>("OwnerUserID");
+                    b.Property<uint?>("OwnerID");
 
                     b.Property<string>("Summary");
 
-                    b.HasKey("RoleplayID");
+                    b.HasKey("ID");
 
-                    b.HasIndex("OwnerUserID");
+                    b.HasIndex("OwnerID");
 
                     b.ToTable("Roleplays");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.UserMessage", b =>
                 {
-                    b.Property<uint>("UserMessageID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("AuthorNickname");
+                    b.Property<uint?>("AuthorID");
 
-                    b.Property<uint?>("AuthorUserID");
+                    b.Property<string>("AuthorNickname");
 
                     b.Property<string>("Contents");
 
@@ -326,9 +249,9 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<DateTimeOffset>("Timestamp");
 
-                    b.HasKey("UserMessageID");
+                    b.HasKey("ID");
 
-                    b.HasIndex("AuthorUserID");
+                    b.HasIndex("AuthorID");
 
                     b.HasIndex("RoleplayID");
 
@@ -337,7 +260,7 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.ServerInfo.Server", b =>
                 {
-                    b.Property<uint>("ServerID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<uint?>("CharacterID");
@@ -348,7 +271,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<bool>("SuppressPermissonWarnings");
 
-                    b.HasKey("ServerID");
+                    b.HasKey("ID");
 
                     b.HasIndex("CharacterID");
 
@@ -357,25 +280,25 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.Species", b =>
                 {
-                    b.Property<uint>("SpeciesID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Description");
 
                     b.Property<string>("Name");
 
-                    b.Property<uint?>("ParentSpeciesID");
+                    b.Property<uint?>("ParentID");
 
-                    b.HasKey("SpeciesID");
+                    b.HasKey("ID");
 
-                    b.HasIndex("ParentSpeciesID");
+                    b.HasIndex("ParentID");
 
                     b.ToTable("Species");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.Transformation", b =>
                 {
-                    b.Property<uint>("TransformationID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Description");
@@ -394,7 +317,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<string>("UniformDescription");
 
-                    b.HasKey("TransformationID");
+                    b.HasKey("ID");
 
                     b.HasIndex("SpeciesID");
 
@@ -403,14 +326,14 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Users.User", b =>
                 {
-                    b.Property<uint>("UserID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("Bio");
 
                     b.Property<int>("Class");
 
-                    b.Property<uint?>("DefaultCharacterCharacterID");
+                    b.Property<uint?>("DefaultCharacterID");
 
                     b.Property<ulong>("DiscordID");
 
@@ -424,9 +347,9 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<int?>("Timezone");
 
-                    b.HasKey("UserID");
+                    b.HasKey("ID");
 
-                    b.HasIndex("DefaultCharacterCharacterID");
+                    b.HasIndex("DefaultCharacterID");
 
                     b.HasIndex("RoleplayID");
 
@@ -441,7 +364,7 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Users.UserKink", b =>
                 {
-                    b.Property<uint>("UserKinkID")
+                    b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<uint?>("KinkID");
@@ -450,7 +373,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<uint?>("UserID");
 
-                    b.HasKey("UserKinkID");
+                    b.HasKey("ID");
 
                     b.HasIndex("KinkID");
 
@@ -459,58 +382,30 @@ namespace DIGOS.Ambassador.Migrations
                     b.ToTable("UserKink");
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Appearances.Appearance", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Database.Appearances.AppearanceComponent", b =>
                 {
-                    b.HasOne("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<string>", "Arms")
-                        .WithMany()
-                        .HasForeignKey("ArmsAppearanceComponentID");
+                    b.HasOne("DIGOS.Ambassador.Database.Appearances.Appearance")
+                        .WithMany("Components")
+                        .HasForeignKey("AppearanceID");
 
-                    b.HasOne("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<string>", "Body")
+                    b.HasOne("DIGOS.Ambassador.Database.Transformations.Transformation", "Transformation")
                         .WithMany()
-                        .HasForeignKey("BodyAppearanceComponentID");
-
-                    b.HasOne("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<string>", "Eyes")
-                        .WithMany()
-                        .HasForeignKey("EyesAppearanceComponentID");
-
-                    b.HasOne("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<DIGOS.Ambassador.Database.Appearances.GenitaliaType>", "Genitalia")
-                        .WithMany()
-                        .HasForeignKey("GenitaliaAppearanceComponentID");
-
-                    b.HasOne("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<string>", "Hair")
-                        .WithMany()
-                        .HasForeignKey("HairAppearanceComponentID");
-
-                    b.HasOne("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<string>", "Head")
-                        .WithMany()
-                        .HasForeignKey("HeadAppearanceComponentID");
-
-                    b.HasOne("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<string>", "Legs")
-                        .WithMany()
-                        .HasForeignKey("LegsAppearanceComponentID");
-
-                    b.HasOne("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<DIGOS.Ambassador.Database.Appearances.SurfaceType>", "Surface")
-                        .WithMany()
-                        .HasForeignKey("SurfaceAppearanceComponentID");
-
-                    b.HasOne("DIGOS.Ambassador.Database.Appearances.AppearanceComponent<string>", "Tail")
-                        .WithMany()
-                        .HasForeignKey("TailAppearanceComponentID");
+                        .HasForeignKey("TransformationID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.Character", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Appearances.Appearance", "DefaultAppearance")
                         .WithMany()
-                        .HasForeignKey("DefaultAppearanceAppearanceID");
+                        .HasForeignKey("DefaultAppearanceID");
 
                     b.HasOne("DIGOS.Ambassador.Database.Users.User", "Owner")
                         .WithMany()
-                        .HasForeignKey("OwnerUserID");
+                        .HasForeignKey("OwnerID");
 
                     b.HasOne("DIGOS.Ambassador.Database.Appearances.Appearance", "TransformedAppearance")
                         .WithMany()
-                        .HasForeignKey("TransformedAppearanceAppearanceID");
+                        .HasForeignKey("TransformedAppearanceID");
 
                     b.HasOne("DIGOS.Ambassador.Database.Users.User")
                         .WithMany("Characters")
@@ -546,14 +441,14 @@ namespace DIGOS.Ambassador.Migrations
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Users.User", "Owner")
                         .WithMany()
-                        .HasForeignKey("OwnerUserID");
+                        .HasForeignKey("OwnerID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.UserMessage", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Users.User", "Author")
                         .WithMany()
-                        .HasForeignKey("AuthorUserID");
+                        .HasForeignKey("AuthorID");
 
                     b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
                         .WithMany("Messages")
@@ -571,7 +466,7 @@ namespace DIGOS.Ambassador.Migrations
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Transformations.Species", "Parent")
                         .WithMany()
-                        .HasForeignKey("ParentSpeciesID");
+                        .HasForeignKey("ParentID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.Transformation", b =>
@@ -585,7 +480,7 @@ namespace DIGOS.Ambassador.Migrations
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Characters.Character", "DefaultCharacter")
                         .WithMany()
-                        .HasForeignKey("DefaultCharacterCharacterID");
+                        .HasForeignKey("DefaultCharacterID");
 
                     b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
                         .WithMany("InvitedUsers")

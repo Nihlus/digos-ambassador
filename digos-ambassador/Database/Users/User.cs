@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Permissions;
 using JetBrains.Annotations;
 
@@ -30,12 +31,10 @@ namespace DIGOS.Ambassador.Database.Users
 	/// <summary>
 	/// Represents globally accessible information about a user.
 	/// </summary>
-	public class User
+	public class User : IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique ID of the user.
-		/// </summary>
-		public uint UserID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the Discord ID of the user.

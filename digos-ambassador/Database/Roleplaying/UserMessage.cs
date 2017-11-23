@@ -22,8 +22,11 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
+
 using Discord;
+
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Roleplaying
@@ -31,12 +34,10 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 	/// <summary>
 	/// Represents a saved user message.
 	/// </summary>
-	public class UserMessage
+	public class UserMessage : IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique message ID.
-		/// </summary>
-		public uint UserMessageID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the unique Discord message ID.

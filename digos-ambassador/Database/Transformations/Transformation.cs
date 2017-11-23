@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Database.Appearances;
+using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Services;
 using YamlDotNet.Serialization;
 
@@ -29,13 +30,11 @@ namespace DIGOS.Ambassador.Database.Transformations
 	/// <summary>
 	/// Represents an individual partial transformation.
 	/// </summary>
-	public class Transformation
+	public class Transformation : IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique ID of this transformation.
-		/// </summary>
+		/// <inheritdoc />
 		[YamlIgnore]
-		public uint TransformationID { get; set; }
+		public uint ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the bodypart that this transformation affects.

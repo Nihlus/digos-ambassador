@@ -20,17 +20,17 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Database.Interfaces;
+
 namespace DIGOS.Ambassador.Database.Dossiers
 {
 	/// <summary>
 	/// Represents a dossier entry.
 	/// </summary>
-	public class Dossier
+	public class Dossier : IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the unique dossier ID.
-		/// </summary>
-		public uint DossierID { get; set; }
+		/// <inheritdoc />
+		public uint ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the title of the dossier.
