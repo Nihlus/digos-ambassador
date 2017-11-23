@@ -8,6 +8,7 @@ using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
+using DIGOS.Ambassador.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -19,7 +20,7 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    [Migration("20171121230056_InitialCreate")]
+    [Migration("20171123130730_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -354,6 +355,52 @@ namespace DIGOS.Ambassador.Migrations
                     b.ToTable("Servers");
                 });
 
+            modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.Species", b =>
+                {
+                    b.Property<uint>("SpeciesID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Description");
+
+                    b.Property<string>("Name");
+
+                    b.Property<uint?>("ParentSpeciesID");
+
+                    b.HasKey("SpeciesID");
+
+                    b.HasIndex("ParentSpeciesID");
+
+                    b.ToTable("Species");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.Transformation", b =>
+                {
+                    b.Property<uint>("TransformationID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Description");
+
+                    b.Property<string>("GrowMessage");
+
+                    b.Property<bool>("IsNSFW");
+
+                    b.Property<int>("Part");
+
+                    b.Property<string>("ShiftMessage");
+
+                    b.Property<string>("SingleDescription");
+
+                    b.Property<uint?>("SpeciesID");
+
+                    b.Property<string>("UniformDescription");
+
+                    b.HasKey("TransformationID");
+
+                    b.HasIndex("SpeciesID");
+
+                    b.ToTable("Transformations");
+                });
+
             modelBuilder.Entity("DIGOS.Ambassador.Database.Users.User", b =>
                 {
                     b.Property<uint>("UserID")
@@ -518,6 +565,20 @@ namespace DIGOS.Ambassador.Migrations
                     b.HasOne("DIGOS.Ambassador.Database.Characters.Character")
                         .WithMany("CurrentServers")
                         .HasForeignKey("CharacterID");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.Species", b =>
+                {
+                    b.HasOne("DIGOS.Ambassador.Database.Transformations.Species", "Parent")
+                        .WithMany()
+                        .HasForeignKey("ParentSpeciesID");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.Transformation", b =>
+                {
+                    b.HasOne("DIGOS.Ambassador.Database.Transformations.Species", "Species")
+                        .WithMany()
+                        .HasForeignKey("SpeciesID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Users.User", b =>

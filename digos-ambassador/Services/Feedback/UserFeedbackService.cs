@@ -123,9 +123,24 @@ namespace DIGOS.Ambassador.Services
 		[NotNull]
 		public EmbedBuilder CreateFeedbackEmbed([NotNull] IMentionable invoker, Color color, [NotNull] string contents)
 		{
-			var eb = new EmbedBuilder();
-			eb.WithColor(color);
+			var eb = CreateBaseEmbed(color);
 			eb.WithDescription($"{invoker.Mention} | {contents}");
+
+			return eb;
+		}
+
+		/// <summary>
+		/// Creates a base embed.
+		/// </summary>
+		/// <param name="color">The colour of the embed. Optional.</param>
+		/// <returns>A basic embed.</returns>
+		[NotNull]
+		public EmbedBuilder CreateBaseEmbed(Color? color = null)
+		{
+			color = color ?? Color.DarkPurple;
+
+			var eb = new EmbedBuilder();
+			eb.WithColor(color.Value);
 
 			return eb;
 		}
@@ -138,8 +153,7 @@ namespace DIGOS.Ambassador.Services
 		[NotNull]
 		public EmbedBuilder CreateCommandUsageEmbed([NotNull] IReadOnlyList<CommandMatch> matchingCommands)
 		{
-			var eb = new EmbedBuilder();
-			eb.WithColor(Color.DarkPurple);
+			var eb = CreateBaseEmbed();
 			eb.WithTitle("Perhaps you meant one of the following?");
 
 			foreach (var matchingCommand in matchingCommands)

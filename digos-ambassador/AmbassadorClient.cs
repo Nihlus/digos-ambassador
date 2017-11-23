@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador
 			this.Feedback = new UserFeedbackService();
 			this.Dossiers = new DossierService(this.Content);
 			this.Interactive = new InteractiveService(this.Client);
-			this.Transformation = new TransformationService();
+			this.Transformation = new TransformationService(this.Content);
 
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)

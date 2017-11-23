@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 
@@ -40,7 +41,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// Gets or sets the parent species.
 		/// </summary>
 		[CanBeNull]
-		public Species ParentSpecies { get; set; }
+		public Species Parent { get; set; }
 
 		/// <summary>
 		/// Gets or sets the name of the species.
@@ -51,5 +52,34 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// Gets or sets the description of the species.
 		/// </summary>
 		public string Description { get; set; }
+
+		/// <summary>
+		/// Gets the depth of this species in the parent chain.
+		/// </summary>
+		/// <returns>The depth of the species.</returns>
+		public uint GetSpeciesDepth()
+		{
+			if (this.Parent is null)
+			{
+				return 0;
+			}
+
+			return this.Parent.GetSpeciesDepth() + 1;
+		}
+
+		/// <summary>
+		/// Determines whether or not two species are the same by comparing their names.
+		/// </summary>
+		/// <param name="species">The species to compare with.</param>
+		/// <returns>true if the species are the same; otherwise, false.</returns>
+		public bool IsSameSpeciesAs([CanBeNull] Species species)
+		{
+			if (species is null)
+			{
+				return false;
+			}
+
+			return this.Name.Equals(species.Name, StringComparison.OrdinalIgnoreCase);
+		}
 	}
 }

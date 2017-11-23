@@ -99,6 +99,27 @@ namespace DIGOS.Ambassador.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Species",
+                columns: table => new
+                {
+                    SpeciesID = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    ParentSpeciesID = table.Column<uint>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Species", x => x.SpeciesID);
+                    table.ForeignKey(
+                        name: "FK_Species_Species_ParentSpeciesID",
+                        column: x => x.ParentSpeciesID,
+                        principalTable: "Species",
+                        principalColumn: "SpeciesID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Appearance",
                 columns: table => new
                 {
@@ -174,6 +195,32 @@ namespace DIGOS.Ambassador.Migrations
                         column: x => x.TailAppearanceComponentID,
                         principalTable: "AppearanceComponent<string>",
                         principalColumn: "AppearanceComponentID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Transformations",
+                columns: table => new
+                {
+                    TransformationID = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    GrowMessage = table.Column<string>(type: "TEXT", nullable: true),
+                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Part = table.Column<int>(type: "INTEGER", nullable: false),
+                    ShiftMessage = table.Column<string>(type: "TEXT", nullable: true),
+                    SingleDescription = table.Column<string>(type: "TEXT", nullable: true),
+                    SpeciesID = table.Column<uint>(type: "INTEGER", nullable: true),
+                    UniformDescription = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transformations", x => x.TransformationID);
+                    table.ForeignKey(
+                        name: "FK_Transformations_Species_SpeciesID",
+                        column: x => x.SpeciesID,
+                        principalTable: "Species",
+                        principalColumn: "SpeciesID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -516,6 +563,16 @@ namespace DIGOS.Ambassador.Migrations
                 column: "CharacterID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Species_ParentSpeciesID",
+                table: "Species",
+                column: "ParentSpeciesID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transformations_SpeciesID",
+                table: "Transformations",
+                column: "SpeciesID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserKink_KinkID",
                 table: "UserKink",
                 column: "KinkID");
@@ -672,10 +729,16 @@ namespace DIGOS.Ambassador.Migrations
                 name: "LocalPermissions");
 
             migrationBuilder.DropTable(
+                name: "Transformations");
+
+            migrationBuilder.DropTable(
                 name: "UserKink");
 
             migrationBuilder.DropTable(
                 name: "UserMessage");
+
+            migrationBuilder.DropTable(
+                name: "Species");
 
             migrationBuilder.DropTable(
                 name: "Kinks");

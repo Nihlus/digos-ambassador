@@ -24,14 +24,21 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Text;
 using System.Threading.Tasks;
 
+using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Dossiers;
+using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
 
 using Discord.Commands;
 
 using JetBrains.Annotations;
+using YamlDotNet.Core;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace DIGOS.Ambassador.Services
 {
@@ -60,6 +67,11 @@ namespace DIGOS.Ambassador.Services
 		/// Gets the base dossier path.
 		/// </summary>
 		public string BaseDossierPath { get; } = Path.GetFullPath(Path.Combine("Content", "Dossiers"));
+
+		/// <summary>
+		/// Gets the base dossier path.
+		/// </summary>
+		public string BaseTransformationSpeciesPath { get; } = Path.GetFullPath(Path.Combine("Content", "Transformations", "Species"));
 
 		/// <summary>
 		/// Gets the <see cref="Uri"/> pointing to the default avatar used by the bot for characters.
@@ -197,6 +209,98 @@ namespace DIGOS.Ambassador.Services
 		public string GetDossierDataPath([NotNull] Dossier dossier)
 		{
 			return Path.GetFullPath(Path.Combine(this.BaseContentPath, "Dossiers", $"{dossier.Title}.pdf"));
+		}
+
+		/// <summary>
+		/// Discovers the species that have been bundled with the program.
+		/// </summary>
+		/// <returns>A retrieval result which may or may not have suceeded.</returns>
+		public async Task<RetrieveEntityResult<IReadOnlyList<Species>>> DiscoverBundledSpeciesAsync()
+		{
+			const string speciesFilename = "Species.yml";
+
+			var deser = new DeserializerBuilder()
+				.WithNamingConvention(new UnderscoredNamingConvention())
+				.Build();
+
+			var species = new List<Species>();
+			var speciesFolders = Directory.EnumerateDirectories(this.BaseTransformationSpeciesPath);
+			foreach (string directory in speciesFolders)
+			{
+				string speciesFilePath = Path.Combine(directory, speciesFilename);
+				if (!File.Exists(speciesFilePath))
+				{
+					continue;
+				}
+
+				string content = await File.ReadAllTextAsync(speciesFilePath, Encoding.UTF8);
+
+				try
+				{
+					species.Add(deser.Deserialize<Species>(content));
+				}
+				catch (YamlException yex)
+				{
+					if (yex.InnerException is SerializationException sex)
+					{
+						return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(sex);
+					}
+
+					return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(yex);
+				}
+			}
+
+			return RetrieveEntityResult<IReadOnlyList<Species>>.FromSuccess(species);
+		}
+
+		/// <summary>
+		/// Discovers the transformations of a specific species that have been bundled with the program. The species
+		/// must already be registered in the database.
+		/// </summary>
+		/// <param name="transformation">The transformation service.</param>
+		/// <param name="species">The species to discover transformations for.</param>
+		/// <returns>A retrieval result which may or may not have suceeded.</returns>
+		public async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync(TransformationService transformation, Species species)
+		{
+			const string speciesFilename = "Species.yml";
+
+			var speciesDir = GetSpeciesDirectory(species);
+			var transformationFiles = Directory.EnumerateFiles(speciesDir).Where(p => !p.EndsWith(speciesFilename));
+
+			var transformations = new List<Transformation>();
+			using (var db = new GlobalInfoContext())
+			{
+				var deser = new DeserializerBuilder()
+					.WithNamingConvention(new UnderscoredNamingConvention())
+					.WithTypeConverter(new SpeciesYamlConverter(db, transformation))
+					.Build();
+
+				foreach (var transformationFile in transformationFiles)
+				{
+					string content = await File.ReadAllTextAsync(transformationFile);
+
+					try
+					{
+						transformations.Add(deser.Deserialize<Transformation>(content));
+					}
+					catch (YamlException yex)
+					{
+						if (yex.InnerException is SerializationException sex)
+						{
+							return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError(sex);
+						}
+
+						return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError(yex);
+					}
+				}
+			}
+
+			return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromSuccess(transformations);
+		}
+
+		private string GetSpeciesDirectory(Species species)
+		{
+			return Path.Combine(this.BaseTransformationSpeciesPath, species.Name);
 		}
 
 		/// <summary>

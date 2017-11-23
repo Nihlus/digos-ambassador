@@ -114,9 +114,9 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		[NotNull]
-		private static EmbedBuilder CreateHumanizedPermissionEmbed([NotNull] IEnumerable<Permission> permissions)
+		private EmbedBuilder CreateHumanizedPermissionEmbed([NotNull] IEnumerable<Permission> permissions)
 		{
-			var eb = new EmbedBuilder();
+			var eb = this.Feedback.CreateBaseEmbed();
 			var humanizedPermissions = new List<(string Name, string Description)>();
 			foreach (var permission in permissions)
 			{
@@ -139,9 +139,9 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		[NotNull]
-		private static EmbedBuilder CreateHumanizedPermissionEmbed([NotNull][ItemNotNull] IEnumerable<LocalPermission> userPermissions)
+		private EmbedBuilder CreateHumanizedPermissionEmbed([NotNull][ItemNotNull] IEnumerable<LocalPermission> userPermissions)
 		{
-			var eb = new EmbedBuilder();
+			var eb = this.Feedback.CreateBaseEmbed();
 			var humanizedPermissions = new List<(string Name, string Description, string Target)>();
 			foreach (var userPermission in userPermissions)
 			{

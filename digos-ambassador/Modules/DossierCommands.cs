@@ -79,8 +79,7 @@ namespace DIGOS.Ambassador.Modules
 		[NotNull]
 		private EmbedBuilder BuildDossierListEmbed([NotNull][ItemNotNull]IEnumerable<Dossier> dossiers)
 		{
-			var eb = new EmbedBuilder();
-			eb.WithColor(Color.DarkPurple);
+			var eb = this.Feedback.CreateBaseEmbed();
 			eb.WithTitle("Dossier Database");
 
 			foreach (var dossier in dossiers)
@@ -136,8 +135,7 @@ namespace DIGOS.Ambassador.Modules
 
 		private EmbedBuilder BuildDossierEmbed(Dossier dossier)
 		{
-			var eb = new EmbedBuilder();
-			eb.WithColor(Color.DarkPurple);
+			var eb = this.Feedback.CreateBaseEmbed();
 			eb.WithTitle(dossier.Title);
 			eb.WithDescription(dossier.Summary);
 

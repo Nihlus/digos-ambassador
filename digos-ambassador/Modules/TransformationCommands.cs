@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Modules
 			{
 				var availableSpecies = await this.Transformation.GetAvailableSpeciesAsync(db);
 
-				var eb = new EmbedBuilder();
+				var eb = this.Feedback.CreateBaseEmbed();
 				eb.WithTitle("Available species");
 
 				if (availableSpecies.Count <= 0)
@@ -140,7 +140,7 @@ namespace DIGOS.Ambassador.Modules
 
 				foreach (var species in availableSpecies)
 				{
-					eb.AddField(species.Name, species.Description);
+					eb.AddField(species.Name.Humanize(LetterCasing.Title), species.Description);
 				}
 
 				await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
@@ -160,7 +160,7 @@ namespace DIGOS.Ambassador.Modules
 			{
 				var transformations = await this.Transformation.GetAvailableTransformations(db, bodyPart);
 
-				var eb = new EmbedBuilder();
+				var eb = this.Feedback.CreateBaseEmbed();
 				eb.WithTitle("Available transformations");
 
 				if (transformations.Count <= 0)
@@ -170,7 +170,7 @@ namespace DIGOS.Ambassador.Modules
 
 				foreach (var transformation in transformations)
 				{
-					eb.AddField(transformation.Species, transformation.Description);
+					eb.AddField(transformation.Species.Name.Humanize(LetterCasing.Title), transformation.Description);
 				}
 
 				await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
@@ -363,7 +363,23 @@ namespace DIGOS.Ambassador.Modules
 		[RequireOwner]
 		public async Task UpdateTransformationDatabaseAsync()
 		{
-			throw new NotImplementedException();
+			using (var db = new GlobalInfoContext())
+			{
+				var updateTransformationsResult = await this.Transformation.UpdateTransformationDatabase(db);
+				if (!updateTransformationsResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, updateTransformationsResult.ErrorReason);
+					return;
+				}
+
+				var confirmationText =
+					$" Database updated. {updateTransformationsResult.SpeciesAdded} species added, " +
+					$"{updateTransformationsResult.TransformationsAdded} transformations added, " +
+					$"{updateTransformationsResult.SpeciesUpdated} species updated, " +
+					$"and {updateTransformationsResult.TransformationsUpdated} transformations updated.";
+
+				await this.Feedback.SendConfirmationAsync(this.Context, confirmationText);
+			}
 		}
 
 		/// <summary>

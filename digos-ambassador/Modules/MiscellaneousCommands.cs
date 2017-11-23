@@ -125,10 +125,9 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Shows some information about Amby's metaworkings.")]
 		public async Task InfoAsync()
 		{
-			var eb = new EmbedBuilder();
+			var eb = this.Feedback.CreateBaseEmbed();
 
 			eb.WithAuthor(this.Context.Client.CurrentUser);
-			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle("The DIGOS Ambassador (\"Amby\")");
 			eb.WithImageUrl(this.Content.AmbyPortraitUri.ToString());
 
@@ -164,9 +163,8 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Lists available command modules.")]
 		public async Task HelpAsync()
 		{
-			var eb = new EmbedBuilder();
+			var eb = this.Feedback.CreateBaseEmbed();
 
-			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle("Available command modules");
 			eb.WithDescription
 			(

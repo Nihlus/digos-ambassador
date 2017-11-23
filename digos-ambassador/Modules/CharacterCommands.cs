@@ -154,10 +154,9 @@ namespace DIGOS.Ambassador.Modules
 		[NotNull]
 		private EmbedBuilder CreateCharacterInfoEmbed([NotNull] Character character)
 		{
-			var eb = new EmbedBuilder();
+			var eb = this.Feedback.CreateBaseEmbed();
 
 			eb.WithAuthor(this.Context.Client.GetUser(character.Owner.DiscordID));
-			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle(character.Name);
 			eb.WithDescription(character.Summary);
 
@@ -252,9 +251,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			discordUser = discordUser ?? this.Context.Message.Author;
 
-			var eb = new EmbedBuilder();
+			var eb = this.Feedback.CreateBaseEmbed();
 			eb.WithAuthor(discordUser);
-			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle("Your characters");
 
 			using (var db = new GlobalInfoContext())
@@ -388,8 +386,7 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Lists the images in a character's gallery.")]
 		public async Task ListImagesAsync([NotNull] Character character)
 		{
-			var eb = new EmbedBuilder();
-			eb.WithColor(Color.DarkPurple);
+			var eb = this.Feedback.CreateBaseEmbed();
 			eb.WithTitle("Images in character gallery");
 
 			foreach (var image in character.Images)

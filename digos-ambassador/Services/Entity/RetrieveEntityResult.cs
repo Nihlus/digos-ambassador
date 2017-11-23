@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Runtime.InteropServices.ComTypes;
 using Discord.Commands;
 using JetBrains.Annotations;
 
@@ -46,16 +48,24 @@ namespace DIGOS.Ambassador.Services
 		public bool IsSuccess => !this.Error.HasValue;
 
 		/// <summary>
+		/// Gets the exception that caused the error, if any.
+		/// </summary>
+		[CanBeNull]
+		public Exception Exception { get; }
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="RetrieveEntityResult{T}"/> struct.
 		/// </summary>
 		/// <param name="entity">The entity.</param>
 		/// <param name="error">The error (if any).</param>
 		/// <param name="errorReason">A more detailed error description.</param>
-		public RetrieveEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
+		/// <param name="exception">The exception that caused the error (if any).</param>
+		public RetrieveEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
 		{
 			this.Entity = entity;
 			this.Error = error;
 			this.ErrorReason = errorReason;
+			this.Exception = exception;
 		}
 
 		/// <summary>
@@ -87,6 +97,16 @@ namespace DIGOS.Ambassador.Services
 		public static RetrieveEntityResult<T> FromError([NotNull] IResult result)
 		{
 			return new RetrieveEntityResult<T>(null, result.Error, result.ErrorReason);
+		}
+
+		/// <summary>
+		/// Creates a failed result based on an exception.
+		/// </summary>
+		/// <param name="exception">The exception to base this result off of.</param>
+		/// <returns>A failed result.</returns>
+		public static RetrieveEntityResult<T> FromError([NotNull] Exception exception)
+		{
+			return new RetrieveEntityResult<T>(null, CommandError.Exception, exception.Message, exception);
 		}
 
 		/// <inheritdoc />

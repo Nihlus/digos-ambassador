@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.ServerInfo;
+using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
 
@@ -141,6 +142,28 @@ namespace DIGOS.Ambassador.Database
 		/// Gets or sets the database where images are stored.
 		/// </summary>
 		public DbSet<Image> Images
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets the database where transformation species are stored.
+		/// </summary>
+		public DbSet<Species> Species
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets the database where transformations are stored.
+		/// </summary>
+		public DbSet<Transformation> Transformations
 		{
 			get;
 

@@ -96,10 +96,9 @@ namespace DIGOS.Ambassador.Modules
 		[NotNull]
 		private EmbedBuilder CreateRoleplayInfoEmbed([NotNull] Roleplay roleplay)
 		{
-			var eb = new EmbedBuilder();
+			var eb = this.Feedback.CreateBaseEmbed();
 
 			eb.WithAuthor(this.Context.Client.GetUser(roleplay.Owner.DiscordID));
-			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle(roleplay.Name);
 			eb.WithDescription(roleplay.Summary);
 
@@ -131,9 +130,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			discordUser = discordUser ?? this.Context.Message.Author;
 
-			var eb = new EmbedBuilder();
+			var eb = this.Feedback.CreateBaseEmbed();
 			eb.WithAuthor(discordUser);
-			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle("Your roleplays");
 
 			using (var db = new GlobalInfoContext())
