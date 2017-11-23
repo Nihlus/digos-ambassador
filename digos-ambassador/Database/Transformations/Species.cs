@@ -33,6 +33,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 	public class Species : IEFEntity
 	{
 		/// <inheritdoc />
+		[YamlIgnore]
 		public uint ID { get; set; }
 
 		/// <summary>
