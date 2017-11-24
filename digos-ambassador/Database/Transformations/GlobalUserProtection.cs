@@ -21,7 +21,6 @@
 //
 
 using System.Collections.Generic;
-using Discord;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Services;

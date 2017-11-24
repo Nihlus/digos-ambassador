@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,11 +28,8 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
-using DIGOS.Ambassador.Extensions;
-
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using DIGOS.Ambassador.Database.Appearances;
 using Humanizer;
 using JetBrains.Annotations;

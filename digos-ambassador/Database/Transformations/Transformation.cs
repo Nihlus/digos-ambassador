@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Services;
 using YamlDotNet.Serialization;

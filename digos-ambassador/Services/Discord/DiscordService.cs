@@ -48,6 +48,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="attachment">The attachment to get.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		[Pure]
+		[MustUseReturnValue("The resulting stream must be disposed.")]
 		public async Task<RetrieveEntityResult<Stream>> GetAttachmentStreamAsync([NotNull] Attachment attachment)
 		{
 			try

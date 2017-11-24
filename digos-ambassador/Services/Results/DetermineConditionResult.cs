@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Runtime.InteropServices.ComTypes;
 using Discord.Commands;
 using JetBrains.Annotations;
 
