@@ -16,7 +16,6 @@
               <e p="Discord_DIGOS.png" t="Include" />
             </e>
           </e>
-          <e p="Databases" t="Include" />
           <e p="FileSignatures.cs" t="Include" />
           <e p="Portraits" t="Include">
             <e p="amby-irbynx-3.png" t="Include" />
@@ -44,6 +43,11 @@
           <e p="Appearances" t="Include">
             <e p="Appearance.cs" t="Include" />
             <e p="AppearanceComponent.cs" t="Include" />
+            <e p="Colour.cs" t="Include" />
+            <e p="Pattern.cs" t="Include" />
+            <e p="Shade.cs" t="Include" />
+            <e p="ShadeModifier.cs" t="Include" />
+            <e p="Texture.cs" t="Include" />
           </e>
           <e p="Characters" t="Include">
             <e p="Character.cs" t="Include" />
@@ -167,11 +171,13 @@
           </e>
           <e p="Transformations" t="Include">
             <e p="Bodypart.cs" t="Include" />
+            <e p="ColourYamlConverter.cs" t="Include" />
             <e p="CompositeParts.cs" t="Include" />
             <e p="ProtectionType.cs" t="Include" />
             <e p="SpeciesYamlConverter.cs" t="Include" />
             <e p="TransformationDescriptionBuilder.cs" t="Include" />
             <e p="TransformationService.cs" t="Include" />
+            <e p="ValidatingNodeDeserializer.cs" t="Include" />
           </e>
         </e>
         <e p="TypeReaders" t="Include">

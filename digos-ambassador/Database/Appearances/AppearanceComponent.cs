@@ -50,28 +50,42 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// <summary>
 		/// Gets or sets the base colour of the component.
 		/// </summary>
-		public string BaseColour { get; set; }
+		[NotNull]
+		public Colour BaseColour { get; set; }
 
 		/// <summary>
 		/// Gets or sets the pattern of the component's secondary colour (if any)
 		/// </summary>
-		public string Pattern { get; set; }
+		[CanBeNull]
+		public Pattern? Pattern { get; set; }
 
 		/// <summary>
 		/// Gets or sets the component's pattern colour.
 		/// </summary>
-		public string PatternColour { get; set; }
+		[CanBeNull]
+		public Colour PatternColour { get; set; }
 
 		/// <summary>
 		/// Gets or sets the size of the component. This is, by default, a unitless value and is only contextually relevant.
 		/// </summary>
 		public int Size { get; set; }
 
+		/// <summary>
+		/// Creates a new <see cref="AppearanceComponent"/> from a transformation of a bodypart.
+		/// </summary>
+		/// <param name="transformation">The transformation.</param>
+		/// <returns>A new component.</returns>
 		[Pure]
 		[NotNull]
 		public static AppearanceComponent CreateFrom([NotNull] Transformation transformation)
 		{
-			throw new System.NotImplementedException();
+			return new AppearanceComponent
+			{
+				Transformation = transformation,
+				BaseColour = transformation.DefaultBaseColour,
+				Pattern = transformation.DefaultPattern,
+				PatternColour = transformation.DefaultPatternColour
+			};
 		}
 	}
 }
