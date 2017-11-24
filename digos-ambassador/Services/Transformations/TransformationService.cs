@@ -210,20 +210,22 @@ namespace DIGOS.Ambassador.Services
 					int updatedFields = 0;
 
 					// Update its fields with the info in the bundled species
-					updatedFields += existingSpecies.Description
-					.ExecuteBy
-					(
-						() => existingSpecies.Description = species.Description,
-						val => !val.Equals(species.Description, StringComparison.OrdinalIgnoreCase)
-					);
+					if (!existingSpecies.Description.Equals(species.Description, StringComparison.OrdinalIgnoreCase))
+					{
+						existingSpecies.Description = species.Description;
+						++updatedFields;
+					}
 
-					// The extra reference equality check is due to the fact that val can be null
-					updatedFields += existingSpecies.Parent
-					.ExecuteBy
-					(
-						() => existingSpecies.Parent = species.Parent,
-						val => val != species.Parent && !val.IsSameSpeciesAs(species.Parent)
-					);
+					// The extra reference equality check is due to the fact that the parent can be null
+					bool shouldUpdateParent =
+						(existingSpecies.Parent is null ^ species.Parent is null)
+						|| (!(existingSpecies.Parent is null) && !existingSpecies.Parent.IsSameSpeciesAs(species.Parent));
+
+					if (shouldUpdateParent)
+					{
+						existingSpecies.Parent = species.Parent;
+						++updatedFields;
+					}
 
 					if (updatedFields > 0)
 					{
@@ -260,47 +262,41 @@ namespace DIGOS.Ambassador.Services
 
 						int updatedFields = 0;
 
-						updatedFields += existingTransformation.Description
-						.ExecuteBy
-						(
-							() => existingTransformation.Description = transformation.Description,
-							val => !val.Equals(transformation.Description, StringComparison.OrdinalIgnoreCase)
-						);
+						if (!existingTransformation.Description.Equals(transformation.Description, StringComparison.OrdinalIgnoreCase))
+						{
+							existingTransformation.Description = transformation.Description;
+							++updatedFields;
+						}
 
-						updatedFields += existingTransformation.IsNSFW
-						.ExecuteBy
-						(
-							() => existingTransformation.IsNSFW = transformation.IsNSFW,
-							val => val != transformation.IsNSFW
-						);
+						if (existingTransformation.IsNSFW != transformation.IsNSFW)
+						{
+							existingTransformation.IsNSFW = transformation.IsNSFW;
+							++updatedFields;
+						}
 
-						updatedFields += existingTransformation.ShiftMessage
-						.ExecuteBy
-						(
-							() => existingTransformation.ShiftMessage = transformation.ShiftMessage,
-							val => !val.Equals(transformation.ShiftMessage, StringComparison.OrdinalIgnoreCase)
-						);
+						if (!existingTransformation.ShiftMessage.Equals(transformation.ShiftMessage, StringComparison.OrdinalIgnoreCase))
+						{
+							existingTransformation.ShiftMessage = transformation.ShiftMessage;
+							++updatedFields;
+						}
 
-						updatedFields += existingTransformation.GrowMessage
-						.ExecuteBy
-						(
-							() => existingTransformation.GrowMessage = transformation.GrowMessage,
-							val => !val.Equals(transformation.GrowMessage, StringComparison.OrdinalIgnoreCase)
-						);
+						if (!existingTransformation.GrowMessage.Equals(transformation.GrowMessage, StringComparison.OrdinalIgnoreCase))
+						{
+							existingTransformation.GrowMessage = transformation.GrowMessage;
+							++updatedFields;
+						}
 
-						updatedFields += existingTransformation.SingleDescription
-						.ExecuteBy
-						(
-							() => existingTransformation.SingleDescription = transformation.SingleDescription,
-							val => !val.Equals(transformation.SingleDescription, StringComparison.OrdinalIgnoreCase)
-						);
+						if (!existingTransformation.SingleDescription.Equals(transformation.SingleDescription, StringComparison.OrdinalIgnoreCase))
+						{
+							existingTransformation.SingleDescription = transformation.SingleDescription;
+							++updatedFields;
+						}
 
-						updatedFields += existingTransformation.UniformDescription
-						.ExecuteBy
-						(
-							() => existingTransformation.UniformDescription = transformation.UniformDescription,
-							val => !val.Equals(transformation.UniformDescription, StringComparison.OrdinalIgnoreCase)
-						);
+						if (!existingTransformation.UniformDescription.Equals(transformation.UniformDescription, StringComparison.OrdinalIgnoreCase))
+						{
+							existingTransformation.UniformDescription = transformation.UniformDescription;
+							++updatedFields;
+						}
 
 						if (updatedFields > 0)
 						{

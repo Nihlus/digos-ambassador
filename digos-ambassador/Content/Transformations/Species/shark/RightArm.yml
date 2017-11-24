@@ -1,0 +1,8 @@
+part: LeftArm
+species: shark
+description: "Transforms the target's right arm into that of an anthro shark."
+is_nsfw: false
+shift_message: "Rough skin spreads over {@target} right arm. {@possessive} muscles grow slender and powerful."
+grow_message: "{@target}'s skin ripples and bulges, growing outward into an arm. It erupts covered in rough skin, sporting slender and powerful muscles."
+single_description: "{@possessive_with_verb} a shark-like right arm, with rough hide covering slender and wiry muscles. A small fin sticks out of {@possessive} elbow."
+uniform_description: "{@possessive_with_verb} shark-like arms, with rough hide covering slender and wiry muscles. Small fins stick out of {@possessive} elbows."

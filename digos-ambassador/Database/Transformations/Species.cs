@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Diagnostics.Contracts;
 using DIGOS.Ambassador.Database.Interfaces;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
@@ -71,6 +72,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// </summary>
 		/// <param name="species">The species to compare with.</param>
 		/// <returns>true if the species are the same; otherwise, false.</returns>
+		[ContractAnnotation("species:null => false")]
 		public bool IsSameSpeciesAs([CanBeNull] Species species)
 		{
 			if (species is null)

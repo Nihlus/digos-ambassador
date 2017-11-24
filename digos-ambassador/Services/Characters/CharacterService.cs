@@ -274,9 +274,15 @@ namespace DIGOS.Ambassador.Services
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] IUser discordUser,
-			[NotNull] IGuild discordServer
+			[CanBeNull] IGuild discordServer
 		)
 		{
+			if (discordServer is null)
+			{
+				// TODO: Allow users to assume characters in DMs
+				return false;
+			}
+
 			var userCharacters = GetUserCharacters(db, discordUser);
 
 			return await userCharacters
