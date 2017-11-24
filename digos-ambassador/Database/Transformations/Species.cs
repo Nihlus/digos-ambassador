@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using DIGOS.Ambassador.Database.Interfaces;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
@@ -45,11 +46,13 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// <summary>
 		/// Gets or sets the name of the species.
 		/// </summary>
+		[Required]
 		public string Name { get; set; }
 
 		/// <summary>
 		/// Gets or sets the description of the species.
 		/// </summary>
+		[Required]
 		public string Description { get; set; }
 
 		/// <summary>

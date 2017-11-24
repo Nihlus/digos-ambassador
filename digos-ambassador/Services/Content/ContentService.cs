@@ -39,6 +39,7 @@ using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using YamlDotNet.Serialization.NodeDeserializers;
 
 namespace DIGOS.Ambassador.Services
 {
@@ -223,6 +224,7 @@ namespace DIGOS.Ambassador.Services
 			const string speciesFilename = "Species.yml";
 
 			var deser = new DeserializerBuilder()
+				.WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
 				.WithNamingConvention(new UnderscoredNamingConvention())
 				.Build();
 
@@ -279,6 +281,7 @@ namespace DIGOS.Ambassador.Services
 			using (var db = new GlobalInfoContext())
 			{
 				var deser = new DeserializerBuilder()
+					.WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
 					.WithNamingConvention(new UnderscoredNamingConvention())
 					.WithTypeConverter(new SpeciesYamlConverter(db, transformation))
 					.Build();
