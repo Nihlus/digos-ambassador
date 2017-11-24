@@ -553,8 +553,6 @@ namespace DIGOS.Ambassador.Modules
 		{
 			private readonly DiscordService Discord;
 
-			private readonly ContentService Content;
-
 			private readonly UserFeedbackService Feedback;
 
 			private readonly CharacterService Characters;
@@ -563,13 +561,11 @@ namespace DIGOS.Ambassador.Modules
 			/// Initializes a new instance of the <see cref="SetCommands"/> class.
 			/// </summary>
 			/// <param name="discordService">The Discord integration service.</param>
-			/// <param name="contentService">The content service.</param>
 			/// <param name="feedbackService">The feedback service.</param>
 			/// <param name="characterService">The character service.</param>
-			public SetCommands(DiscordService discordService, ContentService contentService, UserFeedbackService feedbackService, CharacterService characterService)
+			public SetCommands(DiscordService discordService, UserFeedbackService feedbackService, CharacterService characterService)
 			{
 				this.Discord = discordService;
-				this.Content = contentService;
 				this.Feedback = feedbackService;
 				this.Characters = characterService;
 			}

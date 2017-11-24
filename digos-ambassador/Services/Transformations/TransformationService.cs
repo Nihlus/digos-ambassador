@@ -26,11 +26,12 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using Discord;
 using Discord.Commands;
-using DIGOS.Ambassador.Database.Appearances;
+
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -197,12 +198,11 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Determines whether or not a user is allowed to transform another user.
 		/// </summary>
-		/// <param name="db"></param>
-		/// <param name="discordServer"></param>
-		/// <param name="invokingUser"></param>
-		/// <param name="targetUser"></param>
-		/// <returns></returns>
-		/// <exception cref="ArgumentOutOfRangeException"></exception>
+		/// <param name="db">The database.</param>
+		/// <param name="discordServer">The server the users are on.</param>
+		/// <param name="invokingUser">The user trying to transform.</param>
+		/// <param name="targetUser">The user being transformed.</param>
+		/// <returns>A conditional determination with an attached reason if it failed.</returns>
 		[Pure]
 		public async Task<DetermineConditionResult> CanUserTransformUserAsync
 		(

@@ -32,10 +32,11 @@ using Discord;
 using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
-using static Discord.Commands.ContextType;
+
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
 
+using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -52,8 +53,6 @@ namespace DIGOS.Ambassador.Modules
 	{
 		private readonly UserFeedbackService Feedback;
 
-		private readonly ContentService Content;
-
 		private readonly CharacterService Characters;
 
 		private readonly TransformationService Transformation;
@@ -62,13 +61,11 @@ namespace DIGOS.Ambassador.Modules
 		/// Initializes a new instance of the <see cref="TransformationCommands"/> class.
 		/// </summary>
 		/// <param name="feedback">The feedback service.</param>
-		/// <param name="content">The content service.</param>
 		/// <param name="characters">The character service.</param>
 		/// <param name="transformation">The transformation service.</param>
-		public TransformationCommands(UserFeedbackService feedback, ContentService content, CharacterService characters, TransformationService transformation)
+		public TransformationCommands(UserFeedbackService feedback, CharacterService characters, TransformationService transformation)
 		{
 			this.Feedback = feedback;
-			this.Content = content;
 			this.Characters = characters;
 			this.Transformation = transformation;
 		}
@@ -288,8 +285,9 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		/// <summary>
-		/// Opts into the transformation module, if the server requires you to opt in.
+		/// Sets your default setting for opting in or out of transformations on servers you join.
 		/// </summary>
+		/// <param name="shouldOptIn">Whether or not to opt in by default.</param>
 		[UsedImplicitly]
 		[Command("default-opt-in")]
 		[Summary("Sets your default setting for opting in or out of transformations on servers you join.")]

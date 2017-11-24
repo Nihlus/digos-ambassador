@@ -32,6 +32,7 @@ using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
+// ReSharper disable AssignmentIsFullyDiscarded
 
 namespace DIGOS.Ambassador.Pagination
 {

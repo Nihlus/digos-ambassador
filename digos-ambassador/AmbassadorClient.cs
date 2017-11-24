@@ -55,6 +55,8 @@ namespace DIGOS.Ambassador
 		/// </summary>
 		private static readonly ILog Log = LogManager.GetLogger(typeof(AmbassadorClient));
 
+		// Services should be persisted in the client
+		// ReSharper disable PrivateFieldCanBeConvertedToLocalVariable
 		private readonly DiscordSocketClient Client;
 
 		private readonly DiscordService DiscordIntegration;
@@ -78,6 +80,7 @@ namespace DIGOS.Ambassador
 		private readonly TransformationService Transformation;
 
 		private readonly IServiceProvider Services;
+		// ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AmbassadorClient"/> class.
