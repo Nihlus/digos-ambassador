@@ -264,7 +264,11 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="species">The species to discover transformations for.</param>
 		/// <returns>A retrieval result which may or may not have suceeded.</returns>
 		[Pure]
-		public async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync(TransformationService transformation, Species species)
+		public async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync
+		(
+			[NotNull] TransformationService transformation,
+			[NotNull] Species species
+		)
 		{
 			const string speciesFilename = "Species.yml";
 
@@ -303,7 +307,7 @@ namespace DIGOS.Ambassador.Services
 		}
 
 		[Pure]
-		private string GetSpeciesDirectory(Species species)
+		private string GetSpeciesDirectory([NotNull] Species species)
 		{
 			return Path.Combine(this.BaseTransformationSpeciesPath, species.Name);
 		}

@@ -41,7 +41,8 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// <param name="server">The server that the protection should be valid for.</param>
 		/// <returns>A server-specific protection object.</returns>
 		[Pure]
-		public static ServerUserProtection CreateDefault(GlobalUserProtection globalProtection, Server server)
+		[NotNull]
+		public static ServerUserProtection CreateDefault([NotNull] GlobalUserProtection globalProtection, [NotNull] Server server)
 		{
 			return new ServerUserProtection
 			{

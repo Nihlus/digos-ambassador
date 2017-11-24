@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// <param name="comparer">The string comparer to use.</param>
 		/// <returns>true if the string contains the other string; otherwise, false.</returns>
 		[Pure]
-		public static bool Contains(this string @this, string search, StringComparison comparer)
+		public static bool Contains([CanBeNull] this string @this, [CanBeNull] string search, StringComparison comparer)
 		{
 			return @this != null && search != null && @this.IndexOf(search, comparer) >= 0;
 		}

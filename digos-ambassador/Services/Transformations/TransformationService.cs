@@ -23,7 +23,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -37,6 +36,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using DIGOS.Ambassador.Database.Appearances;
 using Humanizer;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
 namespace DIGOS.Ambassador.Services
@@ -65,9 +65,15 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to remove.</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
-		public async Task<ShiftBodypartResult> RemoveCharacterBodypartAsync(GlobalInfoContext db, SocketCommandContext context, Character character, Bodypart bodyPart)
+		public async Task<ShiftBodypartResult> RemoveCharacterBodypartAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] ICommandContext context,
+			[NotNull] Character character,
+			Bodypart bodyPart
+		)
 		{
-			var discordUser = context.Guild.GetUser(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
 			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -97,9 +103,16 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="bodyPart">The bodypart to add.</param>
 		/// <param name="species">The species of the part to add..</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
-		public async Task<ShiftBodypartResult> AddCharacterBodypartAsync(GlobalInfoContext db, SocketCommandContext context, Character character, Bodypart bodyPart, string species)
+		public async Task<ShiftBodypartResult> AddCharacterBodypartAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] ICommandContext context,
+			[NotNull] Character character,
+			Bodypart bodyPart,
+			[NotNull] string species
+		)
 		{
-			var discordUser = context.Guild.GetUser(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
 			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -142,9 +155,16 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="bodyPart">The bodypart to shift.</param>
 		/// <param name="species">The species to shift the bodypart into.</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
-		public async Task<ShiftBodypartResult> ShiftCharacterBodypartAsync(GlobalInfoContext db, SocketCommandContext context, Character character, Bodypart bodyPart, string species)
+		public async Task<ShiftBodypartResult> ShiftCharacterBodypartAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] ICommandContext context,
+			[NotNull] Character character,
+			Bodypart bodyPart,
+			[NotNull] string species
+		)
 		{
-			var discordUser = context.Guild.GetUser(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
 			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -188,7 +208,13 @@ namespace DIGOS.Ambassador.Services
 		/// <returns></returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		[Pure]
-		public async Task<DetermineConditionResult> CanUserTransformUserAsync(GlobalInfoContext db, IGuild discordServer, IUser invokingUser, IUser targetUser)
+		public async Task<DetermineConditionResult> CanUserTransformUserAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IGuild discordServer,
+			[NotNull] IUser invokingUser,
+			[NotNull] IUser targetUser
+		)
 		{
 			var localProtection = await GetOrCreateServerUserProtectionAsync(db, targetUser, discordServer);
 			if (!localProtection.HasOptedIn)
@@ -224,7 +250,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character to generate the description for.</param>
 		/// <returns>An embed with a formatted description.</returns>
 		[Pure]
-		public async Task<Embed> GenerateCharacterDescriptionAsync(Character character)
+		public async Task<Embed> GenerateCharacterDescriptionAsync([NotNull] Character character)
 		{
 			throw new NotImplementedException();
 		}
@@ -235,7 +261,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database containing the transformations.</param>
 		/// <returns>A list of the available species.</returns>
 		[Pure]
-		public async Task<IReadOnlyList<Species>> GetAvailableSpeciesAsync(GlobalInfoContext db)
+		public async Task<IReadOnlyList<Species>> GetAvailableSpeciesAsync([NotNull] GlobalInfoContext db)
 		{
 			return await db.Species
 				.Include(s => s.Parent)
@@ -249,7 +275,11 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="bodyPart">The bodypart to get the transformations for.</param>
 		/// <returns>A list of the available transformations..</returns>
 		[Pure]
-		public async Task<IReadOnlyList<Transformation>> GetAvailableTransformations(GlobalInfoContext db, Bodypart bodyPart)
+		public async Task<IReadOnlyList<Transformation>> GetAvailableTransformations
+		(
+			[NotNull] GlobalInfoContext db,
+			Bodypart bodyPart
+		)
 		{
 			return await db.Transformations
 				.Include(tf => tf.Species)
@@ -262,7 +292,11 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database containing the characters.</param>
 		/// <param name="character">The character to reset.</param>
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
-		public async Task<ModifyEntityResult> ResetCharacterFormAsync(GlobalInfoContext db, Character character)
+		public async Task<ModifyEntityResult> ResetCharacterFormAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] Character character
+		)
 		{
 			if (character.DefaultAppearance is null)
 			{
@@ -281,7 +315,11 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database containing the characters.</param>
 		/// <param name="character">The character to set the default appearance of.</param>
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
-		public async Task<ModifyEntityResult> SetCurrentAppearanceAsDefaultForCharacterAsync(GlobalInfoContext db, Character character)
+		public async Task<ModifyEntityResult> SetCurrentAppearanceAsDefaultForCharacterAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] Character character
+		)
 		{
 			if (character.CurrentAppearance is null)
 			{
@@ -301,7 +339,12 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordUser">The user to set the protection for.</param>
 		/// <param name="protectionType">The protection type to set.</param>
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
-		public async Task<ModifyEntityResult> SetDefaultProtectionTypeAsync(GlobalInfoContext db, IUser discordUser, ProtectionType protectionType)
+		public async Task<ModifyEntityResult> SetDefaultProtectionTypeAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser,
+			ProtectionType protectionType
+		)
 		{
 			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
 			if (protection.DefaultType == protectionType)
@@ -323,7 +366,13 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordServer">The server to set the protection on.</param>
 		/// <param name="protectionType">The protection type to set.</param>
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
-		public async Task<ModifyEntityResult> SetServerProtectionTypeAsync(GlobalInfoContext db, IUser discordUser, IGuild discordServer, ProtectionType protectionType)
+		public async Task<ModifyEntityResult> SetServerProtectionTypeAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser,
+			[NotNull] IGuild discordServer,
+			ProtectionType protectionType
+		)
 		{
 			var protection = await GetOrCreateServerUserProtectionAsync(db, discordUser, discordServer);
 			if (protection.Type == protectionType)
@@ -344,7 +393,12 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordUser">The user to modify.</param>
 		/// <param name="whitelistedUser">The user to add to the whitelist.</param>
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
-		public async Task<ModifyEntityResult> WhitelistUserAsync(GlobalInfoContext db, IUser discordUser, IUser whitelistedUser)
+		public async Task<ModifyEntityResult> WhitelistUserAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser,
+			[NotNull] IUser whitelistedUser
+		)
 		{
 			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
 			if (protection.Whitelist.Any(u => u.DiscordID == whitelistedUser.Id))
@@ -366,7 +420,12 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordUser">The user to modify.</param>
 		/// <param name="blacklistedUser">The user to add to the blacklist.</param>
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
-		public async Task<ModifyEntityResult> BlacklistUserAsync(GlobalInfoContext db, IUser discordUser, IUser blacklistedUser)
+		public async Task<ModifyEntityResult> BlacklistUserAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser,
+			[NotNull] IUser blacklistedUser
+		)
 		{
 			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
 			if (protection.Blacklist.Any(u => u.DiscordID == blacklistedUser.Id))
@@ -387,7 +446,11 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database.</param>
 		/// <param name="discordUser">The user.</param>
 		/// <returns>Global protection data for the given user.</returns>
-		public async Task<GlobalUserProtection> GetOrCreateGlobalUserProtectionAsync(GlobalInfoContext db, IUser discordUser)
+		public async Task<GlobalUserProtection> GetOrCreateGlobalUserProtectionAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser
+		)
 		{
 			var protection = await db.GlobalUserProtections
 			.Include(p => p.User)
@@ -416,7 +479,12 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordUser">The user.</param>
 		/// <param name="guild">The server.</param>
 		/// <returns>Server-specific protection data for the given user.</returns>
-		public async Task<ServerUserProtection> GetOrCreateServerUserProtectionAsync(GlobalInfoContext db, IUser discordUser, IGuild guild)
+		public async Task<ServerUserProtection> GetOrCreateServerUserProtectionAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser,
+			[NotNull] IGuild guild
+		)
 		{
 			var protection = await db.ServerUserProtections
 			.Include(p => p.Server)
@@ -447,7 +515,10 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database.</param>
 		/// <returns>An update result which may or may not have succeeded.</returns>
-		public async Task<UpdateTransformationsResult> UpdateTransformationDatabase(GlobalInfoContext db)
+		public async Task<UpdateTransformationsResult> UpdateTransformationDatabase
+		(
+			[NotNull] GlobalInfoContext db
+		)
 		{
 			uint addedSpecies = 0;
 			uint updatedSpecies = 0;
@@ -583,7 +654,12 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="species">The species.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		[Pure]
-		public async Task<RetrieveEntityResult<Transformation>> GetTransformationByPartAndSpeciesAsync(GlobalInfoContext db, Bodypart bodypart, Species species)
+		public async Task<RetrieveEntityResult<Transformation>> GetTransformationByPartAndSpeciesAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			Bodypart bodypart,
+			[NotNull] Species species
+		)
 		{
 			var transformation = await db.Transformations.FirstOrDefaultAsync(tf => tf.Part == bodypart && tf.Species.IsSameSpeciesAs(species));
 			if (transformation is null)
@@ -602,7 +678,12 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="species">The species to transform into.</param>
 		/// <returns>true if the combination is unique; otherwise, false.</returns>
 		[Pure]
-		public async Task<bool> IsPartAndSpeciesCombinationUniqueAsync(GlobalInfoContext db, Bodypart bodypart, Species species)
+		public async Task<bool> IsPartAndSpeciesCombinationUniqueAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			Bodypart bodypart,
+			[NotNull] Species species
+		)
 		{
 			return !await db.Transformations.AnyAsync(tf => tf.Part == bodypart && tf.Species.IsSameSpeciesAs(species));
 		}
@@ -614,7 +695,11 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="speciesName">The name of the species.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		[Pure]
-		public RetrieveEntityResult<Species> GetSpeciesByName(GlobalInfoContext db, string speciesName)
+		public RetrieveEntityResult<Species> GetSpeciesByName
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] string speciesName
+		)
 		{
 			var species = db.Species.FirstOrDefault(s => s.Name.Equals(speciesName, StringComparison.OrdinalIgnoreCase));
 			if (species is null)
@@ -632,7 +717,11 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="speciesName">The name of the species.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		[Pure]
-		public async Task<RetrieveEntityResult<Species>> GetSpeciesByNameAsync(GlobalInfoContext db, string speciesName)
+		public async Task<RetrieveEntityResult<Species>> GetSpeciesByNameAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] string speciesName
+		)
 		{
 			var species = await db.Species.FirstOrDefaultAsync(s => s.Name.Equals(speciesName, StringComparison.OrdinalIgnoreCase));
 			if (species is null)
@@ -650,7 +739,11 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="speciesName">The name of the species.</param>
 		/// <returns>true if the name is unique; otherwise, false.</returns>
 		[Pure]
-		public async Task<bool> IsSpeciesNameUniqueAsync(GlobalInfoContext db, string speciesName)
+		public async Task<bool> IsSpeciesNameUniqueAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] string speciesName
+		)
 		{
 			return !await db.Species.AnyAsync(s => s.Name.Equals(speciesName, StringComparison.OrdinalIgnoreCase));
 		}

@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Database.Interfaces
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is the owner; otherwise, false.</returns>
 		[Pure]
-		bool IsOwner(User user);
+		bool IsOwner([NotNull] User user);
 
 		/// <summary>
 		/// Determines whether or not the given user is the owner of the entity.
@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Database.Interfaces
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is the owner; otherwise, false.</returns>
 		[Pure]
-		bool IsOwner(IUser user);
+		bool IsOwner([NotNull] IUser user);
 
 		/// <summary>
 		/// Determines whether or not the given user ID is the owner of the entity.

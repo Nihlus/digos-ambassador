@@ -698,7 +698,13 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="characterName">The name of the new character.</param>
 		/// <param name="appearance">The appearance that the new character should have.</param>
 		/// <returns>A creation result which may or may not have succeeded.</returns>
-		public async Task<CreateEntityResult<Character>> CreateCharacterFromAppearanceAsync(GlobalInfoContext db, ICommandContext context, string characterName, Appearance appearance)
+		public async Task<CreateEntityResult<Character>> CreateCharacterFromAppearanceAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] ICommandContext context,
+			[NotNull] string characterName,
+			[NotNull] Appearance appearance
+		)
 		{
 			var createCharacterResult = await CreateCharacterAsync(db, context, characterName);
 			if (!createCharacterResult.IsSuccess)

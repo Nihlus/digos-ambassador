@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// <typeparam name="T">The type contained in the list.</typeparam>
 		/// <returns>A random value.</returns>
 		[Pure]
-		public static T PickRandom<T>(this IList<T> list)
+		public static T PickRandom<T>([NotNull] this IList<T> list)
 		{
 			var random = new Random();
 			return list[random.Next(0, list.Count)];

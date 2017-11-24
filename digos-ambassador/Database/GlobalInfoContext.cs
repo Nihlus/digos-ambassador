@@ -204,7 +204,7 @@ namespace DIGOS.Ambassador.Database
 		/// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
 		/// </summary>
 		/// <param name="options">The context options.</param>
-		public GlobalInfoContext(DbContextOptions<GlobalInfoContext> options)
+		public GlobalInfoContext([NotNull] DbContextOptions<GlobalInfoContext> options)
 			: base(options)
 		{
 		}

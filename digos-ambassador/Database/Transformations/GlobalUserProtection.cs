@@ -68,7 +68,8 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// <param name="user">The user.</param>
 		/// <returns>A default user protection object.</returns>
 		[Pure]
-		public static GlobalUserProtection CreateDefault(User user)
+		[NotNull]
+		public static GlobalUserProtection CreateDefault([NotNull] User user)
 		{
 			return new GlobalUserProtection
 			{

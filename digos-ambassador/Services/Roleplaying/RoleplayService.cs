@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Services
 		/// Consumes a message, adding it to the active roleplay in its channel if the author is a participant.
 		/// </summary>
 		/// <param name="message">The message to consume.</param>
-		public async void ConsumeMessage([NotNull]IMessage message)
+		public async void ConsumeMessage([NotNull] IMessage message)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -336,7 +336,7 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		[NotNull]
 		[ItemNotNull]
-		public IQueryable<Roleplay> GetUserRoleplays([NotNull]GlobalInfoContext db, [NotNull]IUser discordUser)
+		public IQueryable<Roleplay> GetUserRoleplays([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser)
 		{
 			return db.Roleplays
 				.Include(rp => rp.Owner)

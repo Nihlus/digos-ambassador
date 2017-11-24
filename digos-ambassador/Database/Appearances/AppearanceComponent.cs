@@ -69,7 +69,8 @@ namespace DIGOS.Ambassador.Database.Appearances
 		public int Size { get; set; }
 
 		[Pure]
-		public static AppearanceComponent CreateFrom(Transformation transformation)
+		[NotNull]
+		public static AppearanceComponent CreateFrom([NotNull] Transformation transformation)
 		{
 			throw new System.NotImplementedException();
 		}
