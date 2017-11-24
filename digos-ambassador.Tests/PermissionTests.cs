@@ -75,7 +75,7 @@ namespace DIGOS.Ambassador.Tests
 		public async void ExactlyMatchingLocalPermissionSetReturnsTrue()
 		{
 			const ulong serverID = 1;
-			var server = new Server { DiscordGuildID = serverID };
+			var server = new Server { DiscordID = serverID };
 
 			var requiredPermission = new RequiredPermission
 			{
@@ -115,7 +115,7 @@ namespace DIGOS.Ambassador.Tests
 		public async void GrantedOtherTargetReturnsFalseForMatchingAndSelfTarget()
 		{
 			const ulong serverID = 1;
-			var server = new Server { DiscordGuildID = serverID };
+			var server = new Server { DiscordID = serverID };
 
 			var requiredPermission = new RequiredPermission
 			{
@@ -155,7 +155,7 @@ namespace DIGOS.Ambassador.Tests
 		public async void GrantedSelfTargetReturnsFalseForMatchingAndOtherTarget()
 		{
 			const ulong serverID = 1;
-			var server = new Server { DiscordGuildID = serverID };
+			var server = new Server { DiscordID = serverID };
 
 			var requiredPermission = new RequiredPermission
 			{
@@ -197,8 +197,8 @@ namespace DIGOS.Ambassador.Tests
 			const ulong server1ID = 1;
 			const ulong server2ID = 2;
 
-			var server1 = new Server { DiscordGuildID = server1ID };
-			var server2 = new Server { DiscordGuildID = server2ID };
+			var server1 = new Server { DiscordID = server1ID };
+			var server2 = new Server { DiscordID = server2ID };
 
 			var requiredPermission = new RequiredPermission
 			{
@@ -239,7 +239,7 @@ namespace DIGOS.Ambassador.Tests
 		public async void GrantedGlobalPermissionReturnsTrueForGrantedLocal()
 		{
 			const ulong serverID = 1;
-			var server1 = new Server { DiscordGuildID = serverID };
+			var server1 = new Server { DiscordID = serverID };
 
 			var requiredPermission = new RequiredPermission
 			{
@@ -325,7 +325,7 @@ namespace DIGOS.Ambassador.Tests
 		public async void GrantedGlobalPermissionReturnsTrueForGrantedLocalWithDifferingTarget()
 		{
 			const ulong serverID = 1;
-			var server = new Server { DiscordGuildID = serverID };
+			var server = new Server { DiscordID = serverID };
 
 			var requiredPermission = new RequiredPermission
 			{

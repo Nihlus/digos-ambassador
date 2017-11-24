@@ -108,7 +108,7 @@ namespace DIGOS.Ambassador.Permissions
 				lp =>
 					lp.Permission == requiredPermission.Permission &&
 					lp.Target.HasFlag(requiredPermission.Target) &&
-					lp.Server.DiscordGuildID == discordServer.Id
+					lp.Server.DiscordID == discordServer.Id
 			);
 		}
 	}

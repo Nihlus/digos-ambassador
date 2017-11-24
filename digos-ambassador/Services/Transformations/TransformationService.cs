@@ -23,6 +23,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -34,7 +35,8 @@ using DIGOS.Ambassador.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
+using DIGOS.Ambassador.Database.Appearances;
+using Humanizer;
 using Microsoft.EntityFrameworkCore;
 
 namespace DIGOS.Ambassador.Services
@@ -56,6 +58,82 @@ namespace DIGOS.Ambassador.Services
 		}
 
 		/// <summary>
+		/// Removes the given character's bodypart.
+		/// </summary>
+		/// <param name="db">The database where characters and transformations are stored.</param>
+		/// <param name="context">The context of the command.</param>
+		/// <param name="character">The character to shift.</param>
+		/// <param name="bodyPart">The bodypart to remove.</param>
+		/// <returns>A shifting result which may or may not have succeeded.</returns>
+		public async Task<ShiftBodypartResult> RemoveCharacterBodypartAsync(GlobalInfoContext db, SocketCommandContext context, Character character, Bodypart bodyPart)
+		{
+			var discordUser = context.Guild.GetUser(character.Owner.DiscordID);
+			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			if (!canTransformResult.IsSuccess)
+			{
+				return ShiftBodypartResult.FromError(canTransformResult);
+			}
+
+			var component = character.CurrentAppearance.Components.FirstOrDefault(c => c.Bodypart == bodyPart);
+			if (component is null)
+			{
+				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
+			}
+
+			var transformation = component.Transformation;
+			character.CurrentAppearance.Components.Remove(component);
+			await db.SaveChangesAsync();
+
+			string removeMessage = TransformationDescriptionBuilder.BuildRemoveMessage(character, transformation);
+			return ShiftBodypartResult.FromSuccess(removeMessage);
+		}
+
+		/// <summary>
+		/// Adds the given bodypart to the given character.
+		/// </summary>
+		/// <param name="db">The database where characters and transformations are stored.</param>
+		/// <param name="context">The context of the command.</param>
+		/// <param name="character">The character to shift.</param>
+		/// <param name="bodyPart">The bodypart to add.</param>
+		/// <param name="species">The species of the part to add..</param>
+		/// <returns>A shifting result which may or may not have succeeded.</returns>
+		public async Task<ShiftBodypartResult> AddCharacterBodypartAsync(GlobalInfoContext db, SocketCommandContext context, Character character, Bodypart bodyPart, string species)
+		{
+			var discordUser = context.Guild.GetUser(character.Owner.DiscordID);
+			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			if (!canTransformResult.IsSuccess)
+			{
+				return ShiftBodypartResult.FromError(canTransformResult);
+			}
+
+			if (character.HasBodypart(bodyPart))
+			{
+				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character already has that bodypart.");
+			}
+
+			var getSpeciesResult = await GetSpeciesByNameAsync(db, species);
+			if (!getSpeciesResult.IsSuccess)
+			{
+				return ShiftBodypartResult.FromError(getSpeciesResult);
+			}
+
+			var getTFResult = await GetTransformationByPartAndSpeciesAsync(db, bodyPart, getSpeciesResult.Entity);
+			if (!getTFResult.IsSuccess)
+			{
+				return ShiftBodypartResult.FromError(getTFResult);
+			}
+
+			var transformation = getTFResult.Entity;
+
+			var component = AppearanceComponent.CreateFrom(transformation);
+			character.CurrentAppearance.Components.Add(component);
+			await db.SaveChangesAsync();
+
+			string growMessage = TransformationDescriptionBuilder.BuildGrowMessage(character, transformation);
+			return ShiftBodypartResult.FromSuccess(growMessage);
+		}
+
+		/// <summary>
 		/// Shifts the given character's bodypart to the given species.
 		/// </summary>
 		/// <param name="db">The database where characters and transformations are stored.</param>
@@ -66,7 +144,77 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> ShiftCharacterBodypartAsync(GlobalInfoContext db, SocketCommandContext context, Character character, Bodypart bodyPart, string species)
 		{
-			throw new NotImplementedException();
+			var discordUser = context.Guild.GetUser(character.Owner.DiscordID);
+			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			if (!canTransformResult.IsSuccess)
+			{
+				return ShiftBodypartResult.FromError(canTransformResult);
+			}
+
+			if (!character.HasBodypart(bodyPart))
+			{
+				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
+			}
+
+			var getSpeciesResult = await GetSpeciesByNameAsync(db, species);
+			if (!getSpeciesResult.IsSuccess)
+			{
+				return ShiftBodypartResult.FromError(getSpeciesResult);
+			}
+
+			var getTFResult = await GetTransformationByPartAndSpeciesAsync(db, bodyPart, getSpeciesResult.Entity);
+			if (!getTFResult.IsSuccess)
+			{
+				return ShiftBodypartResult.FromError(getTFResult);
+			}
+
+			var currentComponent = character.CurrentAppearance.Components.First(c => c.Bodypart == bodyPart);
+
+			var transformation = getTFResult.Entity;
+			currentComponent.Transformation = transformation;
+			await db.SaveChangesAsync();
+
+			string shiftMessage = TransformationDescriptionBuilder.BuildShiftMessage(character, transformation);
+			return ShiftBodypartResult.FromSuccess(shiftMessage);
+		}
+
+		/// <summary>
+		/// Determines whether or not a user is allowed to transform another user.
+		/// </summary>
+		/// <param name="db"></param>
+		/// <param name="discordServer"></param>
+		/// <param name="invokingUser"></param>
+		/// <param name="targetUser"></param>
+		/// <returns></returns>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
+		public async Task<DetermineConditionResult> CanUserTransformUserAsync(GlobalInfoContext db, IGuild discordServer, IUser invokingUser, IUser targetUser)
+		{
+			var localProtection = await GetOrCreateServerUserProtectionAsync(db, targetUser, discordServer);
+			if (!localProtection.HasOptedIn)
+			{
+				return DetermineConditionResult.FromError("The target hasn't opted into transformations.");
+			}
+
+			var globalProtection = await GetOrCreateGlobalUserProtectionAsync(db, targetUser);
+			switch (localProtection.Type)
+			{
+				case ProtectionType.Blacklist:
+				{
+					return globalProtection.Blacklist.All(u => u.DiscordID != invokingUser.Id)
+						? DetermineConditionResult.FromSuccess()
+						: DetermineConditionResult.FromError("You're on that user's blacklist.");
+				}
+				case ProtectionType.Whitelist:
+				{
+					return globalProtection.Whitelist.Any(u => u.DiscordID == invokingUser.Id)
+						? DetermineConditionResult.FromSuccess()
+						: DetermineConditionResult.FromError("You're not on that user's whitelist.");
+				}
+				default:
+				{
+					throw new ArgumentOutOfRangeException();
+				}
+			}
 		}
 
 		/// <summary>
@@ -117,7 +265,7 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "The character has no default appearance.");
 			}
 
-			character.TransformedAppearance = character.DefaultAppearance;
+			character.CurrentAppearance = character.DefaultAppearance;
 			await db.SaveChangesAsync();
 
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
@@ -131,51 +279,163 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetCurrentAppearanceAsDefaultForCharacterAsync(GlobalInfoContext db, Character character)
 		{
-			if (character.TransformedAppearance is null)
+			if (character.CurrentAppearance is null)
 			{
 				return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "The character doesn't have an altered appearance.");
 			}
 
-			character.DefaultAppearance = character.TransformedAppearance;
+			character.DefaultAppearance = character.CurrentAppearance;
 			await db.SaveChangesAsync();
 
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 		}
 
 		/// <summary>
-		/// Sets the protection type that the user has for transformations.
+		/// Sets the default protection type that the user has for transformations.
 		/// </summary>
 		/// <param name="db">The database.</param>
-		/// <param name="user">The user to set the protection for.</param>
+		/// <param name="discordUser">The user to set the protection for.</param>
 		/// <param name="protectionType">The protection type to set.</param>
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
-		public async Task<ModifyEntityResult> SetUserProtectionTypeAsync(GlobalInfoContext db, IUser user, ProtectionType protectionType)
+		public async Task<ModifyEntityResult> SetDefaultProtectionTypeAsync(GlobalInfoContext db, IUser discordUser, ProtectionType protectionType)
 		{
-			throw new NotImplementedException();
+			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+			if (protection.DefaultType == protectionType)
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, $"{protectionType.Humanize()} is already your default setting.");
+			}
+
+			protection.DefaultType = protectionType;
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 		}
 
 		/// <summary>
-		/// Whitelists the given user, allowing them to transform the <paramref name="user"/>.
+		/// Sets the protection type that the user has for transformations on the given server.
 		/// </summary>
 		/// <param name="db">The database.</param>
-		/// <param name="user">The user to modify.</param>
+		/// <param name="discordUser">The user to set the protection for.</param>
+		/// <param name="discordServer">The server to set the protection on.</param>
+		/// <param name="protectionType">The protection type to set.</param>
+		/// <returns>An entity modification result which may or may not have succeeded.</returns>
+		public async Task<ModifyEntityResult> SetServerProtectionTypeAsync(GlobalInfoContext db, IUser discordUser, IGuild discordServer, ProtectionType protectionType)
+		{
+			var protection = await GetOrCreateServerUserProtectionAsync(db, discordUser, discordServer);
+			if (protection.Type == protectionType)
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, $"{protectionType.Humanize()} is already your current setting.");
+			}
+
+			protection.Type = protectionType;
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+		}
+
+		/// <summary>
+		/// Whitelists the given user, allowing them to transform the <paramref name="discordUser"/>.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="discordUser">The user to modify.</param>
 		/// <param name="whitelistedUser">The user to add to the whitelist.</param>
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
-		public async Task<ModifyEntityResult> WhitelistUserAsync(GlobalInfoContext db, IUser user, IUser whitelistedUser)
+		public async Task<ModifyEntityResult> WhitelistUserAsync(GlobalInfoContext db, IUser discordUser, IUser whitelistedUser)
 		{
-			throw new NotImplementedException();
+			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+			if (protection.Whitelist.Any(u => u.DiscordID == whitelistedUser.Id))
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already whitelisted that user.");
+			}
+
+			var user = await db.GetOrRegisterUserAsync(whitelistedUser);
+			protection.Whitelist.Add(user);
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 		}
 
 		/// <summary>
-		/// Blacklists the given user, preventing them from transforming the <paramref name="user"/>.
+		/// Blacklists the given user, preventing them from transforming the <paramref name="discordUser"/>.
 		/// </summary>
 		/// <param name="db">The database.</param>
-		/// <param name="user">The user to modify.</param>
+		/// <param name="discordUser">The user to modify.</param>
 		/// <param name="blacklistedUser">The user to add to the blacklist.</param>
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
-		public async Task<ModifyEntityResult> BlacklistUserAsync(GlobalInfoContext db, IUser user, IUser blacklistedUser)
+		public async Task<ModifyEntityResult> BlacklistUserAsync(GlobalInfoContext db, IUser discordUser, IUser blacklistedUser)
 		{
-			throw new NotImplementedException();
+			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+			if (protection.Blacklist.Any(u => u.DiscordID == blacklistedUser.Id))
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already blacklisted that user.");
+			}
+
+			var user = await db.GetOrRegisterUserAsync(blacklistedUser);
+			protection.Blacklist.Add(user);
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+		}
+
+		/// <summary>
+		/// Gets or creates the global transformation protection data for the given user.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="discordUser">The user.</param>
+		/// <returns>Global protection data for the given user.</returns>
+		public async Task<GlobalUserProtection> GetOrCreateGlobalUserProtectionAsync(GlobalInfoContext db, IUser discordUser)
+		{
+			var protection = await db.GlobalUserProtections
+			.Include(p => p.User)
+			.Include(p => p.Whitelist)
+			.Include(p => p.Blacklist)
+			.FirstOrDefaultAsync(p => p.User.DiscordID == discordUser.Id);
+
+			if (!(protection is null))
+			{
+				return protection;
+			}
+
+			var user = await db.GetOrRegisterUserAsync(discordUser);
+			protection = GlobalUserProtection.CreateDefault(user);
+
+			await db.GlobalUserProtections.AddAsync(protection);
+			await db.SaveChangesAsync();
+
+			return protection;
+		}
+
+		/// <summary>
+		/// Gets or creates server-specific transformation protection data for the given user and server.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="discordUser">The user.</param>
+		/// <param name="guild">The server.</param>
+		/// <returns>Server-specific protection data for the given user.</returns>
+		public async Task<ServerUserProtection> GetOrCreateServerUserProtectionAsync(GlobalInfoContext db, IUser discordUser, IGuild guild)
+		{
+			var protection = await db.ServerUserProtections
+			.Include(p => p.Server)
+			.Include(p => p.User)
+			.FirstOrDefaultAsync
+			(
+				p =>
+					p.User.DiscordID == discordUser.Id && p.Server.DiscordID == guild.Id
+			);
+
+			if (!(protection is null))
+			{
+				return protection;
+			}
+
+			var server = await db.GetOrRegisterServerAsync(guild);
+			var globalProtection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+			protection = ServerUserProtection.CreateDefault(globalProtection, server);
+
+			await db.ServerUserProtections.AddAsync(protection);
+			await db.SaveChangesAsync();
+
+			return protection;
 		}
 
 		/// <summary>

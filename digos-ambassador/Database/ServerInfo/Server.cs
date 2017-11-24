@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Database.ServerInfo
 		/// <summary>
 		/// Gets or sets the globally unique guild ID of the server.
 		/// </summary>
-		public virtual ulong DiscordGuildID { get; set; }
+		public virtual ulong DiscordID { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether or not the server allows NSFW content globally.
@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Database.ServerInfo
 		{
 			return new Server
 			{
-				DiscordGuildID = discordServer.Id,
+				DiscordID = discordServer.Id,
 				IsNSFW = true,
 			};
 		}

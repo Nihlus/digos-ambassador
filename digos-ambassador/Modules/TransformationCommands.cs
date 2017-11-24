@@ -32,7 +32,7 @@ using Discord;
 using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
-
+using static Discord.Commands.ContextType;
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
 
@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="species">The species to transform it into.</param>
 		[UsedImplicitly]
 		[Command(RunMode = Async)]
-		[Summary("Transforms the given bodypart into the given species on yourself. You can use \"remove\" instead of a species to remove the body part.")]
+		[Summary("Transforms the given bodypart into the given species on yourself.")]
 		[RequirePermission(Transform)]
 		public async Task ShiftAsync(Bodypart bodyPart, [NotNull] string species) =>
 			await ShiftAsync(this.Context.User, bodyPart, species);
@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="species">The species to transform it into.</param>
 		[UsedImplicitly]
 		[Command(RunMode = Async)]
-		[Summary("Transforms the given bodypart of the target user into the given species. You can use \"remove\" instead of a species to remove the body part.")]
+		[Summary("Transforms the given bodypart of the target user into the given species.")]
 		[RequirePermission(Transform, Other)]
 		public async Task ShiftAsync([NotNull] IUser target, Bodypart bodyPart, [NotNull] string species)
 		{
@@ -107,7 +107,9 @@ namespace DIGOS.Ambassador.Modules
 				}
 
 				var character = getCurrentCharacterResult.Entity;
+
 				var shiftPartResult = await this.Transformation.ShiftCharacterBodypartAsync(db, this.Context, character, bodyPart, species);
+
 				if (!shiftPartResult.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
@@ -186,12 +188,9 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Describes the current physical appearance of a character.")]
 		public async Task DescribeCharacterAsync([NotNull] Character character)
 		{
-			using (var db = new GlobalInfoContext())
-			{
-				var eb = await this.Transformation.GenerateCharacterDescriptionAsync(character);
+			var eb = await this.Transformation.GenerateCharacterDescriptionAsync(character);
 
-				await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
-			}
+			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
 		}
 
 		/// <summary>
@@ -244,7 +243,7 @@ namespace DIGOS.Ambassador.Modules
 				}
 
 				var character = getCurrentCharacterResult.Entity;
-				var currentAppearance = character.TransformedAppearance;
+				var currentAppearance = character.CurrentAppearance;
 
 				var cloneCharacterResult = await this.Characters.CreateCharacterFromAppearanceAsync(db, this.Context, newCharacterName, currentAppearance);
 				if (!cloneCharacterResult.IsSuccess)
@@ -289,17 +288,104 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		/// <summary>
+		/// Opts into the transformation module, if the server requires you to opt in.
+		/// </summary>
+		[UsedImplicitly]
+		[Command("default-opt-in")]
+		[Summary("Sets your default setting for opting in or out of transformations on servers you join.")]
+		[RequireContext(Guild)]
+		public async Task SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				var protection = await this.Transformation.GetOrCreateGlobalUserProtectionAsync(db, this.Context.User);
+				protection.DefaultOptIn = shouldOptIn;
+
+				await db.SaveChangesAsync();
+
+				await this.Feedback.SendConfirmationAsync
+				(
+					this.Context,
+					$"You're now opted {(shouldOptIn ? "in" : "out")} by default on new servers."
+				);
+			}
+		}
+
+		/// <summary>
+		/// Opts into the transformation module on this server.
+		/// </summary>
+		[UsedImplicitly]
+		[Command("opt-in")]
+		[Summary("Opts into the transformation module on this server.")]
+		[RequireContext(Guild)]
+		public async Task OptInToTransformationsAsync()
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				var protection = await this.Transformation.GetOrCreateServerUserProtectionAsync(db, this.Context.User, this.Context.Guild);
+				protection.HasOptedIn = true;
+
+				await db.SaveChangesAsync();
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Opted into transformations. Have fun!");
+			}
+		}
+
+		/// <summary>
+		/// Opts into the transformation module on this server.
+		/// </summary>
+		[UsedImplicitly]
+		[Command("opt-out")]
+		[Summary("Opts out of the transformation module on this server.")]
+		[RequireContext(Guild)]
+		public async Task OptOutOfTransformationsAsync()
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				var protection = await this.Transformation.GetOrCreateServerUserProtectionAsync(db, this.Context.User, this.Context.Guild);
+				protection.HasOptedIn = false;
+
+				await db.SaveChangesAsync();
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Opted out of transformations.");
+			}
+		}
+
+		/// <summary>
+		/// Sets your default protection type for transformations on servers you join. Available types are Whitelist and Blacklist.
+		/// </summary>
+		/// <param name="protectionType">The protection type to use.</param>
+		[UsedImplicitly]
+		[Command("default-protection")]
+		[Summary("Sets your default protection type for transformations on servers you join. Available types are Whitelist and Blacklist.")]
+		public async Task SetDefaultProtectionTypeAsync(ProtectionType protectionType)
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				var setProtectionTypeResult = await this.Transformation.SetDefaultProtectionTypeAsync(db, this.Context.User, protectionType);
+				if (!setProtectionTypeResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, setProtectionTypeResult.ErrorReason);
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Default protection type set to \"{protectionType.Humanize()}\"");
+			}
+		}
+
+		/// <summary>
 		/// Sets your protection type for transformations. Available types are Whitelist and Blacklist.
 		/// </summary>
 		/// <param name="protectionType">The protection type to use.</param>
 		[UsedImplicitly]
 		[Command("protection")]
 		[Summary("Sets your protection type for transformations. Available types are Whitelist and Blacklist.")]
+		[RequireContext(Guild)]
 		public async Task SetProtectionTypeAsync(ProtectionType protectionType)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var setProtectionTypeResult = await this.Transformation.SetUserProtectionTypeAsync(db, this.Context.User, protectionType);
+				var setProtectionTypeResult = await this.Transformation.SetServerProtectionTypeAsync(db, this.Context.User, this.Context.Guild, protectionType);
 				if (!setProtectionTypeResult.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, setProtectionTypeResult.ErrorReason);

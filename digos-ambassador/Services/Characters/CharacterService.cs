@@ -124,7 +124,7 @@ namespace DIGOS.Ambassador.Services
 			var currentCharacter = await GetUserCharacters(db, discordUser)
 			.FirstOrDefaultAsync
 			(
-				ch => ch.CurrentServers.Any(s => s.DiscordGuildID == context.Guild.Id)
+				ch => ch.CurrentServers.Any(s => s.DiscordID == context.Guild.Id)
 			);
 
 			if (currentCharacter is null)
@@ -160,7 +160,7 @@ namespace DIGOS.Ambassador.Services
 				.Include(c => c.Owner)
 				.Include(c => c.CurrentServers)
 				.Include(c => c.DefaultAppearance)
-				.Include(c => c.TransformedAppearance)
+				.Include(c => c.CurrentAppearance)
 				.FirstOrDefault(rp => rp.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase));
 
 			if (character is null)
@@ -252,12 +252,12 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			var currentCharactersOnServer = GetUserCharacters(db, discordUser)
-				.Where(ch => ch.CurrentServers.Any(s => s.DiscordGuildID == discordServer.Id));
+				.Where(ch => ch.CurrentServers.Any(s => s.DiscordID == discordServer.Id));
 
 			await currentCharactersOnServer.ForEachAsync
 			(
 				ch => ch.CurrentServers
-					.RemoveAll(s => s.DiscordGuildID == discordServer.Id)
+					.RemoveAll(s => s.DiscordID == discordServer.Id)
 			);
 
 			await db.SaveChangesAsync();
@@ -290,7 +290,7 @@ namespace DIGOS.Ambassador.Services
 				.AnyAsync
 				(
 					c => c.CurrentServers
-						.Any(s => s.DiscordGuildID == discordServer.Id)
+						.Any(s => s.DiscordID == discordServer.Id)
 				);
 		}
 
@@ -593,7 +593,7 @@ namespace DIGOS.Ambassador.Services
 				.Include(ch => ch.Images)
 				.Include(ch => ch.CurrentServers)
 				.Include(ch => ch.DefaultAppearance)
-				.Include(ch => ch.TransformedAppearance)
+				.Include(ch => ch.CurrentAppearance)
 				.Where(ch => ch.Owner.DiscordID == discordUser.Id);
 
 			return characters;

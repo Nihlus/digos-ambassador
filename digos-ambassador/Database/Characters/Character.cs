@@ -21,14 +21,14 @@
 //
 
 using System.Collections.Generic;
-
+using System.Linq;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
 
 using Discord;
-
+using DIGOS.Ambassador.Services;
 using JetBrains.Annotations;
 using Image = DIGOS.Ambassador.Database.Data.Image;
 
@@ -94,7 +94,17 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// <summary>
 		/// Gets or sets the character's transformed appearance.
 		/// </summary>
-		public Appearance TransformedAppearance { get; set; }
+		public Appearance CurrentAppearance { get; set; }
+
+		/// <summary>
+		/// Determines whether or not the character has a given bodypart in their current appearance.
+		/// </summary>
+		/// <param name="bodypart">The bodypart to check for.</param>
+		/// <returns>true if the character has the bodypart; otherwise, false.</returns>
+		public bool HasBodypart(Bodypart bodypart)
+		{
+			return this.CurrentAppearance.Components.Any(c => c.Bodypart == bodypart);
+		}
 
 		/// <inheritdoc />
 		public bool IsOwner(User user)

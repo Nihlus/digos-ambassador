@@ -172,6 +172,28 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
+		/// Gets or sets the database where global transformation protections are stored.
+		/// </summary>
+		public DbSet<GlobalUserProtection> GlobalUserProtections
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets the database where server-specific transformation protections are stored.
+		/// </summary>
+		public DbSet<ServerUserProtection> ServerUserProtections
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
 		/// </summary>
 		public GlobalInfoContext()
@@ -208,7 +230,7 @@ namespace DIGOS.Ambassador.Database
 			(
 				p =>
 				p.Permission == grantedPermission.Permission &&
-				p.Server.DiscordGuildID == discordServer.Id
+				p.Server.DiscordID == discordServer.Id
 			);
 
 			if (existingPermission is null)
@@ -245,7 +267,7 @@ namespace DIGOS.Ambassador.Database
 			(
 				p =>
 				p.Permission == revokedPermission &&
-				p.Server.DiscordGuildID == discordServer.Id
+				p.Server.DiscordID == discordServer.Id
 			);
 
 			if (existingPermission != null)
@@ -278,7 +300,7 @@ namespace DIGOS.Ambassador.Database
 			(
 				p =>
 					p.Permission == permission &&
-					p.Server.DiscordGuildID == discordServer.Id
+					p.Server.DiscordID == discordServer.Id
 			);
 
 			if (existingPermission != null)
@@ -313,7 +335,7 @@ namespace DIGOS.Ambassador.Database
 		/// <returns><value>true</value> if the server is stored; otherwise, <value>false</value>.</returns>
 		public async Task<bool> IsServerKnownAsync([NotNull] IGuild discordServer)
 		{
-			return await this.Servers.AnyAsync(u => u.DiscordGuildID == discordServer.Id);
+			return await this.Servers.AnyAsync(u => u.DiscordID == discordServer.Id);
 		}
 
 		/// <summary>
@@ -340,7 +362,7 @@ namespace DIGOS.Ambassador.Database
 		[ItemNotNull]
 		public async Task<Server> GetServerAsync([NotNull] IGuild discordServer)
 		{
-			return await this.Servers.FirstAsync(u => u.DiscordGuildID == discordServer.Id);
+			return await this.Servers.FirstAsync(u => u.DiscordID == discordServer.Id);
 		}
 
 		/// <summary>

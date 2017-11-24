@@ -66,5 +66,10 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// Gets or sets the size of the component. This is, by default, a unitless value and is only contextually relevant.
 		/// </summary>
 		public int Size { get; set; }
+
+		public static AppearanceComponent CreateFrom(Transformation transformation)
+		{
+			throw new System.NotImplementedException();
+		}
 	}
 }

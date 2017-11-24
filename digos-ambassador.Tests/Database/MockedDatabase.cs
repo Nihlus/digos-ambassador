@@ -82,7 +82,7 @@ namespace DIGOS.Ambassador.Tests.Database
 		/// <param name="discordServerID">The ID of the server.</param>
 		public void AddMockedServer(ulong discordServerID)
 		{
-			var server = new Server { DiscordGuildID = discordServerID };
+			var server = new Server { DiscordID = discordServerID };
 			AddMockedServer(server);
 		}
 
