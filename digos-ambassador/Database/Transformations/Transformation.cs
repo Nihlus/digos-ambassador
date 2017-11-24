@@ -50,6 +50,12 @@ namespace DIGOS.Ambassador.Database.Transformations
 		public Species Species { get; set; }
 
 		/// <summary>
+		/// Gets or sets a short description of the transformation.
+		/// </summary>
+		[Required]
+		public string Description { get; set; }
+
+		/// <summary>
 		/// Gets or sets the default base colour of the transformation.
 		/// </summary>
 		[Required]
@@ -67,12 +73,6 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// </summary>
 		[YamlMember(Alias = "default_pattern_colour")]
 		public Colour DefaultPatternColour { get; set; }
-
-		/// <summary>
-		/// Gets or sets a short description of the transformation.
-		/// </summary>
-		[Required]
-		public string Description { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether this transformation is NSFW.

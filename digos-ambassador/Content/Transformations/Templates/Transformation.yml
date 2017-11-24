@@ -1,6 +1,9 @@
 part: null
 species: null
 description: null
+default_base_colour: null
+default_pattern: null
+default_pattern_colour: null
 is_nsfw: false
 shift_message: null
 grow_message: null

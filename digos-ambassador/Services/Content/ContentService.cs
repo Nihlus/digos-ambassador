@@ -34,7 +34,6 @@ using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
 
 using Discord.Commands;
-
 using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
@@ -281,9 +280,10 @@ namespace DIGOS.Ambassador.Services
 			using (var db = new GlobalInfoContext())
 			{
 				var deser = new DeserializerBuilder()
+					.WithTypeConverter(new ColourYamlConverter())
+					.WithTypeConverter(new SpeciesYamlConverter(db, transformation))
 					.WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
 					.WithNamingConvention(new UnderscoredNamingConvention())
-					.WithTypeConverter(new SpeciesYamlConverter(db, transformation))
 					.Build();
 
 				foreach (var transformationFile in transformationFiles)

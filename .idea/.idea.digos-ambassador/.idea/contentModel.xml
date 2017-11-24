@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$USER_HOME$/.Rider2017.2/system/resharper-host/local/Transient/ReSharperHost/v10/SolutionCaches/_digos-ambassador.233808278.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/.Rider2017.3/system/resharper-host/local/Transient/ReSharperHost/v11/SolutionCaches/_digos-ambassador.233808278.00" t="ExcludeRecursive" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.2.0/build/netcoreapp1.0/xunit.runner.reporters.netstandard15.dll" t="Include" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.2.0/build/netcoreapp1.0/xunit.runner.utility.netstandard15.dll" t="Include" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.2.0/build/netcoreapp1.0/xunit.runner.visualstudio.dotnetcore.testadapter.dll" t="Include" />
@@ -15,6 +15,9 @@
             <e p="Default" t="Include">
               <e p="Discord_DIGOS.png" t="Include" />
             </e>
+          </e>
+          <e p="Databases" t="Include">
+            <e p="global.db" t="Include" />
           </e>
           <e p="FileSignatures.cs" t="Include" />
           <e p="Portraits" t="Include">
@@ -33,8 +36,8 @@
               </e>
             </e>
             <e p="Templates" t="Include">
-              <e p="Bodypart.yml" t="Include" />
               <e p="Species.yml" t="Include" />
+              <e p="Transformation.yml" t="Include" />
             </e>
           </e>
           <e p="bot.token" t="Include" />
@@ -107,6 +110,11 @@
             <e p="FListKinkCategory.cs" t="Include" />
             <e p="KinkCollection.cs" t="Include" />
           </e>
+        </e>
+        <e p="Migrations" t="Include">
+          <e p="20171124173231_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171124173231_InitialCreate.cs" t="Include" />
+          <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">
           <e p="AdminCommands.cs" t="Include" />

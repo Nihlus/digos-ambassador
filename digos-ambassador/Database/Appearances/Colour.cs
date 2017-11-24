@@ -59,14 +59,13 @@ namespace DIGOS.Ambassador.Database.Appearances
 		[ContractAnnotation("input:null => false")]
 		public static bool TryParse([CanBeNull] string input, out Colour colour)
 		{
-			colour = default;
+			colour = new Colour();
 
 			if (input.IsNullOrWhitespace())
 			{
+				colour = null;
 				return false;
 			}
-
-			var result = new Colour();
 
 			// First, break the input up into parts based on spaces
 			var parts = input.Split(" ");
@@ -74,17 +73,18 @@ namespace DIGOS.Ambassador.Database.Appearances
 			// Check for a modifier
 			if (Enum.TryParse(parts[0], true, out ShadeModifier modifier))
 			{
-				result.Modifier = modifier;
+				colour.Modifier = modifier;
 				parts = parts.Skip(1).ToArray();
 			}
 
 			// Then check for a known shade
 			if (!Enum.TryParse(string.Join(string.Empty, parts), true, out Shade shade))
 			{
+				colour = null;
 				return false;
 			}
 
-			result.Shade = shade;
+			colour.Shade = shade;
 			return true;
 		}
 
