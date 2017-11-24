@@ -47,6 +47,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="attachment">The attachment to get.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Stream>> GetAttachmentStreamAsync([NotNull] Attachment attachment)
 		{
 			try
@@ -98,6 +99,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="context">The command context.</param>
 		/// <param name="guildPermission">The permission to check.</param>
 		/// <returns>true if she has permission; otherwise, false.</returns>
+		[Pure]
 		public bool HasPermission([NotNull] SocketCommandContext context, GuildPermission guildPermission)
 		{
 			var amby = context.Guild.GetUser(context.Client.CurrentUser.Id) as IGuildUser;

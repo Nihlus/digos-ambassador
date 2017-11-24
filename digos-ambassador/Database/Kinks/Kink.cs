@@ -23,6 +23,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Database.Interfaces;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Kinks
 {
@@ -55,6 +56,7 @@ namespace DIGOS.Ambassador.Database.Kinks
 		public string Description { get; set; }
 
 		/// <inheritdoc />
+		[Pure]
 		public bool Equals(Kink other)
 		{
 			if (ReferenceEquals(null, other))

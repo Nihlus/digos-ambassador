@@ -101,6 +101,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// </summary>
 		/// <param name="bodypart">The bodypart to check for.</param>
 		/// <returns>true if the character has the bodypart; otherwise, false.</returns>
+		[Pure]
 		public bool HasBodypart(Bodypart bodypart)
 		{
 			return this.CurrentAppearance.Components.Any(c => c.Bodypart == bodypart);

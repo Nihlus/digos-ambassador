@@ -2,6 +2,7 @@
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Services;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Transformations
 {
@@ -39,6 +40,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// <param name="globalProtection">The global protection data.</param>
 		/// <param name="server">The server that the protection should be valid for.</param>
 		/// <returns>A server-specific protection object.</returns>
+		[Pure]
 		public static ServerUserProtection CreateDefault(GlobalUserProtection globalProtection, Server server)
 		{
 			return new ServerUserProtection

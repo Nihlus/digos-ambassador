@@ -71,6 +71,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="characterOwner">The owner of the character, if any.</param>
 		/// <param name="characterName">The name of the character.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -104,6 +105,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="context">The context of the user.</param>
 		/// <param name="discordUser">The user to get the current character of.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -141,6 +143,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database context where the data is stored.</param>
 		/// <param name="characterName">The name of the character.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Character>> GetNamedCharacterAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -179,6 +182,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="characterOwner">The user to get the character from.</param>
 		/// <param name="characterName">The name of the character.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Character>> GetUserCharacterByNameAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -270,6 +274,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordUser">The user to check.</param>
 		/// <param name="discordServer">The server to check.</param>
 		/// <returns>true if the user has an active character on the server; otherwise, false.</returns>
+		[Pure]
 		public async Task<bool> HasActiveCharacterOnServerAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -584,6 +589,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database where the characters are stored.</param>
 		/// <param name="discordUser">The user to get the characters of.</param>
 		/// <returns>A queryable list of characters belonging to the user.</returns>
+		[Pure]
 		[NotNull]
 		[ItemNotNull]
 		public IQueryable<Character> GetUserCharacters([NotNull]GlobalInfoContext db, [NotNull]IUser discordUser)
@@ -606,6 +612,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordUser">The user to check.</param>
 		/// <param name="characterName">The character name to check.</param>
 		/// <returns>true if the name is unique; otherwise, false.</returns>
+		[Pure]
 		public async Task<bool> IsCharacterNameUniqueForUserAsync
 		(
 			[NotNull] GlobalInfoContext db,

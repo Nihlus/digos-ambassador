@@ -202,6 +202,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="roleplayOwner">The owner of the roleplay, if any.</param>
 		/// <param name="roleplayName">The name of the roleplay, if any.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -234,6 +235,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database context where the data is stored.</param>
 		/// <param name="roleplayName">The name of the roleplay.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -271,6 +273,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database where the roleplays are stored.</param>
 		/// <param name="channel">The channel to get the roleplay from.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Roleplay>> GetActiveRoleplayAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -299,6 +302,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database where the roleplays are stored.</param>
 		/// <param name="channel">The channel to check.</param>
 		/// <returns>true if there is an active roleplay; otherwise, false.</returns>
+		[Pure]
 		public async Task<bool> HasActiveRoleplayAsync([NotNull] GlobalInfoContext db, [NotNull] IChannel channel)
 		{
 			return await db.Roleplays.AnyAsync(rp => rp.IsActive && rp.ActiveChannelID == channel.Id);
@@ -311,6 +315,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordUser">The user to check.</param>
 		/// <param name="roleplayName">The roleplay name to check.</param>
 		/// <returns>true if the name is unique; otherwise, false.</returns>
+		[Pure]
 		public async Task<bool> IsRoleplayNameUniqueForUserAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -328,6 +333,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database where the roleplays are stored.</param>
 		/// <param name="discordUser">The user to get the roleplays of.</param>
 		/// <returns>A queryable list of roleplays belonging to the user.</returns>
+		[Pure]
 		[NotNull]
 		[ItemNotNull]
 		public IQueryable<Roleplay> GetUserRoleplays([NotNull]GlobalInfoContext db, [NotNull]IUser discordUser)
@@ -349,6 +355,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="roleplayOwner">The user to get the roleplay from.</param>
 		/// <param name="roleplayName">The name of the roleplay.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync
 		(
 			[NotNull] GlobalInfoContext db,

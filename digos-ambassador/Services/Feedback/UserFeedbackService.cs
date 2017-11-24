@@ -120,6 +120,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="color">The colour of the embed.</param>
 		/// <param name="contents">The contents of the embed.</param>
 		/// <returns>A feedback embed.</returns>
+		[Pure]
 		[NotNull]
 		public EmbedBuilder CreateFeedbackEmbed([NotNull] IMentionable invoker, Color color, [NotNull] string contents)
 		{
@@ -134,6 +135,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="color">The colour of the embed. Optional.</param>
 		/// <returns>A basic embed.</returns>
+		[Pure]
 		[NotNull]
 		public EmbedBuilder CreateBaseEmbed(Color? color = null)
 		{
@@ -150,6 +152,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="matchingCommands">A set of commands that should be included in the embed.</param>
 		/// <returns>An embed.</returns>
+		[Pure]
 		[NotNull]
 		public EmbedBuilder CreateCommandUsageEmbed([NotNull] IReadOnlyList<CommandMatch> matchingCommands)
 		{
@@ -169,6 +172,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="commandInfo">The command to get the parameters from.</param>
 		/// <returns>A humanized parameter list.</returns>
+		[Pure]
 		[NotNull]
 		public string BuildParameterList([NotNull] CommandInfo commandInfo)
 		{

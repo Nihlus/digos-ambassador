@@ -27,6 +27,7 @@ using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
 
 using Discord;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Roleplaying
 {
@@ -115,6 +116,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is a participant; otherwise, false.</returns>
+		[Pure]
 		public bool IsParticipant(User user)
 		{
 			return IsParticipant(user.DiscordID);
@@ -125,6 +127,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is a participant; otherwise, false.</returns>
+		[Pure]
 		public bool IsParticipant(IUser user)
 		{
 			return IsParticipant(user.Id);
@@ -135,6 +138,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		/// <param name="userID">The ID of the user.</param>
 		/// <returns>true if the user is a participant; otherwise, false.</returns>
+		[Pure]
 		public bool IsParticipant(ulong userID)
 		{
 			return this.Participants.Any(p => p.DiscordID == userID);
@@ -145,6 +149,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is invited; otherwise, false.</returns>
+		[Pure]
 		public bool IsInvited(User user)
 		{
 			return IsInvited(user.DiscordID);
@@ -155,6 +160,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is invited; otherwise, false.</returns>
+		[Pure]
 		public bool IsInvited(IUser user)
 		{
 			return IsInvited(user.Id);
@@ -165,6 +171,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		/// <param name="userID">The ID of the user.</param>
 		/// <returns>true if the user is invited; otherwise, false.</returns>
+		[Pure]
 		public bool IsInvited(ulong userID)
 		{
 			return this.InvitedUsers.Any(iu => iu.DiscordID == userID);
@@ -175,6 +182,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is kicked; otherwise, false.</returns>
+		[Pure]
 		public bool IsKicked(User user)
 		{
 			return IsKicked(user.DiscordID);
@@ -185,6 +193,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is kicked; otherwise, false.</returns>
+		[Pure]
 		public bool IsKicked(IUser user)
 		{
 			return IsKicked(user.Id);
@@ -195,6 +204,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// </summary>
 		/// <param name="userID">The ID of the user.</param>
 		/// <returns>true if the user is kicked; otherwise, false.</returns>
+		[Pure]
 		public bool IsKicked(ulong userID)
 		{
 			return this.KickedUsers.Any(ku => ku.DiscordID == userID);

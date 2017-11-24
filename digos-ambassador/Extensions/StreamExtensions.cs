@@ -47,6 +47,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// <exception cref="ArgumentOutOfRangeException">
 		/// Thrown if reading the given signature at the given offset would fall outside of the stream.
 		/// </exception>
+		[Pure]
 		public static async Task<bool> HasSignatureAsync([NotNull] this Stream @this, [NotNull] byte[] signature, long offset = 0)
 		{
 			if (!@this.CanSeek)

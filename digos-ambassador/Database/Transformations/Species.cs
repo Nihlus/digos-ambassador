@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Diagnostics.Contracts;
 using DIGOS.Ambassador.Database.Interfaces;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
@@ -57,6 +56,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// Gets the depth of this species in the parent chain.
 		/// </summary>
 		/// <returns>The depth of the species.</returns>
+		[Pure]
 		public uint GetSpeciesDepth()
 		{
 			if (this.Parent is null)
@@ -72,6 +72,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// </summary>
 		/// <param name="species">The species to compare with.</param>
 		/// <returns>true if the species are the same; otherwise, false.</returns>
+		[Pure]
 		[ContractAnnotation("species:null => false")]
 		public bool IsSameSpeciesAs([CanBeNull] Species species)
 		{

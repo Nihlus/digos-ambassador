@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
@@ -54,6 +55,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// </summary>
 		/// <param name="this">The type to humanize.</param>
 		/// <returns>A humanized string.</returns>
+		[Pure]
 		public static string Humanize(this Type @this)
 		{
 			return TypeAliases.ContainsKey(@this) ? TypeAliases[@this] : @this.Name;

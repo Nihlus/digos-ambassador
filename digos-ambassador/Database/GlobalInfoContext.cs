@@ -333,6 +333,7 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordServer">The Discord server.</param>
 		/// <returns><value>true</value> if the server is stored; otherwise, <value>false</value>.</returns>
+		[Pure]
 		public async Task<bool> IsServerKnownAsync([NotNull] IGuild discordServer)
 		{
 			return await this.Servers.AnyAsync(u => u.DiscordID == discordServer.Id);
@@ -359,6 +360,7 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordServer">The Discord server.</param>
 		/// <returns>Stored information about the server.</returns>
+		[Pure]
 		[ItemNotNull]
 		public async Task<Server> GetServerAsync([NotNull] IGuild discordServer)
 		{
@@ -393,6 +395,7 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns><value>true</value> if the user is stored; otherwise, <value>false</value>.</returns>
+		[Pure]
 		public async Task<bool> IsUserKnownAsync([NotNull] IUser discordUser)
 		{
 			return await this.Users.AnyAsync(u => u.DiscordID == discordUser.Id);
@@ -419,6 +422,7 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="discordUser">The Discord user.</param>
 		/// <returns>Stored information about the user.</returns>
+		[Pure]
 		[ItemNotNull]
 		public async Task<User> GetUser([NotNull] IUser discordUser)
 		{

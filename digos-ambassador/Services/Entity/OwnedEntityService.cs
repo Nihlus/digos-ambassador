@@ -58,6 +58,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="userEntities">The entities to check.</param>
 		/// <param name="entityName">The entity name to check.</param>
 		/// <returns>true if the name is unique; otherwise, false.</returns>
+		[Pure]
 		public async Task<bool> IsEntityNameUniqueForUserAsync
 		(
 			[NotNull] IQueryable<IOwnedNamedEntity> userEntities,
@@ -123,6 +124,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="commandModule">The command module to scan.</param>
 		/// <param name="entityName">The name of the entity.</param>
 		/// <returns>true if the name is valid; otherwise, false.</returns>
+		[Pure]
 		[ContractAnnotation("entityName:null => false")]
 		public CheckConditionResult IsEntityNameValid
 		(

@@ -111,6 +111,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="error">The error that caused the failure.</param>
 		/// <param name="reason">A more detailed error reason.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static UpdateTransformationsResult FromError(CommandError error, [NotNull] string reason)
 		{
 			return new UpdateTransformationsResult(0, 0, 0, 0, error, reason);
@@ -121,6 +122,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="result">The result to base this result off of.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static UpdateTransformationsResult FromError([NotNull] IResult result)
 		{
 			return new UpdateTransformationsResult(0, 0, 0, 0, result.Error, result.ErrorReason);

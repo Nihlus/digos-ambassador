@@ -43,6 +43,7 @@ namespace DIGOS.Ambassador.Permissions
 		/// <param name="user">The user.</param>
 		/// <param name="requiredPermission">The permission.</param>
 		/// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
+		[Pure]
 		public static async Task<bool> HasPermissionAsync
 		(
 			[CanBeNull] IGuild discordServer,
@@ -64,6 +65,7 @@ namespace DIGOS.Ambassador.Permissions
 		/// <param name="user">The user.</param>
 		/// <param name="requiredPermission">The permission.</param>
 		/// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
+		[Pure]
 		public static async Task<bool> HasPermissionAsync
 		(
 			[NotNull] GlobalInfoContext db,

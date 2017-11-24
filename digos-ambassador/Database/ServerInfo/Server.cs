@@ -64,6 +64,7 @@ namespace DIGOS.Ambassador.Database.ServerInfo
 		/// </summary>
 		/// <param name="discordServer">The Discord server.</param>
 		/// <returns>A default server entity with some information filled in.</returns>
+		[Pure]
 		[NotNull]
 		public static Server CreateDefault([NotNull] IGuild discordServer)
 		{

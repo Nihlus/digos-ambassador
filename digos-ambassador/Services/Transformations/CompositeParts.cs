@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using static DIGOS.Ambassador.Services.Bodypart;
 
 namespace DIGOS.Ambassador.Services
@@ -65,6 +66,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="bodypart">The part to check.</param>
 		/// <returns>true if the part is a composite part; otherwise, false.</returns>
+		[Pure]
 		public static bool IsCompositePart(Bodypart bodypart)
 		{
 			return Composites.Contains(bodypart);
@@ -75,6 +77,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="bodypart">The body part to decompose.</param>
 		/// <returns>An iterator over the bodyparts in the given bodypart.</returns>
+		[Pure]
 		public static IEnumerable<Bodypart> GetBodyparts(Bodypart bodypart)
 		{
 			if (!IsCompositePart(bodypart))

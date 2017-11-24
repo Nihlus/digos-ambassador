@@ -25,6 +25,7 @@ using Discord;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Services;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Transformations
 {
@@ -66,6 +67,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// </summary>
 		/// <param name="user">The user.</param>
 		/// <returns>A default user protection object.</returns>
+		[Pure]
 		public static GlobalUserProtection CreateDefault(User user)
 		{
 			return new GlobalUserProtection

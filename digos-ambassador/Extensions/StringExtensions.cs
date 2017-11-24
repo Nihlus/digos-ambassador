@@ -35,6 +35,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// </summary>
 		/// <param name="source">The string to check.</param>
 		/// <returns>true if the string is null or whitespace; otherwise, false.</returns>
+		[Pure]
 		[ContractAnnotation("source:null => true")]
 		public static bool IsNullOrWhitespace([CanBeNull] this string source)
 		{
@@ -46,6 +47,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// </summary>
 		/// <param name="source">The string to check.</param>
 		/// <returns>true if the string is null or empty; otherwise, false.</returns>
+		[Pure]
 		[ContractAnnotation("source:null => true")]
 		public static bool IsNullOrEmpty([CanBeNull] this string source)
 		{
@@ -59,6 +61,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// <param name="search">The string to search for.</param>
 		/// <param name="comparer">The string comparer to use.</param>
 		/// <returns>true if the string contains the other string; otherwise, false.</returns>
+		[Pure]
 		public static bool Contains(this string @this, string search, StringComparison comparer)
 		{
 			return @this != null && search != null && @this.IndexOf(search, comparer) >= 0;

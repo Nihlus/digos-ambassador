@@ -187,6 +187,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="targetUser"></param>
 		/// <returns></returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
+		[Pure]
 		public async Task<DetermineConditionResult> CanUserTransformUserAsync(GlobalInfoContext db, IGuild discordServer, IUser invokingUser, IUser targetUser)
 		{
 			var localProtection = await GetOrCreateServerUserProtectionAsync(db, targetUser, discordServer);
@@ -222,6 +223,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="character">The character to generate the description for.</param>
 		/// <returns>An embed with a formatted description.</returns>
+		[Pure]
 		public async Task<Embed> GenerateCharacterDescriptionAsync(Character character)
 		{
 			throw new NotImplementedException();
@@ -232,6 +234,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database containing the transformations.</param>
 		/// <returns>A list of the available species.</returns>
+		[Pure]
 		public async Task<IReadOnlyList<Species>> GetAvailableSpeciesAsync(GlobalInfoContext db)
 		{
 			return await db.Species
@@ -245,6 +248,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database containing the transformations.</param>
 		/// <param name="bodyPart">The bodypart to get the transformations for.</param>
 		/// <returns>A list of the available transformations..</returns>
+		[Pure]
 		public async Task<IReadOnlyList<Transformation>> GetAvailableTransformations(GlobalInfoContext db, Bodypart bodyPart)
 		{
 			return await db.Transformations
@@ -578,6 +582,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="bodypart">The part.</param>
 		/// <param name="species">The species.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Transformation>> GetTransformationByPartAndSpeciesAsync(GlobalInfoContext db, Bodypart bodypart, Species species)
 		{
 			var transformation = await db.Transformations.FirstOrDefaultAsync(tf => tf.Part == bodypart && tf.Species.IsSameSpeciesAs(species));
@@ -596,6 +601,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="bodypart">The bodypart that is transformed.</param>
 		/// <param name="species">The species to transform into.</param>
 		/// <returns>true if the combination is unique; otherwise, false.</returns>
+		[Pure]
 		public async Task<bool> IsPartAndSpeciesCombinationUniqueAsync(GlobalInfoContext db, Bodypart bodypart, Species species)
 		{
 			return !await db.Transformations.AnyAsync(tf => tf.Part == bodypart && tf.Species.IsSameSpeciesAs(species));
@@ -607,6 +613,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database.</param>
 		/// <param name="speciesName">The name of the species.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public RetrieveEntityResult<Species> GetSpeciesByName(GlobalInfoContext db, string speciesName)
 		{
 			var species = db.Species.FirstOrDefault(s => s.Name.Equals(speciesName, StringComparison.OrdinalIgnoreCase));
@@ -624,6 +631,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database.</param>
 		/// <param name="speciesName">The name of the species.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Species>> GetSpeciesByNameAsync(GlobalInfoContext db, string speciesName)
 		{
 			var species = await db.Species.FirstOrDefaultAsync(s => s.Name.Equals(speciesName, StringComparison.OrdinalIgnoreCase));
@@ -641,6 +649,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database.</param>
 		/// <param name="speciesName">The name of the species.</param>
 		/// <returns>true if the name is unique; otherwise, false.</returns>
+		[Pure]
 		public async Task<bool> IsSpeciesNameUniqueAsync(GlobalInfoContext db, string speciesName)
 		{
 			return !await db.Species.AnyAsync(s => s.Name.Equals(speciesName, StringComparison.OrdinalIgnoreCase));

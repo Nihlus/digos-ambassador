@@ -22,6 +22,7 @@
 
 using DIGOS.Ambassador.Database.Users;
 using Discord;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Interfaces
 {
@@ -51,6 +52,7 @@ namespace DIGOS.Ambassador.Database.Interfaces
 		/// </summary>
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is the owner; otherwise, false.</returns>
+		[Pure]
 		bool IsOwner(User user);
 
 		/// <summary>
@@ -58,6 +60,7 @@ namespace DIGOS.Ambassador.Database.Interfaces
 		/// </summary>
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is the owner; otherwise, false.</returns>
+		[Pure]
 		bool IsOwner(IUser user);
 
 		/// <summary>
@@ -65,6 +68,7 @@ namespace DIGOS.Ambassador.Database.Interfaces
 		/// </summary>
 		/// <param name="userID">The ID of the user.</param>
 		/// <returns>true if the user is the owner; otherwise, false.</returns>
+		[Pure]
 		bool IsOwner(ulong userID);
 	}
 }

@@ -62,6 +62,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <returns>A successful result.</returns>
 		/// <param name="shiftMessage">The message to display to the user when shifting.</param>
+		[Pure]
 		public static ShiftBodypartResult FromSuccess([NotNull] string shiftMessage)
 		{
 			return new ShiftBodypartResult(shiftMessage, null, null);
@@ -73,6 +74,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="error">The error that caused the failure.</param>
 		/// <param name="reason">A more detailed error reason.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static ShiftBodypartResult FromError(CommandError error, [NotNull] string reason)
 		{
 			return new ShiftBodypartResult(null, error, reason);
@@ -83,6 +85,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="result">The result to base this result off of.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static ShiftBodypartResult FromError([NotNull] IResult result)
 		{
 			return new ShiftBodypartResult(null, result.Error, result.ErrorReason);

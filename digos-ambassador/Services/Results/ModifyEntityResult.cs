@@ -67,6 +67,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="actionTaken">The action that was taken on the entity.</param>
 		/// <returns>A successful result.</returns>
+		[Pure]
 		public static ModifyEntityResult FromSuccess(ModifyEntityAction actionTaken)
 		{
 			return new ModifyEntityResult(actionTaken, null, null);
@@ -78,6 +79,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="error">The error that caused the failure.</param>
 		/// <param name="reason">A more detailed error reason.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static ModifyEntityResult FromError(CommandError error, [NotNull] string reason)
 		{
 			return new ModifyEntityResult(null, error, reason);
@@ -88,6 +90,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="result">The result to base this result off of.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static ModifyEntityResult FromError([NotNull] IResult result)
 		{
 			return new ModifyEntityResult(null, result.Error, result.ErrorReason);

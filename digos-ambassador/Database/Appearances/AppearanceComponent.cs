@@ -25,6 +25,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Appearances
 {
@@ -67,6 +68,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// </summary>
 		public int Size { get; set; }
 
+		[Pure]
 		public static AppearanceComponent CreateFrom(Transformation transformation)
 		{
 			throw new System.NotImplementedException();

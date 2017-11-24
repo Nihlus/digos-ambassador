@@ -73,6 +73,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="entity">The roleplay that was retrieved.</param>
 		/// <returns>A successful result.</returns>
+		[Pure]
 		public static RetrieveEntityResult<T> FromSuccess([NotNull] T entity)
 		{
 			return new RetrieveEntityResult<T>(entity, null, null);
@@ -84,6 +85,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="error">The error that caused the failure.</param>
 		/// <param name="reason">A more detailed error reason.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static RetrieveEntityResult<T> FromError(CommandError error, [NotNull] string reason)
 		{
 			return new RetrieveEntityResult<T>(null, error, reason);
@@ -94,6 +96,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="result">The result to base this result off of.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static RetrieveEntityResult<T> FromError([NotNull] IResult result)
 		{
 			return new RetrieveEntityResult<T>(null, result.Error, result.ErrorReason);
@@ -104,6 +107,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="exception">The exception to base this result off of.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static RetrieveEntityResult<T> FromError([NotNull] Exception exception)
 		{
 			return new RetrieveEntityResult<T>(null, CommandError.Exception, exception.Message, exception);

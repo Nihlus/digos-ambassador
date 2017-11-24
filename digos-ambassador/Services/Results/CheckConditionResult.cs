@@ -54,6 +54,7 @@ namespace DIGOS.Ambassador.Services
 		/// Creates a new successful result.
 		/// </summary>
 		/// <returns>A successful result.</returns>
+		[Pure]
 		public static CheckConditionResult FromSuccess()
 		{
 			return new CheckConditionResult(null, null);
@@ -65,6 +66,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="error">The error that caused the failure.</param>
 		/// <param name="reason">A more detailed error reason.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static CheckConditionResult FromError(CommandError error, [NotNull] string reason)
 		{
 			return new CheckConditionResult(error, reason);
@@ -75,6 +77,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="result">The result to base this result off of.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static CheckConditionResult FromError([NotNull] IResult result)
 		{
 			return new CheckConditionResult(result.Error, result.ErrorReason);

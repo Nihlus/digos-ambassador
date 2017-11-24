@@ -66,6 +66,7 @@ namespace DIGOS.Ambassador.Services
 		/// Creates a new successful result.
 		/// </summary>
 		/// <returns>A successful result.</returns>
+		[Pure]
 		public static DetermineConditionResult FromSuccess()
 		{
 			return new DetermineConditionResult(true, null, null);
@@ -76,6 +77,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="reason">A more detailed error reason.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static DetermineConditionResult FromError([NotNull] string reason)
 		{
 			return new DetermineConditionResult(false, CommandError.UnmetPrecondition, reason);
@@ -87,6 +89,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="error">The error that caused the failure.</param>
 		/// <param name="reason">A more detailed error reason.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static DetermineConditionResult FromError(CommandError error, [NotNull] string reason)
 		{
 			return new DetermineConditionResult(false, error, reason);
@@ -97,6 +100,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="result">The result to base this result off of.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static DetermineConditionResult FromError([NotNull] IResult result)
 		{
 			return new DetermineConditionResult(false, result.Error, result.ErrorReason);
@@ -107,6 +111,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="exception">The exception to base this result off of.</param>
 		/// <returns>A failed result.</returns>
+		[Pure]
 		public static DetermineConditionResult FromError([NotNull] Exception exception)
 		{
 			return new DetermineConditionResult(false, CommandError.Exception, exception.Message, exception);

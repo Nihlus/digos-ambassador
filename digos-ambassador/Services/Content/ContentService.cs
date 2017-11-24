@@ -160,6 +160,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="dossier">The dossier to get the data for.</param>
 		/// <returns>A <see cref="FileStream"/> containing the dossier data.</returns>
+		[Pure]
 		public RetrieveEntityResult<FileStream> GetDossierStream([NotNull] Dossier dossier)
 		{
 			if (!File.Exists(dossier.Path) || dossier.Path.IsNullOrWhitespace())
@@ -205,6 +206,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="dossier">The dossier.</param>
 		/// <returns>The path.</returns>
+		[Pure]
 		[NotNull]
 		public string GetDossierDataPath([NotNull] Dossier dossier)
 		{
@@ -215,6 +217,7 @@ namespace DIGOS.Ambassador.Services
 		/// Discovers the species that have been bundled with the program.
 		/// </summary>
 		/// <returns>A retrieval result which may or may not have suceeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<IReadOnlyList<Species>>> DiscoverBundledSpeciesAsync()
 		{
 			const string speciesFilename = "Species.yml";
@@ -260,6 +263,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="transformation">The transformation service.</param>
 		/// <param name="species">The species to discover transformations for.</param>
 		/// <returns>A retrieval result which may or may not have suceeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync(TransformationService transformation, Species species)
 		{
 			const string speciesFilename = "Species.yml";
@@ -298,6 +302,7 @@ namespace DIGOS.Ambassador.Services
 			return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromSuccess(transformations);
 		}
 
+		[Pure]
 		private string GetSpeciesDirectory(Species species)
 		{
 			return Path.Combine(this.BaseTransformationSpeciesPath, species.Name);
@@ -308,6 +313,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="includeNSFW">Whether or not to include NSFW sass.</param>
 		/// <returns>A sassy comment.</returns>
+		[Pure]
 		public string GetSass(bool includeNSFW = false)
 		{
 			if (includeNSFW)

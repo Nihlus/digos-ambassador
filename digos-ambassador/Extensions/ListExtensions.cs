@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
@@ -36,6 +37,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// <param name="list">The list to pick from.</param>
 		/// <typeparam name="T">The type contained in the list.</typeparam>
 		/// <returns>A random value.</returns>
+		[Pure]
 		public static T PickRandom<T>(this IList<T> list)
 		{
 			var random = new Random();

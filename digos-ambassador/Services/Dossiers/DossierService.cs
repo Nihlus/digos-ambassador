@@ -117,6 +117,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database where dossier metadata is stored.</param>
 		/// <param name="dossierTitle">The title of the dossier.</param>
 		/// <returns><value>true</value> if the title is unique; otherwise,<value>false</value>.</returns>
+		[Pure]
 		public async Task<bool> IsDossierTitleUniqueAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -136,6 +137,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database containing the dossiers.</param>
 		/// <param name="title">The title of the dossier.</param>
 		/// <returns>A retrieval task that may or may not have succeeded.</returns>
+		[Pure]
 		public async Task<RetrieveEntityResult<Dossier>> GetDossierByTitleAsync
 		(
 			[NotNull] GlobalInfoContext db,
