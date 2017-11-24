@@ -37,6 +37,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="character">The character to describe.</param>
 		/// <returns>A visual description of the character.</returns>
+		[Pure]
 		public static string BuildVisualDescription(Character character)
 		{
 			throw new System.NotImplementedException();
@@ -48,6 +49,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character to use as a base.</param>
 		/// <param name="transformation">The transformation to build the message from.</param>
 		/// <returns>The shift message.</returns>
+		[Pure]
 		public static string BuildShiftMessage([NotNull] Character character, [NotNull] Transformation transformation)
 		{
 			throw new System.NotImplementedException();
@@ -59,6 +61,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character to use as a base.</param>
 		/// <param name="transformation">The transformation to build the message from.</param>
 		/// <returns>The grow message.</returns>
+		[Pure]
 		public static string BuildGrowMessage([NotNull] Character character, [NotNull] Transformation transformation)
 		{
 			throw new System.NotImplementedException();
@@ -70,6 +73,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character to use as a base.</param>
 		/// <param name="transformation">The transformation to build the message from.</param>
 		/// <returns>The removal message.</returns>
+		[Pure]
 		public static string BuildRemoveMessage([NotNull] Character character, [NotNull] Transformation transformation)
 		{
 			throw new System.NotImplementedException();
@@ -82,6 +86,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="originalColour">The original colour of the pattern.</param>
 		/// <param name="currentComponent">The current component.</param>
 		/// <returns>The shifting message.</returns>
+		[Pure]
 		public static string BuildPatternColourShiftMessage
 		(
 			[NotNull] Character character,
@@ -100,6 +105,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="originalColour">The original colour of the pattern.</param>
 		/// <param name="currentComponent">The current component.</param>
 		/// <returns>The shifting message.</returns>
+		[Pure]
 		public static string BuildPatternShiftMessage
 		(
 			[NotNull] Character character,
@@ -118,6 +124,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="originalColour">The original colour of the pattern.</param>
 		/// <param name="currentComponent">The current component.</param>
 		/// <returns>The shifting message.</returns>
+		[Pure]
 		public static string BuildColourShiftMessage
 		(
 			[NotNull] Character character,
