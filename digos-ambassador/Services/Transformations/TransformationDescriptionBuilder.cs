@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using JetBrains.Annotations;
@@ -31,6 +32,16 @@ namespace DIGOS.Ambassador.Services
 	/// </summary>
 	public class TransformationDescriptionBuilder
 	{
+		/// <summary>
+		/// Builds a complete visual description of the given character.
+		/// </summary>
+		/// <param name="character">The character to describe.</param>
+		/// <returns>A visual description of the character.</returns>
+		public static string BuildVisualDescription(Character character)
+		{
+			throw new System.NotImplementedException();
+		}
+
 		/// <summary>
 		/// Builds a shift message for the given character if the given transformation were to be applied.
 		/// </summary>
@@ -60,6 +71,59 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="transformation">The transformation to build the message from.</param>
 		/// <returns>The removal message.</returns>
 		public static string BuildRemoveMessage([NotNull] Character character, [NotNull] Transformation transformation)
+		{
+			throw new System.NotImplementedException();
+		}
+
+		/// <summary>
+		/// Builds a pattern colour shifting message for the given character and component.
+		/// </summary>
+		/// <param name="character">The character to use as a base.</param>
+		/// <param name="originalColour">The original colour of the pattern.</param>
+		/// <param name="currentComponent">The current component.</param>
+		/// <returns>The shifting message.</returns>
+		public static string BuildPatternColourShiftMessage
+		(
+			[NotNull] Character character,
+			[NotNull] Colour originalColour,
+			[NotNull] AppearanceComponent currentComponent
+		)
+		{
+			throw new System.NotImplementedException();
+		}
+
+		/// <summary>
+		/// Builds a pattern shifting message for the given character and component.
+		/// </summary>
+		/// <param name="character">The character to use as a base.</param>
+		/// <param name="originalPattern">The original pattern.</param>
+		/// <param name="originalColour">The original colour of the pattern.</param>
+		/// <param name="currentComponent">The current component.</param>
+		/// <returns>The shifting message.</returns>
+		public static string BuildPatternShiftMessage
+		(
+			[NotNull] Character character,
+			[CanBeNull] Pattern? originalPattern,
+			[NotNull] Colour originalColour,
+			[NotNull] AppearanceComponent currentComponent
+		)
+		{
+			throw new System.NotImplementedException();
+		}
+
+		/// <summary>
+		/// Builds a base colour shifting message for the given character and component.
+		/// </summary>
+		/// <param name="character">The character to use as a base.</param>
+		/// <param name="originalColour">The original colour of the pattern.</param>
+		/// <param name="currentComponent">The current component.</param>
+		/// <returns>The shifting message.</returns>
+		public static string BuildColourShiftMessage
+		(
+			[NotNull] Character character,
+			[NotNull] Colour originalColour,
+			[NotNull] AppearanceComponent currentComponent
+		)
 		{
 			throw new System.NotImplementedException();
 		}

@@ -29,6 +29,8 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Extensions;
+
 using Discord;
 using Discord.Commands;
 
@@ -152,7 +154,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="bodyPart">The bodypart to shift.</param>
 		/// <param name="species">The species to shift the bodypart into.</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
-		public async Task<ShiftBodypartResult> ShiftCharacterBodypartAsync
+		public async Task<ShiftBodypartResult> ShiftBodypartAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] ICommandContext context,
@@ -185,13 +187,139 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(getTFResult);
 			}
 
-			var currentComponent = character.CurrentAppearance.Components.First(c => c.Bodypart == bodyPart);
+			var currentComponent = character.GetBodypart(bodyPart);
 
 			var transformation = getTFResult.Entity;
 			currentComponent.Transformation = transformation;
 			await db.SaveChangesAsync();
 
 			string shiftMessage = TransformationDescriptionBuilder.BuildShiftMessage(character, transformation);
+			return ShiftBodypartResult.FromSuccess(shiftMessage);
+		}
+
+		/// <summary>
+		/// Shifts the colour of the given bodypart on the given character to the given colour.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="context">The command context.</param>
+		/// <param name="character">The character to shift.</param>
+		/// <param name="bodyPart">The bodypart to shift.</param>
+		/// <param name="colour">The colour to shift it into.</param>
+		/// <returns>A shifting result which may or may not have succeeded.</returns>
+		public async Task<ShiftBodypartResult> ShiftBodypartColourAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] ICommandContext context,
+			[NotNull] Character character,
+			Bodypart bodyPart,
+			[NotNull] Colour colour
+		)
+		{
+			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			if (!canTransformResult.IsSuccess)
+			{
+				return ShiftBodypartResult.FromError(canTransformResult);
+			}
+
+			if (!character.HasBodypart(bodyPart))
+			{
+				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
+			}
+
+			var currentComponent = character.GetBodypart(bodyPart);
+			var originalColour = currentComponent.BaseColour;
+			currentComponent.BaseColour = colour;
+
+			await db.SaveChangesAsync();
+
+			string shiftMessage = TransformationDescriptionBuilder.BuildColourShiftMessage(character, originalColour, currentComponent);
+			return ShiftBodypartResult.FromSuccess(shiftMessage);
+		}
+
+		/// <summary>
+		/// Shifts the pattern of the given bodypart on the given character to the given pattern with the given colour.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="context">The command context.</param>
+		/// <param name="character">The character to shift.</param>
+		/// <param name="bodyPart">The bodypart to shift.</param>
+		/// <param name="pattern">The pattern to shift the bodypart into.</param>
+		/// <param name="patternColour">The colour to shift it into.</param>
+		/// <returns>A shifting result which may or may not have succeeded.</returns>
+		public async Task<ShiftBodypartResult> ShiftBodypartPatternAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] ICommandContext context,
+			[NotNull] Character character,
+			Bodypart bodyPart,
+			Pattern pattern,
+			[NotNull] Colour patternColour
+		)
+		{
+			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			if (!canTransformResult.IsSuccess)
+			{
+				return ShiftBodypartResult.FromError(canTransformResult);
+			}
+
+			if (!character.HasBodypart(bodyPart))
+			{
+				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
+			}
+
+			var currentComponent = character.GetBodypart(bodyPart);
+
+			var originalPattern = currentComponent.Pattern;
+			var originalColour = currentComponent.BaseColour;
+
+			currentComponent.Pattern = pattern;
+			currentComponent.PatternColour = patternColour;
+
+			await db.SaveChangesAsync();
+
+			string shiftMessage = TransformationDescriptionBuilder.BuildPatternShiftMessage(character, originalPattern, originalColour, currentComponent);
+			return ShiftBodypartResult.FromSuccess(shiftMessage);
+		}
+
+		/// <summary>
+		/// Shifts the colour of the given bodypart's pattern on the given character to the given colour.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="context">The command context.</param>
+		/// <param name="character">The character to shift.</param>
+		/// <param name="bodyPart">The bodypart to shift.</param>
+		/// <param name="patternColour">The colour to shift it into.</param>
+		/// <returns>A shifting result which may or may not have succeeded.</returns>
+		public async Task<ShiftBodypartResult> ShiftPatternColourAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] ICommandContext context,
+			[NotNull] Character character,
+			Bodypart bodyPart,
+			[NotNull] Colour patternColour
+		)
+		{
+			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			if (!canTransformResult.IsSuccess)
+			{
+				return ShiftBodypartResult.FromError(canTransformResult);
+			}
+
+			if (!character.HasBodypart(bodyPart))
+			{
+				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
+			}
+
+			var currentComponent = character.GetBodypart(bodyPart);
+			var originalColour = currentComponent.PatternColour;
+			currentComponent.PatternColour = patternColour;
+
+			await db.SaveChangesAsync();
+
+			string shiftMessage = TransformationDescriptionBuilder.BuildPatternColourShiftMessage(character, originalColour, currentComponent);
 			return ShiftBodypartResult.FromSuccess(shiftMessage);
 		}
 
@@ -243,12 +371,36 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Generate a complete textual description of the given character, and format it into an embed.
 		/// </summary>
+		/// <param name="context">The context of the generation.</param>
 		/// <param name="character">The character to generate the description for.</param>
 		/// <returns>An embed with a formatted description.</returns>
 		[Pure]
-		public async Task<Embed> GenerateCharacterDescriptionAsync([NotNull] Character character)
+		public async Task<Embed> GenerateCharacterDescriptionAsync
+		(
+			[NotNull] ICommandContext context,
+			[NotNull] Character character
+		)
 		{
-			throw new NotImplementedException();
+			var eb = new EmbedBuilder();
+			eb.WithColor(Color.DarkPurple);
+			eb.WithTitle($"{character.Name} \"{(character.Nickname is null ? string.Empty : character.Nickname)}\"".Trim());
+
+			var user = await context.Client.GetUserAsync(character.Owner.DiscordID);
+			eb.WithAuthor(user);
+
+			eb.WithThumbnailUrl
+			(
+				!character.AvatarUrl.IsNullOrWhitespace()
+					? character.AvatarUrl
+					: this.Content.DefaultAvatarUri.ToString()
+			);
+
+			eb.AddField("Description", character.Description);
+
+			string visualDescription = TransformationDescriptionBuilder.BuildVisualDescription(character);
+			eb.WithDescription(visualDescription);
+
+			return eb.Build();
 		}
 
 		/// <summary>

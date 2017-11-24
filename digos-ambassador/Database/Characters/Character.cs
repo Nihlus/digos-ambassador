@@ -108,6 +108,16 @@ namespace DIGOS.Ambassador.Database.Characters
 			return this.CurrentAppearance.Components.Any(c => c.Bodypart == bodypart);
 		}
 
+		/// <summary>
+		/// Gets the component on the character's current appearance that matches the given bodypart.
+		/// </summary>
+		/// <param name="bodypart">The bodypart to get.</param>
+		/// <returns>The appearance component of the bodypart.</returns>
+		public AppearanceComponent GetBodypart(Bodypart bodypart)
+		{
+			return this.CurrentAppearance.Components.First(c => c.Bodypart == bodypart);
+		}
+
 		/// <inheritdoc />
 		public bool IsOwner(User user)
 		{

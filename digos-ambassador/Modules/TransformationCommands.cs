@@ -24,12 +24,14 @@ using System;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
+
 using Humanizer;
 using JetBrains.Annotations;
 
@@ -91,6 +93,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command(RunMode = Async)]
 		[Summary("Transforms the given bodypart of the target user into the given species.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Transform, Other)]
 		public async Task ShiftAsync([NotNull] IUser target, Bodypart bodyPart, [NotNull] string species)
 		{
@@ -105,7 +108,169 @@ namespace DIGOS.Ambassador.Modules
 
 				var character = getCurrentCharacterResult.Entity;
 
-				var shiftPartResult = await this.Transformation.ShiftCharacterBodypartAsync(db, this.Context, character, bodyPart, species);
+				var shiftPartResult = await this.Transformation.ShiftBodypartAsync(db, this.Context, character, bodyPart, species);
+
+				if (!shiftPartResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
+			}
+		}
+
+		/// <summary>
+		/// Transforms the base colour of the given bodypart on yourself into the given colour.
+		/// </summary>
+		/// <param name="bodypart">The part to transform.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Command("colour", RunMode = Async)]
+		[Summary("Transforms the base colour of the given bodypart on yourself into the given colour.")]
+		[RequirePermission(Transform)]
+		public async Task ShiftColourAsync(Bodypart bodypart, [NotNull] [Remainder] Colour colour) =>
+			await ShiftColourAsync(this.Context.User, bodypart, colour);
+
+		/// <summary>
+		/// Transforms the base colour of the given bodypart on the target user into the given colour.
+		/// </summary>
+		/// <param name="target">The target user.</param>
+		/// <param name="bodyPart">The part to transform.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Summary("Transforms the base colour of the given bodypart on the target user into the given colour.")]
+		[Command("colour", RunMode = Async)]
+		[RequireContext(Guild)]
+		[RequirePermission(Transform, Other)]
+		public async Task ShiftColourAsync
+		(
+			[NotNull] IUser target,
+			Bodypart bodyPart,
+			[NotNull] [Remainder] Colour colour
+		)
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, target);
+				if (!getCurrentCharacterResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+					return;
+				}
+
+				var character = getCurrentCharacterResult.Entity;
+
+				var shiftPartResult = await this.Transformation.ShiftBodypartColourAsync(db, this.Context, character, bodyPart, colour);
+
+				if (!shiftPartResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
+			}
+		}
+
+		/// <summary>
+		/// Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.
+		/// </summary>
+		/// <param name="bodypart">The part to transform.</param>
+		/// <param name="pattern">The pattern to transform it into.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Command("pattern", RunMode = Async)]
+		[Summary("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
+		[RequirePermission(Transform)]
+		public async Task ShiftPatternAsync(Bodypart bodypart, Pattern pattern, [NotNull] [Remainder] Colour colour) =>
+			await ShiftPatternAsync(this.Context.User, bodypart, pattern, colour);
+
+		/// <summary>
+		/// Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
+		/// </summary>
+		/// <param name="target">The target user.</param>
+		/// <param name="bodyPart">The part to transform.</param>
+		/// <param name="pattern">The pattern to transform it into.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Command("pattern", RunMode = Async)]
+		[Summary("Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.")]
+		[RequireContext(Guild)]
+		[RequirePermission(Transform, Other)]
+		public async Task ShiftPatternAsync
+		(
+			[NotNull] IUser target,
+			Bodypart bodyPart,
+			Pattern pattern,
+			[NotNull] [Remainder] Colour colour
+		)
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, target);
+				if (!getCurrentCharacterResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+					return;
+				}
+
+				var character = getCurrentCharacterResult.Entity;
+
+				var shiftPartResult = await this.Transformation.ShiftBodypartPatternAsync(db, this.Context, character, bodyPart, pattern, colour);
+
+				if (!shiftPartResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
+			}
+		}
+
+		/// <summary>
+		/// Transforms the colour of the pattern on the given bodypart to the given colour.
+		/// </summary>
+		/// <param name="bodypart">The part to transform.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Command("pattern-colour", RunMode = Async)]
+		[Summary("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
+		[RequirePermission(Transform)]
+		public async Task ShiftPatternColourAsync(Bodypart bodypart, [NotNull] [Remainder] Colour colour) =>
+			await ShiftPatternColourAsync(this.Context.User, bodypart, colour);
+
+		/// <summary>
+		/// Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
+		/// </summary>
+		/// <param name="target">The target user.</param>
+		/// <param name="bodyPart">The part to transform.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Command("pattern-colour", RunMode = Async)]
+		[Summary("Transforms the colour of the pattern on the given bodypart on the target user to the given colour.")]
+		[RequireContext(Guild)]
+		[RequirePermission(Transform, Other)]
+		public async Task ShiftPatternColourAsync
+		(
+			[NotNull] IUser target,
+			Bodypart bodyPart,
+			[NotNull] [Remainder] Colour colour
+		)
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, target);
+				if (!getCurrentCharacterResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+					return;
+				}
+
+				var character = getCurrentCharacterResult.Entity;
+
+				var shiftPartResult = await this.Transformation.ShiftPatternColourAsync(db, this.Context, character, bodyPart, colour);
 
 				if (!shiftPartResult.IsSuccess)
 				{
@@ -185,7 +350,7 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Describes the current physical appearance of a character.")]
 		public async Task DescribeCharacterAsync([NotNull] Character character)
 		{
-			var eb = await this.Transformation.GenerateCharacterDescriptionAsync(character);
+			var eb = await this.Transformation.GenerateCharacterDescriptionAsync(this.Context, character);
 
 			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
 		}
