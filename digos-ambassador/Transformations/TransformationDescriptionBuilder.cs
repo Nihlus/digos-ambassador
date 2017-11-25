@@ -25,7 +25,7 @@ using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
 	/// Service class for building user-visible descriptions of characters based on their appearances.

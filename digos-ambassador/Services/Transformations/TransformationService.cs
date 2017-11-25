@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Transformations;
 
 using Discord;
 using Discord.Commands;

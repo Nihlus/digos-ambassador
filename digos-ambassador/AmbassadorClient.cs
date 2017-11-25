@@ -27,11 +27,13 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
@@ -140,6 +142,7 @@ namespace DIGOS.Ambassador
 			this.Commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
 			this.Commands.AddTypeReader<Character>(new CharacterTypeReader());
 			this.Commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
+			this.Commands.AddTypeReader<Colour>(new ColourTypeReader());
 
 			await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly());
 

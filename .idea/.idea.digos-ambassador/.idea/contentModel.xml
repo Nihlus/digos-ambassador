@@ -183,13 +183,24 @@
             <e p="CompositeParts.cs" t="Include" />
             <e p="ProtectionType.cs" t="Include" />
             <e p="SpeciesYamlConverter.cs" t="Include" />
-            <e p="TransformationDescriptionBuilder.cs" t="Include" />
             <e p="TransformationService.cs" t="Include" />
             <e p="ValidatingNodeDeserializer.cs" t="Include" />
           </e>
         </e>
+        <e p="Transformations" t="Include">
+          <e p="IReplaceableTextToken.cs" t="Include" />
+          <e p="ReplacableTextToken.cs" t="Include" />
+          <e p="TokenIdentifierAttribute.cs" t="Include" />
+          <e p="Tokens" t="Include">
+            <e p="PossessivePronounToken.cs" t="Include" />
+            <e p="TargetToken.cs" t="Include" />
+          </e>
+          <e p="TransformationDescriptionBuilder.cs" t="Include" />
+          <e p="TransformationTextTokenizer.cs" t="Include" />
+        </e>
         <e p="TypeReaders" t="Include">
           <e p="CharacterTypeReader.cs" t="Include" />
+          <e p="ColourTypeReader.cs" t="Include" />
           <e p="OwnedEntityTypeReader.cs" t="Include" />
           <e p="RoleplayTypeReader.cs" t="Include" />
           <e p="UncachedMessageTypeReader.cs" t="Include" />
@@ -213,6 +224,7 @@
           <e p="MockedDatabase.cs" t="Include" />
         </e>
         <e p="PermissionTests.cs" t="Include" />
+        <e p="TokenizerTests.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="digos-ambassador.Tests.csproj" t="IncludeRecursive" />
         <e p="obj" t="ExcludeRecursive">
