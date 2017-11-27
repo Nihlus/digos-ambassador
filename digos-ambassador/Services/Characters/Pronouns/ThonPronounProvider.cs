@@ -1,5 +1,5 @@
 ﻿//
-//  MalePronounProvider.cs
+//  ThonPronounProvider.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,29 +20,32 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Services
 {
-    /// <summary>
-    /// Provides masculine pronouns.
-    /// </summary>
-    public class MalePronounProvider : IPronounProvider
-    {
-        /// <inheritdoc />
-        public string Family => "Male";
+	/// <summary>
+	/// Provides thon pronouns.
+	/// </summary>
+	[UsedImplicitly]
+	public class ThonPronounProvider : IPronounProvider
+	{
+		/// <inheritdoc />
+		public string Family => "Thon";
 
-        /// <inheritdoc />
-        public string GetSubjectForm(bool plural = false, bool withVerb = false) => "he";
+		/// <inheritdoc />
+		public string GetSubjectForm(bool plural = false, bool withVerb = false) => "thon";
 
-        /// <inheritdoc />
-        public string GetObjectForm(bool plural = false) => "him";
+		/// <inheritdoc />
+		public string GetObjectForm(bool plural = false) => "thon";
 
-        /// <inheritdoc />
-        public string GetPossessiveAdjectiveForm(bool plural = false) => "his";
+		/// <inheritdoc />
+		public string GetPossessiveAdjectiveForm(bool plural = false) => "thons";
 
-        /// <inheritdoc />
-        public string GetPossessiveForm(bool plural = false) => "his";
+		/// <inheritdoc />
+		public string GetPossessiveForm(bool plural = false) => "thon's";
 
-        /// <inheritdoc />
-        public string GetReflexiveForm(bool plural = false) => "himself";
-    }
+		/// <inheritdoc />
+		public string GetReflexiveForm(bool plural = false) => "thonself";
+	}
 }

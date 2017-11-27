@@ -148,9 +148,22 @@
           <e p="Characters" t="Include">
             <e p="CharacterService.cs" t="Include" />
             <e p="Pronouns" t="Include">
+              <e p="CoPronounProvider.cs" t="Include" />
+              <e p="ElversonPronounProvider.cs" t="Include" />
+              <e p="FemininePronounProvider.cs" t="Include" />
               <e p="GrammaticalPerson.cs" t="Include" />
               <e p="IPronounProvider.cs" t="Include" />
-              <e p="MalePronounProvider.cs" t="Include" />
+              <e p="MasculinePronounProvider.cs" t="Include" />
+              <e p="NeuterPronounProvider.cs" t="Include" />
+              <e p="PerPronounProvider.cs" t="Include" />
+              <e p="SheHirPronounProvider.cs" t="Include" />
+              <e p="SieHirPronounProvider.cs" t="Include" />
+              <e p="SpivakPronounProvider.cs" t="Include" />
+              <e p="SpivakVariantPronounProvider.cs" t="Include" />
+              <e p="TheyPronounProvider.cs" t="Include" />
+              <e p="ThonPronounProvider.cs" t="Include" />
+              <e p="ZeHirPronounProvider.cs" t="Include" />
+              <e p="ZeZirPronounProvider.cs" t="Include" />
             </e>
           </e>
           <e p="Content" t="Include">
