@@ -160,7 +160,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="snippet">The snippet to execute.</param>
 		/// <param name="variables">Any variables to pass to the snippet as globals.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public Task<RetrieveEntityResult<string>> ExecuteSnippetAsync(string snippet, params (string name, object value)[] variables)
+		public Task<RetrieveEntityResult<string>> ExecuteSnippetAsync(string snippet, params(string name, object value)[] variables)
 		{
 			return Task.Run
 			(
@@ -205,7 +205,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="scriptPath">The path to the file which should be executed.</param>
 		/// <param name="variables">Any variables to pass to the script as globals.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync([PathReference] string scriptPath, params (string name, object value)[] variables)
+		public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync([PathReference] string scriptPath, params(string name, object value)[] variables)
 		{
 			var getScriptResult = this.ContentService.GetLocalStream(scriptPath);
 			if (!getScriptResult.IsSuccess)

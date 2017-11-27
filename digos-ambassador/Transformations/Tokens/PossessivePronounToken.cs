@@ -33,9 +33,15 @@ namespace DIGOS.Ambassador.Transformations
 	{
 		/// <summary>
 		/// Gets a value indicating whether the pronoun should be in its raw form, or together with a
-		/// possessive verb - that is "Her" or "She has".
+		/// possessive verb - that is "Hers" or "She has".
 		/// </summary>
 		public bool UseVerb { get; private set; }
+
+		/// <summary>
+		/// Gets a value indicating whether the pronoun should be in its possessive adjective form, that is,
+		/// "his" or "her".
+		/// </summary>
+		public bool UseAdjective { get; private set; }
 
 		/// <inheritdoc />
 		public override string GetText(Character character, Transformation transformation)
@@ -52,6 +58,7 @@ namespace DIGOS.Ambassador.Transformations
 			}
 
 			this.UseVerb = data.Equals("verb");
+			this.UseAdjective = data.Equals("adjective");
 			return this;
 		}
 	}
