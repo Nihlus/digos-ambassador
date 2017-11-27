@@ -34,18 +34,18 @@ namespace DIGOS.Ambassador.Services
 		public override string Family => "Elverson";
 
 		/// <inheritdoc />
-		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "ey have" : "ey";
+		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ey have" : "ey";
 
 		/// <inheritdoc />
-		public override string GetObjectForm(bool plural = false) => "em";
+		public override string GetObjectForm() => "em";
 
 		/// <inheritdoc />
-		public override string GetPossessiveAdjectiveForm(bool plural = false) => "eir";
+		public override string GetPossessiveAdjectiveForm() => "eir";
 
 		/// <inheritdoc />
-		public override string GetPossessiveForm(bool plural = false) => "eirs";
+		public override string GetPossessiveForm() => "eirs";
 
 		/// <inheritdoc />
-		public override string GetReflexiveForm(bool plural = false) => "emselves";
+		public override string GetReflexiveForm() => "emselves";
 	}
 }

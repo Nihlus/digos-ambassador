@@ -34,18 +34,18 @@ namespace DIGOS.Ambassador.Services
 		public override string Family => "Ze and zir";
 
 		/// <inheritdoc />
-		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "ze has" : "ze";
+		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ze has" : "ze";
 
 		/// <inheritdoc />
-		public override string GetObjectForm(bool plural = false) => "zir";
+		public override string GetObjectForm() => "zir";
 
 		/// <inheritdoc />
-		public override string GetPossessiveAdjectiveForm(bool plural = false) => "zir";
+		public override string GetPossessiveAdjectiveForm() => "zir";
 
 		/// <inheritdoc />
-		public override string GetPossessiveForm(bool plural = false) => "zirs";
+		public override string GetPossessiveForm() => "zirs";
 
 		/// <inheritdoc />
-		public override string GetReflexiveForm(bool plural = false) => "zirself";
+		public override string GetReflexiveForm() => "zirself";
 	}
 }

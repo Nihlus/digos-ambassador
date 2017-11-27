@@ -35,19 +35,19 @@ namespace DIGOS.Ambassador.Services
 		public abstract string Family { get; }
 
 		/// <inheritdoc />
-		public abstract string GetSubjectForm(bool plural = false, bool withVerb = false);
+		public abstract string GetSubjectForm(bool withVerb = false);
 
 		/// <inheritdoc />
-		public abstract string GetObjectForm(bool plural = false);
+		public abstract string GetObjectForm();
 
 		/// <inheritdoc />
-		public abstract string GetPossessiveAdjectiveForm(bool plural = false);
+		public abstract string GetPossessiveAdjectiveForm();
 
 		/// <inheritdoc />
-		public abstract string GetPossessiveForm(bool plural = false);
+		public abstract string GetPossessiveForm();
 
 		/// <inheritdoc />
-		public abstract string GetReflexiveForm(bool plural = false);
+		public abstract string GetReflexiveForm();
 
 		/// <inheritdoc />
 		public string GetForm(PronounForm form)

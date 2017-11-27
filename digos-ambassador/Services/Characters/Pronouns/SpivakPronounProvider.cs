@@ -31,6 +31,6 @@ namespace DIGOS.Ambassador.Services
 		public override string Family => "Spivak";
 
 		/// <inheritdoc />
-		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "e has" : "e";
+		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "e has" : "e";
 	}
 }

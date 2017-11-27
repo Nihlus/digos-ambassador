@@ -34,18 +34,18 @@ namespace DIGOS.Ambassador.Services
 		public override string Family => "Neuter";
 
 		/// <inheritdoc />
-		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "it has" : "it";
+		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "it has" : "it";
 
 		/// <inheritdoc />
-		public override string GetObjectForm(bool plural = false) => "it";
+		public override string GetObjectForm() => "it";
 
 		/// <inheritdoc />
-		public override string GetPossessiveAdjectiveForm(bool plural = false) => "its";
+		public override string GetPossessiveAdjectiveForm() => "its";
 
 		/// <inheritdoc />
-		public override string GetPossessiveForm(bool plural = false) => "its";
+		public override string GetPossessiveForm() => "its";
 
 		/// <inheritdoc />
-		public override string GetReflexiveForm(bool plural = false) => "itself";
+		public override string GetReflexiveForm() => "itself";
 	}
 }
