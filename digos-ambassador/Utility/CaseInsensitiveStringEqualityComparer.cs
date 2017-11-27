@@ -1,5 +1,5 @@
 ﻿//
-//  MasculinePronounProvider.cs
+//  CaseInsensitiveStringEqualityComparer.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,32 +20,37 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Utility
 {
 	/// <summary>
-	/// Provides masculine pronouns.
+	/// Compares strings on a case-insensitive basis.
 	/// </summary>
-	[UsedImplicitly]
-	public class MasculinePronounProvider : PronounProvider
+	public class CaseInsensitiveStringEqualityComparer : IEqualityComparer<string>
 	{
 		/// <inheritdoc />
-		public override string Family => "Masculine";
+		public bool Equals([CanBeNull] string x, [CanBeNull] string y)
+		{
+			if (x is null && y is null)
+			{
+				return true;
+			}
+
+			if (x is null || y is null)
+			{
+				return false;
+			}
+
+			return x.Equals(y, StringComparison.OrdinalIgnoreCase);
+		}
 
 		/// <inheritdoc />
-		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "he has" : "he";
-
-		/// <inheritdoc />
-		public override string GetObjectForm(bool plural = false) => "him";
-
-		/// <inheritdoc />
-		public override string GetPossessiveAdjectiveForm(bool plural = false) => "his";
-
-		/// <inheritdoc />
-		public override string GetPossessiveForm(bool plural = false) => "his";
-
-		/// <inheritdoc />
-		public override string GetReflexiveForm(bool plural = false) => "himself";
+		public int GetHashCode(string obj)
+		{
+			return obj.ToLowerInvariant().GetHashCode();
+		}
 	}
 }

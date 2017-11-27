@@ -28,24 +28,24 @@ namespace DIGOS.Ambassador.Services
 	/// Provides thon pronouns.
 	/// </summary>
 	[UsedImplicitly]
-	public class ThonPronounProvider : IPronounProvider
+	public class ThonPronounProvider : PronounProvider
 	{
 		/// <inheritdoc />
-		public string Family => "Thon";
+		public override string Family => "Thon";
 
 		/// <inheritdoc />
-		public string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "thon has" : "thon";
+		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "thon has" : "thon";
 
 		/// <inheritdoc />
-		public string GetObjectForm(bool plural = false) => "thon";
+		public override string GetObjectForm(bool plural = false) => "thon";
 
 		/// <inheritdoc />
-		public string GetPossessiveAdjectiveForm(bool plural = false) => "thons";
+		public override string GetPossessiveAdjectiveForm(bool plural = false) => "thons";
 
 		/// <inheritdoc />
-		public string GetPossessiveForm(bool plural = false) => "thon's";
+		public override string GetPossessiveForm(bool plural = false) => "thon's";
 
 		/// <inheritdoc />
-		public string GetReflexiveForm(bool plural = false) => "thonself";
+		public override string GetReflexiveForm(bool plural = false) => "thonself";
 	}
 }

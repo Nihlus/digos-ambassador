@@ -28,24 +28,24 @@ namespace DIGOS.Ambassador.Services
 	/// Provides feminine pronouns.
 	/// </summary>
 	[UsedImplicitly]
-	public class FemininePronounProvider : IPronounProvider
+	public class FemininePronounProvider : PronounProvider
 	{
 		/// <inheritdoc />
-		public string Family => "Feminine";
+		public override string Family => "Feminine";
 
 		/// <inheritdoc />
-		public string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "she has" : "she";
+		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "she has" : "she";
 
 		/// <inheritdoc />
-		public string GetObjectForm(bool plural = false) => "her";
+		public override string GetObjectForm(bool plural = false) => "her";
 
 		/// <inheritdoc />
-		public string GetPossessiveAdjectiveForm(bool plural = false) => "her";
+		public override string GetPossessiveAdjectiveForm(bool plural = false) => "her";
 
 		/// <inheritdoc />
-		public string GetPossessiveForm(bool plural = false) => "hers";
+		public override string GetPossessiveForm(bool plural = false) => "hers";
 
 		/// <inheritdoc />
-		public string GetReflexiveForm(bool plural = false) => "herself";
+		public override string GetReflexiveForm(bool plural = false) => "herself";
 	}
 }

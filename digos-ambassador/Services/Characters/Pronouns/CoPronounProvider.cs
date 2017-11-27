@@ -28,24 +28,24 @@ namespace DIGOS.Ambassador.Services
 	/// Provides co pronouns.
 	/// </summary>
 	[UsedImplicitly]
-	public class CoPronounProvider : IPronounProvider
+	public class CoPronounProvider : PronounProvider
 	{
 		/// <inheritdoc />
-		public string Family => "Co";
+		public override string Family => "Co";
 
 		/// <inheritdoc />
-		public string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "co has" : "co";
+		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "co has" : "co";
 
 		/// <inheritdoc />
-		public string GetObjectForm(bool plural = false) => "co";
+		public override string GetObjectForm(bool plural = false) => "co";
 
 		/// <inheritdoc />
-		public string GetPossessiveAdjectiveForm(bool plural = false) => "co's";
+		public override string GetPossessiveAdjectiveForm(bool plural = false) => "co's";
 
 		/// <inheritdoc />
-		public string GetPossessiveForm(bool plural = false) => "co's";
+		public override string GetPossessiveForm(bool plural = false) => "co's";
 
 		/// <inheritdoc />
-		public string GetReflexiveForm(bool plural = false) => "coself";
+		public override string GetReflexiveForm(bool plural = false) => "coself";
 	}
 }

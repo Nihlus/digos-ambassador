@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Transformations
 			}
 		}
 
-		private void AddAvailableTokenType<T>() where T : ReplacableTextToken<T>, new()
+		private void AddAvailableTokenType<T>() where T : ReplacableTextToken<T>
 		{
 			AddAvailableTokenType(typeof(T));
 		}
@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// </summary>
 		/// <typeparam name="T">A valid token type.</typeparam>
 		/// <returns>The tokenizer.</returns>
-		public TransformationTextTokenizer WithTokenType<T>() where T : ReplacableTextToken<T>, new()
+		public TransformationTextTokenizer WithTokenType<T>() where T : ReplacableTextToken<T>
 		{
 			AddAvailableTokenType<T>();
 			return this;

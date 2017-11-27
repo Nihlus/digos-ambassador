@@ -28,24 +28,24 @@ namespace DIGOS.Ambassador.Services
 	/// Provides Elverson pronouns.
 	/// </summary>
 	[UsedImplicitly]
-	public class ElversonPronounProvider : IPronounProvider
+	public class ElversonPronounProvider : PronounProvider
 	{
 		/// <inheritdoc />
-		public virtual string Family => "Elverson";
+		public override string Family => "Elverson";
 
 		/// <inheritdoc />
-		public virtual string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb? "ey have" : "ey";
+		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "ey have" : "ey";
 
 		/// <inheritdoc />
-		public virtual string GetObjectForm(bool plural = false) => "em";
+		public override string GetObjectForm(bool plural = false) => "em";
 
 		/// <inheritdoc />
-		public virtual string GetPossessiveAdjectiveForm(bool plural = false) => "eir";
+		public override string GetPossessiveAdjectiveForm(bool plural = false) => "eir";
 
 		/// <inheritdoc />
-		public virtual string GetPossessiveForm(bool plural = false) => "eirs";
+		public override string GetPossessiveForm(bool plural = false) => "eirs";
 
 		/// <inheritdoc />
-		public virtual string GetReflexiveForm(bool plural = false) => "emselves";
+		public override string GetReflexiveForm(bool plural = false) => "emselves";
 	}
 }

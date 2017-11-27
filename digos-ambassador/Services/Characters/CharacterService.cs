@@ -30,13 +30,13 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Utility;
 
 using Discord;
 using Discord.Commands;
 
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Image = DIGOS.Ambassador.Database.Data.Image;
 
 namespace DIGOS.Ambassador.Services
@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Services
 			this.OwnedEntities = entityService;
 			this.Content = content;
 
-			this.PronounProviders = new Dictionary<string, IPronounProvider>();
+			this.PronounProviders = new Dictionary<string, IPronounProvider>(new CaseInsensitiveStringEqualityComparer());
 		}
 
 		/// <summary>
@@ -80,6 +80,8 @@ namespace DIGOS.Ambassador.Services
 			var pronounProviderTypes = assembly.DefinedTypes.Where
 			(
 				t => t.ImplementedInterfaces.Contains(typeof(IPronounProvider))
+				&& t.IsClass
+				&& !t.IsAbstract
 			);
 
 			foreach (var type in pronounProviderTypes)
@@ -100,7 +102,8 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character.</param>
 		/// <returns>A pronoun provider.</returns>
 		/// <exception cref="ArgumentException">Thrown if no pronoun provider exists for the character's preference.</exception>
-		public IPronounProvider GetPronounProvider(Character character)
+		[NotNull]
+		public IPronounProvider GetPronounProvider([NotNull] Character character)
 		{
 			if (this.PronounProviders.ContainsKey(character.PronounProviderFamily))
 			{
@@ -108,6 +111,17 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			throw new ArgumentException(nameof(character));
+		}
+
+		/// <summary>
+		/// Gets the available pronoun providers.
+		/// </summary>
+		/// <returns>An enumerator over the available pronouns.</returns>
+		[NotNull]
+		[ItemNotNull]
+		public IEnumerable<IPronounProvider> GetAvailablePronounProviders()
+		{
+			return this.PronounProviders.Values;
 		}
 
 		/// <summary>
@@ -422,6 +436,13 @@ namespace DIGOS.Ambassador.Services
 				return CreateEntityResult<Character>.FromError(modifyEntityResult);
 			}
 
+			var defaultPronounFamilyName = this.PronounProviders.First(p => p.Value is TheyPronounProvider).Value.Family;
+			modifyEntityResult = await SetCharacterPronounAsync(db, character, defaultPronounFamilyName);
+			if (!modifyEntityResult.IsSuccess)
+			{
+				return CreateEntityResult<Character>.FromError(modifyEntityResult);
+			}
+
 			owner.Characters.Add(character);
 			await db.Characters.AddAsync(character);
 			await db.SaveChangesAsync();
@@ -586,6 +607,32 @@ namespace DIGOS.Ambassador.Services
 			character.Description = newCharacterDescription;
 			await db.SaveChangesAsync();
 
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+		}
+
+		/// <summary>
+		/// Sets the preferred pronoun for the given character.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="character">The character.</param>
+		/// <param name="pronounFamily">The pronoun family.</param>
+		/// <returns>A modification result which may or may not have succeeded.</returns>
+		public async Task<ModifyEntityResult> SetCharacterPronounAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] Character character,
+			[NotNull] string pronounFamily
+		)
+		{
+			if (!this.PronounProviders.ContainsKey(pronounFamily))
+			{
+				return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "Could not find a pronoun provider for that family.");
+			}
+
+			var pronounProvider = this.PronounProviders[pronounFamily];
+			character.PronounProviderFamily = pronounProvider.Family;
+
+			await db.SaveChangesAsync();
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 		}
 

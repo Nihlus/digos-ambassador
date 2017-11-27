@@ -36,7 +36,7 @@ using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
-
+using Humanizer;
 using JetBrains.Annotations;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
@@ -85,6 +85,27 @@ namespace DIGOS.Ambassador.Modules
 			this.Discord = discordService;
 			this.Feedback = feedbackService;
 			this.Characters = characterService;
+		}
+
+		/// <summary>
+		/// Shows available pronoun families that can be used with characters.
+		/// </summary>
+		[UsedImplicitly]
+		[Alias("available-pronouns", "pronouns")]
+		[Command("available-pronouns")]
+		[Summary("Shows available pronoun families that can be used with characters.")]
+		public async Task ShowAvailablePronounFamiliesAsync()
+		{
+			var pronounProviders = this.Characters.GetAvailablePronounProviders();
+			var eb = this.Feedback.CreateBaseEmbed();
+			eb.WithTitle("Available pronouns");
+
+			eb.WithDescription
+			(
+				string.Join("\n", pronounProviders.Select(p => $"**{p.Family}**"))
+			);
+
+			await this.Feedback.SendEmbedAsync(this.Context, eb);
 		}
 
 		/// <summary>
@@ -167,6 +188,8 @@ namespace DIGOS.Ambassador.Modules
 					: this.Content.DefaultAvatarUri.ToString()
 			);
 
+			eb.AddField("Preferred pronouns", character.PronounProviderFamily);
+
 			return eb;
 		}
 
@@ -232,6 +255,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(character);
+
 				db.Characters.Remove(character);
 				await db.SaveChangesAsync();
 
@@ -290,6 +315,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(character);
+
 				await this.Characters.MakeCharacterCurrentOnServerAsync(db, this.Context, this.Context.Guild, character);
 
 				if (!character.Nickname.IsNullOrWhitespace() && this.Context.Message.Author is IGuildUser guildUser)
@@ -471,6 +498,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(character);
+
 				var addImageResult = await this.Characters.AddImageToCharacterAsync(db, character, imageName, imageUrl, imageCaption, isNSFW);
 				if (!addImageResult.IsSuccess)
 				{
@@ -502,6 +531,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(character);
+
 				var removeImageResult = await this.Characters.RemoveImageFromCharacterAsync(db, character, imageName);
 				if (!removeImageResult.IsSuccess)
 				{
@@ -533,6 +564,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(character);
+
 				var transferResult = await this.Characters.TransferCharacterOwnershipAsync(db, newOwner, character);
 				if (!transferResult.IsSuccess)
 				{
@@ -589,6 +622,8 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
+					db.Attach(character);
+
 					var setNameResult = await this.Characters.SetCharacterNameAsync(db, this.Context, character, newCharacterName);
 					if (!setNameResult.IsSuccess)
 					{
@@ -619,6 +654,8 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
+					db.Attach(character);
+
 					if (newCharacterAvatarUrl is null)
 					{
 						if (!this.Context.Message.Attachments.Any())
@@ -659,6 +696,8 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
+					db.Attach(character);
+
 					var setNickResult = await this.Characters.SetCharacterNicknameAsync(db, character, newCharacterNickname);
 					if (!setNickResult.IsSuccess)
 					{
@@ -689,6 +728,8 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
+					db.Attach(character);
+
 					var setSummaryResult = await this.Characters.SetCharacterSummaryAsync(db, character, newCharacterSummary);
 					if (!setSummaryResult.IsSuccess)
 					{
@@ -720,6 +761,8 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
+					db.Attach(character);
+
 					if (newCharacterDescription is null)
 					{
 						if (!this.Context.Message.Attachments.Any())
@@ -775,9 +818,43 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
+					db.Attach(character);
+
 					await this.Characters.SetCharacterIsNSFWAsync(db, character, isNSFW);
 
 					await this.Feedback.SendConfirmationAsync(this.Context, $"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
+				}
+			}
+
+			/// <summary>
+			/// Sets the preferred pronoun for a character.
+			/// </summary>
+			/// <param name="character">The character.</param>
+			/// <param name="pronounFamily">The pronoun family.</param>
+			[UsedImplicitly]
+			[Command("pronoun", RunMode = RunMode.Async)]
+			[Summary("Sets the preferred pronoun of a character.")]
+			[RequirePermission(Permission.EditCharacter)]
+			public async Task SetCharacterPronounAsync
+			(
+				[NotNull]
+				[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+				Character character,
+				string pronounFamily
+			)
+			{
+				using (var db = new GlobalInfoContext())
+				{
+					db.Attach(character);
+
+					var result = await this.Characters.SetCharacterPronounAsync(db, character, pronounFamily);
+					if (!result.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+						return;
+					}
+
+					await this.Feedback.SendConfirmationAsync(this.Context, "Preferred pronoun set.");
 				}
 			}
 		}

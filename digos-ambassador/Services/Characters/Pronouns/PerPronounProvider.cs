@@ -28,24 +28,24 @@ namespace DIGOS.Ambassador.Services
 	/// Provides per pronouns.
 	/// </summary>
 	[UsedImplicitly]
-	public class PerPronounProvider : IPronounProvider
+	public class PerPronounProvider : PronounProvider
 	{
 		/// <inheritdoc />
-		public string Family => "Per";
+		public override string Family => "Per";
 
 		/// <inheritdoc />
-		public string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "per has" : "per";
+		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "per has" : "per";
 
 		/// <inheritdoc />
-		public string GetObjectForm(bool plural = false) => "per";
+		public override string GetObjectForm(bool plural = false) => "per";
 
 		/// <inheritdoc />
-		public string GetPossessiveAdjectiveForm(bool plural = false) => "per";
+		public override string GetPossessiveAdjectiveForm(bool plural = false) => "per";
 
 		/// <inheritdoc />
-		public string GetPossessiveForm(bool plural = false) => "pers";
+		public override string GetPossessiveForm(bool plural = false) => "pers";
 
 		/// <inheritdoc />
-		public string GetReflexiveForm(bool plural = false) => "perself";
+		public override string GetReflexiveForm(bool plural = false) => "perself";
 	}
 }

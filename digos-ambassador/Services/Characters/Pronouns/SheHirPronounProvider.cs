@@ -28,24 +28,24 @@ namespace DIGOS.Ambassador.Services
 	/// Provides s/he and hir pronouns.
 	/// </summary>
 	[UsedImplicitly]
-	public class SheHirPronounProvider : IPronounProvider
+	public class SheHirPronounProvider : PronounProvider
 	{
 		/// <inheritdoc />
-		public virtual string Family => "S/he and hir";
+		public override string Family => "S/he and hir";
 
 		/// <inheritdoc />
-		public virtual string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "s/he has" : "s/he";
+		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "s/he has" : "s/he";
 
 		/// <inheritdoc />
-		public virtual string GetObjectForm(bool plural = false) => "hir";
+		public override string GetObjectForm(bool plural = false) => "hir";
 
 		/// <inheritdoc />
-		public virtual string GetPossessiveAdjectiveForm(bool plural = false) => "hir";
+		public override string GetPossessiveAdjectiveForm(bool plural = false) => "hir";
 
 		/// <inheritdoc />
-		public virtual string GetPossessiveForm(bool plural = false) => "hirs";
+		public override string GetPossessiveForm(bool plural = false) => "hirs";
 
 		/// <inheritdoc />
-		public virtual string GetReflexiveForm(bool plural = false) => "hirself";
+		public override string GetReflexiveForm(bool plural = false) => "hirself";
 	}
 }

@@ -28,24 +28,24 @@ namespace DIGOS.Ambassador.Services
 	/// Provides singular they pronouns.
 	/// </summary>
 	[UsedImplicitly]
-	public class TheyPronounProvider : IPronounProvider
+	public class TheyPronounProvider : PronounProvider
 	{
 		/// <inheritdoc />
-		public string Family => "They";
+		public override string Family => "They";
 
 		/// <inheritdoc />
-		public string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "they have" : "they";
+		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "they have" : "they";
 
 		/// <inheritdoc />
-		public string GetObjectForm(bool plural = false) => "them";
+		public override string GetObjectForm(bool plural = false) => "them";
 
 		/// <inheritdoc />
-		public string GetPossessiveAdjectiveForm(bool plural = false) => "their";
+		public override string GetPossessiveAdjectiveForm(bool plural = false) => "their";
 
 		/// <inheritdoc />
-		public string GetPossessiveForm(bool plural = false) => "theirs";
+		public override string GetPossessiveForm(bool plural = false) => "theirs";
 
 		/// <inheritdoc />
-		public string GetReflexiveForm(bool plural = false) => "themselves";
+		public override string GetReflexiveForm(bool plural = false) => "themselves";
 	}
 }

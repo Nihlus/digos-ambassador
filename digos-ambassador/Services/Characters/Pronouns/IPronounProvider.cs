@@ -69,5 +69,12 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="plural">Whether or not to pluralize the form.</param>
 		/// <returns>The pronoun.</returns>
 		string GetReflexiveForm(bool plural = false);
+
+		/// <summary>
+		/// Gets the specified pronoun form.
+		/// </summary>
+		/// <param name="form">The form to get.</param>
+		/// <returns>The pronoun.</returns>
+		string GetForm(PronounForm form);
 	}
 }

@@ -28,24 +28,24 @@ namespace DIGOS.Ambassador.Services
 	/// Provides neuter pronouns.
 	/// </summary>
 	[UsedImplicitly]
-	public class NeuterPronounProvider : IPronounProvider
+	public class NeuterPronounProvider : PronounProvider
 	{
 		/// <inheritdoc />
-		public string Family => "Neuter";
+		public override string Family => "Neuter";
 
 		/// <inheritdoc />
-		public string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb? "it has" : "it";
+		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "it has" : "it";
 
 		/// <inheritdoc />
-		public string GetObjectForm(bool plural = false) => "it";
+		public override string GetObjectForm(bool plural = false) => "it";
 
 		/// <inheritdoc />
-		public string GetPossessiveAdjectiveForm(bool plural = false) => "its";
+		public override string GetPossessiveAdjectiveForm(bool plural = false) => "its";
 
 		/// <inheritdoc />
-		public string GetPossessiveForm(bool plural = false) => "its";
+		public override string GetPossessiveForm(bool plural = false) => "its";
 
 		/// <inheritdoc />
-		public string GetReflexiveForm(bool plural = false) => "itself";
+		public override string GetReflexiveForm(bool plural = false) => "itself";
 	}
 }

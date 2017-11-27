@@ -28,24 +28,24 @@ namespace DIGOS.Ambassador.Services
 	/// Provides ze and zir pronouns.
 	/// </summary>
 	[UsedImplicitly]
-	public class ZeZirPronounProvider : IPronounProvider
+	public class ZeZirPronounProvider : PronounProvider
 	{
 		/// <inheritdoc />
-		public string Family => "Ze and hir";
+		public override string Family => "Ze and zir";
 
 		/// <inheritdoc />
-		public string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "ze has" : "ze";
+		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "ze has" : "ze";
 
 		/// <inheritdoc />
-		public string GetObjectForm(bool plural = false) => "zir";
+		public override string GetObjectForm(bool plural = false) => "zir";
 
 		/// <inheritdoc />
-		public string GetPossessiveAdjectiveForm(bool plural = false) => "zir";
+		public override string GetPossessiveAdjectiveForm(bool plural = false) => "zir";
 
 		/// <inheritdoc />
-		public string GetPossessiveForm(bool plural = false) => "zirs";
+		public override string GetPossessiveForm(bool plural = false) => "zirs";
 
 		/// <inheritdoc />
-		public string GetReflexiveForm(bool plural = false) => "zirself";
+		public override string GetReflexiveForm(bool plural = false) => "zirself";
 	}
 }

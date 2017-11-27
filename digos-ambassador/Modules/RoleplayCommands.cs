@@ -41,7 +41,6 @@ using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-// ReSharper disable ArgumentsStyleLiteral
 namespace DIGOS.Ambassador.Modules
 {
 	/// <summary>
@@ -195,6 +194,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(roleplay);
+
 				db.Roleplays.Remove(roleplay);
 				await db.SaveChangesAsync();
 
@@ -215,6 +216,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(roleplay);
+
 				var addUserResult = await this.Roleplays.AddUserToRoleplayAsync(db, this.Context, roleplay, this.Context.Message.Author);
 				if (!addUserResult.IsSuccess)
 				{
@@ -247,6 +250,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(roleplay);
+
 				var invitePlayerResult = await this.Roleplays.InviteUserAsync(db, roleplay, playerToInvite);
 				if (!invitePlayerResult.IsSuccess)
 				{
@@ -273,6 +278,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(roleplay);
+
 				var removeUserResult = await this.Roleplays.RemoveUserFromRoleplayAsync(db, this.Context, roleplay, this.Context.Message.Author);
 				if (!removeUserResult.IsSuccess)
 				{
@@ -305,6 +312,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(roleplay);
+
 				var kickUserResult = await this.Roleplays.KickUserFromRoleplayAsync(db, this.Context, roleplay, discordUser);
 				if (!kickUserResult.IsSuccess)
 				{
@@ -340,6 +349,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(roleplay);
+
 				if (roleplay.IsNSFW && !this.Context.Channel.IsNsfw)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, "This channel is not marked as NSFW, while your roleplay is... naughty!");
@@ -371,6 +382,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(roleplay);
+
 				if (roleplay.IsNSFW && !this.Context.Channel.IsNsfw)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, "This channel is not marked as NSFW, while your roleplay is... naughty!");
@@ -437,6 +450,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(roleplay);
+
 				roleplay.IsActive = false;
 				await db.SaveChangesAsync();
 
@@ -471,6 +486,8 @@ namespace DIGOS.Ambassador.Modules
 
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(roleplay);
+
 				int addedOrUpdatedMessageCount = 0;
 
 				var latestMessage = startMessage;
@@ -518,6 +535,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			using (var db = new GlobalInfoContext())
 			{
+				db.Attach(roleplay);
+
 				var transferResult = await this.Roleplays.TransferRoleplayOwnershipAsync(db, newOwner, roleplay);
 				if (!transferResult.IsSuccess)
 				{
@@ -633,6 +652,8 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
+					db.Attach(roleplay);
+
 					var result = await this.Roleplays.SetRoleplayNameAsync(db, this.Context, roleplay, newRoleplayName);
 					if (!result.IsSuccess)
 					{
@@ -664,6 +685,8 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
+					db.Attach(roleplay);
+
 					var result = await this.Roleplays.SetRoleplaySummaryAsync(db, roleplay, newRoleplaySummary);
 					if (!result.IsSuccess)
 					{
@@ -694,6 +717,8 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
+					db.Attach(roleplay);
+
 					var result = await this.Roleplays.SetRoleplayIsNSFWAsync(db, roleplay, isNSFW);
 					if (!result.IsSuccess)
 					{
@@ -723,6 +748,8 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
+					db.Attach(roleplay);
+
 					var result = await this.Roleplays.SetRoleplayIsPublicAsync(db, roleplay, isPublic);
 					if (!result.IsSuccess)
 					{

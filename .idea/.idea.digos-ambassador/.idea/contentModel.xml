@@ -112,8 +112,8 @@
           </e>
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171127220838_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171127220838_InitialCreate.cs" t="Include" />
+          <e p="20171127230338_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171127230338_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">
@@ -156,6 +156,8 @@
               <e p="MasculinePronounProvider.cs" t="Include" />
               <e p="NeuterPronounProvider.cs" t="Include" />
               <e p="PerPronounProvider.cs" t="Include" />
+              <e p="PronounForm.cs" t="Include" />
+              <e p="PronounProvider.cs" t="Include" />
               <e p="SheHirPronounProvider.cs" t="Include" />
               <e p="SieHirPronounProvider.cs" t="Include" />
               <e p="SpivakPronounProvider.cs" t="Include" />
@@ -216,6 +218,7 @@
             <e p="LuaScriptToken.cs" t="Include" />
             <e p="LuaSnippetToken.cs" t="Include" />
             <e p="PossessivePronounToken.cs" t="Include" />
+            <e p="PronounToken.cs" t="Include" />
             <e p="TargetToken.cs" t="Include" />
           </e>
           <e p="TransformationDescriptionBuilder.cs" t="Include" />
@@ -227,6 +230,9 @@
           <e p="OwnedEntityTypeReader.cs" t="Include" />
           <e p="RoleplayTypeReader.cs" t="Include" />
           <e p="UncachedMessageTypeReader.cs" t="Include" />
+        </e>
+        <e p="Utility" t="Include">
+          <e p="CaseInsensitiveStringEqualityComparer.cs" t="Include" />
         </e>
         <e p="app.config" t="Include" />
         <e p="bin" t="ExcludeRecursive" />

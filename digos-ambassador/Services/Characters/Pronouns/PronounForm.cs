@@ -1,5 +1,5 @@
 ﻿//
-//  MasculinePronounProvider.cs
+//  PronounForm.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,32 +20,36 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using JetBrains.Annotations;
-
 namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
-	/// Provides masculine pronouns.
+	/// Holds different forms that a pronoun can have.
 	/// </summary>
-	[UsedImplicitly]
-	public class MasculinePronounProvider : PronounProvider
+	public enum PronounForm
 	{
-		/// <inheritdoc />
-		public override string Family => "Masculine";
+		/// <summary>
+		/// The subject form, that is, "I" or "you".
+		/// </summary>
+		Subject,
 
-		/// <inheritdoc />
-		public override string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb ? "he has" : "he";
+		/// <summary>
+		/// The object form, that is, "me" or "you.
+		/// </summary>
+		Object,
 
-		/// <inheritdoc />
-		public override string GetObjectForm(bool plural = false) => "him";
+		/// <summary>
+		/// The possessive adjective form, that is, "my" or "yours"
+		/// </summary>
+		PossessiveAdjective,
 
-		/// <inheritdoc />
-		public override string GetPossessiveAdjectiveForm(bool plural = false) => "his";
+		/// <summary>
+		/// The possessive form, that is, "mine" or "yours".
+		/// </summary>
+		Possessive,
 
-		/// <inheritdoc />
-		public override string GetPossessiveForm(bool plural = false) => "his";
-
-		/// <inheritdoc />
-		public override string GetReflexiveForm(bool plural = false) => "himself";
+		/// <summary>
+		/// The reflexive form, that is, "myself" or "yourself".
+		/// </summary>
+		Reflexive
 	}
 }

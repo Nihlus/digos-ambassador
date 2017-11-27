@@ -1,5 +1,5 @@
 ﻿//
-//  PossessivePronounToken.cs
+//  PronounToken.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
@@ -29,60 +30,46 @@ namespace DIGOS.Ambassador.Transformations
 	/// <summary>
 	/// A token that gets replaced with a possessive pronoun
 	/// </summary>
-	[TokenIdentifier("possessive")]
-	public class PossessivePronounToken : ReplacableTextToken<PossessivePronounToken>
+	[TokenIdentifier("pronoun")]
+	public class PronounToken : ReplacableTextToken<PronounToken>
 	{
 		private readonly CharacterService Characters;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="PossessivePronounToken"/> class.
+		/// Gets the form of the pronoun.
+		/// </summary>
+		public PronounForm Form { get; private set; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PronounToken"/> class.
 		/// </summary>
 		/// <param name="characters">The character service.</param>
-		public PossessivePronounToken(CharacterService characters)
+		public PronounToken(CharacterService characters)
 		{
 			this.Characters = characters;
 		}
-
-		/// <summary>
-		/// Gets a value indicating whether the pronoun should be in its raw form, or together with a
-		/// possessive verb - that is "Hers" or "She has".
-		/// </summary>
-		public bool UseVerb { get; private set; }
-
-		/// <summary>
-		/// Gets a value indicating whether the pronoun should be in its possessive adjective form, that is,
-		/// "his" or "her".
-		/// </summary>
-		public bool UseAdjective { get; private set; }
 
 		/// <inheritdoc />
 		public override string GetText(Character character, Transformation transformation)
 		{
 			var pronounProvider = this.Characters.GetPronounProvider(character);
 
-			if (this.UseVerb)
-			{
-				return $"{pronounProvider.GetSubjectForm(withVerb: true)}";
-			}
-
-			if (this.UseAdjective)
-			{
-				return $"{pronounProvider.GetPossessiveAdjectiveForm()}";
-			}
-
-			return pronounProvider.GetPossessiveForm();
+			return pronounProvider.GetForm(this.Form);
 		}
 
 		/// <inheritdoc />
-		protected override PossessivePronounToken Initialize(string data)
+		protected override PronounToken Initialize(string data)
 		{
 			if (data is null)
 			{
 				return this;
 			}
 
-			this.UseVerb = data.Equals("verb");
-			this.UseAdjective = data.Equals("adjective");
+			if (Enum.TryParse<PronounForm>(data, out var result))
+			{
+				this.Form = result;
+			}
+
 			return this;
 		}
 	}
