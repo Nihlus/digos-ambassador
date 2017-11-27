@@ -58,6 +58,7 @@ namespace DIGOS.Ambassador.Tests
 
 			// Set up the mocked discord server
 			var guildMock = new Mock<IGuild>();
+			guildMock.Setup(g => g.OwnerId).Returns(uint.MaxValue);
 
 			using (var mockDbConnection = new MockedDatabase())
 			{
@@ -137,6 +138,7 @@ namespace DIGOS.Ambassador.Tests
 
 			// Set up the mocked discord server
 			var guildMock = new Mock<IGuild>();
+			guildMock.Setup(g => g.OwnerId).Returns(uint.MaxValue);
 			guildMock.Setup(s => s.Id).Returns(serverID);
 
 			using (var mockDbConnection = new MockedDatabase())
@@ -177,6 +179,7 @@ namespace DIGOS.Ambassador.Tests
 
 			// Set up the mocked discord server
 			var guildMock = new Mock<IGuild>();
+			guildMock.Setup(g => g.OwnerId).Returns(uint.MaxValue);
 			guildMock.Setup(s => s.Id).Returns(serverID);
 
 			using (var mockDbConnection = new MockedDatabase())
@@ -220,6 +223,7 @@ namespace DIGOS.Ambassador.Tests
 
 			// Set up the mocked discord server
 			var guildMock = new Mock<IGuild>();
+			guildMock.Setup(g => g.OwnerId).Returns(uint.MaxValue);
 			guildMock.Setup(s => s.Id).Returns(server1ID);
 
 			using (var mockDbConnection = new MockedDatabase())
@@ -268,6 +272,7 @@ namespace DIGOS.Ambassador.Tests
 
 			// Set up the mocked discord server
 			var guildMock = new Mock<IGuild>();
+			guildMock.Setup(g => g.OwnerId).Returns(uint.MaxValue);
 			guildMock.Setup(s => s.Id).Returns(serverID);
 
 			using (var mockDbConnection = new MockedDatabase())
@@ -307,6 +312,7 @@ namespace DIGOS.Ambassador.Tests
 
 			// Set up the mocked current discord server
 			var guildMock = new Mock<IGuild>();
+			guildMock.Setup(g => g.OwnerId).Returns(uint.MaxValue);
 			guildMock.Setup(s => s.Id).Returns(serverID);
 
 			using (var mockDbConnection = new MockedDatabase())
@@ -354,6 +360,7 @@ namespace DIGOS.Ambassador.Tests
 
 			// Set up the mocked current discord server
 			var guildMock = new Mock<IGuild>();
+			guildMock.Setup(g => g.OwnerId).Returns(uint.MaxValue);
 			guildMock.Setup(s => s.Id).Returns(serverID);
 
 			using (var mockDbConnection = new MockedDatabase())
