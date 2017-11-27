@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Services
 		public virtual string Family => "Elverson";
 
 		/// <inheritdoc />
-		public virtual string GetSubjectForm(bool plural = false, bool withVerb = false) => "ey";
+		public virtual string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb? "ey have" : "ey";
 
 		/// <inheritdoc />
 		public virtual string GetObjectForm(bool plural = false) => "em";

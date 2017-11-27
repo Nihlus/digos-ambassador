@@ -22,6 +22,7 @@
 
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Services;
 
 namespace DIGOS.Ambassador.Transformations
 {
@@ -31,6 +32,17 @@ namespace DIGOS.Ambassador.Transformations
 	[TokenIdentifier("possessive")]
 	public class PossessivePronounToken : ReplacableTextToken<PossessivePronounToken>
 	{
+		private readonly CharacterService Characters;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="PossessivePronounToken"/> class.
+		/// </summary>
+		/// <param name="characters"></param>
+		public PossessivePronounToken(CharacterService characters)
+		{
+			this.Characters = characters;
+		}
+
 		/// <summary>
 		/// Gets a value indicating whether the pronoun should be in its raw form, or together with a
 		/// possessive verb - that is "Hers" or "She has".
@@ -46,7 +58,19 @@ namespace DIGOS.Ambassador.Transformations
 		/// <inheritdoc />
 		public override string GetText(Character character, Transformation transformation)
 		{
-			throw new System.NotImplementedException();
+			var pronounProvider = this.Characters.GetPronounProvider(character);
+
+			if (this.UseVerb)
+			{
+				return $"{pronounProvider.GetSubjectForm(withVerb: true)}";
+			}
+
+			if (this.UseAdjective)
+			{
+				return $"{pronounProvider.GetPossessiveAdjectiveForm()}";
+			}
+
+			return pronounProvider.GetPossessiveForm();
 		}
 
 		/// <inheritdoc />

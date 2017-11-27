@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Services
 		public string Family => "Neuter";
 
 		/// <inheritdoc />
-		public string GetSubjectForm(bool plural = false, bool withVerb = false) => "it";
+		public string GetSubjectForm(bool plural = false, bool withVerb = false) => withVerb? "it has" : "it";
 
 		/// <inheritdoc />
 		public string GetObjectForm(bool plural = false) => "it";
