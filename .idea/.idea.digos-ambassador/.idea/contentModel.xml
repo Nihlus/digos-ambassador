@@ -192,6 +192,8 @@
           <e p="ReplacableTextToken.cs" t="Include" />
           <e p="TokenIdentifierAttribute.cs" t="Include" />
           <e p="Tokens" t="Include">
+            <e p="LuaScriptToken.cs" t="Include" />
+            <e p="LuaSnippetToken.cs" t="Include" />
             <e p="PossessivePronounToken.cs" t="Include" />
             <e p="TargetToken.cs" t="Include" />
           </e>

@@ -39,6 +39,17 @@ namespace DIGOS.Ambassador.Transformations
 	{
 		private readonly Dictionary<string, Type> AvailableTokens = new Dictionary<string, Type>();
 
+		private readonly IServiceProvider Services;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TransformationTextTokenizer"/> class.
+		/// </summary>
+		/// <param name="services">The services to make available to tokens via dependency injection.</param>
+		public TransformationTextTokenizer(IServiceProvider services)
+		{
+			this.Services = services;
+		}
+
 		/// <summary>
 		/// Discovers available tokens in the given assembly, adding them to the tokenizer.
 		/// </summary>
@@ -100,14 +111,16 @@ namespace DIGOS.Ambassador.Transformations
 		/// </summary>
 		/// <param name="text">The text to tokenize.</param>
 		/// <returns>A list of recognized tokens in the text.</returns>
+		[NotNull]
+		[ItemNotNull]
 		public IReadOnlyList<IReplaceableTextToken> GetTokens([NotNull] string text)
 		{
 			var tokens = new List<IReplaceableTextToken>();
 			int position = 0;
-			while (position < text.Length)
+			while (position < text.Length - 1)
 			{
 				// Scan ahead to the next token
-				while (text[position] != '{')
+				while (position < text.Length - 1 && text[position] != '{')
 				{
 					position++;
 				}
@@ -117,7 +130,7 @@ namespace DIGOS.Ambassador.Transformations
 				int start = position;
 
 				// Read the token text
-				while (text[position] != '}' && position < text.Length)
+				while (position + 1 < text.Length - 1 && text[position + 1] != '}')
 				{
 					position++;
 					sb.Append(text[position]);
@@ -186,7 +199,8 @@ namespace DIGOS.Ambassador.Transformations
 				BindingFlags.Static | BindingFlags.FlattenHierarchy | BindingFlags.Public
 			);
 
-			var tokenObject = creationMethod.Invoke(null, new object[] { start, tokenText.Length + 1, data } );
+			// The +3 here includes the surrounding braces and the @
+			var tokenObject = creationMethod.Invoke(null, new object[] { start, tokenText.Length + 3, data, this.Services } );
 
 			return (IReplaceableTextToken)tokenObject;
 		}

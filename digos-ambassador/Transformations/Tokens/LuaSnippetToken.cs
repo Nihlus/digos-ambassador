@@ -1,5 +1,5 @@
 ﻿//
-//  PossessivePronounToken.cs
+//  LuaSnippetToken.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,21 +20,22 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Extensions;
 
 namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
-	/// A token that gets replaced with a possessive pronoun
+	/// Represents a token which executes an inline snippet of lua code and gets replaced with the result.
 	/// </summary>
-	[TokenIdentifier("possessive")]
-	public class PossessivePronounToken : ReplacableTextToken<PossessivePronounToken>
+	[TokenIdentifier("snippet")]
+	public class LuaSnippetToken : ReplacableTextToken<LuaSnippetToken>
 	{
 		/// <summary>
-		/// Gets a value indicating whether the pronoun should be in its raw form, or together with a
-		/// possessive verb - that is "Her" or "She has".
+		/// Gets the snippet of lua code to execute.
 		/// </summary>
-		public bool UseVerb { get; private set; }
+		public string Snippet { get; private set; }
 
 		/// <inheritdoc />
 		public override string GetText(Character character)
@@ -43,14 +44,9 @@ namespace DIGOS.Ambassador.Transformations
 		}
 
 		/// <inheritdoc />
-		protected override PossessivePronounToken Initialize(string data)
+		protected override LuaSnippetToken Initialize(string data)
 		{
-			if (data is null)
-			{
-				return this;
-			}
-
-			this.UseVerb = data.Equals("verb");
+			this.Snippet = data ?? string.Empty;
 			return this;
 		}
 	}

@@ -1,5 +1,5 @@
 ﻿//
-//  PossessivePronounToken.cs
+//  LuaScriptToken.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -25,16 +25,15 @@ using DIGOS.Ambassador.Database.Characters;
 namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
-	/// A token that gets replaced with a possessive pronoun
+	/// Represents a token which executes a named lua code script and gets replaced with the result.
 	/// </summary>
-	[TokenIdentifier("possessive")]
-	public class PossessivePronounToken : ReplacableTextToken<PossessivePronounToken>
+	[TokenIdentifier("script")]
+	public class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
 	{
 		/// <summary>
-		/// Gets a value indicating whether the pronoun should be in its raw form, or together with a
-		/// possessive verb - that is "Her" or "She has".
+		/// Gets the name of the script to execute.
 		/// </summary>
-		public bool UseVerb { get; private set; }
+		public string ScriptName { get; private set; }
 
 		/// <inheritdoc />
 		public override string GetText(Character character)
@@ -43,14 +42,9 @@ namespace DIGOS.Ambassador.Transformations
 		}
 
 		/// <inheritdoc />
-		protected override PossessivePronounToken Initialize(string data)
+		protected override LuaScriptToken Initialize(string data)
 		{
-			if (data is null)
-			{
-				return this;
-			}
-
-			this.UseVerb = data.Equals("verb");
+			this.ScriptName = data ?? string.Empty;
 			return this;
 		}
 	}

@@ -20,7 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using DIGOS.Ambassador.Database.Characters;
+using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Transformations
 {
@@ -28,7 +31,7 @@ namespace DIGOS.Ambassador.Transformations
 	/// Base implementation of replacable text tokens, allowing static initialization.
 	/// </summary>
 	/// <typeparam name="T">A class inheriting from this class.</typeparam>
-	public abstract class ReplacableTextToken<T> : IReplaceableTextToken where T : ReplacableTextToken<T>, new()
+	public abstract class ReplacableTextToken<T> : IReplaceableTextToken where T : ReplacableTextToken<T>
 	{
 		/// <inheritdoc />
 		public int Start { get; set; }
@@ -37,14 +40,14 @@ namespace DIGOS.Ambassador.Transformations
 		public int Length { get; set; }
 
 		/// <inheritdoc />
-		public abstract string GetText(Character character);
+		public abstract string GetText([NotNull] Character character);
 
 		/// <summary>
 		/// Initializes the token with generic data coming from the text.
 		/// </summary>
 		/// <param name="data">Generic data.</param>
 		/// <returns>An initialized instance of a token.</returns>
-		protected abstract T Initialize(string data);
+		protected abstract T Initialize([CanBeNull] string data);
 
 		/// <summary>
 		/// Creates a new, initialized token from the given start and end positions, along with generic data.
@@ -52,14 +55,13 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="start">The index in the original text where the token starts.</param>
 		/// <param name="length">The length of the original token.</param>
 		/// <param name="data">Generic data.</param>
+		/// <param name="services">The application's service collection.</param>
 		/// <returns>An initialized instance of a token.</returns>
-		public static T CreateFrom(int start, int length, string data)
+		public static T CreateFrom(int start, int length, [CanBeNull] string data, IServiceProvider services)
 		{
-			var token = new T
-			{
-				Start = start,
-				Length = length
-			};
+			var token = (ReplacableTextToken<T>)ActivatorUtilities.CreateInstance(services, typeof(T));
+			token.Start = start;
+			token.Length = length;
 
 			return token.Initialize(data);
 		}
