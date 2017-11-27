@@ -26,7 +26,7 @@ namespace DIGOS.Ambassador.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.0.0-rtm-26452");
+                .HasAnnotation("ProductVersion", "2.0.1-rtm-125");
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Appearances.Appearance", b =>
                 {
@@ -110,6 +110,8 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<string>("Nickname");
 
                     b.Property<uint?>("OwnerID");
+
+                    b.Property<string>("PronounProviderFamily");
 
                     b.Property<string>("Summary");
 

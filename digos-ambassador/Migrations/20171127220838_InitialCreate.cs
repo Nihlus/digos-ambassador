@@ -17,12 +17,12 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Appearance",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    GenderScale = table.Column<float>(type: "REAL", nullable: false),
-                    Height = table.Column<float>(type: "REAL", nullable: false),
-                    Muscularity = table.Column<float>(type: "REAL", nullable: false),
-                    Weight = table.Column<float>(type: "REAL", nullable: false)
+                    GenderScale = table.Column<float>(nullable: false),
+                    Height = table.Column<float>(nullable: false),
+                    Muscularity = table.Column<float>(nullable: false),
+                    Weight = table.Column<float>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -33,10 +33,10 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Colour",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Modifier = table.Column<int>(type: "INTEGER", nullable: true),
-                    Shade = table.Column<int>(type: "INTEGER", nullable: false)
+                    Modifier = table.Column<int>(nullable: true),
+                    Shade = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -47,11 +47,11 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Dossiers",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Path = table.Column<string>(type: "TEXT", nullable: true),
-                    Summary = table.Column<string>(type: "TEXT", nullable: true),
-                    Title = table.Column<string>(type: "TEXT", nullable: true)
+                    Path = table.Column<string>(nullable: true),
+                    Summary = table.Column<string>(nullable: true),
+                    Title = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -62,12 +62,12 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Kinks",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Category = table.Column<int>(type: "INTEGER", nullable: false),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    FListID = table.Column<uint>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                    Category = table.Column<int>(nullable: false),
+                    Description = table.Column<string>(nullable: true),
+                    FListID = table.Column<uint>(nullable: false),
+                    Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -78,11 +78,11 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Species",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
-                    ParentID = table.Column<uint>(type: "INTEGER", nullable: true)
+                    Description = table.Column<string>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    ParentID = table.Column<uint>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -99,19 +99,19 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Transformations",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    DefaultBaseColourID = table.Column<uint>(type: "INTEGER", nullable: false),
-                    DefaultPattern = table.Column<int>(type: "INTEGER", nullable: true),
-                    DefaultPatternColourID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Description = table.Column<string>(type: "TEXT", nullable: false),
-                    GrowMessage = table.Column<string>(type: "TEXT", nullable: false),
-                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Part = table.Column<int>(type: "INTEGER", nullable: false),
-                    ShiftMessage = table.Column<string>(type: "TEXT", nullable: false),
-                    SingleDescription = table.Column<string>(type: "TEXT", nullable: false),
-                    SpeciesID = table.Column<uint>(type: "INTEGER", nullable: false),
-                    UniformDescription = table.Column<string>(type: "TEXT", nullable: false)
+                    DefaultBaseColourID = table.Column<uint>(nullable: false),
+                    DefaultPattern = table.Column<int>(nullable: true),
+                    DefaultPatternColourID = table.Column<uint>(nullable: true),
+                    Description = table.Column<string>(nullable: false),
+                    GrowMessage = table.Column<string>(nullable: false),
+                    IsNSFW = table.Column<bool>(nullable: false),
+                    Part = table.Column<int>(nullable: false),
+                    ShiftMessage = table.Column<string>(nullable: false),
+                    SingleDescription = table.Column<string>(nullable: false),
+                    SpeciesID = table.Column<uint>(nullable: false),
+                    UniformDescription = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -140,14 +140,14 @@ namespace DIGOS.Ambassador.Migrations
                 name: "AppearanceComponent",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    AppearanceID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    BaseColourID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Pattern = table.Column<int>(type: "INTEGER", nullable: true),
-                    PatternColourID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Size = table.Column<int>(type: "INTEGER", nullable: false),
-                    TransformationID = table.Column<uint>(type: "INTEGER", nullable: true)
+                    AppearanceID = table.Column<uint>(nullable: true),
+                    BaseColourID = table.Column<uint>(nullable: true),
+                    Pattern = table.Column<int>(nullable: true),
+                    PatternColourID = table.Column<uint>(nullable: true),
+                    Size = table.Column<int>(nullable: false),
+                    TransformationID = table.Column<uint>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -182,18 +182,19 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Characters",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    AvatarUrl = table.Column<string>(type: "TEXT", nullable: true),
-                    CurrentAppearanceID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    DefaultAppearanceID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Description = table.Column<string>(type: "TEXT", nullable: true),
-                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Nickname = table.Column<string>(type: "TEXT", nullable: true),
-                    OwnerID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Summary = table.Column<string>(type: "TEXT", nullable: true),
-                    UserID = table.Column<uint>(type: "INTEGER", nullable: true)
+                    AvatarUrl = table.Column<string>(nullable: true),
+                    CurrentAppearanceID = table.Column<uint>(nullable: true),
+                    DefaultAppearanceID = table.Column<uint>(nullable: true),
+                    Description = table.Column<string>(nullable: true),
+                    IsNSFW = table.Column<bool>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    Nickname = table.Column<string>(nullable: true),
+                    OwnerID = table.Column<uint>(nullable: true),
+                    PronounProviderFamily = table.Column<string>(nullable: true),
+                    Summary = table.Column<string>(nullable: true),
+                    UserID = table.Column<uint>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -216,13 +217,13 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Images",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Caption = table.Column<string>(type: "TEXT", nullable: true),
-                    CharacterID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Url = table.Column<string>(type: "TEXT", nullable: true)
+                    Caption = table.Column<string>(nullable: true),
+                    CharacterID = table.Column<uint>(nullable: true),
+                    IsNSFW = table.Column<bool>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    Url = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -239,12 +240,12 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Servers",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    CharacterID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    DiscordID = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
-                    SuppressPermissonWarnings = table.Column<bool>(type: "INTEGER", nullable: false)
+                    CharacterID = table.Column<uint>(nullable: true),
+                    DiscordID = table.Column<ulong>(nullable: false),
+                    IsNSFW = table.Column<bool>(nullable: false),
+                    SuppressPermissonWarnings = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -261,19 +262,19 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Bio = table.Column<string>(type: "TEXT", nullable: true),
-                    Class = table.Column<int>(type: "INTEGER", nullable: false),
-                    DefaultCharacterID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    DiscordID = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    GlobalUserProtectionID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    GlobalUserProtectionID1 = table.Column<uint>(type: "INTEGER", nullable: true),
-                    RoleplayID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    RoleplayID1 = table.Column<uint>(type: "INTEGER", nullable: true),
-                    RoleplayID2 = table.Column<uint>(type: "INTEGER", nullable: true),
-                    ServerID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Timezone = table.Column<int>(type: "INTEGER", nullable: true)
+                    Bio = table.Column<string>(nullable: true),
+                    Class = table.Column<int>(nullable: false),
+                    DefaultCharacterID = table.Column<uint>(nullable: true),
+                    DiscordID = table.Column<ulong>(nullable: false),
+                    GlobalUserProtectionID = table.Column<uint>(nullable: true),
+                    GlobalUserProtectionID1 = table.Column<uint>(nullable: true),
+                    RoleplayID = table.Column<uint>(nullable: true),
+                    RoleplayID1 = table.Column<uint>(nullable: true),
+                    RoleplayID2 = table.Column<uint>(nullable: true),
+                    ServerID = table.Column<uint>(nullable: true),
+                    Timezone = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -296,11 +297,11 @@ namespace DIGOS.Ambassador.Migrations
                 name: "GlobalPermissions",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Permission = table.Column<int>(type: "INTEGER", nullable: false),
-                    Target = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserID = table.Column<uint>(type: "INTEGER", nullable: true)
+                    Permission = table.Column<int>(nullable: false),
+                    Target = table.Column<int>(nullable: false),
+                    UserID = table.Column<uint>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -317,11 +318,11 @@ namespace DIGOS.Ambassador.Migrations
                 name: "GlobalUserProtections",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    DefaultOptIn = table.Column<bool>(type: "INTEGER", nullable: false),
-                    DefaultType = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserID = table.Column<uint>(type: "INTEGER", nullable: true)
+                    DefaultOptIn = table.Column<bool>(nullable: false),
+                    DefaultType = table.Column<int>(nullable: false),
+                    UserID = table.Column<uint>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -338,12 +339,12 @@ namespace DIGOS.Ambassador.Migrations
                 name: "LocalPermissions",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Permission = table.Column<int>(type: "INTEGER", nullable: false),
-                    ServerID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Target = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserID = table.Column<uint>(type: "INTEGER", nullable: true)
+                    Permission = table.Column<int>(nullable: false),
+                    ServerID = table.Column<uint>(nullable: true),
+                    Target = table.Column<int>(nullable: false),
+                    UserID = table.Column<uint>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -366,15 +367,15 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Roleplays",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    ActiveChannelID = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsNSFW = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsPublic = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    OwnerID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Summary = table.Column<string>(type: "TEXT", nullable: true)
+                    ActiveChannelID = table.Column<ulong>(nullable: false),
+                    IsActive = table.Column<bool>(nullable: false),
+                    IsNSFW = table.Column<bool>(nullable: false),
+                    IsPublic = table.Column<bool>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    OwnerID = table.Column<uint>(nullable: true),
+                    Summary = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -391,12 +392,12 @@ namespace DIGOS.Ambassador.Migrations
                 name: "ServerUserProtections",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    HasOptedIn = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ServerID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserID = table.Column<uint>(type: "INTEGER", nullable: true)
+                    HasOptedIn = table.Column<bool>(nullable: false),
+                    ServerID = table.Column<uint>(nullable: true),
+                    Type = table.Column<int>(nullable: false),
+                    UserID = table.Column<uint>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -419,11 +420,11 @@ namespace DIGOS.Ambassador.Migrations
                 name: "UserKink",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    KinkID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Preference = table.Column<int>(type: "INTEGER", nullable: false),
-                    UserID = table.Column<uint>(type: "INTEGER", nullable: true)
+                    KinkID = table.Column<uint>(nullable: true),
+                    Preference = table.Column<int>(nullable: false),
+                    UserID = table.Column<uint>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -446,14 +447,14 @@ namespace DIGOS.Ambassador.Migrations
                 name: "UserMessage",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(type: "INTEGER", nullable: false)
+                    ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    AuthorID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    AuthorNickname = table.Column<string>(type: "TEXT", nullable: true),
-                    Contents = table.Column<string>(type: "TEXT", nullable: true),
-                    DiscordMessageID = table.Column<ulong>(type: "INTEGER", nullable: false),
-                    RoleplayID = table.Column<uint>(type: "INTEGER", nullable: true),
-                    Timestamp = table.Column<DateTimeOffset>(type: "TEXT", nullable: false)
+                    AuthorID = table.Column<uint>(nullable: true),
+                    AuthorNickname = table.Column<string>(nullable: true),
+                    Contents = table.Column<string>(nullable: true),
+                    DiscordMessageID = table.Column<ulong>(nullable: false),
+                    RoleplayID = table.Column<uint>(nullable: true),
+                    Timestamp = table.Column<DateTimeOffset>(nullable: false)
                 },
                 constraints: table =>
                 {

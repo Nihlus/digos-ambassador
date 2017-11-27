@@ -21,7 +21,9 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
@@ -34,6 +36,7 @@ using Discord.Commands;
 
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Image = DIGOS.Ambassador.Database.Data.Image;
 
 namespace DIGOS.Ambassador.Services
@@ -49,6 +52,8 @@ namespace DIGOS.Ambassador.Services
 
 		private readonly ContentService Content;
 
+		private readonly Dictionary<string, IPronounProvider> PronounProviders;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CharacterService"/> class.
 		/// </summary>
@@ -60,6 +65,49 @@ namespace DIGOS.Ambassador.Services
 			this.Commands = commands;
 			this.OwnedEntities = entityService;
 			this.Content = content;
+
+			this.PronounProviders = new Dictionary<string, IPronounProvider>();
+		}
+
+		/// <summary>
+		/// Discovers available pronoun providers in the assembly, adding them to the available providers.
+		/// </summary>
+		public void DiscoverPronounProviders()
+		{
+			this.PronounProviders.Clear();
+
+			var assembly = Assembly.GetExecutingAssembly();
+			var pronounProviderTypes = assembly.DefinedTypes.Where
+			(
+				t => t.ImplementedInterfaces.Contains(typeof(IPronounProvider))
+			);
+
+			foreach (var type in pronounProviderTypes)
+			{
+				var pronounProvider = Activator.CreateInstance(type) as IPronounProvider;
+				if (pronounProvider is null)
+				{
+					continue;
+				}
+
+				this.PronounProviders.Add(pronounProvider.Family, pronounProvider);
+			}
+		}
+
+		/// <summary>
+		/// Gets the pronoun provider for the specified character.
+		/// </summary>
+		/// <param name="character">The character.</param>
+		/// <returns>A pronoun provider.</returns>
+		/// <exception cref="ArgumentException">Thrown if no pronoun provider exists for the character's preference.</exception>
+		public IPronounProvider GetPronounProvider(Character character)
+		{
+			if (this.PronounProviders.ContainsKey(character.PronounProviderFamily))
+			{
+				return this.PronounProviders[character.PronounProviderFamily];
+			}
+
+			throw new ArgumentException(nameof(character));
 		}
 
 		/// <summary>

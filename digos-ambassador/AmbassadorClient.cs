@@ -80,6 +80,8 @@ namespace DIGOS.Ambassador
 
 		private readonly TransformationService Transformation;
 
+		private readonly LuaService Lua;
+
 		private readonly IServiceProvider Services;
 		// ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 
@@ -101,10 +103,13 @@ namespace DIGOS.Ambassador
 			this.OwnedEntities = new OwnedEntityService();
 			this.Roleplays = new RoleplayService(this.Commands, this.OwnedEntities);
 			this.Characters = new CharacterService(this.Commands, this.OwnedEntities, this.Content);
+			this.Characters.DiscoverPronounProviders();
+
 			this.Feedback = new UserFeedbackService();
 			this.Dossiers = new DossierService(this.Content);
 			this.Interactive = new InteractiveService(this.Client);
 			this.Transformation = new TransformationService(this.Content);
+			this.Lua = new LuaService(this.Content);
 
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)
@@ -117,6 +122,7 @@ namespace DIGOS.Ambassador
 				.AddSingleton(this.Dossiers)
 				.AddSingleton(this.Interactive)
 				.AddSingleton(this.Transformation)
+				.AddSingleton(this.Lua)
 				.BuildServiceProvider();
 
 			this.Client.MessageReceived += OnMessageReceived;

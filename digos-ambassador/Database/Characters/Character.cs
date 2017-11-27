@@ -98,6 +98,11 @@ namespace DIGOS.Ambassador.Database.Characters
 		public Appearance CurrentAppearance { get; set; }
 
 		/// <summary>
+		/// Gets or sets the preferred pronoun family of the character.
+		/// </summary>
+		public string PronounProviderFamily { get; set; }
+
+		/// <summary>
 		/// Determines whether or not the character has a given bodypart in their current appearance.
 		/// </summary>
 		/// <param name="bodypart">The bodypart to check for.</param>
