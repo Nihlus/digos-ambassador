@@ -42,6 +42,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
     <PackageReference Include="Microsoft.NETCore.App" Version="2.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="NLua_Safe" Version="1.3.2.1" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" />
     <PackageReference Include="YamlDotNet" Version="4.2.3-pre0454" />
   </ItemGroup>

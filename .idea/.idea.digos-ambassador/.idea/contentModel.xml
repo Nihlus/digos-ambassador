@@ -164,6 +164,9 @@
           <e p="Feedback" t="Include">
             <e p="UserFeedbackService.cs" t="Include" />
           </e>
+          <e p="Lua" t="Include">
+            <e p="LuaService.cs" t="Include" />
+          </e>
           <e p="Results" t="Include">
             <e p="CheckConditionResult.cs" t="Include" />
             <e p="CreateEntityResult.cs" t="Include" />
