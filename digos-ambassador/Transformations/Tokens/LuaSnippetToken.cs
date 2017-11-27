@@ -20,7 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Services;
 
 namespace DIGOS.Ambassador.Transformations
 {
@@ -30,15 +33,44 @@ namespace DIGOS.Ambassador.Transformations
 	[TokenIdentifier("snippet")]
 	public class LuaSnippetToken : ReplacableTextToken<LuaSnippetToken>
 	{
+		private readonly LuaService Lua;
+
 		/// <summary>
 		/// Gets the snippet of lua code to execute.
 		/// </summary>
 		public string Snippet { get; private set; }
 
-		/// <inheritdoc />
-		public override string GetText(Character character)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="LuaSnippetToken"/> class.
+		/// </summary>
+		/// <param name="luaService">The lua execution service.</param>
+		public LuaSnippetToken(LuaService luaService)
 		{
-			throw new System.NotImplementedException();
+			this.Lua = luaService;
+		}
+
+		/// <inheritdoc />
+		public override string GetText(Character character, Transformation transformation)
+		{
+			return GetTextAsync(character, transformation).GetAwaiter().GetResult();
+		}
+
+		/// <inheritdoc />
+		public override async Task<string> GetTextAsync(Character character, Transformation transformation)
+		{
+			var result = await this.Lua.ExecuteSnippetAsync
+			(
+				this.Snippet,
+				(nameof(character), character),
+				(nameof(transformation), transformation)
+			);
+
+			if (!result.IsSuccess)
+			{
+				return $"[{result.ErrorReason}]";
+			}
+
+			return result.Entity;
 		}
 
 		/// <inheritdoc />

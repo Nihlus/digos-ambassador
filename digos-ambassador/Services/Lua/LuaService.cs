@@ -20,8 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -29,7 +29,7 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using NLua;
 
-namespace DIGOS.Ambassador.Services.Lua
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Handles execution of lua code.
@@ -100,41 +100,55 @@ namespace DIGOS.Ambassador.Services.Lua
 			"math.tanh",
 			"os.clock",
 			"os.time",
-
 		};
 
-		private Regex GetErroringFunctionRegex =
+		private readonly ContentService ContentService;
+
+		private readonly Regex GetErroringFunctionRegex =
 			new Regex("(?<=\\((?>global)|(?>field )(?> \')).+(?=\'\\))", RegexOptions.Compiled);
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="LuaService"/> class.
+		/// </summary>
+		/// <param name="contentService">The application's content service.</param>
+		public LuaService(ContentService contentService)
+		{
+			this.ContentService = contentService;
+		}
 
 		/// <summary>
 		/// Gets a sandboxed lua state.
 		/// </summary>
 		/// <returns>A sandboxed lua state.</returns>
 		[MustUseReturnValue("The state must be disposed after use.")]
-		private NLua.Lua GetState()
+		private Lua GetState()
 		{
-			var state = new NLua.Lua();
+			var state = new Lua();
 
 			// Sandbox the state by restricting the available functions to an API whitelist
-			state.DoString($"local env = {{{string.Join(",\n", this.FunctionWhitelist.Select(f => $"\"{f}\""))}}}");
+			var functionList = string.Join(",\n", this.FunctionWhitelist.Select(f => $"\"{f}\""));
+			state.DoString($"env = {{{functionList}}}");
+
 			state.DoString
 			(
-				@"local function run(untrusted_code)
+				@"function run(untrusted_code)
 					if untrusted_code:byte(1) == 27 then return nil, ""binary bytecode prohibited"" end
 					local untrusted_function, message = loadstring(untrusted_code)
 					if not untrusted_function then return nil, message end
 					setfenv(untrusted_function, env)
 					return pcall(untrusted_function)
-				end"
+				end
+				"
 			);
 
 			// Add a script timeout after 1e8 VM instructions
 			state.DoString
 			(
-				@"local function f()
+				@"function f()
 					error(""timeout!"")
 				end
-				debug.sethook(f,""count"", 1e8)"
+				debug.sethook(f,"""", 1e8)
+				"
 			);
 
 			return state;
@@ -144,8 +158,9 @@ namespace DIGOS.Ambassador.Services.Lua
 		/// Executes the given lua snippet and retrieves its first result.
 		/// </summary>
 		/// <param name="snippet">The snippet to execute.</param>
+		/// <param name="variables">Any variables to pass to the snippet as globals.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public Task<RetrieveEntityResult<string>> ExecuteSnippetAsync(string snippet)
+		public Task<RetrieveEntityResult<string>> ExecuteSnippetAsync(string snippet, params (string name, object value)[] variables)
 		{
 			return Task.Run
 			(
@@ -153,13 +168,23 @@ namespace DIGOS.Ambassador.Services.Lua
 				{
 					using (var lua = GetState())
 					{
-						lua.DoString($"local status, result = run [[{snippet}]]");
+						foreach (var variable in variables)
+						{
+							lua[variable.name] = variable.value;
+						}
 
-						string result = lua.DoString("return result").First() as string;
+						lua.DoString($"status, result = run [[{snippet}]]");
+
+						string result = lua["result"] as string;
 						bool ranSuccessfully = lua["status"] is bool b && b;
-						if (ranSuccessfully && !(result is null))
+						if (!(result is null) && ranSuccessfully)
 						{
 							return RetrieveEntityResult<string>.FromSuccess(result);
+						}
+
+						if (!(result is null) && result.EndsWith("timeout!"))
+						{
+							return RetrieveEntityResult<string>.FromError(CommandError.Unsuccessful, "Timed out while waiting for the script to complete.");
 						}
 
 						string erroringFunction = this.GetErroringFunctionRegex.Match(result ?? string.Empty).Value;
@@ -178,10 +203,23 @@ namespace DIGOS.Ambassador.Services.Lua
 		/// Executes the given lua script file and retrieves its first result.
 		/// </summary>
 		/// <param name="scriptPath">The path to the file which should be executed.</param>
+		/// <param name="variables">Any variables to pass to the script as globals.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync([PathReference] string scriptPath)
+		public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync([PathReference] string scriptPath, params (string name, object value)[] variables)
 		{
-			throw new NotImplementedException();
+			var getScriptResult = this.ContentService.GetLocalStream(scriptPath);
+			if (!getScriptResult.IsSuccess)
+			{
+				return RetrieveEntityResult<string>.FromError(getScriptResult);
+			}
+
+			string script;
+			using (var sr = new StreamReader(getScriptResult.Entity))
+			{
+				script = await sr.ReadToEndAsync();
+			}
+
+			return await ExecuteSnippetAsync(script, variables);
 		}
 	}
 }

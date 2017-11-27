@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Services
 	/// Management class for content that comes bundled with the bot. Responsible for loading and providing access to
 	/// the content.
 	/// </summary>
-	public sealed class ContentService
+	public class ContentService
 	{
 		/// <summary>
 		/// Gets the Discord bot OAuth token.
@@ -156,6 +156,43 @@ namespace DIGOS.Ambassador.Services
 		}
 
 		/// <summary>
+		/// Gets the stream of a local content file.
+		/// </summary>
+		/// <param name="path">The path to the file.</param>
+		/// <param name="subdirectory">The subdirectory in the content folder, if any.</param>
+		/// <returns>A <see cref="FileStream"/> with the file data.</returns>
+		[Pure]
+		[MustUseReturnValue("The resulting file stream must be disposed.")]
+		public RetrieveEntityResult<FileStream> GetLocalStream([PathReference] [NotNull] string path, [CanBeNull] string subdirectory = null)
+		{
+			var absolutePath = Path.GetFullPath(path);
+
+			if (!absolutePath.StartsWith(this.BaseContentPath))
+			{
+				return RetrieveEntityResult<FileStream>.FromError
+				(
+					CommandError.Unsuccessful,
+					"The path pointed to something that wasn't in the content folder."
+				);
+			}
+
+			if (!(subdirectory is null))
+			{
+				var subdirectoryParentDir = Path.Combine(this.BaseContentPath, subdirectory);
+				if (!absolutePath.StartsWith(subdirectoryParentDir))
+				{
+					return RetrieveEntityResult<FileStream>.FromError
+					(
+						CommandError.Unsuccessful,
+						"The path pointed to something that wasn't in the specified subdirectory."
+					);
+				}
+			}
+
+			return RetrieveEntityResult<FileStream>.FromSuccess(File.OpenRead(absolutePath));
+		}
+
+		/// <summary>
 		/// Gets a given dossier's data.
 		/// </summary>
 		/// <param name="dossier">The dossier to get the data for.</param>
@@ -168,12 +205,7 @@ namespace DIGOS.Ambassador.Services
 				return RetrieveEntityResult<FileStream>.FromError(CommandError.ObjectNotFound, "No file data set.");
 			}
 
-			if (Directory.GetParent(dossier.Path).FullName != this.BaseDossierPath)
-			{
-				return RetrieveEntityResult<FileStream>.FromError(CommandError.Unsuccessful, "The dossier path pointed to something that wasn't in the dossier folder.");
-			}
-
-			return RetrieveEntityResult<FileStream>.FromSuccess(File.OpenRead(dossier.Path));
+			return GetLocalStream(dossier.Path, "Dossiers");
 		}
 
 		/// <summary>
@@ -329,6 +361,29 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			return this.Sass.PickRandom();
+		}
+
+		/// <summary>
+		/// Gets the absolute path to a named lua script belonging to the given transformation.
+		/// </summary>
+		/// <param name="transformation">The transformation that the script belongs to.</param>
+		/// <param name="scriptName">The name of the script.</param>
+		/// <returns>The path to the script.</returns>
+		[Pure]
+		[NotNull]
+		public string GetLuaScriptPath([NotNull] Transformation transformation, [NotNull] string scriptName)
+		{
+			var scriptNameWithoutExtension = scriptName.EndsWith(".lua")
+				? scriptName
+				: $"{scriptName}.lua";
+
+			return Path.Combine
+			(
+				this.BaseTransformationSpeciesPath,
+				transformation.Species.Name,
+				"Scripts",
+				scriptNameWithoutExtension
+			);
 		}
 	}
 }

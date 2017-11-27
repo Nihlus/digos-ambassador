@@ -20,7 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Database.Transformations;
 
 namespace DIGOS.Ambassador.Transformations
 {
@@ -43,7 +45,16 @@ namespace DIGOS.Ambassador.Transformations
 		/// Gets the text that the token should be replaced with.
 		/// </summary>
 		/// <param name="character">The character that the text should be relevant for.</param>
+		/// <param name="transformation">The transformation that the text originates from.</param>
 		/// <returns>The text that the token should be replaced with.</returns>
-		string GetText(Character character);
+		string GetText(Character character, Transformation transformation);
+
+		/// <summary>
+		/// Gets the text that the token should be replaced with.
+		/// </summary>
+		/// <param name="character">The character that the text should be relevant for.</param>
+		/// <param name="transformation">The transformation that the text originates from.</param>
+		/// <returns>The text that the token should be replaced with.</returns>
+		Task<string> GetTextAsync(Character character, Transformation transformation);
 	}
 }

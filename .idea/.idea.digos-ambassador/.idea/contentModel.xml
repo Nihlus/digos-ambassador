@@ -228,6 +228,7 @@
         <e p="Database" t="Include">
           <e p="MockedDatabase.cs" t="Include" />
         </e>
+        <e p="LuaTests.cs" t="Include" />
         <e p="PermissionTests.cs" t="Include" />
         <e p="TokenizerTests.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />

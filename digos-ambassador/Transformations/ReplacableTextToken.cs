@@ -21,7 +21,9 @@
 //
 
 using System;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Database.Transformations;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,7 +42,13 @@ namespace DIGOS.Ambassador.Transformations
 		public int Length { get; set; }
 
 		/// <inheritdoc />
-		public abstract string GetText([NotNull] Character character);
+		public abstract string GetText([NotNull] Character character, Transformation transformation);
+
+		/// <inheritdoc />
+		public virtual Task<string> GetTextAsync(Character character, Transformation transformation)
+		{
+			return Task.Run(() => GetText(character, transformation));
+		}
 
 		/// <summary>
 		/// Initializes the token with generic data coming from the text.

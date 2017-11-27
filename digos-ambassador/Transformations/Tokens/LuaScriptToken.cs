@@ -20,7 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Services;
 
 namespace DIGOS.Ambassador.Transformations
 {
@@ -30,15 +33,48 @@ namespace DIGOS.Ambassador.Transformations
 	[TokenIdentifier("script")]
 	public class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
 	{
+		private readonly ContentService Content;
+		private readonly LuaService Lua;
+
 		/// <summary>
 		/// Gets the name of the script to execute.
 		/// </summary>
 		public string ScriptName { get; private set; }
 
-		/// <inheritdoc />
-		public override string GetText(Character character)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="LuaScriptToken"/> class.
+		/// </summary>
+		/// <param name="luaService">The lua execution service.</param>
+		/// <param name="content">The application's content service.</param>
+		public LuaScriptToken(LuaService luaService, ContentService content)
 		{
-			throw new System.NotImplementedException();
+			this.Lua = luaService;
+			this.Content = content;
+		}
+
+		/// <inheritdoc />
+		public override string GetText(Character character, Transformation transformation)
+		{
+			return GetTextAsync(character, transformation).GetAwaiter().GetResult();
+		}
+
+		/// <inheritdoc />
+		public override async Task<string> GetTextAsync(Character character, Transformation transformation)
+		{
+			var scriptPath = this.Content.GetLuaScriptPath(transformation, this.ScriptName);
+			var result = await this.Lua.ExecuteScriptAsync
+			(
+				scriptPath,
+				(nameof(character), character),
+				(nameof(transformation), transformation)
+			);
+
+			if (!result.IsSuccess)
+			{
+				return $"[{result.ErrorReason}]";
+			}
+
+			return result.Entity;
 		}
 
 		/// <inheritdoc />

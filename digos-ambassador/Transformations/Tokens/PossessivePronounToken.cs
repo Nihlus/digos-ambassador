@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Database.Transformations;
 
 namespace DIGOS.Ambassador.Transformations
 {
@@ -37,7 +38,7 @@ namespace DIGOS.Ambassador.Transformations
 		public bool UseVerb { get; private set; }
 
 		/// <inheritdoc />
-		public override string GetText(Character character)
+		public override string GetText(Character character, Transformation transformation)
 		{
 			throw new System.NotImplementedException();
 		}
