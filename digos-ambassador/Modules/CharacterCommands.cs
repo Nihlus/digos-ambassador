@@ -113,6 +113,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="targetUser">The user to check.</param>
 		[UsedImplicitly]
+		[Alias("show", "info")]
 		[Command("show", RunMode = RunMode.Async)]
 		[Summary("Shows quick information about a character.")]
 		public async Task ShowCharacterAsync([CanBeNull] IUser targetUser = null)
@@ -140,6 +141,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="character">The character.</param>
 		[UsedImplicitly]
+		[Alias("show", "info")]
 		[Command("show", RunMode = RunMode.Async)]
 		[Summary("Shows quick information about a character.")]
 		public async Task ShowCharacterAsync([NotNull] Character character)
@@ -380,6 +382,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="character">The character to view the gallery of.</param>
 		[UsedImplicitly]
+		[Alias("view-gallery", "gallery")]
 		[Command("view-gallery")]
 		[Summary("View the images in a character's gallery.")]
 		public async Task ViewCharacterGalleryAsync([NotNull] Character character)
@@ -723,7 +726,9 @@ namespace DIGOS.Ambassador.Modules
 				[NotNull]
 				[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 				Character character,
-				[NotNull] string newCharacterSummary
+				[Remainder]
+				[NotNull]
+				string newCharacterSummary
 			)
 			{
 				using (var db = new GlobalInfoContext())
@@ -756,7 +761,9 @@ namespace DIGOS.Ambassador.Modules
 				[NotNull]
 				[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 				Character character,
-				[CanBeNull] string newCharacterDescription = null
+				[Remainder]
+				[CanBeNull]
+				string newCharacterDescription = null
 			)
 			{
 				using (var db = new GlobalInfoContext())
@@ -840,6 +847,8 @@ namespace DIGOS.Ambassador.Modules
 				[NotNull]
 				[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 				Character character,
+				[Remainder]
+				[NotNull]
 				string pronounFamily
 			)
 			{
