@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Database.Characters.Pronouns
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Represents a pronoun in its different forms.

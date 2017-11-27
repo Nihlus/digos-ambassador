@@ -54,10 +54,6 @@
           </e>
           <e p="Characters" t="Include">
             <e p="Character.cs" t="Include" />
-            <e p="Pronouns" t="Include">
-              <e p="GrammaticalPerson.cs" t="Include" />
-              <e p="IPronounProvider.cs" t="Include" />
-            </e>
           </e>
           <e p="Data" t="Include">
             <e p="Image.cs" t="Include" />
@@ -151,6 +147,10 @@
         <e p="Services" t="Include">
           <e p="Characters" t="Include">
             <e p="CharacterService.cs" t="Include" />
+            <e p="Pronouns" t="Include">
+              <e p="GrammaticalPerson.cs" t="Include" />
+              <e p="IPronounProvider.cs" t="Include" />
+            </e>
           </e>
           <e p="Content" t="Include">
             <e p="ContentService.cs" t="Include" />
