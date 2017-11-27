@@ -150,6 +150,7 @@
             <e p="Pronouns" t="Include">
               <e p="GrammaticalPerson.cs" t="Include" />
               <e p="IPronounProvider.cs" t="Include" />
+              <e p="MalePronounProvider.cs" t="Include" />
             </e>
           </e>
           <e p="Content" t="Include">

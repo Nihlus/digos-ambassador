@@ -36,42 +36,38 @@ namespace DIGOS.Ambassador.Services
 		/// Gets the pronoun in subject form, that is, "I" or "you". If <see cref="withVerb"/> is true,
 		/// the pronoun will include a possessive verb - that is, "I have" or "she has".
 		/// </summary>
-		/// <param name="person">The grammatical person of the form.</param>
 		/// <param name="plural">Whether or not to pluralize the form.</param>
-		/// /// <param name="withVerb">Whether or not to include the connective verb.</param>
+		/// <param name="withVerb">Whether or not to include the connective verb.</param>
+		/// ///
 		/// <returns>The pronoun.</returns>
-		string GetSubjectForm(GrammaticalPerson person, bool plural = false, bool withVerb = false);
+		string GetSubjectForm(bool plural = false, bool withVerb = false);
 
 		/// <summary>
 		/// Gets the pronoun in object form, that is, "me" or "you".
 		/// </summary>
-		/// <param name="person">The grammatical person of the form.</param>
 		/// <param name="plural">Whether or not to pluralize the form.</param>
 		/// <returns>The pronoun.</returns>
-		string GetObjectForm(GrammaticalPerson person, bool plural = false);
+		string GetObjectForm(bool plural = false);
 
 		/// <summary>
 		/// Gets the pronoun in possessive adjective form, that is, "my" or "yours".
 		/// </summary>
-		/// <param name="person">The grammatical person of the form.</param>
 		/// <param name="plural">Whether or not to pluralize the form.</param>
 		/// <returns>The pronoun.</returns>
-		string GetPossessiveAdjectiveForm(GrammaticalPerson person, bool plural = false);
+		string GetPossessiveAdjectiveForm(bool plural = false);
 
 		/// <summary>
 		/// Gets the pronoun in possessive form, that is, "mine" or "yours".
 		/// </summary>
-		/// <param name="person">The grammatical person of the form.</param>
 		/// <param name="plural">Whether or not to pluralize the form.</param>
 		/// <returns>The pronoun.</returns>
-		string GetPossessiveForm(GrammaticalPerson person, bool plural = false);
+		string GetPossessiveForm(bool plural = false);
 
 		/// <summary>
 		/// Gets the pronoun in reflexive form, that is, "myself" or "yourself.
 		/// </summary>
-		/// <param name="person">The grammatical person of the form.</param>
 		/// <param name="plural">Whether or not to pluralize the form.</param>
 		/// <returns>The pronoun.</returns>
-		string GetReflexiveForm(GrammaticalPerson person, bool plural = false);
+		string GetReflexiveForm(bool plural = false);
 	}
 }
