@@ -69,12 +69,7 @@ namespace DIGOS.Ambassador.Transformations
 		)
 		{
 			var tokens = this.Tokenizer.GetTokens(text);
-			var tokenContentMap = new Dictionary<IReplaceableTextToken, string>();
-
-			foreach (var token in tokens)
-			{
-				tokenContentMap.Add(token, token.GetText(character, transformation));
-			}
+			var tokenContentMap = tokens.ToDictionary(token => token, token => token.GetText(character, transformation));
 
 			int relativeOffset = 0;
 			var sb = new StringBuilder(text);
@@ -216,7 +211,9 @@ namespace DIGOS.Ambassador.Transformations
 					break;
 				}
 				default:
+				{
 					throw new ArgumentOutOfRangeException();
+				}
 			}
 
 			return ReplaceTokensWithContent(removalText, character, transformation);
@@ -237,7 +234,11 @@ namespace DIGOS.Ambassador.Transformations
 			[NotNull] AppearanceComponent currentComponent
 		)
 		{
-			string shiftMessage = $"{{@target}}'s {{@pattern}} {currentComponent.Bodypart.Humanize()} morphs, as {{@f|their}} ";
+			string shiftMessage =
+				$"{{@target}}'s {currentComponent.Bodypart.Humanize()} morphs, as" +
+				$" {{@f|their}} {{@pattern}} {originalColour} hues turn into {currentComponent.PatternColour}.";
+
+			return ReplaceTokensWithContent(shiftMessage, character, currentComponent.Transformation);
 		}
 
 		/// <summary>
@@ -257,7 +258,12 @@ namespace DIGOS.Ambassador.Transformations
 			[NotNull] AppearanceComponent currentComponent
 		)
 		{
-			throw new System.NotImplementedException();
+			string shiftMessage =
+				$"The surface of {{@target}}'s {currentComponent.Bodypart.Humanize()} morphs, as" +
+				$" {{@colour}} {{@pattern}} patterns spread across it" +
+				$"{(originalPattern.HasValue ? $", replacing their {originalColour} {originalPattern.Humanize().Pluralize()}" : ".")}.";
+
+			return ReplaceTokensWithContent(shiftMessage, character, currentComponent.Transformation);
 		}
 
 		/// <summary>
@@ -275,7 +281,11 @@ namespace DIGOS.Ambassador.Transformations
 			[NotNull] AppearanceComponent currentComponent
 		)
 		{
-			throw new System.NotImplementedException();
+			string shiftMessage =
+				$"{{@target}}'s {currentComponent.Bodypart.Humanize()} morphs, as" +
+				$" {{@f|their}} {originalColour} hues turn into {currentComponent.PatternColour}.";
+
+			return ReplaceTokensWithContent(shiftMessage, character, currentComponent.Transformation);
 		}
 	}
 }
