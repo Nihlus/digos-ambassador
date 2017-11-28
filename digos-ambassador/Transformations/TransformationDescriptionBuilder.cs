@@ -237,7 +237,7 @@ namespace DIGOS.Ambassador.Transformations
 			[NotNull] AppearanceComponent currentComponent
 		)
 		{
-			throw new System.NotImplementedException();
+			string shiftMessage = $"{{@target}}'s {{@pattern}} {currentComponent.Bodypart.Humanize()} morphs, as {{@f|their}} ";
 		}
 
 		/// <summary>
