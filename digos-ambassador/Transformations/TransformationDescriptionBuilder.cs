@@ -38,8 +38,6 @@ namespace DIGOS.Ambassador.Transformations
 	/// </summary>
 	public class TransformationDescriptionBuilder
 	{
-		private readonly IServiceProvider Services;
-
 		private readonly TransformationTextTokenizer Tokenizer;
 
 		/// <summary>
@@ -48,8 +46,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="services">The available services.</param>
 		public TransformationDescriptionBuilder(IServiceProvider services)
 		{
-			this.Services = services;
-			this.Tokenizer = new TransformationTextTokenizer(this.Services);
+			this.Tokenizer = new TransformationTextTokenizer(services);
 
 			this.Tokenizer.DiscoverAvailableTokens();
 		}
