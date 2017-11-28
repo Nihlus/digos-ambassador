@@ -20,16 +20,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Transformations;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 using Xunit;
 
 #pragma warning disable SA1600
