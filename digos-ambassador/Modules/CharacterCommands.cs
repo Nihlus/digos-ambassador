@@ -36,7 +36,7 @@ using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
-using Humanizer;
+
 using JetBrains.Annotations;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
@@ -403,8 +403,14 @@ namespace DIGOS.Ambassador.Modules
 			gallery.Options.FooterFormat = "Image {0}/{1}";
 			gallery.Options.InformationText = "Use the reactions to navigate the gallery.";
 
-			var callback = new PaginatedGalleryCallback(this.Interactive, this.Feedback, this.Context, gallery);
+			var userChannel = await this.Context.User.GetOrCreateDMChannelAsync();
+			var callback = new PaginatedGalleryCallback(this.Interactive, this.Feedback, this.Context, gallery, userChannel);
 			await callback.DisplayAsync().ConfigureAwait(false);
+
+			if (!this.Context.IsPrivate)
+			{
+				await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
+			}
 		}
 
 		/// <summary>

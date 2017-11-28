@@ -315,6 +315,12 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			var currentComponent = character.GetBodypart(bodyPart);
+
+			if (currentComponent.PatternColour is null)
+			{
+				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The pattern doesn't have a colour to shift.");
+			}
+
 			var originalColour = currentComponent.PatternColour;
 			currentComponent.PatternColour = patternColour;
 

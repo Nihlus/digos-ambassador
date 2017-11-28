@@ -44,6 +44,8 @@ namespace DIGOS.Ambassador.Pagination
 		/// <inheritdoc />
 		public SocketCommandContext Context { get; }
 
+		private IMessageChannel Channel { get; }
+
 		/// <summary>
 		/// Gets the interaction service associated with this gallery callback.
 		/// </summary>
@@ -83,6 +85,7 @@ namespace DIGOS.Ambassador.Pagination
 		/// <param name="feedbackService">The user feedback service.</param>
 		/// <param name="sourceContext">The context to which the gallery belongs.</param>
 		/// <param name="pager">The pages in the gallery.</param>
+		/// <param name="targetChannel">The channel in which the gallery should be posted.</param>
 		/// <param name="criterion">The criterion for reactions.</param>
 		public PaginatedGalleryCallback
 		(
@@ -90,6 +93,7 @@ namespace DIGOS.Ambassador.Pagination
 			UserFeedbackService feedbackService,
 			SocketCommandContext sourceContext,
 			PaginatedGallery pager,
+			IMessageChannel targetChannel = null,
 			ICriterion<SocketReaction> criterion = null
 		)
 		{
@@ -98,6 +102,7 @@ namespace DIGOS.Ambassador.Pagination
 			this.Context = sourceContext;
 			this.Criterion = criterion ?? new EmptyCriterion<SocketReaction>();
 			this.Pager = pager;
+			this.Channel = targetChannel ?? this.Context.Channel;
 			this.Pages = this.Pager.Images.Count();
 		}
 
@@ -108,7 +113,7 @@ namespace DIGOS.Ambassador.Pagination
 		public async Task DisplayAsync()
 		{
 			var embed = BuildEmbed();
-			var message = await this.Context.Channel.SendMessageAsync(string.Empty, embed: embed).ConfigureAwait(false);
+			var message = await this.Channel.SendMessageAsync(string.Empty, embed: embed).ConfigureAwait(false);
 			this.Message = message;
 			this.Interactive.AddReactionCallback(message, this);
 
@@ -121,8 +126,8 @@ namespace DIGOS.Ambassador.Pagination
 				await message.AddReactionAsync(this.Options.Last);
 
 				var manageMessages =
-					this.Context.Channel is IGuildChannel guildChannel &&
-					this.Context.User is IGuildUser guildUser &&
+					this.Channel is IGuildChannel guildChannel &&
+					this.Context.Guild?.GetUser(this.Context.Client.CurrentUser.Id) is IGuildUser guildUser &&
 					guildUser.GetPermissions(guildChannel).ManageMessages;
 
 				var canJump =
@@ -228,7 +233,16 @@ namespace DIGOS.Ambassador.Pagination
 				return false;
 			}
 
-			_ = this.Message.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
+			var manageMessages =
+				this.Channel is IGuildChannel guildChannel &&
+				this.Context.Guild?.GetUser(this.Context.Client.CurrentUser.Id) is IGuildUser guildUser &&
+				guildUser.GetPermissions(guildChannel).ManageMessages;
+
+			if (manageMessages)
+			{
+				_ = this.Message.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
+			}
+
 			await RenderAsync().ConfigureAwait(false);
 			return false;
 		}
