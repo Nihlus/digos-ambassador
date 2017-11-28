@@ -1,5 +1,5 @@
 ﻿//
-//  PronounToken.cs
+//  PatternToken.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,57 +20,28 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
+using Humanizer;
 
 namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
-	/// A token that gets replaced with a colour.
+	/// A token that gets replaced with a pattern name.
 	/// </summary>
-	[TokenIdentifier("colour")]
-	public class ColourToken : ReplacableTextToken<ColourToken>
+	[TokenIdentifier("pattern")]
+	public class PatternToken : ReplacableTextToken<PatternToken>
 	{
-		/// <summary>
-		/// Gets the form of the pronoun.
-		/// </summary>
-		public string Part { get; private set; }
-
 		/// <inheritdoc />
 		public override string GetText(Character character, Transformation transformation)
 		{
-			switch (this.Part)
-			{
-				case "base":
-				{
-					return character.GetBodypart(transformation.Part).BaseColour.ToString();
-				}
-				case "pattern":
-				{
-					return character.GetBodypart(transformation.Part).PatternColour?.ToString();
-				}
-				default:
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-			}
+			var currentBodypart = character.GetBodypart(transformation.Part);
+			return currentBodypart.Transformation.DefaultPattern?.ToString().Humanize();
 		}
 
 		/// <inheritdoc />
-		protected override ColourToken Initialize(string data)
+		protected override PatternToken Initialize(string data)
 		{
-			if (data is null)
-			{
-				this.Part = "base";
-				return this;
-			}
-
-			if (data.Equals("base") | data.Equals("pattern"))
-			{
-				this.Part = data;
-			}
-
 			return this;
 		}
 	}
