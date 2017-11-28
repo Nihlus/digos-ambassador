@@ -47,11 +47,6 @@ namespace DIGOS.Ambassador.Services
 		public static IReadOnlyList<Bodypart> Arms { get; } = new[] { LeftArm, RightArm };
 
 		/// <summary>
-		/// Gets the parts constituting the body.
-		/// </summary>
-		public static IReadOnlyList<Bodypart> Body { get; } = new[] { UpperBody, LowerBody };
-
-		/// <summary>
 		/// Gets the parts constituting the legs.
 		/// </summary>
 		public static IReadOnlyList<Bodypart> Legs { get; } = new[] { LeftLeg, RightLeg };
@@ -97,11 +92,6 @@ namespace DIGOS.Ambassador.Services
 				case Bodypart.Arms:
 				{
 					parts = Arms;
-					break;
-				}
-				case Bodypart.Body:
-				{
-					parts = Body;
 					break;
 				}
 				case Bodypart.Legs:

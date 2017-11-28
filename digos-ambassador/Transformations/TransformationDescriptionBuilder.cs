@@ -27,6 +27,7 @@ using System.Text;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Services;
 using Humanizer;
 using JetBrains.Annotations;
 
@@ -110,7 +111,7 @@ namespace DIGOS.Ambassador.Transformations
 		[Pure]
 		public string BuildShiftMessage([NotNull] Character character, [NotNull] Transformation transformation)
 		{
-			throw new System.NotImplementedException();
+			return ReplaceTokensWithContent(transformation.ShiftMessage, character, transformation);
 		}
 
 		/// <summary>
@@ -122,7 +123,7 @@ namespace DIGOS.Ambassador.Transformations
 		[Pure]
 		public string BuildGrowMessage([NotNull] Character character, [NotNull] Transformation transformation)
 		{
-			throw new System.NotImplementedException();
+			return ReplaceTokensWithContent(transformation.GrowMessage, character, transformation);
 		}
 
 		/// <summary>
@@ -134,7 +135,91 @@ namespace DIGOS.Ambassador.Transformations
 		[Pure]
 		public string BuildRemoveMessage([NotNull] Character character, [NotNull] Transformation transformation)
 		{
-			throw new System.NotImplementedException();
+			string removalText;
+			switch (transformation.Part)
+			{
+				case Bodypart.Hair:
+				{
+					removalText = $"{{@target}}'s hair becomes dull and colourless. Strand by strand, tuft by tuft, it falls out, leaving an empty scalp.";
+					break;
+				}
+				case Bodypart.Face:
+				{
+					removalText = $"{{@target}}'s face begins to warp strangely. Slowly, their features smooth and vanish, leaving a blank surface.";
+					break;
+				}
+				case Bodypart.LeftEar:
+				case Bodypart.RightEar:
+				{
+					removalText = $"{{@target}}'s {transformation.Part.Humanize()} shrivels and vanishes.";
+					break;
+				}
+				case Bodypart.LeftEye:
+				case Bodypart.RightEye:
+				{
+					removalText = $"{{@target}}'s {transformation.Part.Humanize()} deflates as their eye socket closes, leaving nothing behind.";
+					break;
+				}
+				case Bodypart.Teeth:
+				{
+					removalText = $"With a strange popping sound, {{@target}}'s teeth retract and disappear.";
+					break;
+				}
+				case Bodypart.LeftLeg:
+				case Bodypart.RightLeg:
+				case Bodypart.LeftArm:
+				case Bodypart.RightArm:
+				{
+					removalText = $"{{@target}}'s {transformation.Part.Humanize()} shrivels and retracts, vanishing.";
+					break;
+				}
+				case Bodypart.Tail:
+				{
+					removalText = $"{{@target}}'s tail flicks and thrashes for a moment, before it thins out and disappears into nothing.";
+					break;
+				}
+				case Bodypart.LeftWing:
+				case Bodypart.RightWing:
+				{
+					removalText = $"{{@target}}'s {transformation.Part.Humanize()} stiffens and shudders, before losing cohesion and disappearing into their body.";
+					break;
+				}
+				case Bodypart.Penis:
+				{
+					removalText = $"{{@target}}'s shaft twitches and shudders, as it begins to shrink and retract. In mere moments, it's gone, leaving nothing.";
+					break;
+				}
+				case Bodypart.Vagina:
+				{
+					removalText = $"{{@target}}'s slit contracts and twitches. A strange sensation rushes through {{@f|them}} as the opening zips up and fills out, leaving nothing.";
+					break;
+				}
+				case Bodypart.Head:
+				{
+					removalText = $"{{@target}}'s head warps strangely before it deflates like a balloon, disappearing.";
+					break;
+				}
+				case Bodypart.Legs:
+				case Bodypart.Arms:
+				{
+					removalText = $"{{@target}}'s {transformation.Part.Humanize()} shrivel and retract, vanishing.";
+					break;
+				}
+				case Bodypart.Body:
+				{
+					removalText = $"{{@target}}'s torso crumples into itself as their main body collapses, shifting and vanishing.";
+					break;
+				}
+				case Bodypart.Wings:
+				{
+					removalText = $"{{@target}}'s {transformation.Part.Humanize()} stiffen and shudder, before losing cohesion and disappearing into their body.";
+					break;
+				}
+				default:
+					throw new ArgumentOutOfRangeException();
+			}
+
+			return ReplaceTokensWithContent(removalText, character, transformation);
 		}
 
 		/// <summary>

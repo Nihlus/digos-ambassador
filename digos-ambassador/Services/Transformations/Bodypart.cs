@@ -63,9 +63,9 @@ namespace DIGOS.Ambassador.Services
 		Teeth,
 
 		/// <summary>
-		/// The upper body.
+		/// The main body.
 		/// </summary>
-		UpperBody,
+		Body,
 
 		/// <summary>
 		/// The left arm.
@@ -76,11 +76,6 @@ namespace DIGOS.Ambassador.Services
 		/// The right arm.
 		/// </summary>
 		RightArm,
-
-		/// <summary>
-		/// The lower body.
-		/// </summary>
-		LowerBody,
 
 		/// <summary>
 		/// The left leg.
@@ -126,11 +121,6 @@ namespace DIGOS.Ambassador.Services
 		/// The arms, composed of the left and right arms.
 		/// </summary>
 		Arms,
-
-		/// <summary>
-		/// The body, composed of the upper and lower body.
-		/// </summary>
-		Body,
 
 		/// <summary>
 		/// The legs, composed of the left and right legs.
