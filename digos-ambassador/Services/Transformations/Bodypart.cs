@@ -28,6 +28,11 @@ namespace DIGOS.Ambassador.Services
 	public enum Bodypart
 	{
 		/// <summary>
+		/// The head hair.
+		/// </summary>
+		Hair,
+
+		/// <summary>
 		/// The face.
 		/// </summary>
 		Face,
@@ -135,6 +140,6 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// The wings, composed of the left and right wings.
 		/// </summary>
-		Wings
+		Wings,
 	}
 }

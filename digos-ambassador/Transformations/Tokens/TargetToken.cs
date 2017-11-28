@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Transformations
 	/// <summary>
 	/// A token that gets replaced with the target's name or nickname.
 	/// </summary>
-	[TokenIdentifier("target")]
+	[TokenIdentifier("target", "t")]
 	public class TargetToken : ReplacableTextToken<TargetToken>
 	{
 		/// <inheritdoc />

@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Services
 
 		/// <summary>
 		/// Gets the pronoun in subject form, that is, "I" or "you". If <see cref="withVerb"/> is true,
-		/// the pronoun will include a possessive verb - that is, "I have" or "she has".
+		/// the pronoun will include a possessive verb - that is, "I am" or "she is".
 		/// </summary>
 		/// <param name="withVerb">Whether or not to include the connective verb.</param>
 		/// <returns>The pronoun.</returns>
@@ -53,10 +53,12 @@ namespace DIGOS.Ambassador.Services
 		string GetPossessiveAdjectiveForm();
 
 		/// <summary>
-		/// Gets the pronoun in possessive form, that is, "mine" or "yours".
+		/// Gets the pronoun in possessive form, that is, "mine" or "yours". If <see cref="withVerb"/> is true,
+		/// the pronoun will include a possessive verb - that is, "I have" or "she has".
 		/// </summary>
+		/// <param name="withVerb">Whether or not to include the connective verb.</param>
 		/// <returns>The pronoun.</returns>
-		string GetPossessiveForm();
+		string GetPossessiveForm(bool withVerb = false);
 
 		/// <summary>
 		/// Gets the pronoun in reflexive form, that is, "myself" or "yourself.

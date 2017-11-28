@@ -48,6 +48,8 @@ namespace DIGOS.Ambassador.Services
 	{
 		private readonly ContentService Content;
 
+		private TransformationDescriptionBuilder DescriptionBuilder;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TransformationService"/> class.
 		/// </summary>
@@ -55,6 +57,17 @@ namespace DIGOS.Ambassador.Services
 		public TransformationService(ContentService content)
 		{
 			this.Content = content;
+		}
+
+		/// <summary>
+		/// Sets the description builder to use with the service.
+		/// </summary>
+		/// <param name="descriptionBuilder">The builder.</param>
+		/// <returns>The transformation service with the given builder.</returns>
+		public TransformationService WithDescriptionBuilder(TransformationDescriptionBuilder descriptionBuilder)
+		{
+			this.DescriptionBuilder = descriptionBuilder;
+			return this;
 		}
 
 		/// <summary>
@@ -90,7 +103,7 @@ namespace DIGOS.Ambassador.Services
 			character.CurrentAppearance.Components.Remove(component);
 			await db.SaveChangesAsync();
 
-			string removeMessage = TransformationDescriptionBuilder.BuildRemoveMessage(character, transformation);
+			string removeMessage = this.DescriptionBuilder.BuildRemoveMessage(character, transformation);
 			return ShiftBodypartResult.FromSuccess(removeMessage);
 		}
 
@@ -142,7 +155,7 @@ namespace DIGOS.Ambassador.Services
 			character.CurrentAppearance.Components.Add(component);
 			await db.SaveChangesAsync();
 
-			string growMessage = TransformationDescriptionBuilder.BuildGrowMessage(character, transformation);
+			string growMessage = this.DescriptionBuilder.BuildGrowMessage(character, transformation);
 			return ShiftBodypartResult.FromSuccess(growMessage);
 		}
 
@@ -194,7 +207,7 @@ namespace DIGOS.Ambassador.Services
 			currentComponent.Transformation = transformation;
 			await db.SaveChangesAsync();
 
-			string shiftMessage = TransformationDescriptionBuilder.BuildShiftMessage(character, transformation);
+			string shiftMessage = this.DescriptionBuilder.BuildShiftMessage(character, transformation);
 			return ShiftBodypartResult.FromSuccess(shiftMessage);
 		}
 
@@ -234,7 +247,7 @@ namespace DIGOS.Ambassador.Services
 
 			await db.SaveChangesAsync();
 
-			string shiftMessage = TransformationDescriptionBuilder.BuildColourShiftMessage(character, originalColour, currentComponent);
+			string shiftMessage = this.DescriptionBuilder.BuildColourShiftMessage(character, originalColour, currentComponent);
 			return ShiftBodypartResult.FromSuccess(shiftMessage);
 		}
 
@@ -280,7 +293,7 @@ namespace DIGOS.Ambassador.Services
 
 			await db.SaveChangesAsync();
 
-			string shiftMessage = TransformationDescriptionBuilder.BuildPatternShiftMessage(character, originalPattern, originalColour, currentComponent);
+			string shiftMessage = this.DescriptionBuilder.BuildPatternShiftMessage(character, originalPattern, originalColour, currentComponent);
 			return ShiftBodypartResult.FromSuccess(shiftMessage);
 		}
 
@@ -326,7 +339,7 @@ namespace DIGOS.Ambassador.Services
 
 			await db.SaveChangesAsync();
 
-			string shiftMessage = TransformationDescriptionBuilder.BuildPatternColourShiftMessage(character, originalColour, currentComponent);
+			string shiftMessage = this.DescriptionBuilder.BuildPatternColourShiftMessage(character, originalColour, currentComponent);
 			return ShiftBodypartResult.FromSuccess(shiftMessage);
 		}
 
@@ -404,7 +417,7 @@ namespace DIGOS.Ambassador.Services
 
 			eb.AddField("Description", character.Description);
 
-			string visualDescription = TransformationDescriptionBuilder.BuildVisualDescription(character);
+			string visualDescription = this.DescriptionBuilder.BuildVisualDescription(character);
 			eb.WithDescription(visualDescription);
 
 			return eb.Build();

@@ -33,6 +33,7 @@ using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
@@ -124,6 +125,12 @@ namespace DIGOS.Ambassador
 				.AddSingleton(this.Transformation)
 				.AddSingleton(this.Lua)
 				.BuildServiceProvider();
+
+			this.Transformation = this.Transformation
+			.WithDescriptionBuilder
+			(
+				ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(this.Services)
+			);
 
 			this.Client.MessageReceived += OnMessageReceived;
 			this.Client.MessageUpdated += OnMessageUpdated;

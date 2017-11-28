@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$USER_HOME$/.Rider2017.3/system/resharper-host/local/Transient/ReSharperHost/v11/SolutionCaches/_digos-ambassador.233808278.00" t="ExcludeRecursive" />
+    <e p="$USER_HOME$/.Rider2017.2/system/resharper-host/local/Transient/ReSharperHost/v10/SolutionCaches/_digos-ambassador.233808278.00" t="ExcludeRecursive" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.3.1/build/netcoreapp1.0/xunit.runner.reporters.netcoreapp10.dll" t="Include" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.3.1/build/netcoreapp1.0/xunit.runner.utility.netcoreapp10.dll" t="Include" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.3.1/build/netcoreapp1.0/xunit.runner.visualstudio.dotnetcore.testadapter.dll" t="Include" />
@@ -47,6 +47,7 @@
             <e p="Appearance.cs" t="Include" />
             <e p="AppearanceComponent.cs" t="Include" />
             <e p="Colour.cs" t="Include" />
+            <e p="IColour.cs" t="Include" />
             <e p="Pattern.cs" t="Include" />
             <e p="Shade.cs" t="Include" />
             <e p="ShadeModifier.cs" t="Include" />
@@ -216,6 +217,7 @@
           <e p="TokenIdentifierAttribute.cs" t="Include" />
           <e p="Tokens" t="Include">
             <e p="ColourToken.cs" t="Include" />
+            <e p="FluentPronounToken.cs" t="Include" />
             <e p="LuaScriptToken.cs" t="Include" />
             <e p="LuaSnippetToken.cs" t="Include" />
             <e p="PatternToken.cs" t="Include" />
@@ -254,6 +256,7 @@
         <e p="Database" t="Include">
           <e p="MockedDatabase.cs" t="Include" />
         </e>
+        <e p="DescriptionBuilderTests.cs" t="Include" />
         <e p="LuaTests.cs" t="Include" />
         <e p="PermissionTests.cs" t="Include" />
         <e p="TokenizerTests.cs" t="Include" />

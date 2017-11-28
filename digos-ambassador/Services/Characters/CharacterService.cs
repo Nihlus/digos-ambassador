@@ -92,8 +92,19 @@ namespace DIGOS.Ambassador.Services
 					continue;
 				}
 
-				this.PronounProviders.Add(pronounProvider.Family, pronounProvider);
+				WithPronounProvider(pronounProvider);
 			}
+		}
+
+		/// <summary>
+		/// Adds the given pronoun provider to the service.
+		/// </summary>
+		/// <param name="pronounProvider">The pronoun provider to add.</param>
+		/// <returns>The service with the provider.</returns>
+		public CharacterService WithPronounProvider(IPronounProvider pronounProvider)
+		{
+			this.PronounProviders.Add(pronounProvider.Family, pronounProvider);
+			return this;
 		}
 
 		/// <summary>
@@ -103,7 +114,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A pronoun provider.</returns>
 		/// <exception cref="ArgumentException">Thrown if no pronoun provider exists for the character's preference.</exception>
 		[NotNull]
-		public IPronounProvider GetPronounProvider([NotNull] Character character)
+		public virtual IPronounProvider GetPronounProvider([NotNull] Character character)
 		{
 			if (this.PronounProviders.ContainsKey(character.PronounProviderFamily))
 			{

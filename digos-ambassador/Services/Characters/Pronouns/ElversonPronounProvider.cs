@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Services
 		public override string Family => "Elverson";
 
 		/// <inheritdoc />
-		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ey have" : "ey";
+		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ey are" : "ey";
 
 		/// <inheritdoc />
 		public override string GetObjectForm() => "em";
@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Services
 		public override string GetPossessiveAdjectiveForm() => "eir";
 
 		/// <inheritdoc />
-		public override string GetPossessiveForm() => "eirs";
+		public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "ey have" : "eirs";
 
 		/// <inheritdoc />
 		public override string GetReflexiveForm() => "emselves";

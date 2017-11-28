@@ -35,15 +35,15 @@ namespace DIGOS.Ambassador.Transformations
 		/// <summary>
 		/// Gets or sets the in-text identifier of the token.
 		/// </summary>
-		public string Identifier { get; set; }
+		public string[] Identifiers { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TokenIdentifierAttribute"/> class.
 		/// </summary>
-		/// <param name="identifier">The identifier.</param>
-		public TokenIdentifierAttribute(string identifier)
+		/// <param name="identifiers">The identifiers.</param>
+		public TokenIdentifierAttribute(params string[] identifiers)
 		{
-			this.Identifier = identifier;
+			this.Identifiers = identifiers;
 		}
 	}
 }

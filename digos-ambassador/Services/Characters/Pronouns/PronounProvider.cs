@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Services
 		public abstract string GetPossessiveAdjectiveForm();
 
 		/// <inheritdoc />
-		public abstract string GetPossessiveForm();
+		public abstract string GetPossessiveForm(bool withVerb = false);
 
 		/// <inheritdoc />
 		public abstract string GetReflexiveForm();
@@ -58,6 +58,10 @@ namespace DIGOS.Ambassador.Services
 				{
 					return GetSubjectForm();
 				}
+				case PronounForm.SubjectVerb:
+				{
+					return GetSubjectForm(true);
+				}
 				case PronounForm.Object:
 				{
 					return GetObjectForm();
@@ -69,6 +73,10 @@ namespace DIGOS.Ambassador.Services
 				case PronounForm.Possessive:
 				{
 					return GetPossessiveForm();
+				}
+				case PronounForm.PossessiveVerb:
+				{
+					return GetPossessiveForm(true);
 				}
 				case PronounForm.Reflexive:
 				{

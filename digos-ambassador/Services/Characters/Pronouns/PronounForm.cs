@@ -33,6 +33,11 @@ namespace DIGOS.Ambassador.Services
 		Subject,
 
 		/// <summary>
+		/// The subject form but with a verb, that is, "I am" or "you are".
+		/// </summary>
+		SubjectVerb,
+
+		/// <summary>
 		/// The object form, that is, "me" or "you.
 		/// </summary>
 		Object,
@@ -46,6 +51,11 @@ namespace DIGOS.Ambassador.Services
 		/// The possessive form, that is, "mine" or "yours".
 		/// </summary>
 		Possessive,
+
+		/// <summary>
+		/// The possessive form but with a verb, that is, "I have", or "you have".
+		/// </summary>
+		PossessiveVerb,
 
 		/// <summary>
 		/// The reflexive form, that is, "myself" or "yourself".

@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Services
 		public override string Family => "Feminine";
 
 		/// <inheritdoc />
-		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "she has" : "she";
+		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "she is" : "she";
 
 		/// <inheritdoc />
 		public override string GetObjectForm() => "her";
@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Services
 		public override string GetPossessiveAdjectiveForm() => "her";
 
 		/// <inheritdoc />
-		public override string GetPossessiveForm() => "hers";
+		public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "she has" : "hers";
 
 		/// <inheritdoc />
 		public override string GetReflexiveForm() => "herself";

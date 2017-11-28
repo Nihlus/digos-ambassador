@@ -84,12 +84,15 @@ namespace DIGOS.Ambassador.Transformations
 				throw new ArgumentException($"The token type \"{tokenType.Name}\" does not have an identifier attribute.");
 			}
 
-			if (this.AvailableTokens.ContainsKey(tokenIdentifier.Identifier))
+			foreach (var identifier in tokenIdentifier.Identifiers)
 			{
-				throw new ArgumentException("A token with that name has already been registered.");
-			}
+				if (this.AvailableTokens.ContainsKey(identifier))
+				{
+					throw new ArgumentException($"A token with the identifier \"{identifier}\"has already been registered.");
+				}
 
-			this.AvailableTokens.Add(tokenIdentifier.Identifier, tokenType);
+				this.AvailableTokens.Add(identifier, tokenType);
+			}
 		}
 
 		/// <summary>

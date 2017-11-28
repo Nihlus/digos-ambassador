@@ -33,20 +33,16 @@ namespace DIGOS.Ambassador.Database.Appearances
 	/// <summary>
 	/// Represents a colour shade with an optional modifier.
 	/// </summary>
-	public class Colour : IEFEntity
+	public class Colour : IEFEntity, IColour
 	{
 		/// <inheritdoc />
 		[YamlIgnore]
 		public uint ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the shade of the colour.
-		/// </summary>
+		/// <inheritdoc />
 		public Shade Shade { get; set; }
 
-		/// <summary>
-		/// Gets or sets the colour modifier.
-		/// </summary>
+		/// <inheritdoc />
 		public ShadeModifier? Modifier { get; set; }
 
 		/// <summary>

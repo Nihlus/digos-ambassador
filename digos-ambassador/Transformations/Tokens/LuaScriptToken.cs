@@ -30,7 +30,7 @@ namespace DIGOS.Ambassador.Transformations
 	/// <summary>
 	/// Represents a token which executes a named lua code script and gets replaced with the result.
 	/// </summary>
-	[TokenIdentifier("script")]
+	[TokenIdentifier("script", "sc")]
 	public class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
 	{
 		private readonly ContentService Content;

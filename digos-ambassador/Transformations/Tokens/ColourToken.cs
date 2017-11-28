@@ -1,5 +1,5 @@
 ﻿//
-//  PronounToken.cs
+//  ColourToken.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Transformations
 	/// <summary>
 	/// A token that gets replaced with a colour.
 	/// </summary>
-	[TokenIdentifier("colour")]
+	[TokenIdentifier("colour", "c")]
 	public class ColourToken : ReplacableTextToken<ColourToken>
 	{
 		/// <summary>

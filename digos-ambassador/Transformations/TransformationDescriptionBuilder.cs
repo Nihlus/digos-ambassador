@@ -20,9 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
+using Humanizer;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Transformations
@@ -32,13 +37,66 @@ namespace DIGOS.Ambassador.Transformations
 	/// </summary>
 	public class TransformationDescriptionBuilder
 	{
+		private readonly IServiceProvider Services;
+
+		private readonly TransformationTextTokenizer Tokenizer;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TransformationDescriptionBuilder"/> class.
+		/// </summary>
+		/// <param name="services">The available services.</param>
+		public TransformationDescriptionBuilder(IServiceProvider services)
+		{
+			this.Services = services;
+			this.Tokenizer = new TransformationTextTokenizer(this.Services);
+
+			this.Tokenizer.DiscoverAvailableTokens();
+		}
+
+		/// <summary>
+		/// Replaces tokens in a piece of text with their respective contents.
+		/// </summary>
+		/// <param name="text">The text to replace in.</param>
+		/// <param name="character">The character for which the text should be valid.</param>
+		/// <param name="transformation">The transformation that the text belongs to.</param>
+		/// <returns>A string with no tokens in it.</returns>
+		public string ReplaceTokensWithContent
+		(
+			[NotNull] string text,
+			[NotNull] Character character,
+			[NotNull] Transformation transformation
+		)
+		{
+			var tokens = this.Tokenizer.GetTokens(text);
+			var tokenContentMap = new Dictionary<IReplaceableTextToken, string>();
+
+			foreach (var token in tokens)
+			{
+				tokenContentMap.Add(token, token.GetText(character, transformation));
+			}
+
+			int relativeOffset = 0;
+			var sb = new StringBuilder(text);
+
+			foreach (var (token, content) in tokenContentMap)
+			{
+				sb.Remove(token.Start + relativeOffset, token.Length);
+				sb.Insert(token.Start + relativeOffset, content);
+
+				relativeOffset += content.Length - token.Length;
+			}
+
+			var result = string.Join(". ", sb.ToString().Split('.').Select(s => s.Trim().Transform(To.SentenceCase))).Trim();
+			return result;
+		}
+
 		/// <summary>
 		/// Builds a complete visual description of the given character.
 		/// </summary>
 		/// <param name="character">The character to describe.</param>
 		/// <returns>A visual description of the character.</returns>
 		[Pure]
-		public static string BuildVisualDescription(Character character)
+		public string BuildVisualDescription(Character character)
 		{
 			throw new System.NotImplementedException();
 		}
@@ -50,7 +108,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="transformation">The transformation to build the message from.</param>
 		/// <returns>The shift message.</returns>
 		[Pure]
-		public static string BuildShiftMessage([NotNull] Character character, [NotNull] Transformation transformation)
+		public string BuildShiftMessage([NotNull] Character character, [NotNull] Transformation transformation)
 		{
 			throw new System.NotImplementedException();
 		}
@@ -62,7 +120,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="transformation">The transformation to build the message from.</param>
 		/// <returns>The grow message.</returns>
 		[Pure]
-		public static string BuildGrowMessage([NotNull] Character character, [NotNull] Transformation transformation)
+		public string BuildGrowMessage([NotNull] Character character, [NotNull] Transformation transformation)
 		{
 			throw new System.NotImplementedException();
 		}
@@ -74,7 +132,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="transformation">The transformation to build the message from.</param>
 		/// <returns>The removal message.</returns>
 		[Pure]
-		public static string BuildRemoveMessage([NotNull] Character character, [NotNull] Transformation transformation)
+		public string BuildRemoveMessage([NotNull] Character character, [NotNull] Transformation transformation)
 		{
 			throw new System.NotImplementedException();
 		}
@@ -87,7 +145,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="currentComponent">The current component.</param>
 		/// <returns>The shifting message.</returns>
 		[Pure]
-		public static string BuildPatternColourShiftMessage
+		public string BuildPatternColourShiftMessage
 		(
 			[NotNull] Character character,
 			[NotNull] Colour originalColour,
@@ -106,7 +164,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="currentComponent">The current component.</param>
 		/// <returns>The shifting message.</returns>
 		[Pure]
-		public static string BuildPatternShiftMessage
+		public string BuildPatternShiftMessage
 		(
 			[NotNull] Character character,
 			[CanBeNull] Pattern? originalPattern,
@@ -125,7 +183,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="currentComponent">The current component.</param>
 		/// <returns>The shifting message.</returns>
 		[Pure]
-		public static string BuildColourShiftMessage
+		public string BuildColourShiftMessage
 		(
 			[NotNull] Character character,
 			[NotNull] Colour originalColour,

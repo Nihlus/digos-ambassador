@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Transformations
 	/// <summary>
 	/// A token that gets replaced with a pattern name.
 	/// </summary>
-	[TokenIdentifier("pattern")]
+	[TokenIdentifier("pattern", "p")]
 	public class PatternToken : ReplacableTextToken<PatternToken>
 	{
 		/// <inheritdoc />

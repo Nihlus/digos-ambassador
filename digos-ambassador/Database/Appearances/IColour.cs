@@ -1,5 +1,5 @@
 ﻿//
-//  CoPronounProvider.cs
+//  IColour.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,32 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using JetBrains.Annotations;
-
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Database.Appearances
 {
 	/// <summary>
-	/// Provides co pronouns.
+	/// Represents a transformation colour.
 	/// </summary>
-	[UsedImplicitly]
-	public class CoPronounProvider : PronounProvider
+	public interface IColour
 	{
-		/// <inheritdoc />
-		public override string Family => "Co";
+		/// <summary>
+		/// Gets the shade of the colour.
+		/// </summary>
+		Shade Shade { get; }
 
-		/// <inheritdoc />
-		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "co is" : "co";
-
-		/// <inheritdoc />
-		public override string GetObjectForm() => "co";
-
-		/// <inheritdoc />
-		public override string GetPossessiveAdjectiveForm() => "co's";
-
-		/// <inheritdoc />
-		public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "co has" : "co's";
-
-		/// <inheritdoc />
-		public override string GetReflexiveForm() => "coself";
+		/// <summary>
+		/// Gets the colour modifier.
+		/// </summary>
+		ShadeModifier? Modifier { get; }
 	}
 }
