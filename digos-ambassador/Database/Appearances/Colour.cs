@@ -43,6 +43,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 		public Shade Shade { get; set; }
 
 		/// <inheritdoc />
+		[CanBeNull]
 		public ShadeModifier? Modifier { get; set; }
 
 		/// <summary>
@@ -87,7 +88,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// <inheritdoc />
 		public override string ToString()
 		{
-			return $"{this.Modifier.Humanize()} {this.Shade.Humanize()}".Trim().Humanize(LetterCasing.LowerCase);
+			return $"{(this.Modifier is null ? string.Empty : this.Modifier.Humanize())} {this.Shade.Humanize()}".Trim().Humanize(LetterCasing.LowerCase);
 		}
 	}
 }
