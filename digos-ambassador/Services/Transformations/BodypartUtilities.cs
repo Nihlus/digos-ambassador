@@ -32,9 +32,31 @@ namespace DIGOS.Ambassador.Services
 	/// Holds composite parts - that is, a body part that consists of a number of smaller parts, which should be
 	/// collectively affected.
 	/// </summary>
-	public static class CompositeParts
+	public static class BodypartUtilities
 	{
-		private static IReadOnlyList<Bodypart> Composites { get; } = new[] { Bodypart.Head, Bodypart.Arms, Bodypart.Body, Bodypart.Legs, Bodypart.Wings };
+		private static IReadOnlyList<Bodypart> Composites { get; } = new[] { Bodypart.Head, Bodypart.Arms, Bodypart.Legs, Bodypart.Wings };
+
+		private static IReadOnlyList<Bodypart> ChiralParts { get; } = new[] { LeftEar, RightEar, LeftEye, RightEye, LeftArm, RightArm, LeftLeg, RightLeg, LeftWing, RightWing };
+
+		private static IDictionary<Bodypart, Bodypart> ChiralCounterparts { get; } = new Dictionary<Bodypart, Bodypart>
+		{
+			{ LeftEar, RightEar },
+			{ RightEar, LeftEar },
+			{ LeftEye, RightEye },
+			{ RightEye, LeftEye },
+			{ LeftArm, RightArm },
+			{ RightArm, LeftArm },
+			{ LeftLeg, RightLeg },
+			{ RightLeg, LeftLeg },
+			{ LeftWing, RightWing },
+			{ RightWing, LeftWing }
+		};
+
+		private static IReadOnlyList<Bodypart> GenderNeutralParts { get; } = Enum
+			.GetValues(typeof(Bodypart))
+			.Cast<Bodypart>()
+			.Except(new[] { Penis, Vagina })
+			.ToArray();
 
 		/// <summary>
 		/// Gets the parts constituting the head.
@@ -57,6 +79,16 @@ namespace DIGOS.Ambassador.Services
 		public static IReadOnlyList<Bodypart> Wings { get; } = new[] { LeftWing, RightWing };
 
 		/// <summary>
+		/// Determines whether or not a given bodypart is considered gender-neutral.
+		/// </summary>
+		/// <param name="bodypart">The bodypart.</param>
+		/// <returns>true if the part is gender-neutral; otherwise, false.</returns>
+		public static bool IsGenderNeutral(Bodypart bodypart)
+		{
+			return GenderNeutralParts.Contains(bodypart);
+		}
+
+		/// <summary>
 		/// Determines whether or not a given bodypart is a composite part.
 		/// </summary>
 		/// <param name="bodypart">The part to check.</param>
@@ -65,6 +97,47 @@ namespace DIGOS.Ambassador.Services
 		public static bool IsCompositePart(Bodypart bodypart)
 		{
 			return Composites.Contains(bodypart);
+		}
+
+		/// <summary>
+		/// Determines whether or not a given bodypart is part of a composite part.
+		/// </summary>
+		/// <param name="bodypart"></param>
+		/// <returns></returns>
+		[Pure]
+		public static bool IsComposingPart(Bodypart bodypart)
+		{
+			return
+				Head.Contains(bodypart) ||
+				Arms.Contains(bodypart) ||
+				Legs.Contains(bodypart) ||
+				Wings.Contains(bodypart);
+		}
+
+		/// <summary>
+		/// Determines whether or not the given part has a left- or right-handed counterpart.
+		/// </summary>
+		/// <param name="bodypart">The bodypart.</param>
+		/// <returns>true if the part is a chiral part; otherwise, false.</returns>
+		public static bool IsChiralPart(Bodypart bodypart)
+		{
+			return ChiralParts.Contains(bodypart);
+		}
+
+		/// <summary>
+		/// Gets the chirally opposing part for the given chiral part.
+		/// </summary>
+		/// <param name="bodypart">The chiral part.</param>
+		/// <returns>The chirally opposite part.</returns>
+		/// <exception cref="ArgumentException">Thrown if the given bodypart is not a chiral part.</exception>
+		public static Bodypart GetChiralPart(Bodypart bodypart)
+		{
+			if (!IsChiralPart(bodypart))
+			{
+				throw new ArgumentException("The bodypart is not a chiral part.", nameof(bodypart));
+			}
+
+			return ChiralCounterparts[bodypart];
 		}
 
 		/// <summary>

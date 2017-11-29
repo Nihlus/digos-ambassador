@@ -91,7 +91,64 @@ namespace DIGOS.Ambassador.Transformations
 		[Pure]
 		public string BuildVisualDescription(Character character)
 		{
-			throw new System.NotImplementedException();
+			var sb = new StringBuilder();
+			sb.Append("{@target} is a {@gender} {@species.}");
+
+			int componentCount = 0;
+			foreach (var component in character.CurrentAppearance.Components)
+			{
+				++componentCount;
+				var csb = new StringBuilder();
+
+				var transformation = component.Transformation;
+				var bodypart = component.Bodypart;
+				if (BodypartUtilities.IsChiralPart(component.Bodypart))
+				{
+					var sameSpecies = AreChiralPartsTheSameSpecies(character, bodypart);
+					csb.Append
+					(
+						sameSpecies
+							? transformation.UniformDescription
+							: transformation.SingleDescription
+					);
+				}
+				else
+				{
+					csb.Append(transformation.SingleDescription);
+				}
+
+				if (component.Pattern.HasValue)
+				{
+					csb.Append("A {@pattern}, {@colour|pattern} pattern covers it.");
+				}
+
+				var tokenizedDesc = csb.ToString();
+				var componentDesc = ReplaceTokensWithContent(tokenizedDesc, character, transformation);
+
+				sb.Append(componentDesc);
+
+				// Break the description into paragraphs every third component
+				if (componentCount % 3 == 0)
+				{
+					sb.Append("\n\n");
+				}
+			}
+
+			return sb.ToString();
+		}
+
+		/// <summary>
+		/// Determines if the chiral parts on the character are the same species.
+		/// </summary>
+		/// <param name="character">The character.</param>
+		/// <param name="bodypart">The chiral bodypart.</param>
+		/// <returns>true if the parts are the same species; otherwise, false.</returns>
+		private bool AreChiralPartsTheSameSpecies(Character character, Bodypart bodypart)
+		{
+			var chiralComponent = character.GetBodypart(bodypart);
+			var opposingComponent = character.GetBodypart(BodypartUtilities.GetChiralPart(bodypart));
+
+			return chiralComponent.Transformation.Species.Name.Equals(opposingComponent.Transformation.Species.Name);
 		}
 
 		/// <summary>
