@@ -1,5 +1,5 @@
 ﻿//
-//  GenderToken.cs
+//  SexToken.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -29,10 +29,10 @@ using static DIGOS.Ambassador.Services.Bodypart;
 namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
-	/// A token that gets replaced with a gender.
+	/// A token that gets replaced with a character's physical sex.
 	/// </summary>
-	[TokenIdentifier("gender", "g")]
-	public class GenderToken : ReplacableTextToken<GenderToken>
+	[TokenIdentifier("sex")]
+	public class SexToken : ReplacableTextToken<SexToken>
 	{
 		/// <inheritdoc />
 		public override string GetText(Character character, Transformation transformation)
@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Transformations
 
 			if (!genderedParts.Any())
 			{
-				return string.Empty;
+				return "sexless";
 			}
 
 			if (genderedParts.Contains(Penis) && genderedParts.Contains(Vagina))
@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Transformations
 		}
 
 		/// <inheritdoc />
-		protected override GenderToken Initialize(string data)
+		protected override SexToken Initialize(string data)
 		{
 			return this;
 		}

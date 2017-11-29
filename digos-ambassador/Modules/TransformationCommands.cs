@@ -78,6 +78,7 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="bodyPart">The part to transform.</param>
 		/// <param name="species">The species to transform it into.</param>
 		[UsedImplicitly]
+		[Priority(int.MinValue)]
 		[Command(RunMode = Async)]
 		[Summary("Transforms the given bodypart into the given species on yourself.")]
 		[RequirePermission(Transform)]
@@ -91,6 +92,7 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="bodyPart">The part to transform.</param>
 		/// <param name="species">The species to transform it into.</param>
 		[UsedImplicitly]
+		[Priority(int.MinValue)]
 		[Command(RunMode = Async)]
 		[Summary("Transforms the given bodypart of the target user into the given species.")]
 		[RequireContext(Guild)]

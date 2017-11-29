@@ -229,12 +229,12 @@
           <e p="Tokens" t="Include">
             <e p="ColourToken.cs" t="Include" />
             <e p="FluentPronounToken.cs" t="Include" />
-            <e p="GenderToken.cs" t="Include" />
             <e p="LuaScriptToken.cs" t="Include" />
             <e p="LuaSnippetToken.cs" t="Include" />
             <e p="PatternToken.cs" t="Include" />
             <e p="PossessivePronounToken.cs" t="Include" />
             <e p="PronounToken.cs" t="Include" />
+            <e p="SexToken.cs" t="Include" />
             <e p="SpeciesToken.cs" t="Include" />
             <e p="TargetToken.cs" t="Include" />
           </e>
