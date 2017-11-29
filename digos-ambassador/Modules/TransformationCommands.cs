@@ -26,7 +26,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 
 using Discord;
@@ -34,10 +33,6 @@ using Discord.Commands;
 
 using Humanizer;
 using JetBrains.Annotations;
-
-using static DIGOS.Ambassador.Permissions.Permission;
-using static DIGOS.Ambassador.Permissions.PermissionTarget;
-
 using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 
@@ -633,17 +628,6 @@ namespace DIGOS.Ambassador.Modules
 
 				await this.Feedback.SendConfirmationAsync(this.Context, confirmationText);
 			}
-		}
-
-		/// <summary>
-		/// Submits a new transformation for review. Attach it to the command.
-		/// </summary>
-		[UsedImplicitly]
-		[Command("submit")]
-		[Summary("Submits a new transformation for review. Attach it to the command.")]
-		public async Task SubmitTransformationAsync()
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

@@ -156,14 +156,29 @@ namespace DIGOS.Ambassador.Services
 		}
 
 		/// <summary>
+		/// Gets or creates a stream with the given content-local path.
+		/// </summary>
+		/// <param name="relativePath">The relative path inside the content directory.</param>
+		/// <returns>A <see cref="FileStream"/> pointing to the path..</returns>
+		public RetrieveEntityResult<FileStream> GetOrCreateLocalStream([PathReference] [NotNull] string relativePath)
+		{
+			var guaranteedRelativePath = relativePath.TrimStart('.', '\\', '/');
+			var contentPath = Path.Combine(this.BaseContentPath, guaranteedRelativePath);
+
+			var openStreamResult = OpenLocalStream(contentPath, fileMode: FileMode.OpenOrCreate);
+			return openStreamResult;
+		}
+
+		/// <summary>
 		/// Gets the stream of a local content file.
 		/// </summary>
 		/// <param name="path">The path to the file.</param>
 		/// <param name="subdirectory">The subdirectory in the content folder, if any.</param>
+		/// <param name="fileMode">The mode with which to open the stream.</param>
 		/// <returns>A <see cref="FileStream"/> with the file data.</returns>
 		[Pure]
 		[MustUseReturnValue("The resulting file stream must be disposed.")]
-		public RetrieveEntityResult<FileStream> GetLocalStream([PathReference] [NotNull] string path, [CanBeNull] string subdirectory = null)
+		public RetrieveEntityResult<FileStream> OpenLocalStream([PathReference] [NotNull] string path, [CanBeNull] string subdirectory = null, FileMode fileMode = FileMode.Open)
 		{
 			var absolutePath = Path.GetFullPath(path);
 
@@ -189,7 +204,10 @@ namespace DIGOS.Ambassador.Services
 				}
 			}
 
-			return RetrieveEntityResult<FileStream>.FromSuccess(File.OpenRead(absolutePath));
+			// Make sure that the directory chain is created
+			Directory.CreateDirectory(Directory.GetParent(absolutePath).FullName);
+
+			return RetrieveEntityResult<FileStream>.FromSuccess(File.Open(absolutePath, fileMode));
 		}
 
 		/// <summary>
@@ -205,7 +223,7 @@ namespace DIGOS.Ambassador.Services
 				return RetrieveEntityResult<FileStream>.FromError(CommandError.ObjectNotFound, "No file data set.");
 			}
 
-			return GetLocalStream(dossier.Path, "Dossiers");
+			return OpenLocalStream(dossier.Path, "Dossiers");
 		}
 
 		/// <summary>

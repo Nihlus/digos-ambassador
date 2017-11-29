@@ -207,7 +207,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync([PathReference] string scriptPath, params(string name, object value)[] variables)
 		{
-			var getScriptResult = this.ContentService.GetLocalStream(scriptPath);
+			var getScriptResult = this.ContentService.OpenLocalStream(scriptPath);
 			if (!getScriptResult.IsSuccess)
 			{
 				return RetrieveEntityResult<string>.FromError(getScriptResult);
