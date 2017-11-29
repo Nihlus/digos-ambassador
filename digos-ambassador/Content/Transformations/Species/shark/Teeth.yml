@@ -1,4 +1,4 @@
-part: LeftArm
+part: Teeth
 species: shark
 description: "Transforms the target's teeth into that of an anthro shark."
 default_base_colour: "white"

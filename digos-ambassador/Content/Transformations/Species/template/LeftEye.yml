@@ -1,0 +1,9 @@
+part: LeftEye
+species: template
+description: "Transforms the target's left eye into a blank template."
+default_base_colour: "grey"
+is_nsfw: false
+shift_message: "{@target}'s left eye rounds out and simplifies."
+grow_message: "{@target} grows an eye on the left side of their face."
+single_description: "{@f|Their} left eye is simple and colourless."
+uniform_description: "{@target}'s eyes are simple and colourless."

@@ -1,4 +1,4 @@
-part: LeftArm
+part: Face
 species: shark
 description: "Transforms the target's face into that of an anthro shark."
 default_base_colour: "dull grey"

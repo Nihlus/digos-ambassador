@@ -30,6 +30,7 @@
           <e p="Transformations" t="Include">
             <e p="Species" t="Include">
               <e p="shark" t="Include">
+                <e p="Body.yml" t="Include" />
                 <e p="Face.yml" t="Include" />
                 <e p="LeftArm.yml" t="Include" />
                 <e p="LeftEar.yml" t="Include" />
@@ -44,6 +45,17 @@
                 <e p="Tail.yml" t="Include" />
                 <e p="Teeth.yml" t="Include" />
                 <e p="Vagina.yml" t="Include" />
+              </e>
+              <e p="template" t="Include">
+                <e p="Body.yml" t="Include" />
+                <e p="Face.yml" t="Include" />
+                <e p="LeftArm.yml" t="Include" />
+                <e p="LeftEye.yml" t="Include" />
+                <e p="LeftLeg.yml" t="Include" />
+                <e p="RightArm.yml" t="Include" />
+                <e p="RightEye.yml" t="Include" />
+                <e p="RightLeg.yml" t="Include" />
+                <e p="Species.yml" t="Include" />
               </e>
             </e>
             <e p="Templates" t="Include">

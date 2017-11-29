@@ -1,0 +1,9 @@
+part: LeftLeg
+species: template
+description: "Transforms the target's left leg into a blank template."
+default_base_colour: "grey"
+is_nsfw: false
+shift_message: "{@target}'s leg smooths out and simplifies."
+grow_message: "The left side of {@target}'s pelvis ripples and bulges, growing outward into a smooth leg."
+single_description: "{@f|They have} a left leg."
+uniform_description: "{@f|They have} legs."

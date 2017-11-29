@@ -1,4 +1,4 @@
-part: LeftArm
+part: RightEye
 species: shark
 description: "Transforms the target's right eye into that of an anthro shark."
 default_base_colour: "light blue"
