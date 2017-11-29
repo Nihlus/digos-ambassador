@@ -91,7 +91,7 @@ namespace DIGOS.Ambassador.Transformations
 		public string BuildVisualDescription(Character character)
 		{
 			var sb = new StringBuilder();
-			sb.Append("{@target} is a {@gender} {@species.}");
+			sb.Append("{@target} is a {@sex} {@species.}");
 
 			int componentCount = 0;
 			foreach (var component in character.CurrentAppearance.Components)
