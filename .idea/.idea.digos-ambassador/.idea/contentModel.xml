@@ -223,6 +223,7 @@
             <e p="PatternToken.cs" t="Include" />
             <e p="PossessivePronounToken.cs" t="Include" />
             <e p="PronounToken.cs" t="Include" />
+            <e p="SpeciesToken.cs" t="Include" />
             <e p="TargetToken.cs" t="Include" />
           </e>
           <e p="TransformationDescriptionBuilder.cs" t="Include" />

@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Services
 		string Family { get; }
 
 		/// <summary>
-		/// Gets the pronoun in subject form, that is, "I" or "you". If <see cref="withVerb"/> is true,
+		/// Gets the pronoun in subject form, that is, "I" or "you". If <paramref name="withVerb"/> is true,
 		/// the pronoun will include a possessive verb - that is, "I am" or "she is".
 		/// </summary>
 		/// <param name="withVerb">Whether or not to include the connective verb.</param>
@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Services
 		string GetPossessiveAdjectiveForm();
 
 		/// <summary>
-		/// Gets the pronoun in possessive form, that is, "mine" or "yours". If <see cref="withVerb"/> is true,
+		/// Gets the pronoun in possessive form, that is, "mine" or "yours". If <paramref name="withVerb"/> is true,
 		/// the pronoun will include a possessive verb - that is, "I have" or "she has".
 		/// </summary>
 		/// <param name="withVerb">Whether or not to include the connective verb.</param>
