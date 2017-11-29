@@ -21,7 +21,6 @@
 //
 
 // Originally licensed under the ISC license; modified from https://github.com/foxbot/Discord.Addons.Interactive
-
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,7 +33,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 
 // ReSharper disable AssignmentIsFullyDiscarded
-
 namespace DIGOS.Ambassador.Pagination
 {
 	/// <summary>
@@ -154,7 +152,7 @@ namespace DIGOS.Ambassador.Pagination
 				_ = Task.Delay(this.Timeout.Value).ContinueWith(_ =>
 				{
 					this.Interactive.RemoveReactionCallback(message);
-					_ = this.Message.DeleteAsync();
+					this.Message.DeleteAsync();
 				});
 			}
 		}

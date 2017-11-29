@@ -40,6 +40,11 @@ namespace DIGOS.Ambassador.Transformations
 		/// <inheritdoc />
 		public override string GetText(Character character, Transformation transformation)
 		{
+			if (transformation is null)
+			{
+				throw new ArgumentNullException(nameof(transformation));
+			}
+
 			switch (this.Part)
 			{
 				case "base":

@@ -84,6 +84,7 @@ namespace DIGOS.Ambassador
 		private readonly LuaService Lua;
 
 		private readonly IServiceProvider Services;
+
 		// ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 
 		/// <summary>

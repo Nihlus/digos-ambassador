@@ -21,7 +21,6 @@
 //
 
 // Originally licensed under the ISC license; modified from https://github.com/foxbot/Discord.Addons.Interactive
-
 using System.Collections.Generic;
 using Discord;
 using Discord.Addons.Interactive;

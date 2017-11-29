@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using Humanizer;
@@ -35,6 +36,11 @@ namespace DIGOS.Ambassador.Transformations
 		/// <inheritdoc />
 		public override string GetText(Character character, Transformation transformation)
 		{
+			if (transformation is null)
+			{
+				throw new ArgumentNullException(nameof(transformation));
+			}
+
 			var currentBodypart = character.GetBodypart(transformation.Part);
 			return currentBodypart.Transformation.DefaultPattern?.ToString().Humanize();
 		}

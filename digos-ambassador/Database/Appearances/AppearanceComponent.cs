@@ -41,6 +41,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// </summary>
 		private AppearanceComponent()
 		{
+			this.BaseColour = new Colour();
 		}
 
 		/// <summary>
