@@ -133,7 +133,7 @@ namespace DIGOS.Ambassador.Transformations
 				}
 			}
 
-			return sb.ToString();
+			return sb.ToString().Trim();
 		}
 
 		/// <summary>

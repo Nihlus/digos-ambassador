@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 
 using Discord;
@@ -45,7 +46,7 @@ namespace DIGOS.Ambassador.TypeReaders
 			var characterService = services.GetRequiredService<CharacterService>();
 			using (var db = new GlobalInfoContext())
 			{
-				if (entityName.Equals("current", StringComparison.OrdinalIgnoreCase))
+				if (!entityName.IsNullOrWhitespace() && entityName.Equals("current", StringComparison.OrdinalIgnoreCase))
 				{
 					return await characterService.GetCurrentCharacterAsync(db, context, context.User);
 				}

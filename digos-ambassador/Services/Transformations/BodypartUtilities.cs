@@ -1,5 +1,5 @@
 ﻿//
-//  CompositeParts.cs
+//  BodypartUtilities.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -102,8 +102,8 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Determines whether or not a given bodypart is part of a composite part.
 		/// </summary>
-		/// <param name="bodypart"></param>
-		/// <returns></returns>
+		/// <param name="bodypart">The bodypart to check.</param>
+		/// <returns>true if the bodypart is a composing part; otherwise, false.</returns>
 		[Pure]
 		public static bool IsComposingPart(Bodypart bodypart)
 		{

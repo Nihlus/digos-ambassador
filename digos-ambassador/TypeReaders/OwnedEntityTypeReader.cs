@@ -33,6 +33,7 @@ using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.TypeReaders
 {
@@ -69,7 +70,19 @@ namespace DIGOS.Ambassador.TypeReaders
 			}
 			else
 			{
-				entityName = input;
+				// We might just have a user and not a name, so let's try parsing it
+				var userParseResult = await ReadUserAsync(context, input);
+				if (userParseResult.IsSuccess)
+				{
+					entityName = null;
+
+					var highestScore = userParseResult.Values.Max(v => v.Score);
+					owner = userParseResult.Values.First(v => v.Score >= highestScore).Value as T1;
+				}
+				else
+				{
+					entityName = input;
+				}
 			}
 
 			owner = owner ?? context.User;
@@ -91,7 +104,13 @@ namespace DIGOS.Ambassador.TypeReaders
 		/// <param name="context">The context of the command.</param>
 		/// <param name="services">The injected services.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		protected abstract Task<RetrieveEntityResult<T2>> RetrieveEntityAsync(IUser entityOwner, string entityName, ICommandContext context, IServiceProvider services);
+		protected abstract Task<RetrieveEntityResult<T2>> RetrieveEntityAsync
+		(
+			[NotNull] IUser entityOwner,
+			[CanBeNull] string entityName,
+			[NotNull] ICommandContext context,
+			[NotNull] IServiceProvider services
+		);
 
 		private async Task<TypeReaderResult> ReadUserAsync(ICommandContext context, string input)
 		{

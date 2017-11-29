@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Transformations
 
 			if (!genderedParts.Any())
 			{
-				return "neuter";
+				return string.Empty;
 			}
 
 			if (genderedParts.Contains(Penis) && genderedParts.Contains(Vagina))

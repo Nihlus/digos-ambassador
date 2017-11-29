@@ -52,6 +52,11 @@ namespace DIGOS.Ambassador.Transformations
 				}
 			}
 
+			if (!speciesShares.Any())
+			{
+				return "person";
+			}
+
 			int totalPoints = speciesShares.Values.Sum();
 
 			// pick the species with the largest share
