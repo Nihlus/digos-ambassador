@@ -42,6 +42,7 @@ namespace DIGOS.Ambassador.Transformations
 			foreach (var component in character.CurrentAppearance.Components)
 			{
 				var speciesName = component.Transformation.Species.Name;
+
 				if (speciesShares.ContainsKey(speciesName))
 				{
 					speciesShares[speciesName]++;

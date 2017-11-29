@@ -41,5 +41,6 @@ namespace DIGOS.Ambassador.Database.Appearances
 		Shimmering,
 		Neon,
 		Milky,
+		Soft
 	}
 }
