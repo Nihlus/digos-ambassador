@@ -37,6 +37,13 @@ namespace DIGOS.Ambassador.Database.Appearances
 		public uint ID { get; set; }
 
 		/// <summary>
+		/// Initializes a new instance of the <see cref="AppearanceComponent"/> class.
+		/// </summary>
+		private AppearanceComponent()
+		{
+		}
+
+		/// <summary>
 		/// Gets the bodypart that the component is.
 		/// </summary>
 		[NotMapped]

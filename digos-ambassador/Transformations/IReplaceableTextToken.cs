@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Transformations
 {
@@ -47,7 +48,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="character">The character that the text should be relevant for.</param>
 		/// <param name="transformation">The transformation that the text originates from.</param>
 		/// <returns>The text that the token should be replaced with.</returns>
-		string GetText(Character character, Transformation transformation);
+		string GetText([NotNull] Character character, [CanBeNull] Transformation transformation);
 
 		/// <summary>
 		/// Gets the text that the token should be replaced with.
@@ -55,6 +56,6 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="character">The character that the text should be relevant for.</param>
 		/// <param name="transformation">The transformation that the text originates from.</param>
 		/// <returns>The text that the token should be replaced with.</returns>
-		Task<string> GetTextAsync(Character character, Transformation transformation);
+		Task<string> GetTextAsync([NotNull] Character character, [CanBeNull] Transformation transformation);
 	}
 }

@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 
 using Discord;
@@ -46,7 +47,7 @@ namespace DIGOS.Ambassador.TypeReaders
 			var roleplayService = services.GetRequiredService<RoleplayService>();
 			using (var db = new GlobalInfoContext())
 			{
-				if (entityName.Equals("current", StringComparison.OrdinalIgnoreCase))
+				if (!entityName.IsNullOrWhitespace() && entityName.Equals("current", StringComparison.OrdinalIgnoreCase))
 				{
 					return await roleplayService.GetActiveRoleplayAsync(db, context.Channel);
 				}

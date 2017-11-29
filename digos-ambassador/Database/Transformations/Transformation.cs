@@ -24,6 +24,7 @@ using System.ComponentModel.DataAnnotations;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Services;
+using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 
 namespace DIGOS.Ambassador.Database.Transformations
@@ -105,8 +106,8 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// <summary>
 		/// Gets or sets the text of the description when the species of the complementary bodyparts match.
 		/// </summary>
-		[Required]
 		[YamlMember(Alias = "uniform_description")]
+		[CanBeNull]
 		public string UniformDescription { get; set; }
 	}
 }

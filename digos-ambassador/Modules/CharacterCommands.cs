@@ -333,7 +333,7 @@ namespace DIGOS.Ambassador.Modules
 
 				await db.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}.");
 			}
 		}
 

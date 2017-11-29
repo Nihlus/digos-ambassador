@@ -61,6 +61,11 @@ namespace DIGOS.Ambassador.Transformations
 		/// <inheritdoc />
 		public override async Task<string> GetTextAsync(Character character, Transformation transformation)
 		{
+			if (transformation is null)
+			{
+				return string.Empty;
+			}
+
 			var scriptPath = this.Content.GetLuaScriptPath(transformation, this.ScriptName);
 			var result = await this.Lua.ExecuteScriptAsync
 			(

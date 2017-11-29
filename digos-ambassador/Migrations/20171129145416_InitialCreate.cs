@@ -19,10 +19,10 @@ namespace DIGOS.Ambassador.Migrations
                 {
                     ID = table.Column<uint>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    GenderScale = table.Column<float>(nullable: false),
-                    Height = table.Column<float>(nullable: false),
-                    Muscularity = table.Column<float>(nullable: false),
-                    Weight = table.Column<float>(nullable: false)
+                    GenderScale = table.Column<double>(nullable: false),
+                    Height = table.Column<double>(nullable: false),
+                    Muscularity = table.Column<double>(nullable: false),
+                    Weight = table.Column<double>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -111,7 +111,7 @@ namespace DIGOS.Ambassador.Migrations
                     ShiftMessage = table.Column<string>(nullable: false),
                     SingleDescription = table.Column<string>(nullable: false),
                     SpeciesID = table.Column<uint>(nullable: false),
-                    UniformDescription = table.Column<string>(nullable: false)
+                    UniformDescription = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

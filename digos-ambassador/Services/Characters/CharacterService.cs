@@ -46,6 +46,8 @@ namespace DIGOS.Ambassador.Services
 	/// </summary>
 	public class CharacterService
 	{
+		private readonly TransformationService Transformations;
+
 		private readonly CommandService Commands;
 
 		private readonly OwnedEntityService OwnedEntities;
@@ -60,11 +62,13 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="commands">The application's command service.</param>
 		/// <param name="entityService">The application's owned entity service.</param>
 		/// <param name="content">The content service.</param>
-		public CharacterService(CommandService commands, OwnedEntityService entityService, ContentService content)
+		/// <param name="transformations">The transformation service.</param>
+		public CharacterService(CommandService commands, OwnedEntityService entityService, ContentService content, TransformationService transformations)
 		{
 			this.Commands = commands;
 			this.OwnedEntities = entityService;
 			this.Content = content;
+			this.Transformations = transformations;
 
 			this.PronounProviders = new Dictionary<string, IPronounProvider>(new CaseInsensitiveStringEqualityComparer());
 		}
@@ -232,12 +236,7 @@ namespace DIGOS.Ambassador.Services
 				);
 			}
 
-			var character = db.Characters
-				.Include(c => c.Owner)
-				.Include(c => c.CurrentServers)
-				.Include(c => c.DefaultAppearance)
-				.Include(c => c.CurrentAppearance)
-				.FirstOrDefault(rp => rp.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase));
+			var character = GetCharacters(db).FirstOrDefault(rp => rp.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase));
 
 			if (character is null)
 			{
@@ -245,6 +244,26 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			return RetrieveEntityResult<Character>.FromSuccess(character);
+		}
+
+		/// <summary>
+		/// Gets the characters in the database along with their navigation properties.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <returns>A queryable set of characters.</returns>
+		public IQueryable<Character> GetCharacters([NotNull] GlobalInfoContext db)
+		{
+			return db.Characters
+				.Include(c => c.Owner)
+				.Include(c => c.CurrentServers)
+				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.BaseColour)
+				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.PatternColour)
+				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.Transformation.Species)
+				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.Transformation.DefaultBaseColour)
+				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.Transformation.DefaultPatternColour)
+				.Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.Species)
+				.Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.DefaultBaseColour)
+				.Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.DefaultPatternColour);
 		}
 
 		/// <summary>
@@ -453,6 +472,16 @@ namespace DIGOS.Ambassador.Services
 			{
 				return CreateEntityResult<Character>.FromError(modifyEntityResult);
 			}
+
+			var getDefaultAppearanceResult = await Appearance.CreateDefaultAsync(db, this.Transformations);
+			if (!getDefaultAppearanceResult.IsSuccess)
+			{
+				return CreateEntityResult<Character>.FromError(getDefaultAppearanceResult);
+			}
+
+			var defaultAppearance = getDefaultAppearanceResult.Entity;
+			character.DefaultAppearance = defaultAppearance;
+			character.CurrentAppearance = defaultAppearance;
 
 			owner.Characters.Add(character);
 			await db.Characters.AddAsync(character);
@@ -700,14 +729,7 @@ namespace DIGOS.Ambassador.Services
 		[ItemNotNull]
 		public IQueryable<Character> GetUserCharacters([NotNull]GlobalInfoContext db, [NotNull]IUser discordUser)
 		{
-			var characters = db.Characters
-				.Include(ch => ch.Owner)
-				.Include(ch => ch.Images)
-				.Include(ch => ch.CurrentServers)
-				.Include(ch => ch.DefaultAppearance)
-				.Include(ch => ch.CurrentAppearance)
-				.Where(ch => ch.Owner.DiscordID == discordUser.Id);
-
+			var characters = GetCharacters(db).Where(ch => ch.Owner.DiscordID == discordUser.Id);
 			return characters;
 		}
 

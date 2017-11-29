@@ -136,8 +136,8 @@
           </e>
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171127230338_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171127230338_InitialCreate.cs" t="Include" />
+          <e p="20171129145416_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171129145416_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">

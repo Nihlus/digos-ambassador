@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Transformations
 		public int Length { get; set; }
 
 		/// <inheritdoc />
-		public abstract string GetText([NotNull] Character character, Transformation transformation);
+		public abstract string GetText(Character character, Transformation transformation);
 
 		/// <inheritdoc />
 		public virtual Task<string> GetTextAsync(Character character, Transformation transformation)

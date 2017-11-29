@@ -21,7 +21,13 @@
 //
 
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Services;
+using JetBrains.Annotations;
+using static DIGOS.Ambassador.Services.Bodypart;
 
 namespace DIGOS.Ambassador.Database.Appearances
 {
@@ -41,21 +47,68 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// <summary>
 		/// Gets or sets a character's height (in meters).
 		/// </summary>
-		public float Height { get; set; }
+		public double Height { get; set; }
 
 		/// <summary>
 		/// Gets or sets a character's weight (in kilograms).
 		/// </summary>
-		public float Weight { get; set; }
+		public double Weight { get; set; }
 
 		/// <summary>
 		/// Gets or sets how feminine or masculine a character appears to be, on a -1 to 1 scale.
 		/// </summary>
-		public float GenderScale { get; set; }
+		public double GenderScale { get; set; }
 
 		/// <summary>
 		/// Gets or sets how muscular a character appears to be, on a 0 to 1 scale.
 		/// </summary>
-		public float Muscularity { get; set; }
+		public double Muscularity { get; set; }
+
+		/// <summary>
+		/// Creates a default appearance using the template species (a featureless, agendered species).
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="transformations">The transformation service.</param>
+		/// <returns>A creation result which may or may not have succeeded.</returns>
+		public static async Task<CreateEntityResult<Appearance>> CreateDefaultAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] TransformationService transformations
+		)
+		{
+			var getSpeciesResult = await transformations.GetSpeciesByNameAsync(db, "template");
+			if (!getSpeciesResult.IsSuccess)
+			{
+				return CreateEntityResult<Appearance>.FromError(getSpeciesResult);
+			}
+
+			var templateSpecies = getSpeciesResult.Entity;
+			var templateTransformations = new List<Transformation>();
+			var templateParts = new List<Bodypart> { Face, Body, LeftArm, RightArm, LeftEye, RightEye, LeftLeg, RightLeg };
+
+			foreach (var part in templateParts)
+			{
+				var getTFResult = await transformations.GetTransformationByPartAndSpeciesAsync(db, part, templateSpecies);
+				if (!getTFResult.IsSuccess)
+				{
+					return CreateEntityResult<Appearance>.FromError(getTFResult);
+				}
+
+				templateTransformations.Add(getTFResult.Entity);
+			}
+
+			var templateComponents = templateTransformations.Select(AppearanceComponent.CreateFrom).ToList();
+
+			var appearance = new Appearance
+			{
+				Components = templateComponents,
+				Height = 1.8,
+				Weight = 80,
+				GenderScale = 0,
+				Muscularity = 0.5
+			};
+
+			return CreateEntityResult<Appearance>.FromSuccess(appearance);
+		}
 	}
 }

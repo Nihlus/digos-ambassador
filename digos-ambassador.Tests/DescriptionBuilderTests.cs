@@ -51,15 +51,12 @@ namespace DIGOS.Ambassador.Tests
 
 			var hairTransformation = new Transformation
 			{
+				DefaultBaseColour = hairColour,
 				Part = Bodypart.Hair,
 				SingleDescription = SampleText
 			};
 
-			var hairComponent = new AppearanceComponent
-			{
-				BaseColour = hairColour,
-				Transformation = hairTransformation
-			};
+			var hairComponent = AppearanceComponent.CreateFrom(hairTransformation);
 
 			var appearance = new Appearance
 			{
@@ -73,7 +70,7 @@ namespace DIGOS.Ambassador.Tests
 				PronounProviderFamily = "Feminine"
 			};
 
-			var characterService = new CharacterService(null, null, null)
+			var characterService = new CharacterService(null, null, null, null)
 				.WithPronounProvider(new FemininePronounProvider());
 
 			var serviceProvider = new ServiceCollection()
@@ -98,15 +95,12 @@ namespace DIGOS.Ambassador.Tests
 
 			var hairTransformation = new Transformation
 			{
+				DefaultBaseColour = hairColour,
 				Part = Bodypart.Hair,
 				SingleDescription = SampleText
 			};
 
-			var hairComponent = new AppearanceComponent
-			{
-				BaseColour = hairColour,
-				Transformation = hairTransformation
-			};
+			var hairComponent = AppearanceComponent.CreateFrom(hairTransformation);
 
 			var appearance = new Appearance
 			{
@@ -120,7 +114,7 @@ namespace DIGOS.Ambassador.Tests
 				PronounProviderFamily = "Feminine"
 			};
 
-			var characterService = new CharacterService(null, null, null)
+			var characterService = new CharacterService(null, null, null, null)
 				.WithPronounProvider(new FemininePronounProvider());
 
 			var serviceProvider = new ServiceCollection()

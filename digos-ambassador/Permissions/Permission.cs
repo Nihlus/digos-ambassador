@@ -130,11 +130,5 @@ namespace DIGOS.Ambassador.Permissions
 		/// </summary>
 		[Description("Allows the user to transfer ownership of roleplays.")]
 		TransferRoleplay,
-
-		/// <summary>
-		/// Allows the user to transform themselves or others.
-		/// </summary>
-		[Description("Allows the user to transform themselves or others.")]
-		Transform,
 	}
 }

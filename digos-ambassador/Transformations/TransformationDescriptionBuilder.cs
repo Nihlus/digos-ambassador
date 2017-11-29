@@ -21,8 +21,10 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
@@ -38,6 +40,8 @@ namespace DIGOS.Ambassador.Transformations
 	public class TransformationDescriptionBuilder
 	{
 		private readonly TransformationTextTokenizer Tokenizer;
+
+		private readonly Regex SentenceSpacingRegex = new Regex("(?<=\\w)\\.(?=\\w)", RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="TransformationDescriptionBuilder"/> class.
@@ -61,7 +65,7 @@ namespace DIGOS.Ambassador.Transformations
 		(
 			[NotNull] string text,
 			[NotNull] Character character,
-			[NotNull] Transformation transformation
+			[CanBeNull] Transformation transformation
 		)
 		{
 			var tokens = this.Tokenizer.GetTokens(text);
@@ -91,12 +95,18 @@ namespace DIGOS.Ambassador.Transformations
 		public string BuildVisualDescription(Character character)
 		{
 			var sb = new StringBuilder();
-			sb.Append("{@target} is a {@sex} {@species.}");
+			sb.Append(ReplaceTokensWithContent("{@target} is a {@sex} {@species}.", character, null));
 
+			var partsToSkip = new List<Bodypart>();
 			int componentCount = 0;
 			foreach (var component in character.CurrentAppearance.Components)
 			{
 				++componentCount;
+				if (partsToSkip.Contains(component.Bodypart))
+				{
+					continue;
+				}
+
 				var csb = new StringBuilder();
 
 				var transformation = component.Transformation;
@@ -110,6 +120,8 @@ namespace DIGOS.Ambassador.Transformations
 							? transformation.UniformDescription
 							: transformation.SingleDescription
 					);
+
+					partsToSkip.Add(BodypartUtilities.GetChiralPart(bodypart));
 				}
 				else
 				{
@@ -133,7 +145,10 @@ namespace DIGOS.Ambassador.Transformations
 				}
 			}
 
-			return sb.ToString().Trim();
+			var description = sb.ToString().Trim();
+			var withSentenceSpacing = this.SentenceSpacingRegex.Replace(description, ". ");
+
+			return withSentenceSpacing;
 		}
 
 		/// <summary>

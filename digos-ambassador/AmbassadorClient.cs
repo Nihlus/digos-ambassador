@@ -103,13 +103,15 @@ namespace DIGOS.Ambassador
 			this.Commands = new CommandService();
 			this.OwnedEntities = new OwnedEntityService();
 			this.Roleplays = new RoleplayService(this.Commands, this.OwnedEntities);
-			this.Characters = new CharacterService(this.Commands, this.OwnedEntities, this.Content);
+			this.Transformation = new TransformationService(this.Content);
+
+			this.Characters = new CharacterService(this.Commands, this.OwnedEntities, this.Content, this.Transformation);
 			this.Characters.DiscoverPronounProviders();
 
 			this.Feedback = new UserFeedbackService();
 			this.Dossiers = new DossierService(this.Content);
 			this.Interactive = new InteractiveService(this.Client);
-			this.Transformation = new TransformationService(this.Content);
+
 			this.Lua = new LuaService(this.Content);
 
 			this.Services = new ServiceCollection()

@@ -20,7 +20,7 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    [Migration("20171127230338_InitialCreate")]
+    [Migration("20171129145416_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,13 +34,13 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<float>("GenderScale");
+                    b.Property<double>("GenderScale");
 
-                    b.Property<float>("Height");
+                    b.Property<double>("Height");
 
-                    b.Property<float>("Muscularity");
+                    b.Property<double>("Muscularity");
 
-                    b.Property<float>("Weight");
+                    b.Property<double>("Weight");
 
                     b.HasKey("ID");
 
@@ -388,8 +388,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<uint>("SpeciesID");
 
-                    b.Property<string>("UniformDescription")
-                        .IsRequired();
+                    b.Property<string>("UniformDescription");
 
                     b.HasKey("ID");
 

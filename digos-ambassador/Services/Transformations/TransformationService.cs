@@ -184,11 +184,6 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(canTransformResult);
 			}
 
-			if (!character.HasBodypart(bodyPart))
-			{
-				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
-			}
-
 			var getSpeciesResult = await GetSpeciesByNameAsync(db, species);
 			if (!getSpeciesResult.IsSuccess)
 			{
@@ -201,13 +196,31 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(getTFResult);
 			}
 
-			var currentComponent = character.GetBodypart(bodyPart);
-
+			string shiftMessage;
+			AppearanceComponent currentComponent;
 			var transformation = getTFResult.Entity;
-			currentComponent.Transformation = transformation;
+			if (!character.HasBodypart(bodyPart))
+			{
+				currentComponent = AppearanceComponent.CreateFrom(transformation);
+				character.CurrentAppearance.Components.Add(currentComponent);
+
+				shiftMessage = this.DescriptionBuilder.BuildGrowMessage(character, transformation);
+			}
+			else
+			{
+				currentComponent = character.GetBodypart(bodyPart);
+				if (currentComponent.Transformation.Species.Name.Equals(transformation.Species.Name))
+				{
+					return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The user's bodypart is already that form.");
+				}
+
+				currentComponent.Transformation = transformation;
+
+				shiftMessage = this.DescriptionBuilder.BuildShiftMessage(character, transformation);
+			}
+
 			await db.SaveChangesAsync();
 
-			string shiftMessage = this.DescriptionBuilder.BuildShiftMessage(character, transformation);
 			return ShiftBodypartResult.FromSuccess(shiftMessage);
 		}
 
@@ -403,7 +416,7 @@ namespace DIGOS.Ambassador.Services
 		{
 			var eb = new EmbedBuilder();
 			eb.WithColor(Color.DarkPurple);
-			eb.WithTitle($"{character.Name} \"{(character.Nickname is null ? string.Empty : character.Nickname)}\"".Trim());
+			eb.WithTitle($"{character.Name} {(character.Nickname is null ? string.Empty : $"\"{character.Nickname}\"")}".Trim());
 
 			var user = await context.Client.GetUserAsync(character.Owner.DiscordID);
 			eb.WithAuthor(user);
@@ -795,7 +808,7 @@ namespace DIGOS.Ambassador.Services
 							++updatedFields;
 						}
 
-						if (!existingTransformation.UniformDescription.Equals(transformation.UniformDescription, StringComparison.OrdinalIgnoreCase))
+						if (existingTransformation.UniformDescription != null && !existingTransformation.UniformDescription.Equals(transformation.UniformDescription, StringComparison.OrdinalIgnoreCase))
 						{
 							existingTransformation.UniformDescription = transformation.UniformDescription;
 							++updatedFields;
@@ -829,7 +842,12 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] Species species
 		)
 		{
-			var transformation = await db.Transformations.FirstOrDefaultAsync(tf => tf.Part == bodypart && tf.Species.IsSameSpeciesAs(species));
+			var transformation = await db.Transformations
+				.Include(tf => tf.DefaultBaseColour)
+				.Include(tf => tf.DefaultPatternColour)
+				.Include(tf => tf.Species)
+				.FirstOrDefaultAsync(tf => tf.Part == bodypart && tf.Species.IsSameSpeciesAs(species));
+
 			if (transformation is null)
 			{
 				return RetrieveEntityResult<Transformation>.FromError(CommandError.ObjectNotFound, "No transformation found for that combination.");

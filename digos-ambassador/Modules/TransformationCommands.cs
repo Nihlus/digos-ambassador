@@ -81,7 +81,6 @@ namespace DIGOS.Ambassador.Modules
 		[Priority(int.MinValue)]
 		[Command(RunMode = Async)]
 		[Summary("Transforms the given bodypart into the given species on yourself.")]
-		[RequirePermission(Transform)]
 		public async Task ShiftAsync(Bodypart bodyPart, [NotNull] string species) =>
 			await ShiftAsync(this.Context.User, bodyPart, species);
 
@@ -96,7 +95,6 @@ namespace DIGOS.Ambassador.Modules
 		[Command(RunMode = Async)]
 		[Summary("Transforms the given bodypart of the target user into the given species.")]
 		[RequireContext(Guild)]
-		[RequirePermission(Transform, Other)]
 		public async Task ShiftAsync([NotNull] IUser target, Bodypart bodyPart, [NotNull] string species)
 		{
 			using (var db = new GlobalInfoContext())
@@ -110,15 +108,23 @@ namespace DIGOS.Ambassador.Modules
 
 				var character = getCurrentCharacterResult.Entity;
 
-				var shiftPartResult = await this.Transformation.ShiftBodypartAsync(db, this.Context, character, bodyPart, species);
-
-				if (!shiftPartResult.IsSuccess)
+				ShiftBodypartResult result;
+				if (species.Equals("remove", StringComparison.OrdinalIgnoreCase))
 				{
-					await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
+					result = await this.Transformation.RemoveCharacterBodypartAsync(db, this.Context, character, bodyPart);
+				}
+				else
+				{
+					result = await this.Transformation.ShiftBodypartAsync(db, this.Context, character, bodyPart, species);
+				}
+
+				if (!result.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
 					return;
 				}
 
-				await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
+				await this.Feedback.SendConfirmationAsync(this.Context, result.ShiftMessage);
 			}
 		}
 
@@ -130,7 +136,6 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("colour", RunMode = Async)]
 		[Summary("Transforms the base colour of the given bodypart on yourself into the given colour.")]
-		[RequirePermission(Transform)]
 		public async Task ShiftColourAsync(Bodypart bodypart, [NotNull] [Remainder] Colour colour) =>
 			await ShiftColourAsync(this.Context.User, bodypart, colour);
 
@@ -144,7 +149,6 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Transforms the base colour of the given bodypart on the target user into the given colour.")]
 		[Command("colour", RunMode = Async)]
 		[RequireContext(Guild)]
-		[RequirePermission(Transform, Other)]
 		public async Task ShiftColourAsync
 		(
 			[NotNull] IUser target,
@@ -184,7 +188,6 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("pattern", RunMode = Async)]
 		[Summary("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
-		[RequirePermission(Transform)]
 		public async Task ShiftPatternAsync(Bodypart bodypart, Pattern pattern, [NotNull] [Remainder] Colour colour) =>
 			await ShiftPatternAsync(this.Context.User, bodypart, pattern, colour);
 
@@ -199,7 +202,6 @@ namespace DIGOS.Ambassador.Modules
 		[Command("pattern", RunMode = Async)]
 		[Summary("Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.")]
 		[RequireContext(Guild)]
-		[RequirePermission(Transform, Other)]
 		public async Task ShiftPatternAsync
 		(
 			[NotNull] IUser target,
@@ -239,7 +241,6 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("pattern-colour", RunMode = Async)]
 		[Summary("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
-		[RequirePermission(Transform)]
 		public async Task ShiftPatternColourAsync(Bodypart bodypart, [NotNull] [Remainder] Colour colour) =>
 			await ShiftPatternColourAsync(this.Context.User, bodypart, colour);
 
@@ -253,7 +254,6 @@ namespace DIGOS.Ambassador.Modules
 		[Command("pattern-colour", RunMode = Async)]
 		[Summary("Transforms the colour of the pattern on the given bodypart on the target user to the given colour.")]
 		[RequireContext(Guild)]
-		[RequirePermission(Transform, Other)]
 		public async Task ShiftPatternColourAsync
 		(
 			[NotNull] IUser target,
@@ -288,6 +288,7 @@ namespace DIGOS.Ambassador.Modules
 		/// Lists the available transformation species.
 		/// </summary>
 		[UsedImplicitly]
+		[Alias("list-available", "list-species", "species")]
 		[Command("list-available", RunMode = Async)]
 		[Summary("Lists the available transformation species.")]
 		public async Task ListAvailableTransformationsAsync()
@@ -318,6 +319,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="bodyPart">The part to list available transformations for. Optional.</param>
 		[UsedImplicitly]
+		[Alias("list-available")]
 		[Command("list-available", RunMode = Async)]
 		[Summary("Lists the available transformations for a given bodypart.")]
 		public async Task ListAvailableTransformationsAsync(Bodypart bodyPart)
