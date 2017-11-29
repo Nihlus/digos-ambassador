@@ -229,6 +229,7 @@
           <e p="Tokens" t="Include">
             <e p="ColourToken.cs" t="Include" />
             <e p="FluentPronounToken.cs" t="Include" />
+            <e p="GenderToken.cs" t="Include" />
             <e p="LuaScriptToken.cs" t="Include" />
             <e p="LuaSnippetToken.cs" t="Include" />
             <e p="PatternToken.cs" t="Include" />

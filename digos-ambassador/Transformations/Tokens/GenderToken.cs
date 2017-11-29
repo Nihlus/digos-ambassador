@@ -1,5 +1,5 @@
 ﻿//
-//  SpeciesToken.cs
+//  GenderToken.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,49 +20,48 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
 using System.Linq;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Services;
+using static DIGOS.Ambassador.Services.Bodypart;
 
 namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
-	/// A token that gets replaced with a species.
+	/// A token that gets replaced with a gender.
 	/// </summary>
-	[TokenIdentifier("species", "s")]
-	public class SpeciesToken : ReplacableTextToken<SpeciesToken>
+	[TokenIdentifier("gender", "g")]
+	public class GenderToken : ReplacableTextToken<GenderToken>
 	{
 		/// <inheritdoc />
 		public override string GetText(Character character, Transformation transformation)
 		{
-			var speciesShares = new Dictionary<string, int>();
+			var genderedParts = character.CurrentAppearance.Components
+				.Where(c => !BodypartUtilities.IsGenderNeutral(c.Bodypart))
+				.Select(c => c.Bodypart)
+				.ToList();
 
-			foreach (var component in character.CurrentAppearance.Components)
+			if (!genderedParts.Any())
 			{
-				var speciesName = component.Transformation.Species.Name;
-
-				if (speciesShares.ContainsKey(speciesName))
-				{
-					speciesShares[speciesName]++;
-				}
-				else
-				{
-					speciesShares.Add(speciesName, 1);
-				}
+				return "neuter";
 			}
 
-			int totalPoints = speciesShares.Values.Sum();
+			if (genderedParts.Contains(Penis) && genderedParts.Contains(Vagina))
+			{
+				return "herm";
+			}
 
-			// pick the species with the largest share
-			var largestSpecies = speciesShares.OrderByDescending(kvp => kvp.Value).FirstOrDefault();
-			var shareByPercentage = largestSpecies.Value / (double)totalPoints;
+			if (genderedParts.Contains(Penis))
+			{
+				return "male";
+			}
 
-			return $"{largestSpecies.Key}{(shareByPercentage <= 0.75 ? "-morph" : string.Empty)}";
+			return "female";
 		}
 
 		/// <inheritdoc />
-		protected override SpeciesToken Initialize(string data)
+		protected override GenderToken Initialize(string data)
 		{
 			return this;
 		}
