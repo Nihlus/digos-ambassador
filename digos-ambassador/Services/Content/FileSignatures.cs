@@ -25,7 +25,7 @@ using System.Collections.Generic;
 // ReSharper disable InconsistentNaming
 #pragma warning disable SA1310
 
-namespace DIGOS.Ambassador.Content
+namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
 	/// Holds binary file signatures.

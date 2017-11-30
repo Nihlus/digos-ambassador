@@ -26,7 +26,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-using DIGOS.Ambassador.Content;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Extensions;
