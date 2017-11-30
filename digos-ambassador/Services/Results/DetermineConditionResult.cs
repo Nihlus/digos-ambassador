@@ -109,11 +109,14 @@ namespace DIGOS.Ambassador.Services
 		/// Creates a failed result based on an exception.
 		/// </summary>
 		/// <param name="exception">The exception to base this result off of.</param>
+		/// <param name="reason">The reason for the exception. Optional, defaults to the exception message.</param>
 		/// <returns>A failed result.</returns>
 		[Pure]
-		public static DetermineConditionResult FromError([NotNull] Exception exception)
+		public static DetermineConditionResult FromError([NotNull] Exception exception, string reason = null)
 		{
-			return new DetermineConditionResult(false, CommandError.Exception, exception.Message, exception);
+			reason = reason ?? exception.Message;
+
+			return new DetermineConditionResult(false, CommandError.Exception, reason, exception);
 		}
 
 		/// <inheritdoc />

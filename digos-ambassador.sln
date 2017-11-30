@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos_ambassador", "digos-a
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos-ambassador.Tests", "digos-ambassador.Tests\digos-ambassador.Tests.csproj", "{60C5B2AC-336F-45FA-87CC-B18265F073F7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos-ambassador.Tools", "digos-ambassador.Tools\digos-ambassador.Tools.csproj", "{3F5CD95D-F64C-4CD0-82BF-224156733C9B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{60C5B2AC-336F-45FA-87CC-B18265F073F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60C5B2AC-336F-45FA-87CC-B18265F073F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60C5B2AC-336F-45FA-87CC-B18265F073F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F5CD95D-F64C-4CD0-82BF-224156733C9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F5CD95D-F64C-4CD0-82BF-224156733C9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F5CD95D-F64C-4CD0-82BF-224156733C9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F5CD95D-F64C-4CD0-82BF-224156733C9B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

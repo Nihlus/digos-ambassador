@@ -296,6 +296,21 @@
           </e>
         </e>
       </e>
+      <e p="digos-ambassador.Tools" t="IncludeRecursive">
+        <e p="CommandLineOptions.cs" t="Include" />
+        <e p="Program.cs" t="Include" />
+        <e p="RawSpeciesYamlConverter.cs" t="Include" />
+        <e p="TransformationFileVerifier.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="digos-ambassador.Tools.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.0" t="Include">
+              <e p="digos-ambassador.Tools.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
+      </e>
       <e p="digos-ambassador.sln" t="IncludeFlat" />
       <e p="packages" t="ExcludeRecursive" />
       <e p="stylecop.json" t="Include" />
