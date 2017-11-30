@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Tools
 		/// <summary>
 		/// Gets or sets the path to the file or directory to verify.
 		/// </summary>
-		[Option('v', "verify", HelpText = "Sets the path to the file or directory to verify.")]
+		[Option('v', "verify", HelpText = "Sets the path to the file or directory to verify.", Required = true)]
 		public string VerifyPath { get; set; }
 	}
 }
