@@ -34,10 +34,10 @@ namespace DIGOS.Ambassador.Tests
 	public class TokenizerTests
 	{
 		private const string TokenWithoutData = "@target";
-		private const string TokenWithoutOptionalData = "@possessive";
-		private const string TokenWithOptionalData = "@possessive|verb";
+		private const string TokenWithoutOptionalData = "@colour";
+		private const string TokenWithOptionalData = "@colour|base";
 
-		private const string SampleText = "lorem ipsum {@target} dolor {@possessive} sit amet {@possessive|verb}";
+		private const string SampleText = "lorem ipsum {@target} dolor {@colour} sit amet {@colour|base}";
 
 		private readonly IServiceProvider Services;
 
@@ -61,24 +61,24 @@ namespace DIGOS.Ambassador.Tests
 		public void CanParseTokenWithoutOptionalData()
 		{
 			var tokenizer = new TransformationTextTokenizer(this.Services);
-			tokenizer.WithTokenType<PossessivePronounToken>();
+			tokenizer.WithTokenType<ColourToken>();
 
-			var token = tokenizer.ParseToken(0, TokenWithoutOptionalData) as PossessivePronounToken;
+			var token = tokenizer.ParseToken(0, TokenWithoutOptionalData) as ColourToken;
 
 			Assert.NotNull(token);
-			Assert.False(token.UseVerb);
+			Assert.Equal(string.Empty, token.Part);
 		}
 
 		[Fact]
 		public void CanParseTokenWithOptionalData()
 		{
 			var tokenizer = new TransformationTextTokenizer(this.Services);
-			tokenizer.WithTokenType<PossessivePronounToken>();
+			tokenizer.WithTokenType<ColourToken>();
 
-			var token = tokenizer.ParseToken(0, TokenWithOptionalData) as PossessivePronounToken;
+			var token = tokenizer.ParseToken(0, TokenWithOptionalData) as ColourToken;
 
 			Assert.NotNull(token);
-			Assert.True(token.UseVerb);
+			Assert.Equal("base", token.Part);
 		}
 
 		[Fact]
@@ -86,15 +86,15 @@ namespace DIGOS.Ambassador.Tests
 		{
 			var tokenizer = new TransformationTextTokenizer(this.Services)
 				.WithTokenType<TargetToken>()
-				.WithTokenType<PossessivePronounToken>();
+				.WithTokenType<ColourToken>();
 
 			var tokens = tokenizer.GetTokens(SampleText);
 
 			Assert.Equal(3, tokens.Count);
 
 			Assert.IsType<TargetToken>(tokens.First());
-			Assert.IsType<PossessivePronounToken>(tokens[1]);
-			Assert.IsType<PossessivePronounToken>(tokens[2]);
+			Assert.IsType<ColourToken>(tokens[1]);
+			Assert.IsType<ColourToken>(tokens[2]);
 		}
 
 		[Fact]
@@ -102,15 +102,15 @@ namespace DIGOS.Ambassador.Tests
 		{
 			var tokenizer = new TransformationTextTokenizer(this.Services)
 				.WithTokenType<TargetToken>()
-				.WithTokenType<PossessivePronounToken>();
+				.WithTokenType<ColourToken>();
 
 			var tokens = tokenizer.GetTokens(SampleText);
 
 			Assert.Equal(12, tokens.First().Start);
 
-			Assert.Equal(28, tokens[1].Start);
+			Assert.Equal(24, tokens[1].Start);
 
-			Assert.Equal(51, tokens[2].Start);
+			Assert.Equal(47, tokens[2].Start);
 		}
 
 		[Fact]
@@ -118,15 +118,15 @@ namespace DIGOS.Ambassador.Tests
 		{
 			var tokenizer = new TransformationTextTokenizer(this.Services)
 				.WithTokenType<TargetToken>()
-				.WithTokenType<PossessivePronounToken>();
+				.WithTokenType<ColourToken>();
 
 			var tokens = tokenizer.GetTokens(SampleText);
 
 			Assert.Equal(9, tokens.First().Length);
 
-			Assert.Equal(13, tokens[1].Length);
+			Assert.Equal(9, tokens[1].Length);
 
-			Assert.Equal(18, tokens[2].Length);
+			Assert.Equal(14, tokens[2].Length);
 		}
 	}
 }

@@ -22,8 +22,11 @@
 
 using System;
 using System.IO;
+
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
+
+using Discord.Commands;
 using YamlDotNet.Core;
 
 namespace DIGOS.Ambassador.Tools
@@ -66,12 +69,18 @@ namespace DIGOS.Ambassador.Tools
 			if (!result.IsSuccess)
 			{
 				Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine($"File \"{result.ErrorReason}\" failed verification.");
+				if (result.Error == CommandError.Exception)
+				{
+					Console.WriteLine($"File \"{result.ErrorReason}\" failed verification.");
 
-				var yamlException = (YamlException)result.Exception ?? throw new ArgumentNullException();
-				Console.WriteLine($"Error at {yamlException.Start}: {yamlException.InnerException.Message}");
+					var yamlException = (YamlException)result.Exception ?? throw new ArgumentNullException();
+					Console.WriteLine($"Error at {yamlException.Start}: {yamlException.InnerException.Message}");
 
-				return -1;
+					return -1;
+				}
+
+				Console.WriteLine(result.ErrorReason);
+				return 3;
 			}
 
 			Console.ForegroundColor = ConsoleColor.Green;

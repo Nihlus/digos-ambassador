@@ -21,8 +21,13 @@
 //
 
 using System.IO;
+using System.Linq;
+
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
+
+using Discord.Commands;
+
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -79,7 +84,13 @@ namespace DIGOS.Ambassador.Tools
 		/// <returns>A condition result, which may or may not have succeeded.</returns>
 		public DetermineConditionResult VerifyFilesInDirectory(string directory)
 		{
-			var files = Directory.EnumerateFiles(directory, "*.yml", SearchOption.AllDirectories);
+			var files = Directory.EnumerateFiles(directory, "*.yml", SearchOption.AllDirectories).ToList();
+
+			if (files.Count <= 0)
+			{
+				return DetermineConditionResult.FromError(CommandError.ObjectNotFound, "No files to verify in input directory.");
+			}
+
 			foreach (var file in files)
 			{
 				var verificationResult = VerifyFile<Transformation>(file);

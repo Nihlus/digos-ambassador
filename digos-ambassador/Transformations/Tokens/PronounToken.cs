@@ -30,7 +30,7 @@ namespace DIGOS.Ambassador.Transformations
 	/// <summary>
 	/// A token that gets replaced with a possessive pronoun
 	/// </summary>
-	[TokenIdentifier("pronoun", "pron")]
+	[TokenIdentifier("pronoun", "pr")]
 	public class PronounToken : ReplacableTextToken<PronounToken>
 	{
 		private readonly CharacterService Characters;

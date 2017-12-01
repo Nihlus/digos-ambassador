@@ -37,7 +37,6 @@ namespace DIGOS.Ambassador.Tests
 	public class DescriptionBuilderTests
 	{
 		private const string SampleFluentText = "{@f|They have} long {@colour} hair. {@f|Their} name is {@target}. {@f|They are} a DIGOS unit.";
-		private const string SampleText = "{@possessive|verb} long {@colour} hair. {@possessive|adjective} name is {@target}. {@pronoun|subjectverb} a DIGOS unit.";
 		private const string ExpectedText = "She has long fluorescent white hair. Her name is Amby. She is a DIGOS unit.";
 
 		[Fact]
@@ -53,7 +52,7 @@ namespace DIGOS.Ambassador.Tests
 			{
 				DefaultBaseColour = hairColour,
 				Part = Bodypart.Hair,
-				SingleDescription = SampleText
+				SingleDescription = SampleFluentText
 			};
 
 			var hairComponent = AppearanceComponent.CreateFrom(hairTransformation);
@@ -80,50 +79,6 @@ namespace DIGOS.Ambassador.Tests
 			var descriptionBuilder = new TransformationDescriptionBuilder(serviceProvider);
 
 			var result = descriptionBuilder.ReplaceTokensWithContent(SampleFluentText, character, hairTransformation);
-
-			Assert.Equal(ExpectedText, result);
-		}
-
-		[Fact]
-		public void ReplacesTokensCorrectly()
-		{
-			var hairColour = new Colour
-			{
-				Shade = Shade.White,
-				Modifier = ShadeModifier.Fluorescent
-			};
-
-			var hairTransformation = new Transformation
-			{
-				DefaultBaseColour = hairColour,
-				Part = Bodypart.Hair,
-				SingleDescription = SampleText
-			};
-
-			var hairComponent = AppearanceComponent.CreateFrom(hairTransformation);
-
-			var appearance = new Appearance
-			{
-				Components = new List<AppearanceComponent> { hairComponent }
-			};
-
-			var character = new Character
-			{
-				Name = "Amby",
-				CurrentAppearance = appearance,
-				PronounProviderFamily = "Feminine"
-			};
-
-			var characterService = new CharacterService(null, null, null, null)
-				.WithPronounProvider(new FemininePronounProvider());
-
-			var serviceProvider = new ServiceCollection()
-				.AddSingleton(characterService)
-				.BuildServiceProvider();
-
-			var descriptionBuilder = new TransformationDescriptionBuilder(serviceProvider);
-
-			var result = descriptionBuilder.ReplaceTokensWithContent(SampleText, character, hairTransformation);
 
 			Assert.Equal(ExpectedText, result);
 		}
