@@ -1,5 +1,5 @@
 ﻿//
-//  PaginatedGallery.cs
+//  PaginatedEmbed.cs
 //
 //  Author:
 //        Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -22,6 +22,7 @@
 
 // Originally licensed under the ISC license; modified from https://github.com/foxbot/Discord.Addons.Interactive
 using System.Collections.Generic;
+using System.Linq;
 using Discord;
 using Discord.Addons.Interactive;
 using Image = DIGOS.Ambassador.Database.Data.Image;
@@ -29,35 +30,34 @@ using Image = DIGOS.Ambassador.Database.Data.Image;
 namespace DIGOS.Ambassador.Pagination
 {
 	/// <summary>
-	/// Represents a paginated gallery of images.
+	/// Represents a paginated gallery of embeds.
 	/// </summary>
-	public class PaginatedGallery : IPager<Image, PaginatedGallery>
+	public class PaginatedEmbed : IPager<EmbedBuilder, PaginatedEmbed>
 	{
 		/// <inheritdoc />
-		public IList<Image> Pages { get; set; }
+		public IList<EmbedBuilder> Pages { get; set; }
 
 		/// <inheritdoc />
-		public PaginatedAppearanceOptions Options { get; set; }
+		public PaginatedAppearanceOptions Options { get; set; } = PaginatedAppearanceOptions.Default;
 
 		/// <summary>
-		/// Gets or sets the colour of the gallery's embed.
+		/// Initializes a new instance of the <see cref="PaginatedEmbed"/> class.
 		/// </summary>
-		public Color Color { get; set; } = Color.Default;
-
-		/// <summary>
-		/// Gets or sets the title of the gallery.
-		/// </summary>
-		public string Title { get; set; } = string.Empty;
+		/// <param name="embeds">The embeds to paginate.</param>
+		public PaginatedEmbed(IList<EmbedBuilder> embeds)
+		{
+			this.Pages = embeds;
+		}
 
 		/// <inheritdoc />
-		public PaginatedGallery WithPage(Image page)
+		public PaginatedEmbed WithPage(EmbedBuilder page)
 		{
 			this.Pages.Add(page);
 			return this;
 		}
 
 		/// <inheritdoc />
-		public PaginatedGallery WithPages(IEnumerable<Image> pages)
+		public PaginatedEmbed WithPages(IEnumerable<EmbedBuilder> pages)
 		{
 			foreach (var page in pages)
 			{
@@ -70,15 +70,11 @@ namespace DIGOS.Ambassador.Pagination
 		/// <inheritdoc />
 		public Embed BuildEmbed(int page)
 		{
-			var currentImage = this.Pages[page];
+			var currentPage = this.Pages[page - 1];
 
-			return new EmbedBuilder()
-				.WithColor(this.Color)
-				.WithTitle($"{this.Title} | {currentImage.Name}")
-				.WithDescription(currentImage.Caption)
-				.WithImageUrl(currentImage.Url)
-				.WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page, this.Pages.Count))
-				.Build();
+			return currentPage
+			.WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page, this.Pages.Count))
+			.Build();
 		}
 	}
 }

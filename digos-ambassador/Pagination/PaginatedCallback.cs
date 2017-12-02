@@ -1,5 +1,5 @@
 ﻿//
-//  PaginatedGalleryCallback.cs
+//  PaginatedCallback.cs
 //
 //  Author:
 //        Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -38,7 +38,9 @@ namespace DIGOS.Ambassador.Pagination
 	/// <summary>
 	/// A page building class for paginated galleries.
 	/// </summary>
-	public sealed class PaginatedGalleryCallback : IReactionCallback
+	/// <typeparam name="T1">The type of content in the pager.</typeparam>
+	/// <typeparam name="T2">The type of the pager.</typeparam>
+	public sealed class PaginatedCallback<T1, T2> : IReactionCallback where T2 : IPager<T1, T2>
 	{
 		/// <inheritdoc />
 		public SocketCommandContext Context { get; }
@@ -58,7 +60,7 @@ namespace DIGOS.Ambassador.Pagination
 		/// <summary>
 		/// Gets or sets the message associated with this gallery callback.
 		/// </summary>
-		private IUserMessage Message { get; set; }
+		public IUserMessage Message { get; set; }
 
 		/// <inheritdoc />
 		public RunMode RunMode => RunMode.Sync;
@@ -69,16 +71,16 @@ namespace DIGOS.Ambassador.Pagination
 		/// <inheritdoc />
 		public TimeSpan? Timeout => this.Options.Timeout;
 
-		private readonly PaginatedGallery Pager;
+		private readonly IPager<T1, T2> Pager;
 
 		private PaginatedAppearanceOptions Options => this.Pager.Options;
 
-		private readonly int Pages;
+		private readonly int PageCount;
 
-		private int Page = 1;
+		private int CurrentPage = 1;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="PaginatedGalleryCallback"/> class.
+		/// Initializes a new instance of the <see cref="PaginatedCallback{T1, T2}"/> class.
 		/// </summary>
 		/// <param name="interactive">The interaction service.</param>
 		/// <param name="feedbackService">The user feedback service.</param>
@@ -86,12 +88,12 @@ namespace DIGOS.Ambassador.Pagination
 		/// <param name="pager">The pages in the gallery.</param>
 		/// <param name="targetChannel">The channel in which the gallery should be posted.</param>
 		/// <param name="criterion">The criterion for reactions.</param>
-		public PaginatedGalleryCallback
+		public PaginatedCallback
 		(
 			InteractiveService interactive,
 			UserFeedbackService feedbackService,
 			SocketCommandContext sourceContext,
-			PaginatedGallery pager,
+			IPager<T1, T2> pager,
 			IMessageChannel targetChannel = null,
 			ICriterion<SocketReaction> criterion = null
 		)
@@ -102,7 +104,7 @@ namespace DIGOS.Ambassador.Pagination
 			this.Criterion = criterion ?? new EmptyCriterion<SocketReaction>();
 			this.Pager = pager;
 			this.Channel = targetChannel ?? this.Context.Channel;
-			this.Pages = this.Pager.Images.Count();
+			this.PageCount = this.Pager.Pages.Count;
 		}
 
 		/// <summary>
@@ -111,7 +113,7 @@ namespace DIGOS.Ambassador.Pagination
 		/// <returns>A task which must be awaited.</returns>
 		public async Task DisplayAsync()
 		{
-			var embed = BuildEmbed();
+			var embed = this.Pager.BuildEmbed(this.CurrentPage - 1);
 			var message = await this.Channel.SendMessageAsync(string.Empty, embed: embed).ConfigureAwait(false);
 			this.Message = message;
 			this.Interactive.AddReactionCallback(message, this);
@@ -164,27 +166,27 @@ namespace DIGOS.Ambassador.Pagination
 
 			if (emote.Equals(this.Options.First))
 			{
-				this.Page = 1;
+				this.CurrentPage = 1;
 			}
 			else if (emote.Equals(this.Options.Next))
 			{
-				if (this.Page >= this.Pages)
+				if (this.CurrentPage >= this.PageCount)
 				{
 					return false;
 				}
-				++this.Page;
+				++this.CurrentPage;
 			}
 			else if (emote.Equals(this.Options.Back))
 			{
-				if (this.Page <= 1)
+				if (this.CurrentPage <= 1)
 				{
 					return false;
 				}
-				--this.Page;
+				--this.CurrentPage;
 			}
 			else if (emote.Equals(this.Options.Last))
 			{
-				this.Page = this.Pages;
+				this.CurrentPage = this.PageCount;
 			}
 			else if (emote.Equals(this.Options.Stop))
 			{
@@ -207,7 +209,7 @@ namespace DIGOS.Ambassador.Pagination
 							return;
 						}
 
-						if (!int.TryParse(response.Content, out int request) || request < 1 || request > this.Pages)
+						if (!int.TryParse(response.Content, out int request) || request < 1 || request > this.PageCount)
 						{
 							_ = response.DeleteAsync().ConfigureAwait(false);
 
@@ -217,7 +219,7 @@ namespace DIGOS.Ambassador.Pagination
 							return;
 						}
 
-						this.Page = request;
+						this.CurrentPage = request;
 						_ = response.DeleteAsync().ConfigureAwait(false);
 						await RenderAsync().ConfigureAwait(false);
 					}
@@ -246,26 +248,9 @@ namespace DIGOS.Ambassador.Pagination
 			return false;
 		}
 
-		/// <summary>
-		/// Build the visible embed.
-		/// </summary>
-		/// <returns>The embed for the current page.</returns>
-		private Embed BuildEmbed()
-		{
-			var currentImage = this.Pager.Images.ElementAt(this.Page - 1);
-
-			return new EmbedBuilder()
-				.WithColor(this.Pager.Color)
-				.WithTitle($"{this.Pager.Title} | {currentImage.Name}")
-				.WithDescription(currentImage.Caption)
-				.WithImageUrl(currentImage.Url)
-				.WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, this.Page, this.Pages))
-				.Build();
-		}
-
 		private async Task RenderAsync()
 		{
-			var embed = BuildEmbed();
+			var embed = this.Pager.BuildEmbed(this.CurrentPage - 1);
 			await this.Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
 		}
 	}

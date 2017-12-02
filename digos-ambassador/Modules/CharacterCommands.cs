@@ -395,22 +395,17 @@ namespace DIGOS.Ambassador.Modules
 
 			var gallery = new PaginatedGallery
 			{
-				Images = character.Images,
+				Pages = character.Images,
 				Color = Color.DarkPurple,
-				Title = character.Name
+				Title = character.Name,
+				Options =
+				{
+					FooterFormat = "Image {0}/{1}",
+					InformationText = "Use the reactions to navigate the gallery."
+				}
 			};
 
-			gallery.Options.FooterFormat = "Image {0}/{1}";
-			gallery.Options.InformationText = "Use the reactions to navigate the gallery.";
-
-			var userChannel = await this.Context.User.GetOrCreateDMChannelAsync();
-			var callback = new PaginatedGalleryCallback(this.Interactive, this.Feedback, this.Context, gallery, userChannel);
-			await callback.DisplayAsync().ConfigureAwait(false);
-
-			if (!this.Context.IsPrivate)
-			{
-				await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
-			}
+			await this.Interactive.SendPrivatePaginatedMessageAsync(this.Context, this.Feedback, gallery);
 		}
 
 		/// <summary>
