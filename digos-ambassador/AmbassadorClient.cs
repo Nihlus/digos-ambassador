@@ -83,6 +83,8 @@ namespace DIGOS.Ambassador
 
 		private readonly LuaService Lua;
 
+		private readonly KinkService Kinks;
+
 		private readonly IServiceProvider Services;
 
 		// ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
@@ -114,6 +116,7 @@ namespace DIGOS.Ambassador
 			this.Interactive = new InteractiveService(this.Client);
 
 			this.Lua = new LuaService(this.Content);
+			this.Kinks = new KinkService();
 
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)
@@ -127,6 +130,7 @@ namespace DIGOS.Ambassador
 				.AddSingleton(this.Interactive)
 				.AddSingleton(this.Transformation)
 				.AddSingleton(this.Lua)
+				.AddSingleton(this.Kinks)
 				.BuildServiceProvider();
 
 			this.Transformation = this.Transformation
