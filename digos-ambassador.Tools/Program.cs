@@ -74,7 +74,11 @@ namespace DIGOS.Ambassador.Tools
 					Console.WriteLine($"File \"{result.ErrorReason}\" failed verification.");
 
 					var yamlException = (YamlException)result.Exception ?? throw new ArgumentNullException();
-					Console.WriteLine($"Error at {yamlException.Start}: {yamlException.InnerException.Message}");
+					var errorMessage = (yamlException.InnerException is null)
+						? yamlException.Message
+						: yamlException.InnerException.Message;
+
+					Console.WriteLine($"Error at {yamlException.Start}: {errorMessage}");
 
 					return -1;
 				}

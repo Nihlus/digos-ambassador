@@ -209,7 +209,12 @@
             <e p="UserFeedbackService.cs" t="Include" />
           </e>
           <e p="Lua" t="Include">
+            <e p="INode.cs" t="Include" />
             <e p="LuaService.cs" t="Include" />
+            <e p="MetaTableBuilder.cs" t="Include" />
+            <e p="NamedNode.cs" t="Include" />
+            <e p="TableNode.cs" t="Include" />
+            <e p="ValueNode.cs" t="Include" />
           </e>
           <e p="Results" t="Include">
             <e p="CheckConditionResult.cs" t="Include" />

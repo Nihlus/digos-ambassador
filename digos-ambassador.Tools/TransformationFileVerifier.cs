@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Tools
 		/// <returns>A condition result, which may or may not have succeeded.</returns>
 		public DetermineConditionResult VerifyFilesInDirectory(string directory)
 		{
-			var files = Directory.EnumerateFiles(directory, "*.yml", SearchOption.AllDirectories).ToList();
+			var files = Directory.EnumerateFiles(directory, "*.yml", SearchOption.AllDirectories).Where(p => !p.EndsWith("Species.yml")).ToList();
 
 			if (files.Count <= 0)
 			{
@@ -96,12 +96,17 @@ namespace DIGOS.Ambassador.Tools
 				var verificationResult = VerifyFile<Transformation>(file);
 				if (!verificationResult.IsSuccess)
 				{
-					verificationResult = VerifyFile<Species>(file);
-				}
-
-				if (!verificationResult.IsSuccess)
-				{
 					return verificationResult;
+				}
+			}
+
+			var speciesPath = Path.Combine(directory, "Species.yml");
+			if (File.Exists(speciesPath))
+			{
+				var speciesVerificationResult = VerifyFile<Species>(speciesPath);
+				if (!speciesVerificationResult.IsSuccess)
+				{
+					return speciesVerificationResult;
 				}
 			}
 

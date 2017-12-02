@@ -25,7 +25,10 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
+using DIGOS.Ambassador.Extensions;
 using Discord.Commands;
+
 using JetBrains.Annotations;
 using NLua;
 
@@ -121,13 +124,24 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <returns>A sandboxed lua state.</returns>
 		[MustUseReturnValue("The state must be disposed after use.")]
-		private Lua GetState()
+		private Lua GetState(params(string name, object value)[] variables)
 		{
 			var state = new Lua();
 
-			// Sandbox the state by restricting the available functions to an API whitelist
-			var functionList = string.Join(",\n", this.FunctionWhitelist.Select(f => $"\"{f}\""));
-			state.DoString($"env = {{{functionList}}}");
+			var envBuilder = new MetaTableBuilder();
+
+			foreach (var variable in variables)
+			{
+				state[variable.name] = variable.value;
+				envBuilder.WithEntry(variable.name);
+			}
+
+			foreach (var function in this.FunctionWhitelist)
+			{
+				envBuilder = envBuilder.WithEntry(function);
+			}
+
+			state.DoString($"{envBuilder.Build()}");
 
 			state.DoString
 			(
@@ -166,16 +180,12 @@ namespace DIGOS.Ambassador.Services
 			(
 				() =>
 				{
-					using (var lua = GetState())
+					using (var lua = GetState(variables))
 					{
-						foreach (var variable in variables)
-						{
-							lua[variable.name] = variable.value;
-						}
-
 						lua.DoString($"status, result = run [[{snippet}]]");
+						lua.DoString("output = tostring(result)");
 
-						string result = lua["result"] as string;
+						string result = lua["output"] as string;
 						bool ranSuccessfully = lua["status"] is bool b && b;
 						if (!(result is null) && ranSuccessfully)
 						{
