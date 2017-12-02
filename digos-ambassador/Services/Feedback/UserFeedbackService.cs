@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +28,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Extensions;
 
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
 
 using JetBrains.Annotations;
@@ -40,6 +42,81 @@ namespace DIGOS.Ambassador.Services
 	/// </summary>
 	public class UserFeedbackService
 	{
+		/// <summary>
+		/// Sends an error message, and deletes it after a specified timeout.
+		/// </summary>
+		/// <param name="context">The context.</param>
+		/// <param name="interactivity">The interactivity service.</param>
+		/// <param name="contents">The contents of the message.</param>
+		/// <param name="timeout">The timeout after which the message should be deleted.</param>
+		public async Task SendErrorAndDeleteAsync
+		(
+			[NotNull] SocketCommandContext context,
+			[NotNull] InteractiveService interactivity,
+			[NotNull] string contents,
+			[CanBeNull] TimeSpan? timeout = null
+		)
+		{
+			await SendEmbedAndDeleteAsync(context, interactivity, Color.Red, contents, timeout);
+		}
+
+		/// <summary>
+		/// Sends a warning message, and deletes it after a specified timeout.
+		/// </summary>
+		/// <param name="context">The context.</param>
+		/// <param name="interactivity">The interactivity service.</param>
+		/// <param name="contents">The contents of the message.</param>
+		/// <param name="timeout">The timeout after which the message should be deleted.</param>
+		public async Task SendWarningAndDeleteAsync
+		(
+			[NotNull] SocketCommandContext context,
+			[NotNull] InteractiveService interactivity,
+			[NotNull] string contents,
+			[CanBeNull] TimeSpan? timeout = null
+		)
+		{
+			await SendEmbedAndDeleteAsync(context, interactivity, Color.Orange, contents, timeout);
+		}
+
+		/// <summary>
+		/// Sends a confirmation message, and deletes it after a specified timeout.
+		/// </summary>
+		/// <param name="context">The context.</param>
+		/// <param name="interactivity">The interactivity service.</param>
+		/// <param name="contents">The contents of the message.</param>
+		/// <param name="timeout">The timeout after which the message should be deleted.</param>
+		public async Task SendConfirmationAndDeleteAsync
+		(
+			[NotNull] SocketCommandContext context,
+			[NotNull] InteractiveService interactivity,
+			[NotNull] string contents,
+			[CanBeNull] TimeSpan? timeout = null
+		)
+		{
+			await SendEmbedAndDeleteAsync(context, interactivity, Color.DarkPurple, contents, timeout);
+		}
+
+		/// <summary>
+		/// Sends an embed, and deletes it after a specified timeout.
+		/// </summary>
+		/// <param name="context">The context.</param>
+		/// <param name="interactivity">The interactivity service.</param>
+		/// <param name="colour">The colour of the embed.</param>
+		/// <param name="contents">The contents of the message.</param>
+		/// <param name="timeout">The timeout after which the message should be deleted.</param>
+		public async Task SendEmbedAndDeleteAsync
+		(
+			[NotNull] SocketCommandContext context,
+			[NotNull] InteractiveService interactivity,
+			Color colour,
+			[NotNull] string contents,
+			[CanBeNull] TimeSpan? timeout = null
+		)
+		{
+			var eb = CreateFeedbackEmbed(context.User, colour, contents);
+			await interactivity.ReplyAndDeleteAsync(context, string.Empty, false, eb, timeout);
+		}
+
 		/// <summary>
 		/// Send a positive confirmation message.
 		/// </summary>

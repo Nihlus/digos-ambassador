@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 
 using Discord;
@@ -144,7 +145,7 @@ namespace DIGOS.Ambassador.Modules
 
 				var display = this.Kinks.BuildKinkOverlapEmbed(this.Context.User, otherUser, overlap);
 
-				await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display);
+				await this.Interactive.SendPrivatePaginatedMessageAsync(this.Context, this.Feedback, display);
 			}
 		}
 
@@ -180,7 +181,7 @@ namespace DIGOS.Ambassador.Modules
 				}
 
 				var paginatedKinks = this.Kinks.BuildPaginatedUserKinkEmbed(withPreference);
-
+				await this.Interactive.SendPrivatePaginatedMessageAsync(this.Context, this.Feedback, paginatedKinks);
 			}
 		}
 
@@ -194,7 +195,25 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Sets your preference for the given kink.")]
 		public async Task SetKinkPreferenceAsync([NotNull] string name, KinkPreference preference)
 		{
+			using (var db = new GlobalInfoContext())
+			{
+				var getUserKinkResult = await this.Kinks.GetUserKinkByNameAsync(db, this.Context.User, name);
+				if (!getUserKinkResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, getUserKinkResult.ErrorReason);
+					return;
+				}
 
+				var userKink = getUserKinkResult.Entity;
+				var setKinkPreferenceResult = await this.Kinks.SetKinkPreferenceAsync(db, userKink, preference);
+				if (!setKinkPreferenceResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, setKinkPreferenceResult.ErrorReason);
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Preference set.");
+			}
 		}
 
 		/// <summary>
@@ -205,7 +224,11 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Runs an interactive wizard for setting kink preferences.")]
 		public async Task RunKinkWizardAsync()
 		{
-
+			using (var db = new GlobalInfoContext())
+			{
+				//var userWizard = await this.Kinks.GetOrCreateUserKinkWizardAsync(db, this.Context.User);
+				//await this.Interactive.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, userWizard);
+			}
 		}
 
 		/// <summary>
@@ -216,7 +239,6 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Resets all your kink preferences.")]
 		public async Task ResetKinksAsync()
 		{
-
 		}
 
 		/// <summary>
@@ -228,7 +250,6 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Sets the visbility level of your kinks; that is, who can see them. Valid choices are All, Friends, and Whitelist.")]
 		public async Task SetKinkVisibilityAsync(KinkVisibility visibility)
 		{
-
 		}
 
 		/// <summary>
@@ -240,7 +261,6 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Adds the given user to your visibility whitelist.")]
 		public async Task AddUserToWhitelistAsync([NotNull] IUser otherUser)
 		{
-
 		}
 	}
 }

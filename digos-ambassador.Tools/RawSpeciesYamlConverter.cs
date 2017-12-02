@@ -21,9 +21,7 @@
 //
 
 using System;
-using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Transformations;
-using DIGOS.Ambassador.Services;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;

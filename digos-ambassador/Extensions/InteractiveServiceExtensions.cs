@@ -22,9 +22,9 @@
 
 using System.Threading.Tasks;
 
+using DIGOS.Ambassador.Interactivity;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;
-
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
@@ -37,6 +37,71 @@ namespace DIGOS.Ambassador.Extensions
 	/// </summary>
 	public static class InteractiveServiceExtensions
 	{
+		/// <summary>
+		/// Sends an interactive message to the context user's direct messaging channel, alerting them if they are
+		/// not already in it.
+		/// </summary>
+		/// <param name="this">The interactive service.</param>
+		/// <param name="context">The message context.</param>
+		/// <param name="feedback">The user feedback service.</param>
+		/// <param name="interactiveMessage">The interactive message.</param>
+		/// <returns>The underlying sent message.</returns>
+		public static async Task<IUserMessage> SendPrivateInteractiveMessageAsync
+		(
+			this InteractiveService @this,
+			SocketCommandContext context,
+			UserFeedbackService feedback,
+			IInteractiveMessage interactiveMessage
+		)
+		{
+			if (!context.IsPrivate)
+			{
+				await feedback.SendConfirmationAsync(context, "Please check your private messages.");
+			}
+
+			var userChannel = await context.User.GetOrCreateDMChannelAsync();
+			return await SendInteractiveMessageAsync(@this, context, interactiveMessage, userChannel);
+		}
+
+		/// <summary>
+		/// Sends an interactive message to the given channel.
+		/// </summary>
+		/// <param name="this">The interactive service.</param>
+		/// <param name="context">The message context.</param>
+		/// <param name="interactiveMessage">The interactive message.</param>
+		/// <param name="channel">The channel to send the message to. Defaults to the context channel.</param>
+		/// <returns>The underlying sent message.</returns>
+		public static async Task<IUserMessage> SendInteractiveMessageAsync
+		(
+			this InteractiveService @this,
+			ICommandContext context,
+			IInteractiveMessage interactiveMessage,
+			IMessageChannel channel = null
+		)
+		{
+			channel = channel ?? context.Channel;
+
+			var message = await interactiveMessage.DisplayAsync(channel);
+
+			if (interactiveMessage.ReactionCallback is null)
+			{
+				return message;
+			}
+
+			@this.AddReactionCallback(message, interactiveMessage.ReactionCallback);
+
+			if (interactiveMessage.Timeout.HasValue)
+			{
+				_ = Task.Delay(interactiveMessage.Timeout.Value).ContinueWith(_ =>
+				{
+					@this.RemoveReactionCallback(interactiveMessage.Message);
+					interactiveMessage.Message.DeleteAsync();
+				});
+			}
+
+			return message;
+		}
+
 		/// <summary>
 		/// Sends a paginated message to the context user's direct messaging channel, alerting them if they are
 		/// not already in it.

@@ -22,7 +22,6 @@
 
 // Originally licensed under the ISC license; modified from https://github.com/foxbot/Discord.Addons.Interactive
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Services;

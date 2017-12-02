@@ -1,8 +1,8 @@
 ﻿//
-//  ValueNode.cs
+//  IWizard.cs
 //
 //  Author:
-//       Jarl Gullberg <jarl.gullberg@gmail.com>
+//        Jarl Gullberg <jarl.gullberg@gmail.com>
 //
 //  Copyright (c) 2017 Jarl Gullberg
 //
@@ -20,18 +20,33 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Services
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Discord;
+
+namespace DIGOS.Ambassador.Wizards
 {
 	/// <summary>
-	/// Represents a named node that holds a value.
+	/// Represents an interactive wizard.
 	/// </summary>
-	/// <typeparam name="T">The type of value.</typeparam>
-	public class ValueNode<T> : NamedNode<T>
+	public interface IWizard : IEmoteConsumer
 	{
-		/// <inheritdoc />
-		public override string Format(bool pretty = false)
-		{
-			return $"{this.Name} = {this.Value.ToString()}";
-		}
+		/// <summary>
+		/// Gets the emotes that should be active for the current page.
+		/// </summary>
+		/// <returns>The emotes.</returns>
+		IEnumerable<IEmote> GetCurrentPageEmotes();
+
+			/// <summary>
+		/// Gets the current page in the wizard.
+		/// </summary>
+		/// <returns>The current page.</returns>
+		Task<Embed> GetCurrentPageAsync();
+
+		/// <summary>
+		/// Gets the home page of the wizard.
+		/// </summary>
+		/// <returns>The home page.</returns>
+		Task<Embed> GetHomePageAsync();
 	}
 }

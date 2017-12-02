@@ -116,7 +116,7 @@ namespace DIGOS.Ambassador
 			this.Interactive = new InteractiveService(this.Client);
 
 			this.Lua = new LuaService(this.Content);
-			this.Kinks = new KinkService();
+			this.Kinks = new KinkService(this.Feedback);
 
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)

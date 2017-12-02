@@ -1,5 +1,5 @@
 ﻿//
-//  ValueNode.cs
+//  KinkWizardState.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,18 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Wizards
 {
 	/// <summary>
-	/// Represents a named node that holds a value.
+	/// Represents the state that the kink wizard is in.
 	/// </summary>
-	/// <typeparam name="T">The type of value.</typeparam>
-	public class ValueNode<T> : NamedNode<T>
+	public enum KinkWizardState
 	{
-		/// <inheritdoc />
-		public override string Format(bool pretty = false)
-		{
-			return $"{this.Name} = {this.Value.ToString()}";
-		}
+		/// <summary>
+		/// The category selection page.
+		/// </summary>
+		CategorySelection,
+
+		/// <summary>
+		/// The kink preference selection page.
+		/// </summary>
+		KinkPreference
 	}
 }

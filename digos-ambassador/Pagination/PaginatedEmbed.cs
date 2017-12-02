@@ -20,12 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-// Originally licensed under the ISC license; modified from https://github.com/foxbot/Discord.Addons.Interactive
 using System.Collections.Generic;
-using System.Linq;
 using Discord;
 using Discord.Addons.Interactive;
-using Image = DIGOS.Ambassador.Database.Data.Image;
 
 namespace DIGOS.Ambassador.Pagination
 {

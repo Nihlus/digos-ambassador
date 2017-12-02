@@ -1,8 +1,8 @@
 ﻿//
-//  ValueNode.cs
+//  IEmoteConsumer.cs
 //
 //  Author:
-//       Jarl Gullberg <jarl.gullberg@gmail.com>
+//        Jarl Gullberg <jarl.gullberg@gmail.com>
 //
 //  Copyright (c) 2017 Jarl Gullberg
 //
@@ -20,18 +20,27 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Services
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Discord;
+
+namespace DIGOS.Ambassador.Wizards
 {
 	/// <summary>
-	/// Represents a named node that holds a value.
+	/// Interface for classes that consume emotes.
 	/// </summary>
-	/// <typeparam name="T">The type of value.</typeparam>
-	public class ValueNode<T> : NamedNode<T>
+	public interface IEmoteConsumer
 	{
-		/// <inheritdoc />
-		public override string Format(bool pretty = false)
-		{
-			return $"{this.Name} = {this.Value.ToString()}";
-		}
+		/// <summary>
+		/// Gets the set of accepted emotes.
+		/// </summary>
+		IReadOnlyCollection<IEmote> AcceptedEmotes { get; }
+
+		/// <summary>
+		/// Consumes the given emote, performing some associated action.
+		/// </summary>
+		/// <param name="emote">The emote.</param>
+		/// <returns>A task that must be awaited.</returns>
+		Task ConsumeAsync(IEmote emote);
 	}
 }
