@@ -143,6 +143,7 @@
           <e p="AdminCommands.cs" t="Include" />
           <e p="CharacterCommands.cs" t="Include" />
           <e p="DossierCommands.cs" t="Include" />
+          <e p="KinkCommands.cs" t="Include" />
           <e p="MiscellaneousCommands.cs" t="Include" />
           <e p="PermissionCommands.cs" t="Include" />
           <e p="RoleplayCommands.cs" t="Include" />
@@ -266,6 +267,7 @@
         </e>
         <e p="Utility" t="Include">
           <e p="CaseInsensitiveStringEqualityComparer.cs" t="Include" />
+          <e p="LevenshteinDistance.cs" t="Include" />
         </e>
         <e p="app.config" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
