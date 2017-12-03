@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Wizards
 				return true;
 			}
 
-			return await this.Wizard.ConsumeAsync(reaction.Emote).ConfigureAwait(false);
+			return await this.Wizard.ConsumeEmoteAsync(reaction.Emote).ConfigureAwait(false);
 		}
 	}
 }

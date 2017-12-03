@@ -42,11 +42,5 @@ namespace DIGOS.Ambassador.Wizards
 		/// </summary>
 		/// <returns>The current page.</returns>
 		Task<Embed> GetCurrentPageAsync();
-
-		/// <summary>
-		/// Gets the home page of the wizard.
-		/// </summary>
-		/// <returns>The home page.</returns>
-		Task<Embed> GetHomePageAsync();
 	}
 }

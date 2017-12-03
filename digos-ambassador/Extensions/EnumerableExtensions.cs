@@ -143,7 +143,7 @@ namespace DIGOS.Ambassador.Extensions
 					)
 					let maxDistance = Math.Max(candidate.Length, search.Length)
 					let percentile = distance / (float)maxDistance
-				select new ValueTuple<string, int, double>(candidate, distance, percentile);
+				select new Tuple<string, int, double>(candidate, distance, percentile);
 
 			var hasAnyPassing = await candidates.Where(c => c.Item3 <= tolerance).AnyAsync();
 			if (!hasAnyPassing)

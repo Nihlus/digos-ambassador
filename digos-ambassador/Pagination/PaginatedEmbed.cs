@@ -67,10 +67,10 @@ namespace DIGOS.Ambassador.Pagination
 		/// <inheritdoc />
 		public Embed BuildEmbed(int page)
 		{
-			var currentPage = this.Pages[page - 1];
+			var currentPage = this.Pages[page];
 
 			return currentPage
-			.WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page, this.Pages.Count))
+			.WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page + 1, this.Pages.Count))
 			.Build();
 		}
 	}

@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
+using Discord.WebSocket;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Interactivity
@@ -54,6 +55,6 @@ namespace DIGOS.Ambassador.Interactivity
 		/// </summary>
 		/// <param name="channel">The channel to send the message to.</param>
 		/// <returns>A user message.</returns>
-		Task<IUserMessage> DisplayAsync(IMessageChannel channel);
+		Task<IUserMessage> DisplayAsync(ISocketMessageChannel channel);
 	}
 }

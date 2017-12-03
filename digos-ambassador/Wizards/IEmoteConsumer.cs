@@ -41,6 +41,6 @@ namespace DIGOS.Ambassador.Wizards
 		/// </summary>
 		/// <param name="emote">The emote.</param>
 		/// <returns>A task that must be awaited.</returns>
-		Task<bool> ConsumeAsync(IEmote emote);
+		Task<bool> ConsumeEmoteAsync(IEmote emote);
 	}
 }

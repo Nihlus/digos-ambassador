@@ -39,6 +39,7 @@ using Discord.Commands;
 
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -71,7 +72,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="name">The name of the kink.</param>
 		[UsedImplicitly]
-		[Command("show", RunMode = Async)]
+		[Command("info", RunMode = Async)]
 		[Summary("Shows information about the named kink.")]
 		public async Task ShowKinkAsync([Remainder] [NotNull] string name)
 		{
@@ -96,7 +97,8 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="name">The name of the kink.</param>
 		[UsedImplicitly]
-		[Command("preference", RunMode = Async)]
+		[Alias("show", "preference")]
+		[Command("show", RunMode = Async)]
 		[Summary("Shows your preference for the named kink.")]
 		public async Task ShowKinkPreferenceAsync([Remainder] [NotNull] string name) => await ShowKinkPreferenceAsync(this.Context.User, name);
 
@@ -106,7 +108,8 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="user">The user.</param>
 		/// <param name="name">The name of the kink.</param>
 		[UsedImplicitly]
-		[Command("preference", RunMode = Async)]
+		[Alias("show", "preference")]
+		[Command("show", RunMode = Async)]
 		[Summary("Shows the user's preference for the named kink.")]
 		public async Task ShowKinkPreferenceAsync([NotNull] IUser user, [Remainder] [NotNull] string name)
 		{
@@ -120,7 +123,7 @@ namespace DIGOS.Ambassador.Modules
 				}
 
 				var userKink = getUserKinkResult.Entity;
-				var display = this.Kinks.BuildKinkPreferenceEmbed(userKink);
+				var display = this.Kinks.BuildUserKinkInfoEmbed(userKink);
 
 				await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display);
 			}
@@ -227,6 +230,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("wizard", RunMode = Async)]
 		[Summary("Runs an interactive wizard for setting kink preferences.")]
+		[RequireContext(DM)]
 		public async Task RunKinkWizardAsync()
 		{
 			var wizard = new KinkWizard(this.Context, this.Feedback, this.Kinks, this.Interactive);
@@ -240,7 +244,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("update-db", RunMode = Async)]
 		[Summary("Updates the kink database with data from F-list.")]
-		[RequireContext(ContextType.DM)]
+		[RequireContext(DM)]
 		[RequireOwner]
 		public async Task UpdateKinkDatabaseAsync()
 		{
@@ -325,14 +329,46 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		/// <summary>
-		/// Adds the given user to your visibility whitelist.
+		/// Kink whitelisting commands.
 		/// </summary>
-		/// <param name="otherUser">The user to add.</param>
-		[UsedImplicitly]
-		[Command("whitelist", RunMode = Async)]
-		[Summary("Adds the given user to your visibility whitelist.")]
-		public async Task AddUserToWhitelistAsync([NotNull] IUser otherUser)
+		[Group("whitelist")]
+		public class WhitelistCommands : ModuleBase<SocketCommandContext>
 		{
+			private readonly KinkService Kinks;
+			private readonly UserFeedbackService Feedback;
+
+			/// <summary>
+			/// Initializes a new instance of the <see cref="WhitelistCommands"/> class.
+			/// </summary>
+			/// <param name="kinks">The kink service.</param>
+			/// <param name="feedback">The feedback service.</param>
+			public WhitelistCommands(KinkService kinks, UserFeedbackService feedback)
+			{
+				this.Kinks = kinks;
+				this.Feedback = feedback;
+			}
+
+			/// <summary>
+			/// Adds the given user to your visibility whitelist.
+			/// </summary>
+			/// <param name="otherUser">The user to add.</param>
+			[UsedImplicitly]
+			[Command("add", RunMode = Async)]
+			[Summary("Adds the given user to your visibility whitelist.")]
+			public async Task AddUserToWhitelistAsync([NotNull] IUser otherUser)
+			{
+			}
+
+			/// <summary>
+			/// Removes the given user from your visibility whitelist.
+			/// </summary>
+			/// <param name="otherUser">The user to add.</param>
+			[UsedImplicitly]
+			[Command("remove", RunMode = Async)]
+			[Summary("Adds the given user to your visibility whitelist.")]
+			public async Task RemoveUserFromWhitelistAsync([NotNull] IUser otherUser)
+			{
+			}
 		}
 	}
 }

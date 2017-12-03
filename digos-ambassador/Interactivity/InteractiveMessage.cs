@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.WebSocket;
 
 namespace DIGOS.Ambassador.Interactivity
 {
@@ -53,12 +54,12 @@ namespace DIGOS.Ambassador.Interactivity
 		public TimeSpan? Timeout { get; protected set; }
 
 		/// <inheritdoc />
-		public abstract Task<IUserMessage> DisplayAsync(IMessageChannel channel);
+		public abstract Task<IUserMessage> DisplayAsync(ISocketMessageChannel socketMessageChannel);
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="InteractiveMessage"/> class.
 		/// </summary>
-		/// <param name="context">The context of the message.</param>
+		/// <param name="context">The context.</param>
 		/// <param name="interactiveService">The interactive service.</param>
 		protected InteractiveMessage(SocketCommandContext context, InteractiveService interactiveService)
 		{

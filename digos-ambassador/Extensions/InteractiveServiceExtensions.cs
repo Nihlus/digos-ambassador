@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Interactivity;
@@ -37,6 +38,41 @@ namespace DIGOS.Ambassador.Extensions
 	/// </summary>
 	public static class InteractiveServiceExtensions
 	{
+		private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(15);
+
+		/// <summary>
+		/// Sends a message and deletes it after a specified timeout.
+		/// </summary>
+		/// <param name="this">The interactive service.</param>
+		/// <param name="channel">The channel to send the message to.</param>
+		/// <param name="content">The content of the message.</param>
+		/// <param name="isTTS">Whether or not the message is a TTS message.</param>
+		/// <param name="embed">The embed to have in the message. Optional.</param>
+		/// <param name="timeout">The timeout before the message is deleted. Defaults to 15 seconds.</param>
+		/// <param name="options">Any options that should be passed along with the request.</param>
+		/// <returns>A user message.</returns>
+		public static async Task<IUserMessage> ReplyAndDeleteAsync
+		(
+			this InteractiveService @this,
+			IMessageChannel channel,
+			string content,
+			bool isTTS = false,
+			Embed embed = null,
+			TimeSpan? timeout = null,
+			RequestOptions options = null
+		)
+		{
+			timeout = timeout ?? DefaultTimeout;
+
+			var message = await channel.SendMessageAsync(content, isTTS, embed, options).ConfigureAwait(false);
+
+			_ = Task.Delay(timeout.Value)
+				.ContinueWith(_ => message.DeleteAsync().ConfigureAwait(false))
+				.ConfigureAwait(false);
+
+			return message;
+		}
+
 		/// <summary>
 		/// Sends an interactive message to the context user's direct messaging channel, alerting them if they are
 		/// not already in it.
@@ -59,7 +95,7 @@ namespace DIGOS.Ambassador.Extensions
 				await feedback.SendConfirmationAsync(context, "Please check your private messages.");
 			}
 
-			var userChannel = await context.User.GetOrCreateDMChannelAsync();
+			var userChannel = await context.User.GetOrCreateDMChannelAsync() as ISocketMessageChannel;
 			return await SendInteractiveMessageAsync(@this, context, interactiveMessage, userChannel);
 		}
 
@@ -74,9 +110,9 @@ namespace DIGOS.Ambassador.Extensions
 		public static async Task<IUserMessage> SendInteractiveMessageAsync
 		(
 			this InteractiveService @this,
-			ICommandContext context,
+			SocketCommandContext context,
 			IInteractiveMessage interactiveMessage,
-			IMessageChannel channel = null
+			ISocketMessageChannel channel = null
 		)
 		{
 			channel = channel ?? context.Channel;

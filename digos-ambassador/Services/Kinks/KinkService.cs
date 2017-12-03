@@ -99,16 +99,14 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="userKink">The kink.</param>
 		/// <returns>An embed.</returns>
-		public Embed BuildKinkPreferenceEmbed(UserKink userKink)
+		public EmbedBuilder BuildUserKinkInfoEmbed(UserKink userKink)
 		{
 			var eb = this.Feedback.CreateBaseEmbed();
 
-			eb.WithTitle(userKink.Kink.Name.Transform(To.TitleCase));
-			eb.WithDescription(userKink.Kink.Description);
-
+			eb.AddField(userKink.Kink.Name.Transform(To.TitleCase), userKink.Kink.Description);
 			eb.AddField("Current preference", userKink.Preference.Humanize());
 
-			return eb.Build();
+			return eb;
 		}
 
 		/// <summary>
@@ -132,19 +130,16 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A paginated embed.</returns>
 		public PaginatedEmbed BuildKinkOverlapEmbed(IUser firstUser, IUser secondUser, IEnumerable<UserKink> kinks)
 		{
-			var pages = new List<EmbedBuilder>();
-
-			foreach (var batch in kinks.Batch(3))
-			{
-				var eb = new EmbedBuilder();
-				eb.WithTitle($"Matching kinks between {firstUser.Mention} and {secondUser.Mention}");
-				foreach (var kink in batch)
-				{
-					eb.AddField(kink.Kink.Name, kink.Preference.Humanize().Transform(To.SentenceCase));
-				}
-
-				pages.Add(eb);
-			}
+			var pages =
+			(
+				from batch in kinks.Batch(3)
+				from kink in batch
+				select BuildUserKinkInfoEmbed(kink).WithTitle
+				(
+					$"Matching kinks between {firstUser.Mention} and {secondUser.Mention}"
+				)
+			)
+			.ToList();
 
 			return new PaginatedEmbed(pages);
 		}
@@ -156,18 +151,13 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A paginated embed.</returns>
 		public PaginatedEmbed BuildPaginatedUserKinkEmbed(IEnumerable<UserKink> kinks)
 		{
-			var pages = new List<EmbedBuilder>();
-
-			foreach (var batch in kinks.Batch(3))
-			{
-				var eb = new EmbedBuilder();
-				foreach (var kink in batch)
-				{
-					eb.AddField(kink.Kink.Name, kink.Preference.Humanize().Transform(To.SentenceCase));
-				}
-
-				pages.Add(eb);
-			}
+			var pages =
+			(
+				from batch in kinks.Batch(3)
+				from kink in batch
+				select BuildUserKinkInfoEmbed(kink)
+			)
+			.ToList();
 
 			return new PaginatedEmbed(pages);
 		}
@@ -322,6 +312,98 @@ namespace DIGOS.Ambassador.Services
 			user.Kinks.Clear();
 
 			await db.SaveChangesAsync();
+		}
+
+		/// <summary>
+		/// Gets the first kink that the given uses does not have a set preference for in the given category.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="user">The user.</param>
+		/// <param name="category">The category.</param>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public async Task<RetrieveEntityResult<Kink>> GetFirstKinkWithoutPreferenceInCategoryAsync(GlobalInfoContext db, IUser user, KinkCategory category)
+		{
+			var getKinksResult = await GetKinksByCategoryAsync(db, category);
+			if (!getKinksResult.IsSuccess)
+			{
+				return RetrieveEntityResult<Kink>.FromError(getKinksResult);
+			}
+
+			var kinks = getKinksResult.Entity;
+			var userKinks = (await GetUserKinksByCategoryAsync(db, user, category)).ToList();
+
+			// Find the first kink that the user either has in their list with no preference, or does not exist
+			// in their list
+			var kinkWithoutPreference = kinks.FirstOrDefault
+			(
+				k =>
+					userKinks.Any
+					(
+						uk =>
+							k.FListID == uk.Kink.FListID && uk.Preference == KinkPreference.NoPreference
+					) ||
+					userKinks.All
+					(
+						uk =>
+							k.FListID != uk.Kink.FListID
+					)
+			);
+
+			if (kinkWithoutPreference is null)
+			{
+				return RetrieveEntityResult<Kink>.FromError(CommandError.ObjectNotFound, "No kink without a set preference found.");
+			}
+
+			return RetrieveEntityResult<Kink>.FromSuccess(kinkWithoutPreference);
+		}
+
+		/// <summary>
+		/// Gets the first kink in the given category.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="category">The category.</param>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public async Task<RetrieveEntityResult<Kink>> GetFirstKinkInCategoryAsync(GlobalInfoContext db, KinkCategory category)
+		{
+			var getKinksResult = await GetKinksByCategoryAsync(db, category);
+			if (!getKinksResult.IsSuccess)
+			{
+				return RetrieveEntityResult<Kink>.FromError(getKinksResult);
+			}
+
+			return RetrieveEntityResult<Kink>.FromSuccess(getKinksResult.Entity.First());
+		}
+
+		/// <summary>
+		/// Gets the next kink in its category by its predecessor's F-List ID.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="precedingFListID">The F-List ID of the preceding kink.</param>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public async Task<RetrieveEntityResult<Kink>> GetNextKinkByCurrentFListIDAsync(GlobalInfoContext db, int precedingFListID)
+		{
+			var getKinkResult = await GetKinkByFListIDAsync(db, precedingFListID);
+			if (!getKinkResult.IsSuccess)
+			{
+				return getKinkResult;
+			}
+
+			var currentKink = getKinkResult.Entity;
+			var getKinksResult = await GetKinksByCategoryAsync(db, currentKink.Category);
+			if (!getKinksResult.IsSuccess)
+			{
+				return RetrieveEntityResult<Kink>.FromError(getKinksResult);
+			}
+
+			var group = getKinksResult.Entity;
+			var nextKink = group.SkipUntil(k => k.FListID == precedingFListID).FirstOrDefault();
+
+			if (nextKink is null)
+			{
+				return RetrieveEntityResult<Kink>.FromError(CommandError.ObjectNotFound, "The current kink was the last one in the category.");
+			}
+
+			return RetrieveEntityResult<Kink>.FromSuccess(nextKink);
 		}
 	}
 }
