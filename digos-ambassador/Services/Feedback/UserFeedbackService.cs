@@ -253,7 +253,7 @@ namespace DIGOS.Ambassador.Services
 		[NotNull]
 		public string BuildParameterList([NotNull] CommandInfo commandInfo)
 		{
-			return string.Join
+			var result = string.Join
 			(
 				", ",
 				commandInfo.Parameters.Select
@@ -270,6 +270,13 @@ namespace DIGOS.Ambassador.Services
 					}
 				)
 			);
+
+			if (result.IsNullOrWhitespace())
+			{
+				return "No parameters";
+			}
+
+			return result;
 		}
 	}
 }
