@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Database.Kinks
 		/// <summary>
 		/// The user would participate in or reciprocate this kink.
 		/// </summary>
-		Yes,
+		Like,
 
 		/// <summary>
 		/// The user is very interested in this kink.

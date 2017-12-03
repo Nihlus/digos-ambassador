@@ -20,23 +20,15 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.FList.Kinks;
 using DIGOS.Ambassador.Services;
 
 using Discord.Commands;
 
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Kink = DIGOS.Ambassador.Database.Kinks.Kink;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -59,69 +51,6 @@ namespace DIGOS.Ambassador.Modules
 		public AdminCommands(UserFeedbackService feedback)
 		{
 			this.Feedback = feedback;
-		}
-
-		/// <summary>
-		/// Updates the kink database with data from F-list.
-		/// </summary>
-		/// <returns>A task wrapping the update action.</returns>
-		[UsedImplicitly]
-		[Command("update-kinks", RunMode = RunMode.Async)]
-		[Summary("Updates the kink list with data from F-list.")]
-		[RequireContext(ContextType.DM)]
-		[RequireOwner]
-		public async Task UpdateKinkDatabaseAsync()
-		{
-			int updatedKinkCount = 0;
-
-			// Get the latest JSON from F-list
-			string json;
-			using (var web = new HttpClient())
-			{
-				web.Timeout = TimeSpan.FromSeconds(3);
-
-				var cts = new CancellationTokenSource();
-				cts.CancelAfter(web.Timeout);
-
-				try
-				{
-					using (var response = await web.GetAsync(new Uri("https://www.f-list.net/json/api/kink-list.php"), cts.Token))
-					{
-						json = await response.Content.ReadAsStringAsync();
-					}
-				}
-				catch (OperationCanceledException)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, "Could not connect to F-list: Operation timed out.");
-					return;
-				}
-			}
-
-			var kinkCollection = JsonConvert.DeserializeObject<KinkCollection>(json);
-			using (var db = new GlobalInfoContext())
-			{
-				foreach (var kinkSection in kinkCollection.KinkCategories)
-				{
-					if (!Enum.TryParse<KinkCategory>(kinkSection.Key, out var kinkCategory))
-					{
-						await this.Feedback.SendErrorAsync(this.Context, "Failed to parse kink category.");
-						return;
-					}
-
-					updatedKinkCount += await db.UpdateKinksAsync(kinkSection.Value.Kinks.Select
-					(
-						k => new Kink
-						{
-							Category = kinkCategory,
-							Name = k.Name,
-							Description = k.Description,
-							FListID = k.KinkId
-						}
-					));
-				}
-			}
-
-			await this.Feedback.SendConfirmationAsync(this.Context, $"Done. {updatedKinkCount} kinks updated.");
 		}
 
 		/// <summary>

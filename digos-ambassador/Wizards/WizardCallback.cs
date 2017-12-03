@@ -81,11 +81,10 @@ namespace DIGOS.Ambassador.Wizards
 			bool matchesCriterion = await this.Criterion.JudgeAsync(this.Context, reaction);
 			if (!matchesCriterion || !this.Wizard.AcceptedEmotes.Contains(reaction.Emote))
 			{
-				return false;
+				return true;
 			}
 
-			await this.Wizard.ConsumeAsync(reaction.Emote).ConfigureAwait(false);
-			return true;
+			return await this.Wizard.ConsumeAsync(reaction.Emote).ConfigureAwait(false);
 		}
 	}
 }

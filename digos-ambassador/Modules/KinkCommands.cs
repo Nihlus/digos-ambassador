@@ -20,20 +20,25 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Linq;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.FList.Kinks;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Wizards;
 
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -135,9 +140,9 @@ namespace DIGOS.Ambassador.Modules
 				var userKinks = await this.Kinks.GetUserKinksAsync(db, this.Context.User);
 				var otherUserKinks = await this.Kinks.GetUserKinksAsync(db, otherUser);
 
-				var overlap = userKinks.Intersect(otherUserKinks, new UserKinkOverlapEqualityComparer());
+				var overlap = userKinks.Intersect(otherUserKinks, new UserKinkOverlapEqualityComparer()).ToList();
 
-				if (!await overlap.AnyAsync())
+				if (!overlap.Any())
 				{
 					await this.Feedback.SendErrorAsync(this.Context, "You don't overlap anywhere.");
 					return;
@@ -172,9 +177,9 @@ namespace DIGOS.Ambassador.Modules
 			using (var db = new GlobalInfoContext())
 			{
 				var userKinks = await this.Kinks.GetUserKinksAsync(db, otherUser);
-				var withPreference = userKinks.Where(k => k.Preference == preference);
+				var withPreference = userKinks.Where(k => k.Preference == preference).ToList();
 
-				if (!await withPreference.AnyAsync())
+				if (!withPreference.Any())
 				{
 					await this.Feedback.SendErrorAsync(this.Context, "The user doesn't have any kinks with that preference.");
 					return;
@@ -224,11 +229,73 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Runs an interactive wizard for setting kink preferences.")]
 		public async Task RunKinkWizardAsync()
 		{
+			var wizard = new KinkWizard(this.Context, this.Feedback, this.Kinks, this.Interactive);
+			await this.Interactive.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, wizard);
+		}
+
+		/// <summary>
+		/// Updates the kink database with data from F-list.
+		/// </summary>
+		/// <returns>A task wrapping the update action.</returns>
+		[UsedImplicitly]
+		[Command("update-db", RunMode = Async)]
+		[Summary("Updates the kink database with data from F-list.")]
+		[RequireContext(ContextType.DM)]
+		[RequireOwner]
+		public async Task UpdateKinkDatabaseAsync()
+		{
+			await this.Feedback.SendConfirmationAsync(this.Context, "Updating kinks...");
+
+			int updatedKinkCount = 0;
+
+			// Get the latest JSON from F-list
+			string json;
+			using (var web = new HttpClient())
+			{
+				web.Timeout = TimeSpan.FromSeconds(3);
+
+				var cts = new CancellationTokenSource();
+				cts.CancelAfter(web.Timeout);
+
+				try
+				{
+					using (var response = await web.GetAsync(new Uri("https://www.f-list.net/json/api/kink-list.php"), cts.Token))
+					{
+						json = await response.Content.ReadAsStringAsync();
+					}
+				}
+				catch (OperationCanceledException)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, "Could not connect to F-list: Operation timed out.");
+					return;
+				}
+			}
+
+			var kinkCollection = JsonConvert.DeserializeObject<KinkCollection>(json);
 			using (var db = new GlobalInfoContext())
 			{
-				//var userWizard = await this.Kinks.GetOrCreateUserKinkWizardAsync(db, this.Context.User);
-				//await this.Interactive.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, userWizard);
+				foreach (var kinkSection in kinkCollection.KinkCategories)
+				{
+					if (!Enum.TryParse<KinkCategory>(kinkSection.Key, out var kinkCategory))
+					{
+						await this.Feedback.SendErrorAsync(this.Context, "Failed to parse kink category.");
+						return;
+					}
+
+					updatedKinkCount += await db.UpdateKinksAsync(kinkSection.Value.Kinks.Select
+					(
+						k => new Kink
+						{
+							Category = kinkCategory,
+							Name = k.Name,
+							Description = k.Description,
+							FListID = k.KinkId
+						}
+					));
+				}
 			}
+
+			await this.Feedback.SendConfirmationAsync(this.Context, $"Done. {updatedKinkCount} kinks updated.");
 		}
 
 		/// <summary>
@@ -239,6 +306,11 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Resets all your kink preferences.")]
 		public async Task ResetKinksAsync()
 		{
+			using (var db = new GlobalInfoContext())
+			{
+				await this.Kinks.ResetUserKinksAsync(db, this.Context.User);
+				await this.Feedback.SendConfirmationAsync(this.Context, "Preferences reset.");
+			}
 		}
 
 		/// <summary>

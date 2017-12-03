@@ -23,12 +23,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Linq.Expressions;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Utility;
 
 using Discord.Commands;
-
+using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
 namespace DIGOS.Ambassador.Extensions
@@ -38,6 +39,122 @@ namespace DIGOS.Ambassador.Extensions
 	/// </summary>
 	public static class EnumerableExtensions
 	{
+		/// <summary>
+		/// Selects an object from the queryable by the best Levenshtein match.
+		/// </summary>
+		/// <param name="this">The sequence.</param>
+		/// <param name="selector">A function which selects the object to return.</param>
+		/// <param name="stringSelector">A function which selects the string field to search.</param>
+		/// <param name="search">The pattern to search for.</param>
+		/// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
+		/// <typeparam name="TSource">The source type of the enumerable.</typeparam>
+		/// <typeparam name="TResult">The resulting type.</typeparam>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public static async Task<RetrieveEntityResult<TResult>> SelectFromBestLevenshteinMatchAsync<TSource, TResult>
+		(
+			this IQueryable<TSource> @this,
+			Func<TSource, TResult> selector,
+			Expression<Func<TSource, string>> stringSelector,
+			string search,
+			double tolerance = 0.25
+		)
+			where TResult : class
+			where TSource : class
+		{
+			var matchResult = await @this.Select(stringSelector).BestLevenshteinMatchAsync(search, tolerance);
+			if (!matchResult.IsSuccess)
+			{
+				return RetrieveEntityResult<TResult>.FromError(matchResult);
+			}
+
+			var selectedString = matchResult.Entity;
+
+			var selectorFunc = stringSelector.Compile();
+
+			var selectedObject = await @this.FirstOrDefaultAsync(i => selectorFunc(i) == selectedString);
+			if (selectedObject is null)
+			{
+				return RetrieveEntityResult<TResult>.FromError(CommandError.ObjectNotFound, "No matching object for the selector found.");
+			}
+
+			var result = selector(selectedObject);
+
+			return RetrieveEntityResult<TResult>.FromSuccess(result);
+		}
+
+		/// <summary>
+		/// Selects an object from the enumerable by the best Levenshtein match.
+		/// </summary>
+		/// <param name="this">The sequence.</param>
+		/// <param name="selector">A function which selects the object to return.</param>
+		/// <param name="stringSelector">A function which selects the string field to search.</param>
+		/// <param name="search">The pattern to search for.</param>
+		/// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
+		/// <typeparam name="TSource">The source type of the enumerable.</typeparam>
+		/// <typeparam name="TResult">The resulting type.</typeparam>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public static RetrieveEntityResult<TResult> SelectFromBestLevenshteinMatch<TSource, TResult>
+		(
+			this IEnumerable<TSource> @this,
+			Func<TSource, TResult> selector,
+			Func<TSource, string> stringSelector,
+			string search,
+			double tolerance = 0.25
+		)
+		where TResult : class
+		where TSource : class
+		{
+			var enumerable = @this as IList<TSource> ?? @this.ToList();
+
+			var matchResult = enumerable.Select(stringSelector).BestLevenshteinMatch(search, tolerance);
+			if (!matchResult.IsSuccess)
+			{
+				return RetrieveEntityResult<TResult>.FromError(matchResult);
+			}
+
+			var selectedString = matchResult.Entity;
+
+			var selectedObject = enumerable.FirstOrDefault(i => stringSelector(i) == selectedString);
+			if (selectedObject is null)
+			{
+				return RetrieveEntityResult<TResult>.FromError(CommandError.ObjectNotFound, "No matching object for the selector found.");
+			}
+
+			var result = selector(selectedObject);
+
+			return RetrieveEntityResult<TResult>.FromSuccess(result);
+		}
+
+		/// <summary>
+		/// Selects the closest match in the sequence using the levenshtein algorithm.
+		/// </summary>
+		/// <param name="this">The sequence to search.</param>
+		/// <param name="search">The value to search for.</param>
+		/// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public static async Task<RetrieveEntityResult<string>> BestLevenshteinMatchAsync(this IQueryable<string> @this, string search, double tolerance = 0.25)
+		{
+			var candidates =
+				from candidate in @this
+					let distance = LevenshteinDistance.Compute
+					(
+						candidate.ToLowerInvariant(),
+						search.ToLowerInvariant()
+					)
+					let maxDistance = Math.Max(candidate.Length, search.Length)
+					let percentile = distance / (float)maxDistance
+				select new ValueTuple<string, int, double>(candidate, distance, percentile);
+
+			var hasAnyPassing = await candidates.Where(c => c.Item3 <= tolerance).AnyAsync();
+			if (!hasAnyPassing)
+			{
+				return RetrieveEntityResult<string>.FromError(CommandError.ObjectNotFound, "No sufficiently close match found.");
+			}
+
+			var best = await candidates.OrderBy(x => x.Item2).FirstAsync();
+			return RetrieveEntityResult<string>.FromSuccess(best.Item1);
+		}
+
 		/// <summary>
 		/// Selects the closest match in the sequence using the levenshtein algorithm.
 		/// </summary>

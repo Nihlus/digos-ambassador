@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Database.Kinks
 		/// <summary>
 		/// Kinks that relate to bondage, domination, and sadomasochism.
 		/// </summary>
-		[Description("")]
+		[Description("Kinks that relate to bondage, domination, and sadomasochism.")]
 		BDSM = 43,
 
 		/// <summary>

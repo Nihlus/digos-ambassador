@@ -42,5 +42,19 @@ namespace DIGOS.Ambassador.Database.Users
 		/// Gets or sets the user's preference for the kink.
 		/// </summary>
 		public KinkPreference Preference { get; set; }
+
+		/// <summary>
+		/// Creates a new <see cref="UserKink"/> from the given <see cref="Kink"/>.
+		/// </summary>
+		/// <param name="kink">The kink.</param>
+		/// <returns>The user kink.</returns>
+		public static UserKink CreateFrom(Kink kink)
+		{
+			return new UserKink
+			{
+				Kink = kink,
+				Preference = KinkPreference.NoPreference
+			};
+		}
 	}
 }

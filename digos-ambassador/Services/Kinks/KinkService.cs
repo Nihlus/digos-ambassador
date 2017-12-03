@@ -27,9 +27,15 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Pagination;
+
 using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
 using Humanizer;
+using Microsoft.EntityFrameworkCore;
+using MoreLinq;
 
 namespace DIGOS.Ambassador.Services
 {
@@ -57,7 +63,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		public async Task<RetrieveEntityResult<Kink>> GetKinkByNameAsync(GlobalInfoContext db, string name)
 		{
-			throw new System.NotImplementedException();
+			return await db.Kinks.SelectFromBestLevenshteinMatchAsync(x => x, k => k.Name, name);
 		}
 
 		/// <summary>
@@ -79,12 +85,13 @@ namespace DIGOS.Ambassador.Services
 		/// Gets a user's kink preference by the kink name.
 		/// </summary>
 		/// <param name="db">The database.</param>
-		/// <param name="user">The user.</param>
+		/// <param name="discordUser">The user.</param>
 		/// <param name="name">The kink name.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByNameAsync(GlobalInfoContext db, IUser user, string name)
+		public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByNameAsync(GlobalInfoContext db, IUser discordUser, string name)
 		{
-			throw new System.NotImplementedException();
+			var user = await db.GetOrRegisterUserAsync(discordUser);
+			return user.Kinks.SelectFromBestLevenshteinMatch(x => x, k => k.Kink.Name, name);
 		}
 
 		/// <summary>
@@ -108,11 +115,12 @@ namespace DIGOS.Ambassador.Services
 		/// Gets the given user's kink preferences.
 		/// </summary>
 		/// <param name="db">The database.</param>
-		/// <param name="user">The user.</param>
+		/// <param name="discordUser">The user.</param>
 		/// <returns>The user's kinks.</returns>
-		public async Task<IQueryable<UserKink>> GetUserKinksAsync(GlobalInfoContext db, IUser user)
+		public async Task<IEnumerable<UserKink>> GetUserKinksAsync(GlobalInfoContext db, IUser discordUser)
 		{
-			throw new System.NotImplementedException();
+			var user = await db.GetOrRegisterUserAsync(discordUser);
+			return user.Kinks;
 		}
 
 		/// <summary>
@@ -124,7 +132,21 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A paginated embed.</returns>
 		public PaginatedEmbed BuildKinkOverlapEmbed(IUser firstUser, IUser secondUser, IEnumerable<UserKink> kinks)
 		{
-			throw new System.NotImplementedException();
+			var pages = new List<EmbedBuilder>();
+
+			foreach (var batch in kinks.Batch(3))
+			{
+				var eb = new EmbedBuilder();
+				eb.WithTitle($"Matching kinks between {firstUser.Mention} and {secondUser.Mention}");
+				foreach (var kink in batch)
+				{
+					eb.AddField(kink.Kink.Name, kink.Preference.Humanize().Transform(To.SentenceCase));
+				}
+
+				pages.Add(eb);
+			}
+
+			return new PaginatedEmbed(pages);
 		}
 
 		/// <summary>
@@ -132,9 +154,22 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="kinks">The kinks.</param>
 		/// <returns>A paginated embed.</returns>
-		public PaginatedEmbed BuildPaginatedUserKinkEmbed(IQueryable<UserKink> kinks)
+		public PaginatedEmbed BuildPaginatedUserKinkEmbed(IEnumerable<UserKink> kinks)
 		{
-			throw new System.NotImplementedException();
+			var pages = new List<EmbedBuilder>();
+
+			foreach (var batch in kinks.Batch(3))
+			{
+				var eb = new EmbedBuilder();
+				foreach (var kink in batch)
+				{
+					eb.AddField(kink.Kink.Name, kink.Preference.Humanize().Transform(To.SentenceCase));
+				}
+
+				pages.Add(eb);
+			}
+
+			return new PaginatedEmbed(pages);
 		}
 
 		/// <summary>
@@ -146,18 +181,65 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetKinkPreferenceAsync(GlobalInfoContext db, UserKink userKink, KinkPreference preference)
 		{
-			throw new System.NotImplementedException();
+			userKink.Preference = preference;
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 		}
 
 		/// <summary>
 		/// Gets a user's kink preferences by the F-List kink ID.
 		/// </summary>
 		/// <param name="db">The database.</param>
+		/// <param name="discordUser">The discord user.</param>
 		/// <param name="onlineKinkID">The F-List kink ID.</param>
 		/// <returns>The user's kink preference.</returns>
-		public Task<UserKink> GetUserKinkByIDAsync(GlobalInfoContext db, int onlineKinkID)
+		public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByFListIDAsync(GlobalInfoContext db, IUser discordUser, int onlineKinkID)
 		{
-			throw new System.NotImplementedException();
+			var getKinkResult = await GetKinkByFListIDAsync(db, onlineKinkID);
+			if (!getKinkResult.IsSuccess)
+			{
+				return RetrieveEntityResult<UserKink>.FromError(getKinkResult);
+			}
+
+			var user = await db.GetOrRegisterUserAsync(discordUser);
+			var userKink = user.Kinks.FirstOrDefault(k => k.Kink.FListID == onlineKinkID);
+
+			if (!(userKink is null))
+			{
+				return RetrieveEntityResult<UserKink>.FromSuccess(userKink);
+			}
+
+			var kink = getKinkResult.Entity;
+			var addKinkResult = await AddUserKinkAsync(db, discordUser, kink);
+			if (!addKinkResult.IsSuccess)
+			{
+				return RetrieveEntityResult<UserKink>.FromError(addKinkResult);
+			}
+
+			return RetrieveEntityResult<UserKink>.FromSuccess(addKinkResult.Entity);
+		}
+
+		/// <summary>
+		/// Adds a kink to a user's preference list.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="discordUser">The user.</param>
+		/// <param name="kink">The kink.</param>
+		/// <returns>A creation result which may or may not have succeeded.</returns>
+		public async Task<CreateEntityResult<UserKink>> AddUserKinkAsync(GlobalInfoContext db, IUser discordUser, Kink kink)
+		{
+			var user = await db.GetOrRegisterUserAsync(discordUser);
+			if (user.Kinks.Any(k => k.Kink.FListID == kink.FListID))
+			{
+				return CreateEntityResult<UserKink>.FromError(CommandError.MultipleMatches, "The user already has a preference for that kink.");
+			}
+
+			var userKink = UserKink.CreateFrom(kink);
+			user.Kinks.Add(userKink);
+
+			await db.SaveChangesAsync();
+			return CreateEntityResult<UserKink>.FromSuccess(userKink);
 		}
 
 		/// <summary>
@@ -165,9 +247,9 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database.</param>
 		/// <returns>A list of kink categories.</returns>
-		public Task<IEnumerable<KinkCategory>> GetKinkCategoriesAsync(GlobalInfoContext db)
+		public Task<IQueryable<KinkCategory>> GetKinkCategoriesAsync(GlobalInfoContext db)
 		{
-			throw new System.NotImplementedException();
+			return Task.FromResult(db.Kinks.Select(k => k.Category).Distinct());
 		}
 
 		/// <summary>
@@ -176,9 +258,70 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database.</param>
 		/// <param name="onlineKinkID">The F-List kink ID.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public Task<RetrieveEntityResult<Kink>> GetKinkByIDAsync(GlobalInfoContext db, int onlineKinkID)
+		public async Task<RetrieveEntityResult<Kink>> GetKinkByFListIDAsync(GlobalInfoContext db, int onlineKinkID)
 		{
-			throw new System.NotImplementedException();
+			var kink = await db.Kinks.FirstOrDefaultAsync(k => k.FListID == onlineKinkID);
+			if (kink is null)
+			{
+				return RetrieveEntityResult<Kink>.FromError(CommandError.ObjectNotFound, "No kink with that ID found.");
+			}
+
+			return RetrieveEntityResult<Kink>.FromSuccess(kink);
+		}
+
+		/// <summary>
+		/// Gets a list of all kinks in a given category.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="category">The category.</param>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public async Task<RetrieveEntityResult<IEnumerable<Kink>>> GetKinksByCategoryAsync(GlobalInfoContext db, KinkCategory category)
+		{
+			var group = await db.Kinks.GroupBy(k => k.Category).FirstOrDefaultAsync(g => g.Key == category);
+			if (group is null)
+			{
+				return RetrieveEntityResult<IEnumerable<Kink>>.FromError
+				(
+					CommandError.ObjectNotFound,
+					"There are no kinks in that category."
+				);
+			}
+
+			return RetrieveEntityResult<IEnumerable<Kink>>.FromSuccess(group);
+		}
+
+		/// <summary>
+		/// Gets a list of all a user's kinks in a given category.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="user">The user.</param>
+		/// <param name="category">The category.</param>
+		/// <returns>A retrieval result which may or may not have succeeded.</returns>
+		public async Task<IEnumerable<UserKink>> GetUserKinksByCategoryAsync(GlobalInfoContext db, IUser user, KinkCategory category)
+		{
+			var userKinks = await GetUserKinksAsync(db, user);
+			var group = userKinks.GroupBy(k => k.Kink.Category).FirstOrDefault(g => g.Key == category);
+
+			if (group is null)
+			{
+				return new UserKink[] { };
+			}
+
+			return group;
+		}
+
+		/// <summary>
+		/// Resets the user's kink preferences.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="discordUser">The user.</param>
+		/// <returns>A task that must be awaited.</returns>
+		public async Task ResetUserKinksAsync(GlobalInfoContext db, IUser discordUser)
+		{
+			var user = await db.GetOrRegisterUserAsync(discordUser);
+			user.Kinks.Clear();
+
+			await db.SaveChangesAsync();
 		}
 	}
 }
