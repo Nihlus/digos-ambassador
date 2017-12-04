@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
@@ -195,7 +196,12 @@ namespace DIGOS.Ambassador.Modules
 			[Command("class", RunMode = RunMode.Async)]
 			[Summary("Sets the invoking user's class.")]
 			[RequirePermission(Permission.SetClass)]
-			public async Task SetUserClassAsync(UserClass userClass)
+			public async Task SetUserClassAsync
+			(
+				[Remainder]
+				[OverrideTypeReader(typeof(HumanizerEnumTypeReader<UserClass>))]
+				UserClass userClass
+			)
 			{
 				using (var db = new GlobalInfoContext())
 				{
@@ -220,7 +226,14 @@ namespace DIGOS.Ambassador.Modules
 			[Summary("Sets the target user's class.")]
 			[RequireContext(ContextType.Guild)]
 			[RequirePermission(Permission.SetClass, PermissionTarget.Other)]
-			public async Task SetUserClassAsync(IUser discordUser, UserClass userClass)
+			public async Task SetUserClassAsync
+			(
+				[NotNull]
+				IUser discordUser,
+				[Remainder]
+				[OverrideTypeReader(typeof(HumanizerEnumTypeReader<UserClass>))]
+				UserClass userClass
+			)
 			{
 				using (var db = new GlobalInfoContext())
 				{

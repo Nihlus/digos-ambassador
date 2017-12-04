@@ -164,6 +164,7 @@ namespace DIGOS.Ambassador
 			this.Commands.AddTypeReader<Character>(new CharacterTypeReader());
 			this.Commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
 			this.Commands.AddTypeReader<Colour>(new ColourTypeReader());
+			this.Commands.AddTypeReader<UserClass>(new HumanizerEnumTypeReader<UserClass>());
 
 			await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly());
 
