@@ -32,6 +32,7 @@ using Discord;
 using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
+using static Discord.Commands.ContextType;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -69,12 +70,23 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		/// <summary>
+		/// Instructs Amby to contact you over DM.
+		/// </summary>
+		[UsedImplicitly]
+		[Command("contact", RunMode = RunMode.Async)]
+		[Summary("Instructs Amby to contact you over DM.")]
+		[RequireContext(Guild)]
+		public async Task ContactSelfAsync() => await ContactUserAsync(this.Context.User);
+
+		/// <summary>
 		/// Instructs Amby to contact a user over DM.
 		/// </summary>
 		/// <param name="discordUser">The user to contact.</param>
 		[UsedImplicitly]
 		[Command("contact", RunMode = RunMode.Async)]
 		[Summary("Instructs Amby to contact a user over DM.")]
+		[RequireContext(Guild)]
+		[RequireUserPermission(GuildPermission.MentionEveryone)]
 		public async Task ContactUserAsync([NotNull] IUser discordUser)
 		{
 			if (discordUser.Id == this.Context.Client.CurrentUser.Id)
