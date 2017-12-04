@@ -40,7 +40,7 @@ using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
-
+using Humanizer;
 using JetBrains.Annotations;
 using log4net;
 using Microsoft.Extensions.DependencyInjection;
@@ -140,6 +140,8 @@ namespace DIGOS.Ambassador
 			);
 
 			this.Client.MessageReceived += OnMessageReceived;
+
+			// TODO: Figure out how to ignore pin/unpin changes
 			this.Client.MessageUpdated += OnMessageUpdated;
 		}
 
@@ -293,6 +295,13 @@ namespace DIGOS.Ambassador
 		private async Task OnMessageUpdated(Cacheable<IMessage, ulong> oldMessage, SocketMessage updatedMessage, ISocketMessageChannel messageChannel)
 		{
 			if (updatedMessage is null)
+			{
+				return;
+			}
+
+			// Ignore all changes except text changes
+			bool isTextUpdate = updatedMessage.EditedTimestamp.HasValue && (updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes());
+			if (!isTextUpdate)
 			{
 				return;
 			}
