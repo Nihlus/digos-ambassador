@@ -103,7 +103,7 @@ namespace DIGOS.Ambassador.Modules
 		[Alias("view", "show")]
 		[Command("view", RunMode = RunMode.Async)]
 		[Summary("Views the named dossier.")]
-		public async Task ViewDossierAsync([NotNull] string title)
+		public async Task ViewDossierAsync([Remainder] [NotNull] string title)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Modules
 		[Command("add", RunMode = RunMode.Async)]
 		[Summary("Adds a new dossier with the given title and summary. A PDF with the full dossier can be attached.")]
 		[RequireOwner]
-		public async Task AddDossierAsync(string title, string summary = "No summary set.")
+		public async Task AddDossierAsync([NotNull] string title, [Remainder] [NotNull] string summary = "No summary set.")
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -191,7 +191,7 @@ namespace DIGOS.Ambassador.Modules
 		[Command("remove")]
 		[Summary("Removes the dossier with the given title.")]
 		[RequireOwner]
-		public async Task RemoveDossierAsync(string title)
+		public async Task RemoveDossierAsync([Remainder] [NotNull] string title)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -243,7 +243,7 @@ namespace DIGOS.Ambassador.Modules
 			[Command("title", RunMode = RunMode.Async)]
 			[Summary("Sets the title of the given dossier.")]
 			[RequireOwner]
-			public async Task SetTitleAsync(string title, string newTitle)
+			public async Task SetTitleAsync([NotNull] string title, [Remainder] [NotNull] string newTitle)
 			{
 				using (var db = new GlobalInfoContext())
 				{
@@ -276,7 +276,7 @@ namespace DIGOS.Ambassador.Modules
 			[Command("summary", RunMode = RunMode.Async)]
 			[Summary("Sets the summary of the given dossier.")]
 			[RequireOwner]
-			public async Task SetSummaryAsync(string title, string newSummary)
+			public async Task SetSummaryAsync([NotNull] string title, [Remainder] [NotNull] string newSummary)
 			{
 				using (var db = new GlobalInfoContext())
 				{
@@ -308,7 +308,7 @@ namespace DIGOS.Ambassador.Modules
 			[Command("data", RunMode = RunMode.Async)]
 			[Summary("Sets the data of the given dossier. Attach a PDF to the command.")]
 			[RequireOwner]
-			public async Task SetFileAsync(string title)
+			public async Task SetFileAsync([Remainder] [NotNull] string title)
 			{
 				using (var db = new GlobalInfoContext())
 				{

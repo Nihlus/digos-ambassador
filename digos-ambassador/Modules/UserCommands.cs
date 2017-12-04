@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("info", RunMode = RunMode.Async)]
 		[Summary("Shows known information about the target user.")]
-		public async Task ShowInfoAsync(IUser discordUser)
+		public async Task ShowInfoAsync([NotNull] IUser discordUser)
 		{
 			User user;
 			using (var db = new GlobalInfoContext())
@@ -256,7 +256,7 @@ namespace DIGOS.Ambassador.Modules
 			[Command("bio", RunMode = RunMode.Async)]
 			[Summary("Sets the invoking user's bio.")]
 			[RequirePermission(Permission.EditUser)]
-			public async Task SetUserBioAsync(string bio)
+			public async Task SetUserBioAsync([NotNull, Remainder] string bio)
 			{
 				using (var db = new GlobalInfoContext())
 				{
@@ -281,7 +281,7 @@ namespace DIGOS.Ambassador.Modules
 			[Summary("Sets the target user's bio.")]
 			[RequireContext(ContextType.Guild)]
 			[RequirePermission(Permission.EditUser, PermissionTarget.Other)]
-			public async Task SetUserBioAsync(IUser discordUser, string bio)
+			public async Task SetUserBioAsync([NotNull] IUser discordUser, [NotNull, Remainder] string bio)
 			{
 				using (var db = new GlobalInfoContext())
 				{
@@ -329,7 +329,7 @@ namespace DIGOS.Ambassador.Modules
 			[Summary("Sets the target user's UTC timezone hour offset.")]
 			[RequireContext(ContextType.Guild)]
 			[RequirePermission(Permission.EditUser, PermissionTarget.Other)]
-			public async Task SetUserTimezoneAsync(IUser discordUser, int timezone)
+			public async Task SetUserTimezoneAsync([NotNull] IUser discordUser, int timezone)
 			{
 				using (var db = new GlobalInfoContext())
 				{

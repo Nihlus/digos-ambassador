@@ -40,6 +40,7 @@ using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
+using DIGOS.Ambassador.Database.Kinks;
 using Humanizer;
 using JetBrains.Annotations;
 using log4net;
@@ -165,6 +166,9 @@ namespace DIGOS.Ambassador
 			this.Commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
 			this.Commands.AddTypeReader<Colour>(new ColourTypeReader());
 			this.Commands.AddTypeReader<UserClass>(new HumanizerEnumTypeReader<UserClass>());
+			this.Commands.AddTypeReader<KinkPreference>(new HumanizerEnumTypeReader<KinkPreference>());
+			this.Commands.AddTypeReader<Bodypart>(new HumanizerEnumTypeReader<Bodypart>());
+			this.Commands.AddTypeReader<Pattern>(new HumanizerEnumTypeReader<Pattern>());
 
 			await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly());
 

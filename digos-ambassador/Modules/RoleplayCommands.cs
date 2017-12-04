@@ -162,7 +162,13 @@ namespace DIGOS.Ambassador.Modules
 		[Command("create", RunMode = RunMode.Async)]
 		[Summary("Creates a new roleplay with the specified name.")]
 		[RequirePermission(Permission.CreateRoleplay)]
-		public async Task CreateRoleplayAsync(string roleplayName, string roleplaySummary = "No summary set.", bool isNSFW = false, bool isPublic = true)
+		public async Task CreateRoleplayAsync
+		(
+			[NotNull] string roleplayName,
+			[NotNull] string roleplaySummary = "No summary set.",
+			bool isNSFW = false,
+			bool isPublic = true
+		)
 		{
 			using (var db = new GlobalInfoContext())
 			{

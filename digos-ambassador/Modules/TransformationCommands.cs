@@ -30,7 +30,7 @@ using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
-
+using DIGOS.Ambassador.TypeReaders;
 using Humanizer;
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
@@ -76,8 +76,16 @@ namespace DIGOS.Ambassador.Modules
 		[Priority(int.MinValue)]
 		[Command(RunMode = Async)]
 		[Summary("Transforms the given bodypart into the given species on yourself.")]
-		public async Task ShiftAsync(Bodypart bodyPart, [NotNull] string species) =>
-			await ShiftAsync(this.Context.User, bodyPart, species);
+		public async Task ShiftAsync
+		(
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodyPart,
+			[Remainder]
+			[NotNull]
+			string species
+		)
+		=>
+		await ShiftAsync(this.Context.User, bodyPart, species);
 
 		/// <summary>
 		/// Transforms the given bodypart into the given species on the target user.
@@ -90,7 +98,15 @@ namespace DIGOS.Ambassador.Modules
 		[Command(RunMode = Async)]
 		[Summary("Transforms the given bodypart of the target user into the given species.")]
 		[RequireContext(Guild)]
-		public async Task ShiftAsync([NotNull] IUser target, Bodypart bodyPart, [NotNull] string species)
+		public async Task ShiftAsync
+		(
+			[NotNull]
+			IUser target,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodyPart,
+			[Remainder]
+			[NotNull] string species
+		)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -131,8 +147,16 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("colour", RunMode = Async)]
 		[Summary("Transforms the base colour of the given bodypart on yourself into the given colour.")]
-		public async Task ShiftColourAsync(Bodypart bodypart, [NotNull] [Remainder] Colour colour) =>
-			await ShiftColourAsync(this.Context.User, bodypart, colour);
+		public async Task ShiftColourAsync
+		(
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodypart,
+			[NotNull]
+			[Remainder]
+			Colour colour
+		)
+		=>
+		await ShiftColourAsync(this.Context.User, bodypart, colour);
 
 		/// <summary>
 		/// Transforms the base colour of the given bodypart on the target user into the given colour.
@@ -147,8 +171,9 @@ namespace DIGOS.Ambassador.Modules
 		public async Task ShiftColourAsync
 		(
 			[NotNull] IUser target,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
-			[NotNull] [Remainder] Colour colour
+			[NotNull, Remainder] Colour colour
 		)
 		{
 			using (var db = new GlobalInfoContext())
@@ -183,8 +208,16 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("pattern", RunMode = Async)]
 		[Summary("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
-		public async Task ShiftPatternAsync(Bodypart bodypart, Pattern pattern, [NotNull] [Remainder] Colour colour) =>
-			await ShiftPatternAsync(this.Context.User, bodypart, pattern, colour);
+		public async Task ShiftPatternAsync
+		(
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodypart,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
+			Pattern pattern,
+			[NotNull, Remainder]
+			Colour colour
+		)
+		=> await ShiftPatternAsync(this.Context.User, bodypart, pattern, colour);
 
 		/// <summary>
 		/// Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
@@ -199,10 +232,14 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task ShiftPatternAsync
 		(
-			[NotNull] IUser target,
+			[NotNull]
+			IUser target,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
 			Pattern pattern,
-			[NotNull] [Remainder] Colour colour
+			[NotNull, Remainder]
+			Colour colour
 		)
 		{
 			using (var db = new GlobalInfoContext())
@@ -236,8 +273,14 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("pattern-colour", RunMode = Async)]
 		[Summary("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
-		public async Task ShiftPatternColourAsync(Bodypart bodypart, [NotNull] [Remainder] Colour colour) =>
-			await ShiftPatternColourAsync(this.Context.User, bodypart, colour);
+		public async Task ShiftPatternColourAsync
+		(
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodypart,
+			[NotNull, Remainder]
+			Colour colour
+		)
+		=> await ShiftPatternColourAsync(this.Context.User, bodypart, colour);
 
 		/// <summary>
 		/// Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
@@ -251,9 +294,12 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task ShiftPatternColourAsync
 		(
-			[NotNull] IUser target,
+			[NotNull]
+			IUser target,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
-			[NotNull] [Remainder] Colour colour
+			[NotNull, Remainder]
+			Colour colour
 		)
 		{
 			using (var db = new GlobalInfoContext())
@@ -317,7 +363,12 @@ namespace DIGOS.Ambassador.Modules
 		[Alias("list-available")]
 		[Command("list-available", RunMode = Async)]
 		[Summary("Lists the available transformations for a given bodypart.")]
-		public async Task ListAvailableTransformationsAsync(Bodypart bodyPart)
+		public async Task ListAvailableTransformationsAsync
+		(
+			[Remainder]
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodyPart
+		)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -392,7 +443,7 @@ namespace DIGOS.Ambassador.Modules
 		[Alias("save", "save-current")]
 		[Command("save", RunMode = Async)]
 		[Summary("Saves your current form as a new character.")]
-		public async Task SaveCurrentFormAsync([NotNull] string newCharacterName)
+		public async Task SaveCurrentFormAsync([NotNull, Remainder] string newCharacterName)
 		{
 			using (var db = new GlobalInfoContext())
 			{

@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("list-granted", RunMode = RunMode.Async)]
 		[Summary("Lists all permissions that have been granted to target user.")]
-		public async Task ListGrantedPermissionsAsync(IUser discordUser)
+		public async Task ListGrantedPermissionsAsync([NotNull] IUser discordUser)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -139,7 +139,7 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		[NotNull]
-		private EmbedBuilder CreateHumanizedPermissionEmbed([NotNull][ItemNotNull] IEnumerable<LocalPermission> userPermissions)
+		private EmbedBuilder CreateHumanizedPermissionEmbed([NotNull] [ItemNotNull] IEnumerable<LocalPermission> userPermissions)
 		{
 			var eb = this.Feedback.CreateBaseEmbed();
 			var humanizedPermissions = new List<(string Name, string Description, string Target)>();

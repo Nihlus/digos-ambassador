@@ -36,7 +36,7 @@ using DIGOS.Ambassador.Wizards;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
-
+using DIGOS.Ambassador.TypeReaders;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using static Discord.Commands.ContextType;
@@ -164,8 +164,13 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("by-preference", RunMode = Async)]
 		[Summary("Shows your kinks with the given preference.")]
-		public async Task ShowKinksByPreferenceAsync(KinkPreference preference) =>
-			await ShowKinksByPreferenceAsync(this.Context.User, preference);
+		public async Task ShowKinksByPreferenceAsync
+		(
+			[Remainder]
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
+			KinkPreference preference
+		)
+		=> await ShowKinksByPreferenceAsync(this.Context.User, preference);
 
 		/// <summary>
 		/// Shows the given user's kinks with the given preference.
@@ -175,7 +180,14 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("by-preference", RunMode = Async)]
 		[Summary("Shows the given user's kinks with the given preference.")]
-		public async Task ShowKinksByPreferenceAsync([NotNull] IUser otherUser, KinkPreference preference)
+		public async Task ShowKinksByPreferenceAsync
+		(
+			[NotNull]
+			IUser otherUser,
+			[Remainder]
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
+			KinkPreference preference
+		)
 		{
 			using (var db = new GlobalInfoContext())
 			{
@@ -201,7 +213,14 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("preference", RunMode = Async)]
 		[Summary("Sets your preference for the given kink.")]
-		public async Task SetKinkPreferenceAsync([NotNull] string name, KinkPreference preference)
+		public async Task SetKinkPreferenceAsync
+		(
+			[NotNull]
+			string name,
+			[Remainder]
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
+			KinkPreference preference
+		)
 		{
 			using (var db = new GlobalInfoContext())
 			{

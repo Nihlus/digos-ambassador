@@ -311,8 +311,9 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(ContextType.Guild)]
 		public async Task AssumeCharacterFormAsync
 		(
+			[NotNull]
 			[RequireEntityOwnerOrPermission(Permission.AssumeCharacter, PermissionTarget.Other)]
-			[NotNull] Character character
+			Character character
 		)
 		{
 			using (var db = new GlobalInfoContext())
@@ -530,6 +531,7 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull]
 			[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 			Character character,
+			[Remainder]
 			[NotNull] string imageName
 		)
 		{
@@ -621,7 +623,9 @@ namespace DIGOS.Ambassador.Modules
 				[NotNull]
 				[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 				Character character,
-				[NotNull] string newCharacterName
+				[Remainder]
+				[NotNull]
+				string newCharacterName
 			)
 			{
 				using (var db = new GlobalInfoContext())
@@ -695,7 +699,9 @@ namespace DIGOS.Ambassador.Modules
 				[NotNull]
 				[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 				Character character,
-				[NotNull] string newCharacterNickname
+				[Remainder]
+				[NotNull]
+				string newCharacterNickname
 			)
 			{
 				using (var db = new GlobalInfoContext())
