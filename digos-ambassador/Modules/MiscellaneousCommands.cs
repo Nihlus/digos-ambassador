@@ -129,6 +129,18 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		/// <summary>
+		/// Boops the invoking user.
+		/// </summary>
+		[UsedImplicitly]
+		[Alias("boop", "bap")]
+		[Command("boop", RunMode = RunMode.Async)]
+		[Summary("Boops the user.")]
+		public async Task BoopAsync()
+		{
+			await this.Feedback.SendConfirmationAsync(this.Context, "*boop*");
+		}
+
+		/// <summary>
 		/// Shows some information about Amby's metaworkings.
 		/// </summary>
 		[UsedImplicitly]
