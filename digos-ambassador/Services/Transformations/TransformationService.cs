@@ -73,21 +73,23 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Removes the given character's bodypart.
 		/// </summary>
-		/// <param name="db">The database where characters and transformations are stored.</param>
+		/// <param name="global">The global database.</param>
+		/// <param name="local">The database where characters and transformations are stored.</param>
 		/// <param name="context">The context of the command.</param>
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to remove.</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> RemoveCharacterBodypartAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] GlobalInfoContext global,
+			[NotNull] LocalInfoContext local,
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			Bodypart bodyPart
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
-			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
+			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
 				return ShiftBodypartResult.FromError(canTransformResult);
@@ -101,7 +103,7 @@ namespace DIGOS.Ambassador.Services
 
 			var transformation = component.Transformation;
 			character.CurrentAppearance.Components.Remove(component);
-			await db.SaveChangesAsync();
+			await local.SaveChangesAsync();
 
 			string removeMessage = this.DescriptionBuilder.BuildRemoveMessage(character, transformation);
 			return ShiftBodypartResult.FromSuccess(removeMessage);
@@ -110,7 +112,8 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Adds the given bodypart to the given character.
 		/// </summary>
-		/// <param name="db">The database where characters and transformations are stored.</param>
+		/// <param name="global">The global database.</param>
+		/// <param name="local">The database where characters and transformations are stored.</param>
 		/// <param name="context">The context of the command.</param>
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to add.</param>
@@ -118,15 +121,16 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> AddCharacterBodypartAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] GlobalInfoContext global,
+			[NotNull] LocalInfoContext local,
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			Bodypart bodyPart,
 			[NotNull] string species
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
-			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
+			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
 				return ShiftBodypartResult.FromError(canTransformResult);
@@ -137,13 +141,13 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character already has that bodypart.");
 			}
 
-			var getSpeciesResult = await GetSpeciesByNameAsync(db, species);
+			var getSpeciesResult = await GetSpeciesByNameAsync(global, species);
 			if (!getSpeciesResult.IsSuccess)
 			{
 				return ShiftBodypartResult.FromError(getSpeciesResult);
 			}
 
-			var getTFResult = await GetTransformationByPartAndSpeciesAsync(db, bodyPart, getSpeciesResult.Entity);
+			var getTFResult = await GetTransformationByPartAndSpeciesAsync(global, bodyPart, getSpeciesResult.Entity);
 			if (!getTFResult.IsSuccess)
 			{
 				return ShiftBodypartResult.FromError(getTFResult);
@@ -153,7 +157,7 @@ namespace DIGOS.Ambassador.Services
 
 			var component = AppearanceComponent.CreateFrom(transformation);
 			character.CurrentAppearance.Components.Add(component);
-			await db.SaveChangesAsync();
+			await local.SaveChangesAsync();
 
 			string growMessage = this.DescriptionBuilder.BuildGrowMessage(character, transformation);
 			return ShiftBodypartResult.FromSuccess(growMessage);
@@ -162,7 +166,8 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Shifts the given character's bodypart to the given species.
 		/// </summary>
-		/// <param name="db">The database where characters and transformations are stored.</param>
+		/// <param name="global">The global database.</param>
+		/// <param name="local">The database where characters and transformations are stored.</param>
 		/// <param name="context">The context of the command.</param>
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to shift.</param>
@@ -170,27 +175,28 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> ShiftBodypartAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] GlobalInfoContext global,
+			[NotNull] LocalInfoContext local,
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			Bodypart bodyPart,
 			[NotNull] string species
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
-			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
+			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
 				return ShiftBodypartResult.FromError(canTransformResult);
 			}
 
-			var getSpeciesResult = await GetSpeciesByNameAsync(db, species);
+			var getSpeciesResult = await GetSpeciesByNameAsync(global, species);
 			if (!getSpeciesResult.IsSuccess)
 			{
 				return ShiftBodypartResult.FromError(getSpeciesResult);
 			}
 
-			var getTFResult = await GetTransformationByPartAndSpeciesAsync(db, bodyPart, getSpeciesResult.Entity);
+			var getTFResult = await GetTransformationByPartAndSpeciesAsync(global, bodyPart, getSpeciesResult.Entity);
 			if (!getTFResult.IsSuccess)
 			{
 				return ShiftBodypartResult.FromError(getTFResult);
@@ -219,7 +225,7 @@ namespace DIGOS.Ambassador.Services
 				shiftMessage = this.DescriptionBuilder.BuildShiftMessage(character, transformation);
 			}
 
-			await db.SaveChangesAsync();
+			await local.SaveChangesAsync();
 
 			return ShiftBodypartResult.FromSuccess(shiftMessage);
 		}
@@ -227,7 +233,8 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Shifts the colour of the given bodypart on the given character to the given colour.
 		/// </summary>
-		/// <param name="db">The database.</param>
+		/// <param name="global">The global database.</param>
+		/// <param name="local">The database.</param>
 		/// <param name="context">The command context.</param>
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to shift.</param>
@@ -235,15 +242,16 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> ShiftBodypartColourAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] GlobalInfoContext global,
+			[NotNull] LocalInfoContext local,
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			Bodypart bodyPart,
 			[NotNull] Colour colour
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
-			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
+			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
 				return ShiftBodypartResult.FromError(canTransformResult);
@@ -258,7 +266,7 @@ namespace DIGOS.Ambassador.Services
 			var originalColour = currentComponent.BaseColour;
 			currentComponent.BaseColour = colour;
 
-			await db.SaveChangesAsync();
+			await local.SaveChangesAsync();
 
 			string shiftMessage = this.DescriptionBuilder.BuildColourShiftMessage(character, originalColour, currentComponent);
 			return ShiftBodypartResult.FromSuccess(shiftMessage);
@@ -267,7 +275,8 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Shifts the pattern of the given bodypart on the given character to the given pattern with the given colour.
 		/// </summary>
-		/// <param name="db">The database.</param>
+		/// <param name="global">The global database.</param>
+		/// <param name="local">The database.</param>
 		/// <param name="context">The command context.</param>
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to shift.</param>
@@ -276,7 +285,8 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> ShiftBodypartPatternAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] GlobalInfoContext global,
+			[NotNull] LocalInfoContext local,
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			Bodypart bodyPart,
@@ -284,8 +294,8 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] Colour patternColour
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
-			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
+			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
 				return ShiftBodypartResult.FromError(canTransformResult);
@@ -304,7 +314,7 @@ namespace DIGOS.Ambassador.Services
 			currentComponent.Pattern = pattern;
 			currentComponent.PatternColour = patternColour;
 
-			await db.SaveChangesAsync();
+			await local.SaveChangesAsync();
 
 			string shiftMessage = this.DescriptionBuilder.BuildPatternShiftMessage(character, originalPattern, originalColour, currentComponent);
 			return ShiftBodypartResult.FromSuccess(shiftMessage);
@@ -313,7 +323,8 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Shifts the colour of the given bodypart's pattern on the given character to the given colour.
 		/// </summary>
-		/// <param name="db">The database.</param>
+		/// <param name="global">The global database.</param>
+		/// <param name="local">The local database.</param>
 		/// <param name="context">The command context.</param>
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to shift.</param>
@@ -321,15 +332,16 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> ShiftPatternColourAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] GlobalInfoContext global,
+			[NotNull] LocalInfoContext local,
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			Bodypart bodyPart,
 			[NotNull] Colour patternColour
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
-			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
+			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
 				return ShiftBodypartResult.FromError(canTransformResult);
@@ -350,7 +362,7 @@ namespace DIGOS.Ambassador.Services
 			var originalColour = currentComponent.PatternColour;
 			currentComponent.PatternColour = patternColour;
 
-			await db.SaveChangesAsync();
+			await local.SaveChangesAsync();
 
 			string shiftMessage = this.DescriptionBuilder.BuildPatternColourShiftMessage(character, originalColour, currentComponent);
 			return ShiftBodypartResult.FromSuccess(shiftMessage);
@@ -359,38 +371,38 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Determines whether or not a user is allowed to transform another user.
 		/// </summary>
-		/// <param name="db">The database.</param>
-		/// <param name="discordServer">The server the users are on.</param>
+		/// <param name="global">The global database.</param>
+		/// <param name="local">The local database.</param>
 		/// <param name="invokingUser">The user trying to transform.</param>
 		/// <param name="targetUser">The user being transformed.</param>
 		/// <returns>A conditional determination with an attached reason if it failed.</returns>
 		[Pure]
 		public async Task<DetermineConditionResult> CanUserTransformUserAsync
 		(
-			[NotNull] GlobalInfoContext db,
-			[NotNull] IGuild discordServer,
+			[NotNull] GlobalInfoContext global,
+			[NotNull] LocalInfoContext local,
 			[NotNull] IUser invokingUser,
 			[NotNull] IUser targetUser
 		)
 		{
-			var localProtection = await GetOrCreateServerUserProtectionAsync(db, targetUser, discordServer);
+			var localProtection = await GetOrCreateServerUserProtectionAsync(global, local, targetUser);
 			if (!localProtection.HasOptedIn)
 			{
 				return DetermineConditionResult.FromError("The target hasn't opted into transformations.");
 			}
 
-			var globalProtection = await GetOrCreateGlobalUserProtectionAsync(db, targetUser);
+			var globalProtection = await GetOrCreateGlobalUserProtectionAsync(global, targetUser);
 			switch (localProtection.Type)
 			{
 				case ProtectionType.Blacklist:
 				{
-					return globalProtection.Blacklist.All(u => u.DiscordID != invokingUser.Id)
+					return globalProtection.Blacklist.All(u => u.Identifier != invokingUser.Id)
 						? DetermineConditionResult.FromSuccess()
 						: DetermineConditionResult.FromError("You're on that user's blacklist.");
 				}
 				case ProtectionType.Whitelist:
 				{
-					return globalProtection.Whitelist.Any(u => u.DiscordID == invokingUser.Id)
+					return globalProtection.Whitelist.Any(u => u.Identifier == invokingUser.Id)
 						? DetermineConditionResult.FromSuccess()
 						: DetermineConditionResult.FromError("You're not on that user's whitelist.");
 				}
@@ -418,7 +430,7 @@ namespace DIGOS.Ambassador.Services
 			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle($"{character.Name} {(character.Nickname is null ? string.Empty : $"\"{character.Nickname}\"")}".Trim());
 
-			var user = await context.Client.GetUserAsync(character.Owner.DiscordID);
+			var user = await context.Client.GetUserAsync(character.Owner);
 			eb.WithAuthor(user);
 
 			eb.WithThumbnailUrl
@@ -475,7 +487,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> ResetCharacterFormAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] Character character
 		)
 		{
@@ -498,7 +510,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetCurrentAppearanceAsDefaultForCharacterAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] Character character
 		)
 		{
@@ -542,27 +554,27 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Sets the protection type that the user has for transformations on the given server.
 		/// </summary>
-		/// <param name="db">The database.</param>
+		/// <param name="global">The global database.</param>
+		/// <param name="local">The local database.</param>
 		/// <param name="discordUser">The user to set the protection for.</param>
-		/// <param name="discordServer">The server to set the protection on.</param>
 		/// <param name="protectionType">The protection type to set.</param>
 		/// <returns>An entity modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetServerProtectionTypeAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] GlobalInfoContext global,
+			[NotNull] LocalInfoContext local,
 			[NotNull] IUser discordUser,
-			[NotNull] IGuild discordServer,
 			ProtectionType protectionType
 		)
 		{
-			var protection = await GetOrCreateServerUserProtectionAsync(db, discordUser, discordServer);
+			var protection = await GetOrCreateServerUserProtectionAsync(global, local, discordUser);
 			if (protection.Type == protectionType)
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, $"{protectionType.Humanize()} is already your current setting.");
 			}
 
 			protection.Type = protectionType;
-			await db.SaveChangesAsync();
+			await local.SaveChangesAsync();
 
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 		}
@@ -582,7 +594,7 @@ namespace DIGOS.Ambassador.Services
 		)
 		{
 			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
-			if (protection.Whitelist.Any(u => u.DiscordID == whitelistedUser.Id))
+			if (protection.Whitelist.Any(u => u.Identifier == whitelistedUser.Id))
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already whitelisted that user.");
 			}
@@ -609,7 +621,7 @@ namespace DIGOS.Ambassador.Services
 		)
 		{
 			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
-			if (protection.Blacklist.Any(u => u.DiscordID == blacklistedUser.Id))
+			if (protection.Blacklist.Any(u => u.Identifier == blacklistedUser.Id))
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already blacklisted that user.");
 			}
@@ -637,7 +649,7 @@ namespace DIGOS.Ambassador.Services
 			.Include(p => p.User)
 			.Include(p => p.Whitelist)
 			.Include(p => p.Blacklist)
-			.FirstOrDefaultAsync(p => p.User.DiscordID == discordUser.Id);
+			.FirstOrDefaultAsync(p => p.User.Identifier == discordUser.Id);
 
 			if (!(protection is null))
 			{
@@ -656,24 +668,21 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Gets or creates server-specific transformation protection data for the given user and server.
 		/// </summary>
-		/// <param name="db">The database.</param>
+		/// <param name="global">The global database.</param>
+		/// <param name="local">The local database.</param>
 		/// <param name="discordUser">The user.</param>
-		/// <param name="guild">The server.</param>
 		/// <returns>Server-specific protection data for the given user.</returns>
 		public async Task<ServerUserProtection> GetOrCreateServerUserProtectionAsync
 		(
-			[NotNull] GlobalInfoContext db,
-			[NotNull] IUser discordUser,
-			[NotNull] IGuild guild
+			[NotNull] GlobalInfoContext global,
+			[NotNull] LocalInfoContext local,
+			[NotNull] IUser discordUser
 		)
 		{
-			var protection = await db.ServerUserProtections
-			.Include(p => p.Server)
-			.Include(p => p.User)
+			var protection = await local.UserProtections
 			.FirstOrDefaultAsync
 			(
-				p =>
-					p.User.DiscordID == discordUser.Id && p.Server.DiscordID == guild.Id
+				p => p.User == discordUser.Id
 			);
 
 			if (!(protection is null))
@@ -681,12 +690,11 @@ namespace DIGOS.Ambassador.Services
 				return protection;
 			}
 
-			var server = await db.GetOrRegisterServerAsync(guild);
-			var globalProtection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
-			protection = ServerUserProtection.CreateDefault(globalProtection, server);
+			var globalProtection = await GetOrCreateGlobalUserProtectionAsync(global, discordUser);
+			protection = ServerUserProtection.CreateDefault(globalProtection);
 
-			await db.ServerUserProtections.AddAsync(protection);
-			await db.SaveChangesAsync();
+			await local.UserProtections.AddAsync(protection);
+			await local.SaveChangesAsync();
 
 			return protection;
 		}

@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 
 using Discord;
@@ -83,7 +84,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An entity modification result, which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> TransferEntityOwnershipAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] IUser newOwner,
 			[NotNull] IQueryable<IOwnedNamedEntity> newOwnerEntities,
 			[NotNull] IOwnedNamedEntity entity
@@ -109,8 +110,7 @@ namespace DIGOS.Ambassador.Services
 				);
 			}
 
-			var newUser = await db.GetOrRegisterUserAsync(newOwner);
-			entity.Owner = newUser;
+			entity.Owner = new UserIdentifier(newOwner);
 
 			await db.SaveChangesAsync();
 

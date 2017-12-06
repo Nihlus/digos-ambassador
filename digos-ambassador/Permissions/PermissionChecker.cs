@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Permissions
 			}
 
 			// The server owner always has all permissions by default
-			if (discordServer.OwnerId == user.DiscordID)
+			if (discordServer.OwnerId == user.Identifier)
 			{
 				return true;
 			}
@@ -94,7 +94,7 @@ namespace DIGOS.Ambassador.Permissions
 			var hasGlobalPermission = await db.GlobalPermissions.AnyAsync
 			(
 				gp =>
-					gp.User.DiscordID == user.DiscordID &&
+					gp.User.Identifier.DiscordID == user.Identifier.DiscordID &&
 					gp.Permission == requiredPermission.Permission &&
 					gp.Target.HasFlag(requiredPermission.Target)
 			);

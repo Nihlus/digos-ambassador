@@ -58,7 +58,6 @@ namespace DIGOS.Ambassador.Wizards
 		/// <param name="wizard">The associated wizard.</param>
 		/// <param name="timeout">The callback timeout length.</param>
 		/// <param name="runMode">The mode with which to run the callback.</param>
-		/// <param name="message">The associated wizard message.</param>
 		/// <param name="criterion">The reaction criteria.</param>
 		public WizardCallback
 		(

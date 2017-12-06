@@ -214,7 +214,11 @@ namespace DIGOS.Ambassador
 			int argumentPos = 0;
 			if (!(message.HasCharPrefix('!', ref argumentPos) || message.HasMentionPrefix(this.Client.CurrentUser, ref argumentPos)))
 			{
-				this.Roleplays.ConsumeMessage(arg);
+				if (arg.Channel is SocketGuildChannel guildChannel)
+				{
+					this.Roleplays.ConsumeMessage(guildChannel.Guild, arg);
+				}
+
 				return;
 			}
 
@@ -232,8 +236,8 @@ namespace DIGOS.Ambassador
 						server.KnownUsers = new List<User>();
 					}
 
-					// Grant permissions to new users
-					if (!server.KnownUsers.Any(u => u.DiscordID == user.DiscordID))
+					// Grant permissions to new users TODO: Create helper method
+					if (!server.KnownUsers.Any(u => u.Identifier.DiscordID == user.Identifier.DiscordID))
 					{
 						DefaultPermissions.Grant(server, user);
 						server.KnownUsers.Add(user);

@@ -85,8 +85,7 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull]
 			string species
 		)
-		=>
-		await ShiftAsync(this.Context.User, bodyPart, species);
+			=> await ShiftAsync(this.Context.User, bodyPart, species);
 
 		/// <summary>
 		/// Transforms the given bodypart into the given species on the target user.
@@ -109,34 +108,37 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull] string species
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var global = new GlobalInfoContext())
 			{
-				var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, target);
-				if (!getCurrentCharacterResult.IsSuccess)
+				using (var local = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
-					await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-					return;
-				}
+					var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(local, this.Context, target);
+					if (!getCurrentCharacterResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+						return;
+					}
 
-				var character = getCurrentCharacterResult.Entity;
+					var character = getCurrentCharacterResult.Entity;
 
-				ShiftBodypartResult result;
-				if (species.Equals("remove", StringComparison.OrdinalIgnoreCase))
-				{
-					result = await this.Transformation.RemoveCharacterBodypartAsync(db, this.Context, character, bodyPart);
-				}
-				else
-				{
-					result = await this.Transformation.ShiftBodypartAsync(db, this.Context, character, bodyPart, species);
-				}
+					ShiftBodypartResult result;
+					if (species.Equals("remove", StringComparison.OrdinalIgnoreCase))
+					{
+						result = await this.Transformation.RemoveCharacterBodypartAsync(global, local, this.Context, character, bodyPart);
+					}
+					else
+					{
+						result = await this.Transformation.ShiftBodypartAsync(global, local, this.Context, character, bodyPart, species);
+					}
 
-				if (!result.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-					return;
-				}
+					if (!result.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+						return;
+					}
 
-				await this.Feedback.SendConfirmationAsync(this.Context, result.ShiftMessage);
+					await this.Feedback.SendConfirmationAsync(this.Context, result.ShiftMessage);
+				}
 			}
 		}
 
@@ -156,8 +158,7 @@ namespace DIGOS.Ambassador.Modules
 			[Remainder]
 			Colour colour
 		)
-		=>
-		await ShiftColourAsync(this.Context.User, bodypart, colour);
+			=> await ShiftColourAsync(this.Context.User, bodypart, colour);
 
 		/// <summary>
 		/// Transforms the base colour of the given bodypart on the target user into the given colour.
@@ -177,26 +178,29 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull, Remainder] Colour colour
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var global = new GlobalInfoContext())
 			{
-				var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, target);
-				if (!getCurrentCharacterResult.IsSuccess)
+				using (var local = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
-					await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-					return;
+					var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(local, this.Context, target);
+					if (!getCurrentCharacterResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+						return;
+					}
+
+					var character = getCurrentCharacterResult.Entity;
+
+					var shiftPartResult = await this.Transformation.ShiftBodypartColourAsync(global, local, this.Context, character, bodyPart, colour);
+
+					if (!shiftPartResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
+						return;
+					}
+
+					await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
 				}
-
-				var character = getCurrentCharacterResult.Entity;
-
-				var shiftPartResult = await this.Transformation.ShiftBodypartColourAsync(db, this.Context, character, bodyPart, colour);
-
-				if (!shiftPartResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
-					return;
-				}
-
-				await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
 			}
 		}
 
@@ -218,7 +222,7 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull, Remainder]
 			Colour colour
 		)
-		=> await ShiftPatternAsync(this.Context.User, bodypart, pattern, colour);
+			=> await ShiftPatternAsync(this.Context.User, bodypart, pattern, colour);
 
 		/// <summary>
 		/// Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
@@ -243,26 +247,29 @@ namespace DIGOS.Ambassador.Modules
 			Colour colour
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var global = new GlobalInfoContext())
 			{
-				var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, target);
-				if (!getCurrentCharacterResult.IsSuccess)
+				using (var local = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
-					await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-					return;
+					var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(local, this.Context, target);
+					if (!getCurrentCharacterResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+						return;
+					}
+
+					var character = getCurrentCharacterResult.Entity;
+
+					var shiftPartResult = await this.Transformation.ShiftBodypartPatternAsync(global, local, this.Context, character, bodyPart, pattern, colour);
+
+					if (!shiftPartResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
+						return;
+					}
+
+					await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
 				}
-
-				var character = getCurrentCharacterResult.Entity;
-
-				var shiftPartResult = await this.Transformation.ShiftBodypartPatternAsync(db, this.Context, character, bodyPart, pattern, colour);
-
-				if (!shiftPartResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
-					return;
-				}
-
-				await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
 			}
 		}
 
@@ -281,7 +288,7 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull, Remainder]
 			Colour colour
 		)
-		=> await ShiftPatternColourAsync(this.Context.User, bodypart, colour);
+			=> await ShiftPatternColourAsync(this.Context.User, bodypart, colour);
 
 		/// <summary>
 		/// Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
@@ -303,26 +310,29 @@ namespace DIGOS.Ambassador.Modules
 			Colour colour
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var global = new GlobalInfoContext())
 			{
-				var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, target);
-				if (!getCurrentCharacterResult.IsSuccess)
+				using (var local = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
-					await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-					return;
+					var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(local, this.Context, target);
+					if (!getCurrentCharacterResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+						return;
+					}
+
+					var character = getCurrentCharacterResult.Entity;
+
+					var shiftPartResult = await this.Transformation.ShiftPatternColourAsync(global, local, this.Context, character, bodyPart, colour);
+
+					if (!shiftPartResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
+						return;
+					}
+
+					await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
 				}
-
-				var character = getCurrentCharacterResult.Entity;
-
-				var shiftPartResult = await this.Transformation.ShiftPatternColourAsync(db, this.Context, character, bodyPart, colour);
-
-				if (!shiftPartResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
-					return;
-				}
-
-				await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
 			}
 		}
 
@@ -415,7 +425,7 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Resets your form to your default one.")]
 		public async Task ResetFormAsync()
 		{
-			using (var db = new GlobalInfoContext())
+			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 			{
 				var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, this.Context.User);
 				if (!getCurrentCharacterResult.IsSuccess)
@@ -446,26 +456,29 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Saves your current form as a new character.")]
 		public async Task SaveCurrentFormAsync([NotNull, Remainder] string newCharacterName)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var global = new GlobalInfoContext())
 			{
-				var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, this.Context.User);
-				if (!getCurrentCharacterResult.IsSuccess)
+				using (var local = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
-					await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-					return;
+					var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(local, this.Context, this.Context.User);
+					if (!getCurrentCharacterResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+						return;
+					}
+
+					var character = getCurrentCharacterResult.Entity;
+					var currentAppearance = character.CurrentAppearance;
+
+					var cloneCharacterResult = await this.Characters.CreateCharacterFromAppearanceAsync(global, local, this.Context, newCharacterName, currentAppearance);
+					if (!cloneCharacterResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, cloneCharacterResult.ErrorReason);
+						return;
+					}
+
+					await this.Feedback.SendConfirmationAsync(this.Context, $"Current appearance saved as new character \"{newCharacterName}\"");
 				}
-
-				var character = getCurrentCharacterResult.Entity;
-				var currentAppearance = character.CurrentAppearance;
-
-				var cloneCharacterResult = await this.Characters.CreateCharacterFromAppearanceAsync(db, this.Context, newCharacterName, currentAppearance);
-				if (!cloneCharacterResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, cloneCharacterResult.ErrorReason);
-					return;
-				}
-
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Current appearance saved as new character \"{newCharacterName}\"");
 			}
 		}
 
@@ -478,7 +491,7 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Sets your current appearance as your current character's default one.")]
 		public async Task SetCurrentAppearanceAsDefaultAsync()
 		{
-			using (var db = new GlobalInfoContext())
+			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 			{
 				var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, this.Context.User);
 				if (!getCurrentCharacterResult.IsSuccess)
@@ -534,14 +547,17 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task OptInToTransformationsAsync()
 		{
-			using (var db = new GlobalInfoContext())
+			using (var global = new GlobalInfoContext())
 			{
-				var protection = await this.Transformation.GetOrCreateServerUserProtectionAsync(db, this.Context.User, this.Context.Guild);
-				protection.HasOptedIn = true;
+				using (var local = LocalInfoContext.GetOrCreate(this.Context.Guild))
+				{
+					var protection = await this.Transformation.GetOrCreateServerUserProtectionAsync(global, local, this.Context.User);
+					protection.HasOptedIn = true;
 
-				await db.SaveChangesAsync();
+					await local.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Opted into transformations. Have fun!");
+					await this.Feedback.SendConfirmationAsync(this.Context, "Opted into transformations. Have fun!");
+				}
 			}
 		}
 
@@ -554,14 +570,17 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task OptOutOfTransformationsAsync()
 		{
-			using (var db = new GlobalInfoContext())
+			using (var global = new GlobalInfoContext())
 			{
-				var protection = await this.Transformation.GetOrCreateServerUserProtectionAsync(db, this.Context.User, this.Context.Guild);
-				protection.HasOptedIn = false;
+				using (var local = LocalInfoContext.GetOrCreate(this.Context.Guild))
+				{
+					var protection = await this.Transformation.GetOrCreateServerUserProtectionAsync(global, local, this.Context.User);
+					protection.HasOptedIn = false;
 
-				await db.SaveChangesAsync();
+					await local.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Opted out of transformations.");
+					await this.Feedback.SendConfirmationAsync(this.Context, "Opted out of transformations.");
+				}
 			}
 		}
 
@@ -597,16 +616,19 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task SetProtectionTypeAsync(ProtectionType protectionType)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var global = new GlobalInfoContext())
 			{
-				var setProtectionTypeResult = await this.Transformation.SetServerProtectionTypeAsync(db, this.Context.User, this.Context.Guild, protectionType);
-				if (!setProtectionTypeResult.IsSuccess)
+				using (var local = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
-					await this.Feedback.SendErrorAsync(this.Context, setProtectionTypeResult.ErrorReason);
-					return;
-				}
+					var setProtectionTypeResult = await this.Transformation.SetServerProtectionTypeAsync(global, local, this.Context.User, protectionType);
+					if (!setProtectionTypeResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, setProtectionTypeResult.ErrorReason);
+						return;
+					}
 
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Protection type set to \"{protectionType.Humanize()}\"");
+					await this.Feedback.SendConfirmationAsync(this.Context, $"Protection type set to \"{protectionType.Humanize()}\"");
+				}
 			}
 		}
 

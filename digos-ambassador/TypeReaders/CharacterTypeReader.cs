@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.TypeReaders
 		protected override async Task<RetrieveEntityResult<Character>> RetrieveEntityAsync(IUser entityOwner, string entityName, ICommandContext context, IServiceProvider services)
 		{
 			var characterService = services.GetRequiredService<CharacterService>();
-			using (var db = new GlobalInfoContext())
+			using (var db = LocalInfoContext.GetOrCreate(context.Guild))
 			{
 				if (!entityName.IsNullOrWhitespace() && entityName.Equals("current", StringComparison.OrdinalIgnoreCase))
 				{

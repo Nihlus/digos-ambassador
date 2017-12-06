@@ -62,10 +62,11 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Consumes a message, adding it to the active roleplay in its channel if the author is a participant.
 		/// </summary>
+		/// <param name="guild">The guild that the message originated in.</param>
 		/// <param name="message">The message to consume.</param>
-		public async void ConsumeMessage([NotNull] IMessage message)
+		public async void ConsumeMessage([NotNull] IGuild guild, [NotNull] IMessage message)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var db = LocalInfoContext.GetOrCreate(guild))
 			{
 				var result = await GetActiveRoleplayAsync(db, message.Channel);
 				if (!result.IsSuccess)
@@ -91,20 +92,19 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A creation result which may or may not have been successful.</returns>
 		public async Task<CreateEntityResult<Roleplay>> CreateRoleplayAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] SocketCommandContext context,
 			[NotNull] string roleplayName,
 			[NotNull] string roleplaySummary,
 			bool isNSFW,
 			bool isPublic)
 		{
-			var owner = await db.GetOrRegisterUserAsync(context.Message.Author);
 			var roleplay = new Roleplay
 			{
 				IsActive = false,
 				ActiveChannelID = context.Channel.Id,
-				Owner = owner,
-				Participants = new List<User> { owner },
+				Owner = new UserIdentifier(context.User),
+				Participants = new List<UserIdentifier> { new UserIdentifier(context.User) },
 				Messages = new List<UserMessage>()
 			};
 
@@ -153,7 +153,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A task wrapping the update action.</returns>
 		public async Task<ModifyEntityResult> AddToOrUpdateMessageInRoleplay
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] Roleplay roleplay,
 			[NotNull] IMessage message
 		)
@@ -205,7 +205,7 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] ICommandContext context,
 			[CanBeNull] IUser roleplayOwner,
 			[CanBeNull] string roleplayName
@@ -238,7 +238,7 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] string roleplayName
 		)
 		{
@@ -252,7 +252,6 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			var roleplay = db.Roleplays
-				.Include(rp => rp.Owner)
 				.Include(rp => rp.Participants)
 				.Include(rp => rp.Messages)
 				.Include(rp => rp.KickedUsers)
@@ -276,12 +275,11 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		public async Task<RetrieveEntityResult<Roleplay>> GetActiveRoleplayAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] IChannel channel
 		)
 		{
 			var roleplay = await db.Roleplays
-				.Include(rp => rp.Owner)
 				.Include(rp => rp.Participants)
 				.Include(rp => rp.Messages)
 				.Include(rp => rp.KickedUsers)
@@ -303,7 +301,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="channel">The channel to check.</param>
 		/// <returns>true if there is an active roleplay; otherwise, false.</returns>
 		[Pure]
-		public async Task<bool> HasActiveRoleplayAsync([NotNull] GlobalInfoContext db, [NotNull] IChannel channel)
+		public async Task<bool> HasActiveRoleplayAsync([NotNull] LocalInfoContext db, [NotNull] IChannel channel)
 		{
 			return await db.Roleplays.AnyAsync(rp => rp.IsActive && rp.ActiveChannelID == channel.Id);
 		}
@@ -318,7 +316,7 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		public async Task<bool> IsRoleplayNameUniqueForUserAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] IUser discordUser,
 			[NotNull] string roleplayName
 		)
@@ -336,15 +334,14 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		[NotNull]
 		[ItemNotNull]
-		public IQueryable<Roleplay> GetUserRoleplays([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser)
+		public IQueryable<Roleplay> GetUserRoleplays([NotNull] LocalInfoContext db, [NotNull] IUser discordUser)
 		{
 			return db.Roleplays
-				.Include(rp => rp.Owner)
 				.Include(rp => rp.Participants)
 				.Include(rp => rp.Messages)
 				.Include(rp => rp.KickedUsers)
 				.Include(rp => rp.InvitedUsers)
-				.Where(rp => rp.Owner.DiscordID == discordUser.Id);
+				.Where(rp => rp.Owner == discordUser.Id);
 		}
 
 		/// <summary>
@@ -358,14 +355,13 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] ICommandContext context,
 			[NotNull] IUser roleplayOwner,
 			[NotNull] string roleplayName
 		)
 		{
 			var roleplay = await db.Roleplays
-			.Include(rp => rp.Owner)
 			.Include(rp => rp.Participants)
 			.Include(rp => rp.Messages)
 			.Include(rp => rp.KickedUsers)
@@ -374,7 +370,7 @@ namespace DIGOS.Ambassador.Services
 			(
 				rp =>
 					rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase) &&
-					rp.Owner.DiscordID == roleplayOwner.Id
+					rp.Owner == roleplayOwner.Id
 			);
 
 			if (roleplay is null)
@@ -400,7 +396,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ExecuteResult> KickUserFromRoleplayAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] SocketCommandContext context,
 			[NotNull] Roleplay roleplay,
 			[NotNull] IUser kickedUser
@@ -420,12 +416,11 @@ namespace DIGOS.Ambassador.Services
 				}
 			}
 
-			roleplay.InvitedUsers.RemoveAll(ku => ku.DiscordID == kickedUser.Id);
+			roleplay.InvitedUsers.RemoveAll(i => i == kickedUser.Id);
 
 			if (!roleplay.IsKicked(kickedUser))
 			{
-				var user = await db.GetOrRegisterUserAsync(kickedUser);
-				roleplay.KickedUsers.Add(user);
+				roleplay.KickedUsers.Add(new UserIdentifier(kickedUser));
 			}
 
 			await db.SaveChangesAsync();
@@ -443,7 +438,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ExecuteResult> RemoveUserFromRoleplayAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] SocketCommandContext context,
 			[NotNull] Roleplay roleplay,
 			[NotNull] IUser removedUser
@@ -468,7 +463,7 @@ namespace DIGOS.Ambassador.Services
 				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
 			}
 
-			roleplay.Participants.RemoveAll(p => p.DiscordID == removedUser.Id);
+			roleplay.Participants.RemoveAll(p => p == removedUser.Id);
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -484,7 +479,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ExecuteResult> AddUserToRoleplayAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] SocketCommandContext context,
 			[NotNull] Roleplay roleplay,
 			[NotNull] IUser newUser
@@ -522,10 +517,10 @@ namespace DIGOS.Ambassador.Services
 			if (!roleplay.IsPublic)
 			{
 				// Remove the user from the invite list
-				roleplay.InvitedUsers.RemoveAll(iu => iu.DiscordID == newUser.Id);
+				roleplay.InvitedUsers.RemoveAll(i => i == newUser.Id);
 			}
 
-			roleplay.Participants.Add(await db.GetOrRegisterUserAsync(newUser));
+			roleplay.Participants.Add(new UserIdentifier(newUser));
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -540,7 +535,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ExecuteResult> InviteUserAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] Roleplay roleplay,
 			[NotNull] IUser invitedUser
 		)
@@ -550,14 +545,14 @@ namespace DIGOS.Ambassador.Services
 				return ExecuteResult.FromError(CommandError.UnmetPrecondition, "The roleplay is not set to private.");
 			}
 
-			if (roleplay.InvitedUsers.Any(p => p.DiscordID == invitedUser.Id))
+			if (roleplay.IsInvited(invitedUser))
 			{
 				return ExecuteResult.FromError(CommandError.Unsuccessful, "The user has already been invited to that roleplay.");
 			}
 
 			// Remove the invited user from the kick list, if they're on it
-			roleplay.KickedUsers.RemoveAll(ku => ku.DiscordID == invitedUser.Id);
-			roleplay.InvitedUsers.Add(await db.GetOrRegisterUserAsync(invitedUser));
+			roleplay.KickedUsers.RemoveAll(k => k == invitedUser.Id);
+			roleplay.InvitedUsers.Add(new UserIdentifier(invitedUser));
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -572,7 +567,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> TransferRoleplayOwnershipAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] IUser newOwner,
 			[NotNull] Roleplay roleplay
 		)
@@ -597,13 +592,13 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetRoleplayNameAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] SocketCommandContext context,
 			[NotNull] Roleplay roleplay,
 			[NotNull] string newRoleplayName
 		)
 		{
-			var isCurrentUser = context.Message.Author.Id == roleplay.Owner.DiscordID;
+			var isCurrentUser = context.Message.Author.Id == roleplay.Owner;
 			if (string.IsNullOrWhiteSpace(newRoleplayName))
 			{
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
@@ -640,7 +635,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetRoleplaySummaryAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] Roleplay roleplay,
 			[NotNull] string newRoleplaySummary
 		)
@@ -665,7 +660,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetRoleplayIsNSFWAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] Roleplay roleplay,
 			bool isNSFW
 		)
@@ -690,7 +685,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetRoleplayIsPublicAsync
 		(
-			[NotNull] GlobalInfoContext db,
+			[NotNull] LocalInfoContext db,
 			[NotNull] Roleplay roleplay,
 			bool isPublic
 		)
@@ -699,6 +694,18 @@ namespace DIGOS.Ambassador.Services
 			await db.SaveChangesAsync();
 
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+		}
+
+		/// <summary>
+		/// Deletes the given roleplay.
+		/// </summary>
+		/// <param name="db">The database.</param>
+		/// <param name="roleplay">The roleplay.</param>
+		/// <returns>A task that must be awaited.</returns>
+		public async Task DeleteRoleplayAsync(LocalInfoContext db, Roleplay roleplay)
+		{
+			db.Roleplays.Remove(roleplay);
+			await db.SaveChangesAsync();
 		}
 	}
 }

@@ -35,7 +35,7 @@ namespace DIGOS.Ambassador.Database.Interfaces
 		/// <summary>
 		/// Gets or sets the user that owns this entity.
 		/// </summary>
-		User Owner { get; set; }
+		UserIdentifier Owner { get; set; }
 
 		/// <summary>
 		/// Gets the user-unique name of the entity.

@@ -51,17 +51,17 @@ namespace DIGOS.Ambassador.Modules
 	[Alias("character", "char", "ch")]
 	[Group("character")]
 	[Summary
-	(
-		"Commands for creating, editing, and interacting with user characters.\n" +
-		"\n" +
-		"Parameters which take a character can be specified in two ways - by just the name, which will search your " +
-		"characters, and by mention and name, which will search the given user's characters. For example,\n" +
-		"\n" +
-		"Your character: Amby\n" +
-		"Another user's character: @DIGOS Ambassador:Amby\n" +
-		"\n" +
-		"You can also substitute any character name for \"current\", and your active character will be used instead."
-	)]
+		(
+			"Commands for creating, editing, and interacting with user characters.\n" +
+			"\n" +
+			"Parameters which take a character can be specified in two ways - by just the name, which will search your " +
+			"characters, and by mention and name, which will search the given user's characters. For example,\n" +
+			"\n" +
+			"Your character: Amby\n" +
+			"Another user's character: @DIGOS Ambassador:Amby\n" +
+			"\n" +
+			"You can also substitute any character name for \"current\", and your active character will be used instead."
+		)]
 	public class CharacterCommands : InteractiveBase<SocketCommandContext>
 	{
 		private readonly DiscordService Discord;
@@ -120,7 +120,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			targetUser = targetUser ?? this.Context.Message.Author;
 
-			using (var db = new GlobalInfoContext())
+			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 			{
 				var getCharacterResult = await this.Characters.GetBestMatchingCharacterAsync(db, this.Context, targetUser, null);
 				if (!getCharacterResult.IsSuccess)
@@ -179,7 +179,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			var eb = this.Feedback.CreateBaseEmbed();
 
-			eb.WithAuthor(this.Context.Client.GetUser(character.Owner.DiscordID));
+			eb.WithAuthor(this.Context.Client.GetUser(character.Owner));
 			eb.WithTitle(character.Name);
 			eb.WithDescription(character.Summary);
 
@@ -216,27 +216,31 @@ namespace DIGOS.Ambassador.Modules
 			[CanBeNull] string characterAvatarUrl = null
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var global = new GlobalInfoContext())
 			{
-				characterAvatarUrl = characterAvatarUrl ?? this.Content.DefaultAvatarUri.ToString();
-
-				var createCharacterResult = await this.Characters.CreateCharacterAsync
-				(
-					db,
-					this.Context,
-					characterName,
-					characterAvatarUrl,
-					characterNickname,
-					characterSummary,
-					characterDescription
-				);
-				if (!createCharacterResult.IsSuccess)
+				using (var local = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
-					await this.Feedback.SendErrorAsync(this.Context, createCharacterResult.ErrorReason);
-					return;
-				}
+					characterAvatarUrl = characterAvatarUrl ?? this.Content.DefaultAvatarUri.ToString();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Character \"{createCharacterResult.Entity.Name}\" created.");
+					var createCharacterResult = await this.Characters.CreateCharacterAsync
+					(
+						global,
+						local,
+						this.Context,
+						characterName,
+						characterAvatarUrl,
+						characterNickname,
+						characterSummary,
+						characterDescription
+					);
+					if (!createCharacterResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, createCharacterResult.ErrorReason);
+						return;
+					}
+
+					await this.Feedback.SendConfirmationAsync(this.Context, $"Character \"{createCharacterResult.Entity.Name}\" created.");
+				}
 			}
 		}
 
@@ -255,11 +259,11 @@ namespace DIGOS.Ambassador.Modules
 			Character character
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 			{
 				db.Attach(character);
 
-				db.Characters.Remove(character);
+				await this.Characters.DeleteCharacterAsync(db, character);
 				await db.SaveChangesAsync();
 
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
@@ -282,7 +286,7 @@ namespace DIGOS.Ambassador.Modules
 			eb.WithAuthor(discordUser);
 			eb.WithTitle("Your characters");
 
-			using (var db = new GlobalInfoContext())
+			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 			{
 				var characters = this.Characters.GetUserCharacters(db, discordUser);
 
@@ -316,25 +320,28 @@ namespace DIGOS.Ambassador.Modules
 			Character character
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var global = new GlobalInfoContext())
 			{
-				db.Attach(character);
-
-				await this.Characters.MakeCharacterCurrentOnServerAsync(db, this.Context, this.Context.Guild, character);
-
-				if (!character.Nickname.IsNullOrWhitespace() && this.Context.Message.Author is IGuildUser guildUser)
+				using (var local = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
-					var currentServer = await db.GetOrRegisterServerAsync(this.Context.Guild);
-					var modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, character.Nickname);
-					if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
+					local.Attach(character);
+
+					await this.Characters.MakeCharacterCurrentAsync(local, this.Context, character);
+
+					if (!character.Nickname.IsNullOrWhitespace() && this.Context.Message.Author is IGuildUser guildUser)
 					{
-						await this.Feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
+						var currentServer = await global.GetOrRegisterServerAsync(this.Context.Guild);
+						var modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, character.Nickname);
+						if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
+						{
+							await this.Feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
+						}
 					}
+
+					await local.SaveChangesAsync();
+
+					await this.Feedback.SendConfirmationAsync(this.Context, $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}.");
 				}
-
-				await db.SaveChangesAsync();
-
-				await this.Feedback.SendConfirmationAsync(this.Context, $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}.");
 			}
 		}
 
@@ -348,33 +355,26 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(ContextType.Guild)]
 		public async Task ClearCharacterFormAsync()
 		{
-			using (var db = new GlobalInfoContext())
+			using (var global = new GlobalInfoContext())
 			{
-				var user = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
-
-				await this.Characters.ClearCurrentCharacterOnServerAsync(db, this.Context.Message.Author, this.Context.Guild);
-
-				if (this.Context.Message.Author is IGuildUser guildUser)
+				using (var local = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
-					var currentServer = await db.GetOrRegisterServerAsync(this.Context.Guild);
+					await this.Characters.ClearCurrentCharacterAsync(local, this.Context.Message.Author);
 
-					ModifyEntityResult modifyNickResult;
-					if (!(user.DefaultCharacter is null) && !user.DefaultCharacter.Nickname.IsNullOrWhitespace())
+					if (this.Context.Message.Author is IGuildUser guildUser)
 					{
-						modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, user.DefaultCharacter.Nickname);
-					}
-					else
-					{
-						modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, null);
+						var currentServer = await global.GetOrRegisterServerAsync(this.Context.Guild);
+
+						var modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, null);
+
+						if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
+						{
+							await this.Feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
+						}
 					}
 
-					if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
-					{
-						await this.Feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
-					}
+					await this.Feedback.SendConfirmationAsync(this.Context, "Character cleared.");
 				}
-
-				await this.Feedback.SendConfirmationAsync(this.Context, "Character cleared.");
 			}
 		}
 
@@ -501,7 +501,7 @@ namespace DIGOS.Ambassador.Modules
 			bool isNSFW = false
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 			{
 				db.Attach(character);
 
@@ -535,7 +535,7 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull] string imageName
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 			{
 				db.Attach(character);
 
@@ -568,7 +568,7 @@ namespace DIGOS.Ambassador.Modules
 			Character character
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 			{
 				db.Attach(character);
 
@@ -628,7 +628,7 @@ namespace DIGOS.Ambassador.Modules
 				string newCharacterName
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
 					db.Attach(character);
 
@@ -660,7 +660,7 @@ namespace DIGOS.Ambassador.Modules
 				[CanBeNull] string newCharacterAvatarUrl = null
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
 					db.Attach(character);
 
@@ -704,7 +704,7 @@ namespace DIGOS.Ambassador.Modules
 				string newCharacterNickname
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
 					db.Attach(character);
 
@@ -738,7 +738,7 @@ namespace DIGOS.Ambassador.Modules
 				string newCharacterSummary
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
 					db.Attach(character);
 
@@ -773,7 +773,7 @@ namespace DIGOS.Ambassador.Modules
 				string newCharacterDescription = null
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
 					db.Attach(character);
 
@@ -830,7 +830,7 @@ namespace DIGOS.Ambassador.Modules
 				bool isNSFW
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
 					db.Attach(character);
 
@@ -859,7 +859,7 @@ namespace DIGOS.Ambassador.Modules
 				string pronounFamily
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
 				{
 					db.Attach(character);
 

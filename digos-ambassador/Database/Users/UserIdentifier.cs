@@ -1,5 +1,5 @@
 ﻿//
-//  User.cs
+//  UserIdentifier.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,18 +20,15 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
-using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Interfaces;
-using DIGOS.Ambassador.Database.Permissions;
-using JetBrains.Annotations;
+using Discord;
 
 namespace DIGOS.Ambassador.Database.Users
 {
 	/// <summary>
-	/// Represents globally accessible information about a user.
+	/// A user identifier entity.
 	/// </summary>
-	public class User : IEFEntity
+	public class UserIdentifier : IEFEntity
 	{
 		/// <inheritdoc />
 		public uint ID { get; set; }
@@ -39,32 +36,25 @@ namespace DIGOS.Ambassador.Database.Users
 		/// <summary>
 		/// Gets or sets the Discord ID of the user.
 		/// </summary>
-		public UserIdentifier Identifier { get; set; }
+		public ulong DiscordID { get; set; }
 
 		/// <summary>
-		/// Gets or sets the class of the user within the DIGOS 'verse.
+		/// Initializes a new instance of the <see cref="UserIdentifier"/> class.
 		/// </summary>
-		public UserClass Class { get; set; }
+		/// <param name="discordUser">The user to identify.</param>
+		public UserIdentifier(IUser discordUser)
+		{
+			this.DiscordID = discordUser.Id;
+		}
 
 		/// <summary>
-		/// Gets or sets the biography of the user. This contains useful information that the users provide themselves.
+		/// Implicitly converts a <see cref="UserIdentifier"/> to a ulong.
 		/// </summary>
-		public string Bio { get; set; }
-
-		/// <summary>
-		/// Gets or sets the current timezone of the user. This is an hour offset ( + or - ) to UTC/GMT.
-		/// </summary>
-		[CanBeNull]
-		public int? Timezone { get; set; }
-
-		/// <summary>
-		/// Gets or sets the kinks or fetishes of a user, as well as their preferences for each.
-		/// </summary>
-		public List<UserKink> Kinks { get; set; }
-
-		/// <summary>
-		/// Gets or sets the bot permissions granted to this user.
-		/// </summary>
-		public List<LocalPermission> LocalPermissions { get; set; }
+		/// <param name="id">The identifier.</param>
+		/// <returns>The encapsulated ID.</returns>
+		public static implicit operator ulong(UserIdentifier id)
+		{
+			return id.DiscordID;
+		}
 	}
 }

@@ -47,7 +47,6 @@ namespace DIGOS.Ambassador.Wizards
 	/// </summary>
 	public class KinkWizard : InteractiveMessage, IWizard
 	{
-		private readonly DiscordSocketClient Client;
 		private readonly UserFeedbackService Feedback;
 		private readonly KinkService Kinks;
 
