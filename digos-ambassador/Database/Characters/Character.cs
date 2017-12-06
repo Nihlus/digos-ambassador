@@ -126,7 +126,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// <inheritdoc />
 		public bool IsOwner(User user)
 		{
-			return IsOwner(user.Identifier);
+			return IsOwner(user.Identifier.DiscordID);
 		}
 
 		/// <inheritdoc />
@@ -138,7 +138,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// <inheritdoc />
 		public bool IsOwner(ulong userID)
 		{
-			return this.Owner == userID;
+			return this.Owner.DiscordID == userID;
 		}
 	}
 }

@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Permissions
 			}
 
 			// The server owner always has all permissions by default
-			if (discordServer.OwnerId == user.Identifier)
+			if (discordServer.OwnerId == user.Identifier.DiscordID)
 			{
 				return true;
 			}

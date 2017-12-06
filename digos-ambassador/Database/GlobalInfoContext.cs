@@ -367,7 +367,7 @@ namespace DIGOS.Ambassador.Database
 		[Pure]
 		public async Task<bool> IsUserKnownAsync([NotNull] IUser discordUser)
 		{
-			return await this.Users.AnyAsync(u => u.Identifier == discordUser.Id);
+			return await this.Users.AnyAsync(u => u.Identifier.DiscordID == discordUser.Id);
 		}
 
 		/// <summary>
@@ -396,11 +396,12 @@ namespace DIGOS.Ambassador.Database
 		public async Task<User> GetUser([NotNull] IUser discordUser)
 		{
 			return await this.Users
+				.Include(u => u.Identifier)
 				.Include(u => u.Kinks)
 				.ThenInclude(k => k.Kink)
 				.Include(u => u.LocalPermissions)
 				.ThenInclude(lp => lp.Server)
-				.FirstAsync(u => u.Identifier == discordUser.Id);
+				.FirstAsync(u => u.Identifier.DiscordID == discordUser.Id);
 		}
 
 		/// <summary>
@@ -419,7 +420,7 @@ namespace DIGOS.Ambassador.Database
 
 			var newUser = new User
 			{
-				Identifier = new UserIdentifier(discordUser),
+				Identifier = UserIdentifier.CreateFrom(discordUser),
 				Class = UserClass.Other,
 				Bio = null,
 				Timezone = null

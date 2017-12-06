@@ -315,7 +315,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] Character character
 		)
 		{
-			var user = context.Client.GetUser(character.Owner);
+			var user = context.Client.GetUser(character.Owner.DiscordID);
 			await ClearCurrentCharacterAsync(db, user);
 			character.IsCurrent = true;
 
@@ -406,7 +406,7 @@ namespace DIGOS.Ambassador.Services
 		{
 			var character = new Character
 			{
-				Owner = new UserIdentifier(context.User),
+				Owner = UserIdentifier.CreateFrom(context.User),
 			};
 
 			var modifyEntityResult = await SetCharacterNameAsync(local, context, character, characterName);
@@ -489,7 +489,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string newCharacterName
 		)
 		{
-			var isCurrentUser = context.Message.Author.Id == character.Owner;
+			var isCurrentUser = context.Message.Author.Id == character.Owner.DiscordID;
 			if (string.IsNullOrWhiteSpace(newCharacterName))
 			{
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
@@ -706,7 +706,7 @@ namespace DIGOS.Ambassador.Services
 		[ItemNotNull]
 		public IQueryable<Character> GetUserCharacters([NotNull]LocalInfoContext db, [NotNull]IUser discordUser)
 		{
-			var characters = GetCharacters(db).Where(ch => ch.Owner == discordUser.Id);
+			var characters = GetCharacters(db).Where(ch => ch.Owner.DiscordID == discordUser.Id);
 			return characters;
 		}
 

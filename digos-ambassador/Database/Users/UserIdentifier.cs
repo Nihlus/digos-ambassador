@@ -39,22 +39,26 @@ namespace DIGOS.Ambassador.Database.Users
 		public ulong DiscordID { get; set; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="UserIdentifier"/> class.
+		/// Creates a new user identifier for the given user.
 		/// </summary>
 		/// <param name="discordUser">The user to identify.</param>
-		public UserIdentifier(IUser discordUser)
+		/// <returns>A new user identifier.</returns>
+		public static UserIdentifier CreateFrom(IUser discordUser)
 		{
-			this.DiscordID = discordUser.Id;
+			return new UserIdentifier
+			{
+				DiscordID = discordUser.Id
+			};
 		}
 
 		/// <summary>
-		/// Implicitly converts a <see cref="UserIdentifier"/> to a ulong.
+		/// Determines whether or not a given user is identified by this instance.
 		/// </summary>
-		/// <param name="id">The identifier.</param>
-		/// <returns>The encapsulated ID.</returns>
-		public static implicit operator ulong(UserIdentifier id)
+		/// <param name="user">The user.</param>
+		/// <returns>True if the identifier identifies the user; otherwise, false.</returns>
+		public bool Is(IUser user)
 		{
-			return id.DiscordID;
+			return this.DiscordID == user.Id;
 		}
 	}
 }
