@@ -94,6 +94,7 @@
             <e p="KinkCategory.cs" t="Include" />
             <e p="KinkPreference.cs" t="Include" />
           </e>
+          <e p="LocalInfoContext.cs" t="Include" />
           <e p="Permissions" t="Include">
             <e p="GlobalPermission.cs" t="Include" />
             <e p="LocalPermission.cs" t="Include" />
@@ -141,9 +142,16 @@
           <e p="InteractiveMessage.cs" t="Include" />
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171129145416_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171129145416_InitialCreate.cs" t="Include" />
-          <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
+          <e p="Global" t="Include">
+            <e p="20171206192251_InitialCreate.Designer.cs" t="Include" />
+            <e p="20171206192251_InitialCreate.cs" t="Include" />
+            <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
+          </e>
+          <e p="Local" t="Include">
+            <e p="20171206192303_InitialCreate.Designer.cs" t="Include" />
+            <e p="20171206192303_InitialCreate.cs" t="Include" />
+            <e p="LocalInfoContextModelSnapshot.cs" t="Include" />
+          </e>
         </e>
         <e p="Modules" t="Include">
           <e p="AdminCommands.cs" t="Include" />
