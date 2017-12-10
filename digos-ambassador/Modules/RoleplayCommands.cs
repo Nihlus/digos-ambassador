@@ -37,6 +37,7 @@ using Discord.Commands;
 
 using Humanizer;
 using JetBrains.Annotations;
+using static Discord.Commands.ContextType;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -86,6 +87,7 @@ namespace DIGOS.Ambassador.Modules
 		[Alias("show", "info")]
 		[Command("show", RunMode = RunMode.Async)]
 		[Summary("Shows information about the specified roleplay.")]
+		[RequireContext(Guild)]
 		public async Task ShowRoleplayAsync([NotNull] Roleplay roleplay)
 		{
 			var eb = CreateRoleplayInfoEmbed(roleplay);
@@ -125,6 +127,7 @@ namespace DIGOS.Ambassador.Modules
 		[Alias("list-owned", "list")]
 		[Command("list-owned", RunMode = RunMode.Async)]
 		[Summary("Lists the roleplays that the given user owns.")]
+		[RequireContext(Guild)]
 		public async Task ListOwnedRoleplaysAsync([CanBeNull] IUser discordUser = null)
 		{
 			discordUser = discordUser ?? this.Context.Message.Author;
@@ -135,7 +138,7 @@ namespace DIGOS.Ambassador.Modules
 
 			using (var db = new GlobalInfoContext())
 			{
-				var roleplays = this.Roleplays.GetUserRoleplays(db, discordUser);
+				var roleplays = this.Roleplays.GetUserRoleplays(db, discordUser, this.Context.Guild);
 
 				foreach (var roleplay in roleplays)
 				{
@@ -161,6 +164,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("create", RunMode = RunMode.Async)]
 		[Summary("Creates a new roleplay with the specified name.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.CreateRoleplay)]
 		public async Task CreateRoleplayAsync
 		(
@@ -190,6 +194,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("delete")]
 		[Summary("Deletes the specified roleplay.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.DeleteRoleplay)]
 		public async Task DeleteRoleplayAsync
 		(
@@ -216,7 +221,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("join", RunMode = RunMode.Async)]
 		[Summary("Joins the roleplay owned by the given person with the given name.")]
-		[RequireContext(ContextType.Guild)]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.JoinRoleplay)]
 		public async Task JoinRoleplayAsync([NotNull] Roleplay roleplay)
 		{
@@ -244,6 +249,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("invite", RunMode = RunMode.Async)]
 		[Summary("Invites the specified user to the given roleplay.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.EditRoleplay)]
 		public async Task InvitePlayerAsync
 		(
@@ -280,6 +286,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("leave", RunMode = RunMode.Async)]
 		[Summary("Leaves the roleplay owned by the given person with the given name.")]
+		[RequireContext(Guild)]
 		public async Task LeaveRoleplayAsync([NotNull] Roleplay roleplay)
 		{
 			using (var db = new GlobalInfoContext())
@@ -306,6 +313,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("kick")]
 		[Summary("Kicks the given user from the named roleplay.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.KickRoleplayMember)]
 		public async Task KickRoleplayParticipantAsync
 		(
@@ -344,7 +352,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("make-current")]
 		[Summary("Makes the roleplay with the given name current in the current channel.")]
-		[RequireContext(ContextType.Guild)]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.StartStopRoleplay)]
 		public async Task MakeRoleplayCurrentAsync
 		(
@@ -377,7 +385,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("start")]
 		[Summary("Starts the roleplay with the given name.")]
-		[RequireContext(ContextType.Guild)]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.StartStopRoleplay)]
 		public async Task StartRoleplayAsync
 		(
@@ -400,7 +408,7 @@ namespace DIGOS.Ambassador.Modules
 				{
 					await this.Feedback.SendWarningAsync(this.Context, "There's already a roleplay active in this channel.");
 
-					var currentRoleplayResult = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context.Channel);
+					var currentRoleplayResult = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context);
 					if (!currentRoleplayResult.IsSuccess)
 					{
 						await this.Feedback.SendErrorAsync(this.Context, currentRoleplayResult.ErrorReason);
@@ -445,7 +453,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("stop", RunMode = RunMode.Async)]
 		[Summary("Stops the given roleplay.")]
-		[RequireContext(ContextType.Guild)]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.StartStopRoleplay)]
 		public async Task StopRoleplayAsync
 		(
@@ -474,7 +482,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("include-previous", RunMode = RunMode.Async)]
 		[Summary("Includes previous messages into the roleplay, starting at the given message.")]
-		[RequireContext(ContextType.Guild)]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.EditRoleplay)]
 		public async Task IncludePreviousMessagesAsync
 		(
@@ -530,6 +538,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("transfer-ownership")]
 		[Summary("Transfers ownership of the named roleplay to the specified user.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.TransferRoleplay, PermissionTarget.Other)]
 		public async Task TransferRoleplayOwnershipAsync
 		(
@@ -543,7 +552,7 @@ namespace DIGOS.Ambassador.Modules
 			{
 				db.Attach(roleplay);
 
-				var transferResult = await this.Roleplays.TransferRoleplayOwnershipAsync(db, newOwner, roleplay);
+				var transferResult = await this.Roleplays.TransferRoleplayOwnershipAsync(db, newOwner, roleplay, this.Context.Guild);
 				if (!transferResult.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);
@@ -563,6 +572,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("replay", RunMode = RunMode.Async)]
 		[Summary("Replays the named roleplay owned by the given user to you.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.ReplayRoleplay)]
 		public async Task ReplayRoleplayAsync
 		(
@@ -646,6 +656,7 @@ namespace DIGOS.Ambassador.Modules
 			[UsedImplicitly]
 			[Command("name", RunMode = RunMode.Async)]
 			[Summary("Sets the new name of the named roleplay.")]
+			[RequireContext(Guild)]
 			[RequirePermission(Permission.EditRoleplay)]
 			public async Task SetRoleplayNameAsync
 			(
@@ -679,6 +690,7 @@ namespace DIGOS.Ambassador.Modules
 			[UsedImplicitly]
 			[Command("summary", RunMode = RunMode.Async)]
 			[Summary("Sets the summary of the named roleplay.")]
+			[RequireContext(Guild)]
 			[RequirePermission(Permission.EditRoleplay)]
 			public async Task SetRoleplaySummaryAsync
 			(
@@ -713,6 +725,7 @@ namespace DIGOS.Ambassador.Modules
 			[UsedImplicitly]
 			[Command("nsfw", RunMode = RunMode.Async)]
 			[Summary("Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.")]
+			[RequireContext(Guild)]
 			public async Task SetRoleplayIsNSFW
 			(
 				bool isNSFW,
@@ -744,6 +757,7 @@ namespace DIGOS.Ambassador.Modules
 			[UsedImplicitly]
 			[Command("public", RunMode = RunMode.Async)]
 			[Summary("Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.")]
+			[RequireContext(Guild)]
 			public async Task SetRoleplayIsPublic
 			(
 				bool isPublic,

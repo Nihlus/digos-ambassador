@@ -88,6 +88,7 @@
           <e p="Interfaces" t="Include">
             <e p="IEFEntity.cs" t="Include" />
             <e p="IOwnedNamedEntity.cs" t="Include" />
+            <e p="IServerEntity.cs" t="Include" />
           </e>
           <e p="Kinks" t="Include">
             <e p="Kink.cs" t="Include" />
@@ -141,8 +142,8 @@
           <e p="InteractiveMessage.cs" t="Include" />
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171129145416_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171129145416_InitialCreate.cs" t="Include" />
+          <e p="20171210224658_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171210224658_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">

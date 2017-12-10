@@ -113,6 +113,8 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<string>("PronounProviderFamily");
 
+                    b.Property<ulong>("ServerID");
+
                     b.Property<string>("Summary");
 
                     b.Property<uint?>("UserID");
@@ -242,6 +244,8 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<string>("Name");
 
                     b.Property<uint?>("OwnerID");
+
+                    b.Property<ulong>("ServerID");
 
                     b.Property<string>("Summary");
 

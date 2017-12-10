@@ -38,6 +38,8 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 
 using JetBrains.Annotations;
+using static Discord.Commands.ContextType;
+using static Discord.Commands.RunMode;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -114,8 +116,9 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="targetUser">The user to check.</param>
 		[UsedImplicitly]
 		[Alias("show", "info")]
-		[Command("show", RunMode = RunMode.Async)]
+		[Command("show", RunMode = Async)]
 		[Summary("Shows quick information about a character.")]
+		[RequireContext(Guild)]
 		public async Task ShowCharacterAsync([CanBeNull] IUser targetUser = null)
 		{
 			targetUser = targetUser ?? this.Context.Message.Author;
@@ -142,8 +145,9 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="character">The character.</param>
 		[UsedImplicitly]
 		[Alias("show", "info")]
-		[Command("show", RunMode = RunMode.Async)]
+		[Command("show", RunMode = Async)]
 		[Summary("Shows quick information about a character.")]
+		[RequireContext(Guild)]
 		public async Task ShowCharacterAsync([NotNull] Character character)
 		{
 			var eb = CreateCharacterInfoEmbed(character);
@@ -204,8 +208,9 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="characterDescription">The full description of the character. Optional.</param>
 		/// <param name="characterAvatarUrl">A url pointing to the character's avatar. Optional.</param>
 		[UsedImplicitly]
-		[Command("create", RunMode = RunMode.Async)]
+		[Command("create", RunMode = Async)]
 		[Summary("Creates a new character.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.CreateCharacter)]
 		public async Task CreateCharacterAsync
 		(
@@ -245,8 +250,9 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="character">The character to delete.</param>
 		[UsedImplicitly]
-		[Command("delete", RunMode = RunMode.Async)]
+		[Command("delete", RunMode = Async)]
 		[Summary("Deletes the named character.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.DeleteCharacter)]
 		public async Task DeleteCharacterAsync
 		(
@@ -272,8 +278,9 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="discordUser">The user whose characters should be listed. Optional.</param>
 		[UsedImplicitly]
 		[Alias("list-owned", "list")]
-		[Command("list-owned", RunMode = RunMode.Async)]
+		[Command("list-owned", RunMode = Async)]
 		[Summary("Lists the characters owned by a given user.")]
+		[RequireContext(Guild)]
 		public async Task ListOwnedCharactersAsync([CanBeNull] IUser discordUser = null)
 		{
 			discordUser = discordUser ?? this.Context.Message.Author;
@@ -284,7 +291,7 @@ namespace DIGOS.Ambassador.Modules
 
 			using (var db = new GlobalInfoContext())
 			{
-				var characters = this.Characters.GetUserCharacters(db, discordUser);
+				var characters = this.Characters.GetUserCharacters(db, discordUser, this.Context.Guild);
 
 				foreach (var character in characters)
 				{
@@ -306,9 +313,9 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="character">The character to become.</param>
 		[UsedImplicitly]
 		[Alias("assume", "become", "transform", "active")]
-		[Command("assume", RunMode = RunMode.Async)]
+		[Command("assume", RunMode = Async)]
 		[Summary("Sets the named character as the user's current character.")]
-		[RequireContext(ContextType.Guild)]
+		[RequireContext(Guild)]
 		public async Task AssumeCharacterFormAsync
 		(
 			[NotNull]
@@ -343,9 +350,9 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		[UsedImplicitly]
 		[Alias("clear", "drop", "default")]
-		[Command("clear", RunMode = RunMode.Async)]
+		[Command("clear", RunMode = Async)]
 		[Summary("Clears any active characters from you, restoring your default form.")]
-		[RequireContext(ContextType.Guild)]
+		[RequireContext(Guild)]
 		public async Task ClearCharacterFormAsync()
 		{
 			using (var db = new GlobalInfoContext())
@@ -386,6 +393,7 @@ namespace DIGOS.Ambassador.Modules
 		[Alias("view-gallery", "gallery")]
 		[Command("view-gallery")]
 		[Summary("View the images in a character's gallery.")]
+		[RequireContext(Guild)]
 		public async Task ViewCharacterGalleryAsync([NotNull] Character character)
 		{
 			if (character.Images.Count <= 0)
@@ -416,6 +424,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("list-images")]
 		[Summary("Lists the images in a character's gallery.")]
+		[RequireContext(Guild)]
 		public async Task ListImagesAsync([NotNull] Character character)
 		{
 			var eb = this.Feedback.CreateBaseEmbed();
@@ -442,8 +451,9 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="imageCaption">The caption of the image.</param>
 		/// <param name="isNSFW">Whether or not the image is NSFW.</param>
 		[UsedImplicitly]
-		[Command("add-image", RunMode = RunMode.Async)]
+		[Command("add-image", RunMode = Async)]
 		[Summary("Adds an attached image to a character's gallery.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.EditCharacter)]
 		public async Task AddImageAsync
 		(
@@ -487,8 +497,9 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="imageCaption">The caption of the image.</param>
 		/// <param name="isNSFW">Whether or not the image is NSFW.</param>
 		[UsedImplicitly]
-		[Command("add-image", RunMode = RunMode.Async)]
+		[Command("add-image", RunMode = Async)]
 		[Summary("Adds a linked image to a character's gallery.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.EditCharacter)]
 		public async Task AddImageAsync
 		(
@@ -523,8 +534,9 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="imageName">The name of the image to remove.</param>
 		[UsedImplicitly]
 		[Alias("remove-image", "delete-image")]
-		[Command("remove-image", RunMode = RunMode.Async)]
+		[Command("remove-image", RunMode = Async)]
 		[Summary("Removes an image from a character's gallery.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.EditCharacter)]
 		public async Task RemoveImageAsync
 		(
@@ -559,6 +571,7 @@ namespace DIGOS.Ambassador.Modules
 		[Alias("transfer-ownership", "transfer")]
 		[Command("transfer-ownership")]
 		[Summary("Transfers ownership of the named character to another user.")]
+		[RequireContext(Guild)]
 		[RequirePermission(Permission.TransferCharacter)]
 		public async Task TransferCharacterOwnershipAsync
 		(
@@ -572,7 +585,7 @@ namespace DIGOS.Ambassador.Modules
 			{
 				db.Attach(character);
 
-				var transferResult = await this.Characters.TransferCharacterOwnershipAsync(db, newOwner, character);
+				var transferResult = await this.Characters.TransferCharacterOwnershipAsync(db, newOwner, character, this.Context.Guild);
 				if (!transferResult.IsSuccess)
 				{
 					await this.Feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);
@@ -615,8 +628,9 @@ namespace DIGOS.Ambassador.Modules
 			/// <param name="character">The character.</param>
 			/// <param name="newCharacterName">The new name of the character.</param>
 			[UsedImplicitly]
-			[Command("name", RunMode = RunMode.Async)]
+			[Command("name", RunMode = Async)]
 			[Summary("Sets the name of a character.")]
+			[RequireContext(Guild)]
 			[RequirePermission(Permission.EditCharacter)]
 			public async Task SetCharacterNameAsync
 			(
@@ -649,8 +663,9 @@ namespace DIGOS.Ambassador.Modules
 			/// <param name="character">The character.</param>
 			/// <param name="newCharacterAvatarUrl">The url of the new avatar. Optional.</param>
 			[UsedImplicitly]
-			[Command("avatar", RunMode = RunMode.Async)]
+			[Command("avatar", RunMode = Async)]
 			[Summary("Sets the avatar of a character. You can attach an image instead of passing a url as a parameter.")]
+			[RequireContext(Guild)]
 			[RequirePermission(Permission.EditCharacter)]
 			public async Task SetCharacterAvatarAsync
 			(
@@ -691,8 +706,9 @@ namespace DIGOS.Ambassador.Modules
 			/// <param name="newCharacterNickname">The new nickname of the character. Max 32 characters.</param>
 			[UsedImplicitly]
 			[Alias("nickname", "nick")]
-			[Command("nickname", RunMode = RunMode.Async)]
+			[Command("nickname", RunMode = Async)]
 			[Summary("Sets the nickname that the user should have when the character is active.")]
+			[RequireContext(Guild)]
 			[RequirePermission(Permission.EditCharacter)]
 			public async Task SetCharacterNicknameAsync
 			(
@@ -725,8 +741,9 @@ namespace DIGOS.Ambassador.Modules
 			/// <param name="character">The character.</param>
 			/// <param name="newCharacterSummary">The new summary. Max 240 characters.</param>
 			[UsedImplicitly]
-			[Command("summary", RunMode = RunMode.Async)]
+			[Command("summary", RunMode = Async)]
 			[Summary("Sets the summary of a character.")]
+			[RequireContext(Guild)]
 			[RequirePermission(Permission.EditCharacter)]
 			public async Task SetCharacterSummaryAsync
 			(
@@ -760,8 +777,9 @@ namespace DIGOS.Ambassador.Modules
 			/// <param name="newCharacterDescription">The new description of the character. Optional.</param>
 			[UsedImplicitly]
 			[Alias("description", "desc")]
-			[Command("description", RunMode = RunMode.Async)]
+			[Command("description", RunMode = Async)]
 			[Summary("Sets the description of a character. You can attach a plaintext document instead of passing it as a parameter.")]
+			[RequireContext(Guild)]
 			[RequirePermission(Permission.EditCharacter)]
 			public async Task SetCharacterDescriptionAsync
 			(
@@ -819,8 +837,9 @@ namespace DIGOS.Ambassador.Modules
 			/// <param name="character">The character.</param>
 			/// <param name="isNSFW">Whether or not the character is NSFW</param>
 			[UsedImplicitly]
-			[Command("nsfw", RunMode = RunMode.Async)]
+			[Command("nsfw", RunMode = Async)]
 			[Summary("Sets whether or not a character is NSFW.")]
+			[RequireContext(Guild)]
 			[RequirePermission(Permission.EditCharacter)]
 			public async Task SetCharacterIsNSFWAsync
 			(
@@ -846,8 +865,9 @@ namespace DIGOS.Ambassador.Modules
 			/// <param name="character">The character.</param>
 			/// <param name="pronounFamily">The pronoun family.</param>
 			[UsedImplicitly]
-			[Command("pronoun", RunMode = RunMode.Async)]
+			[Command("pronoun", RunMode = Async)]
 			[Summary("Sets the preferred pronoun of a character.")]
+			[RequireContext(Guild)]
 			[RequirePermission(Permission.EditCharacter)]
 			public async Task SetCharacterPronounAsync
 			(

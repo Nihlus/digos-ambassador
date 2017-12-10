@@ -38,10 +38,13 @@ namespace DIGOS.Ambassador.Database.Characters
 	/// <summary>
 	/// Represents a user's character.
 	/// </summary>
-	public class Character : IOwnedNamedEntity, IEFEntity
+	public class Character : IOwnedNamedEntity, IServerEntity
 	{
 		/// <inheritdoc />
 		public uint ID { get; set; }
+
+		/// <inheritdoc />
+		public ulong ServerID { get; set; }
 
 		/// <inheritdoc />
 		public User Owner { get; set; }

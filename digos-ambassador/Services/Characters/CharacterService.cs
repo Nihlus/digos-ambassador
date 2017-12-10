@@ -164,7 +164,7 @@ namespace DIGOS.Ambassador.Services
 
 			if (characterOwner is null)
 			{
-				return await GetNamedCharacterAsync(db, characterName);
+				return await GetNamedCharacterAsync(db, characterName, context.Guild);
 			}
 
 			if (characterName.IsNullOrWhitespace())
@@ -200,7 +200,7 @@ namespace DIGOS.Ambassador.Services
 				return RetrieveEntityResult<Character>.FromError(CommandError.ObjectNotFound, errorMessage);
 			}
 
-			var currentCharacter = await GetUserCharacters(db, discordUser)
+			var currentCharacter = await GetUserCharacters(db, discordUser, context.Guild)
 			.FirstOrDefaultAsync
 			(
 				ch => ch.CurrentServers.Any(s => s.DiscordID == context.Guild.Id)
@@ -219,12 +219,14 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database context where the data is stored.</param>
 		/// <param name="characterName">The name of the character.</param>
+		/// <param name="guild">The guild that the character is on.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		[Pure]
 		public async Task<RetrieveEntityResult<Character>> GetNamedCharacterAsync
 		(
 			[NotNull] GlobalInfoContext db,
-			[NotNull] string characterName
+			[NotNull] string characterName,
+			[NotNull] IGuild guild
 		)
 		{
 			if (await db.Characters.CountAsync(ch => ch.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase)) > 1)
@@ -236,7 +238,7 @@ namespace DIGOS.Ambassador.Services
 				);
 			}
 
-			var character = GetCharacters(db).FirstOrDefault(rp => rp.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase));
+			var character = GetCharacters(db, guild).FirstOrDefault(rp => rp.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase));
 
 			if (character is null)
 			{
@@ -250,8 +252,9 @@ namespace DIGOS.Ambassador.Services
 		/// Gets the characters in the database along with their navigation properties.
 		/// </summary>
 		/// <param name="db">The database.</param>
+		/// <param name="guild">The guild where the characters are.</param>
 		/// <returns>A queryable set of characters.</returns>
-		public IQueryable<Character> GetCharacters([NotNull] GlobalInfoContext db)
+		public IQueryable<Character> GetCharacters([NotNull] GlobalInfoContext db, IGuild guild)
 		{
 			return db.Characters
 				.Include(c => c.Owner)
@@ -263,7 +266,8 @@ namespace DIGOS.Ambassador.Services
 				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.Transformation.DefaultPatternColour)
 				.Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.Species)
 				.Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.DefaultBaseColour)
-				.Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.DefaultPatternColour);
+				.Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.DefaultPatternColour)
+				.Where(c => c.ServerID == guild.Id);
 		}
 
 		/// <summary>
@@ -283,7 +287,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string characterName
 		)
 		{
-			var character = await GetUserCharacters(db, characterOwner)
+			var character = await GetUserCharacters(db, characterOwner, context.Guild)
 			.FirstOrDefaultAsync
 			(
 				ch => ch.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase)
@@ -347,7 +351,7 @@ namespace DIGOS.Ambassador.Services
 				return;
 			}
 
-			var currentCharactersOnServer = GetUserCharacters(db, discordUser)
+			var currentCharactersOnServer = GetUserCharacters(db, discordUser, discordServer)
 				.Where(ch => ch.CurrentServers.Any(s => s.DiscordID == discordServer.Id));
 
 			await currentCharactersOnServer.ForEachAsync
@@ -380,7 +384,7 @@ namespace DIGOS.Ambassador.Services
 				return false;
 			}
 
-			var userCharacters = GetUserCharacters(db, discordUser);
+			var userCharacters = GetUserCharacters(db, discordUser, discordServer);
 
 			return await userCharacters
 				.Where(ch => ch.CurrentServers.Any())
@@ -429,6 +433,7 @@ namespace DIGOS.Ambassador.Services
 			var character = new Character
 			{
 				Owner = owner,
+				ServerID = context.Guild.Id
 			};
 
 			var modifyEntityResult = await SetCharacterNameAsync(db, context, character, characterName);
@@ -518,7 +523,7 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
 			}
 
-			if (!await IsCharacterNameUniqueForUserAsync(db, context.Message.Author, newCharacterName))
+			if (!await IsCharacterNameUniqueForUserAsync(db, context.Message.Author, newCharacterName, context.Guild))
 			{
 				var errorMessage = isCurrentUser
 					? "You already have a character with that name."
@@ -700,15 +705,17 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database where the characters are stored.</param>
 		/// <param name="newOwner">The new owner.</param>
 		/// <param name="character">The character to transfer.</param>
+		/// <param name="guild">The guild to scope the character search to.</param>
 		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> TransferCharacterOwnershipAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] IUser newOwner,
-			[NotNull] Character character
+			[NotNull] Character character,
+			[NotNull] IGuild guild
 		)
 		{
-			var newOwnerCharacters = GetUserCharacters(db, newOwner);
+			var newOwnerCharacters = GetUserCharacters(db, newOwner, guild);
 			return await this.OwnedEntities.TransferEntityOwnershipAsync
 			(
 				db,
@@ -723,13 +730,19 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database where the characters are stored.</param>
 		/// <param name="discordUser">The user to get the characters of.</param>
+		/// <param name="guild">The guild to get the user's characters on.</param>
 		/// <returns>A queryable list of characters belonging to the user.</returns>
 		[Pure]
 		[NotNull]
 		[ItemNotNull]
-		public IQueryable<Character> GetUserCharacters([NotNull]GlobalInfoContext db, [NotNull]IUser discordUser)
+		public IQueryable<Character> GetUserCharacters
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser,
+			[NotNull] IGuild guild
+		)
 		{
-			var characters = GetCharacters(db).Where(ch => ch.Owner.DiscordID == discordUser.Id);
+			var characters = GetCharacters(db, guild).Where(ch => ch.Owner.DiscordID == discordUser.Id);
 			return characters;
 		}
 
@@ -739,16 +752,18 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database where the characters are stored.</param>
 		/// <param name="discordUser">The user to check.</param>
 		/// <param name="characterName">The character name to check.</param>
+		/// <param name="guild">The guild to scope the character search to.</param>
 		/// <returns>true if the name is unique; otherwise, false.</returns>
 		[Pure]
 		public async Task<bool> IsCharacterNameUniqueForUserAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] IUser discordUser,
-			[NotNull] string characterName
+			[NotNull] string characterName,
+			[NotNull] IGuild guild
 		)
 		{
-			var userCharacters = GetUserCharacters(db, discordUser);
+			var userCharacters = GetUserCharacters(db, discordUser, guild);
 			return await this.OwnedEntities.IsEntityNameUniqueForUserAsync(userCharacters, characterName);
 		}
 

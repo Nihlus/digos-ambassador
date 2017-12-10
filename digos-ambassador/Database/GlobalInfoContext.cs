@@ -429,11 +429,13 @@ namespace DIGOS.Ambassador.Database
 			return await this.Users
 				.Include(u => u.DefaultCharacter)
 				.Include(u => u.Characters)
-				.Include(u => u.Kinks)
-				.ThenInclude(k => k.Kink)
-				.Include(u => u.LocalPermissions)
-				.ThenInclude(lp => lp.Server)
-				.FirstAsync(u => u.DiscordID == discordUser.Id);
+				.Include(u => u.Kinks).ThenInclude(k => k.Kink)
+				.Include(u => u.LocalPermissions).ThenInclude(lp => lp.Server)
+				.FirstAsync
+				(
+					u =>
+						u.DiscordID == discordUser.Id
+				);
 		}
 
 		/// <summary>

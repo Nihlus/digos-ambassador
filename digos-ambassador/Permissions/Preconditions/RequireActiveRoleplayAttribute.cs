@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 			var roleplayService = services.GetRequiredService<RoleplayService>();
 			using (var db = new GlobalInfoContext())
 			{
-				var result = await roleplayService.GetActiveRoleplayAsync(db, context.Channel);
+				var result = await roleplayService.GetActiveRoleplayAsync(db, context);
 				if (!result.IsSuccess)
 				{
 					return PreconditionResult.FromError(result);

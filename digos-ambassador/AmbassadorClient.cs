@@ -214,7 +214,7 @@ namespace DIGOS.Ambassador
 			int argumentPos = 0;
 			if (!(message.HasCharPrefix('!', ref argumentPos) || message.HasMentionPrefix(this.Client.CurrentUser, ref argumentPos)))
 			{
-				this.Roleplays.ConsumeMessage(arg);
+				this.Roleplays.ConsumeMessage(new SocketCommandContext(this.Client, message));
 				return;
 			}
 
