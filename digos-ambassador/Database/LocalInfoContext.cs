@@ -21,14 +21,7 @@
 //
 
 using System.IO;
-
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.Transformations;
-
 using Discord;
-
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -45,39 +38,6 @@ namespace DIGOS.Ambassador.Database
 		/// Gets the Discord guild ID of the database.
 		/// </summary>
 		public ulong Server { get; }
-
-		/// <summary>
-		/// Gets or sets the database where characters are stored.
-		/// </summary>
-		public DbSet<Character> Characters
-		{
-			get;
-
-			[UsedImplicitly]
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets the database where roleplays are stored.
-		/// </summary>
-		public DbSet<Roleplay> Roleplays
-		{
-			get;
-
-			[UsedImplicitly]
-			set;
-		}
-
-		/// <summary>
-		/// Gets or sets the database where server-specific transformation protections are stored.
-		/// </summary>
-		public DbSet<ServerUserProtection> UserProtections
-		{
-			get;
-
-			[UsedImplicitly]
-			set;
-		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="LocalInfoContext"/> class. This constructor should not be used
@@ -124,7 +84,6 @@ namespace DIGOS.Ambassador.Database
 		/// <summary>
 		/// Design-time factory for local database contexts.
 		/// </summary>
-		[UsedImplicitly]
 		public class DesignTimeLocalInfoContextFactory : IDesignTimeDbContextFactory<LocalInfoContext>
 		{
 			/// <inheritdoc />

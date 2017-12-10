@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		public uint ID { get; set; }
 
 		/// <inheritdoc />
-		public UserIdentifier Owner { get; set; }
+		public User Owner { get; set; }
 
 		/// <inheritdoc />
 		public string Name { get; set; }
@@ -53,9 +53,9 @@ namespace DIGOS.Ambassador.Database.Characters
 		public string EntityTypeDisplayName => nameof(Character);
 
 		/// <summary>
-		/// Gets or sets a value indicating whether the character is the user's current character.
+		/// Gets or sets the server that the character is currently in use on.
 		/// </summary>
-		public bool IsCurrent { get; set; }
+		public List<Server> CurrentServers { get; set; }
 
 		/// <summary>
 		/// Gets or sets a URL pointing to the character's avatar.
@@ -126,7 +126,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// <inheritdoc />
 		public bool IsOwner(User user)
 		{
-			return IsOwner(user.Identifier);
+			return IsOwner(user.DiscordID);
 		}
 
 		/// <inheritdoc />
@@ -138,7 +138,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// <inheritdoc />
 		public bool IsOwner(ulong userID)
 		{
-			return this.Owner == userID;
+			return this.Owner.DiscordID == userID;
 		}
 	}
 }

@@ -62,6 +62,17 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
+		/// Gets or sets the database where characters are stored.
+		/// </summary>
+		public DbSet<Character> Characters
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets the database where kinks are stored.
 		/// </summary>
 		public DbSet<Kink> Kinks
@@ -98,6 +109,17 @@ namespace DIGOS.Ambassador.Database
 		/// Gets or sets the database where granted global permissions are stored.
 		/// </summary>
 		public DbSet<GlobalPermission> GlobalPermissions
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets the database where roleplays are stored.
+		/// </summary>
+		public DbSet<Roleplay> Roleplays
 		{
 			get;
 
@@ -153,6 +175,17 @@ namespace DIGOS.Ambassador.Database
 		/// Gets or sets the database where global transformation protections are stored.
 		/// </summary>
 		public DbSet<GlobalUserProtection> GlobalUserProtections
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets the database where server-specific transformation protections are stored.
+		/// </summary>
+		public DbSet<ServerUserProtection> ServerUserProtections
 		{
 			get;
 
@@ -367,7 +400,7 @@ namespace DIGOS.Ambassador.Database
 		[Pure]
 		public async Task<bool> IsUserKnownAsync([NotNull] IUser discordUser)
 		{
-			return await this.Users.AnyAsync(u => u.Identifier == discordUser.Id);
+			return await this.Users.AnyAsync(u => u.DiscordID == discordUser.Id);
 		}
 
 		/// <summary>
@@ -396,11 +429,13 @@ namespace DIGOS.Ambassador.Database
 		public async Task<User> GetUser([NotNull] IUser discordUser)
 		{
 			return await this.Users
+				.Include(u => u.DefaultCharacter)
+				.Include(u => u.Characters)
 				.Include(u => u.Kinks)
 				.ThenInclude(k => k.Kink)
 				.Include(u => u.LocalPermissions)
 				.ThenInclude(lp => lp.Server)
-				.FirstAsync(u => u.Identifier == discordUser.Id);
+				.FirstAsync(u => u.DiscordID == discordUser.Id);
 		}
 
 		/// <summary>
@@ -419,7 +454,7 @@ namespace DIGOS.Ambassador.Database
 
 			var newUser = new User
 			{
-				Identifier = new UserIdentifier(discordUser),
+				DiscordID = discordUser.Id,
 				Class = UserClass.Other,
 				Bio = null,
 				Timezone = null
@@ -439,6 +474,14 @@ namespace DIGOS.Ambassador.Database
 			{
 				optionsBuilder.UseSqlite($"Data Source={Path.Combine("Content", "Databases", "global.db")}");
 			}
+		}
+
+		/// <inheritdoc />
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			modelBuilder.Entity<User>().HasOne(u => u.DefaultCharacter);
+			modelBuilder.Entity<User>().HasMany(u => u.Characters);
+			modelBuilder.Entity<Character>().HasOne(ch => ch.Owner);
 		}
 	}
 }

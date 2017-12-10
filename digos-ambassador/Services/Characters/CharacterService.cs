@@ -29,7 +29,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Utility;
 
@@ -152,7 +151,7 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] ICommandContext context,
 			[CanBeNull] IUser characterOwner,
 			[CanBeNull] string characterName
@@ -186,12 +185,12 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] ICommandContext context,
 			[NotNull] IUser discordUser
 		)
 		{
-			if (!await HasActiveCharacterAsync(db, discordUser))
+			if (!await HasActiveCharacterOnServerAsync(db, discordUser, context.Guild))
 			{
 				var isCurrentUser = context.Message.Author.Id == discordUser.Id;
 				var errorMessage = isCurrentUser
@@ -204,7 +203,7 @@ namespace DIGOS.Ambassador.Services
 			var currentCharacter = await GetUserCharacters(db, discordUser)
 			.FirstOrDefaultAsync
 			(
-				ch => ch.IsCurrent
+				ch => ch.CurrentServers.Any(s => s.DiscordID == context.Guild.Id)
 			);
 
 			if (currentCharacter is null)
@@ -224,7 +223,7 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		public async Task<RetrieveEntityResult<Character>> GetNamedCharacterAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] string characterName
 		)
 		{
@@ -252,9 +251,11 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database.</param>
 		/// <returns>A queryable set of characters.</returns>
-		public IQueryable<Character> GetCharacters([NotNull] LocalInfoContext db)
+		public IQueryable<Character> GetCharacters([NotNull] GlobalInfoContext db)
 		{
 			return db.Characters
+				.Include(c => c.Owner)
+				.Include(c => c.CurrentServers)
 				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.BaseColour)
 				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.PatternColour)
 				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.Transformation.Species)
@@ -276,7 +277,7 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		public async Task<RetrieveEntityResult<Character>> GetUserCharacterByNameAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] ICommandContext context,
 			[NotNull] IUser characterOwner,
 			[NotNull] string characterName
@@ -306,18 +307,23 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database where the characters are stored.</param>
 		/// <param name="context">The context of the user.</param>
+		/// <param name="discordServer">The server to make the character current on.</param>
 		/// <param name="character">The character to make current.</param>
 		/// <returns>A task that must be awaited.</returns>
-		public async Task MakeCharacterCurrentAsync
+		public async Task MakeCharacterCurrentOnServerAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] SocketCommandContext context,
+			[NotNull] IGuild discordServer,
 			[NotNull] Character character
 		)
 		{
-			var user = context.Client.GetUser(character.Owner);
-			await ClearCurrentCharacterAsync(db, user);
-			character.IsCurrent = true;
+			var server = await db.GetOrRegisterServerAsync(discordServer);
+			var user = context.Guild.GetUser(character.Owner.DiscordID);
+
+			await ClearCurrentCharacterOnServerAsync(db, user, discordServer);
+
+			character.CurrentServers.Add(server);
 
 			await db.SaveChangesAsync();
 		}
@@ -327,24 +333,27 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database where the characters are stored.</param>
 		/// <param name="discordUser">The user to clear the characters from.</param>
+		/// <param name="discordServer">The server to clear the characters on.</param>
 		/// <returns>A task that must be awaited.</returns>
-		public async Task ClearCurrentCharacterAsync
+		public async Task ClearCurrentCharacterOnServerAsync
 		(
-			[NotNull] LocalInfoContext db,
-			[NotNull] IUser discordUser
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser,
+			[NotNull] IGuild discordServer
 		)
 		{
-			if (!await HasActiveCharacterAsync(db, discordUser))
+			if (!await HasActiveCharacterOnServerAsync(db, discordUser, discordServer))
 			{
 				return;
 			}
 
 			var currentCharactersOnServer = GetUserCharacters(db, discordUser)
-				.Where(ch => ch.IsCurrent);
+				.Where(ch => ch.CurrentServers.Any(s => s.DiscordID == discordServer.Id));
 
 			await currentCharactersOnServer.ForEachAsync
 			(
-				ch => ch.IsCurrent = false
+				ch => ch.CurrentServers
+					.RemoveAll(s => s.DiscordID == discordServer.Id)
 			);
 
 			await db.SaveChangesAsync();
@@ -355,36 +364,49 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database where the characters are stored.</param>
 		/// <param name="discordUser">The user to check.</param>
+		/// <param name="discordServer">The server to check.</param>
 		/// <returns>true if the user has an active character on the server; otherwise, false.</returns>
 		[Pure]
-		public async Task<bool> HasActiveCharacterAsync
+		public async Task<bool> HasActiveCharacterOnServerAsync
 		(
-			[NotNull] LocalInfoContext db,
-			[NotNull] IUser discordUser
+			[NotNull] GlobalInfoContext db,
+			[NotNull] IUser discordUser,
+			[CanBeNull] IGuild discordServer
 		)
 		{
+			if (discordServer is null)
+			{
+				// TODO: Allow users to assume characters in DMs
+				return false;
+			}
+
 			var userCharacters = GetUserCharacters(db, discordUser);
-			return await userCharacters.AnyAsync(ch => ch.IsCurrent);
+
+			return await userCharacters
+				.Where(ch => ch.CurrentServers.Any())
+				.AnyAsync
+				(
+					c => c.CurrentServers
+						.Any(s => s.DiscordID == discordServer.Id)
+				);
 		}
 
 		/// <summary>
 		/// Creates a character with the given name and default settings.
 		/// </summary>
-		/// <param name="global">The global database.</param>
-		/// <param name="local">The server-local database.</param>
+		/// <param name="db">The database where the characters are stored.</param>
 		/// <param name="context">The context of the command.</param>
 		/// <param name="characterName">The name of the character.</param>
 		/// <returns>A creation result which may or may not have been successful.</returns>
-		public async Task<CreateEntityResult<Character>> CreateCharacterAsync([NotNull] GlobalInfoContext global, LocalInfoContext local, ICommandContext context, string characterName)
+		public async Task<CreateEntityResult<Character>> CreateCharacterAsync(GlobalInfoContext db, ICommandContext context, string characterName)
 		{
-			return await CreateCharacterAsync(global, local, context, characterName, this.Content.DefaultAvatarUri.ToString(), null, null, null);
+			return await CreateCharacterAsync(db, context, characterName, this.Content.DefaultAvatarUri.ToString(), null, null, null);
 		}
 
 		/// <summary>
 		/// Creates a character with the given parameters.
 		/// </summary>
-		/// <param name="global">The global database.</param>
-		/// <param name="local">The server-local database.</param>
+		/// <param name="db">The database where the characters are stored.</param>
 		/// <param name="context">The context of the command.</param>
 		/// <param name="characterName">The name of the character.</param>
 		/// <param name="characterAvatarUrl">The character's avatar url.</param>
@@ -394,8 +416,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A creation result which may or may not have been successful.</returns>
 		public async Task<CreateEntityResult<Character>> CreateCharacterAsync
 		(
-			[NotNull] GlobalInfoContext global,
-			[NotNull] LocalInfoContext local,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] ICommandContext context,
 			[NotNull] string characterName,
 			[NotNull] string characterAvatarUrl,
@@ -404,18 +425,19 @@ namespace DIGOS.Ambassador.Services
 			[CanBeNull] string characterDescription
 		)
 		{
+			var owner = await db.GetOrRegisterUserAsync(context.Message.Author);
 			var character = new Character
 			{
-				Owner = new UserIdentifier(context.User),
+				Owner = owner,
 			};
 
-			var modifyEntityResult = await SetCharacterNameAsync(local, context, character, characterName);
+			var modifyEntityResult = await SetCharacterNameAsync(db, context, character, characterName);
 			if (!modifyEntityResult.IsSuccess)
 			{
 				return CreateEntityResult<Character>.FromError(modifyEntityResult);
 			}
 
-			modifyEntityResult = await SetCharacterAvatarAsync(local, character, characterAvatarUrl);
+			modifyEntityResult = await SetCharacterAvatarAsync(db, character, characterAvatarUrl);
 			if (!modifyEntityResult.IsSuccess)
 			{
 				return CreateEntityResult<Character>.FromError(modifyEntityResult);
@@ -423,7 +445,7 @@ namespace DIGOS.Ambassador.Services
 
 			if (!(characterNickname is null))
 			{
-				modifyEntityResult = await SetCharacterNicknameAsync(local, character, characterNickname);
+				modifyEntityResult = await SetCharacterNicknameAsync(db, character, characterNickname);
 				if (!modifyEntityResult.IsSuccess)
 				{
 					return CreateEntityResult<Character>.FromError(modifyEntityResult);
@@ -431,27 +453,27 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			characterSummary = characterSummary ?? "No summary set.";
-			modifyEntityResult = await SetCharacterSummaryAsync(local, character, characterSummary);
+			modifyEntityResult = await SetCharacterSummaryAsync(db, character, characterSummary);
 			if (!modifyEntityResult.IsSuccess)
 			{
 				return CreateEntityResult<Character>.FromError(modifyEntityResult);
 			}
 
 			characterDescription = characterDescription ?? "No description set.";
-			modifyEntityResult = await SetCharacterDescriptionAsync(local, character, characterDescription);
+			modifyEntityResult = await SetCharacterDescriptionAsync(db, character, characterDescription);
 			if (!modifyEntityResult.IsSuccess)
 			{
 				return CreateEntityResult<Character>.FromError(modifyEntityResult);
 			}
 
 			var defaultPronounFamilyName = this.PronounProviders.First(p => p.Value is TheyPronounProvider).Value.Family;
-			modifyEntityResult = await SetCharacterPronounAsync(local, character, defaultPronounFamilyName);
+			modifyEntityResult = await SetCharacterPronounAsync(db, character, defaultPronounFamilyName);
 			if (!modifyEntityResult.IsSuccess)
 			{
 				return CreateEntityResult<Character>.FromError(modifyEntityResult);
 			}
 
-			var getDefaultAppearanceResult = await Appearance.CreateDefaultAsync(global, this.Transformations);
+			var getDefaultAppearanceResult = await Appearance.CreateDefaultAsync(db, this.Transformations);
 			if (!getDefaultAppearanceResult.IsSuccess)
 			{
 				return CreateEntityResult<Character>.FromError(getDefaultAppearanceResult);
@@ -461,10 +483,11 @@ namespace DIGOS.Ambassador.Services
 			character.DefaultAppearance = defaultAppearance;
 			character.CurrentAppearance = defaultAppearance;
 
-			await local.Characters.AddAsync(character);
-			await local.SaveChangesAsync();
+			owner.Characters.Add(character);
+			await db.Characters.AddAsync(character);
+			await db.SaveChangesAsync();
 
-			var getCharacterResult = await GetUserCharacterByNameAsync(local, context, context.Message.Author, characterName);
+			var getCharacterResult = await GetUserCharacterByNameAsync(db, context, context.Message.Author, characterName);
 			if (!getCharacterResult.IsSuccess)
 			{
 				return CreateEntityResult<Character>.FromError(getCharacterResult);
@@ -483,13 +506,13 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetCharacterNameAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			[NotNull] string newCharacterName
 		)
 		{
-			var isCurrentUser = context.Message.Author.Id == character.Owner;
+			var isCurrentUser = context.Message.Author.Id == character.Owner.DiscordID;
 			if (string.IsNullOrWhiteSpace(newCharacterName))
 			{
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
@@ -526,7 +549,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetCharacterAvatarAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] Character character,
 			[NotNull] string newCharacterAvatarUrl
 		)
@@ -551,7 +574,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetCharacterNicknameAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] Character character,
 			[NotNull] string newCharacterNickname
 		)
@@ -581,7 +604,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetCharacterSummaryAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] Character character,
 			[NotNull] string newCharacterSummary
 		)
@@ -611,7 +634,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetCharacterDescriptionAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] Character character,
 			[NotNull] string newCharacterDescription
 		)
@@ -636,7 +659,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A modification result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> SetCharacterPronounAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] Character character,
 			[NotNull] string pronounFamily
 		)
@@ -662,7 +685,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A task that must be awaited.</returns>
 		public async Task SetCharacterIsNSFWAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] Character character,
 			bool isNSFW
 		)
@@ -680,7 +703,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> TransferCharacterOwnershipAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] IUser newOwner,
 			[NotNull] Character character
 		)
@@ -704,9 +727,9 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		[NotNull]
 		[ItemNotNull]
-		public IQueryable<Character> GetUserCharacters([NotNull]LocalInfoContext db, [NotNull]IUser discordUser)
+		public IQueryable<Character> GetUserCharacters([NotNull]GlobalInfoContext db, [NotNull]IUser discordUser)
 		{
-			var characters = GetCharacters(db).Where(ch => ch.Owner == discordUser.Id);
+			var characters = GetCharacters(db).Where(ch => ch.Owner.DiscordID == discordUser.Id);
 			return characters;
 		}
 
@@ -720,7 +743,7 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		public async Task<bool> IsCharacterNameUniqueForUserAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] IUser discordUser,
 			[NotNull] string characterName
 		)
@@ -741,7 +764,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> AddImageToCharacterAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] Character character,
 			[NotNull] string imageName,
 			[NotNull] string imageUrl,
@@ -778,7 +801,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An execution result which may or may not have succeeded.</returns>
 		public async Task<ModifyEntityResult> RemoveImageFromCharacterAsync
 		(
-			[NotNull] LocalInfoContext db,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] Character character,
 			[NotNull] string imageName
 		)
@@ -798,22 +821,20 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Creates a new template character with a given appearance.
 		/// </summary>
-		/// <param name="global">The global database.</param>
-		/// <param name="local">The server-local database.</param>
+		/// <param name="db">The database.</param>
 		/// <param name="context">The context of the command.</param>
 		/// <param name="characterName">The name of the new character.</param>
 		/// <param name="appearance">The appearance that the new character should have.</param>
 		/// <returns>A creation result which may or may not have succeeded.</returns>
 		public async Task<CreateEntityResult<Character>> CreateCharacterFromAppearanceAsync
 		(
-			[NotNull] GlobalInfoContext global,
-			[NotNull] LocalInfoContext local,
+			[NotNull] GlobalInfoContext db,
 			[NotNull] ICommandContext context,
 			[NotNull] string characterName,
 			[NotNull] Appearance appearance
 		)
 		{
-			var createCharacterResult = await CreateCharacterAsync(global, local, context, characterName);
+			var createCharacterResult = await CreateCharacterAsync(db, context, characterName);
 			if (!createCharacterResult.IsSuccess)
 			{
 				return createCharacterResult;
@@ -822,27 +843,15 @@ namespace DIGOS.Ambassador.Services
 			var newCharacter = createCharacterResult.Entity;
 			newCharacter.DefaultAppearance = appearance;
 
-			await local.SaveChangesAsync();
+			await db.SaveChangesAsync();
 
-			var getCharacterResult = await GetUserCharacterByNameAsync(local, context, context.Message.Author, characterName);
+			var getCharacterResult = await GetUserCharacterByNameAsync(db, context, context.Message.Author, characterName);
 			if (!getCharacterResult.IsSuccess)
 			{
 				return CreateEntityResult<Character>.FromError(getCharacterResult);
 			}
 
 			return CreateEntityResult<Character>.FromSuccess(getCharacterResult.Entity);
-		}
-
-		/// <summary>
-		/// Deletes the given character.
-		/// </summary>
-		/// <param name="db">The database.</param>
-		/// <param name="character">The character.</param>
-		/// <returns>A task that must be awaited.</returns>
-		public async Task DeleteCharacterAsync(LocalInfoContext db, Character character)
-		{
-			db.Characters.Remove(character);
-			await db.SaveChangesAsync();
 		}
 	}
 }

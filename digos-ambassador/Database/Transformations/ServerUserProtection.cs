@@ -39,7 +39,12 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// <summary>
 		/// Gets or sets the user that owns this protection data.
 		/// </summary>
-		public UserIdentifier User { get; set; }
+		public User User { get; set; }
+
+		/// <summary>
+		/// Gets or sets the server that this protection data is valid on.
+		/// </summary>
+		public Server Server { get; set; }
 
 		/// <summary>
 		/// Gets or sets the active protection type on this server.
@@ -55,14 +60,16 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// Creates a default server-specific protection object based on the given global protection data.
 		/// </summary>
 		/// <param name="globalProtection">The global protection data.</param>
+		/// <param name="server">The server that the protection should be valid for.</param>
 		/// <returns>A server-specific protection object.</returns>
 		[Pure]
 		[NotNull]
-		public static ServerUserProtection CreateDefault([NotNull] GlobalUserProtection globalProtection)
+		public static ServerUserProtection CreateDefault([NotNull] GlobalUserProtection globalProtection, [NotNull] Server server)
 		{
 			return new ServerUserProtection
 			{
-				User = globalProtection.User.Identifier,
+				User = globalProtection.User,
+				Server = server,
 				Type = globalProtection.DefaultType,
 				HasOptedIn = false
 			};

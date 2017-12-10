@@ -64,7 +64,7 @@ namespace DIGOS.Ambassador.Utility
 			// Step 3
 			for (int i = 1; i <= n; i++)
 			{
-				// Step 4
+				//Step 4
 				for (int j = 1; j <= m; j++)
 				{
 					// Step 5

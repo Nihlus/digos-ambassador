@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			var eb = this.Feedback.CreateBaseEmbed();
 
-			eb.WithAuthor(this.Context.Client.GetUser(roleplay.Owner));
+			eb.WithAuthor(this.Context.Client.GetUser(roleplay.Owner.DiscordID));
 			eb.WithTitle(roleplay.Name);
 			eb.WithDescription(roleplay.Summary);
 
@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Modules
 			eb.AddField("NSFW", roleplay.IsNSFW ? "Yes" : "No");
 			eb.AddInlineField("Public", roleplay.IsPublic ? "Yes" : "No");
 
-			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p));
+			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p.DiscordID));
 			var participantMentions = participantUsers.Select(u => u.Mention);
 
 			var participantList = participantMentions.Humanize();
@@ -133,7 +133,7 @@ namespace DIGOS.Ambassador.Modules
 			eb.WithAuthor(discordUser);
 			eb.WithTitle("Your roleplays");
 
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				var roleplays = this.Roleplays.GetUserRoleplays(db, discordUser);
 
@@ -170,7 +170,7 @@ namespace DIGOS.Ambassador.Modules
 			bool isPublic = true
 		)
 		{
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				var result = await this.Roleplays.CreateRoleplayAsync(db, this.Context, roleplayName, roleplaySummary, isNSFW, isPublic);
 				if (!result.IsSuccess)
@@ -198,11 +198,11 @@ namespace DIGOS.Ambassador.Modules
 			Roleplay roleplay
 		)
 		{
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				db.Attach(roleplay);
 
-				await this.Roleplays.DeleteRoleplayAsync(db, roleplay);
+				db.Roleplays.Remove(roleplay);
 				await db.SaveChangesAsync();
 
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Roleplay \"{roleplay.Name}\" deleted.");
@@ -220,7 +220,7 @@ namespace DIGOS.Ambassador.Modules
 		[RequirePermission(Permission.JoinRoleplay)]
 		public async Task JoinRoleplayAsync([NotNull] Roleplay roleplay)
 		{
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				db.Attach(roleplay);
 
@@ -231,7 +231,7 @@ namespace DIGOS.Ambassador.Modules
 					return;
 				}
 
-				var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner);
+				var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
 			}
 		}
@@ -254,7 +254,7 @@ namespace DIGOS.Ambassador.Modules
 			Roleplay roleplay
 		)
 		{
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				db.Attach(roleplay);
 
@@ -282,7 +282,7 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Leaves the roleplay owned by the given person with the given name.")]
 		public async Task LeaveRoleplayAsync([NotNull] Roleplay roleplay)
 		{
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				db.Attach(roleplay);
 
@@ -293,7 +293,7 @@ namespace DIGOS.Ambassador.Modules
 					return;
 				}
 
-				var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner);
+				var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
 			}
 		}
@@ -316,7 +316,7 @@ namespace DIGOS.Ambassador.Modules
 			Roleplay roleplay
 		)
 		{
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				db.Attach(roleplay);
 
@@ -353,7 +353,7 @@ namespace DIGOS.Ambassador.Modules
 			Roleplay roleplay
 		)
 		{
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				db.Attach(roleplay);
 
@@ -386,7 +386,7 @@ namespace DIGOS.Ambassador.Modules
 			Roleplay roleplay
 		)
 		{
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				db.Attach(roleplay);
 
@@ -429,7 +429,7 @@ namespace DIGOS.Ambassador.Modules
 				roleplay.IsActive = true;
 				await db.SaveChangesAsync();
 
-				var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p));
+				var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p.DiscordID));
 				var participantMentions = participantUsers.Select(u => u.Mention);
 
 				var participantList = participantMentions.Humanize();
@@ -454,7 +454,7 @@ namespace DIGOS.Ambassador.Modules
 			Roleplay roleplay
 		)
 		{
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				db.Attach(roleplay);
 
@@ -490,7 +490,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			finalMessage = finalMessage ?? this.Context.Message;
 
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				db.Attach(roleplay);
 
@@ -539,7 +539,7 @@ namespace DIGOS.Ambassador.Modules
 			Roleplay roleplay
 		)
 		{
-			using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+			using (var db = new GlobalInfoContext())
 			{
 				db.Attach(roleplay);
 
@@ -656,7 +656,7 @@ namespace DIGOS.Ambassador.Modules
 				Roleplay roleplay
 			)
 			{
-				using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+				using (var db = new GlobalInfoContext())
 				{
 					db.Attach(roleplay);
 
@@ -689,7 +689,7 @@ namespace DIGOS.Ambassador.Modules
 				Roleplay roleplay
 			)
 			{
-				using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+				using (var db = new GlobalInfoContext())
 				{
 					db.Attach(roleplay);
 
@@ -721,7 +721,7 @@ namespace DIGOS.Ambassador.Modules
 				Roleplay roleplay
 			)
 			{
-				using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+				using (var db = new GlobalInfoContext())
 				{
 					db.Attach(roleplay);
 
@@ -752,7 +752,7 @@ namespace DIGOS.Ambassador.Modules
 				Roleplay roleplay
 			)
 			{
-				using (var db = LocalInfoContext.GetOrCreate(this.Context.Guild))
+				using (var db = new GlobalInfoContext())
 				{
 					db.Attach(roleplay);
 

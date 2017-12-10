@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Database.Users
 		/// <summary>
 		/// Gets or sets the Discord ID of the user.
 		/// </summary>
-		public UserIdentifier Identifier { get; set; }
+		public ulong DiscordID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the class of the user within the DIGOS 'verse.
@@ -56,6 +56,16 @@ namespace DIGOS.Ambassador.Database.Users
 		/// </summary>
 		[CanBeNull]
 		public int? Timezone { get; set; }
+
+		/// <summary>
+		/// Gets or sets the user's default character.
+		/// </summary>
+		public Character DefaultCharacter { get; set; }
+
+		/// <summary>
+		/// Gets or sets the characters that the user owns.
+		/// </summary>
+		public List<Character> Characters { get; set; }
 
 		/// <summary>
 		/// Gets or sets the kinks or fetishes of a user, as well as their preferences for each.
