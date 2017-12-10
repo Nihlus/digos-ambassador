@@ -364,9 +364,7 @@ namespace DIGOS.Ambassador.Database
 		[ItemNotNull]
 		public async Task<Server> GetServerAsync([NotNull] IGuild discordServer)
 		{
-			return await this.Servers
-				.Include(s => s.KnownUsers).ThenInclude(u => u.LocalPermissions)
-				.FirstAsync(u => u.DiscordID == discordServer.Id);
+			return await this.Servers.FirstAsync(u => u.DiscordID == discordServer.Id);
 		}
 
 		/// <summary>

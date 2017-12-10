@@ -34,7 +34,6 @@ using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
-using MoreLinq;
 
 namespace DIGOS.Ambassador.TypeReaders
 {
@@ -66,7 +65,8 @@ namespace DIGOS.Ambassador.TypeReaders
 					return TypeReaderResult.FromError(userParseResult);
 				}
 
-				owner = userParseResult.Values.MaxBy(v => v.Score).Value as T1;
+				var highestScore = userParseResult.Values.Max(v => v.Score);
+				owner = userParseResult.Values.First(v => v.Score >= highestScore).Value as T1;
 			}
 			else
 			{
@@ -76,13 +76,16 @@ namespace DIGOS.Ambassador.TypeReaders
 				{
 					entityName = null;
 
-					owner = userParseResult.Values.MaxBy(v => v.Score).Value as T1;
+					var highestScore = userParseResult.Values.Max(v => v.Score);
+					owner = userParseResult.Values.First(v => v.Score >= highestScore).Value as T1;
 				}
 				else
 				{
 					entityName = input;
 				}
 			}
+
+			owner = owner ?? context.User;
 
 			var retrieveEntityResult = await RetrieveEntityAsync(owner, entityName, context, services);
 			if (!retrieveEntityResult.IsSuccess)
@@ -103,7 +106,7 @@ namespace DIGOS.Ambassador.TypeReaders
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		protected abstract Task<RetrieveEntityResult<T2>> RetrieveEntityAsync
 		(
-			[CanBeNull] IUser entityOwner,
+			[NotNull] IUser entityOwner,
 			[CanBeNull] string entityName,
 			[NotNull] ICommandContext context,
 			[NotNull] IServiceProvider services
