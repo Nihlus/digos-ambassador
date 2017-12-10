@@ -19,7 +19,7 @@ using System;
 namespace DIGOS.Ambassador.Migrations.Global
 {
     [DbContext(typeof(GlobalInfoContext))]
-    [Migration("20171206212724_InitialCreate")]
+    [Migration("20171206204828_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -239,11 +239,11 @@ namespace DIGOS.Ambassador.Migrations.Global
 
                     b.Property<int>("Class");
 
+                    b.Property<ulong>("DiscordID");
+
                     b.Property<uint?>("GlobalUserProtectionID");
 
                     b.Property<uint?>("GlobalUserProtectionID1");
-
-                    b.Property<uint?>("IdentifierID");
 
                     b.Property<uint?>("ServerID");
 
@@ -255,23 +255,9 @@ namespace DIGOS.Ambassador.Migrations.Global
 
                     b.HasIndex("GlobalUserProtectionID1");
 
-                    b.HasIndex("IdentifierID");
-
                     b.HasIndex("ServerID");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Users.UserIdentifier", b =>
-                {
-                    b.Property<uint>("ID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<ulong>("DiscordID");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("UserIdentifier");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Users.UserKink", b =>
@@ -352,10 +338,6 @@ namespace DIGOS.Ambassador.Migrations.Global
                     b.HasOne("DIGOS.Ambassador.Database.Transformations.GlobalUserProtection")
                         .WithMany("Whitelist")
                         .HasForeignKey("GlobalUserProtectionID1");
-
-                    b.HasOne("DIGOS.Ambassador.Database.Users.UserIdentifier", "Identifier")
-                        .WithMany()
-                        .HasForeignKey("IdentifierID");
 
                     b.HasOne("DIGOS.Ambassador.Database.ServerInfo.Server")
                         .WithMany("KnownUsers")

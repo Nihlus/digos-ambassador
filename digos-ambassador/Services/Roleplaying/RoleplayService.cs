@@ -103,8 +103,8 @@ namespace DIGOS.Ambassador.Services
 			{
 				IsActive = false,
 				ActiveChannelID = context.Channel.Id,
-				Owner = UserIdentifier.CreateFrom(context.User),
-				Participants = new List<UserIdentifier> { UserIdentifier.CreateFrom(context.User) },
+				Owner = new UserIdentifier(context.User),
+				Participants = new List<UserIdentifier> { new UserIdentifier(context.User) },
 				Messages = new List<UserMessage>()
 			};
 
@@ -337,12 +337,11 @@ namespace DIGOS.Ambassador.Services
 		public IQueryable<Roleplay> GetUserRoleplays([NotNull] LocalInfoContext db, [NotNull] IUser discordUser)
 		{
 			return db.Roleplays
-				.Include(rp => rp.Owner)
 				.Include(rp => rp.Participants)
 				.Include(rp => rp.Messages)
 				.Include(rp => rp.KickedUsers)
 				.Include(rp => rp.InvitedUsers)
-				.Where(rp => rp.Owner.DiscordID == discordUser.Id);
+				.Where(rp => rp.Owner == discordUser.Id);
 		}
 
 		/// <summary>
@@ -363,7 +362,6 @@ namespace DIGOS.Ambassador.Services
 		)
 		{
 			var roleplay = await db.Roleplays
-			.Include(rp => rp.Owner)
 			.Include(rp => rp.Participants)
 			.Include(rp => rp.Messages)
 			.Include(rp => rp.KickedUsers)
@@ -372,7 +370,7 @@ namespace DIGOS.Ambassador.Services
 			(
 				rp =>
 					rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase) &&
-					rp.Owner.DiscordID == roleplayOwner.Id
+					rp.Owner == roleplayOwner.Id
 			);
 
 			if (roleplay is null)
@@ -418,11 +416,11 @@ namespace DIGOS.Ambassador.Services
 				}
 			}
 
-			roleplay.InvitedUsers.RemoveAll(i => i.DiscordID == kickedUser.Id);
+			roleplay.InvitedUsers.RemoveAll(i => i == kickedUser.Id);
 
 			if (!roleplay.IsKicked(kickedUser))
 			{
-				roleplay.KickedUsers.Add(UserIdentifier.CreateFrom(kickedUser));
+				roleplay.KickedUsers.Add(new UserIdentifier(kickedUser));
 			}
 
 			await db.SaveChangesAsync();
@@ -465,7 +463,7 @@ namespace DIGOS.Ambassador.Services
 				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
 			}
 
-			roleplay.Participants.RemoveAll(p => p.DiscordID == removedUser.Id);
+			roleplay.Participants.RemoveAll(p => p == removedUser.Id);
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -519,10 +517,10 @@ namespace DIGOS.Ambassador.Services
 			if (!roleplay.IsPublic)
 			{
 				// Remove the user from the invite list
-				roleplay.InvitedUsers.RemoveAll(i => i.DiscordID == newUser.Id);
+				roleplay.InvitedUsers.RemoveAll(i => i == newUser.Id);
 			}
 
-			roleplay.Participants.Add(UserIdentifier.CreateFrom(newUser));
+			roleplay.Participants.Add(new UserIdentifier(newUser));
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -553,8 +551,8 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			// Remove the invited user from the kick list, if they're on it
-			roleplay.KickedUsers.RemoveAll(k => k.DiscordID == invitedUser.Id);
-			roleplay.InvitedUsers.Add(UserIdentifier.CreateFrom(invitedUser));
+			roleplay.KickedUsers.RemoveAll(k => k == invitedUser.Id);
+			roleplay.InvitedUsers.Add(new UserIdentifier(invitedUser));
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -600,7 +598,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string newRoleplayName
 		)
 		{
-			var isCurrentUser = context.Message.Author.Id == roleplay.Owner.DiscordID;
+			var isCurrentUser = context.Message.Author.Id == roleplay.Owner;
 			if (string.IsNullOrWhiteSpace(newRoleplayName))
 			{
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");

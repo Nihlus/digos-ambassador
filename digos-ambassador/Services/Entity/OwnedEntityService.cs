@@ -110,7 +110,7 @@ namespace DIGOS.Ambassador.Services
 				);
 			}
 
-			entity.Owner = UserIdentifier.CreateFrom(newOwner);
+			entity.Owner = new UserIdentifier(newOwner);
 
 			await db.SaveChangesAsync();
 

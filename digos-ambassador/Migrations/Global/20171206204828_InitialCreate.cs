@@ -111,19 +111,6 @@ namespace DIGOS.Ambassador.Migrations.Global
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserIdentifier",
-                columns: table => new
-                {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    DiscordID = table.Column<ulong>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserIdentifier", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Transformations",
                 columns: table => new
                 {
@@ -172,21 +159,15 @@ namespace DIGOS.Ambassador.Migrations.Global
                         .Annotation("Sqlite:Autoincrement", true),
                     Bio = table.Column<string>(nullable: true),
                     Class = table.Column<int>(nullable: false),
+                    DiscordID = table.Column<ulong>(nullable: false),
                     GlobalUserProtectionID = table.Column<uint>(nullable: true),
                     GlobalUserProtectionID1 = table.Column<uint>(nullable: true),
-                    IdentifierID = table.Column<uint>(nullable: true),
                     ServerID = table.Column<uint>(nullable: true),
                     Timezone = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Users_UserIdentifier_IdentifierID",
-                        column: x => x.IdentifierID,
-                        principalTable: "UserIdentifier",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Users_Servers_ServerID",
                         column: x => x.ServerID,
@@ -353,11 +334,6 @@ namespace DIGOS.Ambassador.Migrations.Global
                 column: "GlobalUserProtectionID1");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_IdentifierID",
-                table: "Users",
-                column: "IdentifierID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Users_ServerID",
                 table: "Users",
                 column: "ServerID");
@@ -417,9 +393,6 @@ namespace DIGOS.Ambassador.Migrations.Global
 
             migrationBuilder.DropTable(
                 name: "GlobalUserProtections");
-
-            migrationBuilder.DropTable(
-                name: "UserIdentifier");
 
             migrationBuilder.DropTable(
                 name: "Servers");

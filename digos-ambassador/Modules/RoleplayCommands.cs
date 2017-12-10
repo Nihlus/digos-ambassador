@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			var eb = this.Feedback.CreateBaseEmbed();
 
-			eb.WithAuthor(this.Context.Client.GetUser(roleplay.Owner.DiscordID));
+			eb.WithAuthor(this.Context.Client.GetUser(roleplay.Owner));
 			eb.WithTitle(roleplay.Name);
 			eb.WithDescription(roleplay.Summary);
 
@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Modules
 			eb.AddField("NSFW", roleplay.IsNSFW ? "Yes" : "No");
 			eb.AddInlineField("Public", roleplay.IsPublic ? "Yes" : "No");
 
-			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p.DiscordID));
+			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p));
 			var participantMentions = participantUsers.Select(u => u.Mention);
 
 			var participantList = participantMentions.Humanize();
@@ -231,7 +231,7 @@ namespace DIGOS.Ambassador.Modules
 					return;
 				}
 
-				var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
+				var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner);
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
 			}
 		}
@@ -293,7 +293,7 @@ namespace DIGOS.Ambassador.Modules
 					return;
 				}
 
-				var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
+				var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner);
 				await this.Feedback.SendConfirmationAsync(this.Context, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
 			}
 		}
@@ -429,7 +429,7 @@ namespace DIGOS.Ambassador.Modules
 				roleplay.IsActive = true;
 				await db.SaveChangesAsync();
 
-				var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p.DiscordID));
+				var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p));
 				var participantMentions = participantUsers.Select(u => u.Mention);
 
 				var participantList = participantMentions.Humanize();

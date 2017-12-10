@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Services
 			Bodypart bodyPart
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
 			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -129,7 +129,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string species
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
 			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -183,7 +183,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string species
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
 			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -250,7 +250,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] Colour colour
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
 			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -294,7 +294,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] Colour patternColour
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
 			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -340,7 +340,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] Colour patternColour
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync(character.Owner);
 			var canTransformResult = await CanUserTransformUserAsync(global, local, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -396,13 +396,13 @@ namespace DIGOS.Ambassador.Services
 			{
 				case ProtectionType.Blacklist:
 				{
-					return globalProtection.Blacklist.All(u => u.Identifier.DiscordID != invokingUser.Id)
+					return globalProtection.Blacklist.All(u => u.Identifier != invokingUser.Id)
 						? DetermineConditionResult.FromSuccess()
 						: DetermineConditionResult.FromError("You're on that user's blacklist.");
 				}
 				case ProtectionType.Whitelist:
 				{
-					return globalProtection.Whitelist.Any(u => u.Identifier.DiscordID == invokingUser.Id)
+					return globalProtection.Whitelist.Any(u => u.Identifier == invokingUser.Id)
 						? DetermineConditionResult.FromSuccess()
 						: DetermineConditionResult.FromError("You're not on that user's whitelist.");
 				}
@@ -430,7 +430,7 @@ namespace DIGOS.Ambassador.Services
 			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle($"{character.Name} {(character.Nickname is null ? string.Empty : $"\"{character.Nickname}\"")}".Trim());
 
-			var user = await context.Client.GetUserAsync(character.Owner.DiscordID);
+			var user = await context.Client.GetUserAsync(character.Owner);
 			eb.WithAuthor(user);
 
 			eb.WithThumbnailUrl
@@ -594,7 +594,7 @@ namespace DIGOS.Ambassador.Services
 		)
 		{
 			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
-			if (protection.Whitelist.Any(u => u.Identifier.DiscordID == whitelistedUser.Id))
+			if (protection.Whitelist.Any(u => u.Identifier == whitelistedUser.Id))
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already whitelisted that user.");
 			}
@@ -621,7 +621,7 @@ namespace DIGOS.Ambassador.Services
 		)
 		{
 			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
-			if (protection.Blacklist.Any(u => u.Identifier.DiscordID == blacklistedUser.Id))
+			if (protection.Blacklist.Any(u => u.Identifier == blacklistedUser.Id))
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already blacklisted that user.");
 			}
@@ -649,7 +649,7 @@ namespace DIGOS.Ambassador.Services
 			.Include(p => p.User)
 			.Include(p => p.Whitelist)
 			.Include(p => p.Blacklist)
-			.FirstOrDefaultAsync(p => p.User.Identifier.DiscordID == discordUser.Id);
+			.FirstOrDefaultAsync(p => p.User.Identifier == discordUser.Id);
 
 			if (!(protection is null))
 			{
@@ -682,7 +682,7 @@ namespace DIGOS.Ambassador.Services
 			var protection = await local.UserProtections
 			.FirstOrDefaultAsync
 			(
-				p => p.User.DiscordID == discordUser.Id
+				p => p.User == discordUser.Id
 			);
 
 			if (!(protection is null))
