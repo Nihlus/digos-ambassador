@@ -151,7 +151,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("CharacterID");
 
-                    b.ToTable("Images");
+                    b.ToTable("Image");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Dossiers.Dossier", b =>
