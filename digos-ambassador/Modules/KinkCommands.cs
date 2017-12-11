@@ -336,59 +336,5 @@ namespace DIGOS.Ambassador.Modules
 				await this.Feedback.SendConfirmationAsync(this.Context, "Preferences reset.");
 			}
 		}
-
-		/// <summary>
-		/// Sets the visbility level of your kinks; that is, who can see them. Valid choices are All, Friends, and Whitelist.
-		/// </summary>
-		/// <param name="visibility">The new visibility.</param>
-		[UsedImplicitly]
-		[Command("visibility", RunMode = Async)]
-		[Summary("Sets the visbility level of your kinks; that is, who can see them. Valid choices are All, Friends, and Whitelist.")]
-		public async Task SetKinkVisibilityAsync(KinkVisibility visibility)
-		{
-		}
-
-		/// <summary>
-		/// Kink whitelisting commands.
-		/// </summary>
-		[Group("whitelist")]
-		public class WhitelistCommands : ModuleBase<SocketCommandContext>
-		{
-			private readonly KinkService Kinks;
-			private readonly UserFeedbackService Feedback;
-
-			/// <summary>
-			/// Initializes a new instance of the <see cref="WhitelistCommands"/> class.
-			/// </summary>
-			/// <param name="kinks">The kink service.</param>
-			/// <param name="feedback">The feedback service.</param>
-			public WhitelistCommands(KinkService kinks, UserFeedbackService feedback)
-			{
-				this.Kinks = kinks;
-				this.Feedback = feedback;
-			}
-
-			/// <summary>
-			/// Adds the given user to your visibility whitelist.
-			/// </summary>
-			/// <param name="otherUser">The user to add.</param>
-			[UsedImplicitly]
-			[Command("add", RunMode = Async)]
-			[Summary("Adds the given user to your visibility whitelist.")]
-			public async Task AddUserToWhitelistAsync([NotNull] IUser otherUser)
-			{
-			}
-
-			/// <summary>
-			/// Removes the given user from your visibility whitelist.
-			/// </summary>
-			/// <param name="otherUser">The user to add.</param>
-			[UsedImplicitly]
-			[Command("remove", RunMode = Async)]
-			[Summary("Adds the given user to your visibility whitelist.")]
-			public async Task RemoveUserFromWhitelistAsync([NotNull] IUser otherUser)
-			{
-			}
-		}
 	}
 }
