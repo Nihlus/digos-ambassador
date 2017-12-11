@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="error">The error (if any).</param>
 		/// <param name="errorReason">A more detailed error description.</param>
 		/// <param name="exception">The exception that caused the error (if any).</param>
-		public RetrieveEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+		private RetrieveEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
 		{
 			this.Entity = entity;
 			this.Error = error;

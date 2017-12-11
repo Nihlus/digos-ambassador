@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.TypeReaders
 				entityName = input.Substring(splitIndex + 1);
 
 				// Try to parse the user
-				var userParseResult = await ReadUserAsync(context, rawUser);
+				var userParseResult = await ReadUserAsync(context, rawUser, true);
 				if (!userParseResult.IsSuccess)
 				{
 					return TypeReaderResult.FromError(userParseResult);
@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.TypeReaders
 			else
 			{
 				// We might just have a user and not a name, so let's try parsing it
-				var userParseResult = await ReadUserAsync(context, input);
+				var userParseResult = await ReadUserAsync(context, input, true);
 				if (userParseResult.IsSuccess)
 				{
 					entityName = null;
@@ -85,12 +85,19 @@ namespace DIGOS.Ambassador.TypeReaders
 				}
 			}
 
-			owner = owner ?? context.User;
-
 			var retrieveEntityResult = await RetrieveEntityAsync(owner, entityName, context, services);
 			if (!retrieveEntityResult.IsSuccess)
 			{
-				return TypeReaderResult.FromError(retrieveEntityResult);
+				if (!(owner is null))
+				{
+					return TypeReaderResult.FromError(retrieveEntityResult);
+				}
+
+				var retrieveUserEntityResult = await RetrieveEntityAsync(context.User, entityName, context, services);
+				if (!retrieveUserEntityResult.IsSuccess)
+				{
+					return TypeReaderResult.FromError(retrieveUserEntityResult);
+				}
 			}
 
 			return TypeReaderResult.FromSuccess(retrieveEntityResult.Entity);
@@ -106,13 +113,13 @@ namespace DIGOS.Ambassador.TypeReaders
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		protected abstract Task<RetrieveEntityResult<T2>> RetrieveEntityAsync
 		(
-			[NotNull] IUser entityOwner,
+			[CanBeNull] IUser entityOwner,
 			[CanBeNull] string entityName,
 			[NotNull] ICommandContext context,
 			[NotNull] IServiceProvider services
 		);
 
-		private async Task<TypeReaderResult> ReadUserAsync(ICommandContext context, string input)
+		private async Task<TypeReaderResult> ReadUserAsync(ICommandContext context, string input, bool byMentionOnly = false)
 		{
 			var results = new Dictionary<ulong, TypeReaderValue>();
 
@@ -140,6 +147,11 @@ namespace DIGOS.Ambassador.TypeReaders
 				{
 					AddResult(results, await context.Channel.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false) as T1, 1.00f);
 				}
+			}
+
+			if (results.Count <= 0 && byMentionOnly)
+			{
+				return TypeReaderResult.FromError(CommandError.ObjectNotFound, "User not found.");
 			}
 
 			// By Id (0.9)

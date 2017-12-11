@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="entity">The entity.</param>
 		/// <param name="error">The error (if any).</param>
 		/// <param name="errorReason">A more detailed error description.</param>
-		public CreateEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
+		private CreateEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
 		{
 			this.Entity = entity;
 			this.Error = error;

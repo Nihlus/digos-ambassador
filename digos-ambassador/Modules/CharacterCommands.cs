@@ -111,28 +111,25 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		/// <summary>
-		/// Shows quick information about a character that a user has assumed.
+		/// Shows quick information about your current character.
 		/// </summary>
-		/// <param name="targetUser">The user to check.</param>
 		[UsedImplicitly]
 		[Alias("show", "info")]
 		[Command("show", RunMode = Async)]
-		[Summary("Shows quick information about a character.")]
+		[Summary("Shows quick information about your current character.")]
 		[RequireContext(Guild)]
-		public async Task ShowCharacterAsync([CanBeNull] IUser targetUser = null)
+		public async Task ShowCharacterAsync()
 		{
-			targetUser = targetUser ?? this.Context.Message.Author;
-
 			using (var db = new GlobalInfoContext())
 			{
-				var getCharacterResult = await this.Characters.GetBestMatchingCharacterAsync(db, this.Context, targetUser, null);
-				if (!getCharacterResult.IsSuccess)
+				var retrieveCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, this.Context.User);
+				if (!retrieveCurrentCharacterResult.IsSuccess)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, getCharacterResult.ErrorReason);
+					await this.Feedback.SendErrorAsync(this.Context, retrieveCurrentCharacterResult.ErrorReason);
 					return;
 				}
 
-				var character = getCharacterResult.Entity;
+				var character = retrieveCurrentCharacterResult.Entity;
 				var eb = CreateCharacterInfoEmbed(character);
 
 				await ShowCharacterAsync(character, eb);
@@ -145,6 +142,7 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="character">The character.</param>
 		[UsedImplicitly]
 		[Alias("show", "info")]
+		[Priority(1)]
 		[Command("show", RunMode = Async)]
 		[Summary("Shows quick information about a character.")]
 		[RequireContext(Guild)]
@@ -184,7 +182,12 @@ namespace DIGOS.Ambassador.Modules
 			var eb = this.Feedback.CreateBaseEmbed();
 
 			eb.WithAuthor(this.Context.Client.GetUser(character.Owner.DiscordID));
-			eb.WithTitle(character.Name);
+
+			var characterInfoTitle = character.Nickname.IsNullOrWhitespace()
+				? character.Name
+				: $"{character.Name} - \"{character.Nickname}\"";
+
+			eb.WithTitle(characterInfoTitle);
 			eb.WithDescription(character.Summary);
 
 			eb.WithThumbnailUrl
@@ -277,7 +280,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="discordUser">The user whose characters should be listed. Optional.</param>
 		[UsedImplicitly]
-		[Alias("list-owned", "list")]
+		[Alias("list-owned", "list", "owned")]
 		[Command("list-owned", RunMode = Async)]
 		[Summary("Lists the characters owned by a given user.")]
 		[RequireContext(Guild)]

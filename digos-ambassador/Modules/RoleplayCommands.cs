@@ -80,6 +80,31 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		/// <summary>
+		/// Shows information about the current.
+		/// </summary>
+		[UsedImplicitly]
+		[Alias("show", "info")]
+		[Command("show", RunMode = RunMode.Async)]
+		[Summary("Shows information about the current roleplay.")]
+		[RequireContext(Guild)]
+		public async Task ShowRoleplayAsync()
+		{
+			using (var db = new GlobalInfoContext())
+			{
+				var getCurrentRoleplayResult = await this.Roleplays.GetActiveRoleplayAsync(db, this.Context);
+				if (!getCurrentRoleplayResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, getCurrentRoleplayResult.ErrorReason);
+					return;
+				}
+
+				var roleplay = getCurrentRoleplayResult.Entity;
+				var eb = CreateRoleplayInfoEmbed(roleplay);
+				await this.Feedback.SendEmbedAsync(this.Context, eb);
+			}
+		}
+
+		/// <summary>
 		/// Shows information about the named roleplay owned by the specified user.
 		/// </summary>
 		/// <param name="roleplay">The roleplay.</param>
@@ -539,7 +564,7 @@ namespace DIGOS.Ambassador.Modules
 		[Command("transfer-ownership")]
 		[Summary("Transfers ownership of the named roleplay to the specified user.")]
 		[RequireContext(Guild)]
-		[RequirePermission(Permission.TransferRoleplay, PermissionTarget.Other)]
+		[RequirePermission(Permission.TransferRoleplay)]
 		public async Task TransferRoleplayOwnershipAsync
 		(
 			IUser newOwner,
@@ -726,6 +751,7 @@ namespace DIGOS.Ambassador.Modules
 			[Command("nsfw", RunMode = RunMode.Async)]
 			[Summary("Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.")]
 			[RequireContext(Guild)]
+			[RequirePermission(Permission.EditRoleplay)]
 			public async Task SetRoleplayIsNSFW
 			(
 				bool isNSFW,
@@ -758,6 +784,7 @@ namespace DIGOS.Ambassador.Modules
 			[Command("public", RunMode = RunMode.Async)]
 			[Summary("Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.")]
 			[RequireContext(Guild)]
+			[RequirePermission(Permission.EditRoleplay)]
 			public async Task SetRoleplayIsPublic
 			(
 				bool isPublic,

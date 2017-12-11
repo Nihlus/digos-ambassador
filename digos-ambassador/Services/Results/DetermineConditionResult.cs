@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="error">The error (if any).</param>
 		/// <param name="errorReason">A more detailed error description.</param>
 		/// <param name="exception">The exception that caused the error (if any).</param>
-		public DetermineConditionResult(bool wasSuccessful, [CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+		private DetermineConditionResult(bool wasSuccessful, [CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
 		{
 			this.IsSuccess = wasSuccessful;
 			this.Error = error;

@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="error">The error (if any).</param>
 		/// <param name="errorReason">A more detailed error description.</param>
-		public DeleteEntityResult([CanBeNull] CommandError? error, [CanBeNull] string errorReason)
+		private DeleteEntityResult([CanBeNull] CommandError? error, [CanBeNull] string errorReason)
 		{
 			this.Error = error;
 			this.ErrorReason = errorReason;

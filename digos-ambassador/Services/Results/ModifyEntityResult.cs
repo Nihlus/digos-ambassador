@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="actionTaken">The action that was taken on the entity.</param>
 		/// <param name="error">The error (if any).</param>
 		/// <param name="errorReason">A more detailed error description.</param>
-		public ModifyEntityResult([CanBeNull] ModifyEntityAction? actionTaken, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
+		private ModifyEntityResult([CanBeNull] ModifyEntityAction? actionTaken, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
 		{
 			this.ActionTaken = actionTaken;
 			this.Error = error;

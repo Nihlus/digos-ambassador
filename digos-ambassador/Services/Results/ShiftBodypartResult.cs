@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="shiftMessage">The message to display to the user when shifting.</param>
 		/// <param name="error">The error (if any).</param>
 		/// <param name="errorReason">A more detailed error description.</param>
-		public ShiftBodypartResult([CanBeNull] string shiftMessage, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
+		private ShiftBodypartResult([CanBeNull] string shiftMessage, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
 		{
 			this.ShiftMessage = shiftMessage;
 			this.Error = error;

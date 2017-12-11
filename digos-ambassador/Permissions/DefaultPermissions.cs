@@ -49,7 +49,10 @@ namespace DIGOS.Ambassador.Permissions
 			DeleteRoleplay,
 			JoinRoleplay,
 			EditRoleplay,
-			ReplayRoleplay
+			ReplayRoleplay,
+			StartStopRoleplay,
+			TransferRoleplay,
+			KickRoleplayMember
 		};
 
 		/// <summary>

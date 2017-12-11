@@ -126,7 +126,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>true if the name is valid; otherwise, false.</returns>
 		[Pure]
 		[ContractAnnotation("entityName:null => false")]
-		public CheckConditionResult IsEntityNameValid
+		public DetermineConditionResult IsEntityNameValid
 		(
 			[NotNull] ModuleInfo commandModule,
 			[CanBeNull] string entityName
@@ -134,12 +134,12 @@ namespace DIGOS.Ambassador.Services
 		{
 			if (entityName.IsNullOrWhitespace())
 			{
-				return CheckConditionResult.FromError(CommandError.ObjectNotFound, "Names cannot be empty.");
+				return DetermineConditionResult.FromError(CommandError.ObjectNotFound, "Names cannot be empty.");
 			}
 
 			if (entityName.Any(c => this.ReservedNameCharacters.Contains(c)))
 			{
-				return CheckConditionResult.FromError
+				return DetermineConditionResult.FromError
 				(
 					CommandError.UnmetPrecondition,
 					$"Names may not contain any of the following characters: {this.ReservedNameCharacters.Humanize()}"
@@ -148,7 +148,7 @@ namespace DIGOS.Ambassador.Services
 
 			if (this.ReservedNames.Any(n => n.Equals(entityName, StringComparison.OrdinalIgnoreCase)))
 			{
-				return CheckConditionResult.FromError
+				return DetermineConditionResult.FromError
 				(
 					CommandError.UnmetPrecondition,
 					"That is a reserved name."
@@ -167,10 +167,10 @@ namespace DIGOS.Ambassador.Services
 
 			if (commandNames.Contains(entityName))
 			{
-				return CheckConditionResult.FromError(CommandError.UnmetPrecondition, "Names may not be the same as a command.");
+				return DetermineConditionResult.FromError(CommandError.UnmetPrecondition, "Names may not be the same as a command.");
 			}
 
-			return CheckConditionResult.FromSuccess();
+			return DetermineConditionResult.FromSuccess();
 		}
 	}
 }

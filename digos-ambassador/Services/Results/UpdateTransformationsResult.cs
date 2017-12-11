@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="transformationsUpdated">The number of existing transformations that were updated with new information.</param>
 		/// <param name="error">The error (if any).</param>
 		/// <param name="errorReason">A more detailed error description.</param>
-		public UpdateTransformationsResult
+		private UpdateTransformationsResult
 		(
 			uint speciesAdded,
 			uint transformationsAdded,
