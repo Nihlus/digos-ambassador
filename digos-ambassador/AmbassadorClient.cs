@@ -87,6 +87,8 @@ namespace DIGOS.Ambassador
 
 		private readonly KinkService Kinks;
 
+		private readonly PermissionService Permissions;
+
 		private readonly IServiceProvider Services;
 
 		// ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
@@ -120,6 +122,8 @@ namespace DIGOS.Ambassador
 			this.Lua = new LuaService(this.Content);
 			this.Kinks = new KinkService(this.Feedback);
 
+			this.Permissions = new PermissionService();
+
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)
 				.AddSingleton(this.DiscordIntegration)
@@ -133,6 +137,7 @@ namespace DIGOS.Ambassador
 				.AddSingleton(this.Transformation)
 				.AddSingleton(this.Lua)
 				.AddSingleton(this.Kinks)
+				.AddSingleton(this.Permissions)
 				.BuildServiceProvider();
 
 			this.Transformation = this.Transformation
@@ -233,9 +238,9 @@ namespace DIGOS.Ambassador
 					}
 
 					// Grant permissions to new users
-					if (!server.KnownUsers.Any(u => u.DiscordID == user.DiscordID))
+					if (!server.IsUserKnown(arg.Author))
 					{
-						DefaultPermissions.Grant(server, user);
+						await this.Permissions.GrantDefaultPermissionsAsync(db, guild, arg.Author);
 						server.KnownUsers.Add(user);
 
 						await db.SaveChangesAsync();

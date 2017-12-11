@@ -59,6 +59,21 @@ namespace DIGOS.Ambassador.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "GlobalPermissions",
+                columns: table => new
+                {
+                    ID = table.Column<uint>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Permission = table.Column<int>(nullable: false),
+                    Target = table.Column<int>(nullable: false),
+                    UserDiscordID = table.Column<ulong>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GlobalPermissions", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Kinks",
                 columns: table => new
                 {
@@ -72,6 +87,22 @@ namespace DIGOS.Ambassador.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Kinks", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LocalPermissions",
+                columns: table => new
+                {
+                    ID = table.Column<uint>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Permission = table.Column<int>(nullable: false),
+                    ServerDiscordID = table.Column<ulong>(nullable: false),
+                    Target = table.Column<int>(nullable: false),
+                    UserDiscordID = table.Column<ulong>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LocalPermissions", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -295,27 +326,6 @@ namespace DIGOS.Ambassador.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GlobalPermissions",
-                columns: table => new
-                {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Permission = table.Column<int>(nullable: false),
-                    Target = table.Column<int>(nullable: false),
-                    UserID = table.Column<uint>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GlobalPermissions", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_GlobalPermissions_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "GlobalUserProtections",
                 columns: table => new
                 {
@@ -330,34 +340,6 @@ namespace DIGOS.Ambassador.Migrations
                     table.PrimaryKey("PK_GlobalUserProtections", x => x.ID);
                     table.ForeignKey(
                         name: "FK_GlobalUserProtections_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "LocalPermissions",
-                columns: table => new
-                {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Permission = table.Column<int>(nullable: false),
-                    ServerID = table.Column<uint>(nullable: true),
-                    Target = table.Column<int>(nullable: false),
-                    UserID = table.Column<uint>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_LocalPermissions", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_LocalPermissions_Servers_ServerID",
-                        column: x => x.ServerID,
-                        principalTable: "Servers",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_LocalPermissions_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "ID",
@@ -516,11 +498,6 @@ namespace DIGOS.Ambassador.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GlobalPermissions_UserID",
-                table: "GlobalPermissions",
-                column: "UserID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_GlobalUserProtections_UserID",
                 table: "GlobalUserProtections",
                 column: "UserID");
@@ -529,16 +506,6 @@ namespace DIGOS.Ambassador.Migrations
                 name: "IX_Images_CharacterID",
                 table: "Images",
                 column: "CharacterID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LocalPermissions_ServerID",
-                table: "LocalPermissions",
-                column: "ServerID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LocalPermissions_UserID",
-                table: "LocalPermissions",
-                column: "UserID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roleplays_OwnerID",

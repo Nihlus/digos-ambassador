@@ -1,5 +1,5 @@
 ﻿//
-//  RequiredPermission.cs
+//  IPermission.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,39 +20,39 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Permissions
+using System;
+using DIGOS.Ambassador.Permissions;
+
+#pragma warning disable SA1402
+
+namespace DIGOS.Ambassador.Database.Permissions
 {
 	/// <summary>
-	/// Represents a simple record class for passing around required permissions.
+	/// Member interface for permissions.
 	/// </summary>
-	public class RequiredPermission
+	public interface IPermission
 	{
 		/// <summary>
-		/// Gets or sets the required permission.
+		/// Gets or sets the discord ID of the user that this permission has been granted to.
 		/// </summary>
-		public Permission Permission { get; set; }
+		ulong UserDiscordID { get; set; }
 
 		/// <summary>
-		/// Gets or sets the required target.
+		/// Gets or sets the granted permission.
 		/// </summary>
-		public PermissionTarget Target { get; set; }
+		Permission Permission { get; set; }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="RequiredPermission"/> class.
+		/// Gets or sets the allowed targets.
 		/// </summary>
-		public RequiredPermission()
-		{
-		}
+		PermissionTarget Target { get; set; }
+	}
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RequiredPermission"/> class.
-		/// </summary>
-		/// <param name="permission">The permission that is required-</param>
-		/// <param name="target">The target that is required.</param>
-		public RequiredPermission(Permission permission, PermissionTarget target)
-		{
-			this.Permission = permission;
-			this.Target = target;
-		}
+	/// <summary>
+	/// Equation interface for permissions.
+	/// </summary>
+	/// <typeparam name="T">The type of the permission class.</typeparam>
+	public interface IPermission<T> : IEquatable<T>, IPermission where T : IPermission<T>
+	{
 	}
 }

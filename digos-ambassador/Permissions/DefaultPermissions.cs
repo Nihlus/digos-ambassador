@@ -23,9 +23,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using DIGOS.Ambassador.Database.Permissions;
-using DIGOS.Ambassador.Database.ServerInfo;
-using DIGOS.Ambassador.Database.Users;
-using JetBrains.Annotations;
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
 
@@ -59,23 +56,5 @@ namespace DIGOS.Ambassador.Permissions
 		/// Gets the default set of local permissions.
 		/// </summary>
 		public static IReadOnlyList<LocalPermission> DefaultPermissionSet => Permissions.Select(p => new LocalPermission { Permission = p, Target = Self }).ToList();
-
-		/// <summary>
-		/// Grants the specified user their default permissions on the given server.
-		/// </summary>
-		/// <param name="server">The server to grant the permissions on.</param>
-		/// <param name="user">The user to grant the permissions to.</param>
-		public static void Grant([NotNull] Server server, [NotNull] User user)
-		{
-			foreach (var permission in Permissions)
-			{
-				user.LocalPermissions.Add(new LocalPermission
-				{
-					Permission = permission,
-					Target = Self,
-					Server = server
-				});
-			}
-		}
 	}
 }

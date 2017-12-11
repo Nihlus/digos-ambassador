@@ -32,7 +32,6 @@ using DIGOS.Ambassador.Pagination;
 
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;

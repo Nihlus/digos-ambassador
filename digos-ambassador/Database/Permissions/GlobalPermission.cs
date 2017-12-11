@@ -20,10 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Database.Interfaces;
-using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
 
 namespace DIGOS.Ambassador.Database.Permissions
@@ -31,25 +29,19 @@ namespace DIGOS.Ambassador.Database.Permissions
 	/// <summary>
 	/// Represents a globally granted permission.
 	/// </summary>
-	public class GlobalPermission : IEquatable<GlobalPermission>, IEFEntity
+	public class GlobalPermission : IPermission<GlobalPermission>, IEFEntity
 	{
 		/// <inheritdoc />
 		public uint ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the granted permission.
-		/// </summary>
+		/// <inheritdoc />
+		public ulong UserDiscordID { get; set; }
+
+		/// <inheritdoc />
 		public Permission Permission { get; set; }
 
-		/// <summary>
-		/// Gets or sets the allowed targets.
-		/// </summary>
+		/// <inheritdoc />
 		public PermissionTarget Target { get; set; }
-
-		/// <summary>
-		/// Gets or sets the user that this permission has been granted to.
-		/// </summary>
-		public User User { get; set; }
 
 		/// <inheritdoc />
 		public bool Equals(GlobalPermission other)
@@ -67,7 +59,7 @@ namespace DIGOS.Ambassador.Database.Permissions
 			return
 				this.Permission == other.Permission &&
 				this.Target == other.Target &&
-				this.User == other.User;
+				this.UserDiscordID == other.UserDiscordID;
 		}
 
 		/// <inheritdoc />
@@ -100,7 +92,7 @@ namespace DIGOS.Ambassador.Database.Permissions
 			{
 				int hashCode = (int)this.Permission;
 				hashCode = (hashCode * 397) ^ (int)this.Target;
-				hashCode = (hashCode * 397) ^ (this.User != null ? this.User.GetHashCode() : 0);
+				hashCode = (hashCode * 397) ^ this.UserDiscordID.GetHashCode();
 				return hashCode;
 			}
 		}

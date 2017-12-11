@@ -25,8 +25,11 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Services;
 
 using Discord.Commands;
+
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
@@ -64,6 +67,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 				return PreconditionResult.FromError("The value isn't an owned entity.");
 			}
 
+			var permissionService = services.GetRequiredService<PermissionService>();
 			using (var db = new GlobalInfoContext())
 			{
 				if (entity.IsOwner(context.User))
@@ -71,13 +75,12 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 					return PreconditionResult.FromSuccess();
 				}
 
-				var user = await db.GetOrRegisterUserAsync(context.User);
-				bool hasPermission = await PermissionChecker.HasPermissionAsync
+				bool hasPermission = await permissionService.HasPermissionAsync
 				(
 					db,
 					context.Guild,
-					user,
-					new RequiredPermission(this.Permission, this.Target)
+					context.User,
+					(this.Permission, this.Target)
 				);
 
 				if (!hasPermission)

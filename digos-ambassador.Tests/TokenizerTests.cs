@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Tests
 			var token = tokenizer.ParseToken(0, TokenWithoutOptionalData) as ColourToken;
 
 			Assert.NotNull(token);
-			Assert.Equal(string.Empty, token.Part);
+			Assert.Equal("base", token.Part);
 		}
 
 		[Fact]
@@ -108,7 +108,7 @@ namespace DIGOS.Ambassador.Tests
 
 			Assert.Equal(12, tokens.First().Start);
 
-			Assert.Equal(24, tokens[1].Start);
+			Assert.Equal(28, tokens[1].Start);
 
 			Assert.Equal(47, tokens[2].Start);
 		}

@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database.Characters;
@@ -34,14 +33,11 @@ using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Permissions;
-
 using Discord;
 
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Image = DIGOS.Ambassador.Database.Data.Image;
-using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
 namespace DIGOS.Ambassador.Database
 {
@@ -210,107 +206,6 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Grants the specified user the given permission. If the user already has the permission, it is augmented with
-		/// the new scope and target (if they are more permissive than the existing ones).
-		/// </summary>
-		/// <param name="discordServer">The Discord server the permission was granted on.</param>
-		/// <param name="discordUser">The Discord user.</param>
-		/// <param name="grantedPermission">The granted permission.</param>
-		/// <returns>A task wrapping the granting of the permission.</returns>
-		public async Task GrantLocalPermissionAsync
-		(
-			[NotNull] IGuild discordServer,
-			[NotNull] IUser discordUser,
-			[NotNull] LocalPermission grantedPermission
-		)
-		{
-			var user = await GetOrRegisterUserAsync(discordUser);
-
-			var existingPermission = user.LocalPermissions.FirstOrDefault
-			(
-				p =>
-				p.Permission == grantedPermission.Permission &&
-				p.Server.DiscordID == discordServer.Id
-			);
-
-			if (existingPermission is null)
-			{
-				user.LocalPermissions.Add(grantedPermission);
-			}
-			else
-			{
-				// Include the new target permissions
-				existingPermission.Target |= grantedPermission.Target;
-			}
-
-			await SaveChangesAsync();
-		}
-
-		/// <summary>
-		/// Revokes the given permission from the given Discord user. If the user does not have the permission, no
-		/// changes are made.
-		/// </summary>
-		/// <param name="discordServer">The Discord server the permission was revoked on.</param>
-		/// <param name="discordUser">The Discord user.</param>
-		/// <param name="revokedPermission">The revoked permission.</param>
-		/// <returns>A task wrapping the revoking of the permission.</returns>
-		public async Task RevokeLocalPermissionAsync
-		(
-			[NotNull] IGuild discordServer,
-			[NotNull] IUser discordUser,
-			Permission revokedPermission
-		)
-		{
-			var user = await GetOrRegisterUserAsync(discordUser);
-
-			var existingPermission = user.LocalPermissions.FirstOrDefault
-			(
-				p =>
-				p.Permission == revokedPermission &&
-				p.Server.DiscordID == discordServer.Id
-			);
-
-			if (existingPermission != null)
-			{
-				user.LocalPermissions = user.LocalPermissions.Except(new[] { existingPermission }).ToList();
-				await SaveChangesAsync();
-			}
-		}
-
-		/// <summary>
-		/// Revokes the given target permission from the given Discord user. If the user does not have the permission, no
-		/// changes are made.
-		/// </summary>
-		/// <param name="discordServer">The Discord server the permission was revoked on.</param>
-		/// <param name="discordUser">The Discord user.</param>
-		/// <param name="permission">The permission to alter.</param>
-		/// <param name="revokedTarget">The revoked permission.</param>
-		/// <returns>A task wrapping the revoking of the permission.</returns>
-		public async Task RevokeLocalPermissionTargetAsync
-		(
-			[NotNull] IGuild discordServer,
-			[NotNull] IUser discordUser,
-			Permission permission,
-			PermissionTarget revokedTarget
-		)
-		{
-			var user = await GetOrRegisterUserAsync(discordUser);
-
-			var existingPermission = user.LocalPermissions.FirstOrDefault
-			(
-				p =>
-					p.Permission == permission &&
-					p.Server.DiscordID == discordServer.Id
-			);
-
-			if (existingPermission != null)
-			{
-				existingPermission.Target &= ~revokedTarget;
-				await SaveChangesAsync();
-			}
-		}
-
-		/// <summary>
 		/// Updates the kink database, adding in new entries. Duplicates are not added.
 		/// </summary>
 		/// <param name="newKinks">The new kinks.</param>
@@ -430,7 +325,6 @@ namespace DIGOS.Ambassador.Database
 				.Include(u => u.DefaultCharacter)
 				.Include(u => u.Characters)
 				.Include(u => u.Kinks).ThenInclude(k => k.Kink)
-				.Include(u => u.LocalPermissions).ThenInclude(lp => lp.Server)
 				.FirstAsync
 				(
 					u =>

@@ -20,10 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Database.Interfaces;
-using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Permissions;
 
 namespace DIGOS.Ambassador.Database.Permissions
@@ -31,25 +29,24 @@ namespace DIGOS.Ambassador.Database.Permissions
 	/// <summary>
 	/// Represents a server-specific granted permission.
 	/// </summary>
-	public class LocalPermission : IEquatable<LocalPermission>, IEFEntity
+	public class LocalPermission : IPermission<LocalPermission>, IEFEntity
 	{
 		/// <inheritdoc />
 		public uint ID { get; set; }
 
 		/// <summary>
-		/// Gets or sets the granted permission.
-		/// </summary>
-		public Permission Permission { get; set; }
-
-		/// <summary>
-		/// Gets or sets the allowed targets.
-		/// </summary>
-		public PermissionTarget Target { get; set; }
-
-		/// <summary>
 		/// Gets or sets the the server that this permission has been granted on.
 		/// </summary>
-		public Server Server { get; set; }
+		public ulong ServerDiscordID { get; set; }
+
+		/// <inheritdoc />
+		public ulong UserDiscordID { get; set; }
+
+		/// <inheritdoc />
+		public Permission Permission { get; set; }
+
+		/// <inheritdoc />
+		public PermissionTarget Target { get; set; }
 
 		/// <inheritdoc />
 		public bool Equals(LocalPermission other)
@@ -67,7 +64,8 @@ namespace DIGOS.Ambassador.Database.Permissions
 			return
 				this.Permission == other.Permission &&
 				this.Target == other.Target &&
-				this.Server == other.Server;
+				this.ServerDiscordID == other.ServerDiscordID &&
+				this.UserDiscordID == other.UserDiscordID;
 		}
 
 		/// <inheritdoc />
@@ -100,7 +98,8 @@ namespace DIGOS.Ambassador.Database.Permissions
 			{
 				int hashCode = (int)this.Permission;
 				hashCode = (hashCode * 397) ^ (int)this.Target;
-				hashCode = (hashCode * 397) ^ (this.Server != null ? this.Server.GetHashCode() : 0);
+				hashCode = (hashCode * 397) ^ this.UserDiscordID.GetHashCode();
+				hashCode = (hashCode * 397) ^ this.ServerDiscordID.GetHashCode();
 				return hashCode;
 			}
 		}

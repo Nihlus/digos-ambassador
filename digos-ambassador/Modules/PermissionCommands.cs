@@ -36,6 +36,7 @@ using Discord.Commands;
 
 using Humanizer;
 using JetBrains.Annotations;
+using static Discord.Commands.ContextType;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -52,13 +53,17 @@ namespace DIGOS.Ambassador.Modules
 	{
 		private readonly UserFeedbackService Feedback;
 
+		private readonly PermissionService Permissions;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="PermissionCommands"/> class.
 		/// </summary>
 		/// <param name="feedback">The user feedback service.</param>
-		public PermissionCommands(UserFeedbackService feedback)
+		/// <param name="permissions">The permission service.</param>
+		public PermissionCommands(UserFeedbackService feedback, PermissionService permissions)
 		{
 			this.Feedback = feedback;
+			this.Permissions = permissions;
 		}
 
 		/// <summary>
@@ -80,13 +85,12 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("list-granted", RunMode = RunMode.Async)]
 		[Summary("Lists all permissions that have been granted to the invoking user.")]
+		[RequireContext(Guild)]
 		public async Task ListGrantedPermissionsAsync()
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var user = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
-
-				var embed = CreateHumanizedPermissionEmbed(user.LocalPermissions);
+				var embed = CreateHumanizedPermissionEmbed(this.Permissions.GetLocalUserPermissions(db, this.Context.User, this.Context.Guild));
 				embed.WithAuthor(this.Context.Message.Author);
 
 				await this.Feedback.SendEmbedAsync(this.Context, embed);
@@ -100,13 +104,12 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("list-granted", RunMode = RunMode.Async)]
 		[Summary("Lists all permissions that have been granted to target user.")]
+		[RequireContext(Guild)]
 		public async Task ListGrantedPermissionsAsync([NotNull] IUser discordUser)
 		{
 			using (var db = new GlobalInfoContext())
 			{
-				var user = await db.GetOrRegisterUserAsync(discordUser);
-
-				var embed = CreateHumanizedPermissionEmbed(user.LocalPermissions);
+				var embed = CreateHumanizedPermissionEmbed(this.Permissions.GetLocalUserPermissions(db, discordUser, this.Context.Guild));
 				embed.WithAuthor(discordUser);
 
 				await this.Feedback.SendEmbedAsync(this.Context, embed);
@@ -175,13 +178,17 @@ namespace DIGOS.Ambassador.Modules
 		{
 			private readonly UserFeedbackService Feedback;
 
+			private readonly PermissionService Permissions;
+
 			/// <summary>
 			/// Initializes a new instance of the <see cref="GrantCommands"/> class.
 			/// </summary>
 			/// <param name="feedback">The user feedback service.</param>
-			public GrantCommands(UserFeedbackService feedback)
+			/// <param name="permissions">The permission service.</param>
+			public GrantCommands(UserFeedbackService feedback, PermissionService permissions)
 			{
 				this.Feedback = feedback;
+				this.Permissions = permissions;
 			}
 
 			/// <summary>
@@ -202,10 +209,10 @@ namespace DIGOS.Ambassador.Modules
 					{
 						Permission = grantedPermission,
 						Target = grantedTarget,
-						Server = await db.GetOrRegisterServerAsync(this.Context.Guild)
+						ServerDiscordID = this.Context.Guild.Id
 					};
 
-					await db.GrantLocalPermissionAsync(this.Context.Guild, discordUser, newPermission);
+					await this.Permissions.GrantLocalPermissionAsync(db, this.Context.Guild, discordUser, newPermission);
 				}
 
 				await this.Feedback.SendConfirmationAsync(this.Context, $"{grantedPermission.ToString().Humanize().Transform(To.TitleCase)} granted to {discordUser.Mention}.");
@@ -220,14 +227,17 @@ namespace DIGOS.Ambassador.Modules
 		public class RevokeCommands : ModuleBase<SocketCommandContext>
 		{
 			private readonly UserFeedbackService Feedback;
+			private readonly PermissionService Permissions;
 
 			/// <summary>
 			/// Initializes a new instance of the <see cref="RevokeCommands"/> class.
 			/// </summary>
 			/// <param name="feedback">The user feedback service.</param>
-			public RevokeCommands(UserFeedbackService feedback)
+			/// <param name="permissions">The permission service.</param>
+			public RevokeCommands(UserFeedbackService feedback, PermissionService permissions)
 			{
 				this.Feedback = feedback;
+				this.Permissions = permissions;
 			}
 
 			/// <summary>
@@ -243,7 +253,7 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					await db.RevokeLocalPermissionAsync(this.Context.Guild, discordUser, revokedPermission);
+					await this.Permissions.RevokeLocalPermissionAsync(db, this.Context.Guild, discordUser, revokedPermission);
 				}
 
 				await this.Feedback.SendConfirmationAsync(this.Context, $"${revokedPermission.ToString().Humanize().Transform(To.TitleCase)} revoked from {discordUser.Mention}.");
@@ -263,7 +273,7 @@ namespace DIGOS.Ambassador.Modules
 			{
 				using (var db = new GlobalInfoContext())
 				{
-					await db.RevokeLocalPermissionTargetAsync(this.Context.Guild, discordUser, permission, revokedTarget);
+					await this.Permissions.RevokeLocalPermissionTargetAsync(db, this.Context.Guild, discordUser, permission, revokedTarget);
 				}
 
 				await this.Feedback.SendConfirmationAsync

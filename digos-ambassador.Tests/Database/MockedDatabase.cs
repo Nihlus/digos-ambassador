@@ -21,10 +21,12 @@
 //
 
 using System;
+
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
+
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -108,6 +110,19 @@ namespace DIGOS.Ambassador.Tests.Database
 			using (var db = GetDatabaseContext())
 			{
 				db.GlobalPermissions.Add(globalPermission);
+				db.SaveChanges();
+			}
+		}
+
+		/// <summary>
+		/// Adds a mocked local permission to the database.
+		/// </summary>
+		/// <param name="grantedPermission">The granted permission.</param>
+		public void AddMockedLocalPermission(LocalPermission grantedPermission)
+		{
+			using (var db = GetDatabaseContext())
+			{
+				db.LocalPermissions.Add(grantedPermission);
 				db.SaveChanges();
 			}
 		}

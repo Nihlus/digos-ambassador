@@ -21,7 +21,7 @@
 //
 
 using System.Collections.Generic;
-
+using System.Linq;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
 
@@ -58,6 +58,16 @@ namespace DIGOS.Ambassador.Database.ServerInfo
 		/// Gets or sets the users known to the bot on this server.
 		/// </summary>
 		public List<User> KnownUsers { get; set; }
+
+		/// <summary>
+		/// Determines whether or not a given user is known to this server.
+		/// </summary>
+		/// <param name="user">The user.</param>
+		/// <returns>true if the user is known; otherwise, false.</returns>
+		public bool IsUserKnown([NotNull] IUser user)
+		{
+			return this.KnownUsers.Any(u => u.DiscordID == user.Id);
+		}
 
 		/// <summary>
 		/// Creates a default server entity based on a Discord guild.

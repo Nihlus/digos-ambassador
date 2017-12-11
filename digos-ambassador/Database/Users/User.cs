@@ -23,7 +23,6 @@
 using System.Collections.Generic;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Interfaces;
-using DIGOS.Ambassador.Database.Permissions;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Users
@@ -71,10 +70,5 @@ namespace DIGOS.Ambassador.Database.Users
 		/// Gets or sets the kinks or fetishes of a user, as well as their preferences for each.
 		/// </summary>
 		public List<UserKink> Kinks { get; set; }
-
-		/// <summary>
-		/// Gets or sets the bot permissions granted to this user.
-		/// </summary>
-		public List<LocalPermission> LocalPermissions { get; set; }
 	}
 }

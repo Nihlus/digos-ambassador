@@ -20,12 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
-
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.ServerInfo;
-using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
+using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Tests.Database;
 
 using Discord;
@@ -43,18 +41,13 @@ namespace DIGOS.Ambassador.Tests
 		[Fact]
 		public async void EmptyPermissionSetReturnsFalse()
 		{
+			var permissionService = new PermissionService();
+
 			// Set up mocked permissions
-			var requiredPermission = new RequiredPermission()
-			{
-				Permission = Permission.SetClass,
-				Target = PermissionTarget.Other,
-			};
+			var requiredPermission = (Permission.SetClass, PermissionTarget.Other);
 
 			// Set up mocked users
-			var user = new User
-			{
-				LocalPermissions = new List<LocalPermission>()
-			};
+			var userMock = new Mock<IUser>();
 
 			// Set up the mocked discord server
 			var guildMock = new Mock<IGuild>();
@@ -62,12 +55,9 @@ namespace DIGOS.Ambassador.Tests
 
 			using (var mockDbConnection = new MockedDatabase())
 			{
-				// Add mocked data
-				mockDbConnection.AddMockedUser(user);
-
 				using (var db = mockDbConnection.GetDatabaseContext())
 				{
-					Assert.False(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+					Assert.False(await permissionService.HasPermissionAsync(db, guildMock.Object, userMock.Object, requiredPermission));
 				}
 			}
 		}
@@ -78,22 +68,20 @@ namespace DIGOS.Ambassador.Tests
 			const ulong serverID = 1;
 			var server = new Server { DiscordID = serverID };
 
-			var requiredPermission = new RequiredPermission
-			{
-				Permission = Permission.SetClass,
-				Target = PermissionTarget.Other,
-			};
+			const ulong userID = 0;
+			var userMock = new Mock<IUser>();
+			userMock.Setup(u => u.Id).Returns(userID);
+
+			var permissionService = new PermissionService();
+
+			var requiredPermission = (Permission.SetClass, PermissionTarget.Other);
 
 			var grantedPermission = new LocalPermission
 			{
 				Permission = Permission.SetClass,
 				Target = PermissionTarget.Other,
-				Server = server
-			};
-
-			var user = new User
-			{
-				LocalPermissions = new List<LocalPermission> { grantedPermission }
+				ServerDiscordID = server.DiscordID,
+				UserDiscordID = userID
 			};
 
 			// Set up the mocked discord server
@@ -103,11 +91,11 @@ namespace DIGOS.Ambassador.Tests
 			using (var mockDbConnection = new MockedDatabase())
 			{
 				// Add mocked data
-				mockDbConnection.AddMockedUser(user);
+				mockDbConnection.AddMockedLocalPermission(grantedPermission);
 
 				using (var db = mockDbConnection.GetDatabaseContext())
 				{
-					Assert.True(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+					Assert.True(await permissionService.HasPermissionAsync(db, guildMock.Object, userMock.Object, requiredPermission));
 				}
 			}
 		}
@@ -118,22 +106,20 @@ namespace DIGOS.Ambassador.Tests
 			const ulong serverID = 1;
 			var server = new Server { DiscordID = serverID };
 
-			var requiredPermission = new RequiredPermission
-			{
-				Permission = Permission.SetClass,
-				Target = PermissionTarget.Self,
-			};
+			const ulong userID = 0;
+			var userMock = new Mock<IUser>();
+			userMock.Setup(u => u.Id).Returns(userID);
+
+			var permissionService = new PermissionService();
+
+			var requiredPermission = (Permission.SetClass, PermissionTarget.Self);
 
 			var grantedPermission = new LocalPermission
 			{
 				Permission = Permission.SetClass,
 				Target = PermissionTarget.Other,
-				Server = server
-			};
-
-			var user = new User
-			{
-				LocalPermissions = new List<LocalPermission> { grantedPermission }
+				ServerDiscordID = server.DiscordID,
+				UserDiscordID = userID
 			};
 
 			// Set up the mocked discord server
@@ -143,12 +129,11 @@ namespace DIGOS.Ambassador.Tests
 
 			using (var mockDbConnection = new MockedDatabase())
 			{
-				// Add mocked data
-				mockDbConnection.AddMockedUser(user);
+				mockDbConnection.AddMockedLocalPermission(grantedPermission);
 
 				using (var db = mockDbConnection.GetDatabaseContext())
 				{
-					Assert.False(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+					Assert.False(await permissionService.HasPermissionAsync(db, guildMock.Object, userMock.Object, requiredPermission));
 				}
 			}
 		}
@@ -159,22 +144,20 @@ namespace DIGOS.Ambassador.Tests
 			const ulong serverID = 1;
 			var server = new Server { DiscordID = serverID };
 
-			var requiredPermission = new RequiredPermission
-			{
-				Permission = Permission.SetClass,
-				Target = PermissionTarget.Other,
-			};
+			const ulong userID = 0;
+			var userMock = new Mock<IUser>();
+			userMock.Setup(u => u.Id).Returns(userID);
+
+			var permissionService = new PermissionService();
+
+			var requiredPermission = (Permission.SetClass, PermissionTarget.Other);
 
 			var grantedPermission = new LocalPermission
 			{
 				Permission = Permission.SetClass,
 				Target = PermissionTarget.Self,
-				Server = server
-			};
-
-			var user = new User
-			{
-				LocalPermissions = new List<LocalPermission> { grantedPermission }
+				ServerDiscordID = server.DiscordID,
+				UserDiscordID = userID
 			};
 
 			// Set up the mocked discord server
@@ -185,11 +168,11 @@ namespace DIGOS.Ambassador.Tests
 			using (var mockDbConnection = new MockedDatabase())
 			{
 				// Add mocked data
-				mockDbConnection.AddMockedUser(user);
+				mockDbConnection.AddMockedLocalPermission(grantedPermission);
 
 				using (var db = mockDbConnection.GetDatabaseContext())
 				{
-					Assert.False(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+					Assert.False(await permissionService.HasPermissionAsync(db, guildMock.Object, userMock.Object, requiredPermission));
 				}
 			}
 		}
@@ -203,22 +186,19 @@ namespace DIGOS.Ambassador.Tests
 			var server1 = new Server { DiscordID = server1ID };
 			var server2 = new Server { DiscordID = server2ID };
 
-			var requiredPermission = new RequiredPermission
-			{
-				Permission = Permission.SetClass,
-				Target = PermissionTarget.Self,
-			};
+			const ulong userID = 0;
+			var userMock = new Mock<IUser>();
+			userMock.Setup(u => u.Id).Returns(userID);
+
+			var permissionService = new PermissionService();
+
+			var requiredPermission = (Permission.SetClass, PermissionTarget.Self);
 
 			var grantedPermission = new LocalPermission
 			{
 				Permission = Permission.SetClass,
 				Target = PermissionTarget.Other,
-				Server = server2
-			};
-
-			var user = new User
-			{
-				LocalPermissions = new List<LocalPermission> { grantedPermission }
+				ServerDiscordID = server2.DiscordID
 			};
 
 			// Set up the mocked discord server
@@ -229,12 +209,13 @@ namespace DIGOS.Ambassador.Tests
 			using (var mockDbConnection = new MockedDatabase())
 			{
 				// Add mocked data (this method cascades through the sub-entities)
-				mockDbConnection.AddMockedUser(user);
+				mockDbConnection.AddMockedLocalPermission(grantedPermission);
 				mockDbConnection.AddMockedServer(server1);
+				mockDbConnection.AddMockedServer(server2);
 
 				using (var db = mockDbConnection.GetDatabaseContext())
 				{
-					Assert.False(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+					Assert.False(await permissionService.HasPermissionAsync(db, guildMock.Object, userMock.Object, requiredPermission));
 				}
 			}
 		}
@@ -243,31 +224,29 @@ namespace DIGOS.Ambassador.Tests
 		public async void GrantedGlobalPermissionReturnsTrueForGrantedLocal()
 		{
 			const ulong serverID = 1;
-			var server1 = new Server { DiscordID = serverID };
+			var server = new Server { DiscordID = serverID };
 
-			var requiredPermission = new RequiredPermission
-			{
-				Permission = Permission.SetClass,
-				Target = PermissionTarget.Self,
-			};
+			const ulong userID = 0;
+			var userMock = new Mock<IUser>();
+			userMock.Setup(u => u.Id).Returns(userID);
+
+			var permissionService = new PermissionService();
+
+			var requiredPermission = (Permission.SetClass, PermissionTarget.Self);
 
 			var grantedLocalPermission = new LocalPermission
 			{
 				Permission = Permission.SetClass,
 				Target = PermissionTarget.Self,
-				Server = server1
-			};
-
-			var user = new User
-			{
-				LocalPermissions = new List<LocalPermission> { grantedLocalPermission }
+				ServerDiscordID = server.DiscordID,
+				UserDiscordID = userID
 			};
 
 			var grantedGlobalPermission = new GlobalPermission
 			{
 				Permission = Permission.SetClass,
 				Target = PermissionTarget.Self,
-				User = user
+				UserDiscordID = userID
 			};
 
 			// Set up the mocked discord server
@@ -279,10 +258,11 @@ namespace DIGOS.Ambassador.Tests
 			{
 				// Add mocked data (this method cascades through the sub-entities)
 				mockDbConnection.AddMockedGlobalPermission(grantedGlobalPermission);
+				mockDbConnection.AddMockedLocalPermission(grantedLocalPermission);
 
 				using (var db = mockDbConnection.GetDatabaseContext())
 				{
-					Assert.True(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+					Assert.True(await permissionService.HasPermissionAsync(db, guildMock.Object, userMock.Object, requiredPermission));
 				}
 			}
 		}
@@ -292,22 +272,19 @@ namespace DIGOS.Ambassador.Tests
 		{
 			const ulong serverID = 1;
 
-			var requiredPermission = new RequiredPermission
-			{
-				Permission = Permission.SetClass,
-				Target = PermissionTarget.Self,
-			};
+			const ulong userID = 0;
+			var userMock = new Mock<IUser>();
+			userMock.Setup(u => u.Id).Returns(userID);
 
-			var user = new User
-			{
-				LocalPermissions = new List<LocalPermission>()
-			};
+			var permissionService = new PermissionService();
+
+			var requiredPermission = (Permission.SetClass, PermissionTarget.Self);
 
 			var grantedGlobalPermission = new GlobalPermission
 			{
 				Permission = Permission.SetClass,
 				Target = PermissionTarget.Self,
-				User = user
+				UserDiscordID = userID
 			};
 
 			// Set up the mocked current discord server
@@ -322,7 +299,7 @@ namespace DIGOS.Ambassador.Tests
 
 				using (var db = mockDbConnection.GetDatabaseContext())
 				{
-					Assert.True(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+					Assert.True(await permissionService.HasPermissionAsync(db, guildMock.Object, userMock.Object, requiredPermission));
 				}
 			}
 		}
@@ -333,29 +310,27 @@ namespace DIGOS.Ambassador.Tests
 			const ulong serverID = 1;
 			var server = new Server { DiscordID = serverID };
 
-			var requiredPermission = new RequiredPermission
-			{
-				Permission = Permission.SetClass,
-				Target = PermissionTarget.Self,
-			};
+			const ulong userID = 0;
+			var userMock = new Mock<IUser>();
+			userMock.Setup(u => u.Id).Returns(userID);
+
+			var permissionService = new PermissionService();
+
+			var requiredPermission = (Permission.SetClass, PermissionTarget.Self);
 
 			var grantedLocalPermission = new LocalPermission
 			{
 				Permission = Permission.SetClass,
 				Target = PermissionTarget.Self,
-				Server = server
-			};
-
-			var user = new User
-			{
-				LocalPermissions = new List<LocalPermission> { grantedLocalPermission }
+				ServerDiscordID = server.DiscordID,
+				UserDiscordID = userID
 			};
 
 			var grantedGlobalPermission = new GlobalPermission
 			{
 				Permission = Permission.SetClass,
 				Target = PermissionTarget.Other,
-				User = user
+				UserDiscordID = userID
 			};
 
 			// Set up the mocked current discord server
@@ -367,10 +342,11 @@ namespace DIGOS.Ambassador.Tests
 			{
 				// Add mocked data (this method cascades through the sub-entities)
 				mockDbConnection.AddMockedGlobalPermission(grantedGlobalPermission);
+				mockDbConnection.AddMockedLocalPermission(grantedLocalPermission);
 
 				using (var db = mockDbConnection.GetDatabaseContext())
 				{
-					Assert.True(await PermissionChecker.HasPermissionAsync(db, guildMock.Object, user, requiredPermission));
+					Assert.True(await permissionService.HasPermissionAsync(db, guildMock.Object, userMock.Object, requiredPermission));
 				}
 			}
 		}

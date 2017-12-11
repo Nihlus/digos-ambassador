@@ -97,6 +97,7 @@
           </e>
           <e p="Permissions" t="Include">
             <e p="GlobalPermission.cs" t="Include" />
+            <e p="IPermission.cs" t="Include" />
             <e p="LocalPermission.cs" t="Include" />
           </e>
           <e p="Roleplaying" t="Include">
@@ -142,8 +143,8 @@
           <e p="InteractiveMessage.cs" t="Include" />
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171210224658_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171210224658_InitialCreate.cs" t="Include" />
+          <e p="20171211170121_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171211170121_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">
@@ -166,7 +167,6 @@
         <e p="Permissions" t="Include">
           <e p="DefaultPermissions.cs" t="Include" />
           <e p="Permission.cs" t="Include" />
-          <e p="PermissionChecker.cs" t="Include" />
           <e p="PermissionTarget.cs" t="Include" />
           <e p="Preconditions" t="Include">
             <e p="PrioritizedPreconditionAttribute.cs" t="Include" />
@@ -174,7 +174,6 @@
             <e p="RequireEntityOwnerOrPermissionAttribute.cs" t="Include" />
             <e p="RequirePermissionAttribute.cs" t="Include" />
           </e>
-          <e p="RequiredPermission.cs" t="Include" />
         </e>
         <e p="Program.cs" t="Include" />
         <e p="Services" t="Include">
@@ -230,6 +229,9 @@
             <e p="NamedNode.cs" t="Include" />
             <e p="TableNode.cs" t="Include" />
             <e p="ValueNode.cs" t="Include" />
+          </e>
+          <e p="Permissions" t="Include">
+            <e p="PermissionService.cs" t="Include" />
           </e>
           <e p="Results" t="Include">
             <e p="CreateEntityResult.cs" t="Include" />

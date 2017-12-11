@@ -20,7 +20,7 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    [Migration("20171210224658_InitialCreate")]
+    [Migration("20171211171219_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -198,11 +198,9 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<int>("Target");
 
-                    b.Property<uint?>("UserID");
+                    b.Property<ulong>("UserDiscordID");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("UserID");
 
                     b.ToTable("GlobalPermissions");
                 });
@@ -214,17 +212,13 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<int>("Permission");
 
-                    b.Property<uint?>("ServerID");
+                    b.Property<ulong>("ServerDiscordID");
 
                     b.Property<int>("Target");
 
-                    b.Property<uint?>("UserID");
+                    b.Property<ulong>("UserDiscordID");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("ServerID");
-
-                    b.HasIndex("UserID");
 
                     b.ToTable("LocalPermissions");
                 });
@@ -514,24 +508,6 @@ namespace DIGOS.Ambassador.Migrations
                     b.HasOne("DIGOS.Ambassador.Database.Characters.Character")
                         .WithMany("Images")
                         .HasForeignKey("CharacterID");
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Permissions.GlobalPermission", b =>
-                {
-                    b.HasOne("DIGOS.Ambassador.Database.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID");
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Permissions.LocalPermission", b =>
-                {
-                    b.HasOne("DIGOS.Ambassador.Database.ServerInfo.Server", "Server")
-                        .WithMany()
-                        .HasForeignKey("ServerID");
-
-                    b.HasOne("DIGOS.Ambassador.Database.Users.User")
-                        .WithMany("LocalPermissions")
-                        .HasForeignKey("UserID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.Roleplay", b =>

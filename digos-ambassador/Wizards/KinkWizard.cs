@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Net.Sockets;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
@@ -38,7 +37,6 @@ using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
 using Humanizer;
-using MoreLinq;
 
 namespace DIGOS.Ambassador.Wizards
 {
