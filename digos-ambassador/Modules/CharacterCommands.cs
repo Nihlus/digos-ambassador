@@ -661,7 +661,7 @@ namespace DIGOS.Ambassador.Modules
 			}
 
 			/// <summary>
-			/// Sets the avatar of a character.
+			/// Sets the avatar of a character. You can attach an image instead of passing a url as a parameter.
 			/// </summary>
 			/// <param name="character">The character.</param>
 			/// <param name="newCharacterAvatarUrl">The url of the new avatar. Optional.</param>
@@ -774,14 +774,14 @@ namespace DIGOS.Ambassador.Modules
 			}
 
 			/// <summary>
-			/// Sets the description of a character.
+			/// Sets the description of a character. You can attach a plaintext document instead of passing the contents as a parameter.
 			/// </summary>
 			/// <param name="character">The character.</param>
 			/// <param name="newCharacterDescription">The new description of the character. Optional.</param>
 			[UsedImplicitly]
 			[Alias("description", "desc")]
 			[Command("description", RunMode = Async)]
-			[Summary("Sets the description of a character. You can attach a plaintext document instead of passing it as a parameter.")]
+			[Summary("Sets the description of a character. You can attach a plaintext document instead of passing the contents as a parameter.")]
 			[RequireContext(Guild)]
 			[RequirePermission(Permission.EditCharacter)]
 			public async Task SetCharacterDescriptionAsync

@@ -60,7 +60,7 @@ Sets the summary of a character.
 #### Overloads
 **`character set description` (or `character set desc`)**
 
-Sets the description of a character. You can attach a plaintext document instead of passing it as a parameter.
+Sets the description of a character. You can attach a plaintext document instead of passing the contents as a parameter.
 
 | Name | Type | Optional |
 | --- | --- | --- |
