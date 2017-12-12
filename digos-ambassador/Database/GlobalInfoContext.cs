@@ -135,6 +135,17 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
+		/// Gets or sets the database where images are stored.
+		/// </summary>
+		public DbSet<Image> Images
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
+
+		/// <summary>
 		/// Gets or sets the database where transformation species are stored.
 		/// </summary>
 		public DbSet<Species> Species

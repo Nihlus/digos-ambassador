@@ -143,8 +143,8 @@
           <e p="InteractiveMessage.cs" t="Include" />
         </e>
         <e p="Migrations" t="Include">
-          <e p="20171211171219_InitialCreate.Designer.cs" t="Include" />
-          <e p="20171211171219_InitialCreate.cs" t="Include" />
+          <e p="20171211173054_InitialCreate.Designer.cs" t="Include" />
+          <e p="20171211173054_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">
@@ -305,6 +305,45 @@
           </e>
         </e>
         <e p="regenerate-ef.sh" t="Include" />
+      </e>
+      <e p="digos-ambassador.DocumentationGenerator" t="IncludeRecursive">
+        <e p="Extensions" t="Include">
+          <e p="ModuleExtensions.cs" t="Include" />
+        </e>
+        <e p="IDocumentationGenerator.cs" t="Include" />
+        <e p="MarkdownPage.cs" t="Include" />
+        <e p="ModuleDocumentationGenerator.cs" t="Include" />
+        <e p="Nodes" t="Include">
+          <e p="ColumnAlignment.cs" t="Include" />
+          <e p="EmphasisType.cs" t="Include" />
+          <e p="IMarkdownNode.cs" t="Include" />
+          <e p="ListType.cs" t="Include" />
+          <e p="MarkdownBlockQuote.cs" t="Include" />
+          <e p="MarkdownCodeBlock.cs" t="Include" />
+          <e p="MarkdownHeader.cs" t="Include" />
+          <e p="MarkdownHorizontalRule.cs" t="Include" />
+          <e p="MarkdownImage.cs" t="Include" />
+          <e p="MarkdownInlineCode.cs" t="Include" />
+          <e p="MarkdownLink.cs" t="Include" />
+          <e p="MarkdownList.cs" t="Include" />
+          <e p="MarkdownParagraph.cs" t="Include" />
+          <e p="MarkdownSection.cs" t="Include" />
+          <e p="MarkdownTable.cs" t="Include" />
+          <e p="MarkdownTableColumn.cs" t="Include" />
+          <e p="MarkdownTableRow.cs" t="Include" />
+          <e p="MarkdownText.cs" t="Include" />
+        </e>
+        <e p="Options.cs" t="Include" />
+        <e p="Program.cs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="digos-ambassador.DocumentationGenerator.csproj" t="IncludeRecursive" />
+        <e p="obj" t="ExcludeRecursive">
+          <e p="Debug" t="Include">
+            <e p="netcoreapp2.0" t="Include">
+              <e p="digos-ambassador.DocumentationGenerator.AssemblyInfo.cs" t="Include" />
+            </e>
+          </e>
+        </e>
       </e>
       <e p="digos-ambassador.Tests" t="IncludeRecursive">
         <e p="Database" t="Include">

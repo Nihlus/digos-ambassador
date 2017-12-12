@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Modules
 		"Parameters which take a character can be specified in two ways - by just the name, which will search your " +
 		"characters, and by mention and name, which will search the given user's characters. For example,\n" +
 		"\n" +
-		"Your character: Amby\n" +
+		"Your character: Amby  \n" +
 		"Another user's character: @DIGOS Ambassador:Amby\n" +
 		"\n" +
 		"You can also substitute any character name for \"current\", and your active character will be used instead."

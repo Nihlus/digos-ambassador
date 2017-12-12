@@ -246,7 +246,7 @@ namespace DIGOS.Ambassador.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Image",
+                name: "Images",
                 columns: table => new
                 {
                     ID = table.Column<uint>(nullable: false)
@@ -259,9 +259,9 @@ namespace DIGOS.Ambassador.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Image", x => x.ID);
+                    table.PrimaryKey("PK_Images", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Image_Characters_CharacterID",
+                        name: "FK_Images_Characters_CharacterID",
                         column: x => x.CharacterID,
                         principalTable: "Characters",
                         principalColumn: "ID",
@@ -503,8 +503,8 @@ namespace DIGOS.Ambassador.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Image_CharacterID",
-                table: "Image",
+                name: "IX_Images_CharacterID",
+                table: "Images",
                 column: "CharacterID");
 
             migrationBuilder.CreateIndex(
@@ -695,7 +695,7 @@ namespace DIGOS.Ambassador.Migrations
                 name: "GlobalPermissions");
 
             migrationBuilder.DropTable(
-                name: "Image");
+                name: "Images");
 
             migrationBuilder.DropTable(
                 name: "LocalPermissions");

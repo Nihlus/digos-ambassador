@@ -20,7 +20,7 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    [Migration("20171211171609_InitialCreate")]
+    [Migration("20171211173054_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("CharacterID");
 
-                    b.ToTable("Image");
+                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Dossiers.Dossier", b =>

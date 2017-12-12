@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -32,7 +31,6 @@ using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;

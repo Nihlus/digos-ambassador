@@ -180,11 +180,12 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="context">The context of the command.</param>
 		/// <param name="user">The user to send the embed to.</param>
 		/// <param name="eb">The embed to send.</param>
-		public async Task SendPrivateEmbedAsync(SocketCommandContext context, IUser user, Embed eb)
+		/// <param name="notify">Whether or not to notify the user that they've been sent a message.</param>
+		public async Task SendPrivateEmbedAsync(SocketCommandContext context, IUser user, Embed eb, bool notify = true)
 		{
 			await user.SendMessageAsync(string.Empty, false, eb);
 
-			if (!context.IsPrivate)
+			if (!context.IsPrivate && notify)
 			{
 				await SendConfirmationAsync(context, "Please check your private messages.");
 			}

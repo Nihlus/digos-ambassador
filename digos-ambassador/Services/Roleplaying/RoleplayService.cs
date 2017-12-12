@@ -278,6 +278,11 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] ICommandContext context
 		)
 		{
+			if (context.Guild is null)
+			{
+				return RetrieveEntityResult<Roleplay>.FromError(CommandError.ObjectNotFound, "You're not in a server.");
+			}
+
 			var roleplay = await GetRoleplays(db, context.Guild)
 				.FirstOrDefaultAsync(rp => rp.IsActive && rp.ActiveChannelID == context.Channel.Id);
 

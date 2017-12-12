@@ -258,6 +258,7 @@ namespace DIGOS.Ambassador.Services
 		{
 			return db.Characters
 				.Include(c => c.Owner)
+				.Include(c => c.Images)
 				.Include(c => c.CurrentServers)
 				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.BaseColour)
 				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.PatternColour)
