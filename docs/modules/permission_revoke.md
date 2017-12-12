@@ -4,7 +4,7 @@
 These commands have no prefix.
 
 ## Commands
-### Default
+### *Default*
 #### Overloads
 **permission revoke**
 
@@ -15,7 +15,7 @@ Revoke the given permission from the targeted user.
 | discordUser | IUser | `no` |
 | revokedPermission | Permission | `no` |
 
-### target
+### *target*
 #### Overloads
 **permission revoke target**
 

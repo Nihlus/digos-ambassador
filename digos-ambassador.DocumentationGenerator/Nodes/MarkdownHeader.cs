@@ -21,6 +21,7 @@
 //
 
 using JetBrains.Annotations;
+using YamlDotNet.Core;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
@@ -43,7 +44,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// Gets or sets the title text of the header.
 		/// </summary>
 		[NotNull]
-		public string Title { get; set; }
+		public MarkdownText Title { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="MarkdownHeader"/> class.
@@ -53,7 +54,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// <param name="underline">Whether or not the header should be underlined.</param>
 		public MarkdownHeader(string title, int level, bool underline = false)
 		{
-			this.Title = title;
+			this.Title = new MarkdownText(title);
 			this.Level = level;
 			this.Underline = underline;
 		}
@@ -67,16 +68,16 @@ namespace DIGOS.Ambassador.Doc.Nodes
 				{
 					case 1:
 					{
-						return $"{this.Title}\n{new string('=', this.Title.Length)}";
+						return $"{this.Title.Compile()}\n{new string('=', this.Title.Compile().Length)}";
 					}
 					case 2:
 					{
-						return $"{this.Title}\n{new string('-', this.Title.Length)}";
+						return $"{this.Title.Compile()}\n{new string('-', this.Title.Compile().Length)}";
 					}
 				}
 			}
 
-			return $"{new string('#', this.Level)} {this.Title}";
+			return $"{new string('#', this.Level)} {this.Title.Compile()}";
 		}
 	}
 }

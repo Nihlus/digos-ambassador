@@ -4,7 +4,7 @@
 These commands have no prefix.
 
 ## Commands
-### class
+### *class*
 #### Overloads
 **user set class**
 
@@ -25,7 +25,7 @@ Sets the target user's class.
 | discordUser | IUser | `no` |
 | userClass | UserClass | `no` |
 
-### bio
+### *bio*
 #### Overloads
 **user set bio**
 
@@ -46,7 +46,7 @@ Sets the target user's bio.
 | discordUser | IUser | `no` |
 | bio | string | `no` |
 
-### timezone
+### *timezone*
 #### Overloads
 **user set timezone**
 

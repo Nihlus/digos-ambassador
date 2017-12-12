@@ -9,7 +9,7 @@ User-related commands, such as viewing or editing info about a specific user.
 * [Set](user_set.md)
 
 ## Commands
-### info
+### *info*
 #### Overloads
 **user info**
 

@@ -6,7 +6,7 @@ These commands have no prefix.
 Assorted commands that don't really fit anywhere - just for fun, testing, etc.
 
 ## Commands
-### contact
+### *contact*
 #### Overloads
 **contact**
 
@@ -22,25 +22,25 @@ Instructs Amby to contact a user over DM.
 | --- | --- | --- |
 | discordUser | IUser | `no` |
 
-### sass
+### *sass*
 #### Overloads
 **sass**
 
 Sasses the user in a DIGOS fashion.
 
-### boop
+### *boop*
 #### Overloads
 **boop (or bap)**
 
 Boops the user.
 
-### info
+### *info*
 #### Overloads
 **info (as well as information or about)**
 
 Shows some information about Amby's metaworkings.
 
-### help
+### *help*
 #### Overloads
 **help (as well as halp, hlep, or commands)**
 

@@ -4,7 +4,7 @@
 These commands have no prefix.
 
 ## Commands
-### name
+### *name*
 #### Overloads
 **roleplay set name**
 
@@ -15,7 +15,7 @@ Sets the new name of the named roleplay.
 | newRoleplayName | string | `no` |
 | roleplay | Roleplay | `no` |
 
-### summary
+### *summary*
 #### Overloads
 **roleplay set summary**
 
@@ -26,7 +26,7 @@ Sets the summary of the named roleplay.
 | newRoleplaySummary | string | `no` |
 | roleplay | Roleplay | `no` |
 
-### nsfw
+### *nsfw*
 #### Overloads
 **roleplay set nsfw**
 
@@ -37,7 +37,7 @@ Sets a value indicating whether or not the named roleplay is NSFW. This restrict
 | isNSFW | bool | `no` |
 | roleplay | Roleplay | `no` |
 
-### public
+### *public*
 #### Overloads
 **roleplay set public**
 

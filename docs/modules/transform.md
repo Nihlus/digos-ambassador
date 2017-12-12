@@ -6,7 +6,7 @@ These commands are prefixed with `transform`. You can also use `shift` or `tf` i
 Transformation-related commands, such as transforming certain body parts or saving transforms as characters.
 
 ## Commands
-### ShiftAsync
+### *ShiftAsync*
 #### Overloads
 **transform**
 
@@ -29,7 +29,7 @@ Transforms the given bodypart of the target user into the given species.
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
-### colour
+### *colour*
 #### Overloads
 **transform colour**
 
@@ -52,7 +52,7 @@ Transforms the base colour of the given bodypart on the target user into the giv
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-### pattern
+### *pattern*
 #### Overloads
 **transform pattern**
 
@@ -77,7 +77,7 @@ Transforms the pattern on the given bodypart on the target user into the given p
 | pattern | Pattern | `no` |
 | colour | Colour | `no` |
 
-### pattern-colour
+### *pattern-colour*
 #### Overloads
 **transform pattern-colour**
 
@@ -100,7 +100,7 @@ Transforms the colour of the pattern on the given bodypart on the target user to
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-### list-available
+### *list-available*
 #### Overloads
 **transform list-available (as well as transform list-species or transform species)**
 
@@ -116,7 +116,7 @@ Lists the available transformations for a given bodypart.
 | --- | --- | --- |
 | bodyPart | Bodypart | `no` |
 
-### describe
+### *describe*
 #### Overloads
 **transform describe**
 
@@ -126,13 +126,13 @@ Describes the current physical appearance of a character.
 | --- | --- | --- |
 | character | Character | `no` |
 
-### reset
+### *reset*
 #### Overloads
 **transform reset**
 
 Resets your form to your default one.
 
-### save
+### *save*
 #### Overloads
 **transform save (or transform save-current)**
 
@@ -142,13 +142,13 @@ Saves your current form as a new character.
 | --- | --- | --- |
 | newCharacterName | string | `no` |
 
-### set-default
+### *set-default*
 #### Overloads
 **transform set-default (or transform save-default)**
 
 Sets your current appearance as your current character's default one.
 
-### default-opt-in
+### *default-opt-in*
 #### Overloads
 **transform default-opt-in**
 
@@ -158,19 +158,19 @@ Sets your default setting for opting in or out of transformations on servers you
 | --- | --- | --- |
 | shouldOptIn | bool | `yes` |
 
-### opt-in
+### *opt-in*
 #### Overloads
 **transform opt-in**
 
 Opts into the transformation module on this server.
 
-### opt-out
+### *opt-out*
 #### Overloads
 **transform opt-out**
 
 Opts out of the transformation module on this server.
 
-### default-protection
+### *default-protection*
 #### Overloads
 **transform default-protection**
 
@@ -180,7 +180,7 @@ Sets your default protection type for transformations on servers you join. Avail
 | --- | --- | --- |
 | protectionType | ProtectionType | `no` |
 
-### protection
+### *protection*
 #### Overloads
 **transform protection**
 
@@ -190,7 +190,7 @@ Sets your protection type for transformations. Available types are Whitelist and
 | --- | --- | --- |
 | protectionType | ProtectionType | `no` |
 
-### whitelist
+### *whitelist*
 #### Overloads
 **transform whitelist**
 
@@ -200,7 +200,7 @@ Whitelists a user, allowing them to transform you.
 | --- | --- | --- |
 | user | IUser | `no` |
 
-### blacklist
+### *blacklist*
 #### Overloads
 **transform blacklist**
 
@@ -210,7 +210,7 @@ Blacklists a user, preventing them from transforming you.
 | --- | --- | --- |
 | user | IUser | `no` |
 
-### update-db
+### *update-db*
 #### Overloads
 **transform update-db**
 

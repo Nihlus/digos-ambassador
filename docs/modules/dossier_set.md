@@ -4,7 +4,7 @@
 These commands have no prefix.
 
 ## Commands
-### title
+### *title*
 #### Overloads
 **dossier set title**
 
@@ -15,7 +15,7 @@ Sets the title of the given dossier.
 | title | string | `no` |
 | newTitle | string | `no` |
 
-### summary
+### *summary*
 #### Overloads
 **dossier set summary**
 
@@ -26,7 +26,7 @@ Sets the summary of the given dossier.
 | title | string | `no` |
 | newSummary | string | `no` |
 
-### data
+### *data*
 #### Overloads
 **dossier set data**
 

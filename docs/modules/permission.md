@@ -10,13 +10,13 @@ Permission-related commands for granting, revoking and checking user permissions
 * [Revoke](permission_revoke.md)
 
 ## Commands
-### list
+### *list*
 #### Overloads
 **permission list**
 
 Lists all available permissions.
 
-### list-granted
+### *list-granted*
 #### Overloads
 **permission list-granted**
 

@@ -4,7 +4,7 @@
 These commands have no prefix.
 
 ## Commands
-### name
+### *name*
 #### Overloads
 **character set name**
 
@@ -15,7 +15,7 @@ Sets the name of a character.
 | character | Character | `no` |
 | newCharacterName | string | `no` |
 
-### avatar
+### *avatar*
 #### Overloads
 **character set avatar**
 
@@ -26,7 +26,7 @@ Sets the avatar of a character. You can attach an image instead of passing a url
 | character | Character | `no` |
 | newCharacterAvatarUrl | string | `yes` |
 
-### nickname
+### *nickname*
 #### Overloads
 **character set nickname (or character set nick)**
 
@@ -37,7 +37,7 @@ Sets the nickname that the user should have when the character is active.
 | character | Character | `no` |
 | newCharacterNickname | string | `no` |
 
-### summary
+### *summary*
 #### Overloads
 **character set summary**
 
@@ -48,7 +48,7 @@ Sets the summary of a character.
 | character | Character | `no` |
 | newCharacterSummary | string | `no` |
 
-### description
+### *description*
 #### Overloads
 **character set description (or character set desc)**
 
@@ -59,7 +59,7 @@ Sets the description of a character. You can attach a plaintext document instead
 | character | Character | `no` |
 | newCharacterDescription | string | `yes` |
 
-### nsfw
+### *nsfw*
 #### Overloads
 **character set nsfw**
 
@@ -70,7 +70,7 @@ Sets whether or not a character is NSFW.
 | character | Character | `no` |
 | isNSFW | bool | `no` |
 
-### pronoun
+### *pronoun*
 #### Overloads
 **character set pronoun**
 

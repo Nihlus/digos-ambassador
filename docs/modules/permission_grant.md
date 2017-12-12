@@ -4,7 +4,7 @@
 These commands have no prefix.
 
 ## Commands
-### Default
+### *Default*
 #### Overloads
 **permission grant**
 

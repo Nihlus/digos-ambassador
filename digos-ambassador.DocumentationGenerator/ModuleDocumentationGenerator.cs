@@ -294,6 +294,8 @@ namespace DIGOS.Ambassador.Doc
 				}
 
 				var commandSection = new MarkdownSection(commandGroup.Key, 3).AppendContent(commandOverloads);
+				commandSection.Header.Title.Emphasis = Italic;
+
 				moduleCommandsSection.AppendContent(commandSection);
 			}
 

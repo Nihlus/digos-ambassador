@@ -16,13 +16,13 @@ You can also substitute any character name for "current", and your active charac
 * [Set](character_set.md)
 
 ## Commands
-### available-pronouns
+### *available-pronouns*
 #### Overloads
 **character available-pronouns (or character pronouns)**
 
 Shows available pronoun families that can be used with characters.
 
-### show
+### *show*
 #### Overloads
 **character show (or character info)**
 
@@ -38,7 +38,7 @@ Shows quick information about a character.
 | --- | --- | --- |
 | character | Character | `no` |
 
-### create
+### *create*
 #### Overloads
 **character create**
 
@@ -52,7 +52,7 @@ Creates a new character.
 | characterDescription | string | `yes` |
 | characterAvatarUrl | string | `yes` |
 
-### delete
+### *delete*
 #### Overloads
 **character delete**
 
@@ -62,7 +62,7 @@ Deletes the named character.
 | --- | --- | --- |
 | character | Character | `no` |
 
-### list-owned
+### *list-owned*
 #### Overloads
 **character list-owned (as well as character list or character owned)**
 
@@ -72,7 +72,7 @@ Lists the characters owned by a given user.
 | --- | --- | --- |
 | discordUser | IUser | `yes` |
 
-### assume
+### *assume*
 #### Overloads
 **character assume (as well as character become, character transform, or character active)**
 
@@ -82,13 +82,13 @@ Sets the named character as the user's current character.
 | --- | --- | --- |
 | character | Character | `no` |
 
-### clear
+### *clear*
 #### Overloads
 **character clear (as well as character drop or character default)**
 
 Clears any active characters from you, restoring your default form.
 
-### view-gallery
+### *view-gallery*
 #### Overloads
 **character view-gallery (or character gallery)**
 
@@ -98,7 +98,7 @@ View the images in a character's gallery.
 | --- | --- | --- |
 | character | Character | `no` |
 
-### list-images
+### *list-images*
 #### Overloads
 **character list-images**
 
@@ -108,7 +108,7 @@ Lists the images in a character's gallery.
 | --- | --- | --- |
 | character | Character | `no` |
 
-### add-image
+### *add-image*
 #### Overloads
 **character add-image**
 
@@ -135,7 +135,7 @@ Adds a linked image to a character's gallery.
 | imageCaption | string | `yes` |
 | isNSFW | bool | `yes` |
 
-### remove-image
+### *remove-image*
 #### Overloads
 **character remove-image (or character delete-image)**
 
@@ -146,7 +146,7 @@ Removes an image from a character's gallery.
 | character | Character | `no` |
 | imageName | string | `no` |
 
-### transfer-ownership
+### *transfer-ownership*
 #### Overloads
 **character transfer-ownership (or character transfer)**
 

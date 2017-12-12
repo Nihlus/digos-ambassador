@@ -9,13 +9,13 @@ Commands for viewing, adding, and editing dossier entries.
 * [Set](dossier_set.md)
 
 ## Commands
-### list
+### *list*
 #### Overloads
 **dossier list**
 
 Lists the available dossiers.
 
-### view
+### *view*
 #### Overloads
 **dossier view (or dossier show)**
 
@@ -25,7 +25,7 @@ Views the named dossier.
 | --- | --- | --- |
 | title | string | `no` |
 
-### add
+### *add*
 #### Overloads
 **dossier add (or dossier create)**
 
@@ -36,7 +36,7 @@ Adds a new dossier with the given title and summary. A PDF with the full dossier
 | title | string | `no` |
 | summary | string | `yes` |
 
-### remove
+### *remove*
 #### Overloads
 **dossier remove (or dossier delete)**
 
