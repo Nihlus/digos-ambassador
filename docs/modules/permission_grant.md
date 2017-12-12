@@ -3,9 +3,9 @@
 ## Summary
 These commands have no prefix.
 
-### Commands
-#### Default
-##### Overloads
+## Commands
+### Default
+#### Overloads
 **permission grant**
 
 Grant the targeted user the given permission.

@@ -3,9 +3,9 @@
 ## Summary
 These commands have no prefix.
 
-### Commands
-#### Default
-##### Overloads
+## Commands
+### Default
+#### Overloads
 **permission revoke**
 
 Revoke the given permission from the targeted user.
@@ -15,8 +15,8 @@ Revoke the given permission from the targeted user.
 | discordUser | IUser | `no` |
 | revokedPermission | Permission | `no` |
 
-#### target
-##### Overloads
+### target
+#### Overloads
 **permission revoke target**
 
 Revoke the given target permission from the targeted user.

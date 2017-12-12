@@ -279,10 +279,10 @@ namespace DIGOS.Ambassador.Doc
 		[NotNull]
 		protected virtual MarkdownSection GenerateCommandsSection([NotNull] ModuleInfo module)
 		{
-			var moduleCommandsSection = new MarkdownSection("Commands", 3);
+			var moduleCommandsSection = new MarkdownSection("Commands", 2);
 			foreach (var commandGroup in module.Commands.GroupBy(c => c.Name))
 			{
-				var commandOverloads = new MarkdownSection("Overloads", 5);
+				var commandOverloads = new MarkdownSection("Overloads", 4);
 				foreach (var command in commandGroup)
 				{
 					if (command != commandGroup.First())
@@ -293,7 +293,7 @@ namespace DIGOS.Ambassador.Doc
 					commandOverloads.AppendContentRange(GenerateCommandOverloadContent(command));
 				}
 
-				var commandSection = new MarkdownSection(commandGroup.Key, 4).AppendContent(commandOverloads);
+				var commandSection = new MarkdownSection(commandGroup.Key, 3).AppendContent(commandOverloads);
 				moduleCommandsSection.AppendContent(commandSection);
 			}
 
@@ -370,7 +370,7 @@ namespace DIGOS.Ambassador.Doc
 		[NotNull]
 		protected virtual MarkdownSection GenerateSubmodulesSection([NotNull] ModuleInfo module)
 		{
-			var submoduleSection = new MarkdownSection("Submodules", 3);
+			var submoduleSection = new MarkdownSection("Submodules", 2);
 			var submoduleList = new MarkdownList
 			{
 				Type = ListType.Bullet

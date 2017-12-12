@@ -5,9 +5,9 @@ These commands are prefixed with `transform`. You can also use `shift` or `tf` i
 
 Transformation-related commands, such as transforming certain body parts or saving transforms as characters.
 
-### Commands
-#### ShiftAsync
-##### Overloads
+## Commands
+### ShiftAsync
+#### Overloads
 **transform**
 
 Transforms the given bodypart into the given species on yourself.
@@ -29,8 +29,8 @@ Transforms the given bodypart of the target user into the given species.
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
-#### colour
-##### Overloads
+### colour
+#### Overloads
 **transform colour**
 
 Transforms the base colour of the given bodypart on yourself into the given colour.
@@ -52,8 +52,8 @@ Transforms the base colour of the given bodypart on the target user into the giv
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-#### pattern
-##### Overloads
+### pattern
+#### Overloads
 **transform pattern**
 
 Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.
@@ -77,8 +77,8 @@ Transforms the pattern on the given bodypart on the target user into the given p
 | pattern | Pattern | `no` |
 | colour | Colour | `no` |
 
-#### pattern-colour
-##### Overloads
+### pattern-colour
+#### Overloads
 **transform pattern-colour**
 
 Transforms the colour of the pattern on the given bodypart on yourself to the given colour.
@@ -100,8 +100,8 @@ Transforms the colour of the pattern on the given bodypart on the target user to
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-#### list-available
-##### Overloads
+### list-available
+#### Overloads
 **transform list-available (as well as transform list-species or transform species)**
 
 Lists the available transformation species.
@@ -116,8 +116,8 @@ Lists the available transformations for a given bodypart.
 | --- | --- | --- |
 | bodyPart | Bodypart | `no` |
 
-#### describe
-##### Overloads
+### describe
+#### Overloads
 **transform describe**
 
 Describes the current physical appearance of a character.
@@ -126,14 +126,14 @@ Describes the current physical appearance of a character.
 | --- | --- | --- |
 | character | Character | `no` |
 
-#### reset
-##### Overloads
+### reset
+#### Overloads
 **transform reset**
 
 Resets your form to your default one.
 
-#### save
-##### Overloads
+### save
+#### Overloads
 **transform save (or transform save-current)**
 
 Saves your current form as a new character.
@@ -142,14 +142,14 @@ Saves your current form as a new character.
 | --- | --- | --- |
 | newCharacterName | string | `no` |
 
-#### set-default
-##### Overloads
+### set-default
+#### Overloads
 **transform set-default (or transform save-default)**
 
 Sets your current appearance as your current character's default one.
 
-#### default-opt-in
-##### Overloads
+### default-opt-in
+#### Overloads
 **transform default-opt-in**
 
 Sets your default setting for opting in or out of transformations on servers you join.
@@ -158,20 +158,20 @@ Sets your default setting for opting in or out of transformations on servers you
 | --- | --- | --- |
 | shouldOptIn | bool | `yes` |
 
-#### opt-in
-##### Overloads
+### opt-in
+#### Overloads
 **transform opt-in**
 
 Opts into the transformation module on this server.
 
-#### opt-out
-##### Overloads
+### opt-out
+#### Overloads
 **transform opt-out**
 
 Opts out of the transformation module on this server.
 
-#### default-protection
-##### Overloads
+### default-protection
+#### Overloads
 **transform default-protection**
 
 Sets your default protection type for transformations on servers you join. Available types are Whitelist and Blacklist.
@@ -180,8 +180,8 @@ Sets your default protection type for transformations on servers you join. Avail
 | --- | --- | --- |
 | protectionType | ProtectionType | `no` |
 
-#### protection
-##### Overloads
+### protection
+#### Overloads
 **transform protection**
 
 Sets your protection type for transformations. Available types are Whitelist and Blacklist.
@@ -190,8 +190,8 @@ Sets your protection type for transformations. Available types are Whitelist and
 | --- | --- | --- |
 | protectionType | ProtectionType | `no` |
 
-#### whitelist
-##### Overloads
+### whitelist
+#### Overloads
 **transform whitelist**
 
 Whitelists a user, allowing them to transform you.
@@ -200,8 +200,8 @@ Whitelists a user, allowing them to transform you.
 | --- | --- | --- |
 | user | IUser | `no` |
 
-#### blacklist
-##### Overloads
+### blacklist
+#### Overloads
 **transform blacklist**
 
 Blacklists a user, preventing them from transforming you.
@@ -210,8 +210,8 @@ Blacklists a user, preventing them from transforming you.
 | --- | --- | --- |
 | user | IUser | `no` |
 
-#### update-db
-##### Overloads
+### update-db
+#### Overloads
 **transform update-db**
 
 Updates the transformation database with the bundled definitions.

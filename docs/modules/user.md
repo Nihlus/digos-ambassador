@@ -5,12 +5,12 @@ These commands are prefixed with `user`.
 
 User-related commands, such as viewing or editing info about a specific user.
 
-### Submodules
+## Submodules
 * [Set](user_set.md)
 
-### Commands
-#### info
-##### Overloads
+## Commands
+### info
+#### Overloads
 **user info**
 
 Shows known information about the invoking user.

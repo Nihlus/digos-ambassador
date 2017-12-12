@@ -12,12 +12,12 @@ Another user's roleplay: @DIGOS Ambassador:ipsum
 
 You can also substitute any roleplay name for "current", and the active roleplay will be used instead.
 
-### Submodules
+## Submodules
 * [Set](roleplay_set.md)
 
-### Commands
-#### show
-##### Overloads
+## Commands
+### show
+#### Overloads
 **roleplay show (or roleplay info)**
 
 Shows information about the current roleplay.
@@ -32,8 +32,8 @@ Shows information about the specified roleplay.
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
 
-#### list-owned
-##### Overloads
+### list-owned
+#### Overloads
 **roleplay list-owned (or roleplay list)**
 
 Lists the roleplays that the given user owns.
@@ -42,8 +42,8 @@ Lists the roleplays that the given user owns.
 | --- | --- | --- |
 | discordUser | IUser | `yes` |
 
-#### create
-##### Overloads
+### create
+#### Overloads
 **roleplay create**
 
 Creates a new roleplay with the specified name.
@@ -55,8 +55,8 @@ Creates a new roleplay with the specified name.
 | isNSFW | bool | `yes` |
 | isPublic | bool | `yes` |
 
-#### delete
-##### Overloads
+### delete
+#### Overloads
 **roleplay delete**
 
 Deletes the specified roleplay.
@@ -65,8 +65,8 @@ Deletes the specified roleplay.
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
 
-#### join
-##### Overloads
+### join
+#### Overloads
 **roleplay join**
 
 Joins the roleplay owned by the given person with the given name.
@@ -75,8 +75,8 @@ Joins the roleplay owned by the given person with the given name.
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
 
-#### invite
-##### Overloads
+### invite
+#### Overloads
 **roleplay invite**
 
 Invites the specified user to the given roleplay.
@@ -86,8 +86,8 @@ Invites the specified user to the given roleplay.
 | playerToInvite | IUser | `no` |
 | roleplay | Roleplay | `no` |
 
-#### leave
-##### Overloads
+### leave
+#### Overloads
 **roleplay leave**
 
 Leaves the roleplay owned by the given person with the given name.
@@ -96,8 +96,8 @@ Leaves the roleplay owned by the given person with the given name.
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
 
-#### kick
-##### Overloads
+### kick
+#### Overloads
 **roleplay kick**
 
 Kicks the given user from the named roleplay.
@@ -107,8 +107,8 @@ Kicks the given user from the named roleplay.
 | discordUser | IUser | `no` |
 | roleplay | Roleplay | `no` |
 
-#### make-current
-##### Overloads
+### make-current
+#### Overloads
 **roleplay make-current**
 
 Makes the roleplay with the given name current in the current channel.
@@ -117,8 +117,8 @@ Makes the roleplay with the given name current in the current channel.
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
 
-#### start
-##### Overloads
+### start
+#### Overloads
 **roleplay start**
 
 Starts the roleplay with the given name.
@@ -127,8 +127,8 @@ Starts the roleplay with the given name.
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
 
-#### stop
-##### Overloads
+### stop
+#### Overloads
 **roleplay stop**
 
 Stops the given roleplay.
@@ -137,8 +137,8 @@ Stops the given roleplay.
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
 
-#### include-previous
-##### Overloads
+### include-previous
+#### Overloads
 **roleplay include-previous**
 
 Includes previous messages into the roleplay, starting at the given message.
@@ -149,8 +149,8 @@ Includes previous messages into the roleplay, starting at the given message.
 | startMessage | IMessage | `no` |
 | finalMessage | IMessage | `yes` |
 
-#### transfer-ownership
-##### Overloads
+### transfer-ownership
+#### Overloads
 **roleplay transfer-ownership**
 
 Transfers ownership of the named roleplay to the specified user.
@@ -160,8 +160,8 @@ Transfers ownership of the named roleplay to the specified user.
 | newOwner | IUser | `no` |
 | roleplay | Roleplay | `no` |
 
-#### replay
-##### Overloads
+### replay
+#### Overloads
 **roleplay replay**
 
 Replays the named roleplay owned by the given user to you.

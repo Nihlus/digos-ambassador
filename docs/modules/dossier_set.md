@@ -3,9 +3,9 @@
 ## Summary
 These commands have no prefix.
 
-### Commands
-#### title
-##### Overloads
+## Commands
+### title
+#### Overloads
 **dossier set title**
 
 Sets the title of the given dossier.
@@ -15,8 +15,8 @@ Sets the title of the given dossier.
 | title | string | `no` |
 | newTitle | string | `no` |
 
-#### summary
-##### Overloads
+### summary
+#### Overloads
 **dossier set summary**
 
 Sets the summary of the given dossier.
@@ -26,8 +26,8 @@ Sets the summary of the given dossier.
 | title | string | `no` |
 | newSummary | string | `no` |
 
-#### data
-##### Overloads
+### data
+#### Overloads
 **dossier set data**
 
 Sets the data of the given dossier. Attach a PDF to the command.

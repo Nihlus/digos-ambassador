@@ -3,9 +3,9 @@
 ## Summary
 These commands have no prefix.
 
-### Commands
-#### name
-##### Overloads
+## Commands
+### name
+#### Overloads
 **roleplay set name**
 
 Sets the new name of the named roleplay.
@@ -15,8 +15,8 @@ Sets the new name of the named roleplay.
 | newRoleplayName | string | `no` |
 | roleplay | Roleplay | `no` |
 
-#### summary
-##### Overloads
+### summary
+#### Overloads
 **roleplay set summary**
 
 Sets the summary of the named roleplay.
@@ -26,8 +26,8 @@ Sets the summary of the named roleplay.
 | newRoleplaySummary | string | `no` |
 | roleplay | Roleplay | `no` |
 
-#### nsfw
-##### Overloads
+### nsfw
+#### Overloads
 **roleplay set nsfw**
 
 Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.
@@ -37,8 +37,8 @@ Sets a value indicating whether or not the named roleplay is NSFW. This restrict
 | isNSFW | bool | `no` |
 | roleplay | Roleplay | `no` |
 
-#### public
-##### Overloads
+### public
+#### Overloads
 **roleplay set public**
 
 Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.

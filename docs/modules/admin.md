@@ -5,9 +5,9 @@ These commands are prefixed with `admin`.
 
 Administrative commands that directly affect the bot on a global scale.
 
-### Commands
-#### wipe-db
-##### Overloads
+## Commands
+### wipe-db
+#### Overloads
 **admin wipe-db (or admin reset-db)**
 
 Wipes the database, resetting it to its initial state.

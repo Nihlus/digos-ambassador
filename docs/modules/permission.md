@@ -5,19 +5,19 @@ These commands are prefixed with `permission`.
 
 Permission-related commands for granting, revoking and checking user permissions.
 
-### Submodules
+## Submodules
 * [Grant](permission_grant.md)
 * [Revoke](permission_revoke.md)
 
-### Commands
-#### list
-##### Overloads
+## Commands
+### list
+#### Overloads
 **permission list**
 
 Lists all available permissions.
 
-#### list-granted
-##### Overloads
+### list-granted
+#### Overloads
 **permission list-granted**
 
 Lists all permissions that have been granted to the invoking user.

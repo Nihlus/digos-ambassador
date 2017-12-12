@@ -5,9 +5,9 @@ These commands are prefixed with `kink`.
 
 Commands for viewing and configuring user kinks.
 
-### Commands
-#### info
-##### Overloads
+## Commands
+### info
+#### Overloads
 **kink info**
 
 Shows information about the named kink.
@@ -16,8 +16,8 @@ Shows information about the named kink.
 | --- | --- | --- |
 | name | string | `no` |
 
-#### show
-##### Overloads
+### show
+#### Overloads
 **kink show (or kink preference)**
 
 Shows your preference for the named kink.
@@ -37,8 +37,8 @@ Shows the user's preference for the named kink.
 | user | IUser | `no` |
 | name | string | `no` |
 
-#### overlap
-##### Overloads
+### overlap
+#### Overloads
 **kink overlap**
 
 Shows the kinks which overlap between you and the given user.
@@ -47,8 +47,8 @@ Shows the kinks which overlap between you and the given user.
 | --- | --- | --- |
 | otherUser | IUser | `no` |
 
-#### by-preference
-##### Overloads
+### by-preference
+#### Overloads
 **kink by-preference**
 
 Shows your kinks with the given preference.
@@ -68,8 +68,8 @@ Shows the given user's kinks with the given preference.
 | otherUser | IUser | `no` |
 | preference | KinkPreference | `no` |
 
-#### preference
-##### Overloads
+### preference
+#### Overloads
 **kink preference**
 
 Sets your preference for the given kink.
@@ -79,20 +79,20 @@ Sets your preference for the given kink.
 | name | string | `no` |
 | preference | KinkPreference | `no` |
 
-#### wizard
-##### Overloads
+### wizard
+#### Overloads
 **kink wizard**
 
 Runs an interactive wizard for setting kink preferences.
 
-#### update-db
-##### Overloads
+### update-db
+#### Overloads
 **kink update-db**
 
 Updates the kink database with data from F-list.
 
-#### reset
-##### Overloads
+### reset
+#### Overloads
 **kink reset**
 
 Resets all your kink preferences.

@@ -3,9 +3,9 @@
 ## Summary
 These commands have no prefix.
 
-### Commands
-#### class
-##### Overloads
+## Commands
+### class
+#### Overloads
 **user set class**
 
 Sets the invoking user's class.
@@ -25,8 +25,8 @@ Sets the target user's class.
 | discordUser | IUser | `no` |
 | userClass | UserClass | `no` |
 
-#### bio
-##### Overloads
+### bio
+#### Overloads
 **user set bio**
 
 Sets the invoking user's bio.
@@ -46,8 +46,8 @@ Sets the target user's bio.
 | discordUser | IUser | `no` |
 | bio | string | `no` |
 
-#### timezone
-##### Overloads
+### timezone
+#### Overloads
 **user set timezone**
 
 Sets the invoking user's UTC timezone hour offset.
