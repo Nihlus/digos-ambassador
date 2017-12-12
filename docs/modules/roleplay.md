@@ -18,11 +18,11 @@ You can also substitute any roleplay name for "current", and the active roleplay
 ## Commands
 ### *show*
 #### Overloads
-**roleplay show (or roleplay info)**
+**`roleplay show` (or `roleplay info`)**
 
 Shows information about the current roleplay.
 
-**roleplay show (or roleplay info)**
+**`roleplay show` (or `roleplay info`)**
 
 Shows information about the specified roleplay.
 
@@ -34,7 +34,7 @@ Shows information about the specified roleplay.
 
 ### *list-owned*
 #### Overloads
-**roleplay list-owned (or roleplay list)**
+**`roleplay list-owned` (or `roleplay list`)**
 
 Lists the roleplays that the given user owns.
 
@@ -46,7 +46,7 @@ Lists the roleplays that the given user owns.
 
 ### *create*
 #### Overloads
-**roleplay create**
+**`roleplay create`**
 
 Creates a new roleplay with the specified name.
 
@@ -61,7 +61,7 @@ Creates a new roleplay with the specified name.
 
 ### *delete*
 #### Overloads
-**roleplay delete**
+**`roleplay delete`**
 
 Deletes the specified roleplay.
 
@@ -73,7 +73,7 @@ Deletes the specified roleplay.
 
 ### *join*
 #### Overloads
-**roleplay join**
+**`roleplay join`**
 
 Joins the roleplay owned by the given person with the given name.
 
@@ -85,7 +85,7 @@ Joins the roleplay owned by the given person with the given name.
 
 ### *invite*
 #### Overloads
-**roleplay invite**
+**`roleplay invite`**
 
 Invites the specified user to the given roleplay.
 
@@ -98,7 +98,7 @@ Invites the specified user to the given roleplay.
 
 ### *leave*
 #### Overloads
-**roleplay leave**
+**`roleplay leave`**
 
 Leaves the roleplay owned by the given person with the given name.
 
@@ -110,7 +110,7 @@ Leaves the roleplay owned by the given person with the given name.
 
 ### *kick*
 #### Overloads
-**roleplay kick**
+**`roleplay kick`**
 
 Kicks the given user from the named roleplay.
 
@@ -123,7 +123,7 @@ Kicks the given user from the named roleplay.
 
 ### *make-current*
 #### Overloads
-**roleplay make-current**
+**`roleplay make-current`**
 
 Makes the roleplay with the given name current in the current channel.
 
@@ -135,7 +135,7 @@ Makes the roleplay with the given name current in the current channel.
 
 ### *start*
 #### Overloads
-**roleplay start**
+**`roleplay start`**
 
 Starts the roleplay with the given name.
 
@@ -147,7 +147,7 @@ Starts the roleplay with the given name.
 
 ### *stop*
 #### Overloads
-**roleplay stop**
+**`roleplay stop`**
 
 Stops the given roleplay.
 
@@ -159,7 +159,7 @@ Stops the given roleplay.
 
 ### *include-previous*
 #### Overloads
-**roleplay include-previous**
+**`roleplay include-previous`**
 
 Includes previous messages into the roleplay, starting at the given message.
 
@@ -173,7 +173,7 @@ Includes previous messages into the roleplay, starting at the given message.
 
 ### *transfer-ownership*
 #### Overloads
-**roleplay transfer-ownership**
+**`roleplay transfer-ownership`**
 
 Transfers ownership of the named roleplay to the specified user.
 
@@ -186,7 +186,7 @@ Transfers ownership of the named roleplay to the specified user.
 
 ### *replay*
 #### Overloads
-**roleplay replay**
+**`roleplay replay`**
 
 Replays the named roleplay owned by the given user to you.
 

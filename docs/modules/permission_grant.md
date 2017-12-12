@@ -6,7 +6,7 @@ These commands have no prefix.
 ## Commands
 ### *Default*
 #### Overloads
-**permission grant**
+**`permission grant`**
 
 Grant the targeted user the given permission.
 

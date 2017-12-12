@@ -12,7 +12,7 @@ Permission-related commands for granting, revoking and checking user permissions
 ## Commands
 ### *list*
 #### Overloads
-**permission list**
+**`permission list`**
 
 Lists all available permissions.
 
@@ -20,11 +20,11 @@ Lists all available permissions.
 
 ### *list-granted*
 #### Overloads
-**permission list-granted**
+**`permission list-granted`**
 
 Lists all permissions that have been granted to the invoking user.
 
-**permission list-granted**
+**`permission list-granted`**
 
 Lists all permissions that have been granted to target user.
 

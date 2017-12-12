@@ -6,7 +6,7 @@ These commands have no prefix.
 ## Commands
 ### *Default*
 #### Overloads
-**permission revoke**
+**`permission revoke`**
 
 Revoke the given permission from the targeted user.
 
@@ -19,7 +19,7 @@ Revoke the given permission from the targeted user.
 
 ### *target*
 #### Overloads
-**permission revoke target**
+**`permission revoke target`**
 
 Revoke the given target permission from the targeted user.
 

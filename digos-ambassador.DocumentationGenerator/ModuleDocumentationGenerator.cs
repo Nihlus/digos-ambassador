@@ -317,10 +317,10 @@ namespace DIGOS.Ambassador.Doc
 				: "or";
 
 			var commandExtraAliases = relevantAliases.Any()
-				? $"({prefix} {relevantAliases.Humanize("or")})"
+				? $"({prefix} {relevantAliases.Select(a => new MarkdownInlineCode(a).Compile()).Humanize("or")})"
 				: string.Empty;
 
-			var commandDisplayAliases = $"{command.Aliases.First()} {commandExtraAliases}".Trim();
+			var commandDisplayAliases = $"{new MarkdownInlineCode(command.Aliases.First()).Compile()} {commandExtraAliases}".Trim();
 
 			yield return new MarkdownParagraph()
 			.AppendLine

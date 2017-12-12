@@ -6,7 +6,7 @@ These commands have no prefix.
 ## Commands
 ### *class*
 #### Overloads
-**user set class**
+**`user set class`**
 
 Sets the invoking user's class.
 
@@ -14,7 +14,7 @@ Sets the invoking user's class.
 | --- | --- | --- |
 | userClass | UserClass | `no` |
 
-**user set class**
+**`user set class`**
 
 Sets the target user's class.
 
@@ -27,7 +27,7 @@ Sets the target user's class.
 
 ### *bio*
 #### Overloads
-**user set bio**
+**`user set bio`**
 
 Sets the invoking user's bio.
 
@@ -35,7 +35,7 @@ Sets the invoking user's bio.
 | --- | --- | --- |
 | bio | string | `no` |
 
-**user set bio**
+**`user set bio`**
 
 Sets the target user's bio.
 
@@ -48,7 +48,7 @@ Sets the target user's bio.
 
 ### *timezone*
 #### Overloads
-**user set timezone**
+**`user set timezone`**
 
 Sets the invoking user's UTC timezone hour offset.
 
@@ -56,7 +56,7 @@ Sets the invoking user's UTC timezone hour offset.
 | --- | --- | --- |
 | timezone | int | `no` |
 
-**user set timezone**
+**`user set timezone`**
 
 Sets the target user's UTC timezone hour offset.
 

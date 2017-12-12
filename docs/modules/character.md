@@ -18,7 +18,7 @@ You can also substitute any character name for "current", and your active charac
 ## Commands
 ### *available-pronouns*
 #### Overloads
-**character available-pronouns (or character pronouns)**
+**`character available-pronouns` (or `character pronouns`)**
 
 Shows available pronoun families that can be used with characters.
 
@@ -26,11 +26,11 @@ Shows available pronoun families that can be used with characters.
 
 ### *show*
 #### Overloads
-**character show (or character info)**
+**`character show` (or `character info`)**
 
 Shows quick information about your current character.
 
-**character show (or character info)**
+**`character show` (or `character info`)**
 
 Shows quick information about a character.
 
@@ -42,7 +42,7 @@ Shows quick information about a character.
 
 ### *create*
 #### Overloads
-**character create**
+**`character create`**
 
 Creates a new character.
 
@@ -58,7 +58,7 @@ Creates a new character.
 
 ### *delete*
 #### Overloads
-**character delete**
+**`character delete`**
 
 Deletes the named character.
 
@@ -70,7 +70,7 @@ Deletes the named character.
 
 ### *list-owned*
 #### Overloads
-**character list-owned (as well as character list or character owned)**
+**`character list-owned` (as well as `character list` or `character owned`)**
 
 Lists the characters owned by a given user.
 
@@ -82,7 +82,7 @@ Lists the characters owned by a given user.
 
 ### *assume*
 #### Overloads
-**character assume (as well as character become, character transform, or character active)**
+**`character assume` (as well as `character become`, `character transform`, or `character active`)**
 
 Sets the named character as the user's current character.
 
@@ -94,7 +94,7 @@ Sets the named character as the user's current character.
 
 ### *clear*
 #### Overloads
-**character clear (as well as character drop or character default)**
+**`character clear` (as well as `character drop` or `character default`)**
 
 Clears any active characters from you, restoring your default form.
 
@@ -102,7 +102,7 @@ Clears any active characters from you, restoring your default form.
 
 ### *view-gallery*
 #### Overloads
-**character view-gallery (or character gallery)**
+**`character view-gallery` (or `character gallery`)**
 
 View the images in a character's gallery.
 
@@ -114,7 +114,7 @@ View the images in a character's gallery.
 
 ### *list-images*
 #### Overloads
-**character list-images**
+**`character list-images`**
 
 Lists the images in a character's gallery.
 
@@ -126,7 +126,7 @@ Lists the images in a character's gallery.
 
 ### *add-image*
 #### Overloads
-**character add-image**
+**`character add-image`**
 
 Adds an attached image to a character's gallery.
 
@@ -137,7 +137,7 @@ Adds an attached image to a character's gallery.
 | imageCaption | string | `yes` |
 | isNSFW | bool | `yes` |
 
-**character add-image**
+**`character add-image`**
 
 Adds a linked image to a character's gallery.
 
@@ -153,7 +153,7 @@ Adds a linked image to a character's gallery.
 
 ### *remove-image*
 #### Overloads
-**character remove-image (or character delete-image)**
+**`character remove-image` (or `character delete-image`)**
 
 Removes an image from a character's gallery.
 
@@ -166,7 +166,7 @@ Removes an image from a character's gallery.
 
 ### *transfer-ownership*
 #### Overloads
-**character transfer-ownership (or character transfer)**
+**`character transfer-ownership` (or `character transfer`)**
 
 Transfers ownership of the named character to another user.
 

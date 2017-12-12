@@ -8,11 +8,11 @@ Assorted commands that don't really fit anywhere - just for fun, testing, etc.
 ## Commands
 ### *contact*
 #### Overloads
-**contact**
+**`contact`**
 
 Instructs Amby to contact you over DM.
 
-**contact**
+**`contact`**
 
 Instructs Amby to contact a user over DM.
 
@@ -24,7 +24,7 @@ Instructs Amby to contact a user over DM.
 
 ### *sass*
 #### Overloads
-**sass**
+**`sass`**
 
 Sasses the user in a DIGOS fashion.
 
@@ -32,7 +32,7 @@ Sasses the user in a DIGOS fashion.
 
 ### *boop*
 #### Overloads
-**boop (or bap)**
+**`boop` (or `bap`)**
 
 Boops the user.
 
@@ -40,7 +40,7 @@ Boops the user.
 
 ### *info*
 #### Overloads
-**info (as well as information or about)**
+**`info` (as well as `information` or `about`)**
 
 Shows some information about Amby's metaworkings.
 
@@ -48,11 +48,11 @@ Shows some information about Amby's metaworkings.
 
 ### *help*
 #### Overloads
-**help (as well as halp, hlep, or commands)**
+**`help` (as well as `halp`, `hlep`, or `commands`)**
 
 Lists available command modules.
 
-**help (as well as halp, hlep, or commands)**
+**`help` (as well as `halp`, `hlep`, or `commands`)**
 
 Lists available commands that match the given search text.
 

@@ -6,7 +6,7 @@ These commands have no prefix.
 ## Commands
 ### *name*
 #### Overloads
-**character set name**
+**`character set name`**
 
 Sets the name of a character.
 
@@ -19,7 +19,7 @@ Sets the name of a character.
 
 ### *avatar*
 #### Overloads
-**character set avatar**
+**`character set avatar`**
 
 Sets the avatar of a character. You can attach an image instead of passing a url as a parameter.
 
@@ -32,7 +32,7 @@ Sets the avatar of a character. You can attach an image instead of passing a url
 
 ### *nickname*
 #### Overloads
-**character set nickname (or character set nick)**
+**`character set nickname` (or `character set nick`)**
 
 Sets the nickname that the user should have when the character is active.
 
@@ -45,7 +45,7 @@ Sets the nickname that the user should have when the character is active.
 
 ### *summary*
 #### Overloads
-**character set summary**
+**`character set summary`**
 
 Sets the summary of a character.
 
@@ -58,7 +58,7 @@ Sets the summary of a character.
 
 ### *description*
 #### Overloads
-**character set description (or character set desc)**
+**`character set description` (or `character set desc`)**
 
 Sets the description of a character. You can attach a plaintext document instead of passing it as a parameter.
 
@@ -71,7 +71,7 @@ Sets the description of a character. You can attach a plaintext document instead
 
 ### *nsfw*
 #### Overloads
-**character set nsfw**
+**`character set nsfw`**
 
 Sets whether or not a character is NSFW.
 
@@ -84,7 +84,7 @@ Sets whether or not a character is NSFW.
 
 ### *pronoun*
 #### Overloads
-**character set pronoun**
+**`character set pronoun`**
 
 Sets the preferred pronoun of a character.
 

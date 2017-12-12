@@ -8,7 +8,7 @@ Transformation-related commands, such as transforming certain body parts or savi
 ## Commands
 ### *ShiftAsync*
 #### Overloads
-**transform**
+**`transform`**
 
 Transforms the given bodypart into the given species on yourself.
 
@@ -17,7 +17,7 @@ Transforms the given bodypart into the given species on yourself.
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
-**transform**
+**`transform`**
 
 Transforms the given bodypart of the target user into the given species.
 
@@ -31,7 +31,7 @@ Transforms the given bodypart of the target user into the given species.
 
 ### *colour*
 #### Overloads
-**transform colour**
+**`transform colour`**
 
 Transforms the base colour of the given bodypart on yourself into the given colour.
 
@@ -40,7 +40,7 @@ Transforms the base colour of the given bodypart on yourself into the given colo
 | bodypart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-**transform colour**
+**`transform colour`**
 
 Transforms the base colour of the given bodypart on the target user into the given colour.
 
@@ -54,7 +54,7 @@ Transforms the base colour of the given bodypart on the target user into the giv
 
 ### *pattern*
 #### Overloads
-**transform pattern**
+**`transform pattern`**
 
 Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.
 
@@ -64,7 +64,7 @@ Transforms the pattern on the given bodypart on yourself into the given pattern 
 | pattern | Pattern | `no` |
 | colour | Colour | `no` |
 
-**transform pattern**
+**`transform pattern`**
 
 Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
 
@@ -79,7 +79,7 @@ Transforms the pattern on the given bodypart on the target user into the given p
 
 ### *pattern-colour*
 #### Overloads
-**transform pattern-colour**
+**`transform pattern-colour`**
 
 Transforms the colour of the pattern on the given bodypart on yourself to the given colour.
 
@@ -88,7 +88,7 @@ Transforms the colour of the pattern on the given bodypart on yourself to the gi
 | bodypart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-**transform pattern-colour**
+**`transform pattern-colour`**
 
 Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
 
@@ -102,11 +102,11 @@ Transforms the colour of the pattern on the given bodypart on the target user to
 
 ### *list-available*
 #### Overloads
-**transform list-available (as well as transform list-species or transform species)**
+**`transform list-available` (as well as `transform list-species` or `transform species`)**
 
 Lists the available transformation species.
 
-**transform list-available**
+**`transform list-available`**
 
 Lists the available transformations for a given bodypart.
 
@@ -118,7 +118,7 @@ Lists the available transformations for a given bodypart.
 
 ### *describe*
 #### Overloads
-**transform describe**
+**`transform describe`**
 
 Describes the current physical appearance of a character.
 
@@ -130,7 +130,7 @@ Describes the current physical appearance of a character.
 
 ### *reset*
 #### Overloads
-**transform reset**
+**`transform reset`**
 
 Resets your form to your default one.
 
@@ -138,7 +138,7 @@ Resets your form to your default one.
 
 ### *save*
 #### Overloads
-**transform save (or transform save-current)**
+**`transform save` (or `transform save-current`)**
 
 Saves your current form as a new character.
 
@@ -150,7 +150,7 @@ Saves your current form as a new character.
 
 ### *set-default*
 #### Overloads
-**transform set-default (or transform save-default)**
+**`transform set-default` (or `transform save-default`)**
 
 Sets your current appearance as your current character's default one.
 
@@ -158,7 +158,7 @@ Sets your current appearance as your current character's default one.
 
 ### *default-opt-in*
 #### Overloads
-**transform default-opt-in**
+**`transform default-opt-in`**
 
 Sets your default setting for opting in or out of transformations on servers you join.
 
@@ -170,7 +170,7 @@ Sets your default setting for opting in or out of transformations on servers you
 
 ### *opt-in*
 #### Overloads
-**transform opt-in**
+**`transform opt-in`**
 
 Opts into the transformation module on this server.
 
@@ -178,7 +178,7 @@ Opts into the transformation module on this server.
 
 ### *opt-out*
 #### Overloads
-**transform opt-out**
+**`transform opt-out`**
 
 Opts out of the transformation module on this server.
 
@@ -186,7 +186,7 @@ Opts out of the transformation module on this server.
 
 ### *default-protection*
 #### Overloads
-**transform default-protection**
+**`transform default-protection`**
 
 Sets your default protection type for transformations on servers you join. Available types are Whitelist and Blacklist.
 
@@ -198,7 +198,7 @@ Sets your default protection type for transformations on servers you join. Avail
 
 ### *protection*
 #### Overloads
-**transform protection**
+**`transform protection`**
 
 Sets your protection type for transformations. Available types are Whitelist and Blacklist.
 
@@ -210,7 +210,7 @@ Sets your protection type for transformations. Available types are Whitelist and
 
 ### *whitelist*
 #### Overloads
-**transform whitelist**
+**`transform whitelist`**
 
 Whitelists a user, allowing them to transform you.
 
@@ -222,7 +222,7 @@ Whitelists a user, allowing them to transform you.
 
 ### *blacklist*
 #### Overloads
-**transform blacklist**
+**`transform blacklist`**
 
 Blacklists a user, preventing them from transforming you.
 
@@ -234,7 +234,7 @@ Blacklists a user, preventing them from transforming you.
 
 ### *update-db*
 #### Overloads
-**transform update-db**
+**`transform update-db`**
 
 Updates the transformation database with the bundled definitions.
 
