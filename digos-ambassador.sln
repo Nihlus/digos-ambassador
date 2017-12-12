@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos-ambassador.Tests", "d
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos-ambassador.Tools", "digos-ambassador.Tools\digos-ambassador.Tools.csproj", "{3F5CD95D-F64C-4CD0-82BF-224156733C9B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos-ambassador.DocumentationGenerator", "digos-ambassador.DocumentationGenerator\digos-ambassador.DocumentationGenerator.csproj", "{B90660FB-2903-4FE4-BBE3-4E46A3D1A29B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos-ambassador.DocumentationGenerator", "digos-ambassador.Doc\digos-ambassador.Doc.csproj", "{B90660FB-2903-4FE4-BBE3-4E46A3D1A29B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

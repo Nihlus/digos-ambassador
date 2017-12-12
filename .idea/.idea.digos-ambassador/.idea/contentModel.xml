@@ -306,7 +306,7 @@
         </e>
         <e p="regenerate-ef.sh" t="Include" />
       </e>
-      <e p="digos-ambassador.DocumentationGenerator" t="IncludeRecursive">
+      <e p="digos-ambassador.Doc" t="IncludeRecursive">
         <e p="Extensions" t="Include">
           <e p="ModuleExtensions.cs" t="Include" />
         </e>
@@ -336,11 +336,11 @@
         <e p="Options.cs" t="Include" />
         <e p="Program.cs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
-        <e p="digos-ambassador.DocumentationGenerator.csproj" t="IncludeRecursive" />
+        <e p="digos-ambassador.Doc.csproj" t="IncludeRecursive" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
             <e p="netcoreapp2.0" t="Include">
-              <e p="digos-ambassador.DocumentationGenerator.AssemblyInfo.cs" t="Include" />
+              <e p="digos-ambassador.Doc.AssemblyInfo.cs" t="Include" />
             </e>
           </e>
         </e>
