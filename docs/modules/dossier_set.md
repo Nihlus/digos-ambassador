@@ -1,7 +1,7 @@
 ﻿Dossier Set Commands
 ====================
 ## Summary
-These commands have no prefix.
+These commands are prefixed with `dossier set`.
 
 ## Commands
 ### *title*

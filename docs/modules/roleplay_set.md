@@ -1,12 +1,12 @@
 ﻿Roleplay Set Commands
 =====================
 ## Summary
-These commands have no prefix.
+These commands are prefixed with `roleplay set`. You can also use `rp set` instead of `roleplay set`.
 
 ## Commands
 ### *name*
 #### Overloads
-**roleplay set name**
+**`roleplay set name`**
 
 Sets the new name of the named roleplay.
 
@@ -19,7 +19,7 @@ Sets the new name of the named roleplay.
 
 ### *summary*
 #### Overloads
-**roleplay set summary**
+**`roleplay set summary`**
 
 Sets the summary of the named roleplay.
 
@@ -32,7 +32,7 @@ Sets the summary of the named roleplay.
 
 ### *nsfw*
 #### Overloads
-**roleplay set nsfw**
+**`roleplay set nsfw`**
 
 Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.
 
@@ -45,7 +45,7 @@ Sets a value indicating whether or not the named roleplay is NSFW. This restrict
 
 ### *public*
 #### Overloads
-**roleplay set public**
+**`roleplay set public`**
 
 Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.
 

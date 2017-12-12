@@ -186,7 +186,8 @@ namespace DIGOS.Ambassador.Doc
 		private bool HasPrefix([NotNull] ModuleInfo info)
 		{
 			// Workaround for empty ModuleInfo::Attributes
-			return info.Aliases.Contains(info.Name);
+			var baseAlias = info.GetNameChain();
+			return info.Aliases.Contains(baseAlias);
 		}
 
 		/// <summary>
@@ -217,7 +218,7 @@ namespace DIGOS.Ambassador.Doc
 		{
 			var page = new MarkdownPage
 			(
-				module.GetNameChain(),
+				module.GetNameChain().Replace(" ", "_"),
 				$"{module.GetNameChain().Humanize()} commands".Transform(To.TitleCase)
 			);
 
@@ -255,10 +256,10 @@ namespace DIGOS.Ambassador.Doc
 			{
 				var relevantModuleAliases = module.Aliases.Skip(1).Select(a => new MarkdownInlineCode(a).Compile());
 				var moduleExtraAliases = module.Aliases.Count > 1
-					? $"You can also use {relevantModuleAliases.Humanize("or")} instead of `{module.Name}`."
+					? $"You can also use {relevantModuleAliases.Humanize("or")} instead of `{module.GetNameChain()}`."
 					: string.Empty;
 
-				modulePrefixText = $"These commands are prefixed with `{module.Name}`. {moduleExtraAliases}";
+				modulePrefixText = $"These commands are prefixed with `{module.GetNameChain()}`. {moduleExtraAliases}";
 			}
 
 			var summarySection = new MarkdownSection("Summary", 2).AppendContent
@@ -387,7 +388,7 @@ namespace DIGOS.Ambassador.Doc
 				(
 					new MarkdownLink
 					(
-						$"{submodule.GetNameChain()}.md",
+						$"{submodule.GetNameChain().Replace(" ", "_")}.md",
 						submodule.Name.Humanize()
 					)
 				);

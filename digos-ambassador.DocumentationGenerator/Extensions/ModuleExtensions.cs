@@ -34,11 +34,11 @@ namespace DIGOS.Ambassador.Doc.Extensions
 		/// Gets the name chain of a module, that is, the name of its parent followed by the module's name.
 		/// </summary>
 		/// <param name="this">The module to get the chain of.</param>
-		/// <returns>A name chain in the form of [parentName]_[childName]</returns>
+		/// <returns>A name chain in the form of "[parentName] [childName]"</returns>
 		[NotNull]
 		public static string GetNameChain([NotNull] this ModuleInfo @this)
 		{
-			return @this.IsSubmodule ? $"{GetNameChain(@this.Parent)}_{@this.Name}" : @this.Name;
+			return @this.IsSubmodule ? $"{GetNameChain(@this.Parent)} {@this.Name}" : @this.Name;
 		}
 	}
 }

@@ -1,7 +1,7 @@
 ﻿Permission Revoke Commands
 ==========================
 ## Summary
-These commands have no prefix.
+These commands are prefixed with `permission revoke`.
 
 ## Commands
 ### *Default*

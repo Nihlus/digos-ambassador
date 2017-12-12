@@ -1,7 +1,7 @@
 ﻿User Set Commands
 =================
 ## Summary
-These commands have no prefix.
+These commands are prefixed with `user set`.
 
 ## Commands
 ### *class*

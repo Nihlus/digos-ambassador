@@ -1,7 +1,7 @@
 ﻿Character Set Commands
 ======================
 ## Summary
-These commands have no prefix.
+These commands are prefixed with `character set`. You can also use `char set` or `ch set` instead of `character set`.
 
 ## Commands
 ### *name*

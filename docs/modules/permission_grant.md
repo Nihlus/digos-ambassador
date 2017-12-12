@@ -1,7 +1,7 @@
 ﻿Permission Grant Commands
 =========================
 ## Summary
-These commands have no prefix.
+These commands are prefixed with `permission grant`.
 
 ## Commands
 ### *Default*
