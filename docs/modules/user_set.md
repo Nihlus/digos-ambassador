@@ -14,8 +14,6 @@ Sets the invoking user's class.
 | --- | --- | --- |
 | userClass | UserClass | `no` |
 
----
-
 **user set class**
 
 Sets the target user's class.
@@ -24,6 +22,8 @@ Sets the target user's class.
 | --- | --- | --- |
 | discordUser | IUser | `no` |
 | userClass | UserClass | `no` |
+
+---
 
 ### *bio*
 #### Overloads
@@ -35,8 +35,6 @@ Sets the invoking user's bio.
 | --- | --- | --- |
 | bio | string | `no` |
 
----
-
 **user set bio**
 
 Sets the target user's bio.
@@ -45,6 +43,8 @@ Sets the target user's bio.
 | --- | --- | --- |
 | discordUser | IUser | `no` |
 | bio | string | `no` |
+
+---
 
 ### *timezone*
 #### Overloads
@@ -55,8 +55,6 @@ Sets the invoking user's UTC timezone hour offset.
 | Name | Type | Optional |
 | --- | --- | --- |
 | timezone | int | `no` |
-
----
 
 **user set timezone**
 

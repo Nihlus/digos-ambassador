@@ -15,6 +15,8 @@ Revoke the given permission from the targeted user.
 | discordUser | IUser | `no` |
 | revokedPermission | Permission | `no` |
 
+---
+
 ### *target*
 #### Overloads
 **permission revoke target**

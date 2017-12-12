@@ -15,6 +15,8 @@ Sets the name of a character.
 | character | Character | `no` |
 | newCharacterName | string | `no` |
 
+---
+
 ### *avatar*
 #### Overloads
 **character set avatar**
@@ -25,6 +27,8 @@ Sets the avatar of a character. You can attach an image instead of passing a url
 | --- | --- | --- |
 | character | Character | `no` |
 | newCharacterAvatarUrl | string | `yes` |
+
+---
 
 ### *nickname*
 #### Overloads
@@ -37,6 +41,8 @@ Sets the nickname that the user should have when the character is active.
 | character | Character | `no` |
 | newCharacterNickname | string | `no` |
 
+---
+
 ### *summary*
 #### Overloads
 **character set summary**
@@ -47,6 +53,8 @@ Sets the summary of a character.
 | --- | --- | --- |
 | character | Character | `no` |
 | newCharacterSummary | string | `no` |
+
+---
 
 ### *description*
 #### Overloads
@@ -59,6 +67,8 @@ Sets the description of a character. You can attach a plaintext document instead
 | character | Character | `no` |
 | newCharacterDescription | string | `yes` |
 
+---
+
 ### *nsfw*
 #### Overloads
 **character set nsfw**
@@ -69,6 +79,8 @@ Sets whether or not a character is NSFW.
 | --- | --- | --- |
 | character | Character | `no` |
 | isNSFW | bool | `no` |
+
+---
 
 ### *pronoun*
 #### Overloads

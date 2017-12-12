@@ -16,13 +16,13 @@ Permission-related commands for granting, revoking and checking user permissions
 
 Lists all available permissions.
 
+---
+
 ### *list-granted*
 #### Overloads
 **permission list-granted**
 
 Lists all permissions that have been granted to the invoking user.
-
----
 
 **permission list-granted**
 

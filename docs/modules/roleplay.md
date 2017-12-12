@@ -22,8 +22,6 @@ You can also substitute any roleplay name for "current", and the active roleplay
 
 Shows information about the current roleplay.
 
----
-
 **roleplay show (or roleplay info)**
 
 Shows information about the specified roleplay.
@@ -31,6 +29,8 @@ Shows information about the specified roleplay.
 | Name | Type | Optional |
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
+
+---
 
 ### *list-owned*
 #### Overloads
@@ -41,6 +41,8 @@ Lists the roleplays that the given user owns.
 | Name | Type | Optional |
 | --- | --- | --- |
 | discordUser | IUser | `yes` |
+
+---
 
 ### *create*
 #### Overloads
@@ -55,6 +57,8 @@ Creates a new roleplay with the specified name.
 | isNSFW | bool | `yes` |
 | isPublic | bool | `yes` |
 
+---
+
 ### *delete*
 #### Overloads
 **roleplay delete**
@@ -65,6 +69,8 @@ Deletes the specified roleplay.
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
 
+---
+
 ### *join*
 #### Overloads
 **roleplay join**
@@ -74,6 +80,8 @@ Joins the roleplay owned by the given person with the given name.
 | Name | Type | Optional |
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
+
+---
 
 ### *invite*
 #### Overloads
@@ -86,6 +94,8 @@ Invites the specified user to the given roleplay.
 | playerToInvite | IUser | `no` |
 | roleplay | Roleplay | `no` |
 
+---
+
 ### *leave*
 #### Overloads
 **roleplay leave**
@@ -95,6 +105,8 @@ Leaves the roleplay owned by the given person with the given name.
 | Name | Type | Optional |
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
+
+---
 
 ### *kick*
 #### Overloads
@@ -107,6 +119,8 @@ Kicks the given user from the named roleplay.
 | discordUser | IUser | `no` |
 | roleplay | Roleplay | `no` |
 
+---
+
 ### *make-current*
 #### Overloads
 **roleplay make-current**
@@ -116,6 +130,8 @@ Makes the roleplay with the given name current in the current channel.
 | Name | Type | Optional |
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
+
+---
 
 ### *start*
 #### Overloads
@@ -127,6 +143,8 @@ Starts the roleplay with the given name.
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
 
+---
+
 ### *stop*
 #### Overloads
 **roleplay stop**
@@ -136,6 +154,8 @@ Stops the given roleplay.
 | Name | Type | Optional |
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
+
+---
 
 ### *include-previous*
 #### Overloads
@@ -149,6 +169,8 @@ Includes previous messages into the roleplay, starting at the given message.
 | startMessage | IMessage | `no` |
 | finalMessage | IMessage | `yes` |
 
+---
+
 ### *transfer-ownership*
 #### Overloads
 **roleplay transfer-ownership**
@@ -159,6 +181,8 @@ Transfers ownership of the named roleplay to the specified user.
 | --- | --- | --- |
 | newOwner | IUser | `no` |
 | roleplay | Roleplay | `no` |
+
+---
 
 ### *replay*
 #### Overloads

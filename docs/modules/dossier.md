@@ -15,6 +15,8 @@ Commands for viewing, adding, and editing dossier entries.
 
 Lists the available dossiers.
 
+---
+
 ### *view*
 #### Overloads
 **dossier view (or dossier show)**
@@ -24,6 +26,8 @@ Views the named dossier.
 | Name | Type | Optional |
 | --- | --- | --- |
 | title | string | `no` |
+
+---
 
 ### *add*
 #### Overloads
@@ -35,6 +39,8 @@ Adds a new dossier with the given title and summary. A PDF with the full dossier
 | --- | --- | --- |
 | title | string | `no` |
 | summary | string | `yes` |
+
+---
 
 ### *remove*
 #### Overloads

@@ -280,16 +280,17 @@ namespace DIGOS.Ambassador.Doc
 		protected virtual MarkdownSection GenerateCommandsSection([NotNull] ModuleInfo module)
 		{
 			var moduleCommandsSection = new MarkdownSection("Commands", 2);
-			foreach (var commandGroup in module.Commands.GroupBy(c => c.Name))
+			var commandGroups = module.Commands.GroupBy(c => c.Name).ToList();
+			foreach (var commandGroup in commandGroups)
 			{
+				if (commandGroup != commandGroups.First())
+				{
+					moduleCommandsSection.AppendContent(new MarkdownHorizontalRule());
+				}
+
 				var commandOverloads = new MarkdownSection("Overloads", 4);
 				foreach (var command in commandGroup)
 				{
-					if (command != commandGroup.First())
-					{
-						commandOverloads.AppendContent(new MarkdownHorizontalRule());
-					}
-
 					commandOverloads.AppendContentRange(GenerateCommandOverloadContent(command));
 				}
 

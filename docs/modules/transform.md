@@ -17,8 +17,6 @@ Transforms the given bodypart into the given species on yourself.
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
----
-
 **transform**
 
 Transforms the given bodypart of the target user into the given species.
@@ -28,6 +26,8 @@ Transforms the given bodypart of the target user into the given species.
 | target | IUser | `no` |
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
+
+---
 
 ### *colour*
 #### Overloads
@@ -40,8 +40,6 @@ Transforms the base colour of the given bodypart on yourself into the given colo
 | bodypart | Bodypart | `no` |
 | colour | Colour | `no` |
 
----
-
 **transform colour**
 
 Transforms the base colour of the given bodypart on the target user into the given colour.
@@ -51,6 +49,8 @@ Transforms the base colour of the given bodypart on the target user into the giv
 | target | IUser | `no` |
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
+
+---
 
 ### *pattern*
 #### Overloads
@@ -64,8 +64,6 @@ Transforms the pattern on the given bodypart on yourself into the given pattern 
 | pattern | Pattern | `no` |
 | colour | Colour | `no` |
 
----
-
 **transform pattern**
 
 Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
@@ -76,6 +74,8 @@ Transforms the pattern on the given bodypart on the target user into the given p
 | bodyPart | Bodypart | `no` |
 | pattern | Pattern | `no` |
 | colour | Colour | `no` |
+
+---
 
 ### *pattern-colour*
 #### Overloads
@@ -88,8 +88,6 @@ Transforms the colour of the pattern on the given bodypart on yourself to the gi
 | bodypart | Bodypart | `no` |
 | colour | Colour | `no` |
 
----
-
 **transform pattern-colour**
 
 Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
@@ -100,13 +98,13 @@ Transforms the colour of the pattern on the given bodypart on the target user to
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
 
+---
+
 ### *list-available*
 #### Overloads
 **transform list-available (as well as transform list-species or transform species)**
 
 Lists the available transformation species.
-
----
 
 **transform list-available**
 
@@ -115,6 +113,8 @@ Lists the available transformations for a given bodypart.
 | Name | Type | Optional |
 | --- | --- | --- |
 | bodyPart | Bodypart | `no` |
+
+---
 
 ### *describe*
 #### Overloads
@@ -126,11 +126,15 @@ Describes the current physical appearance of a character.
 | --- | --- | --- |
 | character | Character | `no` |
 
+---
+
 ### *reset*
 #### Overloads
 **transform reset**
 
 Resets your form to your default one.
+
+---
 
 ### *save*
 #### Overloads
@@ -142,11 +146,15 @@ Saves your current form as a new character.
 | --- | --- | --- |
 | newCharacterName | string | `no` |
 
+---
+
 ### *set-default*
 #### Overloads
 **transform set-default (or transform save-default)**
 
 Sets your current appearance as your current character's default one.
+
+---
 
 ### *default-opt-in*
 #### Overloads
@@ -158,17 +166,23 @@ Sets your default setting for opting in or out of transformations on servers you
 | --- | --- | --- |
 | shouldOptIn | bool | `yes` |
 
+---
+
 ### *opt-in*
 #### Overloads
 **transform opt-in**
 
 Opts into the transformation module on this server.
 
+---
+
 ### *opt-out*
 #### Overloads
 **transform opt-out**
 
 Opts out of the transformation module on this server.
+
+---
 
 ### *default-protection*
 #### Overloads
@@ -180,6 +194,8 @@ Sets your default protection type for transformations on servers you join. Avail
 | --- | --- | --- |
 | protectionType | ProtectionType | `no` |
 
+---
+
 ### *protection*
 #### Overloads
 **transform protection**
@@ -189,6 +205,8 @@ Sets your protection type for transformations. Available types are Whitelist and
 | Name | Type | Optional |
 | --- | --- | --- |
 | protectionType | ProtectionType | `no` |
+
+---
 
 ### *whitelist*
 #### Overloads
@@ -200,6 +218,8 @@ Whitelists a user, allowing them to transform you.
 | --- | --- | --- |
 | user | IUser | `no` |
 
+---
+
 ### *blacklist*
 #### Overloads
 **transform blacklist**
@@ -209,6 +229,8 @@ Blacklists a user, preventing them from transforming you.
 | Name | Type | Optional |
 | --- | --- | --- |
 | user | IUser | `no` |
+
+---
 
 ### *update-db*
 #### Overloads

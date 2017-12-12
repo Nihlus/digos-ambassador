@@ -12,8 +12,6 @@ Assorted commands that don't really fit anywhere - just for fun, testing, etc.
 
 Instructs Amby to contact you over DM.
 
----
-
 **contact**
 
 Instructs Amby to contact a user over DM.
@@ -22,11 +20,15 @@ Instructs Amby to contact a user over DM.
 | --- | --- | --- |
 | discordUser | IUser | `no` |
 
+---
+
 ### *sass*
 #### Overloads
 **sass**
 
 Sasses the user in a DIGOS fashion.
+
+---
 
 ### *boop*
 #### Overloads
@@ -34,19 +36,21 @@ Sasses the user in a DIGOS fashion.
 
 Boops the user.
 
+---
+
 ### *info*
 #### Overloads
 **info (as well as information or about)**
 
 Shows some information about Amby's metaworkings.
 
+---
+
 ### *help*
 #### Overloads
 **help (as well as halp, hlep, or commands)**
 
 Lists available command modules.
-
----
 
 **help (as well as halp, hlep, or commands)**
 
