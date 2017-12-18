@@ -21,7 +21,6 @@
 //
 
 using JetBrains.Annotations;
-using YamlDotNet.Core;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {

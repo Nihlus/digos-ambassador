@@ -24,16 +24,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
 
-using DIGOS.Ambassador.Database.Appearances;
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.TypeReaders;
-
-using Discord;
-
 namespace DIGOS.Ambassador.Doc
 {
 	/// <summary>

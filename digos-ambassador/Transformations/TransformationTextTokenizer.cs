@@ -59,6 +59,7 @@ namespace DIGOS.Ambassador.Transformations
 				t =>
 					t.ImplementedInterfaces.Contains(typeof(IReplaceableTextToken))
 					&& !t.IsInterface
+					&& !(t.BaseType is null)
 					&& t.BaseType.IsGenericType
 					&&
 						(t.BaseType.GetGenericTypeDefinition() == typeof(ReplacableTextToken<>)
@@ -200,7 +201,7 @@ namespace DIGOS.Ambassador.Transformations
 			);
 
 			// The +3 here includes the surrounding braces and the @
-			var tokenObject = creationMethod.Invoke(null, new object[] { start, tokenText.Length + 3, data, this.Services } );
+			var tokenObject = creationMethod?.Invoke(null, new object[] { start, tokenText.Length + 3, data, this.Services } );
 
 			return (IReplaceableTextToken)tokenObject;
 		}

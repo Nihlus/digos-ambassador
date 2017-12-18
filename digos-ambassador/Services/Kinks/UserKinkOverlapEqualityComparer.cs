@@ -33,6 +33,16 @@ namespace DIGOS.Ambassador.Services
 		/// <inheritdoc />
 		public bool Equals(UserKink x, UserKink y)
 		{
+			if (x is null ^ y is null)
+			{
+				return false;
+			}
+
+			if (x is null) // then y must also be null
+			{
+				return true;
+			}
+
 			return
 				x.Kink.FListID == y.Kink.FListID &&
 				x.Preference == y.Preference;

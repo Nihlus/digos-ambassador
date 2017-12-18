@@ -170,11 +170,11 @@ namespace DIGOS.Ambassador.Utility
 		{
 			if (messageEventArgs.IsBinary)
 			{
-				OnBinaryMessage(sender, messageEventArgs);
+				OnBinaryMessage(messageEventArgs);
 			}
 			else if (messageEventArgs.IsText)
 			{
-				OnTextMessage(sender, messageEventArgs);
+				OnTextMessage(messageEventArgs);
 			}
 		}
 
@@ -199,12 +199,12 @@ namespace DIGOS.Ambassador.Utility
 			}
 		}
 
-		private void OnTextMessage(object sender, MessageEventArgs e)
+		private void OnTextMessage(MessageEventArgs e)
 		{
-			this.TextMessage?.Invoke(Encoding.UTF8.GetString(e.RawData)).GetAwaiter().GetResult();
+			this.TextMessage?.Invoke(e.Data).GetAwaiter().GetResult();
 		}
 
-		private void OnBinaryMessage(object sender, MessageEventArgs e)
+		private void OnBinaryMessage(MessageEventArgs e)
 		{
 			this.BinaryMessage?.Invoke(e.RawData, 0, e.RawData.Length).GetAwaiter().GetResult();
 		}

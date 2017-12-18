@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Utility
 {
@@ -32,7 +31,7 @@ namespace DIGOS.Ambassador.Utility
 	public class CaseInsensitiveStringEqualityComparer : IEqualityComparer<string>
 	{
 		/// <inheritdoc />
-		public bool Equals([CanBeNull] string x, [CanBeNull] string y)
+		public bool Equals(string x, string y)
 		{
 			if (x is null && y is null)
 			{
