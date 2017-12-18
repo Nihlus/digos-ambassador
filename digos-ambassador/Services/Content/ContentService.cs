@@ -127,8 +127,8 @@ namespace DIGOS.Ambassador.Services
 				this.SassNSFW = new List<string>();
 			}
 
-			this.Sass = (await File.ReadAllLinesAsync(sassPath)).ToList();
-			this.SassNSFW = (await File.ReadAllLinesAsync(sassNSFWPath)).ToList();
+			this.Sass = (await FileAsync.ReadAllLinesAsync(sassPath)).ToList();
+			this.SassNSFW = (await FileAsync.ReadAllLinesAsync(sassNSFWPath)).ToList();
 		}
 
 		/// <summary>
@@ -145,7 +145,7 @@ namespace DIGOS.Ambassador.Services
 				throw new FileNotFoundException("The bot token file could not be found.", tokenPath);
 			}
 
-			var token = await File.ReadAllTextAsync(tokenPath);
+			var token = await FileAsync.ReadAllTextAsync(tokenPath);
 
 			if (string.IsNullOrEmpty(token))
 			{
@@ -287,7 +287,7 @@ namespace DIGOS.Ambassador.Services
 					continue;
 				}
 
-				string content = await File.ReadAllTextAsync(speciesFilePath, Encoding.UTF8);
+				string content = await FileAsync.ReadAllTextAsync(speciesFilePath, Encoding.UTF8);
 
 				try
 				{
@@ -338,7 +338,7 @@ namespace DIGOS.Ambassador.Services
 
 				foreach (var transformationFile in transformationFiles)
 				{
-					string content = await File.ReadAllTextAsync(transformationFile);
+					string content = await FileAsync.ReadAllTextAsync(transformationFile);
 
 					try
 					{

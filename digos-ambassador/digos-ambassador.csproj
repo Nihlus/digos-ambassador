@@ -1,57 +1,66 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp2.0</TargetFramework>
-        <RootNamespace>DIGOS.Ambassador</RootNamespace>
-        <AssemblyName>DIGOS.Ambassador</AssemblyName>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <RunCodeAnalysis>true</RunCodeAnalysis>
-        <CodeAnalysisRuleSet>..\stylecop.ruleset</CodeAnalysisRuleSet>
-        <LangVersion>7.1</LangVersion>
-    </PropertyGroup>
-    <ItemGroup>
-        <AdditionalFiles Include="$(ProjectDir)\..\stylecop.json">
-            <Link>stylecop.json</Link>
-        </AdditionalFiles>
-        <AdditionalFiles Include="$(ProjectDir)\..\stylecop.ruleset">
-            <Link>stylecop.ruleset</Link>
-        </AdditionalFiles>
-        <AdditionalFiles Include="$(SolutionDir)\README.md">
-            <Link>README.md</Link>
-        </AdditionalFiles>
-        <AdditionalFiles Include="$(SolutionDir)\.travis.yml">
-            <Link>.travis.yml</Link>
-        </AdditionalFiles>
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Content\*">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </Content>
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="Discord.Addons.Interactive" Version="1.0.1" />
-        <PackageReference Include="Discord.Net" Version="1.0.2" />
-        <PackageReference Include="Discord.Net.Commands" Version="1.0.2" />
-        <PackageReference Include="Humanizer" Version="2.2.0" />
-        <PackageReference Include="JetBrains.Annotations" Version="11.1.0" PrivateAssets="all" />
-        <PackageReference Include="log4net" Version="2.0.8" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.1" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.1" />
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
-        <PackageReference Include="morelinq" Version="2.8.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-        <PackageReference Include="NLua_Safe" Version="1.3.2.1" />
-        <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" />
-        <PackageReference Include="YamlDotNet" Version="4.2.3-pre0454" />
-    </ItemGroup>
-    <ItemGroup>
-        <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
-    </ItemGroup>
-    <ItemGroup>
-        <Folder Include="Content\Portraits" />
-        <Folder Include="Content\Transformations" />
-        <Folder Include="Services\Dossiers" />
-    </ItemGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net462;netcoreapp2.0;netstandard2.0</TargetFrameworks>
+    <RootNamespace>DIGOS.Ambassador</RootNamespace>
+    <AssemblyName>DIGOS.Ambassador</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>..\stylecop.ruleset</CodeAnalysisRuleSet>
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="$(ProjectDir)\..\stylecop.json">
+      <Link>stylecop.json</Link>
+    </AdditionalFiles>
+    <AdditionalFiles Include="$(ProjectDir)\..\stylecop.ruleset">
+      <Link>stylecop.ruleset</Link>
+    </AdditionalFiles>
+    <AdditionalFiles Include="$(SolutionDir)\README.md">
+      <Link>README.md</Link>
+    </AdditionalFiles>
+    <AdditionalFiles Include="$(SolutionDir)\.travis.yml">
+      <Link>.travis.yml</Link>
+    </AdditionalFiles>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\**\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DIGOS.Ambassador.exe.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Discord.Addons.Interactive" Version="1.0.1" />
+    <PackageReference Include="Discord.Net" Version="1.0.2" />
+    <PackageReference Include="Discord.Net.Commands" Version="1.0.2" />
+    <PackageReference Include="Discord.Net.Providers.WS4Net" Version="1.0.2" />
+    <PackageReference Include="Humanizer" Version="2.2.0" />
+    <PackageReference Include="JetBrains.Annotations" Version="11.1.0" PrivateAssets="all" />
+    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
+    <PackageReference Include="morelinq" Version="2.8.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="NLua_Safe" Version="1.3.2.1" />
+    <PackageReference Include="SQLitePCLRaw.bundle_green" Version="1.1.9" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" />
+    <PackageReference Include="websocket-sharp-customheaders" Version="1.0.2.31869" />
+    <PackageReference Include="YamlDotNet" Version="4.2.3-pre0454" />
+  </ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Content\Portraits" />
+    <Folder Include="Content\Transformations" />
+    <Folder Include="Services\Dossiers" />
+  </ItemGroup>
+  <Target Name="DeleteNetHttpMono" AfterTargets="AfterBuild">
+    <Delete Files="$(OutputPath)\System.Net.Http.dll" Condition="'$(OS)' == 'Unix'" />
+  </Target>
 </Project>

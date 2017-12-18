@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 			}
 
 			// First, break the input up into parts based on spaces
-			var parts = input.Split(" ");
+			var parts = input.Split(' ');
 
 			// Check for a modifier
 			if (Enum.TryParse(parts[0], true, out ShadeModifier modifier))

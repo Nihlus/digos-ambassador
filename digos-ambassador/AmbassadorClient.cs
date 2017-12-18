@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;
+using DIGOS.Ambassador.Utility;
 
 using Discord;
 using Discord.Addons.Interactive;
@@ -97,7 +98,7 @@ namespace DIGOS.Ambassador
 		/// <param name="content">The content service.</param>
 		public AmbassadorClient([NotNull] ContentService content)
 		{
-			this.Client = new DiscordSocketClient();
+			this.Client = new DiscordSocketClient(new DiscordSocketConfig() { WebSocketProvider = () => new WebSocketSharpProvider() });
 			this.Client.Log += OnDiscordLogEvent;
 
 			this.Commands = new CommandService();

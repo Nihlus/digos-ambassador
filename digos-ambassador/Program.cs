@@ -50,14 +50,14 @@ namespace DIGOS.Ambassador
 		/// <returns>A task.</returns>
 		public static async Task Main()
 		{
-			Log.Debug($"Starting up. Running on {RuntimeInformation.OSDescription}");
-
 			// Connect to uncaught exceptions for logging
 			AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
 			// Configure logging
 			var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
 			log4net.Config.XmlConfigurator.Configure(logRepository, new FileInfo("app.config"));
+
+			// Log.Debug($"Starting up. Running on {RuntimeInformation.OSDescription}");
 
 			// Initialize
 			var contentService = new ContentService();

@@ -45,7 +45,6 @@ namespace DIGOS.Ambassador.Wizards
 	/// </summary>
 	public class KinkWizard : InteractiveMessage, IWizard
 	{
-		private readonly DiscordSocketClient Client;
 		private readonly UserFeedbackService Feedback;
 		private readonly KinkService Kinks;
 
@@ -357,7 +356,10 @@ namespace DIGOS.Ambassador.Wizards
 				return ExecuteResult.FromError(getCategoryResult);
 			}
 
-			var category = Enum.Parse<KinkCategory>(getCategoryResult.Entity, true);
+			if (!Enum.TryParse<KinkCategory>(getCategoryResult.Entity, true, out var category))
+			{
+				return ExecuteResult.FromError(CommandError.ParseFailed, "Could not parse kink category.");
+			}
 
 			using (var db = new GlobalInfoContext())
 			{

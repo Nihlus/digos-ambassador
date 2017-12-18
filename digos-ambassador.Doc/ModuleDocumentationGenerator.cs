@@ -20,11 +20,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Doc.Extensions;
@@ -48,6 +50,8 @@ namespace DIGOS.Ambassador.Doc
 
 		private readonly CommandService Commands;
 
+		private readonly Regex TypeReaderTypeFinder = new Regex("(?<=No type reader found for type ).+?.(?=, one must be specified)", RegexOptions.Compiled);
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ModuleDocumentationGenerator"/> class.
 		/// </summary>
@@ -58,7 +62,7 @@ namespace DIGOS.Ambassador.Doc
 			this.CommandAssembly = commandAssembly;
 			this.OutputPath = outputPath;
 
-			this.Commands = new CommandService();
+			this.Commands = new CommandService(new CommandServiceConfig { ThrowOnError = false });
 		}
 
 		/// <summary>
@@ -82,7 +86,7 @@ namespace DIGOS.Ambassador.Doc
 		/// <inheritdoc />
 		public async Task GenerateDocumentationAsync()
 		{
-			await this.Commands.AddModulesAsync(this.CommandAssembly);
+			await AddModulesAsync();
 
 			var modules = GetTopLevelModules(this.Commands.Modules);
 			var modulePages = GenerateDocumentationPages(modules);
@@ -98,6 +102,29 @@ namespace DIGOS.Ambassador.Doc
 			);
 
 			await SavePageAsync(indexPage);
+		}
+
+		private async Task AddModulesAsync()
+		{
+			while (true)
+			{
+				try
+				{
+					await this.Commands.AddModulesAsync(this.CommandAssembly);
+					break;
+				}
+				catch (InvalidOperationException iox)
+				{
+					var typeName = this.TypeReaderTypeFinder.Match(iox.Message).Value;
+					var typeInfo = this.CommandAssembly.DefinedTypes.FirstOrDefault(t => t.Name == typeName);
+					if (typeInfo is null)
+					{
+						throw;
+					}
+
+					this.Commands.AddTypeReader(typeInfo.AsType(), new DummyTypeReader());
+				}
+			}
 		}
 
 		/// <summary>

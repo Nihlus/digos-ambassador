@@ -1,5 +1,5 @@
 ﻿//
-//  Program.cs
+//  DummyTypeReader.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,36 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Reflection;
+using System;
 using System.Threading.Tasks;
-using CommandLine;
-
-using DIGOS.Ambassador.Database.Appearances;
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.TypeReaders;
-
-using Discord;
+using Discord.Commands;
 
 namespace DIGOS.Ambassador.Doc
 {
 	/// <summary>
-	/// The main program class.
+	/// Dummy type reader for custom types.
 	/// </summary>
-	internal static class Program
+	public class DummyTypeReader : TypeReader
 	{
-		private static async Task Main(string[] args)
+		/// <inheritdoc />
+		public override Task<TypeReaderResult> Read(ICommandContext context, string input, IServiceProvider services)
 		{
-			var options = new Options();
-			Parser.Default.ParseArgumentsStrict(args, options);
-
-			var assembly = Assembly.LoadFrom(options.AssemblyPath);
-
-			var generator = new ModuleDocumentationGenerator(assembly, options.OutputPath);
-			await generator.GenerateDocumentationAsync();
+			return null;
 		}
 	}
 }

@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Services
 
 			if (subnode is TableNode subtable)
 			{
-				PopulateSubNodes(subtable, string.Join('.', components.Skip(1)), originalValue);
+				PopulateSubNodes(subtable, string.Join(".", components.Skip(1)), originalValue);
 			}
 		}
 	}

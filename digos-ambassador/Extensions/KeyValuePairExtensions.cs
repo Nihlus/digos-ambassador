@@ -1,5 +1,5 @@
 ﻿//
-//  Program.cs
+//  KeyValuePairExtensions.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,36 +20,27 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Reflection;
-using System.Threading.Tasks;
-using CommandLine;
+using System.Collections.Generic;
 
-using DIGOS.Ambassador.Database.Appearances;
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.TypeReaders;
-
-using Discord;
-
-namespace DIGOS.Ambassador.Doc
+namespace DIGOS.Ambassador.Extensions
 {
 	/// <summary>
-	/// The main program class.
+	/// Extensions to the <see cref="KeyValuePair{TKey, TValue}"/> class.
 	/// </summary>
-	internal static class Program
+	public static class KeyValuePairExtensions
 	{
-		private static async Task Main(string[] args)
+		/// <summary>
+		/// Deconstructs a key-value pair into a value tuple.
+		/// </summary>
+		/// <param name="this">The pair.</param>
+		/// <param name="key">Will be filled with the key.</param>
+		/// <param name="value">Will be filled with the value.</param>
+		/// <typeparam name="TKey">The type of the key.</typeparam>
+		/// <typeparam name="TValue">The type of the value.</typeparam>
+		public static void Deconstruct<TKey, TValue>(this KeyValuePair<TKey, TValue> @this, out TKey key, out TValue value)
 		{
-			var options = new Options();
-			Parser.Default.ParseArgumentsStrict(args, options);
-
-			var assembly = Assembly.LoadFrom(options.AssemblyPath);
-
-			var generator = new ModuleDocumentationGenerator(assembly, options.OutputPath);
-			await generator.GenerateDocumentationAsync();
+			key = @this.Key;
+			value = @this.Value;
 		}
 	}
 }
