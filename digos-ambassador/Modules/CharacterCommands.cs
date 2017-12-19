@@ -487,7 +487,7 @@ namespace DIGOS.Ambassador.Modules
 			string imageUrl = firstAttachment.Url;
 
 			imageName = (imageName ?? Path.GetFileNameWithoutExtension(firstAttachment.Filename))
-			            ?? firstAttachment.Url.GetHashCode().ToString();
+						?? firstAttachment.Url.GetHashCode().ToString();
 
 			await AddImageAsync(character, imageName, imageUrl, imageCaption, isNSFW);
 		}

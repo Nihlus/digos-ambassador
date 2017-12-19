@@ -38,8 +38,9 @@ namespace DIGOS.Ambassador.Services
 				return false;
 			}
 
-			if (x is null) // then y must also be null
+			if (x is null)
 			{
+				// then y must also be null
 				return true;
 			}
 

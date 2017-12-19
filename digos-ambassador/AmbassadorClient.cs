@@ -98,7 +98,10 @@ namespace DIGOS.Ambassador
 		/// <param name="content">The content service.</param>
 		public AmbassadorClient([NotNull] ContentService content)
 		{
-			this.Client = new DiscordSocketClient(new DiscordSocketConfig() { WebSocketProvider = () => new WebSocketSharpProvider() });
+			this.Client = Type.GetType("Mono.Runtime") is null
+				? new DiscordSocketClient()
+				: new DiscordSocketClient(new DiscordSocketConfig { WebSocketProvider = () => new WebSocketSharpProvider() });
+
 			this.Client.Log += OnDiscordLogEvent;
 
 			this.Commands = new CommandService();
