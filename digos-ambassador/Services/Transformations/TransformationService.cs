@@ -758,7 +758,7 @@ namespace DIGOS.Ambassador.Services
 			var availableSpecies = await GetAvailableSpeciesAsync(db);
 			foreach (var species in availableSpecies)
 			{
-				var bundledTransformationsResult = await this.Content.DiscoverBundledTransformationsAsync(this, species);
+				var bundledTransformationsResult = await this.Content.DiscoverBundledTransformationsAsync(db, this, species);
 				if (!bundledTransformationsResult.IsSuccess)
 				{
 					return UpdateTransformationsResult.FromError(bundledTransformationsResult);

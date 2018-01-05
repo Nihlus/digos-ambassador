@@ -62,21 +62,19 @@ namespace DIGOS.Ambassador.Services
 		/// <summary>
 		/// Consumes a message, adding it to the active roleplay in its channel if the author is a participant.
 		/// </summary>
+		/// <param name="db">The database.</param>
 		/// <param name="context">The message to consume.</param>
-		public async void ConsumeMessage([NotNull] ICommandContext context)
+		public async void ConsumeMessage([NotNull] GlobalInfoContext db, [NotNull] ICommandContext context)
 		{
-			using (var db = new GlobalInfoContext())
+			var result = await GetActiveRoleplayAsync(db, context);
+			if (!result.IsSuccess)
 			{
-				var result = await GetActiveRoleplayAsync(db, context);
-				if (!result.IsSuccess)
-				{
-					return;
-				}
-
-				var roleplay = result.Entity;
-
-				await AddToOrUpdateMessageInRoleplay(db, roleplay, context.Message);
+				return;
 			}
+
+			var roleplay = result.Entity;
+
+			await AddToOrUpdateMessageInRoleplay(db, roleplay, context.Message);
 		}
 
 		/// <summary>

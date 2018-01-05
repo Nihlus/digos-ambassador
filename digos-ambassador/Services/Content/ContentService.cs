@@ -311,12 +311,14 @@ namespace DIGOS.Ambassador.Services
 		/// Discovers the transformations of a specific species that have been bundled with the program. The species
 		/// must already be registered in the database.
 		/// </summary>
+		/// <param name="db">The database.</param>
 		/// <param name="transformation">The transformation service.</param>
 		/// <param name="species">The species to discover transformations for.</param>
 		/// <returns>A retrieval result which may or may not have suceeded.</returns>
 		[Pure]
 		public async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync
 		(
+			[NotNull] GlobalInfoContext db,
 			[NotNull] TransformationService transformation,
 			[NotNull] Species species
 		)
@@ -327,32 +329,29 @@ namespace DIGOS.Ambassador.Services
 			var transformationFiles = Directory.EnumerateFiles(speciesDir).Where(p => !p.EndsWith(speciesFilename));
 
 			var transformations = new List<Transformation>();
-			using (var db = new GlobalInfoContext())
+			var deser = new DeserializerBuilder()
+				.WithTypeConverter(new ColourYamlConverter())
+				.WithTypeConverter(new SpeciesYamlConverter(db, transformation))
+				.WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
+				.WithNamingConvention(new UnderscoredNamingConvention())
+				.Build();
+
+			foreach (var transformationFile in transformationFiles)
 			{
-				var deser = new DeserializerBuilder()
-					.WithTypeConverter(new ColourYamlConverter())
-					.WithTypeConverter(new SpeciesYamlConverter(db, transformation))
-					.WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-					.WithNamingConvention(new UnderscoredNamingConvention())
-					.Build();
+				string content = await FileAsync.ReadAllTextAsync(transformationFile);
 
-				foreach (var transformationFile in transformationFiles)
+				try
 				{
-					string content = await FileAsync.ReadAllTextAsync(transformationFile);
-
-					try
+					transformations.Add(deser.Deserialize<Transformation>(content));
+				}
+				catch (YamlException yex)
+				{
+					if (yex.InnerException is SerializationException sex)
 					{
-						transformations.Add(deser.Deserialize<Transformation>(content));
+						return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError(sex);
 					}
-					catch (YamlException yex)
-					{
-						if (yex.InnerException is SerializationException sex)
-						{
-							return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError(sex);
-						}
 
-						return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError(yex);
-					}
+					return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError(yex);
 				}
 			}
 

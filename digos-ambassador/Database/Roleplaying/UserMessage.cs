@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <summary>
 		/// Gets or sets the author of the message.
 		/// </summary>
-		public User Author { get; set; }
+		public ulong AuthorDiscordID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the timestamp of the message.
@@ -78,17 +78,14 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 			[NotNull] string authorNickname
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			return new UserMessage
 			{
-				return new UserMessage
-				{
-					DiscordMessageID = message.Id,
-					Author = await db.GetOrRegisterUserAsync(message.Author),
-					Timestamp = message.Timestamp,
-					AuthorNickname = authorNickname,
-					Contents = message.Content
-				};
-			}
+				DiscordMessageID = message.Id,
+				AuthorDiscordID = message.Author.Id,
+				Timestamp = message.Timestamp,
+				AuthorNickname = authorNickname,
+				Contents = message.Content
+			};
 		}
 	}
 }

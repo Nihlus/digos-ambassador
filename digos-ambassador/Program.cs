@@ -70,15 +70,6 @@ namespace DIGOS.Ambassador
 				return;
 			}
 
-			using (var db = new GlobalInfoContext())
-			{
-				if (!((RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>()).Exists())
-				{
-					Log.Error("The database doesn't exist.");
-					return;
-				}
-			}
-
 			var ambassadorClient = new AmbassadorClient(contentService);
 			await ambassadorClient.LoginAsync();
 			await ambassadorClient.StartAsync();
