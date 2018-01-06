@@ -625,7 +625,7 @@ namespace DIGOS.Ambassador.Modules
 		[RequireOwner]
 		public async Task UpdateTransformationDatabaseAsync()
 		{
-			var updateTransformationsResult = await this.Transformation.UpdateTransformationDatabase(this.Database);
+			var updateTransformationsResult = await this.Transformation.UpdateTransformationDatabaseAsync(this.Database);
 			if (!updateTransformationsResult.IsSuccess)
 			{
 				await this.Feedback.SendErrorAsync(this.Context, updateTransformationsResult.ErrorReason);
