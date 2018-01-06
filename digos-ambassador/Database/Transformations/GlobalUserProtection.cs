@@ -74,7 +74,9 @@ namespace DIGOS.Ambassador.Database.Transformations
 			{
 				User = user,
 				DefaultType = ProtectionType.Blacklist,
-				DefaultOptIn = false
+				DefaultOptIn = false,
+				Whitelist = new List<User>(),
+				Blacklist = new List<User>()
 			};
 		}
 	}
