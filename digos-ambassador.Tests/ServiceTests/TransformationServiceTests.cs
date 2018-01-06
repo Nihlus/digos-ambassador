@@ -372,7 +372,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			}
 
 			[Fact]
-			public async Task CreatesServerUserProtectionObjectIfOneDoesNotExist()
+			public async Task CreatesObjectIfOneDoesNotExist()
 			{
 				Assert.Empty(this.Database.ServerUserProtections);
 
@@ -467,7 +467,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			}
 
 			[Fact]
-			public async Task CreatesServerUserProtectionObjectIfOneDoesNotExist()
+			public async Task CreatesObjectIfOneDoesNotExist()
 			{
 				Assert.Empty(this.Database.ServerUserProtections);
 
