@@ -508,6 +508,135 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			}
 		}
 
+		public class BlacklistUserAsync : IDisposable, IAsyncLifetime
+		{
+			private readonly GlobalInfoContext Database;
+			private readonly TransformationService Transformations;
+
+			private readonly IUser User;
+			private readonly IUser BlacklistedUser;
+
+			public BlacklistUserAsync()
+			{
+				this.Database = new MockedDatabase().GetDatabaseContext();
+				this.Transformations = new TransformationService(new ContentService());
+
+				var userMock = new Mock<IUser>();
+				userMock.Setup(u => u.Id).Returns(0);
+
+				var blacklistedUserMock = new Mock<IUser>();
+				blacklistedUserMock.Setup(u => u.Id).Returns(0);
+
+				this.User = userMock.Object;
+				this.BlacklistedUser = blacklistedUserMock.Object;
+			}
+
+			[Fact]
+			public async Task CanBlacklistUser()
+			{
+				var result = await this.Transformations.BlacklistUserAsync(this.Database, this.User, this.BlacklistedUser);
+
+				Assert.True(result.IsSuccess);
+				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
+
+				Assert.NotEmpty(this.Database.GlobalUserProtections.First().Blacklist);
+
+				Assert.Equal(this.BlacklistedUser.Id, this.Database.GlobalUserProtections.First().Blacklist.First().DiscordID);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfUserIsAlreadyBlacklisted()
+			{
+				// Blacklist the user
+				await this.Transformations.BlacklistUserAsync(this.Database, this.User, this.BlacklistedUser);
+
+				// Then blacklist them again
+				var result = await this.Transformations.BlacklistUserAsync(this.Database, this.User, this.BlacklistedUser);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.Unsuccessful, result.Error);
+			}
+
+			public async Task InitializeAsync()
+			{
+				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
+			}
+
+			public void Dispose()
+			{
+				this.Database?.Dispose();
+			}
+
+			public Task DisposeAsync()
+			{
+				return Task.CompletedTask;
+			}
+		}
+
+		public class WhitelistUserAsync : IDisposable, IAsyncLifetime
+		{
+			private readonly GlobalInfoContext Database;
+			private readonly TransformationService Transformations;
+
+			private readonly IUser User;
+			private readonly IUser WhitelistedUser;
+
+			public WhitelistUserAsync()
+			{
+				this.Database = new MockedDatabase().GetDatabaseContext();
+				this.Transformations = new TransformationService(new ContentService());
+
+				var userMock = new Mock<IUser>();
+				userMock.Setup(u => u.Id).Returns(0);
+
+				var blacklistedUserMock = new Mock<IUser>();
+				blacklistedUserMock.Setup(u => u.Id).Returns(0);
+
+				this.User = userMock.Object;
+				this.WhitelistedUser = blacklistedUserMock.Object;
+			}
+
+			[Fact]
+			public async Task CanWhitelistUser()
+			{
+				var result = await this.Transformations.WhitelistUserAsync(this.Database, this.User, this.WhitelistedUser);
+
+				Assert.True(result.IsSuccess);
+				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
+
+				Assert.NotEmpty(this.Database.GlobalUserProtections.First().Whitelist);
+				Assert.Equal(this.WhitelistedUser.Id, this.Database.GlobalUserProtections.First().Whitelist.First().DiscordID);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfUserIsAlreadyWhitelisted()
+			{
+				// Whitelist the user
+				await this.Transformations.WhitelistUserAsync(this.Database, this.User, this.WhitelistedUser);
+
+				// Then Whitelist them again
+				var result = await this.Transformations.WhitelistUserAsync(this.Database, this.User, this.WhitelistedUser);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.Unsuccessful, result.Error);
+			}
+
+			public async Task InitializeAsync()
+			{
+				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
+			}
+
+			public void Dispose()
+			{
+				this.Database?.Dispose();
+			}
+
+			public Task DisposeAsync()
+			{
+				return Task.CompletedTask;
+			}
+		}
+
 		public class Template : IDisposable, IAsyncLifetime
 		{
 			private readonly GlobalInfoContext Database;
