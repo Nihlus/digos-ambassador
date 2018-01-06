@@ -472,7 +472,7 @@ namespace DIGOS.Ambassador.Services
 				return CreateEntityResult<Character>.FromError(modifyEntityResult);
 			}
 
-			var defaultPronounFamilyName = this.PronounProviders.First(p => p.Value is TheyPronounProvider).Value.Family;
+			var defaultPronounFamilyName = this.PronounProviders.FirstOrDefault(p => p.Value is TheyPronounProvider).Value?.Family ?? new TheyPronounProvider().Family;
 			modifyEntityResult = await SetCharacterPronounAsync(db, character, defaultPronounFamilyName);
 			if (!modifyEntityResult.IsSuccess)
 			{
@@ -533,11 +533,14 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.MultipleMatches, errorMessage);
 			}
 
-			var commandModule = this.Commands.Modules.First(m => m.Name == "character");
-			var validNameResult = this.OwnedEntities.IsEntityNameValid(commandModule, newCharacterName);
-			if (!validNameResult.IsSuccess)
+			var commandModule = this.Commands.Modules.FirstOrDefault(m => m.Name == "character");
+			if (!(commandModule is null))
 			{
-				return ModifyEntityResult.FromError(validNameResult);
+				var validNameResult = this.OwnedEntities.IsEntityNameValid(commandModule, newCharacterName);
+				if (!validNameResult.IsSuccess)
+				{
+					return ModifyEntityResult.FromError(validNameResult);
+				}
 			}
 
 			character.Name = newCharacterName;
