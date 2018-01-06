@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 				User = globalProtection.User,
 				Server = server,
 				Type = globalProtection.DefaultType,
-				HasOptedIn = false
+				HasOptedIn = globalProtection.DefaultOptIn
 			};
 		}
 	}
