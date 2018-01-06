@@ -696,7 +696,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database.</param>
 		/// <returns>An update result which may or may not have succeeded.</returns>
-		public async Task<UpdateTransformationsResult> UpdateTransformationDatabase
+		public async Task<UpdateTransformationsResult> UpdateTransformationDatabaseAsync
 		(
 			[NotNull] GlobalInfoContext db
 		)
@@ -887,13 +887,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string speciesName
 		)
 		{
-			var species = db.Species.FirstOrDefault(s => s.Name.Equals(speciesName, StringComparison.OrdinalIgnoreCase));
-			if (species is null)
-			{
-				return RetrieveEntityResult<Species>.FromError(CommandError.ObjectNotFound, "There is no species with that name in the database.");
-			}
-
-			return RetrieveEntityResult<Species>.FromSuccess(species);
+			return GetSpeciesByNameAsync(db, speciesName).GetAwaiter().GetResult();
 		}
 
 		/// <summary>
