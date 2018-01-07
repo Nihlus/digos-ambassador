@@ -28,7 +28,6 @@
     <PackageReference Include="Discord.Net.Commands" Version="1.0.2" />
     <PackageReference Include="Humanizer" Version="2.2.0" />
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" />
-    <PackageReference Include="Mono.Cecil" Version="0.9.6.4" />
     <PackageReference Include="morelinq" Version="2.9.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004" />
   </ItemGroup>
