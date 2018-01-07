@@ -284,7 +284,7 @@ namespace DIGOS.Ambassador
 					{
 						var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
 
-						var errorEmbed = this.Feedback.CreateFeedbackEmbed(context.User, Color.Red, $"Command failed: {result.ErrorReason}");:
+						var errorEmbed = this.Feedback.CreateFeedbackEmbed(context.User, Color.Red, $"Command failed: {result.ErrorReason}");
 						var searchResult = this.Commands.Search(context, argumentPos);
 
 						await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
