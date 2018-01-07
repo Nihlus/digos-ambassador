@@ -329,7 +329,7 @@ namespace DIGOS.Ambassador.Transformations
 		)
 		{
 			string shiftMessage =
-				$"The surface of {{@target}}'s {currentComponent.Bodypart.Humanize()} morphs, as" +
+				$"The surface of {{@target}}'s {currentComponent.Bodypart.Humanize().Transform(To.LowerCase)} morphs, as" +
 				$" {{@colour}} {{@pattern}} patterns spread across it" +
 				$"{(originalPattern.HasValue ? $", replacing their {originalColour} {originalPattern.Humanize().Pluralize()}" : ".")}.";
 

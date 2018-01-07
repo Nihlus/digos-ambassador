@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Transformations
 			}
 
 			var currentBodypart = character.GetBodypart(transformation.Part);
-			return currentBodypart.Transformation.DefaultPattern?.ToString().Humanize();
+			return currentBodypart.Pattern.ToString().Humanize();
 		}
 
 		/// <inheritdoc />

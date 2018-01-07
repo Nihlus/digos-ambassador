@@ -125,7 +125,7 @@ namespace DIGOS.Ambassador.Services
 				return this.PronounProviders[character.PronounProviderFamily];
 			}
 
-			throw new ArgumentException(nameof(character));
+			throw new KeyNotFoundException("No pronoun provider for that family found.");
 		}
 
 		/// <summary>

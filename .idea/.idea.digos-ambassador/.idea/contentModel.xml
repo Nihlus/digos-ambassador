@@ -361,7 +361,6 @@
           <e p="MockedDatabase.cs" t="Include" />
         </e>
         <e p="DescriptionBuilderTests.cs" t="Include" />
-        <e p="Helpers" t="Include" />
         <e p="LuaTests.cs" t="Include" />
         <e p="PermissionTests.cs" t="Include" />
         <e p="ServiceTests" t="Include">
@@ -369,10 +368,16 @@
           <e p="OwnedEntityServiceTests.cs" t="Include" />
           <e p="TransformationServiceTests.cs" t="Include" />
         </e>
-        <e p="TestResults" t="Include">
-          <e p="_barbossa_2018-01-06_11_27_36.trx" t="Include" />
+        <e p="TestBases" t="Include">
+          <e p="CharacterServiceTestBase.cs" t="Include" />
+          <e p="DatabaseDependantTestBase.cs" t="Include" />
+          <e p="OwnedEntityServiceTestBase.cs" t="Include" />
+          <e p="TransformationServiceTestBase.cs" t="Include" />
         </e>
         <e p="TokenizerTests.cs" t="Include" />
+        <e p="Utility" t="Include">
+          <e p="MockHelper.cs" t="Include" />
+        </e>
         <e p="bin" t="ExcludeRecursive" />
         <e p="digos-ambassador.Tests.csproj" t="IncludeRecursive" />
         <e p="obj" t="ExcludeRecursive">

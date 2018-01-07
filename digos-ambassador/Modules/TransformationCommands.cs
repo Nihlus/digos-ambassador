@@ -131,7 +131,7 @@ namespace DIGOS.Ambassador.Modules
 			ShiftBodypartResult result;
 			if (species.Equals("remove", StringComparison.OrdinalIgnoreCase))
 			{
-				result = await this.Transformation.RemoveCharacterBodypartAsync(this.Database, this.Context, character, bodyPart);
+				result = await this.Transformation.RemoveBodypartAsync(this.Database, this.Context, character, bodyPart);
 			}
 			else
 			{
@@ -366,7 +366,7 @@ namespace DIGOS.Ambassador.Modules
 			Bodypart bodyPart
 		)
 		{
-			var transformations = await this.Transformation.GetAvailableTransformations(this.Database, bodyPart);
+			var transformations = await this.Transformation.GetAvailableTransformationsAsync(this.Database, bodyPart);
 
 			var eb = this.Feedback.CreateBaseEmbed();
 			eb.WithTitle("Available transformations");
