@@ -20,22 +20,20 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Modules;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Tests.Database;
+using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
+
 using MockQueryable.Moq;
 using Moq;
 using Xunit;
@@ -47,17 +45,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 {
 	public class OwnedEntityServiceTests
 	{
-		public class IsEntityNameUniqueForUserAsync : IDisposable
+		public class IsEntityNameUniqueForUserAsync : OwnedEntityServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly OwnedEntityService Entities;
-
-			public IsEntityNameUniqueForUserAsync()
-			{
-				this.Entities = new OwnedEntityService();
-				this.Database = new MockedDatabase().GetDatabaseContext();
-			}
-
 			[Fact]
 			public async Task ReturnsTrueForEmptySet()
 			{
@@ -113,18 +102,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 				Assert.False(result);
 			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
 		}
 
-		public class TransferEntityOwnershipAsync : IDisposable, IAsyncLifetime
+		public class TransferEntityOwnershipAsync : OwnedEntityServiceTestBase, IAsyncLifetime
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly OwnedEntityService Entities;
-
 			private readonly IUser OriginalUser;
 			private readonly IUser NewUser;
 
@@ -133,9 +114,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 			public TransferEntityOwnershipAsync()
 			{
-				this.Entities = new OwnedEntityService();
-				this.Database = new MockedDatabase().GetDatabaseContext();
-
 				// Set up mocked discord users
 				var originalUserMock = new Mock<IUser>();
 				originalUserMock.Setup(u => u.Id).Returns(0);
@@ -230,29 +208,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
 			}
 
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
-
 			public Task DisposeAsync()
 			{
 				return Task.CompletedTask;
 			}
 		}
 
-		public class IsEntityNameValid : IDisposable, IAsyncLifetime
+		public class IsEntityNameValid : OwnedEntityServiceTestBase, IAsyncLifetime
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly OwnedEntityService Entities;
-
 			private ModuleInfo CommandModule;
-
-			public IsEntityNameValid()
-			{
-				this.Entities = new OwnedEntityService();
-				this.Database = new MockedDatabase().GetDatabaseContext();
-			}
 
 			public async Task InitializeAsync()
 			{
@@ -315,11 +279,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				var result = this.Entities.IsEntityNameValid(this.CommandModule, name);
 
 				Assert.True(result.IsSuccess);
-			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
 			}
 
 			public Task DisposeAsync()

@@ -20,17 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Tests.Database;
-
+using DIGOS.Ambassador.Tests.TestBases;
 using Discord;
 using Discord.Commands;
+
 using Moq;
 using Xunit;
 
@@ -41,17 +38,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 {
 	public class CharacterServiceTests
 	{
-		public class GetCharacters : IDisposable
+		public class GetCharacters : CharacterServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly CharacterService Characters;
-
-			public GetCharacters()
-			{
-				this.Characters = new CharacterService(new CommandService(), new OwnedEntityService(), new ContentService(), null);
-				this.Database = new MockedDatabase().GetDatabaseContext();
-			}
-
 			[Fact]
 			public void ReturnsNoCharactersFromEmptyDatabase()
 			{
@@ -112,44 +100,28 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.NotEmpty(result);
 				Assert.Equal(2, result.Count());
 			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
 		}
 
-		public class CreateCharacterAsync : IDisposable
+		public class CreateCharacterAsync : CharacterServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly CharacterService Characters;
-
-			private readonly IGuild Guild;
-			private readonly IUser User;
 			private readonly ICommandContext Context;
 
 			public CreateCharacterAsync()
 			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Characters = new CharacterService(new CommandService(), new OwnedEntityService(), new ContentService(), null);
 				this.Characters.WithPronounProvider(new TheyPronounProvider());
 
 				var mockedUser = new Mock<IUser>();
 				mockedUser.Setup(u => u.Id).Returns(0);
 
-				this.User = mockedUser.Object;
-
 				var mockedMessage = new Mock<IUserMessage>();
-				mockedMessage.Setup(m => m.Author).Returns(this.User);
+				mockedMessage.Setup(m => m.Author).Returns(mockedUser.Object);
 
 				var mockedGuild = new Mock<IGuild>();
 				mockedGuild.Setup(g => g.Id).Returns(1);
 
-				this.Guild = mockedGuild.Object;
-
 				var mockedContext = new Mock<ICommandContext>();
 				mockedContext.Setup(c => c.Message).Returns(mockedMessage.Object);
-				mockedContext.Setup(c => c.Guild).Returns(this.Guild);
+				mockedContext.Setup(c => c.Guild).Returns(mockedGuild.Object);
 
 				this.Context = mockedContext.Object;
 			}
@@ -162,11 +134,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.True(result.IsSuccess);
 				Assert.NotEmpty(this.Database.Characters);
 				Assert.Equal("Test", this.Database.Characters.First().Name);
-			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
 			}
 		}
 	}

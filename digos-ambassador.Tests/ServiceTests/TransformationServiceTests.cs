@@ -24,14 +24,18 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.Appearances;
+using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Tests.Database;
+using DIGOS.Ambassador.Tests.TestBases;
+using DIGOS.Ambassador.Tests.Utility;
+using DIGOS.Ambassador.Transformations;
 
 using Discord;
 using Discord.Commands;
 
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -42,15 +46,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 {
 	public class TransformationServiceTests
 	{
-		public class UpdateTransformationDatabaseAsync : IDisposable
+		public class UpdateTransformationDatabaseAsync : TransformationServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly TransformationService Transformations;
-
-			public UpdateTransformationDatabaseAsync()
+			public override Task InitializeAsync()
 			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Transformations = new TransformationService(new ContentService());
+				// Let tests initialize the transformation database.
+				return Task.CompletedTask;
 			}
 
 			[Fact]
@@ -61,34 +62,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.True(result.IsSuccess);
 				Assert.NotEmpty(this.Database.Species);
 			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
-
-			public Task DisposeAsync()
-			{
-				return Task.CompletedTask;
-			}
 		}
 
-		public class IsSpeciesNameUniqueAsync : IDisposable, IAsyncLifetime
+		public class IsSpeciesNameUniqueAsync : TransformationServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly TransformationService Transformations;
-
-			public IsSpeciesNameUniqueAsync()
-			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Transformations = new TransformationService(new ContentService());
-			}
-
-			public async Task InitializeAsync()
-			{
-				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
-			}
-
 			[Theory]
 			[InlineData("asadasdas")]
 			[InlineData("yeee ewwah")]
@@ -116,34 +93,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 				Assert.False(result);
 			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
-
-			public Task DisposeAsync()
-			{
-				return Task.CompletedTask;
-			}
 		}
 
-		public class GetSpeciesByNameAsync : IDisposable, IAsyncLifetime
+		public class GetSpeciesByNameAsync : TransformationServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly TransformationService Transformations;
-
-			public GetSpeciesByNameAsync()
-			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Transformations = new TransformationService(new ContentService());
-			}
-
-			public async Task InitializeAsync()
-			{
-				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
-			}
-
 			[Fact]
 			public async Task ReturnsCorrectSpeciesForGivenName()
 			{
@@ -170,34 +123,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.True(result.IsSuccess);
 				Assert.Equal("template", result.Entity.Name);
 			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
-
-			public Task DisposeAsync()
-			{
-				return Task.CompletedTask;
-			}
 		}
 
-		public class GetSpeciesByName : IDisposable, IAsyncLifetime
+		public class GetSpeciesByName : TransformationServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly TransformationService Transformations;
-
-			public GetSpeciesByName()
-			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Transformations = new TransformationService(new ContentService());
-			}
-
-			public async Task InitializeAsync()
-			{
-				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
-			}
-
 			[Fact]
 			public void ReturnsCorrectSpeciesForGivenName()
 			{
@@ -224,34 +153,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.True(result.IsSuccess);
 				Assert.Equal("template", result.Entity.Name);
 			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
-
-			public Task DisposeAsync()
-			{
-				return Task.CompletedTask;
-			}
 		}
 
-		public class IsPartAndSpeciesCombinationUniqueAsync : IDisposable, IAsyncLifetime
+		public class IsPartAndSpeciesCombinationUniqueAsync : TransformationServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly TransformationService Transformations;
-
 			private Species TemplateSpecies;
 
-			public IsPartAndSpeciesCombinationUniqueAsync()
+			public override async Task InitializeAsync()
 			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Transformations = new TransformationService(new ContentService());
-			}
-
-			public async Task InitializeAsync()
-			{
-				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
+				await base.InitializeAsync();
 				this.TemplateSpecies = this.Database.Species.First(s => s.Name == "template");
 			}
 
@@ -270,35 +180,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 				Assert.False(result);
 			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
-
-			public Task DisposeAsync()
-			{
-				return Task.CompletedTask;
-			}
 		}
 
-		public class GetTransformationByPartAndSpeciesAsync : IDisposable, IAsyncLifetime
+		public class GetTransformationByPartAndSpeciesAsync : TransformationServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly TransformationService Transformations;
-
 			private Species TemplateSpecies;
 
-			public GetTransformationByPartAndSpeciesAsync()
+			public override async Task InitializeAsync()
 			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Transformations = new TransformationService(new ContentService());
-			}
-
-			public async Task InitializeAsync()
-			{
-				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
-
+				await base.InitializeAsync();
 				this.TemplateSpecies = this.Database.Species.First(s => s.Name == "template");
 			}
 
@@ -330,46 +220,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
 			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
-
-			public Task DisposeAsync()
-			{
-				return Task.CompletedTask;
-			}
 		}
 
-		public class GetOrCreateServerUserProtectionAsync : IDisposable, IAsyncLifetime
+		public class GetOrCreateServerUserProtectionAsync : TransformationServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly TransformationService Transformations;
-
-			private readonly IUser User;
-			private readonly IGuild Guild;
-
-			public GetOrCreateServerUserProtectionAsync()
-			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Transformations = new TransformationService(new ContentService());
-
-				var mockedUser = new Mock<IUser>();
-				mockedUser.Setup(u => u.Id).Returns(0);
-
-				this.User = mockedUser.Object;
-
-				var mockedGuild = new Mock<IGuild>();
-				mockedGuild.Setup(g => g.Id).Returns(1);
-
-				this.Guild = mockedGuild.Object;
-			}
-
-			public async Task InitializeAsync()
-			{
-				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
-			}
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+			private readonly IGuild Guild = MockHelper.CreateDiscordGuild(1);
 
 			[Fact]
 			public async Task CreatesObjectIfOneDoesNotExist()
@@ -431,40 +287,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.Equal(globalSetting.DefaultType, localSetting.Type);
 				Assert.Same(globalSetting.User, localSetting.User);
 			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
-
-			public Task DisposeAsync()
-			{
-				return Task.CompletedTask;
-			}
 		}
 
-		public class GetOrCreateGlobalUserProtectionAsync : IDisposable, IAsyncLifetime
+		public class GetOrCreateGlobalUserProtectionAsync : TransformationServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly TransformationService Transformations;
-
-			private readonly IUser User;
-
-			public GetOrCreateGlobalUserProtectionAsync()
-			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Transformations = new TransformationService(new ContentService());
-
-				var mockedUser = new Mock<IUser>();
-				mockedUser.Setup(u => u.Id).Returns(0);
-
-				this.User = mockedUser.Object;
-			}
-
-			public async Task InitializeAsync()
-			{
-				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
-			}
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
 
 			[Fact]
 			public async Task CreatesObjectIfOneDoesNotExist()
@@ -496,40 +323,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 				Assert.Same(created, retrieved);
 			}
-
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
-
-			public Task DisposeAsync()
-			{
-				return Task.CompletedTask;
-			}
 		}
 
-		public class BlacklistUserAsync : IDisposable, IAsyncLifetime
+		public class BlacklistUserAsync : TransformationServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly TransformationService Transformations;
-
-			private readonly IUser User;
-			private readonly IUser BlacklistedUser;
-
-			public BlacklistUserAsync()
-			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Transformations = new TransformationService(new ContentService());
-
-				var userMock = new Mock<IUser>();
-				userMock.Setup(u => u.Id).Returns(0);
-
-				var blacklistedUserMock = new Mock<IUser>();
-				blacklistedUserMock.Setup(u => u.Id).Returns(0);
-
-				this.User = userMock.Object;
-				this.BlacklistedUser = blacklistedUserMock.Object;
-			}
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+			private readonly IUser BlacklistedUser = MockHelper.CreateDiscordUser(1);
 
 			[Fact]
 			public async Task CanBlacklistUser()
@@ -557,44 +356,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.Equal(CommandError.Unsuccessful, result.Error);
 			}
 
-			public async Task InitializeAsync()
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfTargetUserIsInvokingUser()
 			{
-				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
-			}
+				var result = await this.Transformations.BlacklistUserAsync(this.Database, this.User, this.User);
 
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
-
-			public Task DisposeAsync()
-			{
-				return Task.CompletedTask;
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.Unsuccessful, result.Error);
 			}
 		}
 
-		public class WhitelistUserAsync : IDisposable, IAsyncLifetime
+		public class WhitelistUserAsync : TransformationServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly TransformationService Transformations;
-
-			private readonly IUser User;
-			private readonly IUser WhitelistedUser;
-
-			public WhitelistUserAsync()
-			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Transformations = new TransformationService(new ContentService());
-
-				var userMock = new Mock<IUser>();
-				userMock.Setup(u => u.Id).Returns(0);
-
-				var blacklistedUserMock = new Mock<IUser>();
-				blacklistedUserMock.Setup(u => u.Id).Returns(0);
-
-				this.User = userMock.Object;
-				this.WhitelistedUser = blacklistedUserMock.Object;
-			}
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+			private readonly IUser WhitelistedUser = MockHelper.CreateDiscordUser(1);
 
 			[Fact]
 			public async Task CanWhitelistUser()
@@ -621,46 +396,1053 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.Equal(CommandError.Unsuccessful, result.Error);
 			}
 
-			public async Task InitializeAsync()
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfTargetUserIsInvokingUser()
 			{
-				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
-			}
+				var result = await this.Transformations.WhitelistUserAsync(this.Database, this.User, this.User);
 
-			public void Dispose()
-			{
-				this.Database?.Dispose();
-			}
-
-			public Task DisposeAsync()
-			{
-				return Task.CompletedTask;
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.Unsuccessful, result.Error);
 			}
 		}
 
-		public class Template : IDisposable, IAsyncLifetime
+		public class SetServerProtectionTypeAsync : TransformationServiceTestBase
 		{
-			private readonly GlobalInfoContext Database;
-			private readonly TransformationService Transformations;
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+			private readonly IGuild Guild = MockHelper.CreateDiscordGuild(1);
 
-			public Template()
+			[Fact]
+			public async Task CanSetType()
 			{
-				this.Database = new MockedDatabase().GetDatabaseContext();
-				this.Transformations = new TransformationService(new ContentService());
+				var expected = ProtectionType.Whitelist;
+				var result = await this.Transformations.SetServerProtectionTypeAsync(this.Database, this.User, this.Guild, expected);
+
+				Assert.True(result.IsSuccess);
+				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
+				Assert.Equal(expected, this.Database.ServerUserProtections.First().Type);
 			}
 
-			public async Task InitializeAsync()
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfSameTypeIsAlreadySet()
 			{
-				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
+				var existingType = ProtectionType.Blacklist;
+				var result = await this.Transformations.SetServerProtectionTypeAsync(this.Database, this.User, this.Guild, existingType);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.Unsuccessful, result.Error);
+			}
+		}
+
+		public class SetDefaultProtectionTypeAsync : TransformationServiceTestBase
+		{
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+
+			[Fact]
+			public async Task CanSetType()
+			{
+				var expected = ProtectionType.Whitelist;
+				var result = await this.Transformations.SetDefaultProtectionTypeAsync(this.Database, this.User, expected);
+
+				Assert.True(result.IsSuccess);
+				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
+				Assert.Equal(expected, this.Database.GlobalUserProtections.First().DefaultType);
 			}
 
-			public void Dispose()
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfSameTypeIsAlreadySet()
 			{
-				this.Database?.Dispose();
+				var existingType = ProtectionType.Blacklist;
+				var result = await this.Transformations.SetDefaultProtectionTypeAsync(this.Database, this.User, existingType);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.Unsuccessful, result.Error);
+			}
+		}
+
+		public class SetCurrentAppearanceAsDefaultForCharacterAsync : TransformationServiceTestBase
+		{
+			private readonly Character Character;
+
+			public SetCurrentAppearanceAsDefaultForCharacterAsync()
+			{
+				this.Character = new Character();
+				this.Database.Characters.Add(this.Character);
+				this.Database.SaveChanges();
 			}
 
-			public Task DisposeAsync()
+			[Fact]
+			public async Task CanSetDefaultAppearance()
+			{
+				var alteredAppearance = new Appearance();
+				this.Character.CurrentAppearance = alteredAppearance;
+
+				var result = await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync(this.Database, this.Character);
+
+				Assert.True(result.IsSuccess);
+				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
+				Assert.NotNull(this.Character.DefaultAppearance);
+				Assert.Same(alteredAppearance, this.Character.DefaultAppearance);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveAnAlteredAppearance()
+			{
+				var result = await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync(this.Database, this.Character);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+				Assert.Null(this.Character.DefaultAppearance);
+			}
+		}
+
+		public class ResetCharacterFormAsync : TransformationServiceTestBase
+		{
+			private readonly Character Character;
+
+			public ResetCharacterFormAsync()
+			{
+				this.Character = new Character();
+				this.Database.Characters.Add(this.Character);
+				this.Database.SaveChanges();
+			}
+
+			[Fact]
+			public async Task CanResetForm()
+			{
+				var defaultAppearance = new Appearance();
+				this.Character.DefaultAppearance = defaultAppearance;
+
+				var result = await this.Transformations.ResetCharacterFormAsync(this.Database, this.Character);
+
+				Assert.True(result.IsSuccess);
+				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
+				Assert.NotNull(this.Character.CurrentAppearance);
+				Assert.Same(this.Character.DefaultAppearance, this.Character.CurrentAppearance);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveADefaultAppearance()
+			{
+				var result = await this.Transformations.ResetCharacterFormAsync(this.Database, this.Character);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+				Assert.Null(this.Character.CurrentAppearance);
+			}
+		}
+
+		public class GetAvailableTransformationsAsync : TransformationServiceTestBase
+		{
+			[Fact]
+			public async Task ReturnsNonemptySetForExistingTransformation()
+			{
+				var result = await this.Transformations.GetAvailableTransformationsAsync(this.Database, Bodypart.Face);
+
+				Assert.NotEmpty(result);
+			}
+
+			[Fact]
+			public async Task ReturnsEmptySetForNonExistantTransformation()
+			{
+				var result = await this.Transformations.GetAvailableTransformationsAsync(this.Database, Bodypart.Wings);
+
+				Assert.Empty(result);
+			}
+		}
+
+		public class GetAvailableSpeciesAsync : TransformationServiceTestBase
+		{
+			public override Task InitializeAsync()
 			{
 				return Task.CompletedTask;
+			}
+
+			[Fact]
+			public async Task ReturnsNonEmptySetForUpdatedDatabase()
+			{
+				await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
+				var result = await this.Transformations.GetAvailableSpeciesAsync(this.Database);
+
+				Assert.NotEmpty(result);
+			}
+
+			[Fact]
+			public async Task ReturnsEmptySetForEmptyDatabase()
+			{
+				var result = await this.Transformations.GetAvailableSpeciesAsync(this.Database);
+
+				Assert.Empty(result);
+			}
+		}
+
+		public class CanUserTransformUserAsync : TransformationServiceTestBase
+		{
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+			private readonly IUser TargetUser = MockHelper.CreateDiscordUser(1);
+
+			private readonly IGuild Guild = MockHelper.CreateDiscordGuild(0);
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfTargetUserHasNotOptedIn()
+			{
+				var result = await this.Transformations.CanUserTransformUserAsync(this.Database, this.Guild, this.User, this.TargetUser);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfUserIsOnTargetUsersBlacklist()
+			{
+				await EnsureOptedInAsync(this.TargetUser);
+				await this.Transformations.BlacklistUserAsync(this.Database, this.TargetUser, this.User);
+
+				var result = await this.Transformations.CanUserTransformUserAsync(this.Database, this.Guild, this.User, this.TargetUser);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfTargetUserUsesWhitelistingAndUserIsNotOnWhitelist()
+			{
+				await EnsureOptedInAsync(this.TargetUser);
+				await this.Transformations.SetServerProtectionTypeAsync(this.Database, this.TargetUser, this.Guild, ProtectionType.Whitelist);
+
+				var result = await this.Transformations.CanUserTransformUserAsync(this.Database, this.Guild, this.User, this.TargetUser);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsSuccessfulResultIfTargetUserUsesWhitelistingAndUserIsOnWhitelist()
+			{
+				await EnsureOptedInAsync(this.TargetUser);
+				await this.Transformations.SetServerProtectionTypeAsync(this.Database, this.TargetUser, this.Guild, ProtectionType.Whitelist);
+				await this.Transformations.WhitelistUserAsync(this.Database, this.TargetUser, this.User);
+
+				var result = await this.Transformations.CanUserTransformUserAsync(this.Database, this.Guild, this.User, this.TargetUser);
+
+				Assert.True(result.IsSuccess);
+			}
+
+			[Fact]
+			public async Task ReturnsSuccessfulResultIfUserIsNotOnTargetUsersBlacklist()
+			{
+				await EnsureOptedInAsync(this.TargetUser);
+
+				var result = await this.Transformations.CanUserTransformUserAsync(this.Database, this.Guild, this.User, this.TargetUser);
+
+				Assert.True(result.IsSuccess);
+			}
+
+			private async Task EnsureOptedInAsync(IUser user)
+			{
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, user, this.Guild);
+				protection.HasOptedIn = true;
+
+				await this.Database.SaveChangesAsync();
+			}
+		}
+
+		public class RemoveBodypartAsync : TransformationServiceTestBase
+		{
+			private readonly IGuild Guild;
+
+			private readonly IUser Owner = MockHelper.CreateDiscordGuildUser(0);
+			private readonly IUser Invoker = MockHelper.CreateDiscordGuildUser(1);
+
+			private readonly ICommandContext Context;
+			private Character Character;
+
+			public RemoveBodypartAsync()
+			{
+				var mockedGuild = new Mock<IGuild>();
+				mockedGuild.Setup(g => g.Id).Returns(1);
+				mockedGuild.Setup
+				(
+					c =>
+						c.GetUserAsync
+						(
+							It.Is<ulong>(id => id == this.Owner.Id),
+							CacheMode.AllowDownload,
+							null
+						)
+				)
+				.Returns(Task.FromResult((IGuildUser)this.Owner));
+
+				this.Guild = mockedGuild.Object;
+
+				var mockedContext = new Mock<ICommandContext>();
+				mockedContext.Setup(c => c.Guild).Returns(this.Guild);
+				mockedContext.Setup(c => c.User).Returns(this.Invoker);
+
+				this.Context = mockedContext.Object;
+
+				var services = new ServiceCollection()
+					.AddSingleton(this.Transformations)
+					.AddSingleton<CharacterService>()
+					.BuildServiceProvider();
+
+				this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
+			}
+
+			public override async Task InitializeAsync()
+			{
+				await base.InitializeAsync();
+
+				// Ensure owner is opted into transformations
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				protection.HasOptedIn = true;
+
+				// Create a test character
+				var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+				this.Character = new Character
+				{
+					Name = "Test",
+					CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
+					Owner = owner
+				};
+
+				this.Database.Characters.Add(this.Character);
+
+				await this.Database.SaveChangesAsync();
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
+			{
+				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
+
+				var result = await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
+				Assert.True(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveBodypart()
+			{
+				var result = await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Wings);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsSuccessfulResultIfCharacterHasBodypart()
+			{
+				var result = await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+
+				Assert.True(result.IsSuccess);
+			}
+
+			[Fact]
+			public async Task RemovesCorrectBodypart()
+			{
+				Assert.True(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+
+				await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+
+				Assert.False(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+			}
+
+			[Fact]
+			public async Task ReturnsShiftMessage()
+			{
+				var result = await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+
+				Assert.NotNull(result.ShiftMessage);
+			}
+		}
+
+		public class AddBodypartAsync : TransformationServiceTestBase
+		{
+			private readonly IGuild Guild;
+
+			private readonly IUser Owner = MockHelper.CreateDiscordGuildUser(0);
+			private readonly IUser Invoker = MockHelper.CreateDiscordGuildUser(1);
+
+			private readonly ICommandContext Context;
+			private Character Character;
+
+			public AddBodypartAsync()
+			{
+				var mockedGuild = new Mock<IGuild>();
+				mockedGuild.Setup(g => g.Id).Returns(1);
+				mockedGuild.Setup
+				(
+					c =>
+						c.GetUserAsync
+						(
+							It.Is<ulong>(id => id == this.Owner.Id),
+							CacheMode.AllowDownload,
+							null
+						)
+				)
+				.Returns(Task.FromResult((IGuildUser)this.Owner));
+
+				this.Guild = mockedGuild.Object;
+
+				var mockedContext = new Mock<ICommandContext>();
+				mockedContext.Setup(c => c.Guild).Returns(this.Guild);
+				mockedContext.Setup(c => c.User).Returns(this.Invoker);
+
+				this.Context = mockedContext.Object;
+
+				var services = new ServiceCollection()
+					.AddSingleton(this.Transformations)
+					.AddSingleton<CharacterService>()
+					.BuildServiceProvider();
+
+				this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
+			}
+
+			public override async Task InitializeAsync()
+			{
+				await base.InitializeAsync();
+
+				// Ensure owner is opted into transformations
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				protection.HasOptedIn = true;
+
+				// Create a test character
+				var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+				this.Character = new Character
+				{
+					Name = "Test",
+					CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
+					Owner = owner
+				};
+
+				this.Database.Characters.Add(this.Character);
+
+				await this.Database.SaveChangesAsync();
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
+			{
+				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
+
+				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
+				Assert.True(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfCharacterHasBodypart()
+			{
+				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
+			{
+				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "aaaa");
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotHaveBodypart()
+			{
+				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Wings, "template");
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsSuccessfulResultIfCharacterDoesNotHaveBodypart()
+			{
+				// Remove the face
+				await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+
+				// Then add it again
+				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+
+				Assert.True(result.IsSuccess);
+			}
+
+			[Fact]
+			public async Task AddsCorrectBodypart()
+			{
+				// Remove the face
+				await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+				Assert.False(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+
+				// Then add it again
+				await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+
+				Assert.True(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+			}
+
+			[Fact]
+			public async Task ReturnsShiftMessage()
+			{
+				// Remove the face
+				await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+
+				// Then add it again
+				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+
+				Assert.NotNull(result.ShiftMessage);
+			}
+		}
+
+		public class ShiftBodypartAsync : TransformationServiceTestBase
+		{
+			private readonly IGuild Guild;
+
+			private readonly IUser Owner = MockHelper.CreateDiscordGuildUser(0);
+			private readonly IUser Invoker = MockHelper.CreateDiscordGuildUser(1);
+
+			private readonly ICommandContext Context;
+			private Character Character;
+
+			public ShiftBodypartAsync()
+			{
+				var mockedGuild = new Mock<IGuild>();
+				mockedGuild.Setup(g => g.Id).Returns(1);
+				mockedGuild.Setup
+				(
+					c =>
+						c.GetUserAsync
+						(
+							It.Is<ulong>(id => id == this.Owner.Id),
+							CacheMode.AllowDownload,
+							null
+						)
+				)
+				.Returns(Task.FromResult((IGuildUser)this.Owner));
+
+				this.Guild = mockedGuild.Object;
+
+				var mockedContext = new Mock<ICommandContext>();
+				mockedContext.Setup(c => c.Guild).Returns(this.Guild);
+				mockedContext.Setup(c => c.User).Returns(this.Invoker);
+
+				this.Context = mockedContext.Object;
+
+				var services = new ServiceCollection()
+					.AddSingleton(this.Transformations)
+					.AddSingleton<CharacterService>()
+					.BuildServiceProvider();
+
+				this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
+			}
+
+			public override async Task InitializeAsync()
+			{
+				await base.InitializeAsync();
+
+				// Ensure owner is opted into transformations
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				protection.HasOptedIn = true;
+
+				// Create a test character
+				var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+				this.Character = new Character
+				{
+					Name = "Test",
+					CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
+					Owner = owner
+				};
+
+				this.Database.Characters.Add(this.Character);
+
+				await this.Database.SaveChangesAsync();
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
+			{
+				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
+
+				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "shark");
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
+			{
+				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "adsasdsdas");
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotHaveBodypart()
+			{
+				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Wings, "shark");
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfBodypartIsAlreadyThatSpecies()
+			{
+				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.Unsuccessful, result.Error);
+			}
+
+			[Fact]
+			public async Task AddsBodypartIfItDoesNotAlreadyExist()
+			{
+				Assert.False(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Tail));
+
+				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Tail, "shark");
+
+				Assert.True(result.IsSuccess);
+				Assert.True(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Tail));
+			}
+
+			[Fact]
+			public async Task ShiftsBodypartIntoCorrectSpecies()
+			{
+				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "shark");
+
+				Assert.True(result.IsSuccess);
+				Assert.Equal("shark", this.Character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name);
+			}
+
+			[Fact]
+			public async Task ReturnsShiftMessage()
+			{
+				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "shark");
+
+				Assert.NotNull(result.ShiftMessage);
+				Assert.NotEmpty(result.ShiftMessage);
+			}
+		}
+
+		public class ShiftBodypartColourAsync : TransformationServiceTestBase
+		{
+			private readonly IGuild Guild;
+
+			private readonly IUser Owner = MockHelper.CreateDiscordGuildUser(0);
+			private readonly IUser Invoker = MockHelper.CreateDiscordGuildUser(1);
+
+			private readonly Colour NewColour;
+
+			private readonly ICommandContext Context;
+			private Character Character;
+
+			private Colour OriginalColour;
+
+			public ShiftBodypartColourAsync()
+			{
+				var mockedGuild = new Mock<IGuild>();
+				mockedGuild.Setup(g => g.Id).Returns(1);
+				mockedGuild.Setup
+				(
+					c =>
+						c.GetUserAsync
+						(
+							It.Is<ulong>(id => id == this.Owner.Id),
+							CacheMode.AllowDownload,
+							null
+						)
+				)
+				.Returns(Task.FromResult((IGuildUser)this.Owner));
+
+				this.Guild = mockedGuild.Object;
+
+				var mockedContext = new Mock<ICommandContext>();
+				mockedContext.Setup(c => c.Guild).Returns(this.Guild);
+				mockedContext.Setup(c => c.User).Returns(this.Invoker);
+
+				this.Context = mockedContext.Object;
+
+				var services = new ServiceCollection()
+					.AddSingleton<ContentService>()
+					.AddSingleton<CommandService>()
+					.AddSingleton<OwnedEntityService>()
+					.AddSingleton(this.Transformations)
+					.AddSingleton(s => ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider(new TheyPronounProvider()))
+					.BuildServiceProvider();
+
+				this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
+
+				Colour.TryParse("bright purple", out this.NewColour);
+			}
+
+			public override async Task InitializeAsync()
+			{
+				await base.InitializeAsync();
+
+				// Ensure owner is opted into transformations
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				protection.HasOptedIn = true;
+
+				// Create a test character
+				var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+				this.Character = new Character
+				{
+					Name = "Test",
+					CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
+					Owner = owner,
+					PronounProviderFamily = "They"
+				};
+
+				this.OriginalColour = this.Character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).BaseColour;
+
+				this.Database.Characters.Add(this.Character);
+
+				await this.Database.SaveChangesAsync();
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
+			{
+				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
+
+				var result = await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewColour);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveBodypart()
+			{
+				var result = await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Wings, this.NewColour);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfBodypartIsAlreadyThatColour()
+			{
+				var result = await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.OriginalColour);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.Unsuccessful, result.Error);
+			}
+
+			[Fact]
+			public async Task CanShiftBodypartColour()
+			{
+				var result = await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewColour);
+
+				Assert.True(result.IsSuccess);
+			}
+
+			[Fact]
+			public async Task ShiftsBodypartIntoCorrectColour()
+			{
+				await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewColour);
+
+				var face = this.Character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face);
+				Assert.Same(this.NewColour, face.BaseColour);
+			}
+
+			[Fact]
+			public async Task ReturnsShiftMessage()
+			{
+				var result = await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewColour);
+
+				Assert.NotNull(result.ShiftMessage);
+				Assert.NotEmpty(result.ShiftMessage);
+			}
+		}
+
+		public class ShiftBodypartPatternAsync : TransformationServiceTestBase
+		{
+			private readonly IGuild Guild;
+
+			private readonly IUser Owner = MockHelper.CreateDiscordGuildUser(0);
+			private readonly IUser Invoker = MockHelper.CreateDiscordGuildUser(1);
+
+			private readonly Pattern NewPattern;
+			private readonly Colour NewPatternColour;
+
+			private readonly ICommandContext Context;
+			private Character Character;
+
+			public ShiftBodypartPatternAsync()
+			{
+				var mockedGuild = new Mock<IGuild>();
+				mockedGuild.Setup(g => g.Id).Returns(1);
+				mockedGuild.Setup
+				(
+					c =>
+						c.GetUserAsync
+						(
+							It.Is<ulong>(id => id == this.Owner.Id),
+							CacheMode.AllowDownload,
+							null
+						)
+				)
+				.Returns(Task.FromResult((IGuildUser)this.Owner));
+
+				this.Guild = mockedGuild.Object;
+
+				var mockedContext = new Mock<ICommandContext>();
+				mockedContext.Setup(c => c.Guild).Returns(this.Guild);
+				mockedContext.Setup(c => c.User).Returns(this.Invoker);
+
+				this.Context = mockedContext.Object;
+
+				var services = new ServiceCollection()
+					.AddSingleton<ContentService>()
+					.AddSingleton<CommandService>()
+					.AddSingleton<OwnedEntityService>()
+					.AddSingleton(this.Transformations)
+					.AddSingleton(s => ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider(new TheyPronounProvider()))
+					.BuildServiceProvider();
+
+				this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
+
+				this.NewPattern = Pattern.Swirly;
+				Colour.TryParse("bright purple", out this.NewPatternColour);
+			}
+
+			public override async Task InitializeAsync()
+			{
+				await base.InitializeAsync();
+
+				// Ensure owner is opted into transformations
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				protection.HasOptedIn = true;
+
+				// Create a test character
+				var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+				this.Character = new Character
+				{
+					Name = "Test",
+					CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
+					Owner = owner,
+					PronounProviderFamily = "They"
+				};
+
+				this.Database.Characters.Add(this.Character);
+
+				await this.Database.SaveChangesAsync();
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
+			{
+				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
+
+				var result = await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveBodypart()
+			{
+				var result = await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Wings, this.NewPattern, this.NewPatternColour);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfBodypartIsAlreadyThatPattern()
+			{
+				await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+				var result = await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.Unsuccessful, result.Error);
+			}
+
+			[Fact]
+			public async Task CanShiftBodypartPattern()
+			{
+				var result = await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+
+				Assert.True(result.IsSuccess);
+			}
+
+			[Fact]
+			public async Task ShiftsBodypartIntoCorrectPattern()
+			{
+				await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+
+				var face = this.Character.GetBodypart(Bodypart.Face);
+				Assert.Equal(this.NewPattern, face.Pattern);
+			}
+
+			[Fact]
+			public async Task ShiftsBodypartIntoCorrectPatternColour()
+			{
+				await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+
+				var face = this.Character.GetBodypart(Bodypart.Face);
+				Assert.Equal(this.NewPatternColour, face.PatternColour);
+			}
+
+			[Fact]
+			public async Task ReturnsShiftMessage()
+			{
+				var result = await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+
+				Assert.NotNull(result.ShiftMessage);
+				Assert.NotEmpty(result.ShiftMessage);
+			}
+		}
+
+		public class ShiftBodypartPatternColourAsync : TransformationServiceTestBase
+		{
+			private readonly IGuild Guild;
+
+			private readonly IUser Owner = MockHelper.CreateDiscordGuildUser(0);
+			private readonly IUser Invoker = MockHelper.CreateDiscordGuildUser(1);
+
+			private readonly Colour NewPatternColour;
+
+			private readonly ICommandContext Context;
+			private Character Character;
+
+			private Colour OriginalPatternColour;
+
+			public ShiftBodypartPatternColourAsync()
+			{
+				var mockedGuild = new Mock<IGuild>();
+				mockedGuild.Setup(g => g.Id).Returns(1);
+				mockedGuild.Setup
+				(
+					c =>
+						c.GetUserAsync
+						(
+							It.Is<ulong>(id => id == this.Owner.Id),
+							CacheMode.AllowDownload,
+							null
+						)
+				)
+				.Returns(Task.FromResult((IGuildUser)this.Owner));
+
+				this.Guild = mockedGuild.Object;
+
+				var mockedContext = new Mock<ICommandContext>();
+				mockedContext.Setup(c => c.Guild).Returns(this.Guild);
+				mockedContext.Setup(c => c.User).Returns(this.Invoker);
+
+				this.Context = mockedContext.Object;
+
+				var services = new ServiceCollection()
+					.AddSingleton<ContentService>()
+					.AddSingleton<CommandService>()
+					.AddSingleton<OwnedEntityService>()
+					.AddSingleton(this.Transformations)
+					.AddSingleton(s => ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider(new TheyPronounProvider()))
+					.BuildServiceProvider();
+
+				this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
+
+				Colour.TryParse("bright purple", out this.NewPatternColour);
+			}
+
+			public override async Task InitializeAsync()
+			{
+				await base.InitializeAsync();
+
+				// Ensure owner is opted into transformations
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				protection.HasOptedIn = true;
+
+				// Create a test character
+				var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+				this.Character = new Character
+				{
+					Name = "Test",
+					CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
+					Owner = owner,
+					PronounProviderFamily = "They"
+				};
+
+				Colour.TryParse("dull white", out this.OriginalPatternColour);
+				await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, Pattern.Swirly, this.OriginalPatternColour);
+
+				this.Database.Characters.Add(this.Character);
+
+				await this.Database.SaveChangesAsync();
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
+			{
+				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
+
+				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveBodypart()
+			{
+				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Wings, this.NewPatternColour);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfBodypartDoesNotHavePattern()
+			{
+				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.LeftArm, this.NewPatternColour);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.ObjectNotFound, result.Error);
+			}
+
+			[Fact]
+			public async Task ReturnsUnsuccessfulResultIfBodypartIsAlreadyThatColour()
+			{
+				await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
+				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
+
+				Assert.False(result.IsSuccess);
+				Assert.Equal(CommandError.Unsuccessful, result.Error);
+			}
+
+			[Fact]
+			public async Task CanShiftColour()
+			{
+				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
+
+				Assert.True(result.IsSuccess);
+			}
+
+			[Fact]
+			public async Task ShiftsIntoCorrectColour()
+			{
+				await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
+
+				var face = this.Character.GetBodypart(Bodypart.Face);
+				Assert.Equal(this.NewPatternColour, face.PatternColour);
+			}
+
+			[Fact]
+			public async Task ReturnsShiftMessage()
+			{
+				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
+
+				Assert.NotNull(result.ShiftMessage);
+				Assert.NotEmpty(result.ShiftMessage);
 			}
 		}
 	}
