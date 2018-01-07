@@ -24,6 +24,7 @@ using System.ComponentModel.DataAnnotations;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Transformations;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 

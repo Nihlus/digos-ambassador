@@ -29,9 +29,9 @@ using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
 
 using Discord.Commands;
-
+using DIGOS.Ambassador.Transformations;
 using JetBrains.Annotations;
-using static DIGOS.Ambassador.Services.Bodypart;
+using static DIGOS.Ambassador.Transformations.Bodypart;
 
 namespace DIGOS.Ambassador.Database.Appearances
 {

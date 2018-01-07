@@ -25,7 +25,7 @@ using System.ComponentModel.DataAnnotations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
 	/// A node deserializer which validates its input as it goes.

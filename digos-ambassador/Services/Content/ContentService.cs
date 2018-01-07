@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
 
 using Discord.Commands;
+using DIGOS.Ambassador.Transformations;
 using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;

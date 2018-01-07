@@ -249,18 +249,17 @@
             <e p="RoleplayService.cs" t="Include" />
           </e>
           <e p="Transformations" t="Include">
-            <e p="Bodypart.cs" t="Include" />
-            <e p="BodypartUtilities.cs" t="Include" />
-            <e p="ColourYamlConverter.cs" t="Include" />
-            <e p="ProtectionType.cs" t="Include" />
-            <e p="SpeciesYamlConverter.cs" t="Include" />
             <e p="TransformationService.cs" t="Include" />
-            <e p="ValidatingNodeDeserializer.cs" t="Include" />
           </e>
         </e>
         <e p="Transformations" t="Include">
+          <e p="Bodypart.cs" t="Include" />
+          <e p="BodypartUtilities.cs" t="Include" />
+          <e p="ColourYamlConverter.cs" t="Include" />
           <e p="IReplaceableTextToken.cs" t="Include" />
+          <e p="ProtectionType.cs" t="Include" />
           <e p="ReplacableTextToken.cs" t="Include" />
+          <e p="SpeciesYamlConverter.cs" t="Include" />
           <e p="TokenIdentifierAttribute.cs" t="Include" />
           <e p="Tokens" t="Include">
             <e p="ColourToken.cs" t="Include" />
@@ -275,6 +274,7 @@
           </e>
           <e p="TransformationDescriptionBuilder.cs" t="Include" />
           <e p="TransformationTextTokenizer.cs" t="Include" />
+          <e p="ValidatingNodeDeserializer.cs" t="Include" />
         </e>
         <e p="TypeReaders" t="Include">
           <e p="CharacterTypeReader.cs" t="Include" />

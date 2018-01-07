@@ -29,7 +29,7 @@ using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Services;
 
 using Discord;
-
+using DIGOS.Ambassador.Transformations;
 using JetBrains.Annotations;
 using Image = DIGOS.Ambassador.Database.Data.Image;
 

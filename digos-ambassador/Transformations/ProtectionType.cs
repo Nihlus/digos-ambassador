@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
 	/// Represents protection types for interactions between users.

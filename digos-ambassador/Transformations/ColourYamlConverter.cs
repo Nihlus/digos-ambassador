@@ -26,7 +26,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
 	/// YAML deserialization converter for colour objects.

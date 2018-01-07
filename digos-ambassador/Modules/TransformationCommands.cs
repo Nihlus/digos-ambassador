@@ -31,7 +31,7 @@ using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
-
+using DIGOS.Ambassador.Transformations;
 using Humanizer;
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
