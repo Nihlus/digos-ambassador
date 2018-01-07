@@ -267,7 +267,8 @@ namespace DIGOS.Ambassador
 				{
 					case CommandError.UnknownCommand:
 					{
-						await this.Feedback.SendWarningAsync(context, "Unknown command.");
+						// TODO: Better way of doing this
+						//await this.Feedback.SendWarningAsync(context, "Unknown command.");
 						break;
 					}
 					case CommandError.ObjectNotFound:
@@ -281,10 +282,12 @@ namespace DIGOS.Ambassador
 					case CommandError.ParseFailed:
 					case CommandError.BadArgCount:
 					{
-						await this.Feedback.SendErrorAsync(context, $"Command failed: {result.ErrorReason}");
+						var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
+
+						var errorEmbed = this.Feedback.CreateFeedbackEmbed(context.User, Color.Red, $"Command failed: {result.ErrorReason}");:
 						var searchResult = this.Commands.Search(context, argumentPos);
 
-						var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
+						await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
 						await userDMChannel.SendMessageAsync(string.Empty, false, this.Feedback.CreateCommandUsageEmbed(searchResult.Commands));
 						break;
 					}
