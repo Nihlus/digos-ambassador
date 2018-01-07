@@ -69,8 +69,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <param name="authorNickname">The current display name of the author.</param>
 		/// <returns>A new UserMessage.</returns>
 		[Pure]
-		[ItemNotNull]
-		public static async Task<UserMessage> FromDiscordMessageAsync
+		public static UserMessage FromDiscordMessage
 		(
 			[NotNull] IMessage message,
 			[NotNull] string authorNickname

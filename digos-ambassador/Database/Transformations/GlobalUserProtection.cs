@@ -23,7 +23,6 @@
 using System.Collections.Generic;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Transformations;
 using JetBrains.Annotations;
 

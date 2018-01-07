@@ -268,7 +268,7 @@ namespace DIGOS.Ambassador
 					case CommandError.UnknownCommand:
 					{
 						// TODO: Better way of doing this
-						//await this.Feedback.SendWarningAsync(context, "Unknown command.");
+						// await this.Feedback.SendWarningAsync(context, "Unknown command.");
 						break;
 					}
 					case CommandError.ObjectNotFound:

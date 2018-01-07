@@ -32,9 +32,10 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Transformations;
 
 using Discord.Commands;
-using DIGOS.Ambassador.Transformations;
+
 using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;

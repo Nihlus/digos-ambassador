@@ -184,7 +184,7 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 			}
 
-			var roleplayMessage = await UserMessage.FromDiscordMessageAsync(message, userNick);
+			var roleplayMessage = UserMessage.FromDiscordMessage(message, userNick);
 			roleplay.Messages.Add(roleplayMessage);
 
 			await db.SaveChangesAsync();

@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -898,7 +897,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task RemovesCorrectBodypart()
 			{
-				Assert.True(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+				Assert.Contains(this.Character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
 
 				var result = await this.Transformations.RemoveBodypartAsync
 				(
@@ -908,7 +907,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					Bodypart.Face
 				);
 
-				Assert.False(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+				Assert.DoesNotContain(this.Character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
 			}
 
 			[Fact]
@@ -1012,7 +1011,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
-				Assert.True(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+				Assert.Contains(this.Character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
 			}
 
 			[Fact]
