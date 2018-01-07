@@ -27,7 +27,7 @@ using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
 
 using Discord.Commands;
-
+using DIGOS.Ambassador.Transformations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;

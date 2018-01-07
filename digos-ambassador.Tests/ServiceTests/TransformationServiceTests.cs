@@ -168,7 +168,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsTrueForUniqueCombination()
 			{
-				var result = await this.Transformations.IsPartAndSpeciesCombinationUniqueAsync(this.Database, Bodypart.Wings, this.TemplateSpecies);
+				var result = await this.Transformations.IsPartAndSpeciesCombinationUniqueAsync
+				(
+					this.Database,
+					Bodypart.Wings,
+					this.TemplateSpecies
+				);
 
 				Assert.True(result);
 			}
@@ -176,7 +181,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsFalseForNonUniqueCombinationTask()
 			{
-				var result = await this.Transformations.IsPartAndSpeciesCombinationUniqueAsync(this.Database, Bodypart.Face, this.TemplateSpecies);
+				var result = await this.Transformations.IsPartAndSpeciesCombinationUniqueAsync
+				(
+					this.Database,
+					Bodypart.Face,
+					this.TemplateSpecies
+				);
 
 				Assert.False(result);
 			}
@@ -195,7 +205,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task RetrievesCorrectBodypart()
 			{
-				var result = await this.Transformations.GetTransformationByPartAndSpeciesAsync(this.Database, Bodypart.Face, this.TemplateSpecies);
+				var result = await this.Transformations.GetTransformationByPartAndSpeciesAsync
+				(
+					this.Database,
+					Bodypart.Face,
+					this.TemplateSpecies
+				);
 
 				Assert.True(result.IsSuccess);
 				Assert.Equal(Bodypart.Face, result.Entity.Part);
@@ -206,7 +221,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
 			{
 				var nonexistantSpecies = new Species();
-				var result = await this.Transformations.GetTransformationByPartAndSpeciesAsync(this.Database, Bodypart.Face, nonexistantSpecies);
+				var result = await this.Transformations.GetTransformationByPartAndSpeciesAsync
+				(
+					this.Database,
+					Bodypart.Face,
+					nonexistantSpecies
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -215,7 +235,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfCombinationDoesNotExist()
 			{
-				var result = await this.Transformations.GetTransformationByPartAndSpeciesAsync(this.Database, Bodypart.Wings, this.TemplateSpecies);
+				var result = await this.Transformations.GetTransformationByPartAndSpeciesAsync
+				(
+					this.Database,
+					Bodypart.Wings,
+					this.TemplateSpecies
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -232,7 +257,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				Assert.Empty(this.Database.ServerUserProtections);
 
-				var result = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.User, this.Guild);
+				var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.User,
+					this.Guild
+				);
 
 				Assert.NotEmpty(this.Database.ServerUserProtections);
 				Assert.Same(result, this.Database.ServerUserProtections.First());
@@ -241,7 +271,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task CreatedObjectIsBoundToTheCorrectServer()
 			{
-				var result = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.User, this.Guild);
+				var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.User,
+					this.Guild
+				);
 
 				Assert.Equal(this.Guild.Id, result.Server.DiscordID);
 			}
@@ -249,7 +284,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task CreatedObjectIsBoundToTheCorrectUser()
 			{
-				var result = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.User, this.Guild);
+				var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.User,
+					this.Guild
+				);
 
 				Assert.Equal(this.User.Id, result.User.DiscordID);
 			}
@@ -258,10 +298,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			public async Task RetrievesCorrectObjectIfOneExists()
 			{
 				// Create an object
-				var created = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.User, this.Guild);
+				var created = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.User,
+					this.Guild
+				);
 
 				// Get it from the database
-				var retrieved = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.User, this.Guild);
+				var retrieved = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.User,
+					this.Guild
+				);
 
 				Assert.Same(created, retrieved);
 			}
@@ -281,7 +331,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				this.Database.GlobalUserProtections.Add(globalSetting);
 				await this.Database.SaveChangesAsync();
 
-				var localSetting = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.User, this.Guild);
+				var localSetting = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.User,
+					this.Guild
+				);
 
 				Assert.Equal(globalSetting.DefaultOptIn, localSetting.HasOptedIn);
 				Assert.Equal(globalSetting.DefaultType, localSetting.Type);
@@ -415,7 +470,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			public async Task CanSetType()
 			{
 				var expected = ProtectionType.Whitelist;
-				var result = await this.Transformations.SetServerProtectionTypeAsync(this.Database, this.User, this.Guild, expected);
+				var result = await this.Transformations.SetServerProtectionTypeAsync
+				(
+					this.Database,
+					this.User,
+					this.Guild,
+					expected
+				);
 
 				Assert.True(result.IsSuccess);
 				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
@@ -426,7 +487,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			public async Task ReturnsUnsuccessfulResultIfSameTypeIsAlreadySet()
 			{
 				var existingType = ProtectionType.Blacklist;
-				var result = await this.Transformations.SetServerProtectionTypeAsync(this.Database, this.User, this.Guild, existingType);
+				var result = await this.Transformations.SetServerProtectionTypeAsync
+				(
+					this.Database,
+					this.User,
+					this.Guild,
+					existingType
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.Unsuccessful, result.Error);
@@ -441,7 +508,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			public async Task CanSetType()
 			{
 				var expected = ProtectionType.Whitelist;
-				var result = await this.Transformations.SetDefaultProtectionTypeAsync(this.Database, this.User, expected);
+				var result = await this.Transformations.SetDefaultProtectionTypeAsync
+				(
+					this.Database,
+					this.User,
+					expected
+				);
 
 				Assert.True(result.IsSuccess);
 				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
@@ -451,8 +523,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfSameTypeIsAlreadySet()
 			{
-				var existingType = ProtectionType.Blacklist;
-				var result = await this.Transformations.SetDefaultProtectionTypeAsync(this.Database, this.User, existingType);
+				var currentType = ProtectionType.Blacklist;
+				var result = await this.Transformations.SetDefaultProtectionTypeAsync
+				(
+					this.Database,
+					this.User,
+					currentType
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.Unsuccessful, result.Error);
@@ -476,7 +553,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				var alteredAppearance = new Appearance();
 				this.Character.CurrentAppearance = alteredAppearance;
 
-				var result = await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync(this.Database, this.Character);
+				var result = await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
+				(
+					this.Database,
+					this.Character
+				);
 
 				Assert.True(result.IsSuccess);
 				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
@@ -487,7 +568,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveAnAlteredAppearance()
 			{
-				var result = await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync(this.Database, this.Character);
+				var result = await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
+				(
+					this.Database,
+					this.Character
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -585,7 +670,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfTargetUserHasNotOptedIn()
 			{
-				var result = await this.Transformations.CanUserTransformUserAsync(this.Database, this.Guild, this.User, this.TargetUser);
+				var result = await this.Transformations.CanUserTransformUserAsync
+				(
+					this.Database,
+					this.Guild,
+					this.User,
+					this.TargetUser
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
@@ -597,7 +688,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				await EnsureOptedInAsync(this.TargetUser);
 				await this.Transformations.BlacklistUserAsync(this.Database, this.TargetUser, this.User);
 
-				var result = await this.Transformations.CanUserTransformUserAsync(this.Database, this.Guild, this.User, this.TargetUser);
+				var result = await this.Transformations.CanUserTransformUserAsync
+				(
+					this.Database,
+					this.Guild,
+					this.User,
+					this.TargetUser
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
@@ -607,9 +704,21 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			public async Task ReturnsUnsuccessfulResultIfTargetUserUsesWhitelistingAndUserIsNotOnWhitelist()
 			{
 				await EnsureOptedInAsync(this.TargetUser);
-				await this.Transformations.SetServerProtectionTypeAsync(this.Database, this.TargetUser, this.Guild, ProtectionType.Whitelist);
+				await this.Transformations.SetServerProtectionTypeAsync
+				(
+					this.Database,
+					this.TargetUser,
+					this.Guild,
+					ProtectionType.Whitelist
+				);
 
-				var result = await this.Transformations.CanUserTransformUserAsync(this.Database, this.Guild, this.User, this.TargetUser);
+				var result = await this.Transformations.CanUserTransformUserAsync
+				(
+					this.Database,
+					this.Guild,
+					this.User,
+					this.TargetUser
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
@@ -619,10 +728,23 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			public async Task ReturnsSuccessfulResultIfTargetUserUsesWhitelistingAndUserIsOnWhitelist()
 			{
 				await EnsureOptedInAsync(this.TargetUser);
-				await this.Transformations.SetServerProtectionTypeAsync(this.Database, this.TargetUser, this.Guild, ProtectionType.Whitelist);
+				await this.Transformations.SetServerProtectionTypeAsync
+				(
+					this.Database,
+					this.TargetUser,
+					this.Guild,
+					ProtectionType.Whitelist
+				);
+
 				await this.Transformations.WhitelistUserAsync(this.Database, this.TargetUser, this.User);
 
-				var result = await this.Transformations.CanUserTransformUserAsync(this.Database, this.Guild, this.User, this.TargetUser);
+				var result = await this.Transformations.CanUserTransformUserAsync
+				(
+					this.Database,
+					this.Guild,
+					this.User,
+					this.TargetUser
+				);
 
 				Assert.True(result.IsSuccess);
 			}
@@ -632,14 +754,25 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				await EnsureOptedInAsync(this.TargetUser);
 
-				var result = await this.Transformations.CanUserTransformUserAsync(this.Database, this.Guild, this.User, this.TargetUser);
+				var result = await this.Transformations.CanUserTransformUserAsync
+				(
+					this.Database,
+					this.Guild,
+					this.User,
+					this.TargetUser
+				);
 
 				Assert.True(result.IsSuccess);
 			}
 
 			private async Task EnsureOptedInAsync(IUser user)
 			{
-				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, user, this.Guild);
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					user,
+					this.Guild
+				);
 				protection.HasOptedIn = true;
 
 				await this.Database.SaveChangesAsync();
@@ -693,7 +826,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				await base.InitializeAsync();
 
 				// Ensure owner is opted into transformations
-				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.Owner,
+					this.Guild
+				);
 				protection.HasOptedIn = true;
 
 				// Create a test character
@@ -715,17 +853,29 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
 
-				var result = await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+				var result = await this.Transformations.RemoveBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
-				Assert.True(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+				Assert.True(this.Character.HasBodypart(Bodypart.Face));
 			}
 
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveBodypart()
 			{
-				var result = await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Wings);
+				var result = await this.Transformations.RemoveBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Wings
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -734,7 +884,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsSuccessfulResultIfCharacterHasBodypart()
 			{
-				var result = await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+				var result = await this.Transformations.RemoveBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face
+				);
 
 				Assert.True(result.IsSuccess);
 			}
@@ -744,7 +900,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				Assert.True(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
 
-				await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+				var result = await this.Transformations.RemoveBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face
+				);
 
 				Assert.False(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
 			}
@@ -752,7 +914,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsShiftMessage()
 			{
-				var result = await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+				var result = await this.Transformations.RemoveBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face
+				);
 
 				Assert.NotNull(result.ShiftMessage);
 			}
@@ -805,7 +973,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				await base.InitializeAsync();
 
 				// Ensure owner is opted into transformations
-				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.Owner,
+					this.Guild
+				);
+
 				protection.HasOptedIn = true;
 
 				// Create a test character
@@ -827,7 +1001,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
 
-				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+				var result = await this.Transformations.AddBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"template"
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
@@ -837,7 +1018,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfCharacterHasBodypart()
 			{
-				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+				var result = await this.Transformations.AddBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"template"
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -846,7 +1034,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
 			{
-				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "aaaa");
+				var result = await this.Transformations.AddBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"aaaa"
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -855,7 +1050,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotHaveBodypart()
 			{
-				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Wings, "template");
+				var result = await this.Transformations.AddBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Wings,
+					"template"
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -865,10 +1067,23 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			public async Task ReturnsSuccessfulResultIfCharacterDoesNotHaveBodypart()
 			{
 				// Remove the face
-				await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+				await this.Transformations.RemoveBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face
+				);
 
 				// Then add it again
-				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+				var result = await this.Transformations.AddBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"template"
+				);
 
 				Assert.True(result.IsSuccess);
 			}
@@ -877,23 +1092,50 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			public async Task AddsCorrectBodypart()
 			{
 				// Remove the face
-				await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
-				Assert.False(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+				await this.Transformations.RemoveBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face
+				);
+
+				Assert.False(this.Character.HasBodypart(Bodypart.Face));
 
 				// Then add it again
-				await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+				await this.Transformations.AddBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"template"
+				);
 
-				Assert.True(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Face));
+				Assert.True(this.Character.HasBodypart(Bodypart.Face));
 			}
 
 			[Fact]
 			public async Task ReturnsShiftMessage()
 			{
 				// Remove the face
-				await this.Transformations.RemoveBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face);
+				await this.Transformations.RemoveBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face
+				);
 
 				// Then add it again
-				var result = await this.Transformations.AddBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+				var result = await this.Transformations.AddBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"template"
+				);
 
 				Assert.NotNull(result.ShiftMessage);
 			}
@@ -946,7 +1188,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				await base.InitializeAsync();
 
 				// Ensure owner is opted into transformations
-				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.Owner,
+					this.Guild
+				);
+
 				protection.HasOptedIn = true;
 
 				// Create a test character
@@ -968,7 +1216,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
 
-				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "shark");
+				var result = await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"shark"
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
@@ -977,7 +1232,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
 			{
-				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "adsasdsdas");
+				var result = await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"adadadsasd"
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -986,7 +1248,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotHaveBodypart()
 			{
-				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Wings, "shark");
+				var result = await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Wings,
+					"shark"
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -995,7 +1264,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfBodypartIsAlreadyThatSpecies()
 			{
-				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "template");
+				var result = await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"template"
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.Unsuccessful, result.Error);
@@ -1004,27 +1280,48 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task AddsBodypartIfItDoesNotAlreadyExist()
 			{
-				Assert.False(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Tail));
+				Assert.False(this.Character.HasBodypart(Bodypart.Tail));
 
-				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Tail, "shark");
+				var result = await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"shark"
+				);
 
 				Assert.True(result.IsSuccess);
-				Assert.True(this.Character.CurrentAppearance.Components.Any(c => c.Bodypart == Bodypart.Tail));
+				Assert.True(this.Character.HasBodypart(Bodypart.Tail));
 			}
 
 			[Fact]
 			public async Task ShiftsBodypartIntoCorrectSpecies()
 			{
-				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "shark");
+				var result = await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"shark"
+				);
 
 				Assert.True(result.IsSuccess);
-				Assert.Equal("shark", this.Character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name);
+				Assert.Equal("shark", this.Character.GetBodypart(Bodypart.Face).Transformation.Species.Name);
 			}
 
 			[Fact]
 			public async Task ReturnsShiftMessage()
 			{
-				var result = await this.Transformations.ShiftBodypartAsync(this.Database, this.Context, this.Character, Bodypart.Face, "shark");
+				var result = await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"shark"
+				);
 
 				Assert.NotNull(result.ShiftMessage);
 				Assert.NotEmpty(result.ShiftMessage);
@@ -1074,7 +1371,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					.AddSingleton<CommandService>()
 					.AddSingleton<OwnedEntityService>()
 					.AddSingleton(this.Transformations)
-					.AddSingleton(s => ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider(new TheyPronounProvider()))
+					.AddSingleton
+					(
+						s =>
+							ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider
+							(
+								new TheyPronounProvider()
+							)
+					)
 					.BuildServiceProvider();
 
 				this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
@@ -1087,7 +1391,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				await base.InitializeAsync();
 
 				// Ensure owner is opted into transformations
-				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.Owner,
+					this.Guild
+				);
+
 				protection.HasOptedIn = true;
 
 				// Create a test character
@@ -1100,7 +1410,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					PronounProviderFamily = "They"
 				};
 
-				this.OriginalColour = this.Character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).BaseColour;
+				this.OriginalColour = this.Character.GetBodypart(Bodypart.Face).BaseColour;
 
 				this.Database.Characters.Add(this.Character);
 
@@ -1112,7 +1422,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
 
-				var result = await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewColour);
+				var result = await this.Transformations.ShiftBodypartColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewColour
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
@@ -1121,7 +1438,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveBodypart()
 			{
-				var result = await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Wings, this.NewColour);
+				var result = await this.Transformations.ShiftBodypartColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Wings,
+					this.NewColour
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -1130,7 +1454,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfBodypartIsAlreadyThatColour()
 			{
-				var result = await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.OriginalColour);
+				var result = await this.Transformations.ShiftBodypartColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.OriginalColour
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.Unsuccessful, result.Error);
@@ -1139,7 +1470,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task CanShiftBodypartColour()
 			{
-				var result = await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewColour);
+				var result = await this.Transformations.ShiftBodypartColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewColour
+				);
 
 				Assert.True(result.IsSuccess);
 			}
@@ -1147,7 +1485,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ShiftsBodypartIntoCorrectColour()
 			{
-				await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewColour);
+				await this.Transformations.ShiftBodypartColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewColour
+				);
 
 				var face = this.Character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face);
 				Assert.Same(this.NewColour, face.BaseColour);
@@ -1156,7 +1501,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsShiftMessage()
 			{
-				var result = await this.Transformations.ShiftBodypartColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewColour);
+				var result = await this.Transformations.ShiftBodypartColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewColour
+				);
 
 				Assert.NotNull(result.ShiftMessage);
 				Assert.NotEmpty(result.ShiftMessage);
@@ -1205,7 +1557,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					.AddSingleton<CommandService>()
 					.AddSingleton<OwnedEntityService>()
 					.AddSingleton(this.Transformations)
-					.AddSingleton(s => ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider(new TheyPronounProvider()))
+					.AddSingleton
+					(
+						s =>
+							ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider
+							(
+								new TheyPronounProvider()
+							)
+					)
 					.BuildServiceProvider();
 
 				this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
@@ -1219,7 +1578,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				await base.InitializeAsync();
 
 				// Ensure owner is opted into transformations
-				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.Owner,
+					this.Guild
+				);
+
 				protection.HasOptedIn = true;
 
 				// Create a test character
@@ -1242,7 +1607,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
 
-				var result = await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+				var result = await this.Transformations.ShiftBodypartPatternAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPattern,
+					this.NewPatternColour
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
@@ -1251,7 +1624,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveBodypart()
 			{
-				var result = await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Wings, this.NewPattern, this.NewPatternColour);
+				var result = await this.Transformations.ShiftBodypartPatternAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Wings,
+					this.NewPattern,
+					this.NewPatternColour
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -1260,8 +1641,25 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfBodypartIsAlreadyThatPattern()
 			{
-				await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
-				var result = await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+				await this.Transformations.ShiftBodypartPatternAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPattern,
+					this.NewPatternColour
+				);
+
+				var result = await this.Transformations.ShiftBodypartPatternAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPattern,
+					this.NewPatternColour
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.Unsuccessful, result.Error);
@@ -1270,7 +1668,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task CanShiftBodypartPattern()
 			{
-				var result = await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+				var result = await this.Transformations.ShiftBodypartPatternAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPattern,
+					this.NewPatternColour
+				);
 
 				Assert.True(result.IsSuccess);
 			}
@@ -1278,7 +1684,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ShiftsBodypartIntoCorrectPattern()
 			{
-				await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+				await this.Transformations.ShiftBodypartPatternAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPattern,
+					this.NewPatternColour
+				);
 
 				var face = this.Character.GetBodypart(Bodypart.Face);
 				Assert.Equal(this.NewPattern, face.Pattern);
@@ -1287,7 +1701,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ShiftsBodypartIntoCorrectPatternColour()
 			{
-				await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+				await this.Transformations.ShiftBodypartPatternAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPattern,
+					this.NewPatternColour
+				);
 
 				var face = this.Character.GetBodypart(Bodypart.Face);
 				Assert.Equal(this.NewPatternColour, face.PatternColour);
@@ -1296,7 +1718,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsShiftMessage()
 			{
-				var result = await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPattern, this.NewPatternColour);
+				var result = await this.Transformations.ShiftBodypartPatternAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPattern,
+					this.NewPatternColour
+				);
 
 				Assert.NotNull(result.ShiftMessage);
 				Assert.NotEmpty(result.ShiftMessage);
@@ -1346,7 +1776,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					.AddSingleton<CommandService>()
 					.AddSingleton<OwnedEntityService>()
 					.AddSingleton(this.Transformations)
-					.AddSingleton(s => ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider(new TheyPronounProvider()))
+					.AddSingleton
+					(
+						s =>
+							ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider
+							(
+								new TheyPronounProvider()
+							)
+					)
 					.BuildServiceProvider();
 
 				this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
@@ -1359,7 +1796,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				await base.InitializeAsync();
 
 				// Ensure owner is opted into transformations
-				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync(this.Database, this.Owner, this.Guild);
+				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
+				(
+					this.Database,
+					this.Owner,
+					this.Guild
+				);
+
 				protection.HasOptedIn = true;
 
 				// Create a test character
@@ -1373,7 +1816,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				};
 
 				Colour.TryParse("dull white", out this.OriginalPatternColour);
-				await this.Transformations.ShiftBodypartPatternAsync(this.Database, this.Context, this.Character, Bodypart.Face, Pattern.Swirly, this.OriginalPatternColour);
+				await this.Transformations.ShiftBodypartPatternAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					Pattern.Swirly,
+					this.OriginalPatternColour
+				);
 
 				this.Database.Characters.Add(this.Character);
 
@@ -1385,7 +1836,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				await this.Transformations.BlacklistUserAsync(this.Database, this.Owner, this.Invoker);
 
-				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
+				var result = await this.Transformations.ShiftPatternColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPatternColour
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
@@ -1394,7 +1852,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveBodypart()
 			{
-				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Wings, this.NewPatternColour);
+				var result = await this.Transformations.ShiftPatternColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Wings,
+					this.NewPatternColour
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -1403,7 +1868,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfBodypartDoesNotHavePattern()
 			{
-				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.LeftArm, this.NewPatternColour);
+				var result = await this.Transformations.ShiftPatternColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.LeftArm,
+					this.NewPatternColour
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -1412,8 +1884,23 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfBodypartIsAlreadyThatColour()
 			{
-				await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
-				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
+				await this.Transformations.ShiftPatternColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPatternColour
+				);
+
+				var result = await this.Transformations.ShiftPatternColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPatternColour
+				);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.Unsuccessful, result.Error);
@@ -1422,7 +1909,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task CanShiftColour()
 			{
-				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
+				var result = await this.Transformations.ShiftPatternColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPatternColour
+				);
 
 				Assert.True(result.IsSuccess);
 			}
@@ -1430,7 +1924,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ShiftsIntoCorrectColour()
 			{
-				await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
+				await this.Transformations.ShiftPatternColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPatternColour
+				);
 
 				var face = this.Character.GetBodypart(Bodypart.Face);
 				Assert.Equal(this.NewPatternColour, face.PatternColour);
@@ -1439,7 +1940,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsShiftMessage()
 			{
-				var result = await this.Transformations.ShiftPatternColourAsync(this.Database, this.Context, this.Character, Bodypart.Face, this.NewPatternColour);
+				var result = await this.Transformations.ShiftPatternColourAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					this.NewPatternColour
+				);
 
 				Assert.NotNull(result.ShiftMessage);
 				Assert.NotEmpty(result.ShiftMessage);
