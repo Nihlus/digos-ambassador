@@ -22,12 +22,13 @@
 
 using System;
 using System.IO;
-
+using CommandLine;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
 
 using Discord.Commands;
 using YamlDotNet.Core;
+using Parser = CommandLine.Parser;
 
 namespace DIGOS.Ambassador.Tools
 {
@@ -36,28 +37,30 @@ namespace DIGOS.Ambassador.Tools
 	/// </summary>
 	internal static class Program
 	{
+		private static CommandLineOptions Options;
+
 		private static int Main(string[] args)
 		{
-			var options = new CommandLineOptions();
-			var isValid = CommandLine.Parser.Default.ParseArgumentsStrict(args, options);
+			Parser.Default.ParseArguments<CommandLineOptions>(args)
+			.WithParsed(r => Options = r);
 
 			var verifier = new TransformationFileVerifier();
 
-			var path = Path.GetFullPath(options.VerifyPath);
-			DetermineConditionResult result;
+			var path = Path.GetFullPath(Options.VerifyPath);
+			DetermineConditionResult verifyResult;
 			if (File.Exists(path))
 			{
 				// run file verification
-				result = verifier.VerifyFile<Transformation>(path);
-				if (!result.IsSuccess)
+				verifyResult = verifier.VerifyFile<Transformation>(path);
+				if (!verifyResult.IsSuccess)
 				{
-					result = verifier.VerifyFile<Species>(path);
+					verifyResult = verifier.VerifyFile<Species>(path);
 				}
 			}
 			else if (Directory.Exists(path))
 			{
 				// run directory verification
-				result = verifier.VerifyFilesInDirectory(path);
+				verifyResult = verifier.VerifyFilesInDirectory(path);
 			}
 			else
 			{
@@ -66,14 +69,14 @@ namespace DIGOS.Ambassador.Tools
 				return -2;
 			}
 
-			if (!result.IsSuccess)
+			if (!verifyResult.IsSuccess)
 			{
 				Console.ForegroundColor = ConsoleColor.Red;
-				if (result.Error == CommandError.Exception)
+				if (verifyResult.Error == CommandError.Exception)
 				{
-					Console.WriteLine($"File \"{result.ErrorReason}\" failed verification.");
+					Console.WriteLine($"File \"{verifyResult.ErrorReason}\" failed verification.");
 
-					var yamlException = (YamlException)result.Exception ?? throw new ArgumentNullException();
+					var yamlException = (YamlException)verifyResult.Exception ?? throw new ArgumentNullException();
 					var errorMessage = (yamlException.InnerException is null)
 						? yamlException.Message
 						: yamlException.InnerException.Message;
@@ -83,7 +86,7 @@ namespace DIGOS.Ambassador.Tools
 					return -1;
 				}
 
-				Console.WriteLine(result.ErrorReason);
+				Console.WriteLine(verifyResult.ErrorReason);
 				return 3;
 			}
 
