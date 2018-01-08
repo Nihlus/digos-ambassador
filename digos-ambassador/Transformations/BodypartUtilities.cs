@@ -24,9 +24,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
-using static DIGOS.Ambassador.Services.Bodypart;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
 	/// Holds composite parts - that is, a body part that consists of a number of smaller parts, which should be
@@ -36,47 +35,47 @@ namespace DIGOS.Ambassador.Services
 	{
 		private static IReadOnlyList<Bodypart> Composites { get; } = new[] { Bodypart.Head, Bodypart.Arms, Bodypart.Legs, Bodypart.Wings };
 
-		private static IReadOnlyList<Bodypart> ChiralParts { get; } = new[] { LeftEar, RightEar, LeftEye, RightEye, LeftArm, RightArm, LeftLeg, RightLeg, LeftWing, RightWing };
+		private static IReadOnlyList<Bodypart> ChiralParts { get; } = new[] { Bodypart.LeftEar, Bodypart.RightEar, Bodypart.LeftEye, Bodypart.RightEye, Bodypart.LeftArm, Bodypart.RightArm, Bodypart.LeftLeg, Bodypart.RightLeg, Bodypart.LeftWing, Bodypart.RightWing };
 
 		private static IDictionary<Bodypart, Bodypart> ChiralCounterparts { get; } = new Dictionary<Bodypart, Bodypart>
 		{
-			{ LeftEar, RightEar },
-			{ RightEar, LeftEar },
-			{ LeftEye, RightEye },
-			{ RightEye, LeftEye },
-			{ LeftArm, RightArm },
-			{ RightArm, LeftArm },
-			{ LeftLeg, RightLeg },
-			{ RightLeg, LeftLeg },
-			{ LeftWing, RightWing },
-			{ RightWing, LeftWing }
+			{ Bodypart.LeftEar, Bodypart.RightEar },
+			{ Bodypart.RightEar, Bodypart.LeftEar },
+			{ Bodypart.LeftEye, Bodypart.RightEye },
+			{ Bodypart.RightEye, Bodypart.LeftEye },
+			{ Bodypart.LeftArm, Bodypart.RightArm },
+			{ Bodypart.RightArm, Bodypart.LeftArm },
+			{ Bodypart.LeftLeg, Bodypart.RightLeg },
+			{ Bodypart.RightLeg, Bodypart.LeftLeg },
+			{ Bodypart.LeftWing, Bodypart.RightWing },
+			{ Bodypart.RightWing, Bodypart.LeftWing }
 		};
 
 		private static IReadOnlyList<Bodypart> GenderNeutralParts { get; } = Enum
 			.GetValues(typeof(Bodypart))
 			.Cast<Bodypart>()
-			.Except(new[] { Penis, Vagina })
+			.Except(new[] { Bodypart.Penis, Bodypart.Vagina })
 			.ToArray();
 
 		/// <summary>
 		/// Gets the parts constituting the head.
 		/// </summary>
-		public static IReadOnlyList<Bodypart> Head { get; } = new[] { Face, LeftEar, RightEar, LeftEye, RightEye, Teeth };
+		public static IReadOnlyList<Bodypart> Head { get; } = new[] { Bodypart.Face, Bodypart.LeftEar, Bodypart.RightEar, Bodypart.LeftEye, Bodypart.RightEye, Bodypart.Teeth };
 
 		/// <summary>
 		/// Gets the parts constituting the arms.
 		/// </summary>
-		public static IReadOnlyList<Bodypart> Arms { get; } = new[] { LeftArm, RightArm };
+		public static IReadOnlyList<Bodypart> Arms { get; } = new[] { Bodypart.LeftArm, Bodypart.RightArm };
 
 		/// <summary>
 		/// Gets the parts constituting the legs.
 		/// </summary>
-		public static IReadOnlyList<Bodypart> Legs { get; } = new[] { LeftLeg, RightLeg };
+		public static IReadOnlyList<Bodypart> Legs { get; } = new[] { Bodypart.LeftLeg, Bodypart.RightLeg };
 
 		/// <summary>
 		/// Gets the parts constituting the wings.
 		/// </summary>
-		public static IReadOnlyList<Bodypart> Wings { get; } = new[] { LeftWing, RightWing };
+		public static IReadOnlyList<Bodypart> Wings { get; } = new[] { Bodypart.LeftWing, Bodypart.RightWing };
 
 		/// <summary>
 		/// Determines whether or not a given bodypart is considered gender-neutral.

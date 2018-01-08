@@ -44,6 +44,8 @@ using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
 using log4net;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador
@@ -140,6 +142,7 @@ namespace DIGOS.Ambassador
 				.AddSingleton(this.Lua)
 				.AddSingleton(this.Kinks)
 				.AddSingleton(this.Permissions)
+				.AddDbContextPool<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
 				.BuildServiceProvider();
 
 			this.Transformation = this.Transformation
@@ -149,8 +152,6 @@ namespace DIGOS.Ambassador
 			);
 
 			this.Client.MessageReceived += OnMessageReceived;
-
-			// TODO: Figure out how to ignore pin/unpin changes
 			this.Client.MessageUpdated += OnMessageUpdated;
 		}
 
@@ -169,6 +170,13 @@ namespace DIGOS.Ambassador
 		/// <returns>A task representing the start action.</returns>
 		public async Task StartAsync()
 		{
+			var db = this.Services.GetRequiredService<GlobalInfoContext>();
+			if (!((RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>()).Exists())
+			{
+				Log.Error("The database doesn't exist.");
+				return;
+			}
+
 			this.Commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
 			this.Commands.AddTypeReader<Character>(new CharacterTypeReader());
 			this.Commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
@@ -208,6 +216,8 @@ namespace DIGOS.Ambassador
 		/// <returns>A task representing the message handling.</returns>
 		private async Task OnMessageReceived(SocketMessage arg)
 		{
+			var db = this.Services.GetRequiredService<GlobalInfoContext>();
+
 			if (!(arg is SocketUserMessage message))
 			{
 				return;
@@ -221,32 +231,29 @@ namespace DIGOS.Ambassador
 			int argumentPos = 0;
 			if (!(message.HasCharPrefix('!', ref argumentPos) || message.HasMentionPrefix(this.Client.CurrentUser, ref argumentPos)))
 			{
-				this.Roleplays.ConsumeMessage(new SocketCommandContext(this.Client, message));
+				this.Roleplays.ConsumeMessage(db, new SocketCommandContext(this.Client, message));
 				return;
 			}
 
 			// Perform first-time user checks, making sure the user has their default permissions
-			using (var db = new GlobalInfoContext())
+			var guild = (message.Channel as SocketGuildChannel)?.Guild;
+			if (guild != null)
 			{
-				var guild = (message.Channel as SocketGuildChannel)?.Guild;
-				if (guild != null)
+				var user = await db.GetOrRegisterUserAsync(arg.Author);
+				var server = await db.GetOrRegisterServerAsync(guild);
+
+				if (server.KnownUsers is null)
 				{
-					var user = await db.GetOrRegisterUserAsync(arg.Author);
-					var server = await db.GetOrRegisterServerAsync(guild);
+					server.KnownUsers = new List<User>();
+				}
 
-					if (server.KnownUsers is null)
-					{
-						server.KnownUsers = new List<User>();
-					}
+				// Grant permissions to new users
+				if (!server.IsUserKnown(arg.Author))
+				{
+					await this.Permissions.GrantDefaultPermissionsAsync(db, guild, arg.Author);
+					server.KnownUsers.Add(user);
 
-					// Grant permissions to new users
-					if (!server.IsUserKnown(arg.Author))
-					{
-						await this.Permissions.GrantDefaultPermissionsAsync(db, guild, arg.Author);
-						server.KnownUsers.Add(user);
-
-						await db.SaveChangesAsync();
-					}
+					await db.SaveChangesAsync();
 				}
 			}
 
@@ -260,7 +267,8 @@ namespace DIGOS.Ambassador
 				{
 					case CommandError.UnknownCommand:
 					{
-						await this.Feedback.SendWarningAsync(context, "Unknown command.");
+						// TODO: Better way of doing this
+						// await this.Feedback.SendWarningAsync(context, "Unknown command.");
 						break;
 					}
 					case CommandError.ObjectNotFound:
@@ -274,10 +282,12 @@ namespace DIGOS.Ambassador
 					case CommandError.ParseFailed:
 					case CommandError.BadArgCount:
 					{
-						await this.Feedback.SendErrorAsync(context, $"Command failed: {result.ErrorReason}");
+						var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
+
+						var errorEmbed = this.Feedback.CreateFeedbackEmbed(context.User, Color.Red, $"Command failed: {result.ErrorReason}");
 						var searchResult = this.Commands.Search(context, argumentPos);
 
-						var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
+						await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
 						await userDMChannel.SendMessageAsync(string.Empty, false, this.Feedback.CreateCommandUsageEmbed(searchResult.Commands));
 						break;
 					}

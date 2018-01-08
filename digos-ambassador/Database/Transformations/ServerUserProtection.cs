@@ -23,7 +23,7 @@
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Transformations;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Transformations
@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 				User = globalProtection.User,
 				Server = server,
 				Type = globalProtection.DefaultType,
-				HasOptedIn = false
+				HasOptedIn = globalProtection.DefaultOptIn
 			};
 		}
 	}

@@ -165,7 +165,7 @@ namespace DIGOS.Ambassador.Services
 
 			commandNames = commandNames.Union(submoduleCommandNames);
 
-			if (commandNames.Contains(entityName))
+			if (commandNames.Any(entityName.Contains))
 			{
 				return DetermineConditionResult.FromError(CommandError.UnmetPrecondition, "Names may not be the same as a command.");
 			}

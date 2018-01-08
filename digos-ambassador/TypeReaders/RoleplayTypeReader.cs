@@ -45,15 +45,14 @@ namespace DIGOS.Ambassador.TypeReaders
 		protected override async Task<RetrieveEntityResult<Roleplay>> RetrieveEntityAsync(IUser entityOwner, string entityName, ICommandContext context, IServiceProvider services)
 		{
 			var roleplayService = services.GetRequiredService<RoleplayService>();
-			using (var db = new GlobalInfoContext())
-			{
-				if (!entityName.IsNullOrWhitespace() && entityName.Equals("current", StringComparison.OrdinalIgnoreCase))
-				{
-					return await roleplayService.GetActiveRoleplayAsync(db, context);
-				}
+			var db = services.GetRequiredService<GlobalInfoContext>();
 
-				return await roleplayService.GetBestMatchingRoleplayAsync(db, context, entityOwner, entityName);
+			if (!entityName.IsNullOrWhitespace() && entityName.Equals("current", StringComparison.OrdinalIgnoreCase))
+			{
+				return await roleplayService.GetActiveRoleplayAsync(db, context);
 			}
+
+			return await roleplayService.GetBestMatchingRoleplayAsync(db, context, entityOwner, entityName);
 		}
 	}
 }

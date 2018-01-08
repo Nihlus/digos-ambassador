@@ -25,11 +25,8 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Services;
 using log4net;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DIGOS.Ambassador
 {
@@ -68,15 +65,6 @@ namespace DIGOS.Ambassador
 			{
 				Log.Error("Could not initialize content service.", fex);
 				return;
-			}
-
-			using (var db = new GlobalInfoContext())
-			{
-				if (!((RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>()).Exists())
-				{
-					Log.Error("The database doesn't exist.");
-					return;
-				}
 			}
 
 			var ambassadorClient = new AmbassadorClient(contentService);

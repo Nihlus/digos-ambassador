@@ -1,5 +1,5 @@
 ﻿//
-//  ColourYamlConverter.cs
+//  TransformationServiceTestBase.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,47 +20,40 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using DIGOS.Ambassador.Database.Appearances;
-using YamlDotNet.Core;
-using YamlDotNet.Core.Events;
-using YamlDotNet.Serialization;
+using System.Threading.Tasks;
+using DIGOS.Ambassador.Services;
+using Xunit;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Tests.TestBases
 {
 	/// <summary>
-	/// YAML deserialization converter for colour objects.
+	/// Serves as a test base for transformation service tests.
 	/// </summary>
-	public class ColourYamlConverter : IYamlTypeConverter
+	public abstract class TransformationServiceTestBase : DatabaseDependantTestBase, IAsyncLifetime
 	{
-		/// <inheritdoc />
-		public bool Accepts(Type type)
+		/// <summary>
+		/// Gets the transformation service object.
+		/// </summary>
+		protected TransformationService Transformations { get; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="TransformationServiceTestBase"/> class.
+		/// </summary>
+		protected TransformationServiceTestBase()
 		{
-			return type == typeof(Colour);
+			this.Transformations = new TransformationService(new ContentService());
 		}
 
 		/// <inheritdoc />
-		public object ReadYaml(IParser parser, Type type)
+		public virtual async Task InitializeAsync()
 		{
-			var rawColour = parser.Allow<Scalar>().Value;
-
-			if (rawColour is null)
-			{
-				return null;
-			}
-
-			if (!Colour.TryParse(rawColour, out Colour value))
-			{
-				throw new ArgumentException("Failed to parse a valid colour.");
-			}
-
-			return value;
+			await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
 		}
 
 		/// <inheritdoc />
-		public void WriteYaml(IEmitter emitter, object value, Type type)
+		public virtual Task DisposeAsync()
 		{
-			emitter.Emit(new Scalar(value.ToString()));
+			return Task.CompletedTask;
 		}
 	}
 }

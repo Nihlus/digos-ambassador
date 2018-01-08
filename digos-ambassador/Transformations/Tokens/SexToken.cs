@@ -23,8 +23,7 @@
 using System.Linq;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
-using DIGOS.Ambassador.Services;
-using static DIGOS.Ambassador.Services.Bodypart;
+using static DIGOS.Ambassador.Transformations.Bodypart;
 
 namespace DIGOS.Ambassador.Transformations
 {

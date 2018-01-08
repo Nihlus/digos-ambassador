@@ -68,6 +68,8 @@ namespace DIGOS.Ambassador.Modules
 	{
 		private readonly DiscordService Discord;
 
+		[ProvidesContext]
+		private readonly GlobalInfoContext Database;
 		private readonly ContentService Content;
 
 		private readonly UserFeedbackService Feedback;
@@ -77,12 +79,21 @@ namespace DIGOS.Ambassador.Modules
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CharacterCommands"/> class.
 		/// </summary>
+		/// <param name="database">A database context from the context pool.</param>
 		/// <param name="contentService">The content service.</param>
 		/// <param name="discordService">The Discord integration service.</param>
 		/// <param name="feedbackService">The feedback service.</param>
 		/// <param name="characterService">The character service.</param>
-		public CharacterCommands(ContentService contentService, DiscordService discordService, UserFeedbackService feedbackService, CharacterService characterService)
+		public CharacterCommands
+		(
+			GlobalInfoContext database,
+			ContentService contentService,
+			DiscordService discordService,
+			UserFeedbackService feedbackService,
+			CharacterService characterService
+		)
 		{
+			this.Database = database;
 			this.Content = contentService;
 			this.Discord = discordService;
 			this.Feedback = feedbackService;
@@ -120,20 +131,17 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task ShowCharacterAsync()
 		{
-			using (var db = new GlobalInfoContext())
+			var retrieveCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+			if (!retrieveCurrentCharacterResult.IsSuccess)
 			{
-				var retrieveCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(db, this.Context, this.Context.User);
-				if (!retrieveCurrentCharacterResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, retrieveCurrentCharacterResult.ErrorReason);
-					return;
-				}
-
-				var character = retrieveCurrentCharacterResult.Entity;
-				var eb = CreateCharacterInfoEmbed(character);
-
-				await ShowCharacterAsync(character, eb);
+				await this.Feedback.SendErrorAsync(this.Context, retrieveCurrentCharacterResult.ErrorReason);
+				return;
 			}
+
+			var character = retrieveCurrentCharacterResult.Entity;
+			var eb = CreateCharacterInfoEmbed(character);
+
+			await ShowCharacterAsync(character, eb);
 		}
 
 		/// <summary>
@@ -224,28 +232,25 @@ namespace DIGOS.Ambassador.Modules
 			[CanBeNull] string characterAvatarUrl = null
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			characterAvatarUrl = characterAvatarUrl ?? this.Content.DefaultAvatarUri.ToString();
+
+			var createCharacterResult = await this.Characters.CreateCharacterAsync
+			(
+				this.Database,
+				this.Context,
+				characterName,
+				characterAvatarUrl,
+				characterNickname,
+				characterSummary,
+				characterDescription
+			);
+			if (!createCharacterResult.IsSuccess)
 			{
-				characterAvatarUrl = characterAvatarUrl ?? this.Content.DefaultAvatarUri.ToString();
-
-				var createCharacterResult = await this.Characters.CreateCharacterAsync
-				(
-					db,
-					this.Context,
-					characterName,
-					characterAvatarUrl,
-					characterNickname,
-					characterSummary,
-					characterDescription
-				);
-				if (!createCharacterResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, createCharacterResult.ErrorReason);
-					return;
-				}
-
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Character \"{createCharacterResult.Entity.Name}\" created.");
+				await this.Feedback.SendErrorAsync(this.Context, createCharacterResult.ErrorReason);
+				return;
 			}
+
+			await this.Feedback.SendConfirmationAsync(this.Context, $"Character \"{createCharacterResult.Entity.Name}\" created.");
 		}
 
 		/// <summary>
@@ -264,15 +269,12 @@ namespace DIGOS.Ambassador.Modules
 			Character character
 		)
 		{
-			using (var db = new GlobalInfoContext())
-			{
-				db.Attach(character);
+			this.Database.Attach(character);
 
-				db.Characters.Remove(character);
-				await db.SaveChangesAsync();
+			this.Database.Characters.Remove(character);
+			await this.Database.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
-			}
+			await this.Feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
 		}
 
 		/// <summary>
@@ -292,19 +294,16 @@ namespace DIGOS.Ambassador.Modules
 			eb.WithAuthor(discordUser);
 			eb.WithTitle("Your characters");
 
-			using (var db = new GlobalInfoContext())
+			var characters = this.Characters.GetUserCharacters(this.Database, discordUser, this.Context.Guild);
+
+			foreach (var character in characters)
 			{
-				var characters = this.Characters.GetUserCharacters(db, discordUser, this.Context.Guild);
+				eb.AddField(character.Name, character.Summary);
+			}
 
-				foreach (var character in characters)
-				{
-					eb.AddField(character.Name, character.Summary);
-				}
-
-				if (eb.Fields.Count <= 0)
-				{
-					eb.WithDescription("You don't have any characters.");
-				}
+			if (eb.Fields.Count <= 0)
+			{
+				eb.WithDescription("You don't have any characters.");
 			}
 
 			await this.Feedback.SendEmbedAsync(this.Context, eb);
@@ -326,26 +325,23 @@ namespace DIGOS.Ambassador.Modules
 			Character character
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			this.Database.Attach(character);
+
+			await this.Characters.MakeCharacterCurrentOnServerAsync(this.Database, this.Context, this.Context.Guild, character);
+
+			if (!character.Nickname.IsNullOrWhitespace() && this.Context.Message.Author is IGuildUser guildUser)
 			{
-				db.Attach(character);
-
-				await this.Characters.MakeCharacterCurrentOnServerAsync(db, this.Context, this.Context.Guild, character);
-
-				if (!character.Nickname.IsNullOrWhitespace() && this.Context.Message.Author is IGuildUser guildUser)
+				var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+				var modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, character.Nickname);
+				if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
 				{
-					var currentServer = await db.GetOrRegisterServerAsync(this.Context.Guild);
-					var modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, character.Nickname);
-					if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
-					{
-						await this.Feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
-					}
+					await this.Feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
 				}
-
-				await db.SaveChangesAsync();
-
-				await this.Feedback.SendConfirmationAsync(this.Context, $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}.");
 			}
+
+			await this.Database.SaveChangesAsync();
+
+			await this.Feedback.SendConfirmationAsync(this.Context, $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}.");
 		}
 
 		/// <summary>
@@ -358,34 +354,31 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task ClearCharacterFormAsync()
 		{
-			using (var db = new GlobalInfoContext())
+			var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+
+			await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Context.Message.Author, this.Context.Guild);
+
+			if (this.Context.Message.Author is IGuildUser guildUser)
 			{
-				var user = await db.GetOrRegisterUserAsync(this.Context.Message.Author);
+				var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
 
-				await this.Characters.ClearCurrentCharacterOnServerAsync(db, this.Context.Message.Author, this.Context.Guild);
-
-				if (this.Context.Message.Author is IGuildUser guildUser)
+				ModifyEntityResult modifyNickResult;
+				if (!(user.DefaultCharacter is null) && !user.DefaultCharacter.Nickname.IsNullOrWhitespace())
 				{
-					var currentServer = await db.GetOrRegisterServerAsync(this.Context.Guild);
-
-					ModifyEntityResult modifyNickResult;
-					if (!(user.DefaultCharacter is null) && !user.DefaultCharacter.Nickname.IsNullOrWhitespace())
-					{
-						modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, user.DefaultCharacter.Nickname);
-					}
-					else
-					{
-						modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, null);
-					}
-
-					if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
-					{
-						await this.Feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
-					}
+					modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, user.DefaultCharacter.Nickname);
+				}
+				else
+				{
+					modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, null);
 				}
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Character cleared.");
+				if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
+				{
+					await this.Feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
+				}
 			}
+
+			await this.Feedback.SendConfirmationAsync(this.Context, "Character cleared.");
 		}
 
 		/// <summary>
@@ -516,19 +509,16 @@ namespace DIGOS.Ambassador.Modules
 			bool isNSFW = false
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			this.Database.Attach(character);
+
+			var addImageResult = await this.Characters.AddImageToCharacterAsync(this.Database, character, imageName, imageUrl, imageCaption, isNSFW);
+			if (!addImageResult.IsSuccess)
 			{
-				db.Attach(character);
-
-				var addImageResult = await this.Characters.AddImageToCharacterAsync(db, character, imageName, imageUrl, imageCaption, isNSFW);
-				if (!addImageResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, addImageResult.ErrorReason);
-					return;
-				}
-
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Added \"{imageName}\" to {character.Name}'s gallery.");
+				await this.Feedback.SendErrorAsync(this.Context, addImageResult.ErrorReason);
+				return;
 			}
+
+			await this.Feedback.SendConfirmationAsync(this.Context, $"Added \"{imageName}\" to {character.Name}'s gallery.");
 		}
 
 		/// <summary>
@@ -551,19 +541,16 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull] string imageName
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			this.Database.Attach(character);
+
+			var removeImageResult = await this.Characters.RemoveImageFromCharacterAsync(this.Database, character, imageName);
+			if (!removeImageResult.IsSuccess)
 			{
-				db.Attach(character);
-
-				var removeImageResult = await this.Characters.RemoveImageFromCharacterAsync(db, character, imageName);
-				if (!removeImageResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, removeImageResult.ErrorReason);
-					return;
-				}
-
-				await this.Feedback.SendConfirmationAsync(this.Context, "Image removed.");
+				await this.Feedback.SendErrorAsync(this.Context, removeImageResult.ErrorReason);
+				return;
 			}
+
+			await this.Feedback.SendConfirmationAsync(this.Context, "Image removed.");
 		}
 
 		/// <summary>
@@ -585,19 +572,16 @@ namespace DIGOS.Ambassador.Modules
 			Character character
 		)
 		{
-			using (var db = new GlobalInfoContext())
+			this.Database.Attach(character);
+
+			var transferResult = await this.Characters.TransferCharacterOwnershipAsync(this.Database, newOwner, character, this.Context.Guild);
+			if (!transferResult.IsSuccess)
 			{
-				db.Attach(character);
-
-				var transferResult = await this.Characters.TransferCharacterOwnershipAsync(db, newOwner, character, this.Context.Guild);
-				if (!transferResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);
-					return;
-				}
-
-				await this.Feedback.SendConfirmationAsync(this.Context, "Character ownership transferred.");
+				await this.Feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);
+				return;
 			}
+
+			await this.Feedback.SendConfirmationAsync(this.Context, "Character ownership transferred.");
 		}
 
 		/// <summary>
@@ -607,6 +591,7 @@ namespace DIGOS.Ambassador.Modules
 		[Group("set")]
 		public class SetCommands : ModuleBase<SocketCommandContext>
 		{
+			private readonly GlobalInfoContext Database;
 			private readonly DiscordService Discord;
 
 			private readonly UserFeedbackService Feedback;
@@ -616,11 +601,19 @@ namespace DIGOS.Ambassador.Modules
 			/// <summary>
 			/// Initializes a new instance of the <see cref="SetCommands"/> class.
 			/// </summary>
+			/// <param name="database">A database context from the context pool.</param>
 			/// <param name="discordService">The Discord integration service.</param>
 			/// <param name="feedbackService">The feedback service.</param>
 			/// <param name="characterService">The character service.</param>
-			public SetCommands(DiscordService discordService, UserFeedbackService feedbackService, CharacterService characterService)
+			public SetCommands
+			(
+				GlobalInfoContext database,
+				DiscordService discordService,
+				UserFeedbackService feedbackService,
+				CharacterService characterService
+			)
 			{
+				this.Database = database;
 				this.Discord = discordService;
 				this.Feedback = feedbackService;
 				this.Characters = characterService;
@@ -646,19 +639,16 @@ namespace DIGOS.Ambassador.Modules
 				string newCharacterName
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				this.Database.Attach(character);
+
+				var setNameResult = await this.Characters.SetCharacterNameAsync(this.Database, this.Context, character, newCharacterName);
+				if (!setNameResult.IsSuccess)
 				{
-					db.Attach(character);
-
-					var setNameResult = await this.Characters.SetCharacterNameAsync(db, this.Context, character, newCharacterName);
-					if (!setNameResult.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, setNameResult.ErrorReason);
-						return;
-					}
-
-					await this.Feedback.SendConfirmationAsync(this.Context, "Character name set.");
+					await this.Feedback.SendErrorAsync(this.Context, setNameResult.ErrorReason);
+					return;
 				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Character name set.");
 			}
 
 			/// <summary>
@@ -679,28 +669,25 @@ namespace DIGOS.Ambassador.Modules
 				[CanBeNull] string newCharacterAvatarUrl = null
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				this.Database.Attach(character);
+
+				if (newCharacterAvatarUrl is null)
 				{
-					db.Attach(character);
-
-					if (newCharacterAvatarUrl is null)
+					if (!this.Context.Message.Attachments.Any())
 					{
-						if (!this.Context.Message.Attachments.Any())
-						{
-							await this.Feedback.SendErrorAsync(this.Context, "You need to attach an image or provide a url.");
-							return;
-						}
-
-						var newAvatar = this.Context.Message.Attachments.First();
-						newCharacterAvatarUrl = newAvatar.Url;
+						await this.Feedback.SendErrorAsync(this.Context, "You need to attach an image or provide a url.");
+						return;
 					}
 
-					character.AvatarUrl = newCharacterAvatarUrl;
-
-					await db.SaveChangesAsync();
-
-					await this.Feedback.SendConfirmationAsync(this.Context, "Character avatar set.");
+					var newAvatar = this.Context.Message.Attachments.First();
+					newCharacterAvatarUrl = newAvatar.Url;
 				}
+
+				character.AvatarUrl = newCharacterAvatarUrl;
+
+				await this.Database.SaveChangesAsync();
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Character avatar set.");
 			}
 
 			/// <summary>
@@ -724,19 +711,16 @@ namespace DIGOS.Ambassador.Modules
 				string newCharacterNickname
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				this.Database.Attach(character);
+
+				var setNickResult = await this.Characters.SetCharacterNicknameAsync(this.Database, character, newCharacterNickname);
+				if (!setNickResult.IsSuccess)
 				{
-					db.Attach(character);
-
-					var setNickResult = await this.Characters.SetCharacterNicknameAsync(db, character, newCharacterNickname);
-					if (!setNickResult.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, setNickResult.ErrorReason);
-						return;
-					}
-
-					await this.Feedback.SendConfirmationAsync(this.Context, "Character nickname set.");
+					await this.Feedback.SendErrorAsync(this.Context, setNickResult.ErrorReason);
+					return;
 				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Character nickname set.");
 			}
 
 			/// <summary>
@@ -759,19 +743,16 @@ namespace DIGOS.Ambassador.Modules
 				string newCharacterSummary
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				this.Database.Attach(character);
+
+				var setSummaryResult = await this.Characters.SetCharacterSummaryAsync(this.Database, character, newCharacterSummary);
+				if (!setSummaryResult.IsSuccess)
 				{
-					db.Attach(character);
-
-					var setSummaryResult = await this.Characters.SetCharacterSummaryAsync(db, character, newCharacterSummary);
-					if (!setSummaryResult.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, setSummaryResult.ErrorReason);
-						return;
-					}
-
-					await this.Feedback.SendConfirmationAsync(this.Context, "Character summary set.");
+					await this.Feedback.SendErrorAsync(this.Context, setSummaryResult.ErrorReason);
+					return;
 				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Character summary set.");
 			}
 
 			/// <summary>
@@ -795,44 +776,41 @@ namespace DIGOS.Ambassador.Modules
 				string newCharacterDescription = null
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				this.Database.Attach(character);
+
+				if (newCharacterDescription is null)
 				{
-					db.Attach(character);
-
-					if (newCharacterDescription is null)
+					if (!this.Context.Message.Attachments.Any())
 					{
-						if (!this.Context.Message.Attachments.Any())
-						{
-							await this.Feedback.SendErrorAsync(this.Context, "You need to attach a plaintext document or provide an in-message description.");
-							return;
-						}
-
-						var newDescription = this.Context.Message.Attachments.First();
-						var getAttachmentStreamResult = await this.Discord.GetAttachmentStreamAsync(newDescription);
-						if (!getAttachmentStreamResult.IsSuccess)
-						{
-							await this.Feedback.SendErrorAsync(this.Context, getAttachmentStreamResult.ErrorReason);
-							return;
-						}
-
-						using (var s = getAttachmentStreamResult.Entity)
-						{
-							using (var sr = new StreamReader(s))
-							{
-								newCharacterDescription = sr.ReadToEnd();
-							}
-						}
-					}
-
-					var setDescriptionResult = await this.Characters.SetCharacterDescriptionAsync(db, character, newCharacterDescription);
-					if (!setDescriptionResult.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, setDescriptionResult.ErrorReason);
+						await this.Feedback.SendErrorAsync(this.Context, "You need to attach a plaintext document or provide an in-message description.");
 						return;
 					}
 
-					await this.Feedback.SendConfirmationAsync(this.Context, "Character description set.");
+					var newDescription = this.Context.Message.Attachments.First();
+					var getAttachmentStreamResult = await this.Discord.GetAttachmentStreamAsync(newDescription);
+					if (!getAttachmentStreamResult.IsSuccess)
+					{
+						await this.Feedback.SendErrorAsync(this.Context, getAttachmentStreamResult.ErrorReason);
+						return;
+					}
+
+					using (var s = getAttachmentStreamResult.Entity)
+					{
+						using (var sr = new StreamReader(s))
+						{
+							newCharacterDescription = sr.ReadToEnd();
+						}
+					}
 				}
+
+				var setDescriptionResult = await this.Characters.SetCharacterDescriptionAsync(this.Database, character, newCharacterDescription);
+				if (!setDescriptionResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, setDescriptionResult.ErrorReason);
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Character description set.");
 			}
 
 			/// <summary>
@@ -853,14 +831,11 @@ namespace DIGOS.Ambassador.Modules
 				bool isNSFW
 			)
 			{
-				using (var db = new GlobalInfoContext())
-				{
-					db.Attach(character);
+				this.Database.Attach(character);
 
-					await this.Characters.SetCharacterIsNSFWAsync(db, character, isNSFW);
+				await this.Characters.SetCharacterIsNSFWAsync(this.Database, character, isNSFW);
 
-					await this.Feedback.SendConfirmationAsync(this.Context, $"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
-				}
+				await this.Feedback.SendConfirmationAsync(this.Context, $"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
 			}
 
 			/// <summary>
@@ -883,19 +858,16 @@ namespace DIGOS.Ambassador.Modules
 				string pronounFamily
 			)
 			{
-				using (var db = new GlobalInfoContext())
+				this.Database.Attach(character);
+
+				var result = await this.Characters.SetCharacterPronounAsync(this.Database, character, pronounFamily);
+				if (!result.IsSuccess)
 				{
-					db.Attach(character);
-
-					var result = await this.Characters.SetCharacterPronounAsync(db, character, pronounFamily);
-					if (!result.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
-						return;
-					}
-
-					await this.Feedback.SendConfirmationAsync(this.Context, "Preferred pronoun set.");
+					await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+					return;
 				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Preferred pronoun set.");
 			}
 		}
 	}

@@ -25,6 +25,7 @@ using System.Linq;
 
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Transformations;
 
 using Discord.Commands;
 

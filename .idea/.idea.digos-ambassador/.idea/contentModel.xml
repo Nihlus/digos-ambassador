@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="$USER_HOME$/.Rider2017.3/system/resharper-host/local/Transient/ReSharperHost/v11/SolutionCaches/_digos-ambassador.233808278.00" t="ExcludeRecursive" />
-    <e p="$USER_HOME$/.nuget/packages/sqlitepclraw.lib.e_sqlite3.linux/1.1.7/runtimes/linux-x64/native/libe_sqlite3.so" t="Include" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.3.1/build/netcoreapp1.0/xunit.runner.reporters.netcoreapp10.dll" t="Include" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.3.1/build/netcoreapp1.0/xunit.runner.utility.netcoreapp10.dll" t="Include" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.3.1/build/netcoreapp1.0/xunit.runner.visualstudio.dotnetcore.testadapter.dll" t="Include" />
@@ -250,18 +249,17 @@
             <e p="RoleplayService.cs" t="Include" />
           </e>
           <e p="Transformations" t="Include">
-            <e p="Bodypart.cs" t="Include" />
-            <e p="BodypartUtilities.cs" t="Include" />
-            <e p="ColourYamlConverter.cs" t="Include" />
-            <e p="ProtectionType.cs" t="Include" />
-            <e p="SpeciesYamlConverter.cs" t="Include" />
             <e p="TransformationService.cs" t="Include" />
-            <e p="ValidatingNodeDeserializer.cs" t="Include" />
           </e>
         </e>
         <e p="Transformations" t="Include">
+          <e p="Bodypart.cs" t="Include" />
+          <e p="BodypartUtilities.cs" t="Include" />
+          <e p="ColourYamlConverter.cs" t="Include" />
           <e p="IReplaceableTextToken.cs" t="Include" />
+          <e p="ProtectionType.cs" t="Include" />
           <e p="ReplacableTextToken.cs" t="Include" />
+          <e p="SpeciesYamlConverter.cs" t="Include" />
           <e p="TokenIdentifierAttribute.cs" t="Include" />
           <e p="Tokens" t="Include">
             <e p="ColourToken.cs" t="Include" />
@@ -276,6 +274,7 @@
           </e>
           <e p="TransformationDescriptionBuilder.cs" t="Include" />
           <e p="TransformationTextTokenizer.cs" t="Include" />
+          <e p="ValidatingNodeDeserializer.cs" t="Include" />
         </e>
         <e p="TypeReaders" t="Include">
           <e p="CharacterTypeReader.cs" t="Include" />
@@ -364,7 +363,21 @@
         <e p="DescriptionBuilderTests.cs" t="Include" />
         <e p="LuaTests.cs" t="Include" />
         <e p="PermissionTests.cs" t="Include" />
+        <e p="ServiceTests" t="Include">
+          <e p="CharacterServiceTests.cs" t="Include" />
+          <e p="OwnedEntityServiceTests.cs" t="Include" />
+          <e p="TransformationServiceTests.cs" t="Include" />
+        </e>
+        <e p="TestBases" t="Include">
+          <e p="CharacterServiceTestBase.cs" t="Include" />
+          <e p="DatabaseDependantTestBase.cs" t="Include" />
+          <e p="OwnedEntityServiceTestBase.cs" t="Include" />
+          <e p="TransformationServiceTestBase.cs" t="Include" />
+        </e>
         <e p="TokenizerTests.cs" t="Include" />
+        <e p="Utility" t="Include">
+          <e p="MockHelper.cs" t="Include" />
+        </e>
         <e p="bin" t="ExcludeRecursive" />
         <e p="digos-ambassador.Tests.csproj" t="IncludeRecursive" />
         <e p="obj" t="ExcludeRecursive">
@@ -396,5 +409,6 @@
       <e p="stylecop.json" t="Include" />
       <e p="stylecop.ruleset" t="Include" />
     </e>
+    <e p="/usr/share/dotnet/sdk/NuGetFallbackFolder/sqlitepclraw.lib.e_sqlite3.linux/1.1.7/runtimes/linux-x64/native/libe_sqlite3.so" t="Include" />
   </component>
 </project>

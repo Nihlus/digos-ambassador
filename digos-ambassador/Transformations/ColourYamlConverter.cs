@@ -1,5 +1,5 @@
 ﻿//
-//  SpeciesYamlConverter.cs
+//  ColourYamlConverter.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,65 +21,46 @@
 //
 
 using System;
-using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Database.Appearances;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
-	/// YAML deserialization converter for species objects.
+	/// YAML deserialization converter for colour objects.
 	/// </summary>
-	public class SpeciesYamlConverter : IYamlTypeConverter
+	public class ColourYamlConverter : IYamlTypeConverter
 	{
-		private GlobalInfoContext Database { get; }
-
-		private TransformationService Transformation { get; }
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="SpeciesYamlConverter"/> class.
-		/// </summary>
-		/// <param name="database">The database.</param>
-		/// <param name="transformation">The transformation service</param>
-		public SpeciesYamlConverter(GlobalInfoContext database, TransformationService transformation)
-		{
-			this.Database = database;
-			this.Transformation = transformation;
-		}
-
 		/// <inheritdoc />
 		public bool Accepts(Type type)
 		{
-			return type == typeof(Species);
+			return type == typeof(Colour);
 		}
 
 		/// <inheritdoc />
 		public object ReadYaml(IParser parser, Type type)
 		{
-			var speciesName = parser.Allow<Scalar>().Value;
+			var rawColour = parser.Allow<Scalar>().Value;
 
-			if (speciesName is null)
+			if (rawColour is null)
 			{
 				return null;
 			}
 
-			var getSpeciesResult = this.Transformation.GetSpeciesByName(this.Database, speciesName);
-			if (!getSpeciesResult.IsSuccess)
+			if (!Colour.TryParse(rawColour, out Colour value))
 			{
-				throw new InvalidOperationException(getSpeciesResult.ErrorReason);
+				throw new ArgumentException("Failed to parse a valid colour.");
 			}
 
-			return getSpeciesResult.Entity;
+			return value;
 		}
 
 		/// <inheritdoc />
 		public void WriteYaml(IEmitter emitter, object value, Type type)
 		{
-			var species = (Species)value;
-
-			emitter.Emit(new Scalar(species.Name));
+			emitter.Emit(new Scalar(value.ToString()));
 		}
 	}
 }

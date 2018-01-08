@@ -31,14 +31,16 @@ namespace DIGOS.Ambassador.Doc
 	/// </summary>
 	internal static class Program
 	{
+		private static Options Options;
+
 		private static async Task Main(string[] args)
 		{
-			var options = new Options();
-			Parser.Default.ParseArgumentsStrict(args, options);
+			Parser.Default.ParseArguments<Options>(args)
+				.WithParsed(r => Options = r);
 
-			var assembly = Assembly.LoadFrom(options.AssemblyPath);
+			var assembly = Assembly.LoadFrom(Options.AssemblyPath);
 
-			var generator = new ModuleDocumentationGenerator(assembly, options.OutputPath);
+			var generator = new ModuleDocumentationGenerator(assembly, Options.OutputPath);
 			await generator.GenerateDocumentationAsync();
 		}
 	}

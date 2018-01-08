@@ -29,8 +29,6 @@ using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services;
-
 using Humanizer;
 using JetBrains.Annotations;
 
@@ -329,7 +327,7 @@ namespace DIGOS.Ambassador.Transformations
 		)
 		{
 			string shiftMessage =
-				$"The surface of {{@target}}'s {currentComponent.Bodypart.Humanize()} morphs, as" +
+				$"The surface of {{@target}}'s {currentComponent.Bodypart.Humanize().Transform(To.LowerCase)} morphs, as" +
 				$" {{@colour}} {{@pattern}} patterns spread across it" +
 				$"{(originalPattern.HasValue ? $", replacing their {originalColour} {originalPattern.Humanize().Pluralize()}" : ".")}.";
 

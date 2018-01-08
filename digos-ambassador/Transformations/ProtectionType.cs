@@ -1,5 +1,5 @@
 ﻿//
-//  PatternToken.cs
+//  ProtectionType.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,35 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Transformations;
-using Humanizer;
-
 namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
-	/// A token that gets replaced with a pattern name.
+	/// Represents protection types for interactions between users.
 	/// </summary>
-	[TokenIdentifier("pattern", "p")]
-	public class PatternToken : ReplacableTextToken<PatternToken>
+	public enum ProtectionType
 	{
-		/// <inheritdoc />
-		public override string GetText(Character character, Transformation transformation)
-		{
-			if (transformation is null)
-			{
-				throw new ArgumentNullException(nameof(transformation));
-			}
+		/// <summary>
+		/// Blacklist-based protection·
+		/// </summary>
+		Blacklist,
 
-			var currentBodypart = character.GetBodypart(transformation.Part);
-			return currentBodypart.Pattern.ToString().Humanize();
-		}
-
-		/// <inheritdoc />
-		protected override PatternToken Initialize(string data)
-		{
-			return this;
-		}
+		/// <summary>
+		/// Whitelist-based protection.
+		/// </summary>
+		Whitelist
 	}
 }

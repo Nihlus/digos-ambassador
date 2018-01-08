@@ -78,7 +78,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to remove.</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
-		public async Task<ShiftBodypartResult> RemoveCharacterBodypartAsync
+		public async Task<ShiftBodypartResult> RemoveBodypartAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] ICommandContext context,
@@ -116,7 +116,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="bodyPart">The bodypart to add.</param>
 		/// <param name="species">The species of the part to add..</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
-		public async Task<ShiftBodypartResult> AddCharacterBodypartAsync
+		public async Task<ShiftBodypartResult> AddBodypartAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] ICommandContext context,
@@ -254,6 +254,11 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
 			}
 
+			if (character.GetBodypart(bodyPart).BaseColour == colour)
+			{
+				return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The bodypart is already that colour.");
+			}
+
 			var currentComponent = character.GetBodypart(bodyPart);
 			var originalColour = currentComponent.BaseColour;
 			currentComponent.BaseColour = colour;
@@ -297,6 +302,11 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			var currentComponent = character.GetBodypart(bodyPart);
+
+			if (currentComponent.Pattern == pattern)
+			{
+				return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The character already has that pattern.");
+			}
 
 			var originalPattern = currentComponent.Pattern;
 			var originalColour = currentComponent.BaseColour;
@@ -342,9 +352,14 @@ namespace DIGOS.Ambassador.Services
 
 			var currentComponent = character.GetBodypart(bodyPart);
 
-			if (currentComponent.PatternColour is null)
+			if (!currentComponent.Pattern.HasValue)
 			{
-				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The pattern doesn't have a colour to shift.");
+				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The bodypart doesn't have a pattern.");
+			}
+
+			if (currentComponent.PatternColour == patternColour)
+			{
+				return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The pattern is already that colour.");
 			}
 
 			var originalColour = currentComponent.PatternColour;
@@ -352,6 +367,7 @@ namespace DIGOS.Ambassador.Services
 
 			await db.SaveChangesAsync();
 
+			// ReSharper disable once AssignNullToNotNullAttribute - Having a pattern implies having a pattern colour
 			string shiftMessage = this.DescriptionBuilder.BuildPatternColourShiftMessage(character, originalColour, currentComponent);
 			return ShiftBodypartResult.FromSuccess(shiftMessage);
 		}
@@ -456,7 +472,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="bodyPart">The bodypart to get the transformations for.</param>
 		/// <returns>A list of the available transformations..</returns>
 		[Pure]
-		public async Task<IReadOnlyList<Transformation>> GetAvailableTransformations
+		public async Task<IReadOnlyList<Transformation>> GetAvailableTransformationsAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			Bodypart bodyPart
@@ -581,6 +597,11 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] IUser whitelistedUser
 		)
 		{
+			if (discordUser == whitelistedUser)
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You can't whitelist yourself.");
+			}
+
 			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
 			if (protection.Whitelist.Any(u => u.DiscordID == whitelistedUser.Id))
 			{
@@ -608,6 +629,11 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] IUser blacklistedUser
 		)
 		{
+			if (discordUser == blacklistedUser)
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You can't blacklist yourself.");
+			}
+
 			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
 			if (protection.Blacklist.Any(u => u.DiscordID == blacklistedUser.Id))
 			{
@@ -696,7 +722,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database.</param>
 		/// <returns>An update result which may or may not have succeeded.</returns>
-		public async Task<UpdateTransformationsResult> UpdateTransformationDatabase
+		public async Task<UpdateTransformationsResult> UpdateTransformationDatabaseAsync
 		(
 			[NotNull] GlobalInfoContext db
 		)
@@ -758,7 +784,7 @@ namespace DIGOS.Ambassador.Services
 			var availableSpecies = await GetAvailableSpeciesAsync(db);
 			foreach (var species in availableSpecies)
 			{
-				var bundledTransformationsResult = await this.Content.DiscoverBundledTransformationsAsync(this, species);
+				var bundledTransformationsResult = await this.Content.DiscoverBundledTransformationsAsync(db, this, species);
 				if (!bundledTransformationsResult.IsSuccess)
 				{
 					return UpdateTransformationsResult.FromError(bundledTransformationsResult);
@@ -887,13 +913,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string speciesName
 		)
 		{
-			var species = db.Species.FirstOrDefault(s => s.Name.Equals(speciesName, StringComparison.OrdinalIgnoreCase));
-			if (species is null)
-			{
-				return RetrieveEntityResult<Species>.FromError(CommandError.ObjectNotFound, "There is no species with that name in the database.");
-			}
-
-			return RetrieveEntityResult<Species>.FromSuccess(species);
+			return GetSpeciesByNameAsync(db, speciesName).GetAwaiter().GetResult();
 		}
 
 		/// <summary>

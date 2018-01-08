@@ -42,14 +42,18 @@ namespace DIGOS.Ambassador.Modules
 	[Summary("Administrative commands that directly affect the bot on a global scale.")]
 	public class AdminCommands : ModuleBase<SocketCommandContext>
 	{
+		[ProvidesContext]
+		private readonly GlobalInfoContext Database;
 		private readonly UserFeedbackService Feedback;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AdminCommands"/> class.
 		/// </summary>
+		/// <param name="database">A database context from the context pool.</param>
 		/// <param name="feedback">The user feedback service.</param>
-		public AdminCommands(UserFeedbackService feedback)
+		public AdminCommands(GlobalInfoContext database, UserFeedbackService feedback)
 		{
+			this.Database = database;
 			this.Feedback = feedback;
 		}
 
@@ -64,13 +68,10 @@ namespace DIGOS.Ambassador.Modules
 		[RequireOwner]
 		public async Task ResetDatabaseAsync()
 		{
-			using (var db = new GlobalInfoContext())
-			{
-				await db.Database.EnsureDeletedAsync();
-				await db.Database.MigrateAsync();
+			await this.Database.Database.EnsureDeletedAsync();
+			await this.Database.Database.MigrateAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Database reset.");
-			}
+			await this.Feedback.SendConfirmationAsync(this.Context, "Database reset.");
 		}
 	}
 }

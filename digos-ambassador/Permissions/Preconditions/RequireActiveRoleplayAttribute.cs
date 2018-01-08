@@ -51,21 +51,20 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 		public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
 		{
 			var roleplayService = services.GetRequiredService<RoleplayService>();
-			using (var db = new GlobalInfoContext())
-			{
-				var result = await roleplayService.GetActiveRoleplayAsync(db, context);
-				if (!result.IsSuccess)
-				{
-					return PreconditionResult.FromError(result);
-				}
+			var db = services.GetRequiredService<GlobalInfoContext>();
 
-				if (this.RequireOwner)
+			var result = await roleplayService.GetActiveRoleplayAsync(db, context);
+			if (!result.IsSuccess)
+			{
+				return PreconditionResult.FromError(result);
+			}
+
+			if (this.RequireOwner)
+			{
+				var roleplay = result.Entity;
+				if (roleplay.Owner.DiscordID != context.User.Id)
 				{
-					var roleplay = result.Entity;
-					if (roleplay.Owner.DiscordID != context.User.Id)
-					{
-						return PreconditionResult.FromError("Only the roleplay owner can do that.");
-					}
+					return PreconditionResult.FromError("Only the roleplay owner can do that.");
 				}
 			}
 

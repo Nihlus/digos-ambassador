@@ -44,6 +44,8 @@ namespace DIGOS.Ambassador.Modules
 	[Summary("Commands for viewing, adding, and editing dossier entries.")]
 	public class DossierCommands : ModuleBase<SocketCommandContext>
 	{
+		[ProvidesContext]
+		private readonly GlobalInfoContext Database;
 		private readonly UserFeedbackService Feedback;
 		private readonly ContentService Content;
 		private readonly DossierService Dossiers;
@@ -51,11 +53,13 @@ namespace DIGOS.Ambassador.Modules
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DossierCommands"/> class.
 		/// </summary>
+		/// <param name="database">A database context from the context pool.</param>
 		/// <param name="feedback">The feedback service.</param>
 		/// <param name="content">The content service.</param>
 		/// <param name="dossiers">The dossier service.</param>
-		public DossierCommands(UserFeedbackService feedback, ContentService content, DossierService dossiers)
+		public DossierCommands(GlobalInfoContext database, UserFeedbackService feedback, ContentService content, DossierService dossiers)
 		{
+			this.Database = database;
 			this.Feedback = feedback;
 			this.Content = content;
 			this.Dossiers = dossiers;
@@ -69,11 +73,8 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Lists the available dossiers.")]
 		public async Task ListDossiersAsync()
 		{
-			using (var db = new GlobalInfoContext())
-			{
-				var eb = BuildDossierListEmbed(db.Dossiers);
-				await this.Feedback.SendEmbedAsync(this.Context, eb);
-			}
+			var eb = BuildDossierListEmbed(this.Database.Dossiers);
+			await this.Feedback.SendEmbedAsync(this.Context, eb);
 		}
 
 		[NotNull]
@@ -105,31 +106,28 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Views the named dossier.")]
 		public async Task ViewDossierAsync([Remainder] [NotNull] string title)
 		{
-			using (var db = new GlobalInfoContext())
+			var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
+			if (!getDossierResult.IsSuccess)
 			{
-				var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(db, title);
-				if (!getDossierResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-					return;
-				}
+				await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+				return;
+			}
 
-				var dossier = getDossierResult.Entity;
+			var dossier = getDossierResult.Entity;
 
-				var eb = BuildDossierEmbed(dossier);
-				await this.Feedback.SendEmbedAsync(this.Context, eb);
+			var eb = BuildDossierEmbed(dossier);
+			await this.Feedback.SendEmbedAsync(this.Context, eb);
 
-				var dossierDataResult = this.Content.GetDossierStream(dossier);
-				if (!dossierDataResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, dossierDataResult.ErrorReason);
-					return;
-				}
+			var dossierDataResult = this.Content.GetDossierStream(dossier);
+			if (!dossierDataResult.IsSuccess)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, dossierDataResult.ErrorReason);
+				return;
+			}
 
-				using (var dossierData = dossierDataResult.Entity)
-				{
-					await this.Context.Channel.SendFileAsync(dossierData, $"{dossier.Title}.pdf");
-				}
+			using (var dossierData = dossierDataResult.Entity)
+			{
+				await this.Context.Channel.SendFileAsync(dossierData, $"{dossier.Title}.pdf");
 			}
 		}
 
@@ -154,32 +152,29 @@ namespace DIGOS.Ambassador.Modules
 		[RequireOwner]
 		public async Task AddDossierAsync([NotNull] string title, [Remainder] [NotNull] string summary = "No summary set.")
 		{
-			using (var db = new GlobalInfoContext())
+			var dossierCreationResult = await this.Dossiers.CreateDossierAsync(this.Database, title, summary);
+			if (!dossierCreationResult.IsSuccess)
 			{
-				var dossierCreationResult = await this.Dossiers.CreateDossierAsync(db, title, summary);
-				if (!dossierCreationResult.IsSuccess)
+				await this.Feedback.SendErrorAsync(this.Context, dossierCreationResult.ErrorReason);
+				return;
+			}
+
+			var dossier = dossierCreationResult.Entity;
+
+			var modifyResult = await this.Dossiers.SetDossierDataAsync(this.Database, dossier, this.Context);
+			if (!modifyResult.IsSuccess)
+			{
+				if (modifyResult.Error == CommandError.Exception)
 				{
-					await this.Feedback.SendErrorAsync(this.Context, dossierCreationResult.ErrorReason);
+					await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
+					await this.Dossiers.DeleteDossierAsync(this.Database, dossier);
 					return;
 				}
 
-				var dossier = dossierCreationResult.Entity;
-
-				var modifyResult = await this.Dossiers.SetDossierDataAsync(db, dossier, this.Context);
-				if (!modifyResult.IsSuccess)
-				{
-					if (modifyResult.Error == CommandError.Exception)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-						await this.Dossiers.DeleteDossierAsync(db, dossier);
-						return;
-					}
-
-					await this.Feedback.SendWarningAsync(this.Context, modifyResult.ErrorReason);
-				}
-
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" added.");
+				await this.Feedback.SendWarningAsync(this.Context, modifyResult.ErrorReason);
 			}
+
+			await this.Feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" added.");
 		}
 
 		/// <summary>
@@ -193,25 +188,22 @@ namespace DIGOS.Ambassador.Modules
 		[RequireOwner]
 		public async Task RemoveDossierAsync([Remainder] [NotNull] string title)
 		{
-			using (var db = new GlobalInfoContext())
+			var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
+			if (!getDossierResult.IsSuccess)
 			{
-				var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(db, title);
-				if (!getDossierResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-					return;
-				}
-
-				var dossier = getDossierResult.Entity;
-				var deleteDossierResult = await this.Dossiers.DeleteDossierAsync(db, dossier);
-				if (!deleteDossierResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-					return;
-				}
-
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" deleted.");
+				await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+				return;
 			}
+
+			var dossier = getDossierResult.Entity;
+			var deleteDossierResult = await this.Dossiers.DeleteDossierAsync(this.Database, dossier);
+			if (!deleteDossierResult.IsSuccess)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+				return;
+			}
+
+			await this.Feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" deleted.");
 		}
 
 		/// <summary>
@@ -220,16 +212,20 @@ namespace DIGOS.Ambassador.Modules
 		[Group("set")]
 		public class SetCommands : ModuleBase<SocketCommandContext>
 		{
+			[ProvidesContext]
+			private readonly GlobalInfoContext Database;
 			private readonly UserFeedbackService Feedback;
 			private readonly DossierService Dossiers;
 
 			/// <summary>
 			/// Initializes a new instance of the <see cref="SetCommands"/> class.
 			/// </summary>
+			/// <param name="database">A database context from the context pool.</param>
 			/// <param name="feedback">The feedback service.</param>
 			/// <param name="dossiers">The dossier service.</param>
-			public SetCommands(UserFeedbackService feedback, DossierService dossiers)
+			public SetCommands(GlobalInfoContext database, UserFeedbackService feedback, DossierService dossiers)
 			{
+				this.Database = database;
 				this.Feedback = feedback;
 				this.Dossiers = dossiers;
 			}
@@ -245,26 +241,23 @@ namespace DIGOS.Ambassador.Modules
 			[RequireOwner]
 			public async Task SetTitleAsync([NotNull] string title, [Remainder] [NotNull] string newTitle)
 			{
-				using (var db = new GlobalInfoContext())
+				var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
+				if (!getDossierResult.IsSuccess)
 				{
-					var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(db, title);
-					if (!getDossierResult.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-						return;
-					}
-
-					var dossier = getDossierResult.Entity;
-
-					var modifyResult = await this.Dossiers.SetDossierTitleAsync(db, dossier, newTitle);
-					if (!modifyResult.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-						return;
-					}
-
-					await this.Feedback.SendConfirmationAsync(this.Context, "New dossier title set.");
+					await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+					return;
 				}
+
+				var dossier = getDossierResult.Entity;
+
+				var modifyResult = await this.Dossiers.SetDossierTitleAsync(this.Database, dossier, newTitle);
+				if (!modifyResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "New dossier title set.");
 			}
 
 			/// <summary>
@@ -278,26 +271,23 @@ namespace DIGOS.Ambassador.Modules
 			[RequireOwner]
 			public async Task SetSummaryAsync([NotNull] string title, [Remainder] [NotNull] string newSummary)
 			{
-				using (var db = new GlobalInfoContext())
+				var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
+				if (!getDossierResult.IsSuccess)
 				{
-					var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(db, title);
-					if (!getDossierResult.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-						return;
-					}
-
-					var dossier = getDossierResult.Entity;
-
-					var modifyResult = await this.Dossiers.SetDossierSummaryAsync(db, dossier, newSummary);
-					if (!modifyResult.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-						return;
-					}
-
-					await this.Feedback.SendConfirmationAsync(this.Context, "New dossier summary set.");
+					await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+					return;
 				}
+
+				var dossier = getDossierResult.Entity;
+
+				var modifyResult = await this.Dossiers.SetDossierSummaryAsync(this.Database, dossier, newSummary);
+				if (!modifyResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "New dossier summary set.");
 			}
 
 			/// <summary>
@@ -310,26 +300,23 @@ namespace DIGOS.Ambassador.Modules
 			[RequireOwner]
 			public async Task SetFileAsync([Remainder] [NotNull] string title)
 			{
-				using (var db = new GlobalInfoContext())
+				var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
+				if (!getDossierResult.IsSuccess)
 				{
-					var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(db, title);
-					if (!getDossierResult.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-						return;
-					}
-
-					var dossier = getDossierResult.Entity;
-
-					var modifyResult = await this.Dossiers.SetDossierDataAsync(db, dossier, this.Context);
-					if (!modifyResult.IsSuccess)
-					{
-						await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-						return;
-					}
-
-					await this.Feedback.SendConfirmationAsync(this.Context, "Dossier data set.");
+					await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+					return;
 				}
+
+				var dossier = getDossierResult.Entity;
+
+				var modifyResult = await this.Dossiers.SetDossierDataAsync(this.Database, dossier, this.Context);
+				if (!modifyResult.IsSuccess)
+				{
+					await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync(this.Context, "Dossier data set.");
 			}
 		}
 	}

@@ -52,12 +52,11 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 		protected override async Task<PreconditionResult> CheckPrioritizedPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
 		{
 			var permissionService = services.GetRequiredService<PermissionService>();
-			using (var db = new GlobalInfoContext())
+			var db = services.GetRequiredService<GlobalInfoContext>();
+
+			if (await permissionService.HasPermissionAsync(db, context.Guild, context.User, this.RequiredPermission))
 			{
-				if (await permissionService.HasPermissionAsync(db, context.Guild, context.User, this.RequiredPermission))
-				{
-					return PreconditionResult.FromSuccess();
-				}
+				return PreconditionResult.FromSuccess();
 			}
 
 			return PreconditionResult.FromError("You don't have permission to run that command.");

@@ -26,10 +26,9 @@ using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Transformations;
 
 using Discord;
-
 using JetBrains.Annotations;
 using Image = DIGOS.Ambassador.Database.Data.Image;
 

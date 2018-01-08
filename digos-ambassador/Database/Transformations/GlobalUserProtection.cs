@@ -23,7 +23,7 @@
 using System.Collections.Generic;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Transformations;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Transformations
@@ -74,7 +74,9 @@ namespace DIGOS.Ambassador.Database.Transformations
 			{
 				User = user,
 				DefaultType = ProtectionType.Blacklist,
-				DefaultOptIn = false
+				DefaultOptIn = false,
+				Whitelist = new List<User>(),
+				Blacklist = new List<User>()
 			};
 		}
 	}

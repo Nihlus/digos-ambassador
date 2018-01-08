@@ -68,28 +68,27 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 			}
 
 			var permissionService = services.GetRequiredService<PermissionService>();
-			using (var db = new GlobalInfoContext())
+			var db = services.GetRequiredService<GlobalInfoContext>();
+
+			if (entity.IsOwner(context.User))
 			{
-				if (entity.IsOwner(context.User))
-				{
-					return PreconditionResult.FromSuccess();
-				}
-
-				bool hasPermission = await permissionService.HasPermissionAsync
-				(
-					db,
-					context.Guild,
-					context.User,
-					(this.Permission, this.Target)
-				);
-
-				if (!hasPermission)
-				{
-					return PreconditionResult.FromError("You don't have permission to do that.");
-				}
-
 				return PreconditionResult.FromSuccess();
 			}
+
+			bool hasPermission = await permissionService.HasPermissionAsync
+			(
+				db,
+				context.Guild,
+				context.User,
+				(this.Permission, this.Target)
+			);
+
+			if (!hasPermission)
+			{
+				return PreconditionResult.FromError("You don't have permission to do that.");
+			}
+
+			return PreconditionResult.FromSuccess();
 		}
 	}
 }

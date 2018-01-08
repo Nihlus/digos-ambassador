@@ -1,5 +1,5 @@
 ﻿//
-//  ProtectionType.cs
+//  OwnedEntityServiceTestBase.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,21 +20,26 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Services
+using DIGOS.Ambassador.Services;
+
+namespace DIGOS.Ambassador.Tests.TestBases
 {
 	/// <summary>
-	/// Represents protection types for interactions between users.
+	/// Serves as a test base for owned entity service tests.
 	/// </summary>
-	public enum ProtectionType
+	public abstract class OwnedEntityServiceTestBase : DatabaseDependantTestBase
 	{
 		/// <summary>
-		/// Blacklist-based protection·
+		/// Gets the owned entity service object.
 		/// </summary>
-		Blacklist,
+		protected OwnedEntityService Entities { get; }
 
 		/// <summary>
-		/// Whitelist-based protection.
+		/// Initializes a new instance of the <see cref="OwnedEntityServiceTestBase"/> class.
 		/// </summary>
-		Whitelist
+		protected OwnedEntityServiceTestBase()
+		{
+			this.Entities = new OwnedEntityService();
+		}
 	}
 }

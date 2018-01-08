@@ -23,7 +23,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Transformations;
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Transformations;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Appearances

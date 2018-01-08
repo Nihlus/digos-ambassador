@@ -1,5 +1,5 @@
 ﻿//
-//  PatternToken.cs
+//  DatabaseDependantTestBase.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,34 +21,37 @@
 //
 
 using System;
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Transformations;
-using Humanizer;
+using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Tests.Database;
 
-namespace DIGOS.Ambassador.Transformations
+namespace DIGOS.Ambassador.Tests.TestBases
 {
 	/// <summary>
-	/// A token that gets replaced with a pattern name.
+	/// Serves as a test base for tests that depend on a database context.
 	/// </summary>
-	[TokenIdentifier("pattern", "p")]
-	public class PatternToken : ReplacableTextToken<PatternToken>
+	public abstract class DatabaseDependantTestBase : IDisposable
 	{
-		/// <inheritdoc />
-		public override string GetText(Character character, Transformation transformation)
-		{
-			if (transformation is null)
-			{
-				throw new ArgumentNullException(nameof(transformation));
-			}
+		private readonly MockedDatabase DatabaseMock;
 
-			var currentBodypart = character.GetBodypart(transformation.Part);
-			return currentBodypart.Pattern.ToString().Humanize();
+		/// <summary>
+		/// Gets the mocked database connection for this test.
+		/// </summary>
+		protected GlobalInfoContext Database { get; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DatabaseDependantTestBase"/> class.
+		/// </summary>
+		protected DatabaseDependantTestBase()
+		{
+			this.DatabaseMock = new MockedDatabase();
+			this.Database = this.DatabaseMock.GetDatabaseContext();
 		}
 
 		/// <inheritdoc />
-		protected override PatternToken Initialize(string data)
+		public void Dispose()
 		{
-			return this;
+			this.Database?.Dispose();
+			this.DatabaseMock?.Dispose();
 		}
 	}
 }

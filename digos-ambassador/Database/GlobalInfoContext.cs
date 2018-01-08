@@ -192,15 +192,8 @@ namespace DIGOS.Ambassador.Database
 		/// <summary>
 		/// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
 		/// </summary>
-		public GlobalInfoContext()
-		{
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
-		/// </summary>
 		/// <param name="options">The context options.</param>
-		public GlobalInfoContext([NotNull] DbContextOptions<GlobalInfoContext> options)
+		public GlobalInfoContext([NotNull] DbContextOptions options)
 			: base(options)
 		{
 		}
@@ -361,12 +354,24 @@ namespace DIGOS.Ambassador.Database
 			return await GetUser(discordUser);
 		}
 
+		/// <summary>
+		/// Configures the given options builder to match the settings required for the <see cref="GlobalInfoContext"/>.
+		/// </summary>
+		/// <param name="optionsBuilder">The builder to configure.</param>
+		/// <returns>The builder, configured.</returns>
+		public static DbContextOptionsBuilder ConfigureOptions(DbContextOptionsBuilder optionsBuilder)
+		{
+			optionsBuilder.UseSqlite($"Data Source={Path.Combine("Content", "Databases", "global.db")}");
+
+			return optionsBuilder;
+		}
+
 		/// <inheritdoc />
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			if (!optionsBuilder.IsConfigured)
 			{
-				optionsBuilder.UseSqlite($"Data Source={Path.Combine("Content", "Databases", "global.db")}");
+				ConfigureOptions(optionsBuilder);
 			}
 		}
 
