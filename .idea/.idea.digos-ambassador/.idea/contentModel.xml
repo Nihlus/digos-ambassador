@@ -288,6 +288,7 @@
         <e p="Utility" t="Include">
           <e p="CaseInsensitiveStringEqualityComparer.cs" t="Include" />
           <e p="LevenshteinDistance.cs" t="Include" />
+          <e p="PureWebSocketProvider.cs" t="Include" />
           <e p="WebSocketSharpProvider.cs" t="Include" />
         </e>
         <e p="Wizards" t="Include">
