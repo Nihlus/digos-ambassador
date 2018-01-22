@@ -1286,7 +1286,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.Database,
 					this.Context,
 					this.Character,
-					Bodypart.Face,
+					Bodypart.Tail,
 					"shark"
 				);
 

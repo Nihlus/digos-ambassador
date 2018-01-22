@@ -37,6 +37,12 @@ namespace DIGOS.Ambassador.Tests.TestBases
 		/// </summary>
 		protected CharacterService Characters { get; }
 
+		/// <summary>
+		/// Gets the command service dependency.
+		/// </summary>
+		protected CommandService Commands { get; }
+
+		private readonly ContentService Content;
 		private readonly TransformationService Transformations;
 
 		/// <summary>
@@ -44,10 +50,11 @@ namespace DIGOS.Ambassador.Tests.TestBases
 		/// </summary>
 		protected CharacterServiceTestBase()
 		{
-			var contentService = new ContentService();
-			this.Transformations = new TransformationService(contentService);
+			this.Commands = new CommandService();
+			this.Content = new ContentService();
+			this.Transformations = new TransformationService(this.Content);
 
-			this.Characters = new CharacterService(new CommandService(), new OwnedEntityService(), contentService, this.Transformations);
+			this.Characters = new CharacterService(this.Commands, new OwnedEntityService(), this.Content, this.Transformations);
 		}
 
 		/// <inheritdoc />
