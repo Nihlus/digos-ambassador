@@ -41,9 +41,10 @@ namespace DIGOS.Ambassador.TypeReaders
 				var result = input.DehumanizeTo<T>();
 				return Task.FromResult(TypeReaderResult.FromSuccess(result));
 			}
-			catch (NoMatchFoundException nex)
+			catch (NoMatchFoundException)
 			{
-				return Task.FromResult(TypeReaderResult.FromError(CommandError.ObjectNotFound, nex.Message));
+				var message = $"Couldn't parse \"{input}\" as an enum of type \"{typeof(T).Name}\"";
+				return Task.FromResult(TypeReaderResult.FromError(CommandError.ObjectNotFound, message));
 			}
 		}
 	}
