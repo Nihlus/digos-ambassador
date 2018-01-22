@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Interfaces;
 using Discord;
 

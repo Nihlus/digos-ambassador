@@ -1,5 +1,5 @@
 ﻿//
-//  LuaTests.cs
+//  LuaServiceTests.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -23,25 +23,28 @@
 #pragma warning disable SA1600
 #pragma warning disable CS1591
 
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Services;
 using Moq;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests
+namespace DIGOS.Ambassador.Tests.ServiceTests
 {
-	public class LuaTests
+	public class LuaServiceTests
 	{
+		private readonly LuaService Lua;
+
+		public LuaServiceTests()
+		{
+			this.Lua = new LuaService(new Mock<ContentService>().Object);
+		}
+
 		[Fact]
 		public async Task CanExecuteSimpleCode()
 		{
-			var mockContent = new Mock<ContentService>();
-			var luaService = new LuaService(mockContent.Object);
-
 			const string code = "return \"test\"";
 
-			var result = await luaService.ExecuteSnippetAsync(code);
+			var result = await this.Lua.ExecuteSnippetAsync(code);
 			Assert.True(result.IsSuccess);
 			Assert.Equal("test", result.Entity);
 		}
@@ -49,36 +52,27 @@ namespace DIGOS.Ambassador.Tests
 		[Fact]
 		public async Task TimesOutLongRunningScripts()
 		{
-			var mockContent = new Mock<ContentService>();
-			var luaService = new LuaService(mockContent.Object);
-
 			const string code = "while (true) do end";
 
-			var result = await luaService.ExecuteSnippetAsync(code);
+			var result = await this.Lua.ExecuteSnippetAsync(code);
 			Assert.False(result.IsSuccess);
 		}
 
 		[Fact]
 		public async Task ScriptUsingAPINotOnWhitelistFails()
 		{
-			var mockContent = new Mock<ContentService>();
-			var luaService = new LuaService(mockContent.Object);
-
 			const string code = "setfenv({})";
 
-			var result = await luaService.ExecuteSnippetAsync(code);
+			var result = await this.Lua.ExecuteSnippetAsync(code);
 			Assert.False(result.IsSuccess);
 		}
 
 		[Fact]
 		public async Task ScriptUsingAPIOnWhitelistSucceeds()
 		{
-			var mockContent = new Mock<ContentService>();
-			var luaService = new LuaService(mockContent.Object);
-
 			const string code = "return string.lower(\"ABC\")";
 
-			var result = await luaService.ExecuteSnippetAsync(code);
+			var result = await this.Lua.ExecuteSnippetAsync(code);
 			Assert.True(result.IsSuccess);
 			Assert.Equal("abc", result.Entity);
 		}
@@ -86,29 +80,12 @@ namespace DIGOS.Ambassador.Tests
 		[Fact]
 		public async Task CanAccessPassedVariables()
 		{
-			var mockContent = new Mock<ContentService>();
-			var luaService = new LuaService(mockContent.Object);
-
 			int variable = 10;
 			const string code = "return variable";
 
-			var result = await luaService.ExecuteSnippetAsync(code, (nameof(variable), variable));
+			var result = await this.Lua.ExecuteSnippetAsync(code, (nameof(variable), variable));
 			Assert.True(result.IsSuccess);
 			Assert.Equal("10", result.Entity);
-		}
-
-		[Fact]
-		public void CanBuildMetaTable()
-		{
-			const string expected = "env = { test = test,string = { format = string.format,subtable = { format = string.subtable.format } } }";
-			var entries = new[] { "test", "string.format", "string.subtable.format" };
-			var builder = new MetaTableBuilder();
-
-			builder = entries.Aggregate(builder, (current, entry) => current.WithEntry(entry));
-
-			var result = builder.Build();
-
-			Assert.Equal(expected, result);
 		}
 	}
 }
