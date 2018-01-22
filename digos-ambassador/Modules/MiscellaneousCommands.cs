@@ -132,12 +132,46 @@ namespace DIGOS.Ambassador.Modules
 		/// Boops the invoking user.
 		/// </summary>
 		[UsedImplicitly]
-		[Alias("boop", "bap")]
 		[Command("boop", RunMode = RunMode.Async)]
-		[Summary("Boops the user.")]
+		[Summary("Boops you.")]
 		public async Task BoopAsync()
 		{
 			await this.Feedback.SendConfirmationAsync(this.Context, "*boop*");
+		}
+
+		/// <summary>
+		/// Baps the invoking user.
+		/// </summary>
+		[UsedImplicitly]
+		[Command("bap", RunMode = RunMode.Async)]
+		[Summary("Baps you.")]
+		public async Task BapAsync()
+		{
+			await this.Feedback.SendConfirmationAsync(this.Context, "**baps**");
+		}
+
+		/// <summary>
+		/// Boops the target user.
+		/// </summary>
+		/// <param name="target">The target.</param>
+		[UsedImplicitly]
+		[Command("boop", RunMode = RunMode.Async)]
+		[Summary("Boops the user.")]
+		public async Task BoopAsync([NotNull] IUser target)
+		{
+			await this.Feedback.SendConfirmationAsync(this.Context, $"*boops {target.Mention}*");
+		}
+
+		/// <summary>
+		/// Baps the target user.
+		/// </summary>
+		/// <param name="target">The target.</param>
+		[UsedImplicitly]
+		[Command("bap", RunMode = RunMode.Async)]
+		[Summary("Baps the user.")]
+		public async Task BapAsync([NotNull] IUser target)
+		{
+			await this.Feedback.SendConfirmationAsync(this.Context, $"**baps {target.Mention}**");
 		}
 
 		/// <summary>
