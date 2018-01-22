@@ -267,38 +267,23 @@ namespace DIGOS.Ambassador
 				{
 					case CommandError.UnknownCommand:
 					{
-						// TODO: Better way of doing this
-						// await this.Feedback.SendWarningAsync(context, "Unknown command.");
 						break;
 					}
 					case CommandError.ObjectNotFound:
 					case CommandError.MultipleMatches:
 					case CommandError.Unsuccessful:
 					case CommandError.UnmetPrecondition:
-					{
-						await this.Feedback.SendErrorAsync(context, result.ErrorReason);
-						break;
-					}
 					case CommandError.ParseFailed:
 					case CommandError.BadArgCount:
+					case CommandError.Exception:
 					{
 						var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
 
-						var errorEmbed = this.Feedback.CreateFeedbackEmbed(context.User, Color.Red, $"Command failed: {result.ErrorReason}");
+						var errorEmbed = this.Feedback.CreateFeedbackEmbed(context.User, Color.Red, result.ErrorReason);
 						var searchResult = this.Commands.Search(context, argumentPos);
 
 						await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
 						await userDMChannel.SendMessageAsync(string.Empty, false, this.Feedback.CreateCommandUsageEmbed(searchResult.Commands));
-						break;
-					}
-					case CommandError.Exception:
-					{
-						await this.Feedback.SendErrorAsync(context, $"Bzzt: {result.ErrorReason}");
-						break;
-					}
-					case null:
-					{
-						await this.Feedback.SendErrorAsync(context, "Unknown error. Please contact maintenance.");
 						break;
 					}
 					default:
