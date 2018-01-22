@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.TypeReaders
 			var roleplayService = services.GetRequiredService<RoleplayService>();
 			var db = services.GetRequiredService<GlobalInfoContext>();
 
-			if (!entityName.IsNullOrWhitespace() && entityName.Equals("current", StringComparison.OrdinalIgnoreCase))
+			if (!entityName.IsNullOrWhitespace() && string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
 			{
 				return await roleplayService.GetActiveRoleplayAsync(db, context);
 			}

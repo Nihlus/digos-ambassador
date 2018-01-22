@@ -356,7 +356,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
 
-			await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Context.Message.Author, this.Context.Guild);
+			await this.Characters.ClearCurrentCharactersOnServerAsync(this.Database, this.Context.Message.Author, this.Context.Guild);
 
 			if (this.Context.Message.Author is IGuildUser guildUser)
 			{

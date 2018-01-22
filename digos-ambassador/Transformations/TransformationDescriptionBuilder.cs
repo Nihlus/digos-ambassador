@@ -162,7 +162,7 @@ namespace DIGOS.Ambassador.Transformations
 			var chiralComponent = character.GetBodypart(bodypart);
 			var opposingComponent = character.GetBodypart(BodypartUtilities.GetChiralPart(bodypart));
 
-			return chiralComponent.Transformation.Species.Name.Equals(opposingComponent.Transformation.Species.Name);
+			return string.Equals(chiralComponent.Transformation.Species.Name, opposingComponent.Transformation.Species.Name);
 		}
 
 		/// <summary>

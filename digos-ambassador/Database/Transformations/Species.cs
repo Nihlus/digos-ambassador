@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 				return false;
 			}
 
-			return this.Name.Equals(species.Name, StringComparison.OrdinalIgnoreCase);
+			return string.Equals(this.Name, species.Name, StringComparison.OrdinalIgnoreCase);
 		}
 	}
 }

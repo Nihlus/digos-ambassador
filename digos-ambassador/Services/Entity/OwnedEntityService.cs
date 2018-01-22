@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Services
 				return true;
 			}
 
-			return !await userEntities.AnyAsync(ch => ch.Name.Equals(entityName, StringComparison.OrdinalIgnoreCase));
+			return !await userEntities.AnyAsync(ch => string.Equals(ch.Name, entityName, StringComparison.OrdinalIgnoreCase));
 		}
 
 		/// <summary>
@@ -99,7 +99,7 @@ namespace DIGOS.Ambassador.Services
 				);
 			}
 
-			if (newOwnerEntities.Any(e => e.Name.Equals(entity.Name, StringComparison.OrdinalIgnoreCase)))
+			if (newOwnerEntities.Any(e => string.Equals(e.Name, entity.Name, StringComparison.OrdinalIgnoreCase)))
 			{
 				return ModifyEntityResult.FromError
 				(
@@ -146,7 +146,7 @@ namespace DIGOS.Ambassador.Services
 				);
 			}
 
-			if (this.ReservedNames.Any(n => n.Equals(entityName, StringComparison.OrdinalIgnoreCase)))
+			if (this.ReservedNames.Any(n => string.Equals(n, entityName, StringComparison.OrdinalIgnoreCase)))
 			{
 				return DetermineConditionResult.FromError
 				(

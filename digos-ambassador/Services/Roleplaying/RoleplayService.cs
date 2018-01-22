@@ -243,7 +243,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] IGuild guild
 		)
 		{
-			if (await db.Roleplays.CountAsync(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase)) > 1)
+			if (await db.Roleplays.CountAsync(rp => string.Equals(rp.Name, roleplayName, StringComparison.OrdinalIgnoreCase)) > 1)
 			{
 				return RetrieveEntityResult<Roleplay>.FromError
 				(
@@ -253,7 +253,7 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			var roleplay = GetRoleplays(db, guild)
-				.FirstOrDefault(rp => rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase));
+				.FirstOrDefault(rp => string.Equals(rp.Name, roleplayName, StringComparison.OrdinalIgnoreCase));
 
 			if (roleplay is null)
 			{

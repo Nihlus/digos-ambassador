@@ -229,7 +229,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] IGuild guild
 		)
 		{
-			if (await db.Characters.CountAsync(ch => ch.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase)) > 1)
+			if (await db.Characters.CountAsync(ch => string.Equals(ch.Name, characterName, StringComparison.OrdinalIgnoreCase)) > 1)
 			{
 				return RetrieveEntityResult<Character>.FromError
 				(
@@ -238,7 +238,7 @@ namespace DIGOS.Ambassador.Services
 				);
 			}
 
-			var character = GetCharacters(db, guild).FirstOrDefault(rp => rp.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase));
+			var character = GetCharacters(db, guild).FirstOrDefault(ch => string.Equals(ch.Name, characterName, StringComparison.OrdinalIgnoreCase));
 
 			if (character is null)
 			{
@@ -291,7 +291,7 @@ namespace DIGOS.Ambassador.Services
 			var character = await GetUserCharacters(db, characterOwner, context.Guild)
 			.FirstOrDefaultAsync
 			(
-				ch => ch.Name.Equals(characterName, StringComparison.OrdinalIgnoreCase)
+				ch => string.Equals(ch.Name, characterName, StringComparison.OrdinalIgnoreCase)
 			);
 
 			if (character is null)
@@ -315,22 +315,29 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordServer">The server to make the character current on.</param>
 		/// <param name="character">The character to make current.</param>
 		/// <returns>A task that must be awaited.</returns>
-		public async Task MakeCharacterCurrentOnServerAsync
+		public async Task<ModifyEntityResult> MakeCharacterCurrentOnServerAsync
 		(
 			[NotNull] GlobalInfoContext db,
-			[NotNull] SocketCommandContext context,
+			[NotNull] ICommandContext context,
 			[NotNull] IGuild discordServer,
 			[NotNull] Character character
 		)
 		{
 			var server = await db.GetOrRegisterServerAsync(discordServer);
-			var user = context.Guild.GetUser(character.Owner.DiscordID);
+			var user = await context.Guild.GetUserAsync(character.Owner.DiscordID);
 
-			await ClearCurrentCharacterOnServerAsync(db, user, discordServer);
+			if (character.CurrentServers.Any(s => s.DiscordID == discordServer.Id))
+			{
+				return ModifyEntityResult.FromError(CommandError.MultipleMatches, "The character is already current on the server.");
+			}
+
+			await ClearCurrentCharactersOnServerAsync(db, user, discordServer);
 
 			character.CurrentServers.Add(server);
 
 			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 		}
 
 		/// <summary>
@@ -340,7 +347,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordUser">The user to clear the characters from.</param>
 		/// <param name="discordServer">The server to clear the characters on.</param>
 		/// <returns>A task that must be awaited.</returns>
-		public async Task ClearCurrentCharacterOnServerAsync
+		public async Task<ModifyEntityResult> ClearCurrentCharactersOnServerAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] IUser discordUser,
@@ -349,7 +356,7 @@ namespace DIGOS.Ambassador.Services
 		{
 			if (!await HasActiveCharacterOnServerAsync(db, discordUser, discordServer))
 			{
-				return;
+				return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "The character isn't current on this server.");
 			}
 
 			var currentCharactersOnServer = GetUserCharacters(db, discordUser, discordServer)
@@ -362,6 +369,8 @@ namespace DIGOS.Ambassador.Services
 			);
 
 			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 		}
 
 		/// <summary>
@@ -371,7 +380,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordUser">The user to check.</param>
 		/// <param name="discordServer">The server to check.</param>
 		/// <returns>true if the user has an active character on the server; otherwise, false.</returns>
-		[Pure]
+		[Pure, ContractAnnotation("discordServer:null => false")]
 		public async Task<bool> HasActiveCharacterOnServerAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -524,6 +533,11 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
 			}
 
+			if (string.Equals(character.Name, newCharacterName, StringComparison.OrdinalIgnoreCase))
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character already has that name.");
+			}
+
 			if (!await IsCharacterNameUniqueForUserAsync(db, context.Message.Author, newCharacterName, context.Guild))
 			{
 				var errorMessage = isCurrentUser
@@ -565,7 +579,12 @@ namespace DIGOS.Ambassador.Services
 		{
 			if (string.IsNullOrWhiteSpace(newCharacterAvatarUrl))
 			{
-				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new nickname.");
+				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new avatar url.");
+			}
+
+			if (character.AvatarUrl == newCharacterAvatarUrl)
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character's avatar is already set to that URL.");
 			}
 
 			character.AvatarUrl = newCharacterAvatarUrl;
@@ -591,6 +610,11 @@ namespace DIGOS.Ambassador.Services
 			if (string.IsNullOrWhiteSpace(newCharacterNickname))
 			{
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new nickname.");
+			}
+
+			if (character.Nickname == newCharacterNickname)
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character already has that nickname.");
 			}
 
 			if (newCharacterNickname.Length > 32)
@@ -623,9 +647,14 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new summary.");
 			}
 
+			if (character.Summary == newCharacterSummary)
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "That's already the character's summary.");
+			}
+
 			if (newCharacterSummary.Length > 240)
 			{
-				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The summary is too long.");
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The summary is too long. It can be at most 240 characters.");
 			}
 
 			character.Summary = newCharacterSummary;
@@ -653,6 +682,11 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new description.");
 			}
 
+			if (character.Description == newCharacterDescription)
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character already has that description.");
+			}
+
 			character.Description = newCharacterDescription;
 			await db.SaveChangesAsync();
 
@@ -673,9 +707,19 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string pronounFamily
 		)
 		{
+			if (pronounFamily.IsNullOrWhitespace())
+			{
+				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a pronoun family.");
+			}
+
 			if (!this.PronounProviders.ContainsKey(pronounFamily))
 			{
 				return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "Could not find a pronoun provider for that family.");
+			}
+
+			if (character.PronounProviderFamily == pronounFamily)
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character is already using that pronoun set.");
 			}
 
 			var pronounProvider = this.PronounProviders[pronounFamily];
@@ -692,15 +736,26 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character to edit.</param>
 		/// <param name="isNSFW">Whether or not the character is NSFW</param>
 		/// <returns>A task that must be awaited.</returns>
-		public async Task SetCharacterIsNSFWAsync
+		public async Task<ModifyEntityResult> SetCharacterIsNSFWAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] Character character,
 			bool isNSFW
 		)
 		{
+			if (character.IsNSFW == isNSFW)
+			{
+				var message = character.IsNSFW
+					? "The character is already NSFW."
+					: "The character is alreadu SFW.";
+
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, message);
+			}
+
 			character.IsNSFW = isNSFW;
 			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 		}
 
 		/// <summary>
@@ -791,7 +846,7 @@ namespace DIGOS.Ambassador.Services
 			bool isNSFW = false
 		)
 		{
-			bool isImageNameUnique = !character.Images.Any(i => i.Name.Equals(imageName, StringComparison.OrdinalIgnoreCase));
+			bool isImageNameUnique = !character.Images.Any(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
 			if (!isImageNameUnique)
 			{
 				return ModifyEntityResult.FromError(CommandError.MultipleMatches, "The character already has an image with that name.");
@@ -825,13 +880,13 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string imageName
 		)
 		{
-			bool hasNamedImage = character.Images.Any(i => i.Name.Equals(imageName, StringComparison.OrdinalIgnoreCase));
+			bool hasNamedImage = character.Images.Any(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
 			if (!hasNamedImage)
 			{
 				return ModifyEntityResult.FromError(CommandError.MultipleMatches, "The character has no image with that name.");
 			}
 
-			character.Images.RemoveAll(i => i.Name.Equals(imageName, StringComparison.OrdinalIgnoreCase));
+			character.Images.RemoveAll(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
 			await db.SaveChangesAsync();
 
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Added);

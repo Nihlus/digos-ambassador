@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Transformations
 				return this;
 			}
 
-			if (data.Equals("base") | data.Equals("pattern"))
+			if (data.Equals("base") | string.Equals(data, "pattern"))
 			{
 				this.Part = data;
 			}

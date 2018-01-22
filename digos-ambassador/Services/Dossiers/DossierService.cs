@@ -143,7 +143,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string title
 		)
 		{
-			var dossier = await db.Dossiers.FirstOrDefaultAsync(d => d.Title.Equals(title, StringComparison.OrdinalIgnoreCase));
+			var dossier = await db.Dossiers.FirstOrDefaultAsync(d => string.Equals(d.Title, title, StringComparison.OrdinalIgnoreCase));
 			if (dossier is null)
 			{
 				return RetrieveEntityResult<Dossier>.FromError(CommandError.ObjectNotFound, "No dossier with that title found.");
@@ -174,7 +174,7 @@ namespace DIGOS.Ambassador.Services
 				bool isOnlyCaseChange = false;
 				if (!(dossier.Title is null))
 				{
-					isOnlyCaseChange = dossier.Title.Equals(newTitle, StringComparison.OrdinalIgnoreCase);
+					isOnlyCaseChange = string.Equals(dossier.Title, newTitle, StringComparison.OrdinalIgnoreCase);
 				}
 
 				if (!isOnlyCaseChange)

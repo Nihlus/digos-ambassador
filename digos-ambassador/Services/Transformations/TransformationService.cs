@@ -929,7 +929,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string speciesName
 		)
 		{
-			var species = await db.Species.FirstOrDefaultAsync(s => s.Name.Equals(speciesName, StringComparison.OrdinalIgnoreCase));
+			var species = await db.Species.FirstOrDefaultAsync(s => string.Equals(s.Name, speciesName, StringComparison.OrdinalIgnoreCase));
 			if (species is null)
 			{
 				return RetrieveEntityResult<Species>.FromError(CommandError.ObjectNotFound, "There is no species with that name in the database.");
@@ -951,7 +951,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string speciesName
 		)
 		{
-			return !await db.Species.AnyAsync(s => s.Name.Equals(speciesName, StringComparison.OrdinalIgnoreCase));
+			return !await db.Species.AnyAsync(s => string.Equals(s.Name, speciesName, StringComparison.OrdinalIgnoreCase));
 		}
 	}
 }
