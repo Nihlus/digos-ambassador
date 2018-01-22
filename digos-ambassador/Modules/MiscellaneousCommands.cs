@@ -277,7 +277,7 @@ namespace DIGOS.Ambassador.Modules
 				return;
 			}
 
-			var modules = GetTopLevelModules(searchResults.Select(ci => ci.Module)).Distinct();
+			var modules = searchResults.Select(ci => ci.Module).GetTopLevelModules().Distinct();
 
 			foreach (var module in modules)
 			{
@@ -346,24 +346,6 @@ namespace DIGOS.Ambassador.Modules
 			}
 
 			await userChannel.CloseAsync();
-		}
-
-		private IEnumerable<ModuleInfo> GetTopLevelModules(IEnumerable<ModuleInfo> childModules)
-		{
-			foreach (var childModule in childModules)
-			{
-				if (childModule.IsSubmodule)
-				{
-					foreach (var parentModule in GetTopLevelModules(new List<ModuleInfo> { childModule.Parent }))
-					{
-						yield return parentModule;
-					}
-				}
-				else
-				{
-					yield return childModule;
-				}
-			}
 		}
 	}
 }

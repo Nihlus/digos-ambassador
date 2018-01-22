@@ -131,6 +131,7 @@
           <e p="InteractiveServiceExtensions.cs" t="Include" />
           <e p="KeyValuePairExtensions.cs" t="Include" />
           <e p="ListExtensions.cs" t="Include" />
+          <e p="ModuleInfoExtensions.cs" t="Include" />
           <e p="StreamExtensions.cs" t="Include" />
           <e p="StringExtensions.cs" t="Include" />
           <e p="TypeExtensions.cs" t="Include" />
