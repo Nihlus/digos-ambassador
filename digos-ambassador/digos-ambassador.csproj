@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net462;netcoreapp2.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.0;netstandard2.0</TargetFrameworks>
     <RootNamespace>DIGOS.Ambassador</RootNamespace>
     <AssemblyName>DIGOS.Ambassador</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>

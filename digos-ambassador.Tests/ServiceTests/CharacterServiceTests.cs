@@ -148,7 +148,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					Name = CharacterName,
 					ServerID = this.Guild.Id,
 					Owner = new User { DiscordID = this.Owner.Id },
-					CurrentServers = new List<Server>()
 				};
 
 				this.Database.Characters.Add(this.Character);
@@ -185,7 +184,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					Name = CharacterName,
 					ServerID = this.Guild.Id,
 					Owner = new User { DiscordID = 2 },
-					CurrentServers = new List<Server>()
 				};
 
 				await this.Database.Characters.AddAsync(anotherCharacter);
@@ -366,7 +364,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				{
 					ServerID = this.Guild.Id,
 					Owner = new User { DiscordID = this.Owner.Id },
-					CurrentServers = new List<Server>()
 				};
 
 				this.Database.Characters.Add(this.Character);
@@ -560,7 +557,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					Name = CharacterName,
 					ServerID = this.Guild.Id,
 					Owner = new User { DiscordID = this.Owner.Id },
-					CurrentServers = new List<Server>()
 				};
 
 				this.Database.Characters.Add(this.Character);
@@ -632,7 +628,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				this.Character = new Character
 				{
 					Owner = new User { DiscordID = this.Owner.Id },
-					CurrentServers = new List<Server>()
 				};
 
 				this.Database.Characters.Add(this.Character);
@@ -652,7 +647,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				await this.Characters.MakeCharacterCurrentOnServerAsync(this.Database, this.Context, this.Guild, this.Character);
 
-				Assert.Contains(this.Character.CurrentServers, s => s.DiscordID == this.Guild.Id);
+				Assert.True(this.Character.IsCurrent);
 			}
 
 			[Fact]
@@ -678,7 +673,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				{
 					ServerID = this.Guild.Id,
 					Owner = new User { DiscordID = this.Owner.Id },
-					CurrentServers = new List<Server>()
 				};
 
 				this.Database.Characters.Add(this.Character);
@@ -688,7 +682,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfCharacterIsNotCurrentOnServer()
 			{
-				var result = await this.Characters.ClearCurrentCharactersOnServerAsync(this.Database, this.Owner, this.Guild);
+				var result = await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Owner, this.Guild);
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -697,10 +691,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsSuccessfulResultIfCharacterIsCurrentOnServer()
 			{
-				this.Character.CurrentServers.Add(new Server { DiscordID = this.Guild.Id });
+				this.Character.IsCurrent = true;
 				await this.Database.SaveChangesAsync();
 
-				var result = await this.Characters.ClearCurrentCharactersOnServerAsync(this.Database, this.Owner, this.Guild);
+				var result = await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Owner, this.Guild);
 
 				Assert.True(result.IsSuccess);
 			}
@@ -708,12 +702,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task RemovesCorrectServerFromCharacter()
 			{
-				this.Character.CurrentServers.Add(new Server { DiscordID = this.Guild.Id });
+				this.Character.IsCurrent = true;
 				await this.Database.SaveChangesAsync();
 
-				await this.Characters.ClearCurrentCharactersOnServerAsync(this.Database, this.Owner, this.Guild);
+				await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Owner, this.Guild);
 
-				Assert.DoesNotContain(this.Character.CurrentServers, s => s.DiscordID == this.Guild.Id);
+				Assert.False(this.Character.IsCurrent);
 			}
 		}
 
@@ -763,7 +757,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				{
 					Owner = new User { DiscordID = this.Owner.Id },
 					ServerID = this.Guild.Id,
-					CurrentServers = new List<Server> { new Server { DiscordID = this.Guild.Id } }
+					IsCurrent = true
 				};
 
 				this.Database.Characters.Add(character);
@@ -854,7 +848,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					Name = CharacterName,
 					ServerID = mockedGuildObject.Id,
 					Owner = new User { DiscordID = mockedUserObject.Id },
-					CurrentServers = new List<Server>()
 				};
 
 				var anotherCharacter = new Character
@@ -862,7 +855,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					Name = AnotherCharacterName,
 					ServerID = mockedGuildObject.Id,
 					Owner = new User { DiscordID = mockedUserObject.Id },
-					CurrentServers = new List<Server>()
 				};
 
 				this.Database.Characters.Add(this.Character);

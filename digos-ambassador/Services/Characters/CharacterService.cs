@@ -203,7 +203,7 @@ namespace DIGOS.Ambassador.Services
 			var currentCharacter = await GetUserCharacters(db, discordUser, context.Guild)
 			.FirstOrDefaultAsync
 			(
-				ch => ch.CurrentServers.Any(s => s.DiscordID == context.Guild.Id)
+				ch => ch.IsCurrent
 			);
 
 			if (currentCharacter is null)
@@ -259,7 +259,6 @@ namespace DIGOS.Ambassador.Services
 			return db.Characters
 				.Include(c => c.Owner)
 				.Include(c => c.Images)
-				.Include(c => c.CurrentServers)
 				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.BaseColour)
 				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.PatternColour)
 				.Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.Transformation.Species)
@@ -323,17 +322,16 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] Character character
 		)
 		{
-			var server = await db.GetOrRegisterServerAsync(discordServer);
 			var user = await context.Guild.GetUserAsync(character.Owner.DiscordID);
 
-			if (character.CurrentServers.Any(s => s.DiscordID == discordServer.Id))
+			if (character.IsCurrent)
 			{
 				return ModifyEntityResult.FromError(CommandError.MultipleMatches, "The character is already current on the server.");
 			}
 
-			await ClearCurrentCharactersOnServerAsync(db, user, discordServer);
+			await ClearCurrentCharacterOnServerAsync(db, user, discordServer);
 
-			character.CurrentServers.Add(server);
+			character.IsCurrent = true;
 
 			await db.SaveChangesAsync();
 
@@ -347,7 +345,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordUser">The user to clear the characters from.</param>
 		/// <param name="discordServer">The server to clear the characters on.</param>
 		/// <returns>A task that must be awaited.</returns>
-		public async Task<ModifyEntityResult> ClearCurrentCharactersOnServerAsync
+		public async Task<ModifyEntityResult> ClearCurrentCharacterOnServerAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] IUser discordUser,
@@ -359,13 +357,11 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "The character isn't current on this server.");
 			}
 
-			var currentCharactersOnServer = GetUserCharacters(db, discordUser, discordServer)
-				.Where(ch => ch.CurrentServers.Any(s => s.DiscordID == discordServer.Id));
+			var currentCharactersOnServer = GetUserCharacters(db, discordUser, discordServer).Where(ch => ch.IsCurrent);
 
 			await currentCharactersOnServer.ForEachAsync
 			(
-				ch => ch.CurrentServers
-					.RemoveAll(s => s.DiscordID == discordServer.Id)
+				ch => ch.IsCurrent = false
 			);
 
 			await db.SaveChangesAsync();
@@ -397,12 +393,10 @@ namespace DIGOS.Ambassador.Services
 			var userCharacters = GetUserCharacters(db, discordUser, discordServer);
 
 			return await userCharacters
-				.Where(ch => ch.CurrentServers.Any())
-				.AnyAsync
-				(
-					c => c.CurrentServers
-						.Any(s => s.DiscordID == discordServer.Id)
-				);
+			.AnyAsync
+			(
+				c => c.IsCurrent
+			);
 		}
 
 		/// <summary>

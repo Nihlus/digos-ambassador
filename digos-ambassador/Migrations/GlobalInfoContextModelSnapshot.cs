@@ -8,7 +8,7 @@ using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Transformations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -102,6 +102,8 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<uint?>("DefaultAppearanceID");
 
                     b.Property<string>("Description");
+
+                    b.Property<bool>("IsCurrent");
 
                     b.Property<bool>("IsNSFW");
 
@@ -255,7 +257,7 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<uint?>("AuthorID");
+                    b.Property<ulong>("AuthorDiscordID");
 
                     b.Property<string>("AuthorNickname");
 
@@ -269,8 +271,6 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("AuthorID");
-
                     b.HasIndex("RoleplayID");
 
                     b.ToTable("UserMessage");
@@ -281,8 +281,6 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<uint>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<uint?>("CharacterID");
-
                     b.Property<ulong>("DiscordID");
 
                     b.Property<bool>("IsNSFW");
@@ -290,8 +288,6 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<bool>("SuppressPermissonWarnings");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("CharacterID");
 
                     b.ToTable("Servers");
                 });
@@ -518,20 +514,9 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.UserMessage", b =>
                 {
-                    b.HasOne("DIGOS.Ambassador.Database.Users.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorID");
-
                     b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
                         .WithMany("Messages")
                         .HasForeignKey("RoleplayID");
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.ServerInfo.Server", b =>
-                {
-                    b.HasOne("DIGOS.Ambassador.Database.Characters.Character")
-                        .WithMany("CurrentServers")
-                        .HasForeignKey("CharacterID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.GlobalUserProtection", b =>

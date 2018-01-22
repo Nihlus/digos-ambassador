@@ -55,9 +55,9 @@ namespace DIGOS.Ambassador.Database.Characters
 		public string EntityTypeDisplayName => nameof(Character);
 
 		/// <summary>
-		/// Gets or sets the server that the character is currently in use on.
+		/// Gets or sets a value indicating whether the character is currently in use on the server.
 		/// </summary>
-		public List<Server> CurrentServers { get; set; }
+		public bool IsCurrent { get; set; }
 
 		/// <summary>
 		/// Gets or sets a URL pointing to the character's avatar.
