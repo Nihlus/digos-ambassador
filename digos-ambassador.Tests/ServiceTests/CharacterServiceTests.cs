@@ -24,7 +24,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Modules;
 using DIGOS.Ambassador.Services;
@@ -519,7 +518,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 			private readonly ICommandContext Context;
 			private readonly IGuildUser Owner = MockHelper.CreateDiscordGuildUser(0);
-			private readonly IGuild Guild;
 
 			private readonly Character Character;
 
@@ -539,11 +537,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					)
 					.Returns(Task.FromResult(this.Owner));
 
-				this.Guild = mockedGuild.Object;
+				var guild = mockedGuild.Object;
 
 				var mockedContext = new Mock<ICommandContext>();
 				mockedContext.Setup(c => c.User).Returns(this.Owner);
-				mockedContext.Setup(c => c.Guild).Returns(this.Guild);
+				mockedContext.Setup(c => c.Guild).Returns(guild);
 
 				var mockedMessage = new Mock<IUserMessage>();
 				mockedMessage.Setup(m => m.Author).Returns(this.Owner);
@@ -555,7 +553,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				this.Character = new Character
 				{
 					Name = CharacterName,
-					ServerID = this.Guild.Id,
+					ServerID = guild.Id,
 					Owner = new User { DiscordID = this.Owner.Id },
 				};
 

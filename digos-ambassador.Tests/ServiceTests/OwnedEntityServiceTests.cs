@@ -53,8 +53,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				var entityMock = new Mock<IOwnedNamedEntity>();
 				entityMock.Setup(e => e.Name).Returns("Test");
 
-				var collection = new List<IOwnedNamedEntity>();
-				var queryable = collection.AsQueryable().BuildMock().Object;
+				var queryable = new List<IOwnedNamedEntity>().AsQueryable().BuildMock().Object;
 
 				var result = await this.Entities.IsEntityNameUniqueForUserAsync(queryable, "Test2");
 

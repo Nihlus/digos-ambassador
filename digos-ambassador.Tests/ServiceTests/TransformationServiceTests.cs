@@ -900,7 +900,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				Assert.Contains(this.Character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
 
-				var result = await this.Transformations.RemoveBodypartAsync
+				await this.Transformations.RemoveBodypartAsync
 				(
 					this.Database,
 					this.Context,

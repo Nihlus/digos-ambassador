@@ -20,12 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Linq;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Transformations;
 using Humanizer;
-using static DIGOS.Ambassador.Transformations.Bodypart;
 
 namespace DIGOS.Ambassador.Transformations
 {
