@@ -109,5 +109,11 @@ namespace DIGOS.Ambassador.Database.Transformations
 		[YamlMember(Alias = "uniform_description")]
 		[CanBeNull]
 		public string UniformDescription { get; set; }
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return $"{this.Species.Name} - {this.Part}";
+		}
 	}
 }

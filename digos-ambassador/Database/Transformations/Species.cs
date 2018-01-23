@@ -86,5 +86,11 @@ namespace DIGOS.Ambassador.Database.Transformations
 
 			return string.Equals(this.Name, species.Name, StringComparison.OrdinalIgnoreCase);
 		}
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return this.Name;
+		}
 	}
 }
