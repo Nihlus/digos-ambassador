@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Transformations
 				return string.Empty;
 			}
 
-			return component.Chirality.Humanize();
+			return component.Chirality.Humanize().Transform(To.LowerCase);
 		}
 
 		/// <inheritdoc />

@@ -110,10 +110,9 @@ namespace DIGOS.Ambassador.Transformations
 				var csb = new StringBuilder();
 
 				var transformation = component.Transformation;
-				var bodypart = component.Bodypart;
 				if (component.Bodypart.IsChiral())
 				{
-					var sameSpecies = AreChiralPartsTheSameSpecies(character, bodypart);
+					var sameSpecies = AreChiralPartsTheSameSpecies(character, component);
 					csb.Append
 					(
 						sameSpecies
@@ -153,14 +152,13 @@ namespace DIGOS.Ambassador.Transformations
 		/// Determines if the chiral parts on the character are the same species.
 		/// </summary>
 		/// <param name="character">The character.</param>
-		/// <param name="bodypart">The chiral bodypart.</param>
+		/// <param name="component">The chiral component.</param>
 		/// <returns>true if the parts are the same species; otherwise, false.</returns>
-		private bool AreChiralPartsTheSameSpecies(Character character, Bodypart bodypart)
+		private bool AreChiralPartsTheSameSpecies(Character character, AppearanceComponent component)
 		{
-			var chiralComponent = character.GetAppearanceComponent(bodypart);
-			var opposingComponent = character.GetAppearanceComponent(bodypart, chiralComponent.Chirality.Opposite());
+			var opposingComponent = character.GetAppearanceComponent(component.Bodypart, component.Chirality.Opposite());
 
-			return string.Equals(chiralComponent.Transformation.Species.Name, opposingComponent.Transformation.Species.Name);
+			return string.Equals(component.Transformation.Species.Name, opposingComponent.Transformation.Species.Name);
 		}
 
 		/// <summary>

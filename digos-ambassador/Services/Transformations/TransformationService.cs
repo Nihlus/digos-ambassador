@@ -204,7 +204,7 @@ namespace DIGOS.Ambassador.Services
 			string shiftMessage;
 			AppearanceComponent currentComponent;
 			var transformation = getTFResult.Entity;
-			if (!character.HasComponent(bodyPart))
+			if (!character.HasComponent(bodyPart, chirality))
 			{
 				currentComponent = AppearanceComponent.CreateFrom(transformation, chirality);
 				character.CurrentAppearance.Components.Add(currentComponent);
@@ -261,7 +261,7 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
 			}
 
-			if (character.GetAppearanceComponent(bodyPart).BaseColour == colour)
+			if (character.GetAppearanceComponent(bodyPart, chirality).BaseColour == colour)
 			{
 				return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The bodypart is already that colour.");
 			}

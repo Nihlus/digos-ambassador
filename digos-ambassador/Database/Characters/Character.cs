@@ -112,7 +112,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// <param name="chirality">The chirality of the bodypart.</param>
 		/// <returns>true if the character has the bodypart; otherwise, false.</returns>
 		[Pure]
-		public bool HasComponent(Bodypart bodypart, Chirality chirality = Chirality.Center)
+		public bool HasComponent(Bodypart bodypart, Chirality chirality)
 		{
 			if (bodypart.IsChiral() && chirality == Chirality.Center)
 			{
@@ -138,7 +138,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// <param name="bodypart">The bodypart to get.</param>
 		/// <param name="chirality">The chirality of the bodypart.</param>
 		/// <returns>The appearance component of the bodypart.</returns>
-		public AppearanceComponent GetAppearanceComponent(Bodypart bodypart, Chirality chirality = Chirality.Center)
+		public AppearanceComponent GetAppearanceComponent(Bodypart bodypart, Chirality chirality)
 		{
 			if (bodypart.IsChiral() && chirality == Chirality.Center)
 			{

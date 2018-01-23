@@ -50,11 +50,11 @@ namespace DIGOS.Ambassador.Transformations
 			{
 				case "base":
 				{
-					return character.GetAppearanceComponent(component.Bodypart).BaseColour.ToString();
+					return component.BaseColour.ToString();
 				}
 				case "pattern":
 				{
-					return character.GetAppearanceComponent(component.Bodypart).PatternColour?.ToString();
+					return component.PatternColour?.ToString();
 				}
 				default:
 				{
