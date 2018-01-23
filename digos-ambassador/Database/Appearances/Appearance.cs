@@ -89,10 +89,10 @@ namespace DIGOS.Ambassador.Database.Appearances
 
 			var templateSpecies = getSpeciesResult.Entity;
 			var templateTransformations = new List<Transformation>();
-			var templateParts = new List<Bodypart> { Head, Body, Arms, Eyes, Legs };
+			var templateParts = new List<Bodypart> { Head, Body, Arms, Legs };
 
 			// Explode the composite parts into their components
-			templateParts = templateParts.SelectMany(p => p.GetComposingParts()).ToList();
+			templateParts = templateParts.SelectMany(p => p.GetComposingParts()).Distinct().ToList();
 
 			foreach (var part in templateParts)
 			{

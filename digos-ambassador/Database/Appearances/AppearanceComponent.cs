@@ -27,6 +27,7 @@ using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Transformations;
+using Humanizer;
 using JetBrains.Annotations;
 using static DIGOS.Ambassador.Transformations.Chirality;
 
@@ -86,6 +87,13 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// Gets or sets the size of the component. This is, by default, a unitless value and is only contextually relevant.
 		/// </summary>
 		public int Size { get; set; }
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return
+				$"{(this.Chirality == Center ? string.Empty : $"{this.Chirality.Humanize()} ")}{this.Bodypart} ({this.Transformation.Species.Name})";
+		}
 
 		/// <summary>
 		/// Creates a new <see cref="AppearanceComponent"/> from a transformation of a bodypart.

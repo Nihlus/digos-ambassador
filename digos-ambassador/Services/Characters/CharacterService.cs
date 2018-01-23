@@ -229,7 +229,8 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] IGuild guild
 		)
 		{
-			if (await db.Characters.CountAsync(ch => string.Equals(ch.Name, characterName, StringComparison.OrdinalIgnoreCase)) > 1)
+			var guildCharacters = db.Characters.Where(ch => ch.ServerID == guild.Id);
+			if (await guildCharacters.CountAsync(ch => string.Equals(ch.Name, characterName, StringComparison.OrdinalIgnoreCase)) > 1)
 			{
 				return RetrieveEntityResult<Character>.FromError
 				(
