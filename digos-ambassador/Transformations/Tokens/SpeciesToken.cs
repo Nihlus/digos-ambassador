@@ -64,7 +64,7 @@ namespace DIGOS.Ambassador.Transformations
 			var largestSpecies = speciesShares.OrderByDescending(kvp => kvp.Value).FirstOrDefault();
 			var shareByPercentage = largestSpecies.Value / (double)totalPoints;
 
-			return $"{largestSpecies.Key}{(shareByPercentage <= 0.75 ? "-morph" : string.Empty)}";
+			return $"{largestSpecies.Key}{(shareByPercentage <= 0.50 ? "-morph" : string.Empty)}";
 		}
 
 		/// <inheritdoc />

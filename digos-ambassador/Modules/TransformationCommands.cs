@@ -578,6 +578,24 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		/// <summary>
+		/// Describes the current physical appearance of the current character.
+		/// </summary>
+		[UsedImplicitly]
+		[Command("describe", RunMode = Async)]
+		[Summary("Describes the current physical appearance of the current character.")]
+		public async Task DescribeCharacterAsync()
+		{
+			var result = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+			if (!result.IsSuccess)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+				return;
+			}
+
+			await DescribeCharacterAsync(result.Entity);
+		}
+
+		/// <summary>
 		/// Describes the current physical appearance of a character.
 		/// </summary>
 		/// <param name="character">The character to describe.</param>

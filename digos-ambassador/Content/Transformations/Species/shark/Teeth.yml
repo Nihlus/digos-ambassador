@@ -5,5 +5,5 @@ default_base_colour: "white"
 is_nsfw: false
 shift_message: "The teeth in {@target}'s mouth sharpen and angularize, forming rows of perfectly interlinked zigzags."
 grow_message: "Sharp, angular teeth grow in {@target}'s mouth, forming rows of perfectly interlinked zigzags."
-single_description: "{@f|Their} teeth are sharp and pointy, sitting in rows of perfectly interlinked zigzags"
+single_description: "{@f|Their} teeth are sharp and pointy, sitting in rows of perfectly interlinked zigzags."
 uniform_description: null

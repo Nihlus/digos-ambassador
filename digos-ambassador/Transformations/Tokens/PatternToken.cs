@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Transformations
 				throw new ArgumentNullException(nameof(component));
 			}
 
-			return component.Pattern.ToString().Humanize();
+			return component.Pattern.ToString().Humanize().Transform(To.LowerCase);
 		}
 
 		/// <inheritdoc />

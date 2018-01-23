@@ -96,13 +96,15 @@ namespace DIGOS.Ambassador.Transformations
 		{
 			var sb = new StringBuilder();
 			sb.Append(ReplaceTokensWithContent("{@target} is a {@sex} {@species}.", character, null));
+			sb.AppendLine();
+			sb.AppendLine();
 
-			var partsToSkip = new List<Bodypart>();
+			var partsToSkip = new List<AppearanceComponent>();
 			int componentCount = 0;
 			foreach (var component in character.CurrentAppearance.Components)
 			{
 				++componentCount;
-				if (partsToSkip.Contains(component.Bodypart))
+				if (partsToSkip.Contains(component))
 				{
 					continue;
 				}
@@ -119,6 +121,15 @@ namespace DIGOS.Ambassador.Transformations
 							? transformation.UniformDescription
 							: transformation.SingleDescription
 					);
+
+					if (sameSpecies)
+					{
+						var partToSkip = character.GetAppearanceComponent(component.Bodypart, component.Chirality.Opposite());
+						if (!(partToSkip is null))
+						{
+							partsToSkip.Add(partToSkip);
+						}
+					}
 				}
 				else
 				{
@@ -157,6 +168,10 @@ namespace DIGOS.Ambassador.Transformations
 		private bool AreChiralPartsTheSameSpecies(Character character, AppearanceComponent component)
 		{
 			var opposingComponent = character.GetAppearanceComponent(component.Bodypart, component.Chirality.Opposite());
+			if (opposingComponent is null)
+			{
+				return false;
+			}
 
 			return string.Equals(component.Transformation.Species.Name, opposingComponent.Transformation.Species.Name);
 		}
@@ -215,12 +230,12 @@ namespace DIGOS.Ambassador.Transformations
 				}
 				case Bodypart.Ear:
 				{
-					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize()} shrivels and vanishes.";
+					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize().Transform(To.LowerCase)} shrivels and vanishes.";
 					break;
 				}
 				case Bodypart.Eye:
 				{
-					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize()} deflates as their eye socket closes, leaving nothing behind.";
+					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize().Transform(To.LowerCase)} deflates as their eye socket closes, leaving nothing behind.";
 					break;
 				}
 				case Bodypart.Teeth:
@@ -231,7 +246,7 @@ namespace DIGOS.Ambassador.Transformations
 				case Bodypart.Leg:
 				case Bodypart.Arm:
 				{
-					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize()} shrivels and retracts, vanishing.";
+					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize().Transform(To.LowerCase)} shrivels and retracts, vanishing.";
 					break;
 				}
 				case Bodypart.Tail:
@@ -241,7 +256,7 @@ namespace DIGOS.Ambassador.Transformations
 				}
 				case Bodypart.Wing:
 				{
-					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize()} stiffens and shudders, before losing cohesion and disappearing into their body.";
+					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize().Transform(To.LowerCase)} stiffens and shudders, before losing cohesion and disappearing into their body.";
 					break;
 				}
 				case Bodypart.Penis:
@@ -262,7 +277,7 @@ namespace DIGOS.Ambassador.Transformations
 				case Bodypart.Legs:
 				case Bodypart.Arms:
 				{
-					removalText = $"{{@target}}'s {transformation.Part.Humanize()} shrivel and retract, vanishing.";
+					removalText = $"{{@target}}'s {transformation.Part.Humanize().Transform(To.LowerCase)} shrivel and retract, vanishing.";
 					break;
 				}
 				case Bodypart.Body:
@@ -272,7 +287,7 @@ namespace DIGOS.Ambassador.Transformations
 				}
 				case Bodypart.Wings:
 				{
-					removalText = $"{{@target}}'s {transformation.Part.Humanize()} stiffen and shudder, before losing cohesion and disappearing into their body.";
+					removalText = $"{{@target}}'s {transformation.Part.Humanize().Transform(To.LowerCase)} stiffen and shudder, before losing cohesion and disappearing into their body.";
 					break;
 				}
 				default:
@@ -326,7 +341,7 @@ namespace DIGOS.Ambassador.Transformations
 			string shiftMessage =
 				$"The surface of {{@target}}'s {currentComponent.Bodypart.Humanize().Transform(To.LowerCase)} morphs, as" +
 				$" {{@colour}} {{@pattern}} patterns spread across it" +
-				$"{(originalPattern.HasValue ? $", replacing their {originalColour} {originalPattern.Humanize().Pluralize()}" : ".")}.";
+				$"{(originalPattern.HasValue ? $", replacing their {originalColour} {originalPattern.Humanize().Pluralize()}." : ".")}";
 
 			return ReplaceTokensWithContent(shiftMessage, character, currentComponent);
 		}
@@ -347,8 +362,8 @@ namespace DIGOS.Ambassador.Transformations
 		)
 		{
 			string shiftMessage =
-				$"{{@target}}'s {currentComponent.Bodypart.Humanize()} morphs, as" +
-				$" {{@f|their}} {originalColour} hues turn into {currentComponent.PatternColour}.";
+				$"{{@target}}'s {currentComponent.Bodypart.Humanize().Transform(To.LowerCase)} morphs, as" +
+				$" {{@f|their}} {originalColour} hues turn into {currentComponent.BaseColour}.";
 
 			return ReplaceTokensWithContent(shiftMessage, character, currentComponent);
 		}
