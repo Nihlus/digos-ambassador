@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using DIGOS.Ambassador.Attributes;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
@@ -101,9 +102,27 @@ namespace DIGOS.Ambassador.Transformations
 
 			var partsToSkip = new List<AppearanceComponent>();
 			int componentCount = 0;
-			foreach (var component in character.CurrentAppearance.Components)
+
+			var orderedComponents = character.CurrentAppearance.Components.OrderByDescending
+			(
+				c =>
+				{
+					var priorityAttribute = c.Bodypart.GetCustomAttribute<DescriptionPriorityAttribute>();
+
+					return priorityAttribute?.Priority ?? 0;
+				}
+			);
+
+			foreach (var component in orderedComponents)
 			{
 				++componentCount;
+
+				// Break the description into paragraphs every third component
+				if (componentCount % 3 == 0)
+				{
+					sb.Append("\n\n");
+				}
+
 				if (partsToSkip.Contains(component))
 				{
 					continue;
@@ -145,12 +164,6 @@ namespace DIGOS.Ambassador.Transformations
 				var componentDesc = ReplaceTokensWithContent(tokenizedDesc, character, component);
 
 				sb.Append(componentDesc);
-
-				// Break the description into paragraphs every third component
-				if (componentCount % 3 == 0)
-				{
-					sb.Append("\n\n");
-				}
 			}
 
 			var description = sb.ToString().Trim();

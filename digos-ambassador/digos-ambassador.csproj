@@ -63,6 +63,6 @@
     <Delete Files="$(OutputPath)\System.Net.Http.dll" Condition="'$(OS)' == 'Unix'" />
   </Target>
   <Target Name="GenerateDocs" AfterTargets="DeleteNetHttpMono">
-    <Exec Command="dotnet $(SolutionDir)digos-ambassador.Doc\bin\Debug\netcoreapp2.0\DIGOS.Ambassador.Doc.dll --assembly $(OutputPath)\DIGOS.Ambassador.dll --output $(SolutionDir)\docs"/>
+    <Exec Command="dotnet $(SolutionDir)digos-ambassador.Doc\bin\Debug\netcoreapp2.0\DIGOS.Ambassador.Doc.dll --assembly $(OutputPath)\DIGOS.Ambassador.dll --output $(SolutionDir)\docs" />
   </Target>
 </Project>

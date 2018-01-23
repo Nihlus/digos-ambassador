@@ -32,68 +32,73 @@ namespace DIGOS.Ambassador.Transformations
 		/// <summary>
 		/// The head hair.
 		/// </summary>
+		[DescriptionPriority(9)]
 		Hair,
 
 		/// <summary>
 		/// The face.
 		/// </summary>
+		[DescriptionPriority(10)]
 		Face,
 
 		/// <summary>
 		/// An ear.
 		/// </summary>
-		[Chiral]
+		[Chiral, DescriptionPriority(6)]
 		Ear,
 
 		/// <summary>
 		/// An eye.
 		/// </summary>
-		[Chiral]
+		[Chiral, DescriptionPriority(8)]
 		Eye,
 
 		/// <summary>
 		/// The teeth.
 		/// </summary>
+		[DescriptionPriority(7)]
 		Teeth,
 
 		/// <summary>
 		/// The main body.
 		/// </summary>
+		[DescriptionPriority(5)]
 		Body,
 
 		/// <summary>
 		/// An arm.
 		/// </summary>
-		[Chiral]
+		[Chiral, DescriptionPriority(3)]
 		Arm,
 
 		/// <summary>
 		/// A leg.
 		/// </summary>
-		[Chiral]
+		[Chiral, DescriptionPriority(2)]
 		Leg,
 
 		/// <summary>
 		/// The tail.
 		/// </summary>
+		[DescriptionPriority(1)]
 		Tail,
 
 		/// <summary>
 		/// A wing.
 		/// </summary>
-		[Chiral]
+		[Chiral, DescriptionPriority(4)]
 		Wing,
 
 		/// <summary>
 		/// The penis.
 		/// </summary>
-		[Gendered]
+		[Gendered, DescriptionPriority(0)]
 		Penis,
 
 		/// <summary>
 		/// The vagina.
 		/// </summary>
-		[Gendered]
+		[Gendered, DescriptionPriority(0)]
 		Vagina,
 
 		/// <summary>
