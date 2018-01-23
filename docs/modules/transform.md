@@ -14,6 +14,16 @@ Transforms the given bodypart into the given species on yourself.
 
 | Name | Type | Optional |
 | --- | --- | --- |
+| chirality | Chirality | `no` |
+| bodyPart | Bodypart | `no` |
+| species | string | `no` |
+
+**`transform`**
+
+Transforms the given bodypart into the given species on yourself.
+
+| Name | Type | Optional |
+| --- | --- | --- |
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
@@ -27,10 +37,31 @@ Transforms the given bodypart of the target user into the given species.
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
+**`transform`**
+
+Transforms the given bodypart of the target user into the given species.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| target | IUser | `no` |
+| chirality | Chirality | `no` |
+| bodyPart | Bodypart | `no` |
+| species | string | `no` |
+
 ---
 
 ### *colour*
 #### Overloads
+**`transform colour`**
+
+Transforms the base colour of the given bodypart on yourself into the given colour.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| chirality | Chirality | `no` |
+| bodypart | Bodypart | `no` |
+| colour | Colour | `no` |
+
 **`transform colour`**
 
 Transforms the base colour of the given bodypart on yourself into the given colour.
@@ -50,6 +81,17 @@ Transforms the base colour of the given bodypart on the target user into the giv
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
 
+**`transform colour`**
+
+Transforms the base colour of the given bodypart on the target user into the given colour.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| target | IUser | `no` |
+| chirality | Chirality | `no` |
+| bodyPart | Bodypart | `no` |
+| colour | Colour | `no` |
+
 ---
 
 ### *pattern*
@@ -66,6 +108,17 @@ Transforms the pattern on the given bodypart on yourself into the given pattern 
 
 **`transform pattern`**
 
+Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| chirality | Chirality | `no` |
+| bodypart | Bodypart | `no` |
+| pattern | Pattern | `no` |
+| colour | Colour | `no` |
+
+**`transform pattern`**
+
 Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
 
 | Name | Type | Optional |
@@ -75,10 +128,32 @@ Transforms the pattern on the given bodypart on the target user into the given p
 | pattern | Pattern | `no` |
 | colour | Colour | `no` |
 
+**`transform pattern`**
+
+Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| target | IUser | `no` |
+| chirality | Chirality | `no` |
+| bodyPart | Bodypart | `no` |
+| pattern | Pattern | `no` |
+| colour | Colour | `no` |
+
 ---
 
 ### *pattern-colour*
 #### Overloads
+**`transform pattern-colour`**
+
+Transforms the colour of the pattern on the given bodypart on yourself to the given colour.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| chirality | Chirality | `no` |
+| bodypart | Bodypart | `no` |
+| colour | Colour | `no` |
+
 **`transform pattern-colour`**
 
 Transforms the colour of the pattern on the given bodypart on yourself to the given colour.
@@ -95,6 +170,17 @@ Transforms the colour of the pattern on the given bodypart on the target user to
 | Name | Type | Optional |
 | --- | --- | --- |
 | target | IUser | `no` |
+| bodyPart | Bodypart | `no` |
+| colour | Colour | `no` |
+
+**`transform pattern-colour`**
+
+Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| target | IUser | `no` |
+| chirality | Chirality | `no` |
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
 

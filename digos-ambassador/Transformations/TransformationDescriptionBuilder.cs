@@ -59,17 +59,17 @@ namespace DIGOS.Ambassador.Transformations
 		/// </summary>
 		/// <param name="text">The text to replace in.</param>
 		/// <param name="character">The character for which the text should be valid.</param>
-		/// <param name="transformation">The transformation that the text belongs to.</param>
+		/// <param name="component">The transformation that the text belongs to.</param>
 		/// <returns>A string with no tokens in it.</returns>
 		public string ReplaceTokensWithContent
 		(
 			[NotNull] string text,
 			[NotNull] Character character,
-			[CanBeNull] Transformation transformation
+			[CanBeNull] AppearanceComponent component
 		)
 		{
 			var tokens = this.Tokenizer.GetTokens(text);
-			var tokenContentMap = tokens.ToDictionary(token => token, token => token.GetText(character, transformation));
+			var tokenContentMap = tokens.ToDictionary(token => token, token => token.GetText(character, component));
 
 			int relativeOffset = 0;
 			var sb = new StringBuilder(text);
@@ -111,7 +111,7 @@ namespace DIGOS.Ambassador.Transformations
 
 				var transformation = component.Transformation;
 				var bodypart = component.Bodypart;
-				if (BodypartUtilities.IsChiralPart(component.Bodypart))
+				if (component.Bodypart.IsChiral())
 				{
 					var sameSpecies = AreChiralPartsTheSameSpecies(character, bodypart);
 					csb.Append
@@ -120,8 +120,6 @@ namespace DIGOS.Ambassador.Transformations
 							? transformation.UniformDescription
 							: transformation.SingleDescription
 					);
-
-					partsToSkip.Add(BodypartUtilities.GetChiralPart(bodypart));
 				}
 				else
 				{
@@ -134,7 +132,7 @@ namespace DIGOS.Ambassador.Transformations
 				}
 
 				var tokenizedDesc = csb.ToString();
-				var componentDesc = ReplaceTokensWithContent(tokenizedDesc, character, transformation);
+				var componentDesc = ReplaceTokensWithContent(tokenizedDesc, character, component);
 
 				sb.Append(componentDesc);
 
@@ -159,8 +157,8 @@ namespace DIGOS.Ambassador.Transformations
 		/// <returns>true if the parts are the same species; otherwise, false.</returns>
 		private bool AreChiralPartsTheSameSpecies(Character character, Bodypart bodypart)
 		{
-			var chiralComponent = character.GetBodypart(bodypart);
-			var opposingComponent = character.GetBodypart(BodypartUtilities.GetChiralPart(bodypart));
+			var chiralComponent = character.GetAppearanceComponent(bodypart);
+			var opposingComponent = character.GetAppearanceComponent(bodypart, chiralComponent.Chirality.Opposite());
 
 			return string.Equals(chiralComponent.Transformation.Species.Name, opposingComponent.Transformation.Species.Name);
 		}
@@ -169,35 +167,41 @@ namespace DIGOS.Ambassador.Transformations
 		/// Builds a shift message for the given character if the given transformation were to be applied.
 		/// </summary>
 		/// <param name="character">The character to use as a base.</param>
-		/// <param name="transformation">The transformation to build the message from.</param>
+		/// <param name="component">The component to build the message from.</param>
 		/// <returns>The shift message.</returns>
 		[Pure]
-		public string BuildShiftMessage([NotNull] Character character, [NotNull] Transformation transformation)
+		public string BuildShiftMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
 		{
-			return ReplaceTokensWithContent(transformation.ShiftMessage, character, transformation);
+			var transformation = component.Transformation;
+
+			return ReplaceTokensWithContent(transformation.ShiftMessage, character, component);
 		}
 
 		/// <summary>
 		/// Builds a grow message for the given character if the given transformation were to be applied.
 		/// </summary>
 		/// <param name="character">The character to use as a base.</param>
-		/// <param name="transformation">The transformation to build the message from.</param>
+		/// <param name="component">The component to build the message from.</param>
 		/// <returns>The grow message.</returns>
 		[Pure]
-		public string BuildGrowMessage([NotNull] Character character, [NotNull] Transformation transformation)
+		public string BuildGrowMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
 		{
-			return ReplaceTokensWithContent(transformation.GrowMessage, character, transformation);
+			var transformation = component.Transformation;
+
+			return ReplaceTokensWithContent(transformation.GrowMessage, character, component);
 		}
 
 		/// <summary>
 		/// Builds a removal message for the given character if the given transformation were to be applied.
 		/// </summary>
 		/// <param name="character">The character to use as a base.</param>
-		/// <param name="transformation">The transformation to build the message from.</param>
+		/// <param name="component">The component to build the message from.</param>
 		/// <returns>The removal message.</returns>
 		[Pure]
-		public string BuildRemoveMessage([NotNull] Character character, [NotNull] Transformation transformation)
+		public string BuildRemoveMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
 		{
+			var transformation = component.Transformation;
+
 			string removalText;
 			switch (transformation.Part)
 			{
@@ -211,16 +215,14 @@ namespace DIGOS.Ambassador.Transformations
 					removalText = $"{{@target}}'s face begins to warp strangely. Slowly, their features smooth and vanish, leaving a blank surface.";
 					break;
 				}
-				case Bodypart.LeftEar:
-				case Bodypart.RightEar:
+				case Bodypart.Ear:
 				{
-					removalText = $"{{@target}}'s {transformation.Part.Humanize()} shrivels and vanishes.";
+					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize()} shrivels and vanishes.";
 					break;
 				}
-				case Bodypart.LeftEye:
-				case Bodypart.RightEye:
+				case Bodypart.Eye:
 				{
-					removalText = $"{{@target}}'s {transformation.Part.Humanize()} deflates as their eye socket closes, leaving nothing behind.";
+					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize()} deflates as their eye socket closes, leaving nothing behind.";
 					break;
 				}
 				case Bodypart.Teeth:
@@ -228,12 +230,10 @@ namespace DIGOS.Ambassador.Transformations
 					removalText = $"With a strange popping sound, {{@target}}'s teeth retract and disappear.";
 					break;
 				}
-				case Bodypart.LeftLeg:
-				case Bodypart.RightLeg:
-				case Bodypart.LeftArm:
-				case Bodypart.RightArm:
+				case Bodypart.Leg:
+				case Bodypart.Arm:
 				{
-					removalText = $"{{@target}}'s {transformation.Part.Humanize()} shrivels and retracts, vanishing.";
+					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize()} shrivels and retracts, vanishing.";
 					break;
 				}
 				case Bodypart.Tail:
@@ -241,10 +241,9 @@ namespace DIGOS.Ambassador.Transformations
 					removalText = $"{{@target}}'s tail flicks and thrashes for a moment, before it thins out and disappears into nothing.";
 					break;
 				}
-				case Bodypart.LeftWing:
-				case Bodypart.RightWing:
+				case Bodypart.Wing:
 				{
-					removalText = $"{{@target}}'s {transformation.Part.Humanize()} stiffens and shudders, before losing cohesion and disappearing into their body.";
+					removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize()} stiffens and shudders, before losing cohesion and disappearing into their body.";
 					break;
 				}
 				case Bodypart.Penis:
@@ -284,7 +283,7 @@ namespace DIGOS.Ambassador.Transformations
 				}
 			}
 
-			return ReplaceTokensWithContent(removalText, character, transformation);
+			return ReplaceTokensWithContent(removalText, character, component);
 		}
 
 		/// <summary>
@@ -306,7 +305,7 @@ namespace DIGOS.Ambassador.Transformations
 				$"{{@target}}'s {currentComponent.Bodypart.Humanize()} morphs, as" +
 				$" {{@f|their}} {{@pattern}} {originalColour} hues turn into {currentComponent.PatternColour}.";
 
-			return ReplaceTokensWithContent(shiftMessage, character, currentComponent.Transformation);
+			return ReplaceTokensWithContent(shiftMessage, character, currentComponent);
 		}
 
 		/// <summary>
@@ -331,7 +330,7 @@ namespace DIGOS.Ambassador.Transformations
 				$" {{@colour}} {{@pattern}} patterns spread across it" +
 				$"{(originalPattern.HasValue ? $", replacing their {originalColour} {originalPattern.Humanize().Pluralize()}" : ".")}.";
 
-			return ReplaceTokensWithContent(shiftMessage, character, currentComponent.Transformation);
+			return ReplaceTokensWithContent(shiftMessage, character, currentComponent);
 		}
 
 		/// <summary>
@@ -353,7 +352,7 @@ namespace DIGOS.Ambassador.Transformations
 				$"{{@target}}'s {currentComponent.Bodypart.Humanize()} morphs, as" +
 				$" {{@f|their}} {originalColour} hues turn into {currentComponent.PatternColour}.";
 
-			return ReplaceTokensWithContent(shiftMessage, character, currentComponent.Transformation);
+			return ReplaceTokensWithContent(shiftMessage, character, currentComponent);
 		}
 	}
 }

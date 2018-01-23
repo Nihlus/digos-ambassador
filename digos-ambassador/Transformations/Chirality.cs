@@ -1,5 +1,5 @@
 ﻿//
-//  PatternToken.cs
+//  Chirality.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,36 +20,26 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using DIGOS.Ambassador.Database.Appearances;
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Transformations;
-using Humanizer;
-
 namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
-	/// A token that gets replaced with a pattern name.
+	/// Represents the chirality of a component.
 	/// </summary>
-	[TokenIdentifier("pattern", "p")]
-	public class PatternToken : ReplacableTextToken<PatternToken>
+	public enum Chirality
 	{
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			if (component is null)
-			{
-				throw new ArgumentNullException(nameof(component));
-			}
+		/// <summary>
+		/// The component is in the middle, and is not chiral.
+		/// </summary>
+		Center,
 
-			var currentBodypart = character.GetAppearanceComponent(component.Bodypart);
-			return currentBodypart.Pattern.ToString().Humanize();
-		}
+		/// <summary>
+		/// The component is on the left side.
+		/// </summary>
+		Left,
 
-		/// <inheritdoc />
-		protected override PatternToken Initialize(string data)
-		{
-			return this;
-		}
+		/// <summary>
+		/// The component is on the right side.
+		/// </summary>
+		Right
 	}
 }

@@ -32,9 +32,33 @@ Sasses the user in a DIGOS fashion.
 
 ### *boop*
 #### Overloads
-**`boop` (or `bap`)**
+**`boop`**
+
+Boops you.
+
+**`boop`**
 
 Boops the user.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| target | IUser | `no` |
+
+---
+
+### *bap*
+#### Overloads
+**`bap`**
+
+Baps you.
+
+**`bap`**
+
+Baps the user.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| target | IUser | `no` |
 
 ---
 

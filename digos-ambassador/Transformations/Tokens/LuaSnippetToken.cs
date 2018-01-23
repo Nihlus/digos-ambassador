@@ -21,8 +21,9 @@
 //
 
 using System.Threading.Tasks;
+
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
 
 namespace DIGOS.Ambassador.Transformations
@@ -50,19 +51,19 @@ namespace DIGOS.Ambassador.Transformations
 		}
 
 		/// <inheritdoc />
-		public override string GetText(Character character, Transformation transformation)
+		public override string GetText(Character character, AppearanceComponent component)
 		{
-			return GetTextAsync(character, transformation).GetAwaiter().GetResult();
+			return GetTextAsync(character, component).GetAwaiter().GetResult();
 		}
 
 		/// <inheritdoc />
-		public override async Task<string> GetTextAsync(Character character, Transformation transformation)
+		public override async Task<string> GetTextAsync(Character character, AppearanceComponent component)
 		{
 			var result = await this.Lua.ExecuteSnippetAsync
 			(
 				this.Snippet,
 				(nameof(character), character),
-				(nameof(transformation), transformation)
+				(nameof(component), component)
 			);
 
 			if (!result.IsSuccess)

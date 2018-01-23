@@ -20,11 +20,15 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Transformations;
 using JetBrains.Annotations;
+using static DIGOS.Ambassador.Transformations.Chirality;
 
 namespace DIGOS.Ambassador.Database.Appearances
 {
@@ -56,6 +60,11 @@ namespace DIGOS.Ambassador.Database.Appearances
 		public Transformation Transformation { get; set; }
 
 		/// <summary>
+		/// Gets or sets the chirality of the component.
+		/// </summary>
+		public Chirality Chirality { get; set; }
+
+		/// <summary>
 		/// Gets or sets the base colour of the component.
 		/// </summary>
 		[NotNull]
@@ -82,18 +91,59 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// Creates a new <see cref="AppearanceComponent"/> from a transformation of a bodypart.
 		/// </summary>
 		/// <param name="transformation">The transformation.</param>
+		/// <param name="chirality">The chirality of the transformation, if any.</param>
 		/// <returns>A new component.</returns>
 		[Pure]
 		[NotNull]
-		public static AppearanceComponent CreateFrom([NotNull] Transformation transformation)
+		public static AppearanceComponent CreateFrom([NotNull] Transformation transformation, Chirality chirality = Center)
 		{
+			if (transformation.Part.IsChiral() && chirality == Center)
+			{
+				throw new ArgumentException("A chiral transformation requires you to specify the chirality.", nameof(transformation));
+			}
+
+			if (!transformation.Part.IsChiral() && chirality != Center)
+			{
+				throw new ArgumentException("A nonchiral transformation cannot have chirality.", nameof(transformation));
+			}
+
 			return new AppearanceComponent
 			{
 				Transformation = transformation,
+				Chirality = chirality,
 				BaseColour = transformation.DefaultBaseColour,
 				Pattern = transformation.DefaultPattern,
 				PatternColour = transformation.DefaultPatternColour
 			};
+		}
+
+		/// <summary>
+		/// Creates a set of chiral appearance components from a chiral transformation.
+		/// </summary>
+		/// <param name="transformation">The transformation.</param>
+		/// <returns>A set of appearance components.</returns>
+		[Pure]
+		[NotNull]
+		public static IEnumerable<AppearanceComponent> CreateFromChiral([NotNull] Transformation transformation)
+		{
+			if (!transformation.Part.IsChiral())
+			{
+				throw new ArgumentException("The transformation was not chiral.", nameof(transformation));
+			}
+
+			var chiralities = new[] { Left, Right };
+
+			foreach (var chirality in chiralities)
+			{
+				yield return new AppearanceComponent
+				{
+					Transformation = transformation,
+					Chirality = chirality,
+					BaseColour = transformation.DefaultBaseColour,
+					Pattern = transformation.DefaultPattern,
+					PatternColour = transformation.DefaultPatternColour
+				};
+			}
 		}
 	}
 }

@@ -21,6 +21,7 @@
 //
 
 using System;
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
@@ -50,7 +51,7 @@ namespace DIGOS.Ambassador.Transformations
 		}
 
 		/// <inheritdoc />
-		public override string GetText(Character character, Transformation transformation)
+		public override string GetText(Character character, AppearanceComponent component)
 		{
 			var pronounProvider = this.Characters.GetPronounProvider(character);
 

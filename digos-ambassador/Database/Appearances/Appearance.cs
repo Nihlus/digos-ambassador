@@ -26,11 +26,11 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Transformations;
 
 using Discord.Commands;
-
 using JetBrains.Annotations;
 using static DIGOS.Ambassador.Transformations.Bodypart;
 
@@ -89,20 +89,40 @@ namespace DIGOS.Ambassador.Database.Appearances
 
 			var templateSpecies = getSpeciesResult.Entity;
 			var templateTransformations = new List<Transformation>();
-			var templateParts = new List<Bodypart> { Face, Body, LeftArm, RightArm, LeftEye, RightEye, LeftLeg, RightLeg };
+			var templateParts = new List<Bodypart> { Head, Body, Arms, Eyes, Legs };
+
+			// Explode the composite parts into their components
+			templateParts = templateParts.SelectMany(p => p.GetComposingParts()).ToList();
 
 			foreach (var part in templateParts)
 			{
 				var getTFResult = await transformations.GetTransformationByPartAndSpeciesAsync(db, part, templateSpecies);
 				if (!getTFResult.IsSuccess)
 				{
+					// Allow skipping of missing composing parts - a composite part might not have all of them in a TF.
+					if (part.IsComposingPart())
+					{
+						continue;
+					}
+
 					return CreateEntityResult<Appearance>.FromError(getTFResult);
 				}
 
 				templateTransformations.Add(getTFResult.Entity);
 			}
 
-			var templateComponents = templateTransformations.Select(AppearanceComponent.CreateFrom).ToList();
+			var templateComponents = new List<AppearanceComponent>();
+			foreach (var tf in templateTransformations)
+			{
+				if (tf.Part.IsChiral())
+				{
+					templateComponents.AddRange(AppearanceComponent.CreateFromChiral(tf));
+				}
+				else
+				{
+					templateComponents.Add(AppearanceComponent.CreateFrom(tf));
+				}
+			}
 
 			var appearance = new Appearance
 			{

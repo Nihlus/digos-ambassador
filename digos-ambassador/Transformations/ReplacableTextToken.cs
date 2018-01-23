@@ -22,6 +22,7 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using JetBrains.Annotations;
@@ -42,12 +43,12 @@ namespace DIGOS.Ambassador.Transformations
 		public int Length { get; set; }
 
 		/// <inheritdoc />
-		public abstract string GetText(Character character, Transformation transformation);
+		public abstract string GetText(Character character, AppearanceComponent component);
 
 		/// <inheritdoc />
-		public virtual Task<string> GetTextAsync(Character character, Transformation transformation)
+		public virtual Task<string> GetTextAsync(Character character, AppearanceComponent component)
 		{
-			return Task.Run(() => GetText(character, transformation));
+			return Task.Run(() => GetText(character, component));
 		}
 
 		/// <summary>

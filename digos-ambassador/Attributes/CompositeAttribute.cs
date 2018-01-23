@@ -1,5 +1,5 @@
 ﻿//
-//  PatternToken.cs
+//  CompositeAttribute.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,35 +21,29 @@
 //
 
 using System;
-using DIGOS.Ambassador.Database.Appearances;
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Transformations;
-using Humanizer;
+using System.Collections.Generic;
+using DIGOS.Ambassador.Transformations;
 
-namespace DIGOS.Ambassador.Transformations
+namespace DIGOS.Ambassador.Attributes
 {
 	/// <summary>
-	/// A token that gets replaced with a pattern name.
+	/// An attribute which marks a bodypart as a composite part.
 	/// </summary>
-	[TokenIdentifier("pattern", "p")]
-	public class PatternToken : ReplacableTextToken<PatternToken>
+	[AttributeUsage(AttributeTargets.Field)]
+	public class CompositeAttribute : Attribute
 	{
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			if (component is null)
-			{
-				throw new ArgumentNullException(nameof(component));
-			}
+		/// <summary>
+		/// Gets the list of parts that compose this part.
+		/// </summary>
+		public IReadOnlyList<Bodypart> ComposingParts { get; }
 
-			var currentBodypart = character.GetAppearanceComponent(component.Bodypart);
-			return currentBodypart.Pattern.ToString().Humanize();
-		}
-
-		/// <inheritdoc />
-		protected override PatternToken Initialize(string data)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CompositeAttribute"/> class.
+		/// </summary>
+		/// <param name="composingParts">The parts that compose this part.</param>
+		public CompositeAttribute(params Bodypart[] composingParts)
 		{
-			return this;
+			this.ComposingParts = composingParts;
 		}
 	}
 }

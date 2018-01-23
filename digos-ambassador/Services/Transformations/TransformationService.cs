@@ -77,13 +77,15 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="context">The context of the command.</param>
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to remove.</param>
+		/// <param name="chirality">The chirality of the bodypart.</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> RemoveBodypartAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
-			Bodypart bodyPart
+			Bodypart bodyPart,
+			Chirality chirality = Chirality.Center
 		)
 		{
 			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
@@ -93,17 +95,16 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(canTransformResult);
 			}
 
-			var component = character.CurrentAppearance.Components.FirstOrDefault(c => c.Bodypart == bodyPart);
+			var component = character.GetAppearanceComponent(bodyPart, chirality);
 			if (component is null)
 			{
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
 			}
 
-			var transformation = component.Transformation;
 			character.CurrentAppearance.Components.Remove(component);
 			await db.SaveChangesAsync();
 
-			string removeMessage = this.DescriptionBuilder.BuildRemoveMessage(character, transformation);
+			string removeMessage = this.DescriptionBuilder.BuildRemoveMessage(character, component);
 			return ShiftBodypartResult.FromSuccess(removeMessage);
 		}
 
@@ -115,6 +116,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to add.</param>
 		/// <param name="species">The species of the part to add..</param>
+		/// <param name="chirality">The chirality of the bodypart.</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> AddBodypartAsync
 		(
@@ -122,7 +124,8 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			Bodypart bodyPart,
-			[NotNull] string species
+			[NotNull] string species,
+			Chirality chirality = Chirality.Center
 		)
 		{
 			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
@@ -132,7 +135,7 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(canTransformResult);
 			}
 
-			if (character.HasBodypart(bodyPart))
+			if (character.HasComponent(bodyPart, chirality))
 			{
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character already has that bodypart.");
 			}
@@ -151,11 +154,11 @@ namespace DIGOS.Ambassador.Services
 
 			var transformation = getTFResult.Entity;
 
-			var component = AppearanceComponent.CreateFrom(transformation);
+			var component = AppearanceComponent.CreateFrom(transformation, chirality);
 			character.CurrentAppearance.Components.Add(component);
 			await db.SaveChangesAsync();
 
-			string growMessage = this.DescriptionBuilder.BuildGrowMessage(character, transformation);
+			string growMessage = this.DescriptionBuilder.BuildGrowMessage(character, component);
 			return ShiftBodypartResult.FromSuccess(growMessage);
 		}
 
@@ -167,6 +170,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to shift.</param>
 		/// <param name="species">The species to shift the bodypart into.</param>
+		/// <param name="chirality">The chirality of the bodypart.</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> ShiftBodypartAsync
 		(
@@ -174,7 +178,8 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			Bodypart bodyPart,
-			[NotNull] string species
+			[NotNull] string species,
+			Chirality chirality = Chirality.Center
 		)
 		{
 			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
@@ -199,16 +204,16 @@ namespace DIGOS.Ambassador.Services
 			string shiftMessage;
 			AppearanceComponent currentComponent;
 			var transformation = getTFResult.Entity;
-			if (!character.HasBodypart(bodyPart))
+			if (!character.HasComponent(bodyPart))
 			{
-				currentComponent = AppearanceComponent.CreateFrom(transformation);
+				currentComponent = AppearanceComponent.CreateFrom(transformation, chirality);
 				character.CurrentAppearance.Components.Add(currentComponent);
 
-				shiftMessage = this.DescriptionBuilder.BuildGrowMessage(character, transformation);
+				shiftMessage = this.DescriptionBuilder.BuildGrowMessage(character, currentComponent);
 			}
 			else
 			{
-				currentComponent = character.GetBodypart(bodyPart);
+				currentComponent = character.GetAppearanceComponent(bodyPart, chirality);
 				if (currentComponent.Transformation.Species.Name.Equals(transformation.Species.Name))
 				{
 					return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The user's bodypart is already that form.");
@@ -216,7 +221,7 @@ namespace DIGOS.Ambassador.Services
 
 				currentComponent.Transformation = transformation;
 
-				shiftMessage = this.DescriptionBuilder.BuildShiftMessage(character, transformation);
+				shiftMessage = this.DescriptionBuilder.BuildShiftMessage(character, currentComponent);
 			}
 
 			await db.SaveChangesAsync();
@@ -232,6 +237,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to shift.</param>
 		/// <param name="colour">The colour to shift it into.</param>
+		/// <param name="chirality">The chirality of the bodypart.</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> ShiftBodypartColourAsync
 		(
@@ -239,7 +245,8 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			Bodypart bodyPart,
-			[NotNull] Colour colour
+			[NotNull] Colour colour,
+			Chirality chirality = Chirality.Center
 		)
 		{
 			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
@@ -249,17 +256,17 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(canTransformResult);
 			}
 
-			if (!character.HasBodypart(bodyPart))
+			if (!character.HasComponent(bodyPart, chirality))
 			{
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
 			}
 
-			if (character.GetBodypart(bodyPart).BaseColour == colour)
+			if (character.GetAppearanceComponent(bodyPart).BaseColour == colour)
 			{
 				return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The bodypart is already that colour.");
 			}
 
-			var currentComponent = character.GetBodypart(bodyPart);
+			var currentComponent = character.GetAppearanceComponent(bodyPart, chirality);
 			var originalColour = currentComponent.BaseColour;
 			currentComponent.BaseColour = colour;
 
@@ -278,6 +285,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="bodyPart">The bodypart to shift.</param>
 		/// <param name="pattern">The pattern to shift the bodypart into.</param>
 		/// <param name="patternColour">The colour to shift it into.</param>
+		/// <param name="chirality">The chirality of the bodypart.</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> ShiftBodypartPatternAsync
 		(
@@ -286,7 +294,8 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] Character character,
 			Bodypart bodyPart,
 			Pattern pattern,
-			[NotNull] Colour patternColour
+			[NotNull] Colour patternColour,
+			Chirality chirality = Chirality.Center
 		)
 		{
 			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
@@ -296,12 +305,12 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(canTransformResult);
 			}
 
-			if (!character.HasBodypart(bodyPart))
+			if (!character.HasComponent(bodyPart, chirality))
 			{
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
 			}
 
-			var currentComponent = character.GetBodypart(bodyPart);
+			var currentComponent = character.GetAppearanceComponent(bodyPart, chirality);
 
 			if (currentComponent.Pattern == pattern)
 			{
@@ -328,6 +337,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="character">The character to shift.</param>
 		/// <param name="bodyPart">The bodypart to shift.</param>
 		/// <param name="patternColour">The colour to shift it into.</param>
+		/// <param name="chirality">The chirality of the bodypart.</param>
 		/// <returns>A shifting result which may or may not have succeeded.</returns>
 		public async Task<ShiftBodypartResult> ShiftPatternColourAsync
 		(
@@ -335,7 +345,8 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] ICommandContext context,
 			[NotNull] Character character,
 			Bodypart bodyPart,
-			[NotNull] Colour patternColour
+			[NotNull] Colour patternColour,
+			Chirality chirality = Chirality.Center
 		)
 		{
 			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
@@ -345,12 +356,12 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(canTransformResult);
 			}
 
-			if (!character.HasBodypart(bodyPart))
+			if (!character.HasComponent(bodyPart, chirality))
 			{
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
 			}
 
-			var currentComponent = character.GetBodypart(bodyPart);
+			var currentComponent = character.GetAppearanceComponent(bodyPart, chirality);
 
 			if (!currentComponent.Pattern.HasValue)
 			{

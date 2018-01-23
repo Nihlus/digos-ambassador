@@ -1,5 +1,5 @@
 ﻿//
-//  PatternToken.cs
+//  ChiralAttribute.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,35 +21,14 @@
 //
 
 using System;
-using DIGOS.Ambassador.Database.Appearances;
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Transformations;
-using Humanizer;
 
-namespace DIGOS.Ambassador.Transformations
+namespace DIGOS.Ambassador.Attributes
 {
 	/// <summary>
-	/// A token that gets replaced with a pattern name.
+	/// An attribute which marks a bodypart as chiral.
 	/// </summary>
-	[TokenIdentifier("pattern", "p")]
-	public class PatternToken : ReplacableTextToken<PatternToken>
+	[AttributeUsage(AttributeTargets.Field)]
+	public class ChiralAttribute : Attribute
 	{
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			if (component is null)
-			{
-				throw new ArgumentNullException(nameof(component));
-			}
-
-			var currentBodypart = character.GetAppearanceComponent(component.Bodypart);
-			return currentBodypart.Pattern.ToString().Humanize();
-		}
-
-		/// <inheritdoc />
-		protected override PatternToken Initialize(string data)
-		{
-			return this;
-		}
 	}
 }

@@ -21,6 +21,7 @@
 //
 
 using System;
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 
@@ -38,22 +39,22 @@ namespace DIGOS.Ambassador.Transformations
 		public string Part { get; private set; }
 
 		/// <inheritdoc />
-		public override string GetText(Character character, Transformation transformation)
+		public override string GetText(Character character, AppearanceComponent component)
 		{
-			if (transformation is null)
+			if (component is null)
 			{
-				throw new ArgumentNullException(nameof(transformation));
+				throw new ArgumentNullException(nameof(component));
 			}
 
 			switch (this.Part)
 			{
 				case "base":
 				{
-					return character.GetBodypart(transformation.Part).BaseColour.ToString();
+					return character.GetAppearanceComponent(component.Bodypart).BaseColour.ToString();
 				}
 				case "pattern":
 				{
-					return character.GetBodypart(transformation.Part).PatternColour?.ToString();
+					return character.GetAppearanceComponent(component.Bodypart).PatternColour?.ToString();
 				}
 				default:
 				{

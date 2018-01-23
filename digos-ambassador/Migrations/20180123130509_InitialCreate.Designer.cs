@@ -20,7 +20,7 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    [Migration("20180122222641_InitialCreate")]
+    [Migration("20180123130509_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,6 +55,8 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<uint?>("AppearanceID");
 
                     b.Property<uint?>("BaseColourID");
+
+                    b.Property<int>("Chirality");
 
                     b.Property<int?>("Pattern");
 

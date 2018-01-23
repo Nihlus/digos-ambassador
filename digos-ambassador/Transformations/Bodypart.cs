@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Attributes;
+
 namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
@@ -38,24 +40,16 @@ namespace DIGOS.Ambassador.Transformations
 		Face,
 
 		/// <summary>
-		/// The left ear.
+		/// An ear.
 		/// </summary>
-		LeftEar,
+		[Chiral]
+		Ear,
 
 		/// <summary>
-		/// The right ear.
+		/// An eye.
 		/// </summary>
-		RightEar,
-
-		/// <summary>
-		/// The left eye.
-		/// </summary>
-		LeftEye,
-
-		/// <summary>
-		/// The right eye.
-		/// </summary>
-		RightEye,
+		[Chiral]
+		Eye,
 
 		/// <summary>
 		/// The teeth.
@@ -68,24 +62,16 @@ namespace DIGOS.Ambassador.Transformations
 		Body,
 
 		/// <summary>
-		/// The left arm.
+		/// An arm.
 		/// </summary>
-		LeftArm,
+		[Chiral]
+		Arm,
 
 		/// <summary>
-		/// The right arm.
+		/// A leg.
 		/// </summary>
-		RightArm,
-
-		/// <summary>
-		/// The left leg.
-		/// </summary>
-		LeftLeg,
-
-		/// <summary>
-		/// The right leg.
-		/// </summary>
-		RightLeg,
+		[Chiral]
+		Leg,
 
 		/// <summary>
 		/// The tail.
@@ -93,43 +79,51 @@ namespace DIGOS.Ambassador.Transformations
 		Tail,
 
 		/// <summary>
-		/// The left wing.
+		/// A wing.
 		/// </summary>
-		LeftWing,
-
-		/// <summary>
-		/// The right wing.
-		/// </summary>
-		RightWing,
+		[Chiral]
+		Wing,
 
 		/// <summary>
 		/// The penis.
 		/// </summary>
+		[Gendered]
 		Penis,
 
 		/// <summary>
 		/// The vagina.
 		/// </summary>
+		[Gendered]
 		Vagina,
+
+		/// <summary>
+		/// The eyes.
+		/// </summary>
+		[Composite(Eye)]
+		Eyes,
 
 		/// <summary>
 		/// The head, composed of the face, the ears, the teeth, and the eyes.
 		/// </summary>
+		[Composite(Face, Ear, Teeth, Eye)]
 		Head,
 
 		/// <summary>
 		/// The arms, composed of the left and right arms.
 		/// </summary>
+		[Composite(Arm)]
 		Arms,
 
 		/// <summary>
 		/// The legs, composed of the left and right legs.
 		/// </summary>
+		[Composite(Leg)]
 		Legs,
 
 		/// <summary>
 		/// The wings, composed of the left and right wings.
 		/// </summary>
+		[Composite(Wing)]
 		Wings,
 	}
 }

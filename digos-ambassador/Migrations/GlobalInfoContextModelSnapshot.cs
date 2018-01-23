@@ -55,6 +55,8 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<uint?>("BaseColourID");
 
+                    b.Property<int>("Chirality");
+
                     b.Property<int?>("Pattern");
 
                     b.Property<uint?>("PatternColourID");

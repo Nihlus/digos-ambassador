@@ -21,8 +21,10 @@
 //
 
 using System.Linq;
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Extensions;
 using static DIGOS.Ambassador.Transformations.Bodypart;
 
 namespace DIGOS.Ambassador.Transformations
@@ -34,10 +36,10 @@ namespace DIGOS.Ambassador.Transformations
 	public class SexToken : ReplacableTextToken<SexToken>
 	{
 		/// <inheritdoc />
-		public override string GetText(Character character, Transformation transformation)
+		public override string GetText(Character character, AppearanceComponent component)
 		{
 			var genderedParts = character.CurrentAppearance.Components
-				.Where(c => !BodypartUtilities.IsGenderNeutral(c.Bodypart))
+				.Where(c => !c.Bodypart.IsGenderNeutral())
 				.Select(c => c.Bodypart)
 				.ToList();
 

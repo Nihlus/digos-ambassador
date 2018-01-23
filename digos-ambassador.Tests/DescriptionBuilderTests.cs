@@ -78,7 +78,7 @@ namespace DIGOS.Ambassador.Tests
 
 			var descriptionBuilder = new TransformationDescriptionBuilder(serviceProvider);
 
-			var result = descriptionBuilder.ReplaceTokensWithContent(SampleFluentText, character, hairTransformation);
+			var result = descriptionBuilder.ReplaceTokensWithContent(SampleFluentText, character, hairComponent);
 
 			Assert.Equal(ExpectedText, result);
 		}

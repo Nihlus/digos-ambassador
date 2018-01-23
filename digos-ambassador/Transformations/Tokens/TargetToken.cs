@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
@@ -33,7 +34,7 @@ namespace DIGOS.Ambassador.Transformations
 	public class TargetToken : ReplacableTextToken<TargetToken>
 	{
 		/// <inheritdoc />
-		public override string GetText(Character character, Transformation transformation)
+		public override string GetText(Character character, AppearanceComponent component)
 		{
 			return character.Nickname.IsNullOrWhitespace() ? character.Name : character.Nickname;
 		}

@@ -21,6 +21,7 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
@@ -53,25 +54,25 @@ namespace DIGOS.Ambassador.Transformations
 		}
 
 		/// <inheritdoc />
-		public override string GetText(Character character, Transformation transformation)
+		public override string GetText(Character character, AppearanceComponent component)
 		{
-			return GetTextAsync(character, transformation).GetAwaiter().GetResult();
+			return GetTextAsync(character, component).GetAwaiter().GetResult();
 		}
 
 		/// <inheritdoc />
-		public override async Task<string> GetTextAsync(Character character, Transformation transformation)
+		public override async Task<string> GetTextAsync(Character character, AppearanceComponent component)
 		{
-			if (transformation is null)
+			if (component is null)
 			{
 				return string.Empty;
 			}
 
-			var scriptPath = this.Content.GetLuaScriptPath(transformation, this.ScriptName);
+			var scriptPath = this.Content.GetLuaScriptPath(component.Transformation, this.ScriptName);
 			var result = await this.Lua.ExecuteScriptAsync
 			(
 				scriptPath,
 				(nameof(character), character),
-				(nameof(transformation), transformation)
+				(nameof(component), component)
 			);
 
 			if (!result.IsSuccess)

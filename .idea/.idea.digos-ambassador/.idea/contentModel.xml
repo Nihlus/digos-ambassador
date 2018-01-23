@@ -10,6 +10,11 @@
       <e p="README.md" t="Include" />
       <e p="digos-ambassador" t="IncludeRecursive">
         <e p="AmbassadorClient.cs" t="Include" />
+        <e p="Attributes" t="Include">
+          <e p="ChiralAttribute.cs" t="Include" />
+          <e p="CompositeAttribute.cs" t="Include" />
+          <e p="GenderedAttribute.cs" t="Include" />
+        </e>
         <e p="Content" t="Include">
           <e p="Avatars" t="Include">
             <e p="Default" t="Include">
@@ -29,31 +34,24 @@
           <e p="Transformations" t="Include">
             <e p="Species" t="Include">
               <e p="shark" t="Include">
+                <e p="Arm.yml" t="Include" />
                 <e p="Body.yml" t="Include" />
+                <e p="Ear.yml" t="Include" />
+                <e p="Eye.yml" t="Include" />
                 <e p="Face.yml" t="Include" />
-                <e p="LeftArm.yml" t="Include" />
-                <e p="LeftEar.yml" t="Include" />
-                <e p="LeftEye.yml" t="Include" />
-                <e p="LeftLeg.yml" t="Include" />
+                <e p="Leg.yml" t="Include" />
                 <e p="Penis.yml" t="Include" />
-                <e p="RightArm.yml" t="Include" />
-                <e p="RightEar.yml" t="Include" />
-                <e p="RightEye.yml" t="Include" />
-                <e p="RightLeg.yml" t="Include" />
                 <e p="Species.yml" t="Include" />
                 <e p="Tail.yml" t="Include" />
                 <e p="Teeth.yml" t="Include" />
                 <e p="Vagina.yml" t="Include" />
               </e>
               <e p="template" t="Include">
+                <e p="Arm.yml" t="Include" />
                 <e p="Body.yml" t="Include" />
+                <e p="Eye.yml" t="Include" />
                 <e p="Face.yml" t="Include" />
-                <e p="LeftArm.yml" t="Include" />
-                <e p="LeftEye.yml" t="Include" />
-                <e p="LeftLeg.yml" t="Include" />
-                <e p="RightArm.yml" t="Include" />
-                <e p="RightEye.yml" t="Include" />
-                <e p="RightLeg.yml" t="Include" />
+                <e p="Leg.yml" t="Include" />
                 <e p="Species.yml" t="Include" />
               </e>
             </e>
@@ -126,6 +124,9 @@
           <e p="DesignTimeGlobalInfoContextFactory.cs" t="Include" />
         </e>
         <e p="Extensions" t="Include">
+          <e p="BodypartExtensions.cs" t="Include" />
+          <e p="ChiralityExtensions.cs" t="Include" />
+          <e p="EnumExtensions.cs" t="Include" />
           <e p="EnumerableExtensions.cs" t="Include" />
           <e p="FileAsync.cs" t="Include" />
           <e p="InteractiveServiceExtensions.cs" t="Include" />
@@ -148,8 +149,8 @@
           <e p="InteractiveMessage.cs" t="Include" />
         </e>
         <e p="Migrations" t="Include">
-          <e p="20180122222641_InitialCreate.Designer.cs" t="Include" />
-          <e p="20180122222641_InitialCreate.cs" t="Include" />
+          <e p="20180123130509_InitialCreate.Designer.cs" t="Include" />
+          <e p="20180123130509_InitialCreate.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">
@@ -256,7 +257,7 @@
         </e>
         <e p="Transformations" t="Include">
           <e p="Bodypart.cs" t="Include" />
-          <e p="BodypartUtilities.cs" t="Include" />
+          <e p="Chirality.cs" t="Include" />
           <e p="ColourYamlConverter.cs" t="Include" />
           <e p="IReplaceableTextToken.cs" t="Include" />
           <e p="ProtectionType.cs" t="Include" />
@@ -271,6 +272,7 @@
             <e p="PatternToken.cs" t="Include" />
             <e p="PronounToken.cs" t="Include" />
             <e p="SexToken.cs" t="Include" />
+            <e p="SideToken.cs" t="Include" />
             <e p="SpeciesToken.cs" t="Include" />
             <e p="TargetToken.cs" t="Include" />
           </e>

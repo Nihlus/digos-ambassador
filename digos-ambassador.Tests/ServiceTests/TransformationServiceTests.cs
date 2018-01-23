@@ -862,7 +862,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 				Assert.False(result.IsSuccess);
 				Assert.Equal(CommandError.UnmetPrecondition, result.Error);
-				Assert.True(this.Character.HasBodypart(Bodypart.Face));
+				Assert.True(this.Character.HasComponent(Bodypart.Face));
 			}
 
 			[Fact]
@@ -873,7 +873,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.Database,
 					this.Context,
 					this.Character,
-					Bodypart.Wings
+					Bodypart.Wing,
+					Chirality.Left
 				);
 
 				Assert.False(result.IsSuccess);
@@ -1054,8 +1055,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.Database,
 					this.Context,
 					this.Character,
-					Bodypart.Wings,
-					"template"
+					Bodypart.Wing,
+					"template",
+					Chirality.Left
 				);
 
 				Assert.False(result.IsSuccess);
@@ -1099,7 +1101,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					Bodypart.Face
 				);
 
-				Assert.False(this.Character.HasBodypart(Bodypart.Face));
+				Assert.False(this.Character.HasComponent(Bodypart.Face));
 
 				// Then add it again
 				await this.Transformations.AddBodypartAsync
@@ -1111,7 +1113,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					"template"
 				);
 
-				Assert.True(this.Character.HasBodypart(Bodypart.Face));
+				Assert.True(this.Character.HasComponent(Bodypart.Face));
 			}
 
 			[Fact]
@@ -1279,7 +1281,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task AddsBodypartIfItDoesNotAlreadyExist()
 			{
-				Assert.False(this.Character.HasBodypart(Bodypart.Tail));
+				Assert.False(this.Character.HasComponent(Bodypart.Tail));
 
 				var result = await this.Transformations.ShiftBodypartAsync
 				(
@@ -1291,7 +1293,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				);
 
 				Assert.True(result.IsSuccess);
-				Assert.True(this.Character.HasBodypart(Bodypart.Tail));
+				Assert.True(this.Character.HasComponent(Bodypart.Tail));
 			}
 
 			[Fact]
@@ -1307,7 +1309,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				);
 
 				Assert.True(result.IsSuccess);
-				Assert.Equal("shark", this.Character.GetBodypart(Bodypart.Face).Transformation.Species.Name);
+				Assert.Equal("shark", this.Character.GetAppearanceComponent(Bodypart.Face).Transformation.Species.Name);
 			}
 
 			[Fact]
@@ -1409,7 +1411,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					PronounProviderFamily = "They"
 				};
 
-				this.OriginalColour = this.Character.GetBodypart(Bodypart.Face).BaseColour;
+				this.OriginalColour = this.Character.GetAppearanceComponent(Bodypart.Face).BaseColour;
 
 				this.Database.Characters.Add(this.Character);
 
@@ -1442,8 +1444,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.Database,
 					this.Context,
 					this.Character,
-					Bodypart.Wings,
-					this.NewColour
+					Bodypart.Wing,
+					this.NewColour,
+					Chirality.Left
 				);
 
 				Assert.False(result.IsSuccess);
@@ -1628,9 +1631,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.Database,
 					this.Context,
 					this.Character,
-					Bodypart.Wings,
+					Bodypart.Wing,
 					this.NewPattern,
-					this.NewPatternColour
+					this.NewPatternColour,
+					Chirality.Left
 				);
 
 				Assert.False(result.IsSuccess);
@@ -1693,7 +1697,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.NewPatternColour
 				);
 
-				var face = this.Character.GetBodypart(Bodypart.Face);
+				var face = this.Character.GetAppearanceComponent(Bodypart.Face);
 				Assert.Equal(this.NewPattern, face.Pattern);
 			}
 
@@ -1710,7 +1714,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.NewPatternColour
 				);
 
-				var face = this.Character.GetBodypart(Bodypart.Face);
+				var face = this.Character.GetAppearanceComponent(Bodypart.Face);
 				Assert.Equal(this.NewPatternColour, face.PatternColour);
 			}
 
@@ -1856,8 +1860,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.Database,
 					this.Context,
 					this.Character,
-					Bodypart.Wings,
-					this.NewPatternColour
+					Bodypart.Wing,
+					this.NewPatternColour,
+					Chirality.Left
 				);
 
 				Assert.False(result.IsSuccess);
@@ -1872,8 +1877,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.Database,
 					this.Context,
 					this.Character,
-					Bodypart.LeftArm,
-					this.NewPatternColour
+					Bodypart.Arm,
+					this.NewPatternColour,
+					Chirality.Left
 				);
 
 				Assert.False(result.IsSuccess);
@@ -1932,7 +1938,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.NewPatternColour
 				);
 
-				var face = this.Character.GetBodypart(Bodypart.Face);
+				var face = this.Character.GetAppearanceComponent(Bodypart.Face);
 				Assert.Equal(this.NewPatternColour, face.PatternColour);
 			}
 

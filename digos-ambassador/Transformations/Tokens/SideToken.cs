@@ -1,5 +1,5 @@
 ﻿//
-//  PatternToken.cs
+//  SideToken.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,34 +20,34 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
+using System.Linq;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using Humanizer;
+using static DIGOS.Ambassador.Transformations.Bodypart;
 
 namespace DIGOS.Ambassador.Transformations
 {
 	/// <summary>
-	/// A token that gets replaced with a pattern name.
+	/// A token that gets replaced with the transformation's chirality
 	/// </summary>
-	[TokenIdentifier("pattern", "p")]
-	public class PatternToken : ReplacableTextToken<PatternToken>
+	[TokenIdentifier("side", "chirality")]
+	public class SideToken : ReplacableTextToken<SideToken>
 	{
 		/// <inheritdoc />
 		public override string GetText(Character character, AppearanceComponent component)
 		{
 			if (component is null)
 			{
-				throw new ArgumentNullException(nameof(component));
+				return string.Empty;
 			}
 
-			var currentBodypart = character.GetAppearanceComponent(component.Bodypart);
-			return currentBodypart.Pattern.ToString().Humanize();
+			return component.Chirality.Humanize();
 		}
 
 		/// <inheritdoc />
-		protected override PatternToken Initialize(string data)
+		protected override SideToken Initialize(string data)
 		{
 			return this;
 		}

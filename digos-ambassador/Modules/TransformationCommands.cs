@@ -82,6 +82,27 @@ namespace DIGOS.Ambassador.Modules
 		/// <summary>
 		/// Transforms the given bodypart into the given species on yourself.
 		/// </summary>
+		/// <param name="chirality">The chirality of the bodypart.</param>
+		/// <param name="bodyPart">The part to transform.</param>
+		/// <param name="species">The species to transform it into.</param>
+		[UsedImplicitly]
+		[Priority(int.MinValue)]
+		[Command(RunMode = Async)]
+		[Summary("Transforms the given bodypart into the given species on yourself.")]
+		public async Task ShiftAsync
+		(
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
+			Chirality chirality,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodyPart,
+			[Remainder, NotNull]
+			string species
+		)
+		=> await ShiftAsync(this.Context.User, chirality, bodyPart, species);
+
+		/// <summary>
+		/// Transforms the given bodypart into the given species on yourself.
+		/// </summary>
 		/// <param name="bodyPart">The part to transform.</param>
 		/// <param name="species">The species to transform it into.</param>
 		[UsedImplicitly]
@@ -92,12 +113,10 @@ namespace DIGOS.Ambassador.Modules
 		(
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
-			[Remainder]
-			[NotNull]
+			[Remainder, NotNull]
 			string species
 		)
-		=>
-		await ShiftAsync(this.Context.User, bodyPart, species);
+		=> await ShiftAsync(this.Context.User, Chirality.Center, bodyPart, species);
 
 		/// <summary>
 		/// Transforms the given bodypart into the given species on the target user.
@@ -116,6 +135,31 @@ namespace DIGOS.Ambassador.Modules
 			IUser target,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
+			[Remainder, NotNull]
+			string species
+		)
+		=> await ShiftAsync(target, Chirality.Center, bodyPart, species);
+
+		/// <summary>
+		/// Transforms the given bodypart into the given species on the target user.
+		/// </summary>
+		/// <param name="target">The user to transform.</param>
+		/// <param name="chirality">The chirality of the bodypart.</param>
+		/// <param name="bodyPart">The part to transform.</param>
+		/// <param name="species">The species to transform it into.</param>
+		[UsedImplicitly]
+		[Priority(int.MinValue)]
+		[Command(RunMode = Async)]
+		[Summary("Transforms the given bodypart of the target user into the given species.")]
+		[RequireContext(Guild)]
+		public async Task ShiftAsync
+		(
+			[NotNull]
+			IUser target,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
+			Chirality chirality,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodyPart,
 			[Remainder]
 			[NotNull] string species
 		)
@@ -132,11 +176,11 @@ namespace DIGOS.Ambassador.Modules
 			ShiftBodypartResult result;
 			if (species.Equals("remove", StringComparison.OrdinalIgnoreCase))
 			{
-				result = await this.Transformation.RemoveBodypartAsync(this.Database, this.Context, character, bodyPart);
+				result = await this.Transformation.RemoveBodypartAsync(this.Database, this.Context, character, bodyPart, chirality);
 			}
 			else
 			{
-				result = await this.Transformation.ShiftBodypartAsync(this.Database, this.Context, character, bodyPart, species);
+				result = await this.Transformation.ShiftBodypartAsync(this.Database, this.Context, character, bodyPart, species, chirality);
 			}
 
 			if (!result.IsSuccess)
@@ -147,6 +191,26 @@ namespace DIGOS.Ambassador.Modules
 
 			await this.Feedback.SendConfirmationAsync(this.Context, result.ShiftMessage);
 		}
+
+		/// <summary>
+		/// Transforms the base colour of the given bodypart on yourself into the given colour.
+		/// </summary>
+		/// <param name="chirality">The chirality of the bodypart.</param>
+		/// <param name="bodypart">The part to transform.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Command("colour", RunMode = Async)]
+		[Summary("Transforms the base colour of the given bodypart on yourself into the given colour.")]
+		public async Task ShiftColourAsync
+		(
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
+			Chirality chirality,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodypart,
+			[Remainder, NotNull]
+			Colour colour
+		)
+		=> await ShiftColourAsync(this.Context.User, chirality, bodypart, colour);
 
 		/// <summary>
 		/// Transforms the base colour of the given bodypart on yourself into the given colour.
@@ -164,8 +228,7 @@ namespace DIGOS.Ambassador.Modules
 			[Remainder]
 			Colour colour
 		)
-		=>
-		await ShiftColourAsync(this.Context.User, bodypart, colour);
+		=> await ShiftColourAsync(this.Context.User, Chirality.Center, bodypart, colour);
 
 		/// <summary>
 		/// Transforms the base colour of the given bodypart on the target user into the given colour.
@@ -184,6 +247,28 @@ namespace DIGOS.Ambassador.Modules
 			Bodypart bodyPart,
 			[NotNull, Remainder] Colour colour
 		)
+		=> await ShiftColourAsync(target, Chirality.Center, bodyPart, colour);
+
+		/// <summary>
+		/// Transforms the base colour of the given bodypart on the target user into the given colour.
+		/// </summary>
+		/// <param name="target">The target user.</param>
+		/// <param name="chirality">The chirality of the bodypart.</param>
+		/// <param name="bodyPart">The part to transform.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Summary("Transforms the base colour of the given bodypart on the target user into the given colour.")]
+		[Command("colour", RunMode = Async)]
+		[RequireContext(Guild)]
+		public async Task ShiftColourAsync
+		(
+			[NotNull] IUser target,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
+			Chirality chirality,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodyPart,
+			[NotNull, Remainder] Colour colour
+		)
 		{
 			var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
 			if (!getCurrentCharacterResult.IsSuccess)
@@ -194,7 +279,15 @@ namespace DIGOS.Ambassador.Modules
 
 			var character = getCurrentCharacterResult.Entity;
 
-			var shiftPartResult = await this.Transformation.ShiftBodypartColourAsync(this.Database, this.Context, character, bodyPart, colour);
+			var shiftPartResult = await this.Transformation.ShiftBodypartColourAsync
+			(
+				this.Database,
+				this.Context,
+				character,
+				bodyPart,
+				colour,
+				chirality
+			);
 
 			if (!shiftPartResult.IsSuccess)
 			{
@@ -223,7 +316,30 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull, Remainder]
 			Colour colour
 		)
-		=> await ShiftPatternAsync(this.Context.User, bodypart, pattern, colour);
+		=> await ShiftPatternAsync(this.Context.User, Chirality.Center, bodypart, pattern, colour);
+
+		/// <summary>
+		/// Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.
+		/// </summary>
+		/// <param name="chirality">The chirality of the bodypart.</param>
+		/// <param name="bodypart">The part to transform.</param>
+		/// <param name="pattern">The pattern to transform it into.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Command("pattern", RunMode = Async)]
+		[Summary("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
+		public async Task ShiftPatternAsync
+		(
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
+			Chirality chirality,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodypart,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
+			Pattern pattern,
+			[NotNull, Remainder]
+			Colour colour
+		)
+		=> await ShiftPatternAsync(this.Context.User, chirality, bodypart, pattern, colour);
 
 		/// <summary>
 		/// Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
@@ -238,8 +354,33 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task ShiftPatternAsync
 		(
+			[NotNull] IUser target,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodyPart,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
+			Pattern pattern,
+			[NotNull, Remainder] Colour colour
+		)
+		=> await ShiftPatternAsync(target, Chirality.Center, bodyPart, pattern, colour);
+
+		/// <summary>
+		/// Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
+		/// </summary>
+		/// <param name="target">The target user.</param>
+		/// <param name="chirality">The chirality of the part.</param>
+		/// <param name="bodyPart">The part to transform.</param>
+		/// <param name="pattern">The pattern to transform it into.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Command("pattern", RunMode = Async)]
+		[Summary("Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.")]
+		[RequireContext(Guild)]
+		public async Task ShiftPatternAsync
+		(
 			[NotNull]
 			IUser target,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
+			Chirality chirality,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
@@ -257,7 +398,16 @@ namespace DIGOS.Ambassador.Modules
 
 			var character = getCurrentCharacterResult.Entity;
 
-			var shiftPartResult = await this.Transformation.ShiftBodypartPatternAsync(this.Database, this.Context, character, bodyPart, pattern, colour);
+			var shiftPartResult = await this.Transformation.ShiftBodypartPatternAsync
+			(
+				this.Database,
+				this.Context,
+				character,
+				bodyPart,
+				pattern,
+				colour,
+				chirality
+			);
 
 			if (!shiftPartResult.IsSuccess)
 			{
@@ -267,6 +417,26 @@ namespace DIGOS.Ambassador.Modules
 
 			await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
 		}
+
+		/// <summary>
+		/// Transforms the colour of the pattern on the given bodypart to the given colour.
+		/// </summary>
+		/// <param name="chirality">The chirality of the bodypart.</param>
+		/// <param name="bodypart">The part to transform.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Command("pattern-colour", RunMode = Async)]
+		[Summary("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
+		public async Task ShiftPatternColourAsync
+		(
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
+			Chirality chirality,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodypart,
+			[NotNull, Remainder]
+			Colour colour
+		)
+		=> await ShiftPatternColourAsync(this.Context.User, chirality, bodypart, colour);
 
 		/// <summary>
 		/// Transforms the colour of the pattern on the given bodypart to the given colour.
@@ -283,7 +453,7 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull, Remainder]
 			Colour colour
 		)
-		=> await ShiftPatternColourAsync(this.Context.User, bodypart, colour);
+			=> await ShiftPatternColourAsync(this.Context.User, Chirality.Center, bodypart, colour);
 
 		/// <summary>
 		/// Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
@@ -297,8 +467,30 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task ShiftPatternColourAsync
 		(
+			[NotNull] IUser target,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
+			Bodypart bodyPart,
+			[NotNull, Remainder] Colour colour
+		)
+		=> await ShiftPatternColourAsync(target, Chirality.Center, bodyPart, colour);
+
+		/// <summary>
+		/// Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
+		/// </summary>
+		/// <param name="target">The target user.</param>
+		/// <param name="chirality">The chirality of the part.</param>
+		/// <param name="bodyPart">The part to transform.</param>
+		/// <param name="colour">The colour to transform it into.</param>
+		[UsedImplicitly]
+		[Command("pattern-colour", RunMode = Async)]
+		[Summary("Transforms the colour of the pattern on the given bodypart on the target user to the given colour.")]
+		[RequireContext(Guild)]
+		public async Task ShiftPatternColourAsync
+		(
 			[NotNull]
 			IUser target,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
+			Chirality chirality,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
 			[NotNull, Remainder]
@@ -314,7 +506,7 @@ namespace DIGOS.Ambassador.Modules
 
 			var character = getCurrentCharacterResult.Entity;
 
-			var shiftPartResult = await this.Transformation.ShiftPatternColourAsync(this.Database, this.Context, character, bodyPart, colour);
+			var shiftPartResult = await this.Transformation.ShiftPatternColourAsync(this.Database, this.Context, character, bodyPart, colour, chirality);
 
 			if (!shiftPartResult.IsSuccess)
 			{

@@ -190,6 +190,7 @@ namespace DIGOS.Ambassador.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     AppearanceID = table.Column<uint>(nullable: true),
                     BaseColourID = table.Column<uint>(nullable: true),
+                    Chirality = table.Column<int>(nullable: false),
                     Pattern = table.Column<int>(nullable: true),
                     PatternColourID = table.Column<uint>(nullable: true),
                     Size = table.Column<int>(nullable: false),

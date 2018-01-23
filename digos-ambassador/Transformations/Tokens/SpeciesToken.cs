@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 
@@ -34,13 +35,13 @@ namespace DIGOS.Ambassador.Transformations
 	public class SpeciesToken : ReplacableTextToken<SpeciesToken>
 	{
 		/// <inheritdoc />
-		public override string GetText(Character character, Transformation transformation)
+		public override string GetText(Character character, AppearanceComponent component)
 		{
 			var speciesShares = new Dictionary<string, int>();
 
-			foreach (var component in character.CurrentAppearance.Components)
+			foreach (var characterComponent in character.CurrentAppearance.Components)
 			{
-				var speciesName = component.Transformation.Species.Name;
+				var speciesName = characterComponent.Transformation.Species.Name;
 
 				if (speciesShares.ContainsKey(speciesName))
 				{

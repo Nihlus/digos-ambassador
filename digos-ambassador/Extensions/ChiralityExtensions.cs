@@ -1,5 +1,5 @@
 ﻿//
-//  PatternToken.cs
+//  ChiralityExtensions.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,35 +21,30 @@
 //
 
 using System;
-using DIGOS.Ambassador.Database.Appearances;
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Transformations;
-using Humanizer;
+using DIGOS.Ambassador.Transformations;
+using static DIGOS.Ambassador.Transformations.Chirality;
 
-namespace DIGOS.Ambassador.Transformations
+namespace DIGOS.Ambassador.Extensions
 {
 	/// <summary>
-	/// A token that gets replaced with a pattern name.
+	/// Extension methods for the <see cref="Chirality"/> enum.
 	/// </summary>
-	[TokenIdentifier("pattern", "p")]
-	public class PatternToken : ReplacableTextToken<PatternToken>
+	public static class ChiralityExtensions
 	{
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
+		/// <summary>
+		/// Gets the inverse chirality of the given chirality.
+		/// </summary>
+		/// <param name="this">The chirality.</param>
+		/// <returns>The inverse chirality.</returns>
+		public static Chirality Opposite(this Chirality @this)
 		{
-			if (component is null)
+			switch (@this)
 			{
-				throw new ArgumentNullException(nameof(component));
+				case Left: return Right;
+				case Right: return Left;
+				case Center: return Center;
+				default: throw new ArgumentOutOfRangeException(nameof(@this), @this, "Unknown chirality.");
 			}
-
-			var currentBodypart = character.GetAppearanceComponent(component.Bodypart);
-			return currentBodypart.Pattern.ToString().Humanize();
-		}
-
-		/// <inheritdoc />
-		protected override PatternToken Initialize(string data)
-		{
-			return this;
 		}
 	}
 }
