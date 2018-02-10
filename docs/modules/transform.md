@@ -206,6 +206,10 @@ Lists the available transformations for a given bodypart.
 #### Overloads
 **`transform describe`**
 
+Describes the current physical appearance of the current character.
+
+**`transform describe`**
+
 Describes the current physical appearance of a character.
 
 | Name | Type | Optional |
