@@ -33,7 +33,7 @@ using DIGOS.Ambassador.Transformations;
 
 using Discord;
 using Discord.Commands;
-
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Theory]
 			[InlineData("asadasdas")]
 			[InlineData("yeee ewwah")]
-			public async Task ReturnsTrueForUniqueName(string name)
+			public async Task ReturnsTrueForUniqueName([NotNull] string name)
 			{
 				var result = await this.Transformations.IsSpeciesNameUniqueAsync(this.Database, name);
 
@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 			[Theory]
 			[InlineData("template")]
-			public async Task ReturnsFalseForNonUniqueName(string name)
+			public async Task ReturnsFalseForNonUniqueName([NotNull] string name)
 			{
 				var result = await this.Transformations.IsSpeciesNameUniqueAsync(this.Database, name);
 
@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 			[Theory]
 			[InlineData("TEMPLATE")]
-			public async Task IsCaseInsensitive(string name)
+			public async Task IsCaseInsensitive([NotNull] string name)
 			{
 				var result = await this.Transformations.IsSpeciesNameUniqueAsync(this.Database, name);
 
@@ -764,7 +764,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.True(result.IsSuccess);
 			}
 
-			private async Task EnsureOptedInAsync(IUser user)
+			private async Task EnsureOptedInAsync([NotNull] IUser user)
 			{
 				var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
 				(
@@ -1819,6 +1819,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				};
 
 				Colour.TryParse("dull white", out this.OriginalPatternColour);
+				Assert.NotNull(this.OriginalPatternColour);
+
 				await this.Transformations.ShiftBodypartPatternAsync
 				(
 					this.Database,

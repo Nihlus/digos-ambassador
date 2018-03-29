@@ -535,7 +535,7 @@ namespace DIGOS.Ambassador.Modules
 		[RequirePermission(Permission.TransferRoleplay)]
 		public async Task TransferRoleplayOwnershipAsync
 		(
-			IUser newOwner,
+			[NotNull] IUser newOwner,
 			[NotNull]
 			[RequireEntityOwnerOrPermission(Permission.TransferRoleplay, PermissionTarget.Other)]
 			Roleplay roleplay

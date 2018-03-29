@@ -300,7 +300,7 @@ namespace DIGOS.Ambassador
 		/// <param name="oldMessage">The old message.</param>
 		/// <param name="updatedMessage">The new message.</param>
 		/// <param name="messageChannel">The channel of the message.</param>
-		private async Task OnMessageUpdated(Cacheable<IMessage, ulong> oldMessage, SocketMessage updatedMessage, ISocketMessageChannel messageChannel)
+		private async Task OnMessageUpdated(Cacheable<IMessage, ulong> oldMessage, [CanBeNull] SocketMessage updatedMessage, ISocketMessageChannel messageChannel)
 		{
 			if (updatedMessage is null)
 			{
@@ -323,6 +323,7 @@ namespace DIGOS.Ambassador
 		/// <param name="arg">The log message from Discord</param>
 		/// <returns>A completed task.</returns>
 		/// <exception cref="ArgumentOutOfRangeException">Thrown if the log severity is not recognized.</exception>
+		[NotNull]
 		private static Task OnDiscordLogEvent(LogMessage arg)
 		{
 			var content = $"Discord log event: {arg.Message}";

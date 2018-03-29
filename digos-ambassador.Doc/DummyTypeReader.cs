@@ -23,6 +23,7 @@
 using System;
 using System.Threading.Tasks;
 using Discord.Commands;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc
 {
@@ -32,6 +33,7 @@ namespace DIGOS.Ambassador.Doc
 	public class DummyTypeReader : TypeReader
 	{
 		/// <inheritdoc />
+		[CanBeNull]
 		public override Task<TypeReaderResult> Read(ICommandContext context, string input, IServiceProvider services)
 		{
 			return null;

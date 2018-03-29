@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 using Discord;
 using Discord.Addons.Interactive;
+using JetBrains.Annotations;
 using Image = DIGOS.Ambassador.Database.Data.Image;
 
 namespace DIGOS.Ambassador.Pagination
@@ -50,6 +51,7 @@ namespace DIGOS.Ambassador.Pagination
 		public string Title { get; set; } = string.Empty;
 
 		/// <inheritdoc />
+		[NotNull]
 		public PaginatedGallery WithPage(Image page)
 		{
 			this.Pages.Add(page);
@@ -57,7 +59,8 @@ namespace DIGOS.Ambassador.Pagination
 		}
 
 		/// <inheritdoc />
-		public PaginatedGallery WithPages(IEnumerable<Image> pages)
+		[NotNull]
+		public PaginatedGallery WithPages([NotNull] IEnumerable<Image> pages)
 		{
 			foreach (var page in pages)
 			{

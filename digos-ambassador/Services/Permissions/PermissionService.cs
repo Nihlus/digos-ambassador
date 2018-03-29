@@ -227,7 +227,8 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="contextUser">The user.</param>
 		/// <param name="guild">The server.</param>
 		/// <returns>The permissions.</returns>
-		public IQueryable<LocalPermission> GetLocalUserPermissions(GlobalInfoContext db, IUser contextUser, IGuild guild)
+		[NotNull]
+		public IQueryable<LocalPermission> GetLocalUserPermissions([NotNull] GlobalInfoContext db, IUser contextUser, IGuild guild)
 		{
 			return db.LocalPermissions
 				.Where
@@ -244,7 +245,8 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database.</param>
 		/// <param name="contextUser">The user.</param>
 		/// <returns>The permissions.</returns>
-		public IQueryable<GlobalPermission> GetGlobalUserPermissions(GlobalInfoContext db, IUser contextUser)
+		[NotNull]
+		public IQueryable<GlobalPermission> GetGlobalUserPermissions([NotNull] GlobalInfoContext db, IUser contextUser)
 		{
 			return db.GlobalPermissions
 				.Where

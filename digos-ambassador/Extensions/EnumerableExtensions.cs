@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Utility;
 
 using Discord.Commands;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
@@ -52,9 +53,9 @@ namespace DIGOS.Ambassador.Extensions
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		public static async Task<RetrieveEntityResult<TResult>> SelectFromBestLevenshteinMatchAsync<TSource, TResult>
 		(
-			this IQueryable<TSource> @this,
+			[NotNull] this IQueryable<TSource> @this,
 			Func<TSource, TResult> selector,
-			Expression<Func<TSource, string>> stringSelector,
+			[NotNull] Expression<Func<TSource, string>> stringSelector,
 			string search,
 			double tolerance = 0.25
 		)
@@ -95,9 +96,9 @@ namespace DIGOS.Ambassador.Extensions
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		public static RetrieveEntityResult<TResult> SelectFromBestLevenshteinMatch<TSource, TResult>
 		(
-			this IEnumerable<TSource> @this,
+			[NotNull] this IEnumerable<TSource> @this,
 			Func<TSource, TResult> selector,
-			Func<TSource, string> stringSelector,
+			[NotNull] Func<TSource, string> stringSelector,
 			string search,
 			double tolerance = 0.25
 		)
@@ -162,7 +163,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// <param name="search">The value to search for.</param>
 		/// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		public static RetrieveEntityResult<string> BestLevenshteinMatch(this IEnumerable<string> @this, string search, double tolerance = 0.25)
+		public static RetrieveEntityResult<string> BestLevenshteinMatch([NotNull] this IEnumerable<string> @this, string search, double tolerance = 0.25)
 		{
 			var candidates = @this.Select
 			(

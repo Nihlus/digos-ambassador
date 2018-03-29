@@ -22,6 +22,7 @@
 
 using System;
 using DIGOS.Ambassador.Database.Transformations;
+using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -40,6 +41,7 @@ namespace DIGOS.Ambassador.Tools
 		}
 
 		/// <inheritdoc />
+		[CanBeNull]
 		public object ReadYaml(IParser parser, Type type)
 		{
 			var speciesName = parser.Allow<Scalar>().Value;
@@ -56,7 +58,7 @@ namespace DIGOS.Ambassador.Tools
 		}
 
 		/// <inheritdoc />
-		public void WriteYaml(IEmitter emitter, object value, Type type)
+		public void WriteYaml([NotNull] IEmitter emitter, object value, Type type)
 		{
 			var species = (Species)value;
 

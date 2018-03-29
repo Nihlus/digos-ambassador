@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Wizards
 {
@@ -63,7 +64,7 @@ namespace DIGOS.Ambassador.Wizards
 		(
 			SocketCommandContext context,
 			IWizard wizard,
-			ICriterion<SocketReaction> criterion = null,
+			[CanBeNull] ICriterion<SocketReaction> criterion = null,
 			TimeSpan? timeout = null,
 			RunMode runMode = RunMode.Async)
 		{

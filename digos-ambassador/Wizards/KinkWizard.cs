@@ -68,11 +68,13 @@ namespace DIGOS.Ambassador.Wizards
 		private static readonly Emoji Info = new Emoji("\x2139");
 
 		/// <inheritdoc />
+		[NotNull]
 		public IReadOnlyCollection<IEmote> AcceptedEmotes => GetCurrentPageEmotes().ToList();
 
 		/// <summary>
 		/// Gets the emotes that are currently rejected by the wizard.
 		/// </summary>
+		[NotNull]
 		public IReadOnlyCollection<IEmote> CurrrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
 
 		private readonly Embed LoadingEmbed;
@@ -110,7 +112,7 @@ namespace DIGOS.Ambassador.Wizards
 		}
 
 		/// <inheritdoc />
-		public override async Task<IUserMessage> DisplayAsync(ISocketMessageChannel channel)
+		public override async Task<IUserMessage> DisplayAsync([NotNull] ISocketMessageChannel channel)
 		{
 			if (!(this.Message is null))
 			{
@@ -163,7 +165,7 @@ namespace DIGOS.Ambassador.Wizards
 		}
 
 		/// <inheritdoc />
-		public async Task<bool> ConsumeEmoteAsync(IEmote emote)
+		public async Task<bool> ConsumeEmoteAsync([NotNull] IEmote emote)
 		{
 			if (emote.Equals(Exit))
 			{
@@ -200,7 +202,7 @@ namespace DIGOS.Ambassador.Wizards
 			return false;
 		}
 
-		private async Task ConsumePreferenceInteractionAsync(IEmote emote)
+		private async Task ConsumePreferenceInteractionAsync([NotNull] IEmote emote)
 		{
 			if (emote.Equals(Back))
 			{
@@ -255,7 +257,7 @@ namespace DIGOS.Ambassador.Wizards
 			}
 		}
 
-		private async Task ConsumeCategoryInteractionAsync(IEmote emote)
+		private async Task ConsumeCategoryInteractionAsync([NotNull] IEmote emote)
 		{
 			if (emote.Equals(Next))
 			{
@@ -449,6 +451,7 @@ namespace DIGOS.Ambassador.Wizards
 		/// Gets the emotes that are associated with the current page.
 		/// </summary>
 		/// <returns>A set of emotes.</returns>
+		[NotNull]
 		public IEnumerable<IEmote> GetCurrentPageEmotes()
 		{
 			switch (this.State)
@@ -468,6 +471,7 @@ namespace DIGOS.Ambassador.Wizards
 			}
 		}
 
+		[NotNull]
 		private IEnumerable<IEmote> GetCurrentPageRejectedEmotes()
 		{
 			switch (this.State)

@@ -29,6 +29,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Discord.Net;
 using Discord.Net.WebSockets;
+using JetBrains.Annotations;
 using WebSocketSharp;
 
 namespace DIGOS.Ambassador.Utility
@@ -72,7 +73,7 @@ namespace DIGOS.Ambassador.Utility
 		}
 
 		/// <inheritdoc />
-		public void SetHeader(string key, string value)
+		public void SetHeader([NotNull] string key, string value)
 		{
 			this.Headers[key] = value;
 		}
@@ -143,6 +144,7 @@ namespace DIGOS.Ambassador.Utility
 			}
 		}
 
+		[NotNull]
 		private Task DisconnectInternalAsync()
 		{
 			this.CancelTokenSource.Cancel();
@@ -166,7 +168,7 @@ namespace DIGOS.Ambassador.Utility
 			return Task.CompletedTask;
 		}
 
-		private void OnMessage(object sender, MessageEventArgs messageEventArgs)
+		private void OnMessage(object sender, [NotNull] MessageEventArgs messageEventArgs)
 		{
 			if (messageEventArgs.IsBinary)
 			{
@@ -179,7 +181,7 @@ namespace DIGOS.Ambassador.Utility
 		}
 
 		/// <inheritdoc />
-		public async Task SendAsync(byte[] data, int index, int count, bool isText)
+		public async Task SendAsync([NotNull] byte[] data, int index, int count, bool isText)
 		{
 			await this.Lock.WaitAsync(this.CancelToken).ConfigureAwait(false);
 			try
@@ -214,7 +216,7 @@ namespace DIGOS.Ambassador.Utility
 			this.WaitUntilConnect.Set();
 		}
 
-		private void OnClosed(object sender, CloseEventArgs e)
+		private void OnClosed(object sender, [NotNull] CloseEventArgs e)
 		{
 			if (e.WasClean)
 			{

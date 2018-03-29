@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Doc.Nodes
 {
 	/// <summary>
@@ -42,6 +44,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		}
 
 		/// <inheritdoc />
+		[NotNull]
 		public string Compile()
 		{
 			return $"`{this.Content.Compile()}`";

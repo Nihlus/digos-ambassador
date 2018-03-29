@@ -26,6 +26,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Services;
+using JetBrains.Annotations;
 using log4net;
 
 namespace DIGOS.Ambassador
@@ -82,7 +83,7 @@ namespace DIGOS.Ambassador
 		/// </summary>
 		/// <param name="sender">The sending object.</param>
 		/// <param name="unhandledExceptionEventArgs">The event object containing the information about the exception.</param>
-		private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
+		private static void OnUnhandledException(object sender, [NotNull] UnhandledExceptionEventArgs unhandledExceptionEventArgs)
 		{
 			// Force english exception output
 			System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;

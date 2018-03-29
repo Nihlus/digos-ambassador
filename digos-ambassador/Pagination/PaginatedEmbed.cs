@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using Discord;
 using Discord.Addons.Interactive;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Pagination
 {
@@ -47,6 +48,7 @@ namespace DIGOS.Ambassador.Pagination
 		}
 
 		/// <inheritdoc />
+		[NotNull]
 		public PaginatedEmbed WithPage(EmbedBuilder page)
 		{
 			this.Pages.Add(page);
@@ -54,7 +56,8 @@ namespace DIGOS.Ambassador.Pagination
 		}
 
 		/// <inheritdoc />
-		public PaginatedEmbed WithPages(IEnumerable<EmbedBuilder> pages)
+		[NotNull]
+		public PaginatedEmbed WithPages([NotNull] IEnumerable<EmbedBuilder> pages)
 		{
 			foreach (var page in pages)
 			{

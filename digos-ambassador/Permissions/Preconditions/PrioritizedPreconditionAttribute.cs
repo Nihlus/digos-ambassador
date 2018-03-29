@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Discord.Commands;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
@@ -39,7 +40,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 		public int Priority { get; set; }
 
 		/// <inheritdoc />
-		public sealed override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+		public sealed override async Task<PreconditionResult> CheckPermissions(ICommandContext context, [NotNull] CommandInfo command, IServiceProvider services)
 		{
 			var prioPreconditions = command.Preconditions.Where(a => a is PrioritizedPreconditionAttribute).Cast<PrioritizedPreconditionAttribute>();
 

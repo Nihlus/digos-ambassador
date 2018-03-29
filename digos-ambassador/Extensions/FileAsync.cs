@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
@@ -50,6 +51,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// </summary>
 		/// <param name="path">The path to the file.</param>
 		/// <returns>The contents of the file.</returns>
+		[NotNull]
 		public static Task<string[]> ReadAllLinesAsync(string path)
 		{
 			return ReadAllLinesAsync(path, Encoding.UTF8);
@@ -61,7 +63,8 @@ namespace DIGOS.Ambassador.Extensions
 		/// <param name="path">The path to the file.</param>
 		/// <param name="encoding">The encoding of the file.</param>
 		/// <returns>The contents of the file.</returns>
-		public static async Task<string[]> ReadAllLinesAsync(string path, Encoding encoding)
+		[ItemNotNull]
+		public static async Task<string[]> ReadAllLinesAsync(string path, [NotNull] Encoding encoding)
 		{
 			var lines = new List<string>();
 
@@ -87,6 +90,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// </summary>
 		/// <param name="path">The path to the file.</param>
 		/// <returns>The contents of the file.</returns>
+		[NotNull]
 		public static Task<string> ReadAllTextAsync(string path)
 		{
 			return ReadAllTextAsync(path, Encoding.UTF8);
@@ -98,7 +102,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// <param name="path">The path to the file.</param>
 		/// <param name="encoding">The encoding of the file.</param>
 		/// <returns>The contents of the file.</returns>
-		public static async Task<string> ReadAllTextAsync(string path, Encoding encoding)
+		public static async Task<string> ReadAllTextAsync(string path, [NotNull] Encoding encoding)
 		{
 			// Open the FileStream with the same FileMode, FileAccess
 			// and FileShare as a call to File.OpenText would've done.

@@ -23,6 +23,7 @@
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Permissions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Permissions
 {
@@ -110,7 +111,7 @@ namespace DIGOS.Ambassador.Database.Permissions
 		/// <param name="left">The first object.</param>
 		/// <param name="right">The second object.</param>
 		/// <returns>true if the objects are equal; otherwise, false.</returns>
-		public static bool operator ==(LocalPermission left, LocalPermission right)
+		public static bool operator ==([CanBeNull] LocalPermission left, [CanBeNull] LocalPermission right)
 		{
 			return Equals(left, right);
 		}
@@ -121,7 +122,7 @@ namespace DIGOS.Ambassador.Database.Permissions
 		/// <param name="left">The first object.</param>
 		/// <param name="right">The second object.</param>
 		/// <returns>true if the objects are equal; otherwise, false.</returns>
-		public static bool operator !=(LocalPermission left, LocalPermission right)
+		public static bool operator !=([CanBeNull] LocalPermission left, [CanBeNull] LocalPermission right)
 		{
 			return !Equals(left, right);
 		}

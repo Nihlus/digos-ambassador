@@ -64,6 +64,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="descriptionBuilder">The builder.</param>
 		/// <returns>The transformation service with the given builder.</returns>
+		[NotNull]
 		public TransformationService WithDescriptionBuilder(TransformationDescriptionBuilder descriptionBuilder)
 		{
 			this.DescriptionBuilder = descriptionBuilder;
@@ -95,8 +96,7 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(canTransformResult);
 			}
 
-			var component = character.GetAppearanceComponent(bodyPart, chirality);
-			if (component is null)
+			if (!character.TryGetAppearanceComponent(bodyPart, chirality, out var component))
 			{
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
 			}
@@ -202,9 +202,8 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			string shiftMessage;
-			AppearanceComponent currentComponent;
 			var transformation = getTFResult.Entity;
-			if (!character.HasComponent(bodyPart, chirality))
+			if (!character.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
 			{
 				currentComponent = AppearanceComponent.CreateFrom(transformation, chirality);
 				character.CurrentAppearance.Components.Add(currentComponent);
@@ -213,7 +212,6 @@ namespace DIGOS.Ambassador.Services
 			}
 			else
 			{
-				currentComponent = character.GetAppearanceComponent(bodyPart, chirality);
 				if (currentComponent.Transformation.Species.Name.Equals(transformation.Species.Name))
 				{
 					return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The user's bodypart is already that form.");
@@ -256,17 +254,16 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(canTransformResult);
 			}
 
-			if (!character.HasComponent(bodyPart, chirality))
+			if (!character.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
 			{
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
 			}
 
-			if (character.GetAppearanceComponent(bodyPart, chirality).BaseColour == colour)
+			if (currentComponent.BaseColour == colour)
 			{
 				return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The bodypart is already that colour.");
 			}
 
-			var currentComponent = character.GetAppearanceComponent(bodyPart, chirality);
 			var originalColour = currentComponent.BaseColour;
 			currentComponent.BaseColour = colour;
 
@@ -305,12 +302,10 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(canTransformResult);
 			}
 
-			if (!character.HasComponent(bodyPart, chirality))
+			if (!character.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
 			{
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
 			}
-
-			var currentComponent = character.GetAppearanceComponent(bodyPart, chirality);
 
 			if (currentComponent.Pattern == pattern)
 			{
@@ -356,12 +351,10 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(canTransformResult);
 			}
 
-			if (!character.HasComponent(bodyPart, chirality))
+			if (!character.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
 			{
 				return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
 			}
-
-			var currentComponent = character.GetAppearanceComponent(bodyPart, chirality);
 
 			if (!currentComponent.Pattern.HasValue)
 			{
@@ -664,6 +657,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database.</param>
 		/// <param name="discordUser">The user.</param>
 		/// <returns>Global protection data for the given user.</returns>
+		[ItemNotNull]
 		public async Task<GlobalUserProtection> GetOrCreateGlobalUserProtectionAsync
 		(
 			[NotNull] GlobalInfoContext db,
@@ -697,6 +691,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="discordUser">The user.</param>
 		/// <param name="guild">The server.</param>
 		/// <returns>Server-specific protection data for the given user.</returns>
+		[ItemNotNull]
 		public async Task<ServerUserProtection> GetOrCreateServerUserProtectionAsync
 		(
 			[NotNull] GlobalInfoContext db,

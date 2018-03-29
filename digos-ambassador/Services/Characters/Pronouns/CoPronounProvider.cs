@@ -31,21 +31,27 @@ namespace DIGOS.Ambassador.Services
 	public class CoPronounProvider : PronounProvider
 	{
 		/// <inheritdoc />
+		[NotNull]
 		public override string Family => "Co";
 
 		/// <inheritdoc />
+		[NotNull]
 		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "co is" : "co";
 
 		/// <inheritdoc />
+		[NotNull]
 		public override string GetObjectForm() => "co";
 
 		/// <inheritdoc />
+		[NotNull]
 		public override string GetPossessiveAdjectiveForm() => "co's";
 
 		/// <inheritdoc />
+		[NotNull]
 		public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "co has" : "co's";
 
 		/// <inheritdoc />
+		[NotNull]
 		public override string GetReflexiveForm() => "coself";
 	}
 }

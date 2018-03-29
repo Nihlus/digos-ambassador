@@ -67,6 +67,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <param name="message">The message to create from.</param>
 		/// <param name="authorNickname">The current display name of the author.</param>
 		/// <returns>A new UserMessage.</returns>
+		[NotNull]
 		[Pure]
 		public static UserMessage FromDiscordMessage
 		(

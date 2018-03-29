@@ -30,12 +30,14 @@ using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
 	/// <summary>
 	/// Contains extensions to the <see cref="InteractiveService"/> class.
 	/// </summary>
+	[PublicAPI]
 	public static class InteractiveServiceExtensions
 	{
 		private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(15);
@@ -51,23 +53,25 @@ namespace DIGOS.Ambassador.Extensions
 		/// <param name="timeout">The timeout before the message is deleted. Defaults to 15 seconds.</param>
 		/// <param name="options">Any options that should be passed along with the request.</param>
 		/// <returns>A user message.</returns>
+		[PublicAPI]
 		public static async Task<IUserMessage> ReplyAndDeleteAsync
 		(
 			this InteractiveService @this,
-			IMessageChannel channel,
-			string content,
+			[NotNull] IMessageChannel channel,
+			[NotNull] string content,
 			bool isTTS = false,
-			Embed embed = null,
+			[CanBeNull] Embed embed = null,
 			TimeSpan? timeout = null,
-			RequestOptions options = null
+			[CanBeNull] RequestOptions options = null
 		)
 		{
 			timeout = timeout ?? DefaultTimeout;
 
 			var message = await channel.SendMessageAsync(content, isTTS, embed, options).ConfigureAwait(false);
 
+			// ReSharper disable once AssignmentIsFullyDiscarded
 			_ = Task.Delay(timeout.Value)
-				.ContinueWith(_ => message.DeleteAsync().ConfigureAwait(false))
+				.ContinueWith(c => message.DeleteAsync().ConfigureAwait(false))
 				.ConfigureAwait(false);
 
 			return message;
@@ -82,12 +86,13 @@ namespace DIGOS.Ambassador.Extensions
 		/// <param name="feedback">The user feedback service.</param>
 		/// <param name="interactiveMessage">The interactive message.</param>
 		/// <returns>The underlying sent message.</returns>
+		[PublicAPI]
 		public static async Task<IUserMessage> SendPrivateInteractiveMessageAsync
 		(
 			this InteractiveService @this,
-			SocketCommandContext context,
-			UserFeedbackService feedback,
-			IInteractiveMessage interactiveMessage
+			[NotNull] SocketCommandContext context,
+			[NotNull] UserFeedbackService feedback,
+			[NotNull] IInteractiveMessage interactiveMessage
 		)
 		{
 			if (!context.IsPrivate)
@@ -95,7 +100,11 @@ namespace DIGOS.Ambassador.Extensions
 				await feedback.SendConfirmationAsync(context, "Please check your private messages.");
 			}
 
-			var userChannel = await context.User.GetOrCreateDMChannelAsync() as ISocketMessageChannel;
+			if (!(await context.User.GetOrCreateDMChannelAsync() is ISocketMessageChannel userChannel))
+			{
+				throw new InvalidOperationException("Could not create DM channel for target user.");
+			}
+
 			return await SendInteractiveMessageAsync(@this, context, interactiveMessage, userChannel);
 		}
 
@@ -107,12 +116,13 @@ namespace DIGOS.Ambassador.Extensions
 		/// <param name="interactiveMessage">The interactive message.</param>
 		/// <param name="channel">The channel to send the message to. Defaults to the context channel.</param>
 		/// <returns>The underlying sent message.</returns>
+		[PublicAPI]
 		public static async Task<IUserMessage> SendInteractiveMessageAsync
 		(
 			this InteractiveService @this,
-			SocketCommandContext context,
-			IInteractiveMessage interactiveMessage,
-			ISocketMessageChannel channel = null
+			[NotNull] SocketCommandContext context,
+			[NotNull] IInteractiveMessage interactiveMessage,
+			[CanBeNull] ISocketMessageChannel channel = null
 		)
 		{
 			channel = channel ?? context.Channel;
@@ -128,7 +138,8 @@ namespace DIGOS.Ambassador.Extensions
 
 			if (interactiveMessage.Timeout.HasValue)
 			{
-				_ = Task.Delay(interactiveMessage.Timeout.Value).ContinueWith(_ =>
+				// ReSharper disable once AssignmentIsFullyDiscarded
+				_ = Task.Delay(interactiveMessage.Timeout.Value).ContinueWith(c =>
 				{
 					@this.RemoveReactionCallback(interactiveMessage.Message);
 					interactiveMessage.Message.DeleteAsync();
@@ -150,13 +161,14 @@ namespace DIGOS.Ambassador.Extensions
 		/// <typeparam name="T1">The type of content in the pager.</typeparam>
 		/// <typeparam name="T2">The type of pager.</typeparam>
 		/// <returns>The message that was sent.</returns>
+		[PublicAPI]
 		public static async Task<IUserMessage> SendPrivatePaginatedMessageAsync<T1, T2>
 		(
 			this InteractiveService @this,
-			SocketCommandContext context,
-			UserFeedbackService feedback,
-			IPager<T1, T2> pager,
-			ICriterion<SocketReaction> criterion = null
+			[NotNull] SocketCommandContext context,
+			[NotNull] UserFeedbackService feedback,
+			[NotNull] IPager<T1, T2> pager,
+			[CanBeNull] ICriterion<SocketReaction> criterion = null
 		)
 			where T2 : IPager<T1, T2>
 		{
@@ -181,14 +193,15 @@ namespace DIGOS.Ambassador.Extensions
 		/// <typeparam name="T1">The type of content in the pager.</typeparam>
 		/// <typeparam name="T2">The type of pager.</typeparam>
 		/// <returns>The message that was sent.</returns>
+		[PublicAPI]
 		public static async Task<IUserMessage> SendPaginatedMessageAsync<T1, T2>
 		(
 			this InteractiveService @this,
-			SocketCommandContext context,
-			UserFeedbackService feedback,
-			IPager<T1, T2> pager,
-			IMessageChannel channel = null,
-			ICriterion<SocketReaction> criterion = null
+			[NotNull] SocketCommandContext context,
+			[NotNull] UserFeedbackService feedback,
+			[NotNull] IPager<T1, T2> pager,
+			[CanBeNull] IMessageChannel channel = null,
+			[CanBeNull] ICriterion<SocketReaction> criterion = null
 		)
 		where T2 : IPager<T1, T2>
 		{

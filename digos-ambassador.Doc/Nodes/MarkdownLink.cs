@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Extensions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
@@ -56,6 +57,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		public string Tooltip { get; set; }
 
 		/// <inheritdoc />
+		[NotNull]
 		public virtual string Compile()
 		{
 			if (this.Tooltip.IsNullOrWhitespace())

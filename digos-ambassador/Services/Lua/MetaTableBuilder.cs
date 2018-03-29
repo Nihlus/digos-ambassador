@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
@@ -37,6 +38,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="entry">The entry.</param>
 		/// <returns>The builder with the entry.</returns>
+		[NotNull]
 		public MetaTableBuilder WithEntry(string entry)
 		{
 			if (!this.Entries.Contains(entry))
@@ -52,6 +54,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="pretty">Whether or not the output should be in a pretty format.</param>
 		/// <returns>The metatable as a formatted string.</returns>
+		[NotNull]
 		public string Build(bool pretty = false)
 		{
 			var metatable = new TableNode
@@ -67,7 +70,7 @@ namespace DIGOS.Ambassador.Services
 			return metatable.Format(pretty);
 		}
 
-		private void PopulateSubNodes(TableNode parent, string value, string originalValue)
+		private void PopulateSubNodes([NotNull] TableNode parent, [NotNull] string value, string originalValue)
 		{
 			var components = value.Split('.');
 			if (components.Length == 1)

@@ -114,7 +114,7 @@ namespace DIGOS.Ambassador.Database.Kinks
 		/// <param name="left">The first object.</param>
 		/// <param name="right">The second object.</param>
 		/// <returns>true if the objects are equal; otherwise, false.</returns>
-		public static bool operator ==(Kink left, Kink right)
+		public static bool operator ==([CanBeNull] Kink left, [CanBeNull] Kink right)
 		{
 			return Equals(left, right);
 		}
@@ -125,7 +125,7 @@ namespace DIGOS.Ambassador.Database.Kinks
 		/// <param name="left">The first object.</param>
 		/// <param name="right">The second object.</param>
 		/// <returns>true if the objects are equal; otherwise, false.</returns>
-		public static bool operator !=(Kink left, Kink right)
+		public static bool operator !=([CanBeNull] Kink left, [CanBeNull] Kink right)
 		{
 			return !Equals(left, right);
 		}

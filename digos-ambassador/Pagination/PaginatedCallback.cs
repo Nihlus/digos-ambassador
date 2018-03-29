@@ -30,6 +30,7 @@ using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
+using JetBrains.Annotations;
 
 // ReSharper disable AssignmentIsFullyDiscarded
 namespace DIGOS.Ambassador.Pagination
@@ -93,8 +94,8 @@ namespace DIGOS.Ambassador.Pagination
 			UserFeedbackService feedbackService,
 			SocketCommandContext sourceContext,
 			IPager<T1, T2> pager,
-			IMessageChannel targetChannel = null,
-			ICriterion<SocketReaction> criterion = null
+			[CanBeNull] IMessageChannel targetChannel = null,
+			[CanBeNull] ICriterion<SocketReaction> criterion = null
 		)
 		{
 			this.Interactive = interactive;
@@ -159,7 +160,7 @@ namespace DIGOS.Ambassador.Pagination
 		}
 
 		/// <inheritdoc />
-		public async Task<bool> HandleCallbackAsync(SocketReaction reaction)
+		public async Task<bool> HandleCallbackAsync([NotNull] SocketReaction reaction)
 		{
 			var emote = reaction.Emote;
 

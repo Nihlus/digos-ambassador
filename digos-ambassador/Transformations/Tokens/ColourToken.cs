@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Transformations
 				}
 				case "pattern":
 				{
-					return component.PatternColour?.ToString();
+					return component.PatternColour?.ToString() ?? string.Empty;
 				}
 				default:
 				{

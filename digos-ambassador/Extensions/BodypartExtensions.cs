@@ -74,6 +74,7 @@ namespace DIGOS.Ambassador.Extensions
 			.SelectMany
 			(
 				b =>
+					// ReSharper disable once PossibleNullReferenceException
 					b.GetCustomAttribute<CompositeAttribute>().ComposingParts
 			);
 
@@ -104,6 +105,7 @@ namespace DIGOS.Ambassador.Extensions
 				yield break;
 			}
 
+			// ReSharper disable once PossibleNullReferenceException
 			foreach (var part in @this.GetCustomAttribute<CompositeAttribute>().ComposingParts)
 			{
 				yield return part;

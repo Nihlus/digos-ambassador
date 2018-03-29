@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Doc.Nodes
 {
 	/// <summary>
@@ -38,6 +40,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		public IMarkdownNode Content { get; set; }
 
 		/// <inheritdoc />
+		[NotNull]
 		public string Compile()
 		{
 			return $"```{this.Highlighting}\n{this.Content.Compile()}\n```";

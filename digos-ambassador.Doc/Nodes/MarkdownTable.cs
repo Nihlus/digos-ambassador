@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
@@ -101,7 +102,8 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// </summary>
 		/// <param name="column">The column.</param>
 		/// <returns>The table, with the column appended.</returns>
-		public MarkdownTable AppendColumn(MarkdownTableColumn column)
+		[NotNull]
+		public MarkdownTable AppendColumn([NotNull] MarkdownTableColumn column)
 		{
 			this.Columns.Add(column);
 			return this;
@@ -112,7 +114,8 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// </summary>
 		/// <param name="row">The row.</param>
 		/// <returns>The table, with the row appended.</returns>
-		public MarkdownTable AppendRow(MarkdownTableRow row)
+		[NotNull]
+		public MarkdownTable AppendRow([NotNull] MarkdownTableRow row)
 		{
 			this.Rows.Add(row);
 			return this;

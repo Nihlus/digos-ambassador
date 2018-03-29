@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Text.RegularExpressions;
 using DIGOS.Ambassador.Attributes;
@@ -61,6 +62,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="character">The character for which the text should be valid.</param>
 		/// <param name="component">The transformation that the text belongs to.</param>
 		/// <returns>A string with no tokens in it.</returns>
+		[NotNull]
 		public string ReplaceTokensWithContent
 		(
 			[NotNull] string text,
@@ -91,8 +93,9 @@ namespace DIGOS.Ambassador.Transformations
 		/// </summary>
 		/// <param name="character">The character to describe.</param>
 		/// <returns>A visual description of the character.</returns>
+		[NotNull]
 		[Pure]
-		public string BuildVisualDescription(Character character)
+		public string BuildVisualDescription([NotNull] Character character)
 		{
 			var sb = new StringBuilder();
 			sb.Append(ReplaceTokensWithContent("{@target} is a {@sex} {@species}.", character, null));
@@ -142,8 +145,7 @@ namespace DIGOS.Ambassador.Transformations
 
 					if (sameSpecies)
 					{
-						var partToSkip = character.GetAppearanceComponent(component.Bodypart, component.Chirality.Opposite());
-						if (!(partToSkip is null))
+						if (character.TryGetAppearanceComponent(component.Bodypart, component.Chirality.Opposite(), out var partToSkip))
 						{
 							partsToSkip.Add(partToSkip);
 						}
@@ -177,10 +179,9 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="character">The character.</param>
 		/// <param name="component">The chiral component.</param>
 		/// <returns>true if the parts are the same species; otherwise, false.</returns>
-		private bool AreChiralPartsTheSameSpecies(Character character, AppearanceComponent component)
+		private bool AreChiralPartsTheSameSpecies([NotNull] Character character, [NotNull] AppearanceComponent component)
 		{
-			var opposingComponent = character.GetAppearanceComponent(component.Bodypart, component.Chirality.Opposite());
-			if (opposingComponent is null)
+			if (!character.TryGetAppearanceComponent(component.Bodypart, component.Chirality.Opposite(), out var opposingComponent))
 			{
 				return false;
 			}
@@ -194,6 +195,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="character">The character to use as a base.</param>
 		/// <param name="component">The component to build the message from.</param>
 		/// <returns>The shift message.</returns>
+		[NotNull]
 		[Pure]
 		public string BuildShiftMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
 		{
@@ -208,6 +210,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="character">The character to use as a base.</param>
 		/// <param name="component">The component to build the message from.</param>
 		/// <returns>The grow message.</returns>
+		[NotNull]
 		[Pure]
 		public string BuildGrowMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
 		{
@@ -222,6 +225,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="character">The character to use as a base.</param>
 		/// <param name="component">The component to build the message from.</param>
 		/// <returns>The removal message.</returns>
+		[NotNull]
 		[Pure]
 		public string BuildRemoveMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
 		{
@@ -318,6 +322,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="originalColour">The original colour of the pattern.</param>
 		/// <param name="currentComponent">The current component.</param>
 		/// <returns>The shifting message.</returns>
+		[NotNull]
 		[Pure]
 		public string BuildPatternColourShiftMessage
 		(
@@ -341,6 +346,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="originalColour">The original colour of the pattern.</param>
 		/// <param name="currentComponent">The current component.</param>
 		/// <returns>The shifting message.</returns>
+		[NotNull]
 		[Pure]
 		public string BuildPatternShiftMessage
 		(
@@ -365,6 +371,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="originalColour">The original colour of the pattern.</param>
 		/// <param name="currentComponent">The current component.</param>
 		/// <returns>The shifting message.</returns>
+		[NotNull]
 		[Pure]
 		public string BuildColourShiftMessage
 		(

@@ -359,7 +359,8 @@ namespace DIGOS.Ambassador.Database
 		/// </summary>
 		/// <param name="optionsBuilder">The builder to configure.</param>
 		/// <returns>The builder, configured.</returns>
-		public static DbContextOptionsBuilder ConfigureOptions(DbContextOptionsBuilder optionsBuilder)
+		[NotNull]
+		public static DbContextOptionsBuilder ConfigureOptions([NotNull] DbContextOptionsBuilder optionsBuilder)
 		{
 			optionsBuilder.UseSqlite($"Data Source={Path.Combine("Content", "Databases", "global.db")}");
 
@@ -367,7 +368,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <inheritdoc />
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		protected override void OnConfiguring([NotNull] DbContextOptionsBuilder optionsBuilder)
 		{
 			if (!optionsBuilder.IsConfigured)
 			{
@@ -376,7 +377,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <inheritdoc />
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
 		{
 			modelBuilder.Entity<User>().HasOne(u => u.DefaultCharacter);
 			modelBuilder.Entity<User>().HasMany(u => u.Characters);

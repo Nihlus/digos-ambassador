@@ -31,21 +31,27 @@ namespace DIGOS.Ambassador.Services
 	public class NeuterPronounProvider : PronounProvider
 	{
 		/// <inheritdoc />
+		[NotNull]
 		public override string Family => "Neuter";
 
 		/// <inheritdoc />
+		[NotNull]
 		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "it is" : "it";
 
 		/// <inheritdoc />
+		[NotNull]
 		public override string GetObjectForm() => "it";
 
 		/// <inheritdoc />
+		[NotNull]
 		public override string GetPossessiveAdjectiveForm() => "its";
 
 		/// <inheritdoc />
+		[NotNull]
 		public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "it has" : "its";
 
 		/// <inheritdoc />
+		[NotNull]
 		public override string GetReflexiveForm() => "itself";
 	}
 }

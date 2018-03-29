@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
@@ -91,7 +92,8 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// </summary>
 		/// <param name="item">The item to append.</param>
 		/// <returns>The list, with the item appended.</returns>
-		public MarkdownList AppendItem(IMarkdownNode item)
+		[NotNull]
+		public MarkdownList AppendItem([NotNull] IMarkdownNode item)
 		{
 			this.Items.Add(item);
 			return this;

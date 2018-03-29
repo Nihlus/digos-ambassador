@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.TypeReaders
 		where T2 : class, IOwnedNamedEntity
 	{
 		/// <inheritdoc />
-		public sealed override async Task<TypeReaderResult> Read(ICommandContext context, string input, IServiceProvider services)
+		public sealed override async Task<TypeReaderResult> Read([NotNull] ICommandContext context, string input, IServiceProvider services)
 		{
 			IUser owner = null;
 			string entityName;
@@ -119,7 +119,7 @@ namespace DIGOS.Ambassador.TypeReaders
 			[NotNull] IServiceProvider services
 		);
 
-		private async Task<TypeReaderResult> ReadUserAsync(ICommandContext context, string input, bool byMentionOnly = false)
+		private async Task<TypeReaderResult> ReadUserAsync([NotNull] ICommandContext context, string input, bool byMentionOnly = false)
 		{
 			var results = new Dictionary<ulong, TypeReaderValue>();
 
@@ -218,7 +218,7 @@ namespace DIGOS.Ambassador.TypeReaders
 			return TypeReaderResult.FromError(CommandError.ObjectNotFound, "User not found.");
 		}
 
-		private void AddResult(IDictionary<ulong, TypeReaderValue> results, T1 user, float score)
+		private void AddResult(IDictionary<ulong, TypeReaderValue> results, [CanBeNull] T1 user, float score)
 		{
 			if (user != null && !results.ContainsKey(user.Id))
 			{

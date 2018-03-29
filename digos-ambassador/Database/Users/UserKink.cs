@@ -22,6 +22,7 @@
 
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Kinks;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Users
 {
@@ -48,6 +49,7 @@ namespace DIGOS.Ambassador.Database.Users
 		/// </summary>
 		/// <param name="kink">The kink.</param>
 		/// <returns>The user kink.</returns>
+		[NotNull]
 		public static UserKink CreateFrom(Kink kink)
 		{
 			return new UserKink

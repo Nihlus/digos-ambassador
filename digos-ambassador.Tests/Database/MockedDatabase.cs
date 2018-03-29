@@ -26,7 +26,7 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
-
+using JetBrains.Annotations;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
@@ -60,6 +60,7 @@ namespace DIGOS.Ambassador.Tests.Database
 		/// Gets a new instance of the database context.
 		/// </summary>
 		/// <returns>The database context.</returns>
+		[NotNull]
 		public GlobalInfoContext GetDatabaseContext()
 		{
 			return new GlobalInfoContext(this.DatabaseOptions);
@@ -69,7 +70,7 @@ namespace DIGOS.Ambassador.Tests.Database
 		/// Adds a mocked user to the database.
 		/// </summary>
 		/// <param name="user">The user to add.</param>
-		public void AddMockedUser(User user)
+		public void AddMockedUser([NotNull] User user)
 		{
 			using (var db = GetDatabaseContext())
 			{
@@ -92,7 +93,7 @@ namespace DIGOS.Ambassador.Tests.Database
 		/// Adds a mocked server to the database.
 		/// </summary>
 		/// <param name="server">The server to add.</param>
-		public void AddMockedServer(Server server)
+		public void AddMockedServer([NotNull] Server server)
 		{
 			using (var db = GetDatabaseContext())
 			{
@@ -105,7 +106,7 @@ namespace DIGOS.Ambassador.Tests.Database
 		/// Adds a mocked global permission to the database.
 		/// </summary>
 		/// <param name="globalPermission">The permission to add.</param>
-		public void AddMockedGlobalPermission(GlobalPermission globalPermission)
+		public void AddMockedGlobalPermission([NotNull] GlobalPermission globalPermission)
 		{
 			using (var db = GetDatabaseContext())
 			{
@@ -118,7 +119,7 @@ namespace DIGOS.Ambassador.Tests.Database
 		/// Adds a mocked local permission to the database.
 		/// </summary>
 		/// <param name="grantedPermission">The granted permission.</param>
-		public void AddMockedLocalPermission(LocalPermission grantedPermission)
+		public void AddMockedLocalPermission([NotNull] LocalPermission grantedPermission)
 		{
 			using (var db = GetDatabaseContext())
 			{

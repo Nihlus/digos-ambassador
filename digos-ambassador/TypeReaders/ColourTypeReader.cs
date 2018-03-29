@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Appearances;
 using Discord.Commands;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.TypeReaders
 {
@@ -33,6 +34,7 @@ namespace DIGOS.Ambassador.TypeReaders
 	public sealed class ColourTypeReader : TypeReader
 	{
 		/// <inheritdoc />
+		[NotNull]
 		public override Task<TypeReaderResult> Read(ICommandContext context, string input, IServiceProvider services)
 		{
 			if (!Colour.TryParse(input, out var colour))

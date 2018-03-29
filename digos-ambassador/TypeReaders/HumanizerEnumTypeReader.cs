@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.TypeReaders
 {
@@ -34,6 +35,7 @@ namespace DIGOS.Ambassador.TypeReaders
 	public class HumanizerEnumTypeReader<T> : TypeReader where T : struct, IComparable, IFormattable
 	{
 		/// <inheritdoc />
+		[NotNull]
 		public override Task<TypeReaderResult> Read(ICommandContext context, string input, IServiceProvider services)
 		{
 			try

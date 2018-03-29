@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// <returns>true if the parsing was successful; otherwise, false.</returns>
 		[Pure]
 		[ContractAnnotation("input:null => false")]
-		public static bool TryParse([CanBeNull] string input, out Colour colour)
+		public static bool TryParse([CanBeNull] string input, [CanBeNull] out Colour colour)
 		{
 			colour = new Colour();
 

@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Transformations
 			AddAvailableTokenType(typeof(T));
 		}
 
-		private void AddAvailableTokenType(Type tokenType)
+		private void AddAvailableTokenType([NotNull] Type tokenType)
 		{
 			var tokenIdentifier = tokenType.GetCustomAttribute<TokenIdentifierAttribute>();
 			if (tokenIdentifier is null)
@@ -101,6 +101,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// </summary>
 		/// <typeparam name="T">A valid token type.</typeparam>
 		/// <returns>The tokenizer.</returns>
+		[NotNull]
 		public TransformationTextTokenizer WithTokenType<T>() where T : ReplacableTextToken<T>
 		{
 			AddAvailableTokenType<T>();
@@ -157,6 +158,7 @@ namespace DIGOS.Ambassador.Transformations
 		/// <param name="start">The start index of the token.</param>
 		/// <param name="tokenText">The raw text of the token.</param>
 		/// <returns>A token object.</returns>
+		[CanBeNull]
 		public IReplaceableTextToken ParseToken(int start, string tokenText)
 		{
 			// Tokens are of the format @<tag>|<data>

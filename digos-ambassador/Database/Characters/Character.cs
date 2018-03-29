@@ -53,6 +53,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		public string Name { get; set; }
 
 		/// <inheritdoc />
+		[NotNull]
 		public string EntityTypeDisplayName => nameof(Character);
 
 		/// <summary>
@@ -138,6 +139,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// <param name="bodypart">The bodypart to get.</param>
 		/// <param name="chirality">The chirality of the bodypart.</param>
 		/// <returns>The appearance component of the bodypart.</returns>
+		[NotNull]
 		public AppearanceComponent GetAppearanceComponent(Bodypart bodypart, Chirality chirality)
 		{
 			if (bodypart.IsChiral() && chirality == Chirality.Center)
@@ -155,7 +157,28 @@ namespace DIGOS.Ambassador.Database.Characters
 				throw new ArgumentException("The bodypart must not be a composite part.");
 			}
 
-			return this.CurrentAppearance.Components.FirstOrDefault(c => c.Bodypart == bodypart && c.Chirality == chirality);
+			return this.CurrentAppearance.Components.First(c => c.Bodypart == bodypart && c.Chirality == chirality);
+		}
+
+		/// <summary>
+		/// Tries to retrieve the component on the character's current appearance that matches the given bodypart.
+		/// </summary>
+		/// <param name="bodypart">The bodypart to get.</param>
+		/// <param name="chirality">The chirality of the bodypart.</param>
+		/// <param name="component">The component, or null.</param>
+		/// <returns>True if a component could be retrieved, otherwise, false.</returns>
+		[ContractAnnotation("=> true, component:notnull; => false, component:null")]
+		public bool TryGetAppearanceComponent(Bodypart bodypart, Chirality chirality, [CanBeNull] out AppearanceComponent component)
+		{
+			component = null;
+
+			if (!HasComponent(bodypart, chirality))
+			{
+				return false;
+			}
+
+			component = GetAppearanceComponent(bodypart, chirality);
+			return true;
 		}
 
 		/// <inheritdoc />

@@ -71,6 +71,7 @@ namespace DIGOS.Ambassador.Doc
 		/// <param name="typeReader">The type reader.</param>
 		/// <typeparam name="T">The type that the reader reads.</typeparam>
 		/// <returns>The generator, with the type reader added.</returns>
+		[NotNull]
 		public ModuleDocumentationGenerator WithTypeReader<T>(TypeReader typeReader)
 		{
 			this.Commands.AddTypeReader<T>(typeReader);

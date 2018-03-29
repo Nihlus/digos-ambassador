@@ -59,6 +59,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		}
 
 		/// <inheritdoc />
+		[NotNull]
 		public string Compile()
 		{
 			if (this.Underline && this.Level <= 2)

@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Services;
 using Discord.Commands;
-
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 		}
 
 		/// <inheritdoc />
-		public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, CommandInfo command, IServiceProvider services)
+		public override async Task<PreconditionResult> CheckPermissions([NotNull] ICommandContext context, CommandInfo command, IServiceProvider services)
 		{
 			var roleplayService = services.GetRequiredService<RoleplayService>();
 			var db = services.GetRequiredService<GlobalInfoContext>();

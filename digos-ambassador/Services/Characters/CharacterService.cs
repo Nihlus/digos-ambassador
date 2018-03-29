@@ -105,7 +105,8 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="pronounProvider">The pronoun provider to add.</param>
 		/// <returns>The service with the provider.</returns>
-		public CharacterService WithPronounProvider(IPronounProvider pronounProvider)
+		[NotNull]
+		public CharacterService WithPronounProvider([NotNull] IPronounProvider pronounProvider)
 		{
 			this.PronounProviders.Add(pronounProvider.Family, pronounProvider);
 			return this;
@@ -255,6 +256,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="db">The database.</param>
 		/// <param name="guild">The guild where the characters are.</param>
 		/// <returns>A queryable set of characters.</returns>
+		[NotNull]
 		public IQueryable<Character> GetCharacters([NotNull] GlobalInfoContext db, IGuild guild)
 		{
 			return db.Characters
@@ -407,7 +409,7 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="context">The context of the command.</param>
 		/// <param name="characterName">The name of the character.</param>
 		/// <returns>A creation result which may or may not have been successful.</returns>
-		public async Task<CreateEntityResult<Character>> CreateCharacterAsync(GlobalInfoContext db, ICommandContext context, string characterName)
+		public async Task<CreateEntityResult<Character>> CreateCharacterAsync([NotNull] GlobalInfoContext db, [NotNull] ICommandContext context, [NotNull] string characterName)
 		{
 			return await CreateCharacterAsync(db, context, characterName, this.Content.DefaultAvatarUri.ToString(), null, null, null);
 		}

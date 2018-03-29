@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
@@ -52,6 +53,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		}
 
 		/// <inheritdoc />
+		[NotNull]
 		public string Compile()
 		{
 			return $"{this.Components.Select(c => c.Compile()).Aggregate((a, b) => a + b)}";
@@ -62,6 +64,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// </summary>
 		/// <param name="text">The text to append.</param>
 		/// <returns>The paragraph, with the text appended.</returns>
+		[NotNull]
 		public MarkdownParagraph AppendText(MarkdownText text)
 		{
 			this.Components.Add(text);
@@ -73,6 +76,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// </summary>
 		/// <param name="text">The text to append.</param>
 		/// <returns>The paragraph, with the text appended.</returns>
+		[NotNull]
 		public MarkdownParagraph AppendText(string text)
 		{
 			return AppendText(new MarkdownText(text));
@@ -83,6 +87,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// </summary>
 		/// <param name="text">The text.</param>
 		/// <returns>The paragrpah, with the text appended.</returns>
+		[NotNull]
 		public MarkdownParagraph AppendLine(MarkdownText text)
 		{
 			return AppendText(text).AppendText("\n\n");
@@ -93,6 +98,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// </summary>
 		/// <param name="text">The text.</param>
 		/// <returns>The paragrpah, with the text appended.</returns>
+		[NotNull]
 		public MarkdownParagraph AppendLine(string text)
 		{
 			return AppendText(text).AppendText("\n\n");

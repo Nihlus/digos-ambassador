@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
@@ -66,7 +67,8 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// </summary>
 		/// <param name="content">The content.</param>
 		/// <returns>The section, with the content appended.</returns>
-		public MarkdownSection AppendContent(IMarkdownNode content)
+		[NotNull]
+		public MarkdownSection AppendContent([NotNull] IMarkdownNode content)
 		{
 			this.Content.Add(content);
 			return this;
@@ -77,7 +79,8 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// </summary>
 		/// <param name="content">The content.</param>
 		/// <returns>The section, with all the content appended.</returns>
-		public MarkdownSection AppendContentRange(IEnumerable<IMarkdownNode> content)
+		[NotNull]
+		public MarkdownSection AppendContentRange([NotNull, ItemNotNull] IEnumerable<IMarkdownNode> content)
 		{
 			foreach (var node in content)
 			{

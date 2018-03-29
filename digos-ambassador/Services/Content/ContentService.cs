@@ -233,6 +233,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="dossier">The dossier.</param>
 		/// <returns>A deletion result which may or may not have succeeded.</returns>
+		[NotNull]
 		public Task<DeleteEntityResult> DeleteDossierDataAsync([NotNull] Dossier dossier)
 		{
 			var dataPath = GetDossierDataPath(dossier);
@@ -360,6 +361,7 @@ namespace DIGOS.Ambassador.Services
 			return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromSuccess(transformations);
 		}
 
+		[NotNull]
 		[Pure]
 		private string GetSpeciesDirectory([NotNull] Species species)
 		{

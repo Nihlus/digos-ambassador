@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Database;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
@@ -32,6 +33,7 @@ namespace DIGOS.Ambassador.Design
 	public class DesignTimeGlobalInfoContextFactory : IDesignTimeDbContextFactory<GlobalInfoContext>
 	{
 		/// <inheritdoc />
+		[NotNull]
 		public GlobalInfoContext CreateDbContext(string[] args)
 		{
 			var options = GlobalInfoContext.ConfigureOptions(new DbContextOptionsBuilder<GlobalInfoContext>()).Options;

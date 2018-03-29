@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
@@ -39,6 +40,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
 		/// </summary>
 		/// <param name="cell">The cell to append.</param>
 		/// <returns>The row, with the cell appended.</returns>
+		[NotNull]
 		public MarkdownTableRow AppendCell(IMarkdownNode cell)
 		{
 			this.Cells.Add(cell);

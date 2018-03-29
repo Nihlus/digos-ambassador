@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
@@ -36,7 +37,8 @@ namespace DIGOS.Ambassador.Extensions
 		/// <param name="value">The value.</param>
 		/// <typeparam name="T">The attribute type</typeparam>
 		/// <returns>The attribute.</returns>
-		public static T GetCustomAttribute<T>(this Enum value) where T : Attribute
+		[CanBeNull]
+		public static T GetCustomAttribute<T>([NotNull] this Enum value) where T : Attribute
 		{
 			var enumType = value.GetType();
 			var name = Enum.GetName(enumType, value);
@@ -49,7 +51,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// <param name="value">The value.</param>
 		/// <typeparam name="T">The type.</typeparam>
 		/// <returns>true if the value has an attribute; otherwise, false.</returns>
-		public static bool HasCustomAttribute<T>(this Enum value) where T : Attribute
+		public static bool HasCustomAttribute<T>([NotNull] this Enum value) where T : Attribute
 		{
 			return !(value.GetCustomAttribute<T>() is null);
 		}

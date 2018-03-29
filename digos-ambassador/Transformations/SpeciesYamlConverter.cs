@@ -24,6 +24,7 @@ using System;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Services;
+using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -76,7 +77,7 @@ namespace DIGOS.Ambassador.Transformations
 		}
 
 		/// <inheritdoc />
-		public void WriteYaml(IEmitter emitter, object value, Type type)
+		public void WriteYaml([NotNull] IEmitter emitter, object value, Type type)
 		{
 			var species = (Species)value;
 

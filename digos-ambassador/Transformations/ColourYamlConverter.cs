@@ -22,6 +22,7 @@
 
 using System;
 using DIGOS.Ambassador.Database.Appearances;
+using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
@@ -40,6 +41,7 @@ namespace DIGOS.Ambassador.Transformations
 		}
 
 		/// <inheritdoc />
+		[CanBeNull]
 		public object ReadYaml(IParser parser, Type type)
 		{
 			var rawColour = parser.Allow<Scalar>().Value;
@@ -58,7 +60,7 @@ namespace DIGOS.Ambassador.Transformations
 		}
 
 		/// <inheritdoc />
-		public void WriteYaml(IEmitter emitter, object value, Type type)
+		public void WriteYaml([NotNull] IEmitter emitter, [NotNull] object value, Type type)
 		{
 			emitter.Emit(new Scalar(value.ToString()));
 		}

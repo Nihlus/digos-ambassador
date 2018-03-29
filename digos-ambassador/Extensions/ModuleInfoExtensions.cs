@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using Discord.Commands;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
@@ -35,7 +36,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// </summary>
 		/// <param name="childModules">The modules to start searching in.</param>
 		/// <returns>The top-level methods.</returns>
-		public static IEnumerable<ModuleInfo> GetTopLevelModules(this IEnumerable<ModuleInfo> childModules)
+		public static IEnumerable<ModuleInfo> GetTopLevelModules([NotNull] this IEnumerable<ModuleInfo> childModules)
 		{
 			foreach (var childModule in childModules)
 			{

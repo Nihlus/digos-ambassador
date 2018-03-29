@@ -130,6 +130,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// </summary>
 		/// <param name="transformation">The transformation.</param>
 		/// <returns>A set of appearance components.</returns>
+		[ItemNotNull]
 		[Pure]
 		[NotNull]
 		public static IEnumerable<AppearanceComponent> CreateFromChiral([NotNull] Transformation transformation)

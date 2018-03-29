@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DIGOS.Ambassador.Database.Permissions;
+using JetBrains.Annotations;
 using static DIGOS.Ambassador.Permissions.Permission;
 using static DIGOS.Ambassador.Permissions.PermissionTarget;
 
@@ -55,6 +56,7 @@ namespace DIGOS.Ambassador.Permissions
 		/// <summary>
 		/// Gets the default set of local permissions.
 		/// </summary>
+		[NotNull]
 		public static IReadOnlyList<LocalPermission> DefaultPermissionSet => Permissions.Select(p => new LocalPermission { Permission = p, Target = Self }).ToList();
 	}
 }

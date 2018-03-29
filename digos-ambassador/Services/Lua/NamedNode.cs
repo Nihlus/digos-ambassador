@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Services
 {
 	/// <summary>
@@ -37,6 +39,7 @@ namespace DIGOS.Ambassador.Services
 		public T Value { get; set; }
 
 		/// <inheritdoc />
+		[NotNull]
 		public virtual string Format(bool pretty = false)
 		{
 			return this.Value.ToString();

@@ -131,7 +131,8 @@ namespace DIGOS.Ambassador.Modules
 			}
 		}
 
-		private EmbedBuilder BuildDossierEmbed(Dossier dossier)
+		[NotNull]
+		private EmbedBuilder BuildDossierEmbed([NotNull] Dossier dossier)
 		{
 			var eb = this.Feedback.CreateBaseEmbed();
 			eb.WithTitle(dossier.Title);

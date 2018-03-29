@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Doc
 		/// </summary>
 		/// <param name="name">The name of the page.</param>
 		/// <param name="title">The title of the page.</param>
-		public MarkdownPage(string name, string title)
+		public MarkdownPage([NotNull] string name, [NotNull] string title)
 		{
 			this.Name = name;
 			this.Title = title;
@@ -92,6 +92,7 @@ namespace DIGOS.Ambassador.Doc
 		/// </summary>
 		/// <param name="section">The section.</param>
 		/// <returns>The page, with the section appended.</returns>
+		[NotNull]
 		public MarkdownPage AppendSection(MarkdownSection section)
 		{
 			this.Sections.Add(section);
