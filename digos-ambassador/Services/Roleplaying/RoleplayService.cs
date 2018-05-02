@@ -628,6 +628,11 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
 			}
 
+			if (newRoleplayName.Contains("\""))
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The name may not contain double quotes.");
+			}
+
 			if (!await IsRoleplayNameUniqueForUserAsync(db, context.Message.Author, newRoleplayName, context.Guild))
 			{
 				var errorMessage = isCurrentUser

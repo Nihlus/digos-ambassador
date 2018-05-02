@@ -183,6 +183,11 @@ namespace DIGOS.Ambassador.Services
 				}
 			}
 
+			if (newTitle.Contains("\""))
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The title may not contain double quotes.");
+			}
+
 			if (newTitle.IndexOfAny(Path.GetInvalidPathChars()) > -1)
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, $"The title contains one or more of invalid characters ({Path.GetInvalidPathChars().Humanize("or")})");

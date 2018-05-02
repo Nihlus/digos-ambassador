@@ -369,7 +369,7 @@ namespace DIGOS.Ambassador.Modules
 				}
 				else
 				{
-					modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, null);
+					modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, guildUser.Username);
 				}
 
 				if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)

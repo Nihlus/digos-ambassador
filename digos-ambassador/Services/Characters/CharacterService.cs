@@ -535,6 +535,11 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character already has that name.");
 			}
 
+			if (newCharacterName.Contains("\""))
+			{
+				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The name may not contain double quotes.");
+			}
+
 			if (!await IsCharacterNameUniqueForUserAsync(db, context.Message.Author, newCharacterName, context.Guild))
 			{
 				var errorMessage = isCurrentUser
