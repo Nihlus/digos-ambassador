@@ -404,6 +404,7 @@ namespace DIGOS.Ambassador.Modules
 				Color = Color.DarkPurple,
 				Title = character.Name,
 				Options =
+				new PaginatedAppearanceOptions
 				{
 					FooterFormat = "Image {0}/{1}",
 					InformationText = "Use the reactions to navigate the gallery."

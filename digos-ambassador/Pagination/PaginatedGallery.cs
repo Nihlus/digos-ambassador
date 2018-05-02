@@ -35,10 +35,10 @@ namespace DIGOS.Ambassador.Pagination
 	public class PaginatedGallery : IPager<Image, PaginatedGallery>
 	{
 		/// <inheritdoc />
-		public IList<Image> Pages { get; set; }
+		public IList<Image> Pages { get; set; } = new List<Image>();
 
 		/// <inheritdoc />
-		public PaginatedAppearanceOptions Options { get; set; }
+		public PaginatedAppearanceOptions Options { get; set; } = PaginatedAppearanceOptions.Default;
 
 		/// <summary>
 		/// Gets or sets the colour of the gallery's embed.
