@@ -586,6 +586,8 @@ namespace DIGOS.Ambassador.Modules
 			await userDMChannel.SendMessageAsync(string.Empty, false, eb);
 
 			var messages = roleplay.Messages.Where(m => m.Timestamp > from && m.Timestamp < to).OrderBy(msg => msg.Timestamp).ToList();
+			var timestampEmbed = this.Feedback.CreateFeedbackEmbed(this.Context.User, Color.DarkPurple, $"Roleplay began at {messages.First().Timestamp.ToUniversalTime()}");
+			await userDMChannel.SendMessageAsync(string.Empty, false, timestampEmbed);
 
 			if (messages.Count <= 0)
 			{
