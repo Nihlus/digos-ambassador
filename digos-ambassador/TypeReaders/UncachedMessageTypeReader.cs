@@ -35,7 +35,7 @@ namespace DIGOS.Ambassador.TypeReaders
 	public class UncachedMessageTypeReader<T> : TypeReader where T : class, IMessage
 	{
 		/// <inheritdoc />
-		public override async Task<TypeReaderResult> Read(ICommandContext context, string input, IServiceProvider services)
+		public override async Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
 		{
 			if (ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out ulong id))
 			{

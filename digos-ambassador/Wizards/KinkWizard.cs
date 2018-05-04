@@ -427,7 +427,7 @@ namespace DIGOS.Ambassador.Wizards
 				}
 			}
 
-			await this.Interactive.ReplyAndDeleteAsync(this.Context, string.Empty, false, eb, TimeSpan.FromSeconds(30));
+			await this.Interactive.ReplyAndDeleteAsync(this.Context, string.Empty, false, eb.Build(), TimeSpan.FromSeconds(30));
 		}
 
 		private async Task SetCurrentKinkPreference(KinkPreference preference)
@@ -498,7 +498,7 @@ namespace DIGOS.Ambassador.Wizards
 			{
 				case KinkWizardState.CategorySelection:
 				{
-					var eb = this.Feedback.CreateBaseEmbed();
+					var eb = this.Feedback.CreateEmbedBase();
 					eb.WithTitle("Category selection");
 
 					if (this.Categories.Any())
@@ -532,7 +532,7 @@ namespace DIGOS.Ambassador.Wizards
 					}
 
 					var userKink = getUserKinkResult.Entity;
-					return this.Kinks.BuildUserKinkInfoEmbed(userKink);
+					return this.Kinks.BuildUserKinkInfoEmbedBase(userKink).Build();
 				}
 				default:
 				{

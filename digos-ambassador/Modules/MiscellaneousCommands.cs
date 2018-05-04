@@ -123,7 +123,8 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Sasses the user in a DIGOS fashion.")]
 		public async Task SassAsync()
 		{
-			string sass = this.Content.GetSass(this.Context.Channel.IsNsfw);
+			var isNsfwChannel = this.Context.Channel is ITextChannel textChannel && textChannel.IsNsfw;
+			string sass = this.Content.GetSass(isNsfwChannel);
 
 			await this.Feedback.SendConfirmationAsync(this.Context, sass);
 		}
@@ -183,7 +184,7 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Shows some information about Amby's metaworkings.")]
 		public async Task InfoAsync()
 		{
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 
 			eb.WithAuthor(this.Context.Client.CurrentUser);
 			eb.WithTitle("The DIGOS Ambassador (\"Amby\")");
@@ -209,7 +210,7 @@ namespace DIGOS.Ambassador.Modules
 				"- Amby"
 			);
 
-			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
+			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
 		}
 
 		/// <summary>
@@ -221,7 +222,7 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Lists available command modules.")]
 		public async Task HelpAsync()
 		{
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 
 			eb.WithTitle("Available command modules");
 			eb.WithDescription
@@ -237,7 +238,7 @@ namespace DIGOS.Ambassador.Modules
 				eb.AddField(module.Name, module.Summary);
 			}
 
-			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
+			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
 		}
 
 		/// <summary>
@@ -331,12 +332,12 @@ namespace DIGOS.Ambassador.Modules
 
 				if (availableEmbed.Fields.Count > 0)
 				{
-					await userChannel.SendMessageAsync(string.Empty, false, availableEmbed);
+					await userChannel.SendMessageAsync(string.Empty, false, availableEmbed.Build());
 				}
 
 				if (unavailableEmbed.Fields.Count > 0)
 				{
-					await userChannel.SendMessageAsync(string.Empty, false, unavailableEmbed);
+					await userChannel.SendMessageAsync(string.Empty, false, unavailableEmbed.Build());
 				}
 			}
 

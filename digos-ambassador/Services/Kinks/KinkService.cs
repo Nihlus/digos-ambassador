@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An embed.</returns>
 		public Embed BuildKinkInfoEmbed([NotNull] Kink kink)
 		{
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 
 			eb.WithTitle(kink.Name.Transform(To.TitleCase));
 			eb.WithDescription(kink.Description);
@@ -100,9 +100,9 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="userKink">The kink.</param>
 		/// <returns>An embed.</returns>
 		[NotNull]
-		public EmbedBuilder BuildUserKinkInfoEmbed([NotNull] UserKink userKink)
+		public EmbedBuilder BuildUserKinkInfoEmbedBase([NotNull] UserKink userKink)
 		{
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 
 			eb.AddField(userKink.Kink.Name.Transform(To.TitleCase), userKink.Kink.Description);
 			eb.AddField("Current preference", userKink.Preference.Humanize());
@@ -136,7 +136,7 @@ namespace DIGOS.Ambassador.Services
 			(
 				from batch in kinks.Batch(3)
 				from kink in batch
-				select BuildUserKinkInfoEmbed(kink).WithTitle
+				select BuildUserKinkInfoEmbedBase(kink).WithTitle
 				(
 					$"Matching kinks between {firstUser.Mention} and {secondUser.Mention}"
 				)
@@ -158,7 +158,7 @@ namespace DIGOS.Ambassador.Services
 			(
 				from batch in kinks.Batch(3)
 				from kink in batch
-				select BuildUserKinkInfoEmbed(kink)
+				select BuildUserKinkInfoEmbedBase(kink)
 			)
 			.ToList();
 

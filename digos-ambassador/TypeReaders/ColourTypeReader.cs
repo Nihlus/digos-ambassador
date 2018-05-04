@@ -35,7 +35,7 @@ namespace DIGOS.Ambassador.TypeReaders
 	{
 		/// <inheritdoc />
 		[NotNull]
-		public override Task<TypeReaderResult> Read(ICommandContext context, string input, IServiceProvider services)
+		public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
 		{
 			if (!Colour.TryParse(input, out var colour))
 			{

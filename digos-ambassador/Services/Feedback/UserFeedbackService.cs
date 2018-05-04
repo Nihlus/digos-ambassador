@@ -162,7 +162,7 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="context">The context of the send operation.</param>
 		/// <param name="eb">The embed to send.</param>
-		public async Task SendEmbedAsync([NotNull] SocketCommandContext context, [NotNull] EmbedBuilder eb)
+		public async Task SendEmbedAsync([NotNull] SocketCommandContext context, [NotNull] Embed eb)
 		{
 			await context.Channel.SendMessageAsync(string.Empty, false, eb);
 		}
@@ -200,12 +200,12 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A feedback embed.</returns>
 		[Pure]
 		[NotNull]
-		public EmbedBuilder CreateFeedbackEmbed([NotNull] IMentionable invoker, Color color, [NotNull] string contents)
+		public Embed CreateFeedbackEmbed([NotNull] IMentionable invoker, Color color, [NotNull] string contents)
 		{
-			var eb = CreateBaseEmbed(color);
+			var eb = CreateEmbedBase(color);
 			eb.WithDescription($"{invoker.Mention} | {contents}");
 
-			return eb;
+			return eb.Build();
 		}
 
 		/// <summary>
@@ -215,7 +215,7 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>A basic embed.</returns>
 		[Pure]
 		[NotNull]
-		public EmbedBuilder CreateBaseEmbed(Color? color = null)
+		public EmbedBuilder CreateEmbedBase(Color? color = null)
 		{
 			color = color ?? Color.DarkPurple;
 
@@ -232,9 +232,9 @@ namespace DIGOS.Ambassador.Services
 		/// <returns>An embed.</returns>
 		[Pure]
 		[NotNull]
-		public EmbedBuilder CreateCommandUsageEmbed([NotNull] IReadOnlyList<CommandMatch> matchingCommands)
+		public Embed CreateCommandUsageEmbed([NotNull] IReadOnlyList<CommandMatch> matchingCommands)
 		{
-			var eb = CreateBaseEmbed();
+			var eb = CreateEmbedBase();
 			eb.WithTitle("Perhaps you meant one of the following?");
 
 			foreach (var matchingCommand in matchingCommands)
@@ -242,7 +242,7 @@ namespace DIGOS.Ambassador.Services
 				eb.AddField($"{matchingCommand.Alias}", BuildParameterList(matchingCommand.Command));
 			}
 
-			return eb;
+			return eb.Build();
 		}
 
 		/// <summary>

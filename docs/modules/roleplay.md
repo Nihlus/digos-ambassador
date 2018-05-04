@@ -184,6 +184,18 @@ Transfers ownership of the named roleplay to the specified user.
 
 ---
 
+### *export*
+#### Overloads
+**`roleplay export`**
+
+ Exports the named roleplay owned by the given user, sending you a file with the contents.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| roleplay | Roleplay | `no` |
+
+---
+
 ### *replay*
 #### Overloads
 **`roleplay replay`**

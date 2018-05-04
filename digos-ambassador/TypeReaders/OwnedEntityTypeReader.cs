@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.TypeReaders
 		where T2 : class, IOwnedNamedEntity
 	{
 		/// <inheritdoc />
-		public sealed override async Task<TypeReaderResult> Read([NotNull] ICommandContext context, string input, IServiceProvider services)
+		public sealed override async Task<TypeReaderResult> ReadAsync([NotNull] ICommandContext context, string input, IServiceProvider services)
 		{
 			IUser owner = null;
 			string entityName;
@@ -125,7 +125,7 @@ namespace DIGOS.Ambassador.TypeReaders
 
 			IReadOnlyCollection<IUser> channelUsers =
 			(
-				await context.Channel.GetUsersAsync(CacheMode.CacheOnly).Flatten().ConfigureAwait(false)
+				await context.Channel.GetUsersAsync(CacheMode.CacheOnly).FlattenAsync().ConfigureAwait(false)
 			)
 			.ToArray();
 

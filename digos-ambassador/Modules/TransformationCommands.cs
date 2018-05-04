@@ -528,7 +528,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			var availableSpecies = await this.Transformation.GetAvailableSpeciesAsync(this.Database);
 
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 			eb.WithTitle("Available species");
 
 			if (availableSpecies.Count <= 0)
@@ -541,7 +541,7 @@ namespace DIGOS.Ambassador.Modules
 				eb.AddField(species.Name.Humanize(LetterCasing.Title), species.Description);
 			}
 
-			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
+			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
 		}
 
 		/// <summary>
@@ -561,7 +561,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			var transformations = await this.Transformation.GetAvailableTransformationsAsync(this.Database, bodyPart);
 
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 			eb.WithTitle("Available transformations");
 
 			if (transformations.Count <= 0)
@@ -574,7 +574,7 @@ namespace DIGOS.Ambassador.Modules
 				eb.AddField(transformation.Species.Name.Humanize(LetterCasing.Title), transformation.Description);
 			}
 
-			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
+			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
 		}
 
 		/// <summary>

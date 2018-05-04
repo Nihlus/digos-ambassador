@@ -78,9 +78,9 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		[NotNull]
-		private EmbedBuilder BuildDossierListEmbed([NotNull][ItemNotNull]IEnumerable<Dossier> dossiers)
+		private Embed BuildDossierListEmbed([NotNull][ItemNotNull]IEnumerable<Dossier> dossiers)
 		{
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 			eb.WithTitle("Dossier Database");
 
 			foreach (var dossier in dossiers)
@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Modules
 				eb.WithDescription("No dossiers found.");
 			}
 
-			return eb;
+			return eb.Build();
 		}
 
 		/// <summary>
@@ -132,13 +132,13 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		[NotNull]
-		private EmbedBuilder BuildDossierEmbed([NotNull] Dossier dossier)
+		private Embed BuildDossierEmbed([NotNull] Dossier dossier)
 		{
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 			eb.WithTitle(dossier.Title);
 			eb.WithDescription(dossier.Summary);
 
-			return eb;
+			return eb.Build();
 		}
 
 		/// <summary>

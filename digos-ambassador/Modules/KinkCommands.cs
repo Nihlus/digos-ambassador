@@ -123,9 +123,9 @@ namespace DIGOS.Ambassador.Modules
 			}
 
 			var userKink = getUserKinkResult.Entity;
-			var display = this.Kinks.BuildUserKinkInfoEmbed(userKink);
+			var display = this.Kinks.BuildUserKinkInfoEmbedBase(userKink);
 
-			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display);
+			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display.Build());
 		}
 
 		/// <summary>

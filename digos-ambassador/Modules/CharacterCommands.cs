@@ -110,7 +110,7 @@ namespace DIGOS.Ambassador.Modules
 		public async Task ShowAvailablePronounFamiliesAsync()
 		{
 			var pronounProviders = this.Characters.GetAvailablePronounProviders();
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 			eb.WithTitle("Available pronouns");
 
 			eb.WithDescription
@@ -118,7 +118,7 @@ namespace DIGOS.Ambassador.Modules
 				string.Join("\n", pronounProviders.Select(p => $"**{p.Family}**"))
 			);
 
-			await this.Feedback.SendEmbedAsync(this.Context, eb);
+			await this.Feedback.SendEmbedAsync(this.Context, eb.Build());
 		}
 
 		/// <summary>
@@ -168,7 +168,7 @@ namespace DIGOS.Ambassador.Modules
 				var userDMChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
 				using (var ds = new MemoryStream(Encoding.UTF8.GetBytes(character.Description)))
 				{
-					await userDMChannel.SendMessageAsync(string.Empty, false, eb);
+					await userDMChannel.SendMessageAsync(string.Empty, false, eb.Build());
 					await userDMChannel.SendFileAsync(ds, $"{character.Name}_description.txt");
 				}
 
@@ -180,14 +180,14 @@ namespace DIGOS.Ambassador.Modules
 			else
 			{
 				eb.AddField("Description", character.Description);
-				await this.Feedback.SendEmbedAsync(this.Context, eb);
+				await this.Feedback.SendEmbedAsync(this.Context, eb.Build());
 			}
 		}
 
 		[NotNull]
 		private EmbedBuilder CreateCharacterInfoEmbed([NotNull] Character character)
 		{
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 
 			eb.WithAuthor(this.Context.Client.GetUser(character.Owner.DiscordID));
 
@@ -290,7 +290,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			discordUser = discordUser ?? this.Context.Message.Author;
 
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 			eb.WithAuthor(discordUser);
 			eb.WithTitle("Your characters");
 
@@ -306,7 +306,7 @@ namespace DIGOS.Ambassador.Modules
 				eb.WithDescription("You don't have any characters.");
 			}
 
-			await this.Feedback.SendEmbedAsync(this.Context, eb);
+			await this.Feedback.SendEmbedAsync(this.Context, eb.Build());
 		}
 
 		/// <summary>
@@ -424,7 +424,7 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task ListImagesAsync([NotNull] Character character)
 		{
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 			eb.WithTitle("Images in character gallery");
 
 			foreach (var image in character.Images)
@@ -437,7 +437,7 @@ namespace DIGOS.Ambassador.Modules
 				eb.WithDescription("There are no images in the character's gallery.");
 			}
 
-			await this.Context.Channel.SendMessageAsync(string.Empty, false, eb);
+			await this.Context.Channel.SendMessageAsync(string.Empty, false, eb.Build());
 		}
 
 		/// <summary>

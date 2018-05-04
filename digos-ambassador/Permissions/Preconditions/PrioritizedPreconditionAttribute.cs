@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 		public int Priority { get; set; }
 
 		/// <inheritdoc />
-		public sealed override async Task<PreconditionResult> CheckPermissions(ICommandContext context, [NotNull] CommandInfo command, IServiceProvider services)
+		public sealed override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, [NotNull] CommandInfo command, IServiceProvider services)
 		{
 			var prioPreconditions = command.Preconditions.Where(a => a is PrioritizedPreconditionAttribute).Cast<PrioritizedPreconditionAttribute>();
 

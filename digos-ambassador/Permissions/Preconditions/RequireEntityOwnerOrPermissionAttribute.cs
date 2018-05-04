@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 		}
 
 		/// <inheritdoc />
-		public override async Task<PreconditionResult> CheckPermissions(ICommandContext context, ParameterInfo parameter, object value, IServiceProvider services)
+		public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, ParameterInfo parameter, object value, IServiceProvider services)
 		{
 			if (!(value is IOwnedNamedEntity entity))
 			{

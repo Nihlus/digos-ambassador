@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			var enumValues = (Permission[])Enum.GetValues(typeof(Permission));
 
-			await this.Context.Channel.SendMessageAsync(string.Empty, false, CreateHumanizedPermissionEmbed(enumValues));
+			await this.Context.Channel.SendMessageAsync(string.Empty, false, CreateHumanizedPermissionEmbedBase(enumValues).Build());
 		}
 
 		/// <summary>
@@ -92,10 +92,10 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task ListGrantedPermissionsAsync()
 		{
-			var embed = CreateHumanizedPermissionEmbed(this.Permissions.GetLocalUserPermissions(this.Database, this.Context.User, this.Context.Guild));
+			var embed = CreateHumanizedPermissionEmbedBase(this.Permissions.GetLocalUserPermissions(this.Database, this.Context.User, this.Context.Guild));
 			embed.WithAuthor(this.Context.Message.Author);
 
-			await this.Feedback.SendEmbedAsync(this.Context, embed);
+			await this.Feedback.SendEmbedAsync(this.Context, embed.Build());
 		}
 
 		/// <summary>
@@ -108,16 +108,16 @@ namespace DIGOS.Ambassador.Modules
 		[RequireContext(Guild)]
 		public async Task ListGrantedPermissionsAsync([NotNull] IUser discordUser)
 		{
-			var embed = CreateHumanizedPermissionEmbed(this.Permissions.GetLocalUserPermissions(this.Database, discordUser, this.Context.Guild));
+			var embed = CreateHumanizedPermissionEmbedBase(this.Permissions.GetLocalUserPermissions(this.Database, discordUser, this.Context.Guild));
 			embed.WithAuthor(discordUser);
 
-			await this.Feedback.SendEmbedAsync(this.Context, embed);
+			await this.Feedback.SendEmbedAsync(this.Context, embed.Build());
 		}
 
 		[NotNull]
-		private EmbedBuilder CreateHumanizedPermissionEmbed([NotNull] IEnumerable<Permission> permissions)
+		private EmbedBuilder CreateHumanizedPermissionEmbedBase([NotNull] IEnumerable<Permission> permissions)
 		{
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 			var humanizedPermissions = new List<(string Name, string Description)>();
 			foreach (var permission in permissions)
 			{
@@ -140,9 +140,9 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		[NotNull]
-		private EmbedBuilder CreateHumanizedPermissionEmbed([NotNull] [ItemNotNull] IEnumerable<LocalPermission> userPermissions)
+		private EmbedBuilder CreateHumanizedPermissionEmbedBase([NotNull] [ItemNotNull] IEnumerable<LocalPermission> userPermissions)
 		{
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 			var humanizedPermissions = new List<(string Name, string Description, string Target)>();
 			foreach (var userPermission in userPermissions)
 			{
@@ -161,7 +161,7 @@ namespace DIGOS.Ambassador.Modules
 			foreach (var permission in humanizedPermissions)
 			{
 				eb.AddField(permission.Name, permission.Description);
-				eb.AddInlineField("Allowed targets", permission.Target);
+				eb.AddField("Allowed targets", permission.Target, true);
 			}
 
 			return eb;

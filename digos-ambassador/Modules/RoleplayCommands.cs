@@ -121,19 +121,19 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		[NotNull]
-		private EmbedBuilder CreateRoleplayInfoEmbed([NotNull] Roleplay roleplay)
+		private Embed CreateRoleplayInfoEmbed([NotNull] Roleplay roleplay)
 		{
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 
 			eb.WithAuthor(this.Context.Client.GetUser(roleplay.Owner.DiscordID));
 			eb.WithTitle(roleplay.Name);
 			eb.WithDescription(roleplay.Summary);
 
-			eb.AddInlineField("Currently", $"{(roleplay.IsActive ? "Active" : "Inactive")}");
-			eb.AddInlineField("Channel", MentionUtils.MentionChannel(this.Context.Channel.Id));
+			eb.AddField("Currently", $"{(roleplay.IsActive ? "Active" : "Inactive")}", true);
+			eb.AddField("Channel", MentionUtils.MentionChannel(this.Context.Channel.Id), true);
 
 			eb.AddField("NSFW", roleplay.IsNSFW ? "Yes" : "No");
-			eb.AddInlineField("Public", roleplay.IsPublic ? "Yes" : "No");
+			eb.AddField("Public", roleplay.IsPublic ? "Yes" : "No", true);
 
 			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p.DiscordID));
 			var participantMentions = participantUsers.Select(u => u.Mention);
@@ -142,7 +142,8 @@ namespace DIGOS.Ambassador.Modules
 			participantList = string.IsNullOrEmpty(participantList) ? "None" : participantList;
 
 			eb.AddField("Participants", $"{participantList}");
-			return eb;
+
+			return eb.Build();
 		}
 
 		/// <summary>
@@ -158,7 +159,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			discordUser = discordUser ?? this.Context.Message.Author;
 
-			var eb = this.Feedback.CreateBaseEmbed();
+			var eb = this.Feedback.CreateEmbedBase();
 			eb.WithAuthor(discordUser);
 			eb.WithTitle("Your roleplays");
 
@@ -174,7 +175,7 @@ namespace DIGOS.Ambassador.Modules
 				eb.WithDescription("You don't have any roleplays.");
 			}
 
-			await this.Feedback.SendEmbedAsync(this.Context, eb);
+			await this.Feedback.SendEmbedAsync(this.Context, eb.Build());
 		}
 
 		/// <summary>
@@ -368,7 +369,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			this.Database.Attach(roleplay);
 
-			if (roleplay.IsNSFW && !this.Context.Channel.IsNsfw)
+			var isNsfwChannel = this.Context.Channel is ITextChannel textChannel && textChannel.IsNsfw;
+			if (roleplay.IsNSFW && !isNsfwChannel)
 			{
 				await this.Feedback.SendErrorAsync(this.Context, "This channel is not marked as NSFW, while your roleplay is... naughty!");
 				return;
@@ -398,7 +400,8 @@ namespace DIGOS.Ambassador.Modules
 		{
 			this.Database.Attach(roleplay);
 
-			if (roleplay.IsNSFW && !this.Context.Channel.IsNsfw)
+			var isNsfwChannel = this.Context.Channel is ITextChannel textChannel && textChannel.IsNsfw;
+			if (roleplay.IsNSFW && !isNsfwChannel)
 			{
 				await this.Feedback.SendErrorAsync(this.Context, "This channel is not marked as NSFW, while your roleplay is... naughty!");
 				return;
@@ -501,7 +504,7 @@ namespace DIGOS.Ambassador.Modules
 			var latestMessage = startMessage;
 			while (latestMessage.Timestamp < finalMessage.Timestamp)
 			{
-				var messages = (await this.Context.Channel.GetMessagesAsync(latestMessage, Direction.After).Flatten()).OrderBy(m => m.Timestamp).ToList();
+				var messages = (await this.Context.Channel.GetMessagesAsync(latestMessage, Direction.After).FlattenAsync()).OrderBy(m => m.Timestamp).ToList();
 				latestMessage = messages.Last();
 
 				foreach (var message in messages)
@@ -551,6 +554,22 @@ namespace DIGOS.Ambassador.Modules
 			}
 
 			await this.Feedback.SendConfirmationAsync(this.Context, "Roleplay ownership transferred.");
+		}
+
+		/// <summary>
+		/// Exports the named roleplay owned by the given user, sending you a file with the contents.
+		/// </summary>
+		/// <param name="roleplay">The roleplay.</param>
+		[UsedImplicitly]
+		[Command("export", RunMode = RunMode.Async)]
+		[Summary(" Exports the named roleplay owned by the given user, sending you a file with the contents.")]
+		[RequireContext(Guild)]
+		[RequirePermission(Permission.ReplayRoleplay)]
+		public async Task ExportRoleplayAsync
+		(
+			[NotNull] Roleplay roleplay
+		)
+		{
 		}
 
 		/// <summary>
