@@ -130,6 +130,7 @@
           <e p="ChiralityExtensions.cs" t="Include" />
           <e p="EnumExtensions.cs" t="Include" />
           <e p="EnumerableExtensions.cs" t="Include" />
+          <e p="ExportFormatExtensions.cs" t="Include" />
           <e p="FileAsync.cs" t="Include" />
           <e p="InteractiveServiceExtensions.cs" t="Include" />
           <e p="KeyValuePairExtensions.cs" t="Include" />
@@ -251,6 +252,14 @@
             <e p="UpdateTransformationsResult.cs" t="Include" />
           </e>
           <e p="Roleplaying" t="Include">
+            <e p="Exporters" t="Include">
+              <e p="ExportFormat.cs" t="Include" />
+              <e p="ExportedRoleplay.cs" t="Include" />
+              <e p="IRoleplayExporter.cs" t="Include" />
+              <e p="PDFRoleplayExporter.cs" t="Include" />
+              <e p="PlaintextRoleplayExporter.cs" t="Include" />
+              <e p="RoleplayExporterBase.cs" t="Include" />
+            </e>
             <e p="RoleplayService.cs" t="Include" />
           </e>
           <e p="Transformations" t="Include">

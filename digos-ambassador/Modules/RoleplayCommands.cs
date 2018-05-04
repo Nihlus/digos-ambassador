@@ -27,9 +27,11 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Exporters;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
@@ -560,6 +562,7 @@ namespace DIGOS.Ambassador.Modules
 		/// Exports the named roleplay owned by the given user, sending you a file with the contents.
 		/// </summary>
 		/// <param name="roleplay">The roleplay.</param>
+		/// <param name="format">The export format.</param>
 		[UsedImplicitly]
 		[Command("export", RunMode = RunMode.Async)]
 		[Summary(" Exports the named roleplay owned by the given user, sending you a file with the contents.")]
@@ -567,9 +570,37 @@ namespace DIGOS.Ambassador.Modules
 		[RequirePermission(Permission.ReplayRoleplay)]
 		public async Task ExportRoleplayAsync
 		(
-			[NotNull] Roleplay roleplay
+			[NotNull]
+			Roleplay roleplay,
+			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<ExportFormat>))]
+			ExportFormat format = ExportFormat.PDF
 		)
 		{
+			IRoleplayExporter exporter;
+			switch (format)
+			{
+				case ExportFormat.PDF:
+				{
+					exporter = new PDFRoleplayExporter(this.Context);
+					break;
+				}
+				case ExportFormat.Plaintext:
+				{
+					exporter = new PlaintextRoleplayExporter(this.Context);
+					break;
+				}
+				default:
+				{
+					await this.Feedback.SendErrorAsync(this.Context, "That export format hasn't been implemented yet.");
+					return;
+				}
+			}
+
+			await this.Feedback.SendConfirmationAsync(this.Context, "Compiling the roleplay...");
+			using (var output = await exporter.ExportAsync(roleplay))
+			{
+				await this.Context.Channel.SendFileAsync(output.Data, $"{output.Title}.{output.Format.GetFileExtension()}");
+			}
 		}
 
 		/// <summary>
