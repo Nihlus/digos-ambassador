@@ -600,16 +600,20 @@ namespace DIGOS.Ambassador.Modules
 
 			foreach (var message in messages)
 			{
-				if (sb.Length + message.Contents.Length > messageCharacterLimit)
+				var newContent = $"**{message.AuthorNickname}** {message.Contents}\n";
+
+				if (sb.Length + newContent.Length >= messageCharacterLimit)
 				{
 					await userDMChannel.SendMessageAsync(sb.ToString());
+					await Task.Delay(TimeSpan.FromSeconds(2));
+
 					sb.Clear();
 					sb.AppendLine();
 				}
 
-				sb.AppendLine($"**{message.AuthorNickname}** {message.Contents}");
+				sb.Append(newContent);
 
-				if (message == messages.Last())
+				if (message.ID == messages.Last().ID)
 				{
 					await userDMChannel.SendMessageAsync(sb.ToString());
 				}
