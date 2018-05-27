@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 using DIGOS.Ambassador.Database.Interfaces;
@@ -37,10 +38,10 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 	public class Roleplay : IOwnedNamedEntity, IServerEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <inheritdoc />
-		public ulong ServerID { get; set; }
+		public long ServerID { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether or not the roleplay is currently active in a channel.
@@ -60,25 +61,36 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <summary>
 		/// Gets or sets the ID of the channel that the roleplay is active in.
 		/// </summary>
-		public ulong ActiveChannelID { get; set; }
+		public long ActiveChannelID { get; set; }
 
 		/// <inheritdoc />
 		public User Owner { get; set; }
 
 		/// <summary>
-		/// Gets or sets the users that have been invited to join the roleplay.
+		/// Gets or sets the users that are participating in the roleplay in any way.
 		/// </summary>
-		public List<User> InvitedUsers { get; set; }
+		public List<RoleplayParticipant> Participants { get; set; }
 
 		/// <summary>
-		/// Gets or sets the users that have been kicked from the roleplay.
+		/// Gets the users that have been kicked from the roleplay.
 		/// </summary>
-		public List<User> KickedUsers { get; set; }
+		[NotNull, NotMapped]
+		public IEnumerable<RoleplayParticipant> JoinedUsers =>
+			this.Participants.Where(p => p.Status == ParticipantStatus.Joined);
 
 		/// <summary>
-		/// Gets or sets the participants of the roleplay.
+		/// Gets the users that have been kicked from the roleplay.
 		/// </summary>
-		public List<User> Participants { get; set; }
+		[NotNull, NotMapped]
+		public IEnumerable<RoleplayParticipant> KickedUsers =>
+				this.Participants.Where(p => p.Status == ParticipantStatus.Kicked);
+
+		/// <summary>
+		/// Gets the users that have been invited to the roleplay.
+		/// </summary>
+		[NotNull, NotMapped]
+		public IEnumerable<RoleplayParticipant> InvitedUsers =>
+			this.Participants.Where(p => p.Status == ParticipantStatus.Invited);
 
 		/// <inheritdoc />
 		public string Name { get; set; }
@@ -106,11 +118,11 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <inheritdoc />
 		public bool IsOwner(IUser user)
 		{
-			return IsOwner(user.Id);
+			return IsOwner((long)user.Id);
 		}
 
 		/// <inheritdoc />
-		public bool IsOwner(ulong userID)
+		public bool IsOwner(long userID)
 		{
 			return this.Owner.DiscordID == userID;
 		}
@@ -121,9 +133,9 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is a participant; otherwise, false.</returns>
 		[Pure]
-		public bool IsParticipant([NotNull] User user)
+		public bool HasJoined([NotNull] User user)
 		{
-			return IsParticipant(user.DiscordID);
+			return HasJoined(user.DiscordID);
 		}
 
 		/// <summary>
@@ -132,9 +144,9 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <param name="user">The user.</param>
 		/// <returns>true if the user is a participant; otherwise, false.</returns>
 		[Pure]
-		public bool IsParticipant([NotNull] IUser user)
+		public bool HasJoined([NotNull] IUser user)
 		{
-			return IsParticipant(user.Id);
+			return HasJoined((long)user.Id);
 		}
 
 		/// <summary>
@@ -143,9 +155,9 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <param name="userID">The ID of the user.</param>
 		/// <returns>true if the user is a participant; otherwise, false.</returns>
 		[Pure]
-		public bool IsParticipant(ulong userID)
+		public bool HasJoined(long userID)
 		{
-			return this.Participants.Any(p => p.DiscordID == userID);
+			return this.JoinedUsers.Any(p => p.User.DiscordID == userID);
 		}
 
 		/// <summary>
@@ -167,7 +179,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		[Pure]
 		public bool IsInvited([NotNull] IUser user)
 		{
-			return IsInvited(user.Id);
+			return IsInvited((long)user.Id);
 		}
 
 		/// <summary>
@@ -176,9 +188,9 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <param name="userID">The ID of the user.</param>
 		/// <returns>true if the user is invited; otherwise, false.</returns>
 		[Pure]
-		public bool IsInvited(ulong userID)
+		public bool IsInvited(long userID)
 		{
-			return this.InvitedUsers.Any(iu => iu.DiscordID == userID);
+			return this.InvitedUsers.Any(iu => iu.User.DiscordID == userID);
 		}
 
 		/// <summary>
@@ -200,7 +212,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		[Pure]
 		public bool IsKicked([NotNull] IUser user)
 		{
-			return IsKicked(user.Id);
+			return IsKicked((long)user.Id);
 		}
 
 		/// <summary>
@@ -209,9 +221,9 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <param name="userID">The ID of the user.</param>
 		/// <returns>true if the user is kicked; otherwise, false.</returns>
 		[Pure]
-		public bool IsKicked(ulong userID)
+		public bool IsKicked(long userID)
 		{
-			return this.KickedUsers.Any(ku => ku.DiscordID == userID);
+			return this.KickedUsers.Any(ku => ku.User.DiscordID == userID);
 		}
 	}
 }

@@ -35,6 +35,6 @@ namespace DIGOS.Ambassador.Database.Interfaces
 		/// </summary>
 		[Key]
 		[UsedImplicitly]
-		uint ID { get; set; }
+		long ID { get; set; }
 	}
 }

@@ -277,7 +277,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.Guild
 				);
 
-				Assert.Equal(this.Guild.Id, result.Server.DiscordID);
+				Assert.Equal((long)this.Guild.Id, result.Server.DiscordID);
 			}
 
 			[Fact]
@@ -290,7 +290,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.Guild
 				);
 
-				Assert.Equal(this.User.Id, result.User.DiscordID);
+				Assert.Equal((long)this.User.Id, result.User.DiscordID);
 			}
 
 			[Fact]
@@ -363,7 +363,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			{
 				var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, this.User);
 
-				Assert.Equal(this.User.Id, result.User.DiscordID);
+				Assert.Equal((long)this.User.Id, result.User.DiscordID);
 			}
 
 			[Fact]
@@ -394,7 +394,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 				Assert.NotEmpty(this.Database.GlobalUserProtections.First().Blacklist);
 
-				Assert.Equal(this.BlacklistedUser.Id, this.Database.GlobalUserProtections.First().Blacklist.First().DiscordID);
+				Assert.Equal((long)this.BlacklistedUser.Id, this.Database.GlobalUserProtections.First().Blacklist.First().DiscordID);
 			}
 
 			[Fact]
@@ -434,7 +434,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
 
 				Assert.NotEmpty(this.Database.GlobalUserProtections.First().Whitelist);
-				Assert.Equal(this.WhitelistedUser.Id, this.Database.GlobalUserProtections.First().Whitelist.First().DiscordID);
+				Assert.Equal((long)this.WhitelistedUser.Id, this.Database.GlobalUserProtections.First().Whitelist.First().DiscordID);
 			}
 
 			[Fact]

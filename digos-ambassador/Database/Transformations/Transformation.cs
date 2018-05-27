@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 	{
 		/// <inheritdoc />
 		[YamlIgnore]
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the bodypart that this transformation affects.

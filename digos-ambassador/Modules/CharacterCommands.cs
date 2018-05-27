@@ -189,7 +189,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			var eb = this.Feedback.CreateEmbedBase();
 
-			eb.WithAuthor(this.Context.Client.GetUser(character.Owner.DiscordID));
+			eb.WithAuthor(this.Context.Client.GetUser((ulong)character.Owner.DiscordID));
 
 			var characterInfoTitle = character.Nickname.IsNullOrWhitespace()
 				? character.Name

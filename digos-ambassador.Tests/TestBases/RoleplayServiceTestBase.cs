@@ -1,5 +1,5 @@
 ﻿//
-//  IPermission.cs
+//  RoleplayServiceTestBase.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,39 +20,33 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using DIGOS.Ambassador.Permissions;
+using DIGOS.Ambassador.Services;
+using Discord.Commands;
 
-#pragma warning disable SA1402
-
-namespace DIGOS.Ambassador.Database.Permissions
+namespace DIGOS.Ambassador.Tests.TestBases
 {
 	/// <summary>
-	/// Member interface for permissions.
+	/// Serves as a test base for roleplay service tests.
 	/// </summary>
-	public interface IPermission
+	public class RoleplayServiceTestBase
 	{
 		/// <summary>
-		/// Gets or sets the discord ID of the user that this permission has been granted to.
+		/// Gets the roleplay service object.
 		/// </summary>
-		long UserDiscordID { get; set; }
+		protected RoleplayService Roleplays { get; }
 
 		/// <summary>
-		/// Gets or sets the granted permission.
+		/// Gets the command service dependency.
 		/// </summary>
-		Permission Permission { get; set; }
+		protected CommandService Commands { get; }
 
 		/// <summary>
-		/// Gets or sets the allowed targets.
+		/// Initializes a new instance of the <see cref="RoleplayServiceTestBase"/> class.
 		/// </summary>
-		PermissionTarget Target { get; set; }
-	}
-
-	/// <summary>
-	/// Equation interface for permissions.
-	/// </summary>
-	/// <typeparam name="T">The type of the permission class.</typeparam>
-	public interface IPermission<T> : IEquatable<T>, IPermission where T : IPermission<T>
-	{
+		protected RoleplayServiceTestBase()
+		{
+			this.Commands = new CommandService();
+			this.Roleplays = new RoleplayService(this.Commands, new OwnedEntityService());
+		}
 	}
 }

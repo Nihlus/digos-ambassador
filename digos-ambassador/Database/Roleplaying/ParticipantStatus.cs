@@ -1,5 +1,5 @@
 ﻿//
-//  IPermission.cs
+//  ParticipantStatus.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,39 +20,31 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using DIGOS.Ambassador.Permissions;
-
-#pragma warning disable SA1402
-
-namespace DIGOS.Ambassador.Database.Permissions
+namespace DIGOS.Ambassador.Database.Roleplaying
 {
 	/// <summary>
-	/// Member interface for permissions.
+	/// Represents the status of a participant in a roleplay.
 	/// </summary>
-	public interface IPermission
+	public enum ParticipantStatus
 	{
 		/// <summary>
-		/// Gets or sets the discord ID of the user that this permission has been granted to.
+		/// The user isn't participating in the roleplay. They may have been a part of it previously, but isn't anymore.
 		/// </summary>
-		long UserDiscordID { get; set; }
+		None,
 
 		/// <summary>
-		/// Gets or sets the granted permission.
+		/// The user has been invited to the roleplay, but has not yet joined.
 		/// </summary>
-		Permission Permission { get; set; }
+		Invited,
 
 		/// <summary>
-		/// Gets or sets the allowed targets.
+		/// The user has joined the roleplay.
 		/// </summary>
-		PermissionTarget Target { get; set; }
-	}
+		Joined,
 
-	/// <summary>
-	/// Equation interface for permissions.
-	/// </summary>
-	/// <typeparam name="T">The type of the permission class.</typeparam>
-	public interface IPermission<T> : IEquatable<T>, IPermission where T : IPermission<T>
-	{
+		/// <summary>
+		/// The user has been kicked from the roleplay, and cannot rejoin unless reinvited.
+		/// </summary>
+		Kicked
 	}
 }

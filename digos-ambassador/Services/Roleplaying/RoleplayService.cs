@@ -27,13 +27,11 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -74,7 +72,7 @@ namespace DIGOS.Ambassador.Services
 
 			var roleplay = result.Entity;
 
-			await AddToOrUpdateMessageInRoleplay(db, roleplay, context.Message);
+			await AddToOrUpdateMessageInRoleplayAsync(db, roleplay, context.Message);
 		}
 
 		/// <summary>
@@ -100,12 +98,14 @@ namespace DIGOS.Ambassador.Services
 			var roleplay = new Roleplay
 			{
 				Owner = owner,
-				ServerID = context.Guild.Id,
+				ServerID = (long)context.Guild.Id,
 				IsActive = false,
-				ActiveChannelID = context.Channel.Id,
-				Participants = new List<User> { owner },
+				ActiveChannelID = (long)context.Channel.Id,
+				Participants = new List<RoleplayParticipant>(),
 				Messages = new List<UserMessage>()
 			};
+
+			roleplay.Participants.Add(new RoleplayParticipant(roleplay, owner, ParticipantStatus.Joined));
 
 			var setNameResult = await SetRoleplayNameAsync(db, context, roleplay, roleplayName);
 			if (!setNameResult.IsSuccess)
@@ -150,14 +150,14 @@ namespace DIGOS.Ambassador.Services
 		/// <param name="roleplay">The roleplay to modify.</param>
 		/// <param name="message">The message to add or update.</param>
 		/// <returns>A task wrapping the update action.</returns>
-		public async Task<ModifyEntityResult> AddToOrUpdateMessageInRoleplay
+		public async Task<ModifyEntityResult> AddToOrUpdateMessageInRoleplayAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			[NotNull] Roleplay roleplay,
 			[NotNull] IMessage message
 		)
 		{
-			if (roleplay.Participants is null || !roleplay.IsParticipant(message.Author))
+			if (roleplay.Participants is null || !roleplay.HasJoined(message.Author))
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The given message was not authored by a participant of the roleplay.");
 			}
@@ -168,10 +168,10 @@ namespace DIGOS.Ambassador.Services
 				userNick = guildUser.Nickname;
 			}
 
-			if (roleplay.Messages.Any(m => m.DiscordMessageID == message.Id))
+			if (roleplay.Messages.Any(m => m.DiscordMessageID == (long)message.Id))
 			{
 				// Edit the existing message
-				var existingMessage = roleplay.Messages.Find(m => m.DiscordMessageID == message.Id);
+				var existingMessage = roleplay.Messages.Find(m => m.DiscordMessageID == (long)message.Id);
 
 				if (existingMessage.Contents.Equals(message.Content))
 				{
@@ -282,7 +282,7 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			var roleplay = await GetRoleplays(db, context.Guild)
-				.FirstOrDefaultAsync(rp => rp.IsActive && rp.ActiveChannelID == context.Channel.Id);
+				.FirstOrDefaultAsync(rp => rp.IsActive && rp.ActiveChannelID == (long)context.Channel.Id);
 
 			if (roleplay is null)
 			{
@@ -301,7 +301,7 @@ namespace DIGOS.Ambassador.Services
 		[Pure]
 		public async Task<bool> HasActiveRoleplayAsync([NotNull] GlobalInfoContext db, [NotNull] IChannel channel)
 		{
-			return await db.Roleplays.AnyAsync(rp => rp.IsActive && rp.ActiveChannelID == channel.Id);
+			return await db.Roleplays.AnyAsync(rp => rp.IsActive && rp.ActiveChannelID == (long)channel.Id);
 		}
 
 		/// <summary>
@@ -340,12 +340,10 @@ namespace DIGOS.Ambassador.Services
 				.Include(rp => rp.Owner)
 				.Include(rp => rp.Participants)
 				.Include(rp => rp.Messages)
-				.Include(rp => rp.KickedUsers)
-				.Include(rp => rp.InvitedUsers)
 				.Where
 				(
 					rp =>
-						rp.ServerID == guild.Id
+						rp.ServerID == (long)guild.Id
 				);
 		}
 
@@ -365,7 +363,7 @@ namespace DIGOS.Ambassador.Services
 				.Where
 				(
 					rp =>
-						rp.Owner.DiscordID == discordUser.Id
+						rp.Owner.DiscordID == (long)discordUser.Id
 				);
 		}
 
@@ -391,7 +389,7 @@ namespace DIGOS.Ambassador.Services
 			(
 				rp =>
 					rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase) &&
-					rp.Owner.DiscordID == roleplayOwner.Id
+					rp.Owner.DiscordID == (long)roleplayOwner.Id
 			);
 
 			if (roleplay is null)
@@ -423,12 +421,12 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] IUser kickedUser
 		)
 		{
-			if (!roleplay.IsParticipant(kickedUser) && !roleplay.IsInvited(kickedUser))
+			if (!roleplay.HasJoined(kickedUser) && !roleplay.IsInvited(kickedUser))
 			{
 				return ExecuteResult.FromError(CommandError.ObjectNotFound, "That user is neither invited to or a participant of the roleplay.");
 			}
 
-			if (!roleplay.IsParticipant(kickedUser))
+			if (!roleplay.HasJoined(kickedUser))
 			{
 				var removeUserResult = await RemoveUserFromRoleplayAsync(db, context, roleplay, kickedUser);
 				if (!removeUserResult.IsSuccess)
@@ -437,13 +435,8 @@ namespace DIGOS.Ambassador.Services
 				}
 			}
 
-			roleplay.InvitedUsers.RemoveAll(ku => ku.DiscordID == kickedUser.Id);
-
-			if (!roleplay.IsKicked(kickedUser))
-			{
-				var user = await db.GetOrRegisterUserAsync(kickedUser);
-				roleplay.KickedUsers.Add(user);
-			}
+			var participantEntry = roleplay.Participants.First(p => p.User.DiscordID == (long)kickedUser.Id);
+			participantEntry.Status = ParticipantStatus.Kicked;
 
 			await db.SaveChangesAsync();
 
@@ -467,7 +460,7 @@ namespace DIGOS.Ambassador.Services
 		)
 		{
 			var isCurrentUser = context.Message.Author.Id == removedUser.Id;
-			if (!roleplay.IsParticipant(removedUser))
+			if (!roleplay.HasJoined(removedUser))
 			{
 				var errorMessage = isCurrentUser
 					? "You're not in that roleplay."
@@ -485,7 +478,9 @@ namespace DIGOS.Ambassador.Services
 				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
 			}
 
-			roleplay.Participants.RemoveAll(p => p.DiscordID == removedUser.Id);
+			var participantEntry = roleplay.Participants.First(p => p.User.DiscordID == (long)removedUser.Id);
+			participantEntry.Status = ParticipantStatus.None;
+
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -508,7 +503,7 @@ namespace DIGOS.Ambassador.Services
 		)
 		{
 			var isCurrentUser = context.Message.Author.Id == newUser.Id;
-			if (roleplay.IsParticipant(newUser))
+			if (roleplay.HasJoined(newUser))
 			{
 				var errorMessage = isCurrentUser
 					? "You're already in that roleplay."
@@ -536,13 +531,18 @@ namespace DIGOS.Ambassador.Services
 				return ExecuteResult.FromError(CommandError.UnmetPrecondition, errorMessage);
 			}
 
-			if (!roleplay.IsPublic)
+			var participantEntry = roleplay.Participants.FirstOrDefault(p => p.User.DiscordID == (long)newUser.Id);
+			if (participantEntry is null)
 			{
-				// Remove the user from the invite list
-				roleplay.InvitedUsers.RemoveAll(iu => iu.DiscordID == newUser.Id);
+				var user = await db.GetOrRegisterUserAsync(newUser);
+				participantEntry = new RoleplayParticipant(roleplay, user, ParticipantStatus.Joined);
+				roleplay.Participants.Add(participantEntry);
+			}
+			else
+			{
+				participantEntry.Status = ParticipantStatus.Joined;
 			}
 
-			roleplay.Participants.Add(await db.GetOrRegisterUserAsync(newUser));
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -567,14 +567,24 @@ namespace DIGOS.Ambassador.Services
 				return ExecuteResult.FromError(CommandError.UnmetPrecondition, "The roleplay is not set to private.");
 			}
 
-			if (roleplay.InvitedUsers.Any(p => p.DiscordID == invitedUser.Id))
+			if (roleplay.InvitedUsers.Any(p => p.User.DiscordID == (long)invitedUser.Id))
 			{
 				return ExecuteResult.FromError(CommandError.Unsuccessful, "The user has already been invited to that roleplay.");
 			}
 
 			// Remove the invited user from the kick list, if they're on it
-			roleplay.KickedUsers.RemoveAll(ku => ku.DiscordID == invitedUser.Id);
-			roleplay.InvitedUsers.Add(await db.GetOrRegisterUserAsync(invitedUser));
+			var participantEntry = roleplay.Participants.FirstOrDefault(p => p.User.DiscordID == (long)invitedUser.Id);
+			if (participantEntry is null)
+			{
+				var user = await db.GetOrRegisterUserAsync(invitedUser);
+				participantEntry = new RoleplayParticipant(roleplay, user, ParticipantStatus.Invited);
+				roleplay.Participants.Add(participantEntry);
+			}
+			else
+			{
+				participantEntry.Status = ParticipantStatus.Invited;
+			}
+
 			await db.SaveChangesAsync();
 
 			return ExecuteResult.FromSuccess();
@@ -622,7 +632,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string newRoleplayName
 		)
 		{
-			var isCurrentUser = context.Message.Author.Id == roleplay.Owner.DiscordID;
+			var isCurrentUser = context.Message.Author.Id == (ulong)roleplay.Owner.DiscordID;
 			if (string.IsNullOrWhiteSpace(newRoleplayName))
 			{
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");

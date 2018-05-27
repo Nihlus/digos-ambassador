@@ -33,10 +33,10 @@ namespace DIGOS.Ambassador.Database.Permissions
 	public class GlobalPermission : IPermission<GlobalPermission>, IEFEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <inheritdoc />
-		public ulong UserDiscordID { get; set; }
+		public long UserDiscordID { get; set; }
 
 		/// <inheritdoc />
 		public Permission Permission { get; set; }

@@ -33,12 +33,12 @@ namespace DIGOS.Ambassador.Database.Users
 	public class User : IEFEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the Discord ID of the user.
 		/// </summary>
-		public ulong DiscordID { get; set; }
+		public long DiscordID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the class of the user within the DIGOS 'verse.

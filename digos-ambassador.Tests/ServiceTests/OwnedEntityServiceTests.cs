@@ -148,7 +148,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				.Returns<IUser>
 				(
 					u =>
-						u.Id == entityMock.Object.Owner.DiscordID
+						u.Id == (ulong)entityMock.Object.Owner.DiscordID
 				);
 
 				// Set up the list of entities owned by the new owner

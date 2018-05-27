@@ -30,6 +30,6 @@ namespace DIGOS.Ambassador.Database.Interfaces
 		/// <summary>
 		/// Gets or sets the Discord server ID.
 		/// </summary>
-		ulong ServerID { get; set; }
+		long ServerID { get; set; }
 	}
 }

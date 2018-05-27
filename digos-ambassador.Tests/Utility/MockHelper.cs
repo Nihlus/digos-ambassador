@@ -35,10 +35,10 @@ namespace DIGOS.Ambassador.Tests.Utility
 		/// </summary>
 		/// <param name="id">The ID of the object.</param>
 		/// <returns>A mocked object.</returns>
-		public static IUser CreateDiscordUser(ulong id)
+		public static IUser CreateDiscordUser(long id)
 		{
 			var mock = new Mock<IUser>();
-			mock.Setup(u => u.Id).Returns(id);
+			mock.Setup(u => u.Id).Returns((ulong)id);
 
 			return mock.Object;
 		}
@@ -48,10 +48,10 @@ namespace DIGOS.Ambassador.Tests.Utility
 		/// </summary>
 		/// <param name="id">The ID of the object.</param>
 		/// <returns>A mocked object.</returns>
-		public static IGuildUser CreateDiscordGuildUser(ulong id)
+		public static IGuildUser CreateDiscordGuildUser(long id)
 		{
 			var mock = new Mock<IGuildUser>();
-			mock.Setup(u => u.Id).Returns(id);
+			mock.Setup(u => u.Id).Returns((ulong)id);
 
 			return mock.Object;
 		}
@@ -61,10 +61,10 @@ namespace DIGOS.Ambassador.Tests.Utility
 		/// </summary>
 		/// <param name="id">The ID of the object.</param>
 		/// <returns>A mocked object.</returns>
-		public static IGuild CreateDiscordGuild(ulong id)
+		public static IGuild CreateDiscordGuild(long id)
 		{
 			var mock = new Mock<IGuild>();
-			mock.Setup(u => u.Id).Returns(id);
+			mock.Setup(u => u.Id).Returns((ulong)id);
 
 			return mock.Object;
 		}

@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Services.Exporters
 		/// <inheritdoc />
 		public override async Task<ExportedRoleplay> ExportAsync(Roleplay roleplay)
 		{
-			var owner = await this.Context.Guild.GetUserAsync(roleplay.Owner.DiscordID);
+			var owner = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
 
 			var filePath = Path.GetTempFileName();
 			using (var of = File.Create(filePath))
@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Services.Exporters
 					await ofw.WriteLineAsync($"Roleplay name: {roleplay.Name}");
 					await ofw.WriteLineAsync($"Owner: {owner.Username}");
 
-					var participants = await Task.WhenAll(roleplay.Participants.Select(p => this.Context.Guild.GetUserAsync(p.DiscordID)));
+					var participants = await Task.WhenAll(roleplay.Participants.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
 
 					await ofw.WriteLineAsync("Participants:");
 					foreach (var participant in participants)

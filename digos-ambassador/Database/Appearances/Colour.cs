@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 	{
 		/// <inheritdoc />
 		[YamlIgnore]
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <inheritdoc />
 		public Shade Shade { get; set; }

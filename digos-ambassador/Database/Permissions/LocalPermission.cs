@@ -33,15 +33,15 @@ namespace DIGOS.Ambassador.Database.Permissions
 	public class LocalPermission : IPermission<LocalPermission>, IEFEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the the server that this permission has been granted on.
 		/// </summary>
-		public ulong ServerDiscordID { get; set; }
+		public long ServerDiscordID { get; set; }
 
 		/// <inheritdoc />
-		public ulong UserDiscordID { get; set; }
+		public long UserDiscordID { get; set; }
 
 		/// <inheritdoc />
 		public Permission Permission { get; set; }

@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 	public class ServerUserProtection : IEFEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the user that owns this protection data.

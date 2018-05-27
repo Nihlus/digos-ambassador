@@ -71,14 +71,14 @@ namespace DIGOS.Ambassador.Services.Exporters
 				{
 					pdfDoc.Open();
 
-					var owner = await this.Context.Guild.GetUserAsync(roleplay.Owner.DiscordID);
+					var owner = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
 
 					pdfDoc.AddAuthor(owner.Nickname);
 					pdfDoc.AddCreationDate();
 					pdfDoc.AddCreator("DIGOS Ambassador");
 					pdfDoc.AddTitle(roleplay.Name);
 
-					var participants = await Task.WhenAll(roleplay.Participants.Select(p => this.Context.Guild.GetUserAsync(p.DiscordID)));
+					var participants = await Task.WhenAll(roleplay.Participants.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
 
 					pdfDoc.Add(CreateTitle(roleplay.Name));
 					pdfDoc.Add(CreateParticipantList(participants));

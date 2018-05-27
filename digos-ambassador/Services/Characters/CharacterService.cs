@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Utility;
 
@@ -230,7 +231,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] IGuild guild
 		)
 		{
-			var guildCharacters = db.Characters.Where(ch => ch.ServerID == guild.Id);
+			var guildCharacters = db.Characters.Where(ch => ch.ServerID == (long)guild.Id);
 			if (await guildCharacters.CountAsync(ch => string.Equals(ch.Name, characterName, StringComparison.OrdinalIgnoreCase)) > 1)
 			{
 				return RetrieveEntityResult<Character>.FromError
@@ -270,7 +271,7 @@ namespace DIGOS.Ambassador.Services
 				.Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.Species)
 				.Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.DefaultBaseColour)
 				.Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.DefaultPatternColour)
-				.Where(c => c.ServerID == guild.Id);
+				.Where(c => c.ServerID == (long)guild.Id);
 		}
 
 		/// <summary>
@@ -325,7 +326,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] Character character
 		)
 		{
-			var user = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var user = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
 
 			if (character.IsCurrent)
 			{
@@ -440,7 +441,7 @@ namespace DIGOS.Ambassador.Services
 			var character = new Character
 			{
 				Owner = owner,
-				ServerID = context.Guild.Id
+				ServerID = (long)context.Guild.Id
 			};
 
 			var modifyEntityResult = await SetCharacterNameAsync(db, context, character, characterName);
@@ -509,6 +510,39 @@ namespace DIGOS.Ambassador.Services
 		}
 
 		/// <summary>
+		/// Sets the default character of a user.
+		/// </summary>
+		/// <param name="db">The database containing the characters.</param>
+		/// <param name="context">The context of the operation.</param>
+		/// <param name="newDefaultCharacter">The new default character.</param>
+		/// <param name="targetUser">The user to set the default character of.</param>
+		/// <returns>A modification result which may or may not have succeeded.</returns>
+		public async Task<ModifyEntityResult> SetDefaultCharacterForUserAsync
+		(
+			[NotNull] GlobalInfoContext db,
+			[NotNull] ICommandContext context,
+			[NotNull] Character newDefaultCharacter,
+			[NotNull] User targetUser
+		)
+		{
+			var isCurrentUser = context.Message.Author.Id == (ulong)newDefaultCharacter.Owner.DiscordID;
+			var isSameCharacter = targetUser.DefaultCharacter.Name == newDefaultCharacter.Name;
+			if (isSameCharacter)
+			{
+				var errorMessage = isCurrentUser
+					? "That's already your default character."
+					: "That's already the user's default character.";
+
+				return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, errorMessage);
+			}
+
+			targetUser.DefaultCharacter = newDefaultCharacter;
+			await db.SaveChangesAsync();
+
+			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+		}
+
+		/// <summary>
 		/// Sets the name of the given character.
 		/// </summary>
 		/// <param name="db">The database containing the characters.</param>
@@ -524,7 +558,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] string newCharacterName
 		)
 		{
-			var isCurrentUser = context.Message.Author.Id == character.Owner.DiscordID;
+			var isCurrentUser = context.Message.Author.Id == (ulong)character.Owner.DiscordID;
 			if (string.IsNullOrWhiteSpace(newCharacterName))
 			{
 				return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
@@ -803,7 +837,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] IGuild guild
 		)
 		{
-			var characters = GetCharacters(db, guild).Where(ch => ch.Owner.DiscordID == discordUser.Id);
+			var characters = GetCharacters(db, guild).Where(ch => ch.Owner.DiscordID == (long)discordUser.Id);
 			return characters;
 		}
 

@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Database.Users
 	public class UserKink : IEFEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the kink.

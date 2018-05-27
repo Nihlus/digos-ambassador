@@ -41,10 +41,10 @@ namespace DIGOS.Ambassador.Database.Characters
 	public class Character : IOwnedNamedEntity, IServerEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <inheritdoc />
-		public ulong ServerID { get; set; }
+		public long ServerID { get; set; }
 
 		/// <inheritdoc />
 		public User Owner { get; set; }
@@ -190,11 +190,11 @@ namespace DIGOS.Ambassador.Database.Characters
 		/// <inheritdoc />
 		public bool IsOwner(IUser user)
 		{
-			return IsOwner(user.Id);
+			return IsOwner((long)user.Id);
 		}
 
 		/// <inheritdoc />
-		public bool IsOwner(ulong userID)
+		public bool IsOwner(long userID)
 		{
 			return this.Owner.DiscordID == userID;
 		}

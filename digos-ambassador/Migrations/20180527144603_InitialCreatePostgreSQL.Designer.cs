@@ -6,8 +6,6 @@
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Transformations;
@@ -22,9 +20,10 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    partial class GlobalInfoContextModelSnapshot : ModelSnapshot
+    [Migration("20180527144603_InitialCreatePostgreSQL")]
+    partial class InitialCreatePostgreSQL
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -253,26 +252,6 @@ namespace DIGOS.Ambassador.Migrations
                     b.ToTable("Roleplays");
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.RoleplayParticipant", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<long?>("RoleplayID");
-
-                    b.Property<int>("Status");
-
-                    b.Property<long?>("UserID");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("RoleplayID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("RoleplayParticipant");
-                });
-
             modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.UserMessage", b =>
                 {
                     b.Property<long>("ID")
@@ -415,26 +394,6 @@ namespace DIGOS.Ambassador.Migrations
                     b.ToTable("Transformations");
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.UserProtectionEntry", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<long?>("GlobalProtectionID");
-
-                    b.Property<int>("Type");
-
-                    b.Property<long?>("UserID");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("GlobalProtectionID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("UserProtectionEntry");
-                });
-
             modelBuilder.Entity("DIGOS.Ambassador.Database.Users.User", b =>
                 {
                     b.Property<long>("ID")
@@ -444,9 +403,19 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<int>("Class");
 
-                    b.Property<long?>("DefaultCharacterID");
+                    b.Property<long>("DefaultCharacterID");
 
                     b.Property<long>("DiscordID");
+
+                    b.Property<long?>("GlobalUserProtectionID");
+
+                    b.Property<long?>("GlobalUserProtectionID1");
+
+                    b.Property<long?>("RoleplayID");
+
+                    b.Property<long?>("RoleplayID1");
+
+                    b.Property<long?>("RoleplayID2");
 
                     b.Property<long?>("ServerID");
 
@@ -456,6 +425,16 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("DefaultCharacterID")
                         .IsUnique();
+
+                    b.HasIndex("GlobalUserProtectionID");
+
+                    b.HasIndex("GlobalUserProtectionID1");
+
+                    b.HasIndex("RoleplayID");
+
+                    b.HasIndex("RoleplayID1");
+
+                    b.HasIndex("RoleplayID2");
 
                     b.HasIndex("ServerID");
 
@@ -530,17 +509,6 @@ namespace DIGOS.Ambassador.Migrations
                         .HasForeignKey("OwnerID");
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.RoleplayParticipant", b =>
-                {
-                    b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay", "Roleplay")
-                        .WithMany("Participants")
-                        .HasForeignKey("RoleplayID");
-
-                    b.HasOne("DIGOS.Ambassador.Database.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID");
-                });
-
             modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.UserMessage", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
@@ -590,22 +558,32 @@ namespace DIGOS.Ambassador.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.UserProtectionEntry", b =>
-                {
-                    b.HasOne("DIGOS.Ambassador.Database.Transformations.GlobalUserProtection", "GlobalProtection")
-                        .WithMany("UserListing")
-                        .HasForeignKey("GlobalProtectionID");
-
-                    b.HasOne("DIGOS.Ambassador.Database.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID");
-                });
-
             modelBuilder.Entity("DIGOS.Ambassador.Database.Users.User", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Characters.Character", "DefaultCharacter")
                         .WithOne()
-                        .HasForeignKey("DIGOS.Ambassador.Database.Users.User", "DefaultCharacterID");
+                        .HasForeignKey("DIGOS.Ambassador.Database.Users.User", "DefaultCharacterID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("DIGOS.Ambassador.Database.Transformations.GlobalUserProtection")
+                        .WithMany("Blacklist")
+                        .HasForeignKey("GlobalUserProtectionID");
+
+                    b.HasOne("DIGOS.Ambassador.Database.Transformations.GlobalUserProtection")
+                        .WithMany("Whitelist")
+                        .HasForeignKey("GlobalUserProtectionID1");
+
+                    b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
+                        .WithMany("InvitedUsers")
+                        .HasForeignKey("RoleplayID");
+
+                    b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
+                        .WithMany("KickedUsers")
+                        .HasForeignKey("RoleplayID1");
+
+                    b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
+                        .WithMany("Participants")
+                        .HasForeignKey("RoleplayID2");
 
                     b.HasOne("DIGOS.Ambassador.Database.ServerInfo.Server")
                         .WithMany("KnownUsers")

@@ -12,15 +12,11 @@
   <ItemGroup>
     <AdditionalFiles Include="$(ProjectDir)\..\stylecop.json">
       <Link>stylecop.json</Link>
+      <InProject>false</InProject>
     </AdditionalFiles>
     <AdditionalFiles Include="$(ProjectDir)\..\stylecop.ruleset">
       <Link>stylecop.ruleset</Link>
-    </AdditionalFiles>
-    <AdditionalFiles Include="$(SolutionDir)\README.md">
-      <Link>README.md</Link>
-    </AdditionalFiles>
-    <AdditionalFiles Include="$(SolutionDir)\.travis.yml">
-      <Link>.travis.yml</Link>
+      <InProject>false</InProject>
     </AdditionalFiles>
   </ItemGroup>
   <ItemGroup>
@@ -39,17 +35,18 @@
     <PackageReference Include="iTextSharp" Version="5.5.13" />
     <PackageReference Include="JetBrains.Annotations" Version="11.1.0" PrivateAssets="all" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.2" />
     <PackageReference Include="morelinq" Version="2.10.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NLua_Safe" Version="1.3.2.1" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" />
     <PackageReference Include="WebSocketSharp.CustomHeaders.Standard" Version="1.0.2" />
-    <PackageReference Include="YamlDotNet" Version="4.2.3" />
+    <PackageReference Include="YamlDotNet" Version="4.3.1" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
@@ -57,12 +54,14 @@
   <ItemGroup>
     <Folder Include="Content\Portraits" />
     <Folder Include="Content\Transformations" />
+    <Folder Include="Migrations" />
     <Folder Include="Services\Dossiers" />
   </ItemGroup>
   <Target Name="DeleteNetHttpMono" AfterTargets="AfterBuild">
     <Delete Files="$(OutputPath)\System.Net.Http.dll" Condition="'$(OS)' == 'Unix'" />
   </Target>
   <Target Name="GenerateDocs" AfterTargets="AfterBuild">
-    <Exec Command="dotnet $(SolutionDir)digos-ambassador.Doc\bin\Debug\netcoreapp2.0\DIGOS.Ambassador.Doc.dll --assembly $(OutputPath)$(AssemblyName)$(TargetExt) --output $(SolutionDir)docs" />
+    <Exec Command="dotnet $(ProjectDir)\..\digos-ambassador.Doc\bin\Debug\netcoreapp2.0\DIGOS.Ambassador.Doc.dll --assembly $(OutputPath)$(AssemblyName)$(TargetExt) --output $(SolutionDir)docs" />
   </Target>
+  <Import Project="..\msbuild\netfx-mono.props" />
 </Project>

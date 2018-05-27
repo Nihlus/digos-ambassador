@@ -69,6 +69,6 @@ namespace DIGOS.Ambassador.Database.Interfaces
 		/// <param name="userID">The ID of the user.</param>
 		/// <returns>true if the user is the owner; otherwise, false.</returns>
 		[Pure]
-		bool IsOwner(ulong userID);
+		bool IsOwner(long userID);
 	}
 }

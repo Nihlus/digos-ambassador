@@ -238,4 +238,7 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+
+# Sensitive credentials
 /digos-ambassador/Content/bot.token
+/digos-ambassador/Content/database.credentials

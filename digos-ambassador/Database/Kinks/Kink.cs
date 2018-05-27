@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Database.Kinks
 	public class Kink : IEquatable<Kink>, IEFEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the category the kink belongs to.

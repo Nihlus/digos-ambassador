@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database.Characters;
@@ -224,7 +225,7 @@ namespace DIGOS.Ambassador.Database
 		[Pure]
 		public async Task<bool> IsServerKnownAsync([NotNull] IGuild discordServer)
 		{
-			return await this.Servers.AnyAsync(u => u.DiscordID == discordServer.Id);
+			return await this.Servers.AnyAsync(u => u.DiscordID == (long)discordServer.Id);
 		}
 
 		/// <summary>
@@ -252,7 +253,7 @@ namespace DIGOS.Ambassador.Database
 		[ItemNotNull]
 		public async Task<Server> GetServerAsync([NotNull] IGuild discordServer)
 		{
-			return await this.Servers.FirstAsync(u => u.DiscordID == discordServer.Id);
+			return await this.Servers.FirstAsync(u => u.DiscordID == (long)discordServer.Id);
 		}
 
 		/// <summary>
@@ -286,7 +287,7 @@ namespace DIGOS.Ambassador.Database
 		[Pure]
 		public async Task<bool> IsUserKnownAsync([NotNull] IUser discordUser)
 		{
-			return await this.Users.AnyAsync(u => u.DiscordID == discordUser.Id);
+			return await this.Users.AnyAsync(u => u.DiscordID == (long)discordUser.Id);
 		}
 
 		/// <summary>
@@ -318,10 +319,11 @@ namespace DIGOS.Ambassador.Database
 				.Include(u => u.DefaultCharacter)
 				.Include(u => u.Characters)
 				.Include(u => u.Kinks).ThenInclude(k => k.Kink)
+				.OrderBy(u => u.ID)
 				.FirstAsync
 				(
 					u =>
-						u.DiscordID == discordUser.Id
+						u.DiscordID == (long)discordUser.Id
 				);
 		}
 
@@ -341,7 +343,7 @@ namespace DIGOS.Ambassador.Database
 
 			var newUser = new User
 			{
-				DiscordID = discordUser.Id,
+				DiscordID = (long)discordUser.Id,
 				Class = UserClass.Other,
 				Bio = null,
 				Timezone = null
@@ -362,7 +364,22 @@ namespace DIGOS.Ambassador.Database
 		[NotNull]
 		public static DbContextOptionsBuilder ConfigureOptions([NotNull] DbContextOptionsBuilder optionsBuilder)
 		{
-			optionsBuilder.UseSqlite($"Data Source={Path.Combine("Content", "Databases", "global.db")}");
+			var passfilePath = Path.Combine("Content", "database.credentials");
+			if (!File.Exists(passfilePath))
+			{
+				throw new FileNotFoundException("Could not find PostreSQL credentials.", passfilePath);
+			}
+
+			var passfileContents = File.ReadAllText(passfilePath).Split(':');
+			if (passfileContents.Length != 5)
+			{
+				throw new InvalidDataException("The credential file was of an invalid format.");
+			}
+
+			var password = passfileContents[4];
+
+			optionsBuilder.UseNpgsql($"Server=localhost;Database=amby;Username=amby;Password={password}");
+			//optionsBuilder.UseSqlite($"Data Source={Path.Combine("Content", "Databases", "global.db")}");
 
 			return optionsBuilder;
 		}
@@ -379,9 +396,22 @@ namespace DIGOS.Ambassador.Database
 		/// <inheritdoc />
 		protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<User>().HasOne(u => u.DefaultCharacter);
-			modelBuilder.Entity<User>().HasMany(u => u.Characters);
-			modelBuilder.Entity<Character>().HasOne(ch => ch.Owner);
+			modelBuilder.Entity<User>().HasMany(u => u.Characters).WithOne(u => u.Owner);
+			modelBuilder.Entity<User>()
+				.HasOne(u => u.DefaultCharacter)
+				.WithOne()
+				.HasForeignKey(typeof(User).FullName, "DefaultCharacterID");
+
+			modelBuilder.Entity<User>().Property(typeof(long?), "DefaultCharacterID").IsRequired(false);
+
+			modelBuilder.Entity<Character>().HasOne(ch => ch.Owner).WithMany(u => u.Characters);
+
+			modelBuilder.Entity<Roleplay>().HasOne(u => u.Owner).WithMany();
+			modelBuilder.Entity<Roleplay>().HasMany(u => u.Participants).WithOne(p => p.Roleplay);
+			modelBuilder.Entity<RoleplayParticipant>().HasOne(u => u.User).WithMany();
+
+			modelBuilder.Entity<GlobalUserProtection>().HasMany(p => p.UserListing).WithOne(u => u.GlobalProtection);
+			modelBuilder.Entity<UserProtectionEntry>().HasOne(u => u.User).WithMany();
 		}
 	}
 }

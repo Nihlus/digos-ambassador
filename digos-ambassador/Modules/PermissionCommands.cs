@@ -209,7 +209,7 @@ namespace DIGOS.Ambassador.Modules
 				{
 					Permission = grantedPermission,
 					Target = grantedTarget,
-					ServerDiscordID = this.Context.Guild.Id
+					ServerDiscordID = (long)this.Context.Guild.Id
 				};
 
 				await this.Permissions.GrantLocalPermissionAsync(this.Database, this.Context.Guild, discordUser, newPermission);

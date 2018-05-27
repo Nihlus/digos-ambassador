@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 			if (this.RequireOwner)
 			{
 				var roleplay = result.Entity;
-				if (roleplay.Owner.DiscordID != context.User.Id)
+				if (roleplay.Owner.DiscordID != (long)context.User.Id)
 				{
 					return PreconditionResult.FromError("Only the roleplay owner can do that.");
 				}

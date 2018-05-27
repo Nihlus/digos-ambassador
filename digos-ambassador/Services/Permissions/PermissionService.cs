@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Services
 			(
 				p =>
 				p.Permission == grantedPermission.Permission &&
-				p.ServerDiscordID == discordServer.Id
+				p.ServerDiscordID == (long)discordServer.Id
 			);
 
 			if (existingPermission is null)
@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Services
 			(
 				p =>
 				p.Permission == revokedPermission &&
-				p.ServerDiscordID == discordServer.Id
+				p.ServerDiscordID == (long)discordServer.Id
 			);
 
 			if (existingPermission != null)
@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Services
 			(
 				p =>
 					p.Permission == permission &&
-					p.ServerDiscordID == discordServer.Id
+					p.ServerDiscordID == (long)discordServer.Id
 			);
 
 			if (existingPermission != null)
@@ -155,8 +155,8 @@ namespace DIGOS.Ambassador.Services
 				{
 					Permission = permission.Permission,
 					Target = permission.Target,
-					UserDiscordID = user.Id,
-					ServerDiscordID = server.Id
+					UserDiscordID = (long)user.Id,
+					ServerDiscordID = (long)server.Id
 				};
 
 				await db.LocalPermissions.AddAsync(scopedPermission);
@@ -234,8 +234,8 @@ namespace DIGOS.Ambassador.Services
 				.Where
 				(
 					p =>
-						p.ServerDiscordID == guild.Id &&
-						p.UserDiscordID == contextUser.Id
+						p.ServerDiscordID == (long)guild.Id &&
+						p.UserDiscordID == (long)contextUser.Id
 				);
 		}
 
@@ -252,7 +252,7 @@ namespace DIGOS.Ambassador.Services
 				.Where
 				(
 					p =>
-						p.UserDiscordID == contextUser.Id
+						p.UserDiscordID == (long)contextUser.Id
 				);
 		}
 	}

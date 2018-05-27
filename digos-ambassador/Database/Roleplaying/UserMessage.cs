@@ -34,17 +34,17 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 	public class UserMessage : IEFEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the unique Discord message ID.
 		/// </summary>
-		public ulong DiscordMessageID { get; set; }
+		public long DiscordMessageID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the author of the message.
 		/// </summary>
-		public ulong AuthorDiscordID { get; set; }
+		public long AuthorDiscordID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the timestamp of the message.
@@ -77,8 +77,8 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		{
 			return new UserMessage
 			{
-				DiscordMessageID = message.Id,
-				AuthorDiscordID = message.Author.Id,
+				DiscordMessageID = (long)message.Id,
+				AuthorDiscordID = (long)message.Author.Id,
 				Timestamp = message.Timestamp,
 				AuthorNickname = authorNickname,
 				Contents = message.Content

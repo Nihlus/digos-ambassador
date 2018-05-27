@@ -89,7 +89,7 @@ namespace DIGOS.Ambassador.Services
 			Chirality chirality = Chirality.Center
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
 			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -128,7 +128,7 @@ namespace DIGOS.Ambassador.Services
 			Chirality chirality = Chirality.Center
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
 			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -182,7 +182,7 @@ namespace DIGOS.Ambassador.Services
 			Chirality chirality = Chirality.Center
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
 			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -247,7 +247,7 @@ namespace DIGOS.Ambassador.Services
 			Chirality chirality = Chirality.Center
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
 			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -295,7 +295,7 @@ namespace DIGOS.Ambassador.Services
 			Chirality chirality = Chirality.Center
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
 			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -344,7 +344,7 @@ namespace DIGOS.Ambassador.Services
 			Chirality chirality = Chirality.Center
 		)
 		{
-			var discordUser = await context.Guild.GetUserAsync(character.Owner.DiscordID);
+			var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
 			var canTransformResult = await CanUserTransformUserAsync(db, context.Guild, context.User, discordUser);
 			if (!canTransformResult.IsSuccess)
 			{
@@ -404,13 +404,13 @@ namespace DIGOS.Ambassador.Services
 			{
 				case ProtectionType.Blacklist:
 				{
-					return globalProtection.Blacklist.All(u => u.DiscordID != invokingUser.Id)
+					return globalProtection.Blacklist.All(u => u.DiscordID != (long)invokingUser.Id)
 						? DetermineConditionResult.FromSuccess()
 						: DetermineConditionResult.FromError("You're on that user's blacklist.");
 				}
 				case ProtectionType.Whitelist:
 				{
-					return globalProtection.Whitelist.Any(u => u.DiscordID == invokingUser.Id)
+					return globalProtection.Whitelist.Any(u => u.DiscordID == (long)invokingUser.Id)
 						? DetermineConditionResult.FromSuccess()
 						: DetermineConditionResult.FromError("You're not on that user's whitelist.");
 				}
@@ -438,7 +438,7 @@ namespace DIGOS.Ambassador.Services
 			eb.WithColor(Color.DarkPurple);
 			eb.WithTitle($"{character.Name} {(character.Nickname is null ? string.Empty : $"\"{character.Nickname}\"")}".Trim());
 
-			var user = await context.Client.GetUserAsync(character.Owner.DiscordID);
+			var user = await context.Client.GetUserAsync((ulong)character.Owner.DiscordID);
 			eb.WithAuthor(user);
 
 			eb.WithThumbnailUrl
@@ -607,13 +607,29 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
-			if (protection.Whitelist.Any(u => u.DiscordID == whitelistedUser.Id))
+			if (protection.Whitelist.Any(u => u.DiscordID == (long)whitelistedUser.Id))
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already whitelisted that user.");
 			}
 
-			var user = await db.GetOrRegisterUserAsync(whitelistedUser);
-			protection.Whitelist.Add(user);
+			var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == (long)discordUser.Id);
+			if (protectionEntry is null)
+			{
+				var user = await db.GetOrRegisterUserAsync(whitelistedUser);
+				protectionEntry = new UserProtectionEntry
+				{
+					GlobalProtection = protection,
+					User = user,
+					Type = ListingType.Whitelist
+				};
+
+				protection.UserListing.Add(protectionEntry);
+			}
+			else
+			{
+				protectionEntry.Type = ListingType.Whitelist;
+			}
+
 			await db.SaveChangesAsync();
 
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
@@ -639,13 +655,29 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
-			if (protection.Blacklist.Any(u => u.DiscordID == blacklistedUser.Id))
+			if (protection.Blacklist.Any(u => u.DiscordID == (long)blacklistedUser.Id))
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already blacklisted that user.");
 			}
 
-			var user = await db.GetOrRegisterUserAsync(blacklistedUser);
-			protection.Blacklist.Add(user);
+			var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == (long)discordUser.Id);
+			if (protectionEntry is null)
+			{
+				var user = await db.GetOrRegisterUserAsync(blacklistedUser);
+				protectionEntry = new UserProtectionEntry
+				{
+					GlobalProtection = protection,
+					User = user,
+					Type = ListingType.Blacklist
+				};
+
+				protection.UserListing.Add(protectionEntry);
+			}
+			else
+			{
+				protectionEntry.Type = ListingType.Blacklist;
+			}
+
 			await db.SaveChangesAsync();
 
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
@@ -668,7 +700,7 @@ namespace DIGOS.Ambassador.Services
 			.Include(p => p.User)
 			.Include(p => p.Whitelist)
 			.Include(p => p.Blacklist)
-			.FirstOrDefaultAsync(p => p.User.DiscordID == discordUser.Id);
+			.FirstOrDefaultAsync(p => p.User.DiscordID == (long)discordUser.Id);
 
 			if (!(protection is null))
 			{
@@ -705,7 +737,7 @@ namespace DIGOS.Ambassador.Services
 			.FirstOrDefaultAsync
 			(
 				p =>
-					p.User.DiscordID == discordUser.Id && p.Server.DiscordID == guild.Id
+					p.User.DiscordID == (long)discordUser.Id && p.Server.DiscordID == (long)guild.Id
 			);
 
 			if (!(protection is null))

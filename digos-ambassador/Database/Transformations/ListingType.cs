@@ -1,5 +1,5 @@
 ﻿//
-//  IPermission.cs
+//  ListingType.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,39 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using DIGOS.Ambassador.Permissions;
-
-#pragma warning disable SA1402
-
-namespace DIGOS.Ambassador.Database.Permissions
+namespace DIGOS.Ambassador.Database.Transformations
 {
 	/// <summary>
-	/// Member interface for permissions.
+	/// Represents a value indicating whether a user is on another user's blacklist or whitelist.
 	/// </summary>
-	public interface IPermission
+	public enum ListingType
 	{
 		/// <summary>
-		/// Gets or sets the discord ID of the user that this permission has been granted to.
+		/// The user is blacklisted.
 		/// </summary>
-		long UserDiscordID { get; set; }
+		Blacklist,
 
 		/// <summary>
-		/// Gets or sets the granted permission.
+		/// The user is whitelisted.
 		/// </summary>
-		Permission Permission { get; set; }
-
-		/// <summary>
-		/// Gets or sets the allowed targets.
-		/// </summary>
-		PermissionTarget Target { get; set; }
-	}
-
-	/// <summary>
-	/// Equation interface for permissions.
-	/// </summary>
-	/// <typeparam name="T">The type of the permission class.</typeparam>
-	public interface IPermission<T> : IEquatable<T>, IPermission where T : IPermission<T>
-	{
+		Whitelist
 	}
 }

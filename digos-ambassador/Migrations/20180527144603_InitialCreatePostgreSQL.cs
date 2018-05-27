@@ -3,13 +3,14 @@
 // ReSharper disable RedundantArgumentDefaultValue
 // ReSharper disable PartialTypeWithSinglePart
 // ReSharper disable RedundantUsingDirective
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 
 namespace DIGOS.Ambassador.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class InitialCreatePostgreSQL : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -17,8 +18,8 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Appearance",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     GenderScale = table.Column<double>(nullable: false),
                     Height = table.Column<double>(nullable: false),
                     Muscularity = table.Column<double>(nullable: false),
@@ -33,8 +34,8 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Colour",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Modifier = table.Column<int>(nullable: true),
                     Shade = table.Column<int>(nullable: false)
                 },
@@ -47,8 +48,8 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Dossiers",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Path = table.Column<string>(nullable: true),
                     Summary = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true)
@@ -62,11 +63,11 @@ namespace DIGOS.Ambassador.Migrations
                 name: "GlobalPermissions",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Permission = table.Column<int>(nullable: false),
                     Target = table.Column<int>(nullable: false),
-                    UserDiscordID = table.Column<ulong>(nullable: false)
+                    UserDiscordID = table.Column<long>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -77,8 +78,8 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Kinks",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Category = table.Column<int>(nullable: false),
                     Description = table.Column<string>(nullable: true),
                     FListID = table.Column<uint>(nullable: false),
@@ -93,12 +94,12 @@ namespace DIGOS.Ambassador.Migrations
                 name: "LocalPermissions",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Permission = table.Column<int>(nullable: false),
-                    ServerDiscordID = table.Column<ulong>(nullable: false),
+                    ServerDiscordID = table.Column<long>(nullable: false),
                     Target = table.Column<int>(nullable: false),
-                    UserDiscordID = table.Column<ulong>(nullable: false)
+                    UserDiscordID = table.Column<long>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -109,9 +110,9 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Servers",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    DiscordID = table.Column<ulong>(nullable: false),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    DiscordID = table.Column<long>(nullable: false),
                     IsNSFW = table.Column<bool>(nullable: false),
                     SuppressPermissonWarnings = table.Column<bool>(nullable: false)
                 },
@@ -124,11 +125,11 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Species",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Description = table.Column<string>(nullable: false),
                     Name = table.Column<string>(nullable: false),
-                    ParentID = table.Column<uint>(nullable: true)
+                    ParentID = table.Column<long>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -145,18 +146,18 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Transformations",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    DefaultBaseColourID = table.Column<uint>(nullable: false),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    DefaultBaseColourID = table.Column<long>(nullable: false),
                     DefaultPattern = table.Column<int>(nullable: true),
-                    DefaultPatternColourID = table.Column<uint>(nullable: true),
+                    DefaultPatternColourID = table.Column<long>(nullable: true),
                     Description = table.Column<string>(nullable: false),
                     GrowMessage = table.Column<string>(nullable: false),
                     IsNSFW = table.Column<bool>(nullable: false),
                     Part = table.Column<int>(nullable: false),
                     ShiftMessage = table.Column<string>(nullable: false),
                     SingleDescription = table.Column<string>(nullable: false),
-                    SpeciesID = table.Column<uint>(nullable: false),
+                    SpeciesID = table.Column<long>(nullable: false),
                     UniformDescription = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -186,15 +187,15 @@ namespace DIGOS.Ambassador.Migrations
                 name: "AppearanceComponent",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    AppearanceID = table.Column<uint>(nullable: true),
-                    BaseColourID = table.Column<uint>(nullable: true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    AppearanceID = table.Column<long>(nullable: true),
+                    BaseColourID = table.Column<long>(nullable: true),
                     Chirality = table.Column<int>(nullable: false),
                     Pattern = table.Column<int>(nullable: true),
-                    PatternColourID = table.Column<uint>(nullable: true),
+                    PatternColourID = table.Column<long>(nullable: true),
                     Size = table.Column<int>(nullable: false),
-                    TransformationID = table.Column<uint>(nullable: true)
+                    TransformationID = table.Column<long>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -229,21 +230,20 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Characters",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     AvatarUrl = table.Column<string>(nullable: true),
-                    CurrentAppearanceID = table.Column<uint>(nullable: true),
-                    DefaultAppearanceID = table.Column<uint>(nullable: true),
+                    CurrentAppearanceID = table.Column<long>(nullable: true),
+                    DefaultAppearanceID = table.Column<long>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     IsCurrent = table.Column<bool>(nullable: false),
                     IsNSFW = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Nickname = table.Column<string>(nullable: true),
-                    OwnerID = table.Column<uint>(nullable: true),
+                    OwnerID = table.Column<long>(nullable: true),
                     PronounProviderFamily = table.Column<string>(nullable: true),
-                    ServerID = table.Column<ulong>(nullable: false),
-                    Summary = table.Column<string>(nullable: true),
-                    UserID = table.Column<uint>(nullable: true)
+                    ServerID = table.Column<long>(nullable: false),
+                    Summary = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -266,10 +266,10 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Images",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Caption = table.Column<string>(nullable: true),
-                    CharacterID = table.Column<uint>(nullable: true),
+                    CharacterID = table.Column<long>(nullable: true),
                     IsNSFW = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     Url = table.Column<string>(nullable: true)
@@ -289,18 +289,18 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Bio = table.Column<string>(nullable: true),
                     Class = table.Column<int>(nullable: false),
-                    DefaultCharacterID = table.Column<uint>(nullable: true),
-                    DiscordID = table.Column<ulong>(nullable: false),
-                    GlobalUserProtectionID = table.Column<uint>(nullable: true),
-                    GlobalUserProtectionID1 = table.Column<uint>(nullable: true),
-                    RoleplayID = table.Column<uint>(nullable: true),
-                    RoleplayID1 = table.Column<uint>(nullable: true),
-                    RoleplayID2 = table.Column<uint>(nullable: true),
-                    ServerID = table.Column<uint>(nullable: true),
+                    DefaultCharacterID = table.Column<long>(nullable: false),
+                    DiscordID = table.Column<long>(nullable: false),
+                    GlobalUserProtectionID = table.Column<long>(nullable: true),
+                    GlobalUserProtectionID1 = table.Column<long>(nullable: true),
+                    RoleplayID = table.Column<long>(nullable: true),
+                    RoleplayID1 = table.Column<long>(nullable: true),
+                    RoleplayID2 = table.Column<long>(nullable: true),
+                    ServerID = table.Column<long>(nullable: true),
                     Timezone = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
@@ -311,7 +311,7 @@ namespace DIGOS.Ambassador.Migrations
                         column: x => x.DefaultCharacterID,
                         principalTable: "Characters",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Users_Servers_ServerID",
                         column: x => x.ServerID,
@@ -324,11 +324,11 @@ namespace DIGOS.Ambassador.Migrations
                 name: "GlobalUserProtections",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     DefaultOptIn = table.Column<bool>(nullable: false),
                     DefaultType = table.Column<int>(nullable: false),
-                    UserID = table.Column<uint>(nullable: true)
+                    UserID = table.Column<long>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -345,15 +345,15 @@ namespace DIGOS.Ambassador.Migrations
                 name: "Roleplays",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ActiveChannelID = table.Column<ulong>(nullable: false),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    ActiveChannelID = table.Column<long>(nullable: false),
                     IsActive = table.Column<bool>(nullable: false),
                     IsNSFW = table.Column<bool>(nullable: false),
                     IsPublic = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(nullable: true),
-                    OwnerID = table.Column<uint>(nullable: true),
-                    ServerID = table.Column<ulong>(nullable: false),
+                    OwnerID = table.Column<long>(nullable: true),
+                    ServerID = table.Column<long>(nullable: false),
                     Summary = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -371,12 +371,12 @@ namespace DIGOS.Ambassador.Migrations
                 name: "ServerUserProtections",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     HasOptedIn = table.Column<bool>(nullable: false),
-                    ServerID = table.Column<uint>(nullable: true),
+                    ServerID = table.Column<long>(nullable: true),
                     Type = table.Column<int>(nullable: false),
-                    UserID = table.Column<uint>(nullable: true)
+                    UserID = table.Column<long>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -399,11 +399,11 @@ namespace DIGOS.Ambassador.Migrations
                 name: "UserKink",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    KinkID = table.Column<uint>(nullable: true),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    KinkID = table.Column<long>(nullable: true),
                     Preference = table.Column<int>(nullable: false),
-                    UserID = table.Column<uint>(nullable: true)
+                    UserID = table.Column<long>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -426,13 +426,13 @@ namespace DIGOS.Ambassador.Migrations
                 name: "UserMessage",
                 columns: table => new
                 {
-                    ID = table.Column<uint>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    AuthorDiscordID = table.Column<ulong>(nullable: false),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
+                    AuthorDiscordID = table.Column<long>(nullable: false),
                     AuthorNickname = table.Column<string>(nullable: true),
                     Contents = table.Column<string>(nullable: true),
-                    DiscordMessageID = table.Column<ulong>(nullable: false),
-                    RoleplayID = table.Column<uint>(nullable: true),
+                    DiscordMessageID = table.Column<long>(nullable: false),
+                    RoleplayID = table.Column<long>(nullable: true),
                     Timestamp = table.Column<DateTimeOffset>(nullable: false)
                 },
                 constraints: table =>
@@ -480,11 +480,6 @@ namespace DIGOS.Ambassador.Migrations
                 name: "IX_Characters_OwnerID",
                 table: "Characters",
                 column: "OwnerID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Characters_UserID",
-                table: "Characters",
-                column: "UserID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GlobalUserProtections_UserID",
@@ -549,7 +544,8 @@ namespace DIGOS.Ambassador.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Users_DefaultCharacterID",
                 table: "Users",
-                column: "DefaultCharacterID");
+                column: "DefaultCharacterID",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_GlobalUserProtectionID",
@@ -585,14 +581,6 @@ namespace DIGOS.Ambassador.Migrations
                 name: "FK_Characters_Users_OwnerID",
                 table: "Characters",
                 column: "OwnerID",
-                principalTable: "Users",
-                principalColumn: "ID",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Characters_Users_UserID",
-                table: "Characters",
-                column: "UserID",
                 principalTable: "Users",
                 principalColumn: "ID",
                 onDelete: ReferentialAction.Restrict);
@@ -650,10 +638,6 @@ namespace DIGOS.Ambassador.Migrations
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Characters_Users_OwnerID",
-                table: "Characters");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Characters_Users_UserID",
                 table: "Characters");
 
             migrationBuilder.DropForeignKey(

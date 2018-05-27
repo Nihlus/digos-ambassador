@@ -37,12 +37,12 @@ namespace DIGOS.Ambassador.Database.ServerInfo
 	public class Server : IEFEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the globally unique guild ID of the server.
 		/// </summary>
-		public virtual ulong DiscordID { get; set; }
+		public virtual long DiscordID { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether or not the server allows NSFW content globally.
@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Database.ServerInfo
 		/// <returns>true if the user is known; otherwise, false.</returns>
 		public bool IsUserKnown([NotNull] IUser user)
 		{
-			return this.KnownUsers.Any(u => u.DiscordID == user.Id);
+			return this.KnownUsers.Any(u => u.DiscordID == (long)user.Id);
 		}
 
 		/// <summary>
@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Database.ServerInfo
 		{
 			return new Server
 			{
-				DiscordID = discordServer.Id,
+				DiscordID = (long)discordServer.Id,
 				IsNSFW = true,
 			};
 		}

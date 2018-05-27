@@ -1,5 +1,5 @@
 ﻿//
-//  IPermission.cs
+//  UserProtectionEntry.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,39 +20,33 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using DIGOS.Ambassador.Permissions;
+using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Database.Users;
 
-#pragma warning disable SA1402
-
-namespace DIGOS.Ambassador.Database.Permissions
+namespace DIGOS.Ambassador.Database.Transformations
 {
 	/// <summary>
-	/// Member interface for permissions.
+	/// Represents a protection entry, that is, a user that has been whitelisted or blacklisted by another user in the
+	/// TF module.
 	/// </summary>
-	public interface IPermission
+	public class UserProtectionEntry : IEFEntity
 	{
-		/// <summary>
-		/// Gets or sets the discord ID of the user that this permission has been granted to.
-		/// </summary>
-		long UserDiscordID { get; set; }
+		/// <inheritdoc />
+		public long ID { get; set; }
 
 		/// <summary>
-		/// Gets or sets the granted permission.
+		/// Gets or sets the global protection entry that the user has been listed in.
 		/// </summary>
-		Permission Permission { get; set; }
+		public GlobalUserProtection GlobalProtection { get; set; }
 
 		/// <summary>
-		/// Gets or sets the allowed targets.
+		/// Gets or sets the user that's listed in the global protection entry.
 		/// </summary>
-		PermissionTarget Target { get; set; }
-	}
+		public User User { get; set; }
 
-	/// <summary>
-	/// Equation interface for permissions.
-	/// </summary>
-	/// <typeparam name="T">The type of the permission class.</typeparam>
-	public interface IPermission<T> : IEquatable<T>, IPermission where T : IPermission<T>
-	{
+		/// <summary>
+		/// Gets or sets the type of listing.
+		/// </summary>
+		public ListingType Type { get; set; }
 	}
 }

@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 	public class AppearanceComponent : IEFEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AppearanceComponent"/> class.

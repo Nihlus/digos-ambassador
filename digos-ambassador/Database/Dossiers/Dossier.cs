@@ -30,7 +30,7 @@ namespace DIGOS.Ambassador.Database.Dossiers
 	public class Dossier : IEFEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the title of the dossier.

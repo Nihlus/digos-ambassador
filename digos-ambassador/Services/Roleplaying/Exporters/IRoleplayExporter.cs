@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.IO;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Roleplaying;
 using JetBrains.Annotations;

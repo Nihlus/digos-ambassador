@@ -7,9 +7,30 @@
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.3.1/build/netcoreapp1.0/xunit.runner.utility.netcoreapp10.dll" t="Include" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.3.1/build/netcoreapp1.0/xunit.runner.visualstudio.dotnetcore.testadapter.dll" t="Include" />
     <e p="$PROJECT_DIR$" t="IncludeFlat">
+      <e p=".gitignore" t="Include" />
       <e p=".travis.yml" t="Include" />
       <e p="README.md" t="Include" />
       <e p="digos-ambassador" t="IncludeRecursive">
+        <e p="*Undefined*docs" t="Include">
+          <e p="index.md" t="Include" />
+          <e p="modules" t="Include">
+            <e p="admin.md" t="Include" />
+            <e p="character.md" t="Include" />
+            <e p="character_set.md" t="Include" />
+            <e p="dossier.md" t="Include" />
+            <e p="dossier_set.md" t="Include" />
+            <e p="kink.md" t="Include" />
+            <e p="miscellaneous.md" t="Include" />
+            <e p="permission.md" t="Include" />
+            <e p="permission_grant.md" t="Include" />
+            <e p="permission_revoke.md" t="Include" />
+            <e p="roleplay.md" t="Include" />
+            <e p="roleplay_set.md" t="Include" />
+            <e p="transform.md" t="Include" />
+            <e p="user.md" t="Include" />
+            <e p="user_set.md" t="Include" />
+          </e>
+        </e>
         <e p="AmbassadorClient.cs" t="Include" />
         <e p="Attributes" t="Include">
           <e p="ChiralAttribute.cs" t="Include" />
@@ -24,6 +45,7 @@
             </e>
           </e>
           <e p="Databases" t="Include">
+            <e p="convert.pgloader" t="Include" />
             <e p="global.db" t="Include" />
           </e>
           <e p="Portraits" t="Include">
@@ -63,6 +85,7 @@
             </e>
           </e>
           <e p="bot.token" t="Include" />
+          <e p="database.credentials" t="Include" />
         </e>
         <e p="DIGOS.Ambassador.exe.config" t="Include" />
         <e p="Database" t="Include">
@@ -102,7 +125,9 @@
             <e p="LocalPermission.cs" t="Include" />
           </e>
           <e p="Roleplaying" t="Include">
+            <e p="ParticipantStatus.cs" t="Include" />
             <e p="Roleplay.cs" t="Include" />
+            <e p="RoleplayParticipant.cs" t="Include" />
             <e p="UserMessage.cs" t="Include" />
           </e>
           <e p="ServerInfo" t="Include">
@@ -110,9 +135,11 @@
           </e>
           <e p="Transformations" t="Include">
             <e p="GlobalUserProtection.cs" t="Include" />
+            <e p="ListingType.cs" t="Include" />
             <e p="ServerUserProtection.cs" t="Include" />
             <e p="Species.cs" t="Include" />
             <e p="Transformation.cs" t="Include" />
+            <e p="UserProtectionEntry.cs" t="Include" />
           </e>
           <e p="Users" t="Include">
             <e p="User.cs" t="Include" />
@@ -152,8 +179,14 @@
           <e p="InteractiveMessage.cs" t="Include" />
         </e>
         <e p="Migrations" t="Include">
-          <e p="20180123130509_InitialCreate.Designer.cs" t="Include" />
-          <e p="20180123130509_InitialCreate.cs" t="Include" />
+          <e p="20180527144603_InitialCreatePostgreSQL.Designer.cs" t="Include" />
+          <e p="20180527144603_InitialCreatePostgreSQL.cs" t="Include" />
+          <e p="20180527152717_NullableDefaultCharacters.Designer.cs" t="Include" />
+          <e p="20180527152717_NullableDefaultCharacters.cs" t="Include" />
+          <e p="20180527164455_AddRoleplayParticipantJoinTable.Designer.cs" t="Include" />
+          <e p="20180527164455_AddRoleplayParticipantJoinTable.cs" t="Include" />
+          <e p="20180527184643_AddGlobalProtectionListingJoinTable.Designer.cs" t="Include" />
+          <e p="20180527184643_AddGlobalProtectionListingJoinTable.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">
@@ -382,6 +415,7 @@
           <e p="LuaServiceTests.cs" t="Include" />
           <e p="OwnedEntityServiceTests.cs" t="Include" />
           <e p="PermissionServiceTests.cs" t="Include" />
+          <e p="RoleplayServiceTests.cs" t="Include" />
           <e p="TransformationServiceTests.cs" t="Include" />
         </e>
         <e p="TestBases" t="Include">
@@ -389,6 +423,7 @@
           <e p="DatabaseDependantTestBase.cs" t="Include" />
           <e p="OwnedEntityServiceTestBase.cs" t="Include" />
           <e p="PermissionServiceTestBase.cs" t="Include" />
+          <e p="RoleplayServiceTestBase.cs" t="Include" />
           <e p="TransformationServiceTestBase.cs" t="Include" />
         </e>
         <e p="TokenizerTests.cs" t="Include" />
@@ -422,6 +457,9 @@
         </e>
       </e>
       <e p="digos-ambassador.sln" t="IncludeFlat" />
+      <e p="msbuild" t="Include">
+        <e p="netfx-mono.props" t="Include" />
+      </e>
       <e p="packages" t="ExcludeRecursive" />
       <e p="stylecop.json" t="Include" />
       <e p="stylecop.ruleset" t="Include" />

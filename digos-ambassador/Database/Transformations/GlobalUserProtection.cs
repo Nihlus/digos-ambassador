@@ -21,6 +21,8 @@
 //
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Transformations;
@@ -34,7 +36,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 	public class GlobalUserProtection : IEFEntity
 	{
 		/// <inheritdoc />
-		public uint ID { get; set; }
+		public long ID { get; set; }
 
 		/// <summary>
 		/// Gets or sets the user that owns this protection data.
@@ -52,14 +54,23 @@ namespace DIGOS.Ambassador.Database.Transformations
 		public bool DefaultOptIn { get; set; }
 
 		/// <summary>
-		/// Gets or sets the list of users that are allowed to transform the owner.
+		/// Gets or sets the list of users that are listed in this protection entry.
 		/// </summary>
-		public List<User> Whitelist { get; set; }
+		public List<UserProtectionEntry> UserListing { get; set; }
 
 		/// <summary>
-		/// Gets or sets the list of users that are prohibited from transforming the owner.
+		/// Gets the list of users that are allowed to transform the owner.
 		/// </summary>
-		public List<User> Blacklist { get; set; }
+		[NotNull, NotMapped]
+		public IEnumerable<User> Whitelist =>
+			this.UserListing.Where(u => u.Type == ListingType.Whitelist).Select(u => u.User);
+
+		/// <summary>
+		/// Gets the list of users that are prohibited from transforming the owner.
+		/// </summary>
+		[NotNull, NotMapped]
+		public IEnumerable<User> Blacklist =>
+				this.UserListing.Where(u => u.Type == ListingType.Blacklist).Select(u => u.User);
 
 		/// <summary>
 		/// Creates a default global protection object for the given user.
@@ -75,8 +86,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 				User = user,
 				DefaultType = ProtectionType.Blacklist,
 				DefaultOptIn = false,
-				Whitelist = new List<User>(),
-				Blacklist = new List<User>()
+				UserListing = new List<UserProtectionEntry>()
 			};
 		}
 	}

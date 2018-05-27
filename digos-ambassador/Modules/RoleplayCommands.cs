@@ -127,7 +127,7 @@ namespace DIGOS.Ambassador.Modules
 		{
 			var eb = this.Feedback.CreateEmbedBase();
 
-			eb.WithAuthor(this.Context.Client.GetUser(roleplay.Owner.DiscordID));
+			eb.WithAuthor(this.Context.Client.GetUser((ulong)roleplay.Owner.DiscordID));
 			eb.WithTitle(roleplay.Name);
 			eb.WithDescription(roleplay.Summary);
 
@@ -137,7 +137,7 @@ namespace DIGOS.Ambassador.Modules
 			eb.AddField("NSFW", roleplay.IsNSFW ? "Yes" : "No");
 			eb.AddField("Public", roleplay.IsPublic ? "Yes" : "No", true);
 
-			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p.DiscordID));
+			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser((ulong)p.User.DiscordID));
 			var participantMentions = participantUsers.Select(u => u.Mention);
 
 			var participantList = participantMentions.Humanize();
@@ -254,7 +254,7 @@ namespace DIGOS.Ambassador.Modules
 				return;
 			}
 
-			var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
+			var roleplayOwnerUser = this.Context.Guild.GetUser((ulong)roleplay.Owner.DiscordID);
 			await this.Feedback.SendConfirmationAsync(this.Context, $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
 		}
 
@@ -312,7 +312,7 @@ namespace DIGOS.Ambassador.Modules
 				return;
 			}
 
-			var roleplayOwnerUser = this.Context.Guild.GetUser(roleplay.Owner.DiscordID);
+			var roleplayOwnerUser = this.Context.Guild.GetUser((ulong)roleplay.Owner.DiscordID);
 			await this.Feedback.SendConfirmationAsync(this.Context, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
 		}
 
@@ -378,7 +378,7 @@ namespace DIGOS.Ambassador.Modules
 				return;
 			}
 
-			roleplay.ActiveChannelID = this.Context.Channel.Id;
+			roleplay.ActiveChannelID = (long)this.Context.Channel.Id;
 			await this.Database.SaveChangesAsync();
 
 			await this.Feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplay.Name}\" is now current in #{this.Context.Channel.Name}.");
@@ -434,15 +434,15 @@ namespace DIGOS.Ambassador.Modules
 				}
 			}
 
-			if (roleplay.ActiveChannelID != this.Context.Channel.Id)
+			if (roleplay.ActiveChannelID != (long)this.Context.Channel.Id)
 			{
-				roleplay.ActiveChannelID = this.Context.Channel.Id;
+				roleplay.ActiveChannelID = (long)this.Context.Channel.Id;
 			}
 
 			roleplay.IsActive = true;
 			await this.Database.SaveChangesAsync();
 
-			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser(p.DiscordID));
+			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser((ulong)p.User.DiscordID));
 			var participantMentions = participantUsers.Select(u => u.Mention);
 
 			var participantList = participantMentions.Humanize();
@@ -517,7 +517,7 @@ namespace DIGOS.Ambassador.Modules
 						break;
 					}
 
-					var modifyResult = await this.Roleplays.AddToOrUpdateMessageInRoleplay(this.Database, roleplay, message);
+					var modifyResult = await this.Roleplays.AddToOrUpdateMessageInRoleplayAsync(this.Database, roleplay, message);
 					if (modifyResult.IsSuccess)
 					{
 						++addedOrUpdatedMessageCount;

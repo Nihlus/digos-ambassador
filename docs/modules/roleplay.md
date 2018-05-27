@@ -193,6 +193,7 @@ Transfers ownership of the named roleplay to the specified user.
 | Name | Type | Optional |
 | --- | --- | --- |
 | roleplay | Roleplay | `no` |
+| format | ExportFormat | `yes` |
 
 ---
 
