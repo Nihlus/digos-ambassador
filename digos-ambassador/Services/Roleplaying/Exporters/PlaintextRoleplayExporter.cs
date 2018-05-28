@@ -58,10 +58,10 @@ namespace DIGOS.Ambassador.Services.Exporters
 					await ofw.WriteLineAsync($"Roleplay name: {roleplay.Name}");
 					await ofw.WriteLineAsync($"Owner: {owner.Username}");
 
-					var participants = await Task.WhenAll(roleplay.Participants.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
+					var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
 
 					await ofw.WriteLineAsync("Participants:");
-					foreach (var participant in participants)
+					foreach (var participant in joinedUsers)
 					{
 						await ofw.WriteLineAsync(participant.Username);
 					}

@@ -69,28 +69,28 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <summary>
 		/// Gets or sets the users that are participating in the roleplay in any way.
 		/// </summary>
-		public List<RoleplayParticipant> Participants { get; set; }
+		public List<RoleplayParticipant> ParticipatingUsers { get; set; }
 
 		/// <summary>
 		/// Gets the users that have been kicked from the roleplay.
 		/// </summary>
 		[NotNull, NotMapped]
 		public IEnumerable<RoleplayParticipant> JoinedUsers =>
-			this.Participants.Where(p => p.Status == ParticipantStatus.Joined);
+			this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Joined);
 
 		/// <summary>
 		/// Gets the users that have been kicked from the roleplay.
 		/// </summary>
 		[NotNull, NotMapped]
 		public IEnumerable<RoleplayParticipant> KickedUsers =>
-				this.Participants.Where(p => p.Status == ParticipantStatus.Kicked);
+				this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Kicked);
 
 		/// <summary>
 		/// Gets the users that have been invited to the roleplay.
 		/// </summary>
 		[NotNull, NotMapped]
 		public IEnumerable<RoleplayParticipant> InvitedUsers =>
-			this.Participants.Where(p => p.Status == ParticipantStatus.Invited);
+			this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Invited);
 
 		/// <inheritdoc />
 		public string Name { get; set; }

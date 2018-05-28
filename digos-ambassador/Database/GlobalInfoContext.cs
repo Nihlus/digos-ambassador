@@ -367,7 +367,7 @@ namespace DIGOS.Ambassador.Database
 			var passfilePath = Path.Combine("Content", "database.credentials");
 			if (!File.Exists(passfilePath))
 			{
-				throw new FileNotFoundException("Could not find PostreSQL credentials.", passfilePath);
+				throw new FileNotFoundException("Could not find PostgreSQL credentials.", passfilePath);
 			}
 
 			var passfileContents = File.ReadAllText(passfilePath).Split(':');
@@ -379,7 +379,6 @@ namespace DIGOS.Ambassador.Database
 			var password = passfileContents[4];
 
 			optionsBuilder.UseNpgsql($"Server=localhost;Database=amby;Username=amby;Password={password}");
-			//optionsBuilder.UseSqlite($"Data Source={Path.Combine("Content", "Databases", "global.db")}");
 
 			return optionsBuilder;
 		}
@@ -407,7 +406,7 @@ namespace DIGOS.Ambassador.Database
 			modelBuilder.Entity<Character>().HasOne(ch => ch.Owner).WithMany(u => u.Characters);
 
 			modelBuilder.Entity<Roleplay>().HasOne(u => u.Owner).WithMany();
-			modelBuilder.Entity<Roleplay>().HasMany(u => u.Participants).WithOne(p => p.Roleplay);
+			modelBuilder.Entity<Roleplay>().HasMany(u => u.ParticipatingUsers).WithOne(p => p.Roleplay);
 			modelBuilder.Entity<RoleplayParticipant>().HasOne(u => u.User).WithMany();
 
 			modelBuilder.Entity<GlobalUserProtection>().HasMany(p => p.UserListing).WithOne(u => u.GlobalProtection);

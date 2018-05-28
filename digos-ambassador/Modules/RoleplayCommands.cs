@@ -137,10 +137,10 @@ namespace DIGOS.Ambassador.Modules
 			eb.AddField("NSFW", roleplay.IsNSFW ? "Yes" : "No");
 			eb.AddField("Public", roleplay.IsPublic ? "Yes" : "No", true);
 
-			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser((ulong)p.User.DiscordID));
-			var participantMentions = participantUsers.Select(u => u.Mention);
+			var joinedUsers = roleplay.JoinedUsers.Select(p => this.Context.Client.GetUser((ulong)p.User.DiscordID));
+			var joinedMentions = joinedUsers.Select(u => u.Mention);
 
-			var participantList = participantMentions.Humanize();
+			var participantList = joinedMentions.Humanize();
 			participantList = string.IsNullOrEmpty(participantList) ? "None" : participantList;
 
 			eb.AddField("Participants", $"{participantList}");
@@ -286,9 +286,10 @@ namespace DIGOS.Ambassador.Modules
 				return;
 			}
 
+			await this.Feedback.SendConfirmationAsync(this.Context, $"Invited {playerToInvite.Mention} to {roleplay.Name}.");
+
 			var userDMChannel = await playerToInvite.GetOrCreateDMChannelAsync();
 			await userDMChannel.SendMessageAsync($"You've been invited to join {roleplay.Name}. Use \"!rp join {roleplay.Name}\" to join.");
-			await this.Feedback.SendConfirmationAsync(this.Context, $"Invited {playerToInvite.Mention} to {roleplay.Name}.");
 
 			await userDMChannel.CloseAsync();
 		}
@@ -442,10 +443,10 @@ namespace DIGOS.Ambassador.Modules
 			roleplay.IsActive = true;
 			await this.Database.SaveChangesAsync();
 
-			var participantUsers = roleplay.Participants.Select(p => this.Context.Client.GetUser((ulong)p.User.DiscordID));
-			var participantMentions = participantUsers.Select(u => u.Mention);
+			var joinedUsers = roleplay.JoinedUsers.Select(p => this.Context.Client.GetUser((ulong)p.User.DiscordID));
+			var joinedMentions = joinedUsers.Select(u => u.Mention);
 
-			var participantList = participantMentions.Humanize();
+			var participantList = joinedMentions.Humanize();
 			await this.Feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplay.Name}\" is now active in {MentionUtils.MentionChannel(this.Context.Channel.Id)}.");
 			await this.Context.Channel.SendMessageAsync($"Calling {participantList}!");
 		}

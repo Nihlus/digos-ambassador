@@ -102,11 +102,11 @@ namespace DIGOS.Ambassador.Services
 				ServerID = (long)context.Guild.Id,
 				IsActive = false,
 				ActiveChannelID = (long)context.Channel.Id,
-				Participants = new List<RoleplayParticipant>(),
+				ParticipatingUsers = new List<RoleplayParticipant>(),
 				Messages = new List<UserMessage>()
 			};
 
-			roleplay.Participants.Add(new RoleplayParticipant(roleplay, owner, ParticipantStatus.Joined));
+			roleplay.ParticipatingUsers.Add(new RoleplayParticipant(roleplay, owner, ParticipantStatus.Joined));
 
 			var setNameResult = await SetRoleplayNameAsync(db, context, roleplay, roleplayName);
 			if (!setNameResult.IsSuccess)
@@ -158,7 +158,7 @@ namespace DIGOS.Ambassador.Services
 			[NotNull] IMessage message
 		)
 		{
-			if (roleplay.Participants is null || !roleplay.HasJoined(message.Author))
+			if (!roleplay.HasJoined(message.Author))
 			{
 				return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The given message was not authored by a participant of the roleplay.");
 			}
@@ -339,9 +339,9 @@ namespace DIGOS.Ambassador.Services
 		{
 			return db.Roleplays
 				.Include(rp => rp.Owner)
-				.Include(rp => rp.Participants)
+				.Include(rp => rp.JoinedUsers)
 				.ThenInclude(p => p.Roleplay)
-				.Include(rp => rp.Participants)
+				.Include(rp => rp.JoinedUsers)
 				.ThenInclude(p => p.User)
 				.Include(rp => rp.Messages)
 				.Where
@@ -439,7 +439,7 @@ namespace DIGOS.Ambassador.Services
 				}
 			}
 
-			var participantEntry = roleplay.Participants.First(p => p.User.DiscordID == (long)kickedUser.Id);
+			var participantEntry = roleplay.JoinedUsers.First(p => p.User.DiscordID == (long)kickedUser.Id);
 			participantEntry.Status = ParticipantStatus.Kicked;
 
 			await db.SaveChangesAsync();
@@ -482,7 +482,7 @@ namespace DIGOS.Ambassador.Services
 				return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
 			}
 
-			var participantEntry = roleplay.Participants.First(p => p.User.DiscordID == (long)removedUser.Id);
+			var participantEntry = roleplay.JoinedUsers.First(p => p.User.DiscordID == (long)removedUser.Id);
 			participantEntry.Status = ParticipantStatus.None;
 
 			await db.SaveChangesAsync();
@@ -535,12 +535,12 @@ namespace DIGOS.Ambassador.Services
 				return ExecuteResult.FromError(CommandError.UnmetPrecondition, errorMessage);
 			}
 
-			var participantEntry = roleplay.Participants.FirstOrDefault(p => p.User.DiscordID == (long)newUser.Id);
+			var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)newUser.Id);
 			if (participantEntry is null)
 			{
 				var user = await db.GetOrRegisterUserAsync(newUser);
 				participantEntry = new RoleplayParticipant(roleplay, user, ParticipantStatus.Joined);
-				roleplay.Participants.Add(participantEntry);
+				roleplay.ParticipatingUsers.Add(participantEntry);
 			}
 			else
 			{
@@ -577,12 +577,12 @@ namespace DIGOS.Ambassador.Services
 			}
 
 			// Remove the invited user from the kick list, if they're on it
-			var participantEntry = roleplay.Participants.FirstOrDefault(p => p.User.DiscordID == (long)invitedUser.Id);
+			var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)invitedUser.Id);
 			if (participantEntry is null)
 			{
 				var user = await db.GetOrRegisterUserAsync(invitedUser);
 				participantEntry = new RoleplayParticipant(roleplay, user, ParticipantStatus.Invited);
-				roleplay.Participants.Add(participantEntry);
+				roleplay.ParticipatingUsers.Add(participantEntry);
 			}
 			else
 			{

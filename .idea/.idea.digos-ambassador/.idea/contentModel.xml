@@ -61,7 +61,6 @@
             </e>
           </e>
           <e p="bot.token" t="Include" />
-          <e p="database.credentials" t="Include" />
         </e>
         <e p="DIGOS.Ambassador.exe.config" t="Include" />
         <e p="Database" t="Include">
