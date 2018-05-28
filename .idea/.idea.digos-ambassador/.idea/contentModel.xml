@@ -11,26 +11,6 @@
       <e p=".travis.yml" t="Include" />
       <e p="README.md" t="Include" />
       <e p="digos-ambassador" t="IncludeRecursive">
-        <e p="*Undefined*docs" t="Include">
-          <e p="index.md" t="Include" />
-          <e p="modules" t="Include">
-            <e p="admin.md" t="Include" />
-            <e p="character.md" t="Include" />
-            <e p="character_set.md" t="Include" />
-            <e p="dossier.md" t="Include" />
-            <e p="dossier_set.md" t="Include" />
-            <e p="kink.md" t="Include" />
-            <e p="miscellaneous.md" t="Include" />
-            <e p="permission.md" t="Include" />
-            <e p="permission_grant.md" t="Include" />
-            <e p="permission_revoke.md" t="Include" />
-            <e p="roleplay.md" t="Include" />
-            <e p="roleplay_set.md" t="Include" />
-            <e p="transform.md" t="Include" />
-            <e p="user.md" t="Include" />
-            <e p="user_set.md" t="Include" />
-          </e>
-        </e>
         <e p="AmbassadorClient.cs" t="Include" />
         <e p="Attributes" t="Include">
           <e p="ChiralAttribute.cs" t="Include" />
@@ -43,10 +23,6 @@
             <e p="Default" t="Include">
               <e p="Discord_DIGOS.png" t="Include" />
             </e>
-          </e>
-          <e p="Databases" t="Include">
-            <e p="convert.pgloader" t="Include" />
-            <e p="global.db" t="Include" />
           </e>
           <e p="Portraits" t="Include">
             <e p="amby-irbynx-3.png" t="Include" />

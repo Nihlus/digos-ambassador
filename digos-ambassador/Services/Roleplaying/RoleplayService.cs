@@ -62,7 +62,8 @@ namespace DIGOS.Ambassador.Services
 		/// </summary>
 		/// <param name="db">The database.</param>
 		/// <param name="context">The message to consume.</param>
-		public async void ConsumeMessage([NotNull] GlobalInfoContext db, [NotNull] ICommandContext context)
+		/// <returns>A task that must be awaited.</returns>
+		public async Task ConsumeMessageAsync([NotNull] GlobalInfoContext db, [NotNull] ICommandContext context)
 		{
 			var result = await GetActiveRoleplayAsync(db, context);
 			if (!result.IsSuccess)
@@ -339,6 +340,9 @@ namespace DIGOS.Ambassador.Services
 			return db.Roleplays
 				.Include(rp => rp.Owner)
 				.Include(rp => rp.Participants)
+				.ThenInclude(p => p.Roleplay)
+				.Include(rp => rp.Participants)
+				.ThenInclude(p => p.User)
 				.Include(rp => rp.Messages)
 				.Where
 				(
