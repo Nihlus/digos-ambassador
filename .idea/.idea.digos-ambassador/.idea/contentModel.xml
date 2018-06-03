@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ContentModelStore">
     <e p="$USER_HOME$/.Rider2018.1/system/resharper-host/local/Transient/ReSharperHost/v12/SolutionCaches/_digos-ambassador.233808278.00" t="ExcludeRecursive" />
-    <e p="$USER_HOME$/.nuget/packages/sqlitepclraw.lib.e_sqlite3.linux/1.1.7/runtimes/linux-x64/native/libe_sqlite3.so" t="Include" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.3.1/build/netcoreapp1.0/xunit.runner.reporters.netcoreapp10.dll" t="Include" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.3.1/build/netcoreapp1.0/xunit.runner.utility.netcoreapp10.dll" t="Include" />
     <e p="$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.3.1/build/netcoreapp1.0/xunit.runner.visualstudio.dotnetcore.testadapter.dll" t="Include" />
@@ -61,6 +60,7 @@
             </e>
           </e>
           <e p="bot.token" t="Include" />
+          <e p="database.credentials" t="Include" />
         </e>
         <e p="DIGOS.Ambassador.exe.config" t="Include" />
         <e p="Database" t="Include">
