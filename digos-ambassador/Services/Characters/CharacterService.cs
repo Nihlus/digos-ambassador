@@ -526,7 +526,7 @@ namespace DIGOS.Ambassador.Services
 		)
 		{
 			var isCurrentUser = context.Message.Author.Id == (ulong)newDefaultCharacter.Owner.DiscordID;
-			var isSameCharacter = targetUser.DefaultCharacter.Name == newDefaultCharacter.Name;
+			var isSameCharacter = targetUser.DefaultCharacter?.Name == newDefaultCharacter.Name;
 			if (isSameCharacter)
 			{
 				var errorMessage = isCurrentUser

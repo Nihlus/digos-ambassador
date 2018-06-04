@@ -22,10 +22,12 @@
 
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
@@ -90,7 +92,15 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I can't set the nickname of the server's owner.");
 			}
 
-			await guildUser.ModifyAsync(u => u.Nickname = nickname);
+			try
+			{
+				await guildUser.ModifyAsync(u => u.Nickname = nickname);
+			}
+			catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
+			{
+				return ModifyEntityResult.FromError(CommandError.Exception, "I couldn't modify the nickname due to a priority issue.");
+			}
+
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
 		}
 

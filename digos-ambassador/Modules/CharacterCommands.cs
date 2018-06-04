@@ -394,6 +394,8 @@ namespace DIGOS.Ambassador.Modules
 			Character character
 		)
 		{
+			this.Database.Attach(character);
+
 			var user = await this.Database.GetOrRegisterUserAsync(this.Context.User);
 
 			var result = await this.Characters.SetDefaultCharacterForUserAsync(this.Database, this.Context, character, user);

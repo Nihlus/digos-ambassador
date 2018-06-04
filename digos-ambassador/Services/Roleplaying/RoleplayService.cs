@@ -339,9 +339,9 @@ namespace DIGOS.Ambassador.Services
 		{
 			return db.Roleplays
 				.Include(rp => rp.Owner)
-				.Include(rp => rp.JoinedUsers)
+				.Include(rp => rp.ParticipatingUsers)
 				.ThenInclude(p => p.Roleplay)
-				.Include(rp => rp.JoinedUsers)
+				.Include(rp => rp.ParticipatingUsers)
 				.ThenInclude(p => p.User)
 				.Include(rp => rp.Messages)
 				.Where
