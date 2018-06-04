@@ -361,6 +361,52 @@ namespace DIGOS.Ambassador.Modules
 		}
 
 		/// <summary>
+		/// Sets your default form to your current character.
+		/// </summary>
+		[UsedImplicitly]
+		[Command("set-default", RunMode = Async)]
+		[Summary("Sets your default form to your current character.")]
+		[RequireContext(Guild)]
+		public async Task SetDefaultCharacterAsync()
+		{
+			var result = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+			if (!result.IsSuccess)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+				return;
+			}
+
+			await SetDefaultCharacterAsync(result.Entity);
+		}
+
+		/// <summary>
+		/// Sets your default form to the given character.
+		/// </summary>
+		/// <param name="character">The character to set as the default character.</param>
+		[UsedImplicitly]
+		[Command("set-default", RunMode = Async)]
+		[Summary("Sets your default form to the given character.")]
+		[RequireContext(Guild)]
+		public async Task SetDefaultCharacterAsync
+		(
+			[NotNull]
+			[RequireEntityOwner]
+			Character character
+		)
+		{
+			var user = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+
+			var result = await this.Characters.SetDefaultCharacterForUserAsync(this.Database, this.Context, character, user);
+			if (!result.IsSuccess)
+			{
+				await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+				return;
+			}
+
+			await this.Feedback.SendConfirmationAsync(this.Context, "Default character set.");
+		}
+
+		/// <summary>
 		/// Clears any active characters from you, restoring your default form.
 		/// </summary>
 		[UsedImplicitly]
