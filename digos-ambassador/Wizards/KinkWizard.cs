@@ -160,7 +160,8 @@ namespace DIGOS.Ambassador.Wizards
 
 			if (shouldModifyContents)
 			{
-				await this.Message.ModifyAsync(async m => m.Embed = await GetCurrentPageAsync());
+				var newEmbed = await GetCurrentPageAsync();
+				await this.Message.ModifyAsync(m => m.Embed = newEmbed);
 			}
 		}
 
