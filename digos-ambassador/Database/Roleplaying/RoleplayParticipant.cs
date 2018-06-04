@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
 using JetBrains.Annotations;
@@ -37,11 +38,13 @@ namespace DIGOS.Ambassador.Database.Roleplaying
 		/// <summary>
 		/// Gets or sets the roleplay that the user is a part of.
 		/// </summary>
+		[Required]
 		public Roleplay Roleplay { get; set; }
 
 		/// <summary>
 		/// Gets or sets the user that is part of the roleplay.
 		/// </summary>
+		[Required]
 		public User User { get; set; }
 
 		/// <summary>

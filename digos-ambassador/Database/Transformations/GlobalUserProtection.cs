@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DIGOS.Ambassador.Database.Interfaces;
@@ -41,6 +42,7 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// <summary>
 		/// Gets or sets the user that owns this protection data.
 		/// </summary>
+		[Required]
 		public User User { get; set; }
 
 		/// <summary>

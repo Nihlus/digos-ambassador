@@ -22,9 +22,10 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    partial class GlobalInfoContextModelSnapshot : ModelSnapshot
+    [Migration("20180604105426_ConfigureUserProtectionEntryRelationshipRequirements")]
+    partial class ConfigureUserProtectionEntryRelationshipRequirements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -54,8 +55,7 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long?>("AppearanceID")
-                        .IsRequired();
+                    b.Property<long?>("AppearanceID");
 
                     b.Property<long?>("BaseColourID");
 
@@ -117,7 +117,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<string>("Nickname");
 
-                    b.Property<long>("OwnerID");
+                    b.Property<long?>("OwnerID");
 
                     b.Property<string>("PronounProviderFamily");
 
@@ -287,8 +287,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.Property<long>("DiscordMessageID");
 
-                    b.Property<long?>("RoleplayID")
-                        .IsRequired();
+                    b.Property<long?>("RoleplayID");
 
                     b.Property<DateTimeOffset>("Timestamp");
 
@@ -469,12 +468,11 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long>("KinkID");
+                    b.Property<long?>("KinkID");
 
                     b.Property<int>("Preference");
 
-                    b.Property<long?>("UserID")
-                        .IsRequired();
+                    b.Property<long?>("UserID");
 
                     b.HasKey("ID");
 
@@ -489,8 +487,7 @@ namespace DIGOS.Ambassador.Migrations
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Appearances.Appearance")
                         .WithMany("Components")
-                        .HasForeignKey("AppearanceID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("AppearanceID");
 
                     b.HasOne("DIGOS.Ambassador.Database.Appearances.Colour", "BaseColour")
                         .WithMany()
@@ -517,8 +514,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasOne("DIGOS.Ambassador.Database.Users.User", "Owner")
                         .WithMany("Characters")
-                        .HasForeignKey("OwnerID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("OwnerID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Data.Image", b =>
@@ -552,8 +548,7 @@ namespace DIGOS.Ambassador.Migrations
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
                         .WithMany("Messages")
-                        .HasForeignKey("RoleplayID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("RoleplayID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.GlobalUserProtection", b =>
@@ -629,13 +624,11 @@ namespace DIGOS.Ambassador.Migrations
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Kinks.Kink", "Kink")
                         .WithMany()
-                        .HasForeignKey("KinkID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("KinkID");
 
                     b.HasOne("DIGOS.Ambassador.Database.Users.User")
                         .WithMany("Kinks")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UserID");
                 });
 #pragma warning restore 612, 618
         }

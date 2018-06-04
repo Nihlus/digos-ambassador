@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
 
@@ -37,11 +38,13 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// <summary>
 		/// Gets or sets the global protection entry that the user has been listed in.
 		/// </summary>
+		[Required]
 		public GlobalUserProtection GlobalProtection { get; set; }
 
 		/// <summary>
 		/// Gets or sets the user that's listed in the global protection entry.
 		/// </summary>
+		[Required]
 		public User User { get; set; }
 
 		/// <summary>

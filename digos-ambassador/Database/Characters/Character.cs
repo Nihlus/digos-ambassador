@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Interfaces;
@@ -47,6 +48,7 @@ namespace DIGOS.Ambassador.Database.Characters
 		public long ServerID { get; set; }
 
 		/// <inheritdoc />
+		[Required]
 		public User Owner { get; set; }
 
 		/// <inheritdoc />

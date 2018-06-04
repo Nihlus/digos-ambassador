@@ -26,6 +26,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
+using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Database.Kinks;
@@ -34,6 +35,7 @@ using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Users;
+
 using Discord;
 
 using JetBrains.Annotations;
@@ -402,15 +404,20 @@ namespace DIGOS.Ambassador.Database
 				.HasForeignKey(typeof(User).FullName, "DefaultCharacterID");
 
 			modelBuilder.Entity<User>().Property(typeof(long?), "DefaultCharacterID").IsRequired(false);
+			modelBuilder.Entity<User>().HasMany(u => u.Kinks).WithOne().IsRequired();
 
 			modelBuilder.Entity<Character>().HasOne(ch => ch.Owner).WithMany(u => u.Characters);
 
 			modelBuilder.Entity<Roleplay>().HasOne(u => u.Owner).WithMany();
 			modelBuilder.Entity<Roleplay>().HasMany(u => u.ParticipatingUsers).WithOne(p => p.Roleplay);
+			modelBuilder.Entity<Roleplay>().HasMany(r => r.Messages).WithOne().IsRequired();
+
 			modelBuilder.Entity<RoleplayParticipant>().HasOne(u => u.User).WithMany();
 
 			modelBuilder.Entity<GlobalUserProtection>().HasMany(p => p.UserListing).WithOne(u => u.GlobalProtection);
 			modelBuilder.Entity<UserProtectionEntry>().HasOne(u => u.User).WithMany();
+
+			modelBuilder.Entity<Appearance>().HasMany(a => a.Components).WithOne().IsRequired();
 		}
 	}
 }

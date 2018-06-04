@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
@@ -39,11 +40,13 @@ namespace DIGOS.Ambassador.Database.Transformations
 		/// <summary>
 		/// Gets or sets the user that owns this protection data.
 		/// </summary>
+		[Required]
 		public User User { get; set; }
 
 		/// <summary>
 		/// Gets or sets the server that this protection data is valid on.
 		/// </summary>
+		[Required]
 		public Server Server { get; set; }
 
 		/// <summary>

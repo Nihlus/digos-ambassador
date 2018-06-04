@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Kinks;
 using JetBrains.Annotations;
@@ -37,6 +38,7 @@ namespace DIGOS.Ambassador.Database.Users
 		/// <summary>
 		/// Gets or sets the kink.
 		/// </summary>
+		[Required]
 		public Kink Kink { get; set; }
 
 		/// <summary>

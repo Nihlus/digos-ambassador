@@ -22,9 +22,10 @@ using System;
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(GlobalInfoContext))]
-    partial class GlobalInfoContextModelSnapshot : ModelSnapshot
+    [Migration("20180604110755_ConfigureAppearanceComponentRelationshipRequirements")]
+    partial class ConfigureAppearanceComponentRelationshipRequirements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -469,12 +470,11 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long>("KinkID");
+                    b.Property<long?>("KinkID");
 
                     b.Property<int>("Preference");
 
-                    b.Property<long?>("UserID")
-                        .IsRequired();
+                    b.Property<long?>("UserID");
 
                     b.HasKey("ID");
 
@@ -629,13 +629,11 @@ namespace DIGOS.Ambassador.Migrations
                 {
                     b.HasOne("DIGOS.Ambassador.Database.Kinks.Kink", "Kink")
                         .WithMany()
-                        .HasForeignKey("KinkID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("KinkID");
 
                     b.HasOne("DIGOS.Ambassador.Database.Users.User")
                         .WithMany("Kinks")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("UserID");
                 });
 #pragma warning restore 612, 618
         }

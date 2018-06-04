@@ -163,6 +163,22 @@
           <e p="20180527164455_AddRoleplayParticipantJoinTable.cs" t="Include" />
           <e p="20180527184643_AddGlobalProtectionListingJoinTable.Designer.cs" t="Include" />
           <e p="20180527184643_AddGlobalProtectionListingJoinTable.cs" t="Include" />
+          <e p="20180604105050_ConfigureRoleplayParticipantRelationshipRequirements.Designer.cs" t="Include" />
+          <e p="20180604105050_ConfigureRoleplayParticipantRelationshipRequirements.cs" t="Include" />
+          <e p="20180604105146_ConfigureGlobalUserProtectionRelationshipRequirements.Designer.cs" t="Include" />
+          <e p="20180604105146_ConfigureGlobalUserProtectionRelationshipRequirements.cs" t="Include" />
+          <e p="20180604105315_ConfigureServerUserProtectionRelationshipRequirements.Designer.cs" t="Include" />
+          <e p="20180604105315_ConfigureServerUserProtectionRelationshipRequirements.cs" t="Include" />
+          <e p="20180604105426_ConfigureUserProtectionEntryRelationshipRequirements.Designer.cs" t="Include" />
+          <e p="20180604105426_ConfigureUserProtectionEntryRelationshipRequirements.cs" t="Include" />
+          <e p="20180604105535_ConfigureCharacterRelationshipRequirements.Designer.cs" t="Include" />
+          <e p="20180604105535_ConfigureCharacterRelationshipRequirements.cs" t="Include" />
+          <e p="20180604110331_ConfigureUserMessageRelationshipRequirements.Designer.cs" t="Include" />
+          <e p="20180604110331_ConfigureUserMessageRelationshipRequirements.cs" t="Include" />
+          <e p="20180604110755_ConfigureAppearanceComponentRelationshipRequirements.Designer.cs" t="Include" />
+          <e p="20180604110755_ConfigureAppearanceComponentRelationshipRequirements.cs" t="Include" />
+          <e p="20180604111151_ConfigureUserKinkRelationshipRequirements.Designer.cs" t="Include" />
+          <e p="20180604111151_ConfigureUserKinkRelationshipRequirements.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">
