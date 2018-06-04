@@ -49,6 +49,6 @@ namespace DIGOS.Ambassador.Services.Exporters
 
 		/// <inheritdoc />
 		[ItemNotNull]
-		public abstract Task<ExportedRoleplay> ExportAsync([NotNull] Roleplay roleplay);
+		public abstract Task<ExportedRoleplay> ExportAsync(Roleplay roleplay);
 	}
 }

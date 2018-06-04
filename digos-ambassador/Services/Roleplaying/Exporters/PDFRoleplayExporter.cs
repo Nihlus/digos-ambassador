@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Services.Exporters
 			var filePath = Path.GetTempFileName();
 			using (var of = File.Create(filePath))
 			{
-				using (var writer = PdfWriter.GetInstance(pdfDoc, of))
+				using (PdfWriter.GetInstance(pdfDoc, of))
 				{
 					pdfDoc.Open();
 

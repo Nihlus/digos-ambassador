@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 		}
 
 		/// <summary>
-		/// Checks the permissions of this specific attribute. Calling <see cref="CheckPermissions"/> will hijack the
+		/// Checks the permissions of this specific attribute. Calling <see cref="CheckPermissionsAsync"/> will hijack the
 		/// process and check all prioritized preconditions as well.
 		/// </summary>
 		/// <param name="context">The command context.</param>
