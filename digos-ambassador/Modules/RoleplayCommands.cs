@@ -36,7 +36,7 @@ using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
-
+using Discord.Net;
 using Humanizer;
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
@@ -289,9 +289,18 @@ namespace DIGOS.Ambassador.Modules
 			await this.Feedback.SendConfirmationAsync(this.Context, $"Invited {playerToInvite.Mention} to {roleplay.Name}.");
 
 			var userDMChannel = await playerToInvite.GetOrCreateDMChannelAsync();
-			await userDMChannel.SendMessageAsync($"You've been invited to join {roleplay.Name}. Use \"!rp join {roleplay.Name}\" to join.");
-
-			await userDMChannel.CloseAsync();
+			try
+			{
+				await userDMChannel.SendMessageAsync(
+					$"You've been invited to join {roleplay.Name}. Use \"!rp join {roleplay.Name}\" to join.");
+			}
+			catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
+			{
+			}
+			finally
+			{
+				await userDMChannel.CloseAsync();
+			}
 		}
 
 		/// <summary>
@@ -346,10 +355,20 @@ namespace DIGOS.Ambassador.Modules
 			}
 
 			var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
-			await userDMChannel.SendMessageAsync
-			(
-				$"You've been removed from the \"{roleplay.Name}\" by {this.Context.Message.Author.Username}."
-			);
+			try
+			{
+				await userDMChannel.SendMessageAsync
+				(
+					$"You've been removed from the \"{roleplay.Name}\" by {this.Context.Message.Author.Username}."
+				);
+			}
+			catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
+			{
+			}
+			finally
+			{
+				await userDMChannel.CloseAsync();
+			}
 
 			await this.Feedback.SendConfirmationAsync(this.Context, $"{discordUser.Mention} has been kicked from {roleplay.Name}.");
 		}
@@ -634,42 +653,74 @@ namespace DIGOS.Ambassador.Modules
 
 			var userDMChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
 			var eb = CreateRoleplayInfoEmbed(roleplay);
-			await userDMChannel.SendMessageAsync(string.Empty, false, eb);
 
-			var messages = roleplay.Messages.Where(m => m.Timestamp > from && m.Timestamp < to).OrderBy(msg => msg.Timestamp).ToList();
-			var timestampEmbed = this.Feedback.CreateFeedbackEmbed(this.Context.User, Color.DarkPurple, $"Roleplay began at {messages.First().Timestamp.ToUniversalTime()}");
-			await userDMChannel.SendMessageAsync(string.Empty, false, timestampEmbed);
-
-			if (messages.Count <= 0)
+			try
 			{
-				await userDMChannel.SendMessageAsync("No messages found in the specified timeframe.");
-				return;
+				await userDMChannel.SendMessageAsync(string.Empty, false, eb);
+
+				var messages = roleplay.Messages.Where
+				(
+					m =>
+						m.Timestamp > from && m.Timestamp < to
+				)
+				.OrderBy(msg => msg.Timestamp).ToList();
+
+				var timestampEmbed = this.Feedback.CreateFeedbackEmbed
+				(
+					this.Context.User,
+					Color.DarkPurple,
+					$"Roleplay began at {messages.First().Timestamp.ToUniversalTime()}"
+				);
+
+				await userDMChannel.SendMessageAsync(string.Empty, false, timestampEmbed);
+
+				if (messages.Count <= 0)
+				{
+					await userDMChannel.SendMessageAsync("No messages found in the specified timeframe.");
+					return;
+				}
+
+				await this.Feedback.SendConfirmationAsync
+				(
+					this.Context,
+					$"Replaying \"{roleplay.Name}\". Please check your private messages."
+				);
+
+				const int messageCharacterLimit = 2000;
+				var sb = new StringBuilder(messageCharacterLimit);
+
+				foreach (var message in messages)
+				{
+					var newContent = $"**{message.AuthorNickname}** {message.Contents}\n";
+
+					if (sb.Length + newContent.Length >= messageCharacterLimit)
+					{
+						await userDMChannel.SendMessageAsync(sb.ToString());
+						await Task.Delay(TimeSpan.FromSeconds(2));
+
+						sb.Clear();
+						sb.AppendLine();
+					}
+
+					sb.Append(newContent);
+
+					if (message.ID == messages.Last().ID)
+					{
+						await userDMChannel.SendMessageAsync(sb.ToString());
+					}
+				}
 			}
-
-			await this.Feedback.SendConfirmationAsync(this.Context, $"Replaying \"{roleplay.Name}\". Please check your private messages.");
-
-			const int messageCharacterLimit = 2000;
-			var sb = new StringBuilder(messageCharacterLimit);
-
-			foreach (var message in messages)
+			catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
 			{
-				var newContent = $"**{message.AuthorNickname}** {message.Contents}\n";
-
-				if (sb.Length + newContent.Length >= messageCharacterLimit)
-				{
-					await userDMChannel.SendMessageAsync(sb.ToString());
-					await Task.Delay(TimeSpan.FromSeconds(2));
-
-					sb.Clear();
-					sb.AppendLine();
-				}
-
-				sb.Append(newContent);
-
-				if (message.ID == messages.Last().ID)
-				{
-					await userDMChannel.SendMessageAsync(sb.ToString());
-				}
+				await this.Feedback.SendWarningAsync
+				(
+					this.Context,
+					"I can't do that, since you don't accept DMs from non-friends on this server."
+				);
+			}
+			finally
+			{
+				await userDMChannel.CloseAsync();
 			}
 		}
 

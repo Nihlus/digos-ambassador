@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;
@@ -39,6 +40,7 @@ using DIGOS.Ambassador.Utility;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.Net;
 using Discord.WebSocket;
 
 using Humanizer;
@@ -282,8 +284,24 @@ namespace DIGOS.Ambassador
 						var errorEmbed = this.Feedback.CreateFeedbackEmbed(context.User, Color.Red, result.ErrorReason);
 						var searchResult = this.Commands.Search(context, argumentPos);
 
-						await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
-						await userDMChannel.SendMessageAsync(string.Empty, false, this.Feedback.CreateCommandUsageEmbed(searchResult.Commands));
+						try
+						{
+							await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
+							await userDMChannel.SendMessageAsync
+							(
+								string.Empty,
+								false,
+								this.Feedback.CreateCommandUsageEmbed(searchResult.Commands)
+							);
+						}
+						catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
+						{
+						}
+						finally
+						{
+							await userDMChannel.CloseAsync();
+						}
+
 						break;
 					}
 					default:

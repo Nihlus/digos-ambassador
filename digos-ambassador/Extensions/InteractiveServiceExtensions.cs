@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.Net;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 
@@ -95,14 +96,28 @@ namespace DIGOS.Ambassador.Extensions
 			[NotNull] IInteractiveMessage interactiveMessage
 		)
 		{
-			if (!context.IsPrivate)
-			{
-				await feedback.SendConfirmationAsync(context, "Please check your private messages.");
-			}
-
 			if (!(await context.User.GetOrCreateDMChannelAsync() is ISocketMessageChannel userChannel))
 			{
 				throw new InvalidOperationException("Could not create DM channel for target user.");
+			}
+
+			try
+			{
+				await feedback.SendConfirmationAsync(context, "Loading...");
+			}
+			catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
+			{
+				await feedback.SendWarningAsync(context, "You don't accept DMs from non-friends on this server, so I'm unable to do that.");
+				throw new InvalidOperationException("User does not accept DMs from non-friends.");
+			}
+			finally
+			{
+				await ((IDMChannel)userChannel).CloseAsync();
+			}
+
+			if (!context.IsPrivate)
+			{
+				await feedback.SendConfirmationAsync(context, "Please check your private messages.");
 			}
 
 			return await SendInteractiveMessageAsync(@this, context, interactiveMessage, userChannel);
@@ -172,12 +187,29 @@ namespace DIGOS.Ambassador.Extensions
 		)
 			where T2 : IPager<T1, T2>
 		{
+			var userChannel = await context.User.GetOrCreateDMChannelAsync();
+			try
+			{
+				await feedback.SendConfirmationAsync(context, "Loading...");
+			}
+			catch (HttpException hex)
+			{
+				if (hex.WasCausedByDMsNotAccepted())
+				{
+					await feedback.SendWarningAsync(context, "You don't accept DMs from non-friends on this server, so I'm unable to do that.");
+					throw new InvalidOperationException("User does not accept DMs from non-friends.");
+				}
+			}
+			finally
+			{
+				await userChannel.CloseAsync();
+			}
+
 			if (!context.IsPrivate)
 			{
 				await feedback.SendConfirmationAsync(context, "Please check your private messages.");
 			}
 
-			var userChannel = await context.User.GetOrCreateDMChannelAsync();
 			return await SendPaginatedMessageAsync(@this, context, feedback, pager, userChannel, criterion);
 		}
 

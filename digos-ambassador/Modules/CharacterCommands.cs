@@ -36,7 +36,7 @@ using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Addons.Interactive;
 using Discord.Commands;
-
+using Discord.Net;
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
@@ -166,15 +166,31 @@ namespace DIGOS.Ambassador.Modules
 			if (character.Description.Length + eb.Build().Length > 2000)
 			{
 				var userDMChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
-				using (var ds = new MemoryStream(Encoding.UTF8.GetBytes(character.Description)))
-				{
-					await userDMChannel.SendMessageAsync(string.Empty, false, eb.Build());
-					await userDMChannel.SendFileAsync(ds, $"{character.Name}_description.txt");
-				}
 
-				if (!this.Context.IsPrivate)
+				try
 				{
-					await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
+					using (var ds = new MemoryStream(Encoding.UTF8.GetBytes(character.Description)))
+					{
+						await userDMChannel.SendMessageAsync(string.Empty, false, eb.Build());
+						await userDMChannel.SendFileAsync(ds, $"{character.Name}_description.txt");
+					}
+
+					if (!this.Context.IsPrivate)
+					{
+						await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
+					}
+				}
+				catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
+				{
+					await this.Feedback.SendWarningAsync
+					(
+						this.Context,
+						"Your description is really long, and you don't accept DMs from non-friends on this server, so I'm unable to do that."
+					);
+				}
+				finally
+				{
+					await userDMChannel.CloseAsync();
 				}
 			}
 			else

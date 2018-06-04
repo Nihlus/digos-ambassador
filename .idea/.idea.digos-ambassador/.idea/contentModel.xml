@@ -134,6 +134,7 @@
           <e p="EnumerableExtensions.cs" t="Include" />
           <e p="ExportFormatExtensions.cs" t="Include" />
           <e p="FileAsync.cs" t="Include" />
+          <e p="HttpExceptionExtensions.cs" t="Include" />
           <e p="InteractiveServiceExtensions.cs" t="Include" />
           <e p="KeyValuePairExtensions.cs" t="Include" />
           <e p="ListExtensions.cs" t="Include" />

@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Humanizer;
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
@@ -101,8 +102,6 @@ namespace DIGOS.Ambassador.Modules
 				return;
 			}
 
-			var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
-
 			var eb = this.Feedback.CreateFeedbackEmbed
 			(
 				discordUser,
@@ -110,8 +109,20 @@ namespace DIGOS.Ambassador.Modules
 				$"Hello there, {discordUser.Mention}. I've been instructed to initiate... negotiations... with you. \nA good place to start would be the \"!help <topic>\" command."
 			);
 
-			await userDMChannel.SendMessageAsync(string.Empty, false, eb);
-			await userDMChannel.CloseAsync();
+			var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
+			try
+			{
+				await userDMChannel.SendMessageAsync(string.Empty, false, eb);
+			}
+			catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
+			{
+				return;
+			}
+			finally
+			{
+				await userDMChannel.CloseAsync();
+			}
+
 			await this.Feedback.SendConfirmationAsync(this.Context, "User contacted.");
 		}
 
@@ -272,6 +283,7 @@ namespace DIGOS.Ambassador.Modules
 			}
 
 			var userChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
+
 			if (searchResults.Count <= 0)
 			{
 				await this.Feedback.SendWarningAsync(this.Context, "No matching commands found.");
@@ -330,14 +342,30 @@ namespace DIGOS.Ambassador.Modules
 					}
 				}
 
-				if (availableEmbed.Fields.Count > 0)
+				try
 				{
-					await userChannel.SendMessageAsync(string.Empty, false, availableEmbed.Build());
-				}
+					if (availableEmbed.Fields.Count > 0)
+					{
+						await userChannel.SendMessageAsync(string.Empty, false, availableEmbed.Build());
+					}
 
-				if (unavailableEmbed.Fields.Count > 0)
+					if (unavailableEmbed.Fields.Count > 0)
+					{
+						await userChannel.SendMessageAsync(string.Empty, false, unavailableEmbed.Build());
+					}
+				}
+				catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
 				{
-					await userChannel.SendMessageAsync(string.Empty, false, unavailableEmbed.Build());
+					if (!this.Context.IsPrivate)
+					{
+						await this.Feedback.SendWarningAsync(this.Context, "I can't do that, since you don't accept DMs from non-friends on this server.");
+					}
+
+					return;
+				}
+				finally
+				{
+					await userChannel.CloseAsync();
 				}
 			}
 
@@ -345,8 +373,6 @@ namespace DIGOS.Ambassador.Modules
 			{
 				await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
 			}
-
-			await userChannel.CloseAsync();
 		}
 	}
 }
