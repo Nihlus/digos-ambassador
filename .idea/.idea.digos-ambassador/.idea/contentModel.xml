@@ -16,6 +16,7 @@
           <e p="CompositeAttribute.cs" t="Include" />
           <e p="DescriptionPriorityAttribute.cs" t="Include" />
           <e p="GenderedAttribute.cs" t="Include" />
+          <e p="PrivacyExemptAttribute.cs" t="Include" />
         </e>
         <e p="Content" t="Include">
           <e p="Avatars" t="Include">
@@ -26,6 +27,7 @@
           <e p="Portraits" t="Include">
             <e p="amby-irbynx-3.png" t="Include" />
           </e>
+          <e p="PrivacyPolicy.pdf" t="Include" />
           <e p="Sass" t="Include">
             <e p="sass-nsfw.txt" t="Include" />
             <e p="sass.txt" t="Include" />
@@ -119,6 +121,7 @@
           <e p="Users" t="Include">
             <e p="User.cs" t="Include" />
             <e p="UserClass.cs" t="Include" />
+            <e p="UserConsent.cs" t="Include" />
             <e p="UserKink.cs" t="Include" />
           </e>
         </e>
@@ -179,6 +182,8 @@
           <e p="20180604110755_ConfigureAppearanceComponentRelationshipRequirements.cs" t="Include" />
           <e p="20180604111151_ConfigureUserKinkRelationshipRequirements.Designer.cs" t="Include" />
           <e p="20180604111151_ConfigureUserKinkRelationshipRequirements.cs" t="Include" />
+          <e p="20180604182540_AddUserConsentTable.Designer.cs" t="Include" />
+          <e p="20180604182540_AddUserConsentTable.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">
@@ -188,6 +193,7 @@
           <e p="KinkCommands.cs" t="Include" />
           <e p="MiscellaneousCommands.cs" t="Include" />
           <e p="PermissionCommands.cs" t="Include" />
+          <e p="PrivacyCommands.cs" t="Include" />
           <e p="RoleplayCommands.cs" t="Include" />
           <e p="TransformationCommands.cs" t="Include" />
           <e p="UserCommands.cs" t="Include" />
@@ -290,6 +296,9 @@
           </e>
           <e p="Transformations" t="Include">
             <e p="TransformationService.cs" t="Include" />
+          </e>
+          <e p="Users" t="Include">
+            <e p="PrivacyService.cs" t="Include" />
           </e>
         </e>
         <e p="Transformations" t="Include">

@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Database
 	public class GlobalInfoContext : DbContext
 	{
 		/// <summary>
-		/// Gets or sets the database where the user information is stored.
+		/// Gets or sets the table where the user information is stored.
 		/// </summary>
 		public DbSet<User> Users
 		{
@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where characters are stored.
+		/// Gets or sets the table where characters are stored.
 		/// </summary>
 		public DbSet<Character> Characters
 		{
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where kinks are stored.
+		/// Gets or sets the table where kinks are stored.
 		/// </summary>
 		public DbSet<Kink> Kinks
 		{
@@ -83,7 +83,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where server-specific settings are stored.
+		/// Gets or sets the table where server-specific settings are stored.
 		/// </summary>
 		public DbSet<Server> Servers
 		{
@@ -94,7 +94,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where granted local permissions are stored.
+		/// Gets or sets the table where granted local permissions are stored.
 		/// </summary>
 		public DbSet<LocalPermission> LocalPermissions
 		{
@@ -105,7 +105,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where granted global permissions are stored.
+		/// Gets or sets the table where granted global permissions are stored.
 		/// </summary>
 		public DbSet<GlobalPermission> GlobalPermissions
 		{
@@ -116,7 +116,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where roleplays are stored.
+		/// Gets or sets the table where roleplays are stored.
 		/// </summary>
 		public DbSet<Roleplay> Roleplays
 		{
@@ -127,7 +127,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where dossier metadata is stored.
+		/// Gets or sets the table where dossier metadata is stored.
 		/// </summary>
 		public DbSet<Dossier> Dossiers
 		{
@@ -138,7 +138,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where images are stored.
+		/// Gets or sets the table where images are stored.
 		/// </summary>
 		public DbSet<Image> Images
 		{
@@ -149,7 +149,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where transformation species are stored.
+		/// Gets or sets the table where transformation species are stored.
 		/// </summary>
 		public DbSet<Species> Species
 		{
@@ -160,7 +160,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where transformations are stored.
+		/// Gets or sets the table where transformations are stored.
 		/// </summary>
 		public DbSet<Transformation> Transformations
 		{
@@ -171,7 +171,7 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where global transformation protections are stored.
+		/// Gets or sets the table where global transformation protections are stored.
 		/// </summary>
 		public DbSet<GlobalUserProtection> GlobalUserProtections
 		{
@@ -182,9 +182,20 @@ namespace DIGOS.Ambassador.Database
 		}
 
 		/// <summary>
-		/// Gets or sets the database where server-specific transformation protections are stored.
+		/// Gets or sets the table where server-specific transformation protections are stored.
 		/// </summary>
 		public DbSet<ServerUserProtection> ServerUserProtections
+		{
+			get;
+
+			[UsedImplicitly]
+			set;
+		}
+
+		/// <summary>
+		/// Gets or sets the table where user consents are stored.
+		/// </summary>
+		public DbSet<UserConsent> UserConsents
 		{
 			get;
 

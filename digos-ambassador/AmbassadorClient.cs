@@ -22,9 +22,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
+using DIGOS.Ambassador.Attributes;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
@@ -33,6 +35,7 @@ using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;
 using DIGOS.Ambassador.Utility;
@@ -49,6 +52,8 @@ using log4net;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+
+#pragma warning disable SA1118 // Parameter spans multiple lines, big strings
 
 namespace DIGOS.Ambassador
 {
@@ -94,6 +99,8 @@ namespace DIGOS.Ambassador
 
 		private readonly IServiceProvider Services;
 
+		private readonly PrivacyService Privacy;
+
 		// ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 
 		/// <summary>
@@ -130,6 +137,8 @@ namespace DIGOS.Ambassador
 
 			this.Permissions = new PermissionService();
 
+			this.Privacy = new PrivacyService();
+
 			this.Services = new ServiceCollection()
 				.AddSingleton(this.Client)
 				.AddSingleton(this.DiscordIntegration)
@@ -144,6 +153,7 @@ namespace DIGOS.Ambassador
 				.AddSingleton(this.Lua)
 				.AddSingleton(this.Kinks)
 				.AddSingleton(this.Permissions)
+				.AddSingleton(this.Privacy)
 				.AddDbContextPool<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
 				.BuildServiceProvider();
 
@@ -237,10 +247,44 @@ namespace DIGOS.Ambassador
 				return;
 			}
 
+			var context = new SocketCommandContext(this.Client, message);
+
 			// Perform first-time user checks, making sure the user has their default permissions
 			var guild = (message.Channel as SocketGuildChannel)?.Guild;
 			if (guild != null)
 			{
+				if (!await this.Privacy.HasUserConsentedAsync(db, context.User))
+				{
+					// We need to gather consent from the user
+					var commandSearchResult = this.Commands.Search(context, argumentPos);
+					if (commandSearchResult.IsSuccess)
+					{
+						// Some command we recognize as being exempt from the privacy regulations
+						// (mostly privacy commands) - if this is one of them, just run it
+						var potentialPrivacyCommand = commandSearchResult.Commands.FirstOrDefault().Command;
+						if (potentialPrivacyCommand.Attributes.Any(a => a is PrivacyExemptAttribute))
+						{
+							await ExecuteCommandAsync(context, argumentPos);
+							return;
+						}
+
+						// else, ask for consent
+						var userDMChannel = await arg.Author.GetOrCreateDMChannelAsync();
+						var result = await this.Privacy.RequestConsentAsync(userDMChannel, this.Content, this.Feedback);
+						if (!result.IsSuccess)
+						{
+							await this.Feedback.SendWarningAsync
+							(
+								context,
+								"It seems like you're not accepting DMs from non-friends. Please enable this, so you" +
+								"can read the bot's privacy policy and consent to data handling and processing."
+							);
+						}
+					}
+
+					return;
+				}
+
 				var user = await db.GetOrRegisterUserAsync(arg.Author);
 				var server = await db.GetOrRegisterServerAsync(guild);
 
@@ -259,8 +303,11 @@ namespace DIGOS.Ambassador
 				}
 			}
 
-			var context = new SocketCommandContext(this.Client, message);
+			await ExecuteCommandAsync(context, argumentPos);
+		}
 
+		private async Task ExecuteCommandAsync(SocketCommandContext context, int argumentPos)
+		{
 			var result = await this.Commands.ExecuteAsync(context, argumentPos, this.Services);
 
 			if (!result.IsSuccess)
