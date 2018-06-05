@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Services.Users
 					"full privacy policy before you agree to anything. It's not very long (3 pages) and shouldn't take " +
 					"more than five minutes to read through.\n" +
 					"\n" +
-					"Once you've read it, you can grant consent by running the `!privacy consent` command over DM. If you " +
+					"Once you've read it, you can grant consent by running the `!privacy grant-consent` command over DM. If you " +
 					"don't want to consent to anything, just don't use the bot :smiley:"
 				);
 
