@@ -6,6 +6,30 @@ These commands are prefixed with `privacy`.
 Privacy-related commands (data storage, deleting requests, data protection, privacy contacts, etc).
 
 ## Commands
+### *policy*
+#### Overloads
+**`privacy policy`**
+
+Requests a copy of the privacy policy.
+
+---
+
+### *grant-consent*
+#### Overloads
+**`privacy grant-consent`**
+
+Grants consent to store user data.
+
+---
+
+### *revoke-consent*
+#### Overloads
+**`privacy revoke-consent`**
+
+Revokes consent to store user data.
+
+---
+
 ### *contact*
 #### Overloads
 **`privacy contact`**
