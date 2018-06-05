@@ -22,6 +22,7 @@
 
 using System.Net;
 using Discord.Net;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
@@ -36,7 +37,7 @@ namespace DIGOS.Ambassador.Extensions
 		/// </summary>
 		/// <param name="this">The exception.</param>
 		/// <returns>true if it was caused by the user not accepting DMs; Otherwise, false.</returns>
-		public static bool WasCausedByDMsNotAccepted(this HttpException @this)
+		public static bool WasCausedByDMsNotAccepted([NotNull] this HttpException @this)
 		{
 			return @this.HttpCode == HttpStatusCode.Forbidden && @this.DiscordCode == 50007;
 		}

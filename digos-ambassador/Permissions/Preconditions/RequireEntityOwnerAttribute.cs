@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Interfaces;
 using Discord.Commands;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
@@ -33,6 +34,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
 	public class RequireEntityOwnerAttribute : ParameterPreconditionAttribute
 	{
 		/// <inheritdoc />
+		[NotNull]
 		public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, ParameterInfo parameter, object value, IServiceProvider services)
 		{
 			if (!(value is IOwnedNamedEntity entity))
