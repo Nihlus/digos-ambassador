@@ -38,7 +38,7 @@ using static Discord.Commands.ContextType;
 namespace DIGOS.Ambassador.Modules
 {
 	/// <summary>
-	/// Assorted commands that don't really fit anywhere - just for fun, testing, etc.
+	/// Privacy-related commands (data storage, deleting requests, data protection, privacy contacts, etc).
 	/// </summary>
 	[UsedImplicitly]
 	[Group("privacy")]

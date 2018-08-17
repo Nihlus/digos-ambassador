@@ -92,22 +92,6 @@ Sets the named character as the user's current character.
 
 ---
 
-### *set-default*
-#### Overloads
-**`character set-default`**
-
-Sets your default form to your current character.
-
-**`character set-default`**
-
-Sets your default form to the given character.
-
-| Name | Type | Optional |
-| --- | --- | --- |
-| character | Character | `no` |
-
----
-
 ### *clear*
 #### Overloads
 **`character clear` (as well as `character drop` or `character default`)**
