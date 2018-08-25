@@ -59,7 +59,7 @@
   <Target Name="DeleteNetHttpMono" AfterTargets="AfterBuild">
     <Delete Files="$(OutputPath)\System.Net.Http.dll" Condition="'$(OS)' == 'Unix'" />
   </Target>
-  <Target Name="GenerateDocs" AfterTargets="AfterBuild">
+  <Target Name="GenerateDocs" AfterTargets="PostBuildEvent">
     <Exec Command="dotnet $(ProjectDir)..\digos-ambassador.Doc\bin\Debug\netcoreapp2.0\DIGOS.Ambassador.Doc.dll --assembly $(OutputPath)$(AssemblyName)$(TargetExt) --output $(ProjectDir)..\docs" />
   </Target>
   <Import Project="..\msbuild\netfx-mono.props" />
