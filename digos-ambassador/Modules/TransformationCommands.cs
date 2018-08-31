@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Modules
 			Chirality chirality,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
-			[Remainder, NotNull]
+			[NotNull]
 			string species
 		)
 		=> await ShiftAsync(this.Context.User, chirality, bodyPart, species);
@@ -113,7 +113,7 @@ namespace DIGOS.Ambassador.Modules
 		(
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
-			[Remainder, NotNull]
+			[NotNull]
 			string species
 		)
 		=> await ShiftAsync(this.Context.User, Chirality.Center, bodyPart, species);
@@ -135,7 +135,7 @@ namespace DIGOS.Ambassador.Modules
 			IUser target,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
-			[Remainder, NotNull]
+			[NotNull]
 			string species
 		)
 		=> await ShiftAsync(target, Chirality.Center, bodyPart, species);
@@ -160,7 +160,6 @@ namespace DIGOS.Ambassador.Modules
 			Chirality chirality,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
-			[Remainder]
 			[NotNull] string species
 		)
 		{
@@ -207,7 +206,7 @@ namespace DIGOS.Ambassador.Modules
 			Chirality chirality,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodypart,
-			[Remainder, NotNull]
+			[NotNull]
 			Colour colour
 		)
 		=> await ShiftColourAsync(this.Context.User, chirality, bodypart, colour);
@@ -225,7 +224,6 @@ namespace DIGOS.Ambassador.Modules
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodypart,
 			[NotNull]
-			[Remainder]
 			Colour colour
 		)
 		=> await ShiftColourAsync(this.Context.User, Chirality.Center, bodypart, colour);
@@ -245,7 +243,7 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull] IUser target,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
-			[NotNull, Remainder] Colour colour
+			[NotNull] Colour colour
 		)
 		=> await ShiftColourAsync(target, Chirality.Center, bodyPart, colour);
 
@@ -267,7 +265,7 @@ namespace DIGOS.Ambassador.Modules
 			Chirality chirality,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
-			[NotNull, Remainder] Colour colour
+			[NotNull] Colour colour
 		)
 		{
 			var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
@@ -313,7 +311,7 @@ namespace DIGOS.Ambassador.Modules
 			Bodypart bodypart,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
 			Pattern pattern,
-			[NotNull, Remainder]
+			[NotNull]
 			Colour colour
 		)
 		=> await ShiftPatternAsync(this.Context.User, Chirality.Center, bodypart, pattern, colour);
@@ -336,7 +334,7 @@ namespace DIGOS.Ambassador.Modules
 			Bodypart bodypart,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
 			Pattern pattern,
-			[NotNull, Remainder]
+			[NotNull]
 			Colour colour
 		)
 		=> await ShiftPatternAsync(this.Context.User, chirality, bodypart, pattern, colour);
@@ -359,7 +357,7 @@ namespace DIGOS.Ambassador.Modules
 			Bodypart bodyPart,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
 			Pattern pattern,
-			[NotNull, Remainder] Colour colour
+			[NotNull] Colour colour
 		)
 		=> await ShiftPatternAsync(target, Chirality.Center, bodyPart, pattern, colour);
 
@@ -385,7 +383,7 @@ namespace DIGOS.Ambassador.Modules
 			Bodypart bodyPart,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
 			Pattern pattern,
-			[NotNull, Remainder]
+			[NotNull]
 			Colour colour
 		)
 		{
@@ -433,7 +431,7 @@ namespace DIGOS.Ambassador.Modules
 			Chirality chirality,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodypart,
-			[NotNull, Remainder]
+			[NotNull]
 			Colour colour
 		)
 		=> await ShiftPatternColourAsync(this.Context.User, chirality, bodypart, colour);
@@ -450,7 +448,7 @@ namespace DIGOS.Ambassador.Modules
 		(
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodypart,
-			[NotNull, Remainder]
+			[NotNull]
 			Colour colour
 		)
 			=> await ShiftPatternColourAsync(this.Context.User, Chirality.Center, bodypart, colour);
@@ -470,7 +468,7 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull] IUser target,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
-			[NotNull, Remainder] Colour colour
+			[NotNull] Colour colour
 		)
 		=> await ShiftPatternColourAsync(target, Chirality.Center, bodyPart, colour);
 
@@ -493,7 +491,7 @@ namespace DIGOS.Ambassador.Modules
 			Chirality chirality,
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart,
-			[NotNull, Remainder]
+			[NotNull]
 			Colour colour
 		)
 		{
@@ -554,7 +552,6 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Lists the available transformations for a given bodypart.")]
 		public async Task ListAvailableTransformationsAsync
 		(
-			[Remainder]
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
 			Bodypart bodyPart
 		)
@@ -644,7 +641,7 @@ namespace DIGOS.Ambassador.Modules
 		[Alias("save", "save-current")]
 		[Command("save", RunMode = Async)]
 		[Summary("Saves your current form as a new character.")]
-		public async Task SaveCurrentFormAsync([NotNull, Remainder] string newCharacterName)
+		public async Task SaveCurrentFormAsync([NotNull] string newCharacterName)
 		{
 			var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
 			if (!getCurrentCharacterResult.IsSuccess)

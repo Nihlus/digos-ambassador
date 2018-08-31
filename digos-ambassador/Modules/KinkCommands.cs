@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Modules
 		[UsedImplicitly]
 		[Command("info", RunMode = Async)]
 		[Summary("Shows information about the named kink.")]
-		public async Task ShowKinkAsync([Remainder] [NotNull] string name)
+		public async Task ShowKinkAsync([NotNull] string name)
 		{
 			var getKinkInfoResult = await this.Kinks.GetKinkByNameAsync(this.Database, name);
 			if (!getKinkInfoResult.IsSuccess)
@@ -102,7 +102,7 @@ namespace DIGOS.Ambassador.Modules
 		[Alias("show", "preference")]
 		[Command("show", RunMode = Async)]
 		[Summary("Shows your preference for the named kink.")]
-		public async Task ShowKinkPreferenceAsync([Remainder] [NotNull] string name) => await ShowKinkPreferenceAsync(this.Context.User, name);
+		public async Task ShowKinkPreferenceAsync([NotNull] string name) => await ShowKinkPreferenceAsync(this.Context.User, name);
 
 		/// <summary>
 		/// Shows the user's preference for the named kink.
@@ -113,7 +113,7 @@ namespace DIGOS.Ambassador.Modules
 		[Alias("show", "preference")]
 		[Command("show", RunMode = Async)]
 		[Summary("Shows the user's preference for the named kink.")]
-		public async Task ShowKinkPreferenceAsync([NotNull] IUser user, [Remainder] [NotNull] string name)
+		public async Task ShowKinkPreferenceAsync([NotNull] IUser user, [NotNull] string name)
 		{
 			var getUserKinkResult = await this.Kinks.GetUserKinkByNameAsync(this.Database, user, name);
 			if (!getUserKinkResult.IsSuccess)
@@ -162,7 +162,6 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Shows your kinks with the given preference.")]
 		public async Task ShowKinksByPreferenceAsync
 		(
-			[Remainder]
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
 			KinkPreference preference
 		)
@@ -180,7 +179,6 @@ namespace DIGOS.Ambassador.Modules
 		(
 			[NotNull]
 			IUser otherUser,
-			[Remainder]
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
 			KinkPreference preference
 		)
@@ -210,7 +208,6 @@ namespace DIGOS.Ambassador.Modules
 		(
 			[NotNull]
 			string name,
-			[Remainder]
 			[OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
 			KinkPreference preference
 		)

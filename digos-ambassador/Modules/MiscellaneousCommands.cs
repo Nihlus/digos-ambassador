@@ -260,7 +260,7 @@ namespace DIGOS.Ambassador.Modules
 		[Alias("help", "halp", "hlep", "commands")]
 		[Command("help", RunMode = RunMode.Async)]
 		[Summary("Lists available commands that match the given search text.")]
-		public async Task HelpAsync([Remainder] [CanBeNull] string searchText)
+		public async Task HelpAsync([CanBeNull] string searchText)
 		{
 			IReadOnlyList<CommandInfo> searchResults;
 			if (searchText.IsNullOrEmpty())

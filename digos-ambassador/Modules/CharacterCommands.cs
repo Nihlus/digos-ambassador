@@ -602,7 +602,6 @@ namespace DIGOS.Ambassador.Modules
 			[NotNull]
 			[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 			Character character,
-			[Remainder]
 			[NotNull] string imageName
 		)
 		{
@@ -699,7 +698,6 @@ namespace DIGOS.Ambassador.Modules
 				[NotNull]
 				[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 				Character character,
-				[Remainder]
 				[NotNull]
 				string newCharacterName
 			)
@@ -771,7 +769,6 @@ namespace DIGOS.Ambassador.Modules
 				[NotNull]
 				[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 				Character character,
-				[Remainder]
 				[NotNull]
 				string newCharacterNickname
 			)
@@ -803,7 +800,6 @@ namespace DIGOS.Ambassador.Modules
 				[NotNull]
 				[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 				Character character,
-				[Remainder]
 				[NotNull]
 				string newCharacterSummary
 			)
@@ -836,7 +832,6 @@ namespace DIGOS.Ambassador.Modules
 				[NotNull]
 				[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 				Character character,
-				[Remainder]
 				[CanBeNull]
 				string newCharacterDescription = null
 			)
@@ -918,7 +913,6 @@ namespace DIGOS.Ambassador.Modules
 				[NotNull]
 				[RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
 				Character character,
-				[Remainder]
 				[NotNull]
 				string pronounFamily
 			)

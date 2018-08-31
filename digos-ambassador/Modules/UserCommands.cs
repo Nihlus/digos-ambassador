@@ -195,7 +195,6 @@ namespace DIGOS.Ambassador.Modules
 			[RequirePermission(Permission.SetClass)]
 			public async Task SetUserClassAsync
 			(
-				[Remainder]
 				[OverrideTypeReader(typeof(HumanizerEnumTypeReader<UserClass>))]
 				UserClass userClass
 			)
@@ -224,7 +223,6 @@ namespace DIGOS.Ambassador.Modules
 			(
 				[NotNull]
 				IUser discordUser,
-				[Remainder]
 				[OverrideTypeReader(typeof(HumanizerEnumTypeReader<UserClass>))]
 				UserClass userClass
 			)
@@ -247,7 +245,7 @@ namespace DIGOS.Ambassador.Modules
 			[Command("bio", RunMode = RunMode.Async)]
 			[Summary("Sets the invoking user's bio.")]
 			[RequirePermission(Permission.EditUser)]
-			public async Task SetUserBioAsync([NotNull, Remainder] string bio)
+			public async Task SetUserBioAsync([NotNull] string bio)
 			{
 				// Add the user to the user database if they're not already in it
 				var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
@@ -269,7 +267,7 @@ namespace DIGOS.Ambassador.Modules
 			[Summary("Sets the target user's bio.")]
 			[RequireContext(ContextType.Guild)]
 			[RequirePermission(Permission.EditUser, PermissionTarget.Other)]
-			public async Task SetUserBioAsync([NotNull] IUser discordUser, [NotNull, Remainder] string bio)
+			public async Task SetUserBioAsync([NotNull] IUser discordUser, [NotNull] string bio)
 			{
 				// Add the user to the user database if they're not already in it
 				var user = await this.Database.GetOrRegisterUserAsync(discordUser);
