@@ -1,9 +1,0 @@
-part: Vagina
-species: wolf
-description: "Transforms the target's vagina into that of an anthro wolf.”
-default_base_colour: “dark black”
-is_nsfw: true
-shift_message: "{@target}'s slit shifts and morphs as it changes shape both internally and externally. Their petals becomes flush and swollen, becoming {@colour} as they transforms into the shape of a naughty bitch’s folds.”
-grow_message: "The skin on {@target}'s groin stretches and contorts, building up before it finally splits, opening up into a tight puffy {@colour} slit. Soft walls dive deep, all but begging to be tied.”
-single_description: "{@f|Their} slit is plump and welcoming, with a soft luscious cleft begging to be tied.”
-uniform_description: null
