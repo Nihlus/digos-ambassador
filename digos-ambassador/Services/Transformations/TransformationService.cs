@@ -698,8 +698,7 @@ namespace DIGOS.Ambassador.Services
 		{
 			var protection = await db.GlobalUserProtections
 			.Include(p => p.User)
-			.Include(p => p.Whitelist)
-			.Include(p => p.Blacklist)
+			.Include(p => p.UserListing)
 			.FirstOrDefaultAsync(p => p.User.DiscordID == (long)discordUser.Id);
 
 			if (!(protection is null))
