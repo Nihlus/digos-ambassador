@@ -198,7 +198,7 @@ namespace DIGOS.Ambassador
 			this.Commands.AddTypeReader<Bodypart>(new HumanizerEnumTypeReader<Bodypart>());
 			this.Commands.AddTypeReader<Pattern>(new HumanizerEnumTypeReader<Pattern>());
 
-			await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly());
+			await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly(), this.Services);
 
 			await this.Client.StartAsync();
 		}

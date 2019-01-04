@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,8 +33,11 @@ using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.WebSocket;
 
+using Microsoft.Extensions.DependencyInjection;
 using MockQueryable.Moq;
 using Moq;
 using Xunit;
@@ -216,13 +220,27 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 		public class IsEntityNameValid : OwnedEntityServiceTestBase, IAsyncLifetime
 		{
 			private ModuleInfo CommandModule;
+			private IServiceProvider Services;
 
 			public async Task InitializeAsync()
 			{
 				var commands = new CommandService();
-				commands.AddTypeReader<Character>(new CharacterTypeReader());
 
-				this.CommandModule = await commands.AddModuleAsync<CharacterCommands>();
+				this.Services = new ServiceCollection()
+					.AddSingleton(this.Database)
+					.AddSingleton<ContentService>()
+					.AddSingleton<CommandService>()
+					.AddSingleton<DiscordService>()
+					.AddSingleton<UserFeedbackService>()
+					.AddSingleton<OwnedEntityService>()
+					.AddSingleton<TransformationService>()
+					.AddSingleton<InteractiveService>()
+					.AddSingleton<CharacterService>()
+					.AddSingleton(new DiscordSocketClient())
+					.BuildServiceProvider();
+
+				commands.AddTypeReader<Character>(new CharacterTypeReader());
+				this.CommandModule = await commands.AddModuleAsync<CharacterCommands>(this.Services);
 			}
 
 			[Fact]

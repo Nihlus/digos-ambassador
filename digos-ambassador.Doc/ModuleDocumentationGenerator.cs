@@ -36,6 +36,7 @@ using DIGOS.Ambassador.Extensions;
 using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 using static DIGOS.Ambassador.Doc.Nodes.EmphasisType;
 
 namespace DIGOS.Ambassador.Doc
@@ -51,6 +52,8 @@ namespace DIGOS.Ambassador.Doc
 		private readonly CommandService Commands;
 
 		private readonly Regex TypeReaderTypeFinder = new Regex("(?<=No type reader found for type ).+?.(?=, one must be specified)", RegexOptions.Compiled);
+
+		private IServiceProvider Services = new ServiceCollection().BuildServiceProvider();
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ModuleDocumentationGenerator"/> class.
@@ -111,7 +114,7 @@ namespace DIGOS.Ambassador.Doc
 			{
 				try
 				{
-					await this.Commands.AddModulesAsync(this.CommandAssembly);
+					await this.Commands.AddModulesAsync(this.CommandAssembly, this.Services);
 					break;
 				}
 				catch (InvalidOperationException iox)

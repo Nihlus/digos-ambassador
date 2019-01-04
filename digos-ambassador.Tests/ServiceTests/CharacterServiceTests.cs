@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,8 +32,10 @@ using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
 using DIGOS.Ambassador.TypeReaders;
 using Discord;
+using Discord.Addons.Interactive;
 using Discord.Commands;
-
+using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -825,6 +828,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			private readonly ICommandContext Context;
 			private readonly Character Character;
 
+			private IServiceProvider Services;
+
 			public SetCharacterNameAsync()
 			{
 				var mockedUserObject = MockHelper.CreateDiscordGuildUser(0);
@@ -877,8 +882,21 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 			public override async Task InitializeAsync()
 			{
+				this.Services = new ServiceCollection()
+					.AddSingleton(this.Database)
+					.AddSingleton<ContentService>()
+					.AddSingleton<CommandService>()
+					.AddSingleton<DiscordService>()
+					.AddSingleton<UserFeedbackService>()
+					.AddSingleton<OwnedEntityService>()
+					.AddSingleton<TransformationService>()
+					.AddSingleton<InteractiveService>()
+					.AddSingleton<CharacterService>()
+					.AddSingleton(new DiscordSocketClient())
+					.BuildServiceProvider();
+
 				this.Commands.AddTypeReader<Character>(new CharacterTypeReader());
-				await this.Commands.AddModuleAsync<CharacterCommands>();
+				await this.Commands.AddModuleAsync<CharacterCommands>(this.Services);
 
 				await base.InitializeAsync();
 			}

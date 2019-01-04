@@ -188,7 +188,7 @@ namespace DIGOS.Ambassador.Extensions
 				return RetrieveEntityResult<string>.FromError(CommandError.ObjectNotFound, "No sufficiently close match found.");
 			}
 
-			var best = passing.MinBy(c => c.distance);
+			var best = passing.MinBy(c => c.distance).First();
 			return RetrieveEntityResult<string>.FromSuccess(best.value);
 		}
 	}
