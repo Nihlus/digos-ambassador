@@ -403,15 +403,21 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 		{
 			private const string CharacterName = "Test";
 			private readonly IGuild Guild = MockHelper.CreateDiscordGuild(0);
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
 
-			private readonly Character Character;
+			private User Owner;
 
-			public GetNamedCharacterAsync()
+			private Character Character;
+
+			public override async Task InitializeAsync()
 			{
+				this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+
 				this.Character = new Character
 				{
 					Name = CharacterName,
 					ServerID = (long)this.Guild.Id,
+					Owner = this.Owner
 				};
 
 				this.Database.Characters.Add(this.Character);
@@ -433,7 +439,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				var anotherCharacter = new Character
 				{
 					Name = CharacterName,
-					ServerID = (long)this.Guild.Id
+					ServerID = (long)this.Guild.Id,
+					Owner = this.Owner
 				};
 
 				await this.Database.Characters.AddAsync(anotherCharacter);
@@ -465,6 +472,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 		public class GetCharacters : CharacterServiceTestBase
 		{
 			private readonly IGuild Guild = MockHelper.CreateDiscordGuild(0);
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+
+			private User Owner;
+
+			public override async Task InitializeAsync()
+			{
+				this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+			}
 
 			[Fact]
 			public void ReturnsNoCharactersFromEmptyDatabase()
@@ -477,7 +492,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public void ReturnsSingleCharacterFromSingleCharacterOnServer()
 			{
-				this.Database.Characters.Add(new Character { ServerID = (long)this.Guild.Id });
+				this.Database.Characters.Add(new Character { ServerID = (long)this.Guild.Id, Owner = this.Owner });
 				this.Database.SaveChanges();
 
 				var result = this.Characters.GetCharacters(this.Database, this.Guild);
@@ -489,7 +504,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public void ReturnsNoCharacterFromSingleCharacterOnServerWhenRequestedServerIsDifferent()
 			{
-				this.Database.Characters.Add(new Character { ServerID = 1 });
+				this.Database.Characters.Add(new Character { ServerID = 1, Owner = this.Owner });
 				this.Database.SaveChanges();
 
 				var result = this.Characters.GetCharacters(this.Database, this.Guild);
@@ -500,9 +515,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public void ReturnsCorrectCharactersFromDatabase()
 			{
-				this.Database.Characters.Add(new Character { ServerID = 1 });
-				this.Database.Characters.Add(new Character { ServerID = (long)this.Guild.Id });
-				this.Database.Characters.Add(new Character { ServerID = (long)this.Guild.Id });
+				this.Database.Characters.Add(new Character { ServerID = 1, Owner = this.Owner });
+				this.Database.Characters.Add(new Character { ServerID = (long)this.Guild.Id, Owner = this.Owner });
+				this.Database.Characters.Add(new Character { ServerID = (long)this.Guild.Id, Owner = this.Owner });
 				this.Database.SaveChanges();
 
 				var result = this.Characters.GetCharacters(this.Database, this.Guild);
@@ -937,10 +952,17 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 		public class SetCharacterAvatarAsync : CharacterServiceTestBase
 		{
 			private const string AvatarURL = "http://fake.com/avatar.png";
-			private readonly Character Character = new Character { AvatarUrl = AvatarURL };
 
-			public SetCharacterAvatarAsync()
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+
+			private User Owner;
+			private Character Character;
+
+			public override async Task InitializeAsync()
 			{
+				this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+				this.Character = new Character { AvatarUrl = AvatarURL, Owner = this.Owner };
+
 				this.Database.Characters.Add(this.Character);
 				this.Database.SaveChanges();
 			}
@@ -995,10 +1017,17 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 		public class SetCharacterNicknameAsync : CharacterServiceTestBase
 		{
 			private const string Nickname = "Nicke";
-			private readonly Character Character = new Character { Nickname = Nickname };
 
-			public SetCharacterNicknameAsync()
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+
+			private User Owner;
+			private Character Character;
+
+			public override async Task InitializeAsync()
 			{
+				this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+				this.Character = new Character { Nickname = Nickname, Owner = this.Owner };
+
 				this.Database.Characters.Add(this.Character);
 				this.Database.SaveChanges();
 			}
@@ -1062,10 +1091,16 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 		public class SetCharacterSummaryAsync : CharacterServiceTestBase
 		{
 			private const string Summary = "A cool person";
-			private readonly Character Character = new Character { Summary = Summary };
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
 
-			public SetCharacterSummaryAsync()
+			private User Owner;
+			private Character Character;
+
+			public override async Task InitializeAsync()
 			{
+				this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+				this.Character = new Character { Summary = Summary, Owner = this.Owner };
+
 				this.Database.Characters.Add(this.Character);
 				this.Database.SaveChanges();
 			}
@@ -1129,10 +1164,16 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 		public class SetCharacterDescriptionAsync : CharacterServiceTestBase
 		{
 			private const string Description = "A cool person";
-			private readonly Character Character = new Character { Description = Description };
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
 
-			public SetCharacterDescriptionAsync()
+			private User Owner;
+			private Character Character;
+
+			public override async Task InitializeAsync()
 			{
+				this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+				this.Character = new Character { Description = Description, Owner = this.Owner };
+
 				this.Database.Characters.Add(this.Character);
 				this.Database.SaveChanges();
 			}
@@ -1187,12 +1228,18 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 		public class SetCharacterPronounAsync : CharacterServiceTestBase
 		{
 			private const string PronounFamily = "They";
-			private readonly Character Character = new Character { PronounProviderFamily = PronounFamily };
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
 
-			public SetCharacterPronounAsync()
+			private User Owner;
+			private Character Character;
+
+			public override async Task InitializeAsync()
 			{
 				this.Characters.WithPronounProvider(new TheyPronounProvider());
 				this.Characters.WithPronounProvider(new ZeHirPronounProvider());
+
+				this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+				this.Character = new Character { PronounProviderFamily = PronounFamily, Owner = this.Owner };
 
 				this.Database.Characters.Add(this.Character);
 				this.Database.SaveChanges();
@@ -1257,10 +1304,17 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 		public class SetCharacterIsNSFWAsync : CharacterServiceTestBase
 		{
 			private const bool IsNSFW = false;
-			private readonly Character Character = new Character { IsNSFW = IsNSFW };
 
-			public SetCharacterIsNSFWAsync()
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+
+			private User Owner;
+			private Character Character;
+
+			public override async Task InitializeAsync()
 			{
+				this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+				this.Character = new Character { IsNSFW = IsNSFW, Owner = this.Owner };
+
 				this.Database.Characters.Add(this.Character);
 				this.Database.SaveChanges();
 			}

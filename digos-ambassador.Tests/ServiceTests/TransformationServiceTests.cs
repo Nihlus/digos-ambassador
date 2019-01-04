@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
@@ -33,6 +34,7 @@ using DIGOS.Ambassador.Transformations;
 
 using Discord;
 using Discord.Commands;
+
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -537,11 +539,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 		public class SetCurrentAppearanceAsDefaultForCharacterAsync : TransformationServiceTestBase
 		{
-			private readonly Character Character;
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+			private User Owner;
+			private Character Character;
 
-			public SetCurrentAppearanceAsDefaultForCharacterAsync()
+			public override async Task InitializeAsync()
 			{
-				this.Character = new Character();
+				this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+
+				this.Character = new Character { Owner = this.Owner };
 				this.Database.Characters.Add(this.Character);
 				this.Database.SaveChanges();
 			}
@@ -581,11 +587,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 		public class ResetCharacterFormAsync : TransformationServiceTestBase
 		{
-			private readonly Character Character;
+			private readonly IUser User = MockHelper.CreateDiscordUser(0);
+			private User Owner;
+			private Character Character;
 
-			public ResetCharacterFormAsync()
+			public override async Task InitializeAsync()
 			{
-				this.Character = new Character();
+				this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+
+				this.Character = new Character { Owner = this.Owner };
 				this.Database.Characters.Add(this.Character);
 				this.Database.SaveChanges();
 			}
