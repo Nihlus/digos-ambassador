@@ -1,0 +1,9 @@
+part: Face
+species: snake
+description: "Transforms the target's face into that of an anthro snake."
+default_base_colour: "green"
+is_nsfw: false
+shift_message: "{@target}'s face reshapes with a cracking sound, forming a wide angular snout covered in smooth {@colour} scales. Flesh twists and pops at the joints of their jaw as it becomes much more flexible and capable, reflexively opening wide to reveal a serpent-like snakes tongue that cautiously tastes the air. Muscles on the back of their neck grow dense and begin to bulge and flare outwards into the shape of a wide hood."
+grow_message: "{@target}'s face pushes outwards with a horrific cracking sound, forming a wide angular snout covered in smooth {@colour} scales. Their jaw reflexively opens wide to reveal a serpent-like snakes tongue that cautiously tastes the air. Dense muscles on the back of their neck flare outwards into the shape of a wide hood."
+single_description: "{@f|Their} face is a wide angular snout with a smooth scaled serpentine apperance featuring small, hole-like nostrils. A large flared hood grows from the back of their head, accompanying their impressively wide snake-like maw. {@f|Their} smooth scaled skin shifts in glimmering hues of {@colour}."
+uniform_description: null
