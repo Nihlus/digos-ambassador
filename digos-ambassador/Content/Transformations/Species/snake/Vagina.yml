@@ -1,9 +1,8 @@
 part: Vagina
 species: snake
-description: "Transforms the target's vagina into that of an anthro shark."
-default_base_colour: "soft pink"
+description: "Transforms the target's vagina into that of an anthro snake."
+default_base_colour: "pink"
 is_nsfw: true
-shift_message: "{@target}'s slit distends and morphs as it changes shape both internally and externally. The slit becomes tight and welcoming, with protective exterior scales shifting into place to hide soft secondary folds and wet vagina."
-grow_message: "The skin on {@target}'s groin splits, opening up into a tight slit protected by smooth {@colour} scales. An undulating sensation pulses within as a soft vaginal canal slowly shifts into shape."
+shift_message: "{@target}'s slit pulses and morphs as it changes internally and externally, pulling tight while thick protective scales emerge around their simmering mound. Tension builds like a spring before releasing with a jolt of sexual energy as their body relaxes. {@target} wiggles their hips, parting scaled serpentine flesh to reveal delicate interior folds of supple {@colour} skin and a wet, undulating passage that absolutely begs for attention."
+grow_message: "The skin on {@target}'s groin splits, opening up into a tight slit protected by smooth scales. An undulating sensation pulses within as a soft {@colour} breeding canal slowly shifts into shape."
 single_description: "{@f|Their} scaled slit is tight and welcoming, with a soft interior that squeezes as only a snake can."
-uniform_description: null

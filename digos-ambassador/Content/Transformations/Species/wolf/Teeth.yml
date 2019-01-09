@@ -6,4 +6,3 @@ is_nsfw: false
 shift_message: "The teeth in {@target}'s mouth sharpen and grow ridged and pointed, forming into capable canine fangs.”
 grow_message: "Sharp, ridged and pointed teeth grow in {@target}'s mouth, forming into perfectly canine fangs.”
 single_description: "{@f|Their} teeth are sharp and capable, with a distinctly canine appearance.”
-uniform_description: null
