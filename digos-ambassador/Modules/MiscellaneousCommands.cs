@@ -171,6 +171,14 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Boops the user.")]
 		public async Task BoopAsync([NotNull] IUser target)
 		{
+			if (target == this.Context.Client.CurrentUser)
+			{
+				await this.Feedback.SendConfirmationAsync(this.Context, "...seriously?");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"*boops {this.Context.User}*");
+
+				return;
+			}
+
 			await this.Feedback.SendConfirmationAsync(this.Context, $"*boops {target.Mention}*");
 		}
 
@@ -183,6 +191,14 @@ namespace DIGOS.Ambassador.Modules
 		[Summary("Baps the user.")]
 		public async Task BapAsync([NotNull] IUser target)
 		{
+			if (target == this.Context.Client.CurrentUser)
+			{
+				await this.Feedback.SendConfirmationAsync(this.Context, "...seriously?");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"**baps {this.Context.User}**");
+
+				return;
+			}
+
 			await this.Feedback.SendConfirmationAsync(this.Context, $"**baps {target.Mention}**");
 		}
 

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="$APPLICATION_CONFIG_DIR$/consoles/db" t="IncludeRecursive" />
     <e p="$APPLICATION_CONFIG_DIR$/extensions" t="IncludeRecursive" />
     <e p="$APPLICATION_CONFIG_DIR$/scratches" t="IncludeRecursive" />
     <e p="$USER_HOME$/.Rider2018.3/system/extResources" t="IncludeRecursive" />
@@ -67,7 +66,6 @@
             </e>
           </e>
           <e p="bot.token" t="Include" />
-          <e p="database.credentials" t="Include" />
         </e>
         <e p="DIGOS.Ambassador.exe.config" t="Include" />
         <e p="Database" t="Include">
