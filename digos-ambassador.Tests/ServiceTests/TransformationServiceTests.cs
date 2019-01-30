@@ -206,7 +206,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task RetrievesCorrectBodypart()
 			{
-				var result = await this.Transformations.GetTransformationByPartAndSpeciesAsync
+				var result = await this.Transformations.GetTransformationsByPartAndSpeciesAsync
 				(
 					this.Database,
 					Bodypart.Face,
@@ -214,15 +214,19 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				);
 
 				Assert.True(result.IsSuccess);
-				Assert.Equal(Bodypart.Face, result.Entity.Part);
-				Assert.Same(this.TemplateSpecies, result.Entity.Species);
+				Assert.Single(result.Entity);
+
+				var transformation = result.Entity.First();
+
+				Assert.Equal(Bodypart.Face, transformation.Part);
+				Assert.Same(this.TemplateSpecies, transformation.Species);
 			}
 
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
 			{
 				var nonexistantSpecies = new Species();
-				var result = await this.Transformations.GetTransformationByPartAndSpeciesAsync
+				var result = await this.Transformations.GetTransformationsByPartAndSpeciesAsync
 				(
 					this.Database,
 					Bodypart.Face,
@@ -236,7 +240,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task ReturnsUnsuccessfulResultIfCombinationDoesNotExist()
 			{
-				var result = await this.Transformations.GetTransformationByPartAndSpeciesAsync
+				var result = await this.Transformations.GetTransformationsByPartAndSpeciesAsync
 				(
 					this.Database,
 					Bodypart.Wings,
@@ -1188,8 +1192,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 				var services = new ServiceCollection()
 					.AddSingleton(this.Transformations)
+					.AddSingleton<ContentService>()
+					.AddSingleton<OwnedEntityService>()
+					.AddSingleton<CommandService>()
 					.AddSingleton<CharacterService>()
 					.BuildServiceProvider();
+
+				var characterService = services.GetRequiredService<CharacterService>();
+				characterService.WithPronounProvider(new FemininePronounProvider());
 
 				this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
 			}
@@ -1214,7 +1224,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				{
 					Name = "Test",
 					CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
-					Owner = owner
+					Owner = owner,
+					PronounProviderFamily = "Feminine"
 				};
 
 				this.Database.Characters.Add(this.Character);
@@ -1264,8 +1275,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 					this.Database,
 					this.Context,
 					this.Character,
-					Bodypart.Wings,
-					"shark"
+					Bodypart.Wing,
+					"shark",
+					Chirality.Left
 				);
 
 				Assert.False(result.IsSuccess);

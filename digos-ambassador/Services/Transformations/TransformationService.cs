@@ -146,19 +146,29 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(getSpeciesResult);
 			}
 
-			var getTFResult = await GetTransformationByPartAndSpeciesAsync(db, bodyPart, getSpeciesResult.Entity);
-			if (!getTFResult.IsSuccess)
+			if (bodyPart.IsComposite())
 			{
-				return ShiftBodypartResult.FromError(getTFResult);
+				return ShiftBodypartResult.FromError
+				(
+					CommandError.Unsuccessful,
+					"Wrong method used to shift a composite bodypart."
+				);
 			}
 
-			var transformation = getTFResult.Entity;
+			var getTFsResult = await GetTransformationsByPartAndSpeciesAsync(db, bodyPart, getSpeciesResult.Entity);
+			if (!getTFsResult.IsSuccess)
+			{
+				return ShiftBodypartResult.FromError(getTFsResult);
+			}
 
+			// We just take the first one, since we know this is not a composite part
+			var transformation = getTFsResult.Entity.First();
 			var component = AppearanceComponent.CreateFrom(transformation, chirality);
 			character.CurrentAppearance.Components.Add(component);
+
 			await db.SaveChangesAsync();
 
-			string growMessage = this.DescriptionBuilder.BuildGrowMessage(character, component);
+			var growMessage = this.DescriptionBuilder.BuildGrowMessage(character, component);
 			return ShiftBodypartResult.FromSuccess(growMessage);
 		}
 
@@ -195,14 +205,25 @@ namespace DIGOS.Ambassador.Services
 				return ShiftBodypartResult.FromError(getSpeciesResult);
 			}
 
-			var getTFResult = await GetTransformationByPartAndSpeciesAsync(db, bodyPart, getSpeciesResult.Entity);
+			if (bodyPart.IsComposite())
+			{
+				return ShiftBodypartResult.FromError
+				(
+					CommandError.Unsuccessful,
+					"Wrong method used to shift a composite bodypart."
+				);
+			}
+
+			var getTFResult = await GetTransformationsByPartAndSpeciesAsync(db, bodyPart, getSpeciesResult.Entity);
 			if (!getTFResult.IsSuccess)
 			{
 				return ShiftBodypartResult.FromError(getTFResult);
 			}
 
 			string shiftMessage;
-			var transformation = getTFResult.Entity;
+
+			// We know this part is not composite, so we'll just use the first result
+			var transformation = getTFResult.Entity.First();
 			if (!character.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
 			{
 				currentComponent = AppearanceComponent.CreateFrom(transformation, chirality);
@@ -837,7 +858,16 @@ namespace DIGOS.Ambassador.Services
 					}
 					else
 					{
-						var existingTransformation = (await GetTransformationByPartAndSpeciesAsync(db, transformation.Part, transformation.Species)).Entity;
+						// We just take the first one, since species can't define composite parts individually
+						var existingTransformation =
+						(
+							await GetTransformationsByPartAndSpeciesAsync
+							(
+								db,
+								transformation.Part,
+								transformation.Species
+							)
+						).Entity.First();
 
 						int updatedFields = 0;
 
@@ -891,32 +921,44 @@ namespace DIGOS.Ambassador.Services
 		}
 
 		/// <summary>
-		/// Gets a transformation from the database by its part and species.
+		/// Gets a set of transformations from the database by their part and species. This method typically returns a
+		/// single transformation, but may return more than one in the case of a composite part.
 		/// </summary>
 		/// <param name="db">The database.</param>
 		/// <param name="bodypart">The part.</param>
 		/// <param name="species">The species.</param>
 		/// <returns>A retrieval result which may or may not have succeeded.</returns>
 		[Pure]
-		public async Task<RetrieveEntityResult<Transformation>> GetTransformationByPartAndSpeciesAsync
+		public async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> GetTransformationsByPartAndSpeciesAsync
 		(
 			[NotNull] GlobalInfoContext db,
 			Bodypart bodypart,
 			[NotNull] Species species
 		)
 		{
-			var transformation = await db.Transformations
+			var bodyparts = new List<Bodypart>();
+			if (bodypart.IsComposite())
+			{
+				bodyparts.AddRange(bodypart.GetComposingParts());
+			}
+			else
+			{
+				bodyparts.Add(bodypart);
+			}
+
+			var transformations = await db.Transformations
 				.Include(tf => tf.DefaultBaseColour)
 				.Include(tf => tf.DefaultPatternColour)
 				.Include(tf => tf.Species)
-				.FirstOrDefaultAsync(tf => tf.Part == bodypart && tf.Species.IsSameSpeciesAs(species));
+				.Where(tf => bodyparts.Contains(tf.Part) && tf.Species.IsSameSpeciesAs(species))
+				.ToListAsync();
 
-			if (transformation is null)
+			if (!transformations.Any())
 			{
-				return RetrieveEntityResult<Transformation>.FromError(CommandError.ObjectNotFound, "No transformation found for that combination.");
+				return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError(CommandError.ObjectNotFound, "No transformation found for that combination.");
 			}
 
-			return RetrieveEntityResult<Transformation>.FromSuccess(transformation);
+			return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromSuccess(transformations);
 		}
 
 		/// <summary>

@@ -96,7 +96,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 
 			foreach (var part in templateParts)
 			{
-				var getTFResult = await transformations.GetTransformationByPartAndSpeciesAsync(db, part, templateSpecies);
+				var getTFResult = await transformations.GetTransformationsByPartAndSpeciesAsync(db, part, templateSpecies);
 				if (!getTFResult.IsSuccess)
 				{
 					// Allow skipping of missing composing parts - a composite part might not have all of them in a TF.
@@ -108,7 +108,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 					return CreateEntityResult<Appearance>.FromError(getTFResult);
 				}
 
-				templateTransformations.Add(getTFResult.Entity);
+				templateTransformations.AddRange(getTFResult.Entity);
 			}
 
 			var templateComponents = new List<AppearanceComponent>();
