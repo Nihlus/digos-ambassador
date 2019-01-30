@@ -174,7 +174,7 @@ namespace DIGOS.Ambassador.Modules
 			if (target.IsMe(this.Context))
 			{
 				await this.Feedback.SendConfirmationAsync(this.Context, "...seriously?");
-				await this.Feedback.SendConfirmationAsync(this.Context, $"*boops {this.Context.User}*");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"*boops {this.Context.User.Mention}*");
 
 				return;
 			}
@@ -194,7 +194,7 @@ namespace DIGOS.Ambassador.Modules
 			if (target.IsMe(this.Context))
 			{
 				await this.Feedback.SendConfirmationAsync(this.Context, "...seriously?");
-				await this.Feedback.SendConfirmationAsync(this.Context, $"**baps {this.Context.User}**");
+				await this.Feedback.SendConfirmationAsync(this.Context, $"**baps {this.Context.User.Mention}**");
 
 				return;
 			}
