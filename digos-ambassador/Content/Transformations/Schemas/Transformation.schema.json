@@ -1,0 +1,116 @@
+{
+    "$schema" : "http://json-schema.org/draft-07/schema#",
+    "$id" : "https://github.com/Nihlus/digos-ambassador/tree/master/digos-ambassador/Content/Transformations/Schemas/Transformation.schema.json",
+    "title" : "Transformation",
+    "description": "A transformation of a body part",
+    "type": "object",
+    "additionalProperties" : false,
+    "properties" :
+    {
+        "part" :
+        {
+            "description" : "The body part that the transformation transforms",
+            "type" : "string",
+            "enum" :
+            [
+                "Hair",
+                "Face",
+                "Ear",
+                "Eye",
+                "Teeth",
+                "Body",
+                "Arm",
+                "Leg",
+                "Tail",
+                "Wing",
+                "Penis",
+                "Vagina"
+            ]
+
+        },
+        "species" :
+        {
+            "description" : "The species the part is transformed into",
+            "type" : "string"
+        },
+        "description" :
+        {
+            "description" : "A short description of the transformation",
+            "type" : "string"
+        },
+        "default_base_colour" :
+        {
+            "description" : "The default base colour of the body part",
+            "type" : "string"
+        },
+        "default_pattern" :
+        {
+            "description" : "The visual pattern overlaid on the part",
+            "type" : "string",
+            "enum" :
+            [
+                "Striped",
+                "Spotted",
+                "Swirly",
+                "Checkered",
+                "Splotchy",
+                "Banded"
+            ]
+        },
+        "default_pattern_colour" :
+        {
+            "description" : "The default pattern colour of the body part",
+            "type" : "string"
+        },
+        "is_nsfw" :
+        {
+            "description" : "Defines whether or not the part is considered adult content",
+            "type" : "boolean"
+
+        },
+        "shift_message" :
+        {
+            "description" : "Defines the message printed to the user when an existing body part shifts into this part",
+            "type" : "string"
+        },
+        "grow_message" :
+        {
+            "description" : "Defines the message printed to the user when a body part grows into place from nothing",
+            "type" : "string"
+        },
+        "uniform_shift_message" :
+        {
+            "description" : "Defines the message printed to the user when two chiral existing body parts shift together",
+            "type" : "string"
+        },
+        "uniform_grow_message" :
+        {
+            "description" : "Defines the message printed to the user when two chiral body parts grow into place from nothing",
+            "type" : "string"
+        },
+        "single_description" :
+        {
+            "description" : "Defines the description of a fully transformed body part",
+            "type" : "string"
+        },
+        "uniform_description" :
+        {
+            "description" : "Defines the joint description of two chiral body parts",
+            "type" : "string"
+        }
+    },
+    "required" :
+    [
+        "part",
+        "species",
+        "description",
+        "default_base_colour",
+        "is_nsfw",
+        "shift_message",
+        "grow_message",
+        "single_description"
+    ],
+    "dependencies" : {
+        "default_pattern" : [ "default_pattern_colour" ]
+    }
+}

@@ -3,7 +3,12 @@ species: shark
 description: "Transforms the target's {@side} leg into that of an anthro shark."
 default_base_colour: "dull grey"
 is_nsfw: false
+
 shift_message: "Rough skin spreads over {@target}'s {@side} leg. {@f|Their} muscles ripple under {@f|their} skin, growing slender and powerful."
 grow_message: "The {@side} side of {@target}'s pelvis ripples and bulges, erupting into a leg covered in rough skin, sporting slender and powerful muscles."
+
+uniform_shift_message: "Rough skin spreads over {@target}'s legs. {@f|Their} muscles ripple under {@f|their} skin, growing slender and powerful."
+uniform_grow_message: "The sides of {@target}'s pelvis ripple and bulge, erupting into a pair of legs covered in rough skin, sporting slender and powerful muscles."
+
 single_description: "{@f|They have} a powerful {@side} leg covered in {@colour} hide, clearly meant for swimming."
 uniform_description: "{@f|They have} powerul legs covered in {@colour} hide, clearly meant for swimming."

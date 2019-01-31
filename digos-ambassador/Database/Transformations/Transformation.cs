@@ -97,6 +97,18 @@ namespace DIGOS.Ambassador.Database.Transformations
 		public string GrowMessage { get; set; }
 
 		/// <summary>
+		/// Gets or sets the uniform shift message, used when two chiral parts shift together.
+		/// </summary>
+		[CanBeNull]
+		public string UniformShiftMessage { get; set; }
+
+		/// <summary>
+		/// Gets or sets the uniform grow message, used when two chiral parts grow together.
+		/// </summary>
+		[CanBeNull]
+		public string UniformGrowMessage { get; set; }
+
+		/// <summary>
 		/// Gets or sets the text of the description when the species of the complementary bodyparts don't match.
 		/// </summary>
 		[Required]

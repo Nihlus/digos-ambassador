@@ -2,7 +2,7 @@
 # This file defines a species that transformations can belong to. Furthermore, it also defines the inheritance chain of
 # certain species and subspecies (such as shark -> tiger shark)
 #
-# Generally, any field that is marked as @required must be included. Those that are not marked as required can be 
+# Generally, any field that is marked as @required must be included. Those that are not marked as required can be
 # completely omitted.
 # @source https://github.com/Nihlus/digos-ambassador/blob/master/digos-ambassador/Database/Transformations/Species.cs
 #
@@ -18,7 +18,7 @@
 parent: null
 
 #
-# This field defines the name of the species. It must be unique among the existing species. The value is 
+# This field defines the name of the species. It must be unique among the existing species. The value is
 # case-insensitive when matching against other species, but should be all lower case in this and other files.
 #
 # @type string

@@ -1,17 +1,17 @@
 #
-# This file defines a transformation of a specific body part into a given species, and its associated appearance. In 
+# This file defines a transformation of a specific body part into a given species, and its associated appearance. In
 # full, it should describe the transition into the appearance, and the appearance itself. Each field in this file maps
 # to an appearance property in some way. Refer to each field's documentation header for more information.
 #
-# When created, the file name should be the same as the body part it describes, capitalized. Therefore, a file 
+# When created, the file name should be the same as the body part it describes, capitalized. Therefore, a file
 # describing an arm would be named "Arm.yml".
 #
-# Generally, any field that is marked as @required must be included. Those that are not marked as required can be 
+# Generally, any field that is marked as @required must be included. Those that are not marked as required can be
 # completely omitted.
 # @source https://github.com/Nihlus/digos-ambassador/blob/master/digos-ambassador/Database/Transformations/Transformation.cs
 #
 
-# 
+#
 # This field names the body part the transformation transforms. It can be entered as a string or a plain value, e.g,
 # "Arm" or Arm. A strict set of values are valid in this field; see @source for the valid values.
 # @type enum Bodypart
@@ -21,8 +21,8 @@
 #
 part: null
 
-# 
-# This field names the species the bodypart is transformed into. This should be the same as the folder the 
+#
+# This field names the species the bodypart is transformed into. This should be the same as the folder the
 # transformation lives in.
 # @type string
 # @nullable No
@@ -30,7 +30,7 @@ part: null
 #
 species: null
 
-# 
+#
 # A short description of the transformation. Should be a single sentence that is displayed as a summary for a user.
 # @type string
 # @nullable No
@@ -38,8 +38,8 @@ species: null
 #
 description: null
 
-# 
-# The default base colour of the body part. Practically any colour should work here, but it is limited to the colours 
+#
+# The default base colour of the body part. Practically any colour should work here, but it is limited to the colours
 # and modifiers the bot knows about. Refer to @source for the complete list of shades and shade modifiers.
 # @type [enum ShadeModifier] enum Shade
 # @nullable No
@@ -50,7 +50,7 @@ description: null
 default_base_colour: null
 
 #
-# This field specifies the visual pattern overlayed on the body part. It can be entered as a string or a plain value, 
+# This field specifies the visual pattern overlayed on the body part. It can be entered as a string or a plain value,
 # e.g, "Striped" or Striped. A strict set of values are valid in this field; see @source for the valid values.
 # @type enum Pattern
 # @nullable No
@@ -59,15 +59,15 @@ default_base_colour: null
 #
 default_pattern: null
 
-# 
-# The default pattern colour of the body part. Practically any colour should work here, but it is limited to the colours 
+#
+# The default pattern colour of the body part. Practically any colour should work here, but it is limited to the colours
 # and modifiers the bot knows about. Refer to @source for the complete list of shades and shade modifiers.
 # @type [enum ShadeModifier] enum Shade
 # @nullable No
 # @required Conditional (Yes when default_pattern is present; otherwise, No)
 # @source https://github.com/Nihlus/digos-ambassador/blob/master/digos-ambassador/Database/Appearances/Shade.cs
 # @source https://github.com/Nihlus/digos-ambassador/blob/master/digos-ambassador/Database/Appearances/ShadeModifier.cs
-# @remarks Omitting this field when default_pattern is present will result in undefined behaviour. Typically, it'll 
+# @remarks Omitting this field when default_pattern is present will result in undefined behaviour. Typically, it'll
 # present itself as a parsing failure.
 #
 default_pattern_colour: null
@@ -81,7 +81,7 @@ default_pattern_colour: null
 is_nsfw: false
 
 #
-# Defines the message printed to the user when their existing body part shifts into this part. Depending on the part 
+# Defines the message printed to the user when their existing body part shifts into this part. Depending on the part
 # type, you may need to take chirality (which side of the body something is on) into account. Generally, this message
 # should be written as vaguely as possible, while being as specific as possible. You'll get the hang of it - read the
 # guide in @details!
@@ -94,8 +94,8 @@ is_nsfw: false
 shift_message: null
 
 #
-# Similar to shift_message, this defines the message that is printed when a body part grows into place from nothing. 
-# Since the system supports *removing* a body part completely, you also need to write a bit about what happens when 
+# Similar to shift_message, this defines the message that is printed when a body part grows into place from nothing.
+# Since the system supports *removing* a body part completely, you also need to write a bit about what happens when
 # something grows back.
 # @type string
 # @nullable No
@@ -106,12 +106,40 @@ shift_message: null
 grow_message: null
 
 #
-# This field defines the description of a body part that is fully transformed and in place. Depending on the part type, 
+# This field mirrors shift_message, but fills the role when two chiral parts are transformed together. Printing the
+# normal shift message twice gets repetitive and doesn't often flow well - here, a joint description should be written.
+#
+# Typically, this is a pluralized form of the normal shift message.
+#
+# @type string
+# @nullable no
+# @required Conditional(Yes, when part is chiral; otherwise, No)
+# @source https://github.com/Nihlus/digos-ambassador/blob/master/digos-ambassador/Transformations/Chirality.cs
+# @details https://github.com/Nihlus/digos-ambassador/wiki/Writing-Transformations
+#
+uniform_shift_message: null
+
+#
+# This field mirrors grow_message, but fills the role when two chiral parts grow into place together. Printing the
+# normal grow message twice gets repetitive and doesn't often flow well - here, a joint description should be written.
+#
+# Typically, this is a pluralized form of the normal grow message.
+#
+# @type string
+# @nullable no
+# @required Conditional(Yes, when part is chiral; otherwise, No)
+# @source https://github.com/Nihlus/digos-ambassador/blob/master/digos-ambassador/Transformations/Chirality.cs
+# @details https://github.com/Nihlus/digos-ambassador/wiki/Writing-Transformations
+#
+uniform_grow_message: null
+
+#
+# This field defines the description of a body part that is fully transformed and in place. Depending on the part type,
 # this field serves two purposes: describing the part completely (if there's only one), or describing the part *on one
 # side* if there's more than one. Therefore, if you have mismatched arms, this is the description that'll be used for
 # the corresponding arm.
 #
-# If the type is chiral, you should also define uniform_description. If it's not chiral, you should just define 
+# If the type is chiral, you should also define uniform_description. If it's not chiral, you should just define
 # single_description.
 # @type string
 # @nullable No
@@ -126,7 +154,7 @@ single_description: null
 # of two chiral body parts *together* when they're the same species. Therefore, if you have two shark arms, this is the
 # description that'll be used.
 #
-# If the type is chiral, you should also define uniform_description. If it's not chiral, you should just define 
+# If the type is chiral, you should also define uniform_description. If it's not chiral, you should just define
 # single_description.
 # @type string
 # @nullable No
