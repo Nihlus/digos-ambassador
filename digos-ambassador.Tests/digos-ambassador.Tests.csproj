@@ -27,6 +27,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\digos-ambassador.Tools\digos-ambassador.Tools.csproj" />
     <ProjectReference Include="..\digos-ambassador\digos-ambassador.csproj" />
   </ItemGroup>
 </Project>

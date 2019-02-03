@@ -417,6 +417,14 @@
         </e>
       </e>
       <e p="digos-ambassador.Tests" t="IncludeRecursive">
+        <e p="ContentTests" t="Include">
+          <e p="Data" t="Include">
+            <e p="SpeciesDataProvider.cs" t="Include" />
+            <e p="TransformationDataProvider.cs" t="Include" />
+          </e>
+          <e p="SpeciesValidityTests.cs" t="Include" />
+          <e p="TransformationValidityTests.cs" t="Include" />
+        </e>
         <e p="Database" t="Include">
           <e p="MockedDatabase.cs" t="Include" />
         </e>
