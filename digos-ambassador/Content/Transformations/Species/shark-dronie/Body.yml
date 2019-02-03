@@ -1,0 +1,10 @@
+part: Body
+species: shark-dronie
+description: "Transforms the target's body into that of a shark dronie."
+default_base_colour: "deep purple"
+is_nsfw: false
+
+shift_message: "A torrent of shiny, {@colour} latex erupts over {@target}'s body, covering them from neck to hip. The torrent pulsates over {@f|their} chest, pushing out {@f|their} full breasts for all to see. A dorsal fin grows out of the rubber cascading down {@f|their} back, and {@f|their} belly turns a lighter hue of {@colour}, accenting the rest of {@f|their} darker rubber skin. Armor pieces set firmly into place, sealing them inside."
+grow_message: "{@target} inflates and grows outward in a torrent of shiny, {@colour} latex. Full breasts bulge out from {@f|their} forming chest, glistening for all to see. A dorsal fin grows out of the rubber cascading down {@f|their} back, and {@f|their} belly turns a lighter hue of {@colour}, accenting the rest of {@f|their} darker rubber skin. Armor pieces set firmly into place, sealing them inside."
+
+single_description: "{@f|Their} body is covered in a {@colour} latex sheen, and a dorsal fin adorns their back, its tips glinting with light. Full breasts hang from {@f|their} chest, glistening in the light. {@f|Their} belly is a lighter hue of {@colour}, accenting the rest of {@f|their} darker rubber skin. Angular armor pieces surround {@f|their} back and sides, protecting them from harm... and the suit from removal."
