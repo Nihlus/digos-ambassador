@@ -6,4 +6,4 @@ is_nsfw: false
 shift_message: "You watch as {@target}'s {@side} eye morphs in its socket, the iris and pupil narrowing as if being squeezed together until they're finely slitted. Its sclera begins changing hues until reaching a vibrant {@colour} colour."
 grow_message: "The blank indent on {@target}'s face splits and unzips, revealing a rapidly forming eye. The iris and pupil are a thin and narrow slit, with the scelera a vibrant {@colour} colour."
 single_description: "The iris is narrow and slitted, with the sclera a vibrant {@colour} colour accenting a gaze that's positively hypnotic."
-uniform_description: "{@target}'s hypnotic eyes are narrow and slitted, tracking movement within their surroundings. {@f|Their} sclera are a vibrant {@colour} colour.
+uniform_description: "{@target}'s hypnotic eyes are narrow and slitted, tracking movement within their surroundings. {@f|Their} sclera are a vibrant {@colour} colour."

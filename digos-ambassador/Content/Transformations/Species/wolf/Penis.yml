@@ -1,8 +1,8 @@
 part: Penis
 species: wolf
-description: "Transforms the target's penis into that of an anthro wolf.”
-default_base_colour: “red”
+description: "Transforms the target's penis into that of an anthro wolf."
+default_base_colour: "red"
 is_nsfw: true
-shift_message: "A ripple goes up {@target}'s shaft as it starts to morph and become more canid in shape. The tip becomes tapered and pointed, and the surface smooths out becoming fleshy and {@colour}. A pleasurable pressure builds at the base of the cock as a thick knot grows into place while excess skin quickly forms into a fuzzy bestial sheath.”
+shift_message: "A ripple goes up {@target}'s shaft as it starts to morph and become more canid in shape. The tip becomes tapered and pointed, and the surface smooths out becoming fleshy and {@colour}. A pleasurable pressure builds at the base of the cock as a thick knot grows into place while excess skin quickly forms into a fuzzy bestial sheath."
 grow_message: "{@target}'s groin ripples and bulges as a canine shaft begins to grow. The tip is tapered and pointy with a smooth {@colour} surface that builds towards a thick knot and sheath. A tiny drop of pre seeps out of the end as it finishes forming."
 single_description: "{@f|Their} shaft is a tapered and knotted {@colour} canine rod that nestles between their legs."
