@@ -91,5 +91,49 @@ namespace DIGOS.Ambassador.Tests.ContentTests
 				Assert.True(transformation.IsNSFW);
 			}
 		}
+
+		[Theory]
+		[ClassData(typeof(TransformationDataProvider))]
+		public void TransformationMessagesAreCorrectlyFormatted(string transformationFile)
+		{
+			var transformation = Deserialize<Transformation>(transformationFile);
+
+			Assert.True(transformation.Description.EndsWith('.'), "Text fields must end with a dot.");
+			Assert.True(transformation.SingleDescription.EndsWith('.'));
+
+			if (transformation.Part.IsChiral())
+			{
+				Assert.True(transformation.UniformShiftMessage?.EndsWith('.'), "Text fields must end with a dot.");
+				Assert.True(transformation.UniformGrowMessage?.EndsWith('.'), "Text fields must end with a dot.");
+				Assert.True(transformation.UniformDescription?.EndsWith('.'), "Text fields must end with a dot.");
+			}
+			else
+			{
+				Assert.True(transformation.ShiftMessage.EndsWith('.'), "Text fields must end with a dot.");
+				Assert.True(transformation.GrowMessage.EndsWith('.'), "Text fields must end with a dot.");
+			}
+		}
+
+		[Theory]
+		[ClassData(typeof(TransformationDataProvider))]
+		public void TransformationMessagesAreShortEnough(string transformationFile)
+		{
+			var transformation = Deserialize<Transformation>(transformationFile);
+
+			Assert.True(transformation.Description.Length < 1800, "Messages must be less than 1800 characters.");
+			Assert.True(transformation.SingleDescription.Length < 1800);
+
+			if (transformation.Part.IsChiral())
+			{
+				Assert.True(transformation.UniformShiftMessage?.Length < 1800, "Messages must be less than 1800 characters.");
+				Assert.True(transformation.UniformGrowMessage?.Length < 1800, "Messages must be less than 1800 characters.");
+				Assert.True(transformation.UniformDescription?.Length < 1800, "Messages must be less than 1800 characters.");
+			}
+			else
+			{
+				Assert.True(transformation.ShiftMessage.Length < 1800, "Messages must be less than 1800 characters.");
+				Assert.True(transformation.GrowMessage.Length < 1800, "Messages must be less than 1800 characters.");
+			}
+		}
 	}
 }
