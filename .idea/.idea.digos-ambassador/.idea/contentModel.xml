@@ -220,6 +220,8 @@
           <e p="20180604111151_ConfigureUserKinkRelationshipRequirements.cs" t="Include" />
           <e p="20180604182540_AddUserConsentTable.Designer.cs" t="Include" />
           <e p="20180604182540_AddUserConsentTable.cs" t="Include" />
+          <e p="20190203160716_AddUniformTFMessages.Designer.cs" t="Include" />
+          <e p="20190203160716_AddUniformTFMessages.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">
@@ -389,13 +391,7 @@
         <e p="digos-ambassador.log" t="Include" />
         <e p="obj" t="ExcludeRecursive">
           <e p="Debug" t="Include">
-            <e p="net462" t="Include">
-              <e p="digos-ambassador.AssemblyInfo.cs" t="Include" />
-            </e>
             <e p="netcoreapp2.0" t="Include">
-              <e p="digos-ambassador.AssemblyInfo.cs" t="Include" />
-            </e>
-            <e p="netstandard2.0" t="Include">
               <e p="digos-ambassador.AssemblyInfo.cs" t="Include" />
             </e>
           </e>
