@@ -895,6 +895,18 @@ namespace DIGOS.Ambassador.Services
 							++updatedFields;
 						}
 
+						if (!string.Equals(existingTransformation.UniformShiftMessage, transformation.UniformShiftMessage, StringComparison.OrdinalIgnoreCase))
+						{
+							existingTransformation.UniformShiftMessage = transformation.UniformShiftMessage;
+							++updatedFields;
+						}
+
+						if (!string.Equals(existingTransformation.UniformGrowMessage, transformation.UniformGrowMessage, StringComparison.OrdinalIgnoreCase))
+						{
+							existingTransformation.UniformGrowMessage = transformation.UniformGrowMessage;
+							++updatedFields;
+						}
+
 						if (!existingTransformation.SingleDescription.Equals(transformation.SingleDescription, StringComparison.OrdinalIgnoreCase))
 						{
 							existingTransformation.SingleDescription = transformation.SingleDescription;
