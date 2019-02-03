@@ -1,0 +1,14 @@
+part: Arm
+species: snake
+description: "Transforms the target's {@side} arm into that of an anthro snake."
+default_base_colour: "green"
+is_nsfw: false
+
+shift_message: "Smooth {@colour} scales which mildly shimmer spread over {@target}'s {@side} arm. {@f|Their} newly scaled flesh ripples as fibrous muscles coil and stitch themselves into shape beneath their skin. The bones in their {@side} hand twist and pop as they slightly extend while small inhuman claws push out from their fingertips."
+grow_message: "{@target}'s {@side} shoulder pops and shimmers, erupting outward into an arm. It emerges covered in smooth {@colour} scales which shimmer as they reveal every coiled bundle of potent flesh. {@f|Their} long slender fingers are tipped with with small inhuman claws which assure nothing will escape their grasp."
+
+uniform_shift_message: "Smooth {@colour} scales which mildly shimmer spread over {@target}'s arms. {@f|Their} newly scaled flesh ripples as fibrous muscles coil and stitch themselves into shape beneath their skin. The bones in their hands twist and pop as they slightly extend while small inhuman claws push out from their fingertips."
+uniform_grow_message: "{@target}'s shoulders pop and shimmer, erupting outward into a pair of arms. They emerge covered in smooth {@colour} scales which shimmer as they reveal every coiled bundle of potent flesh. {@f|Their} long slender fingers are tipped with with small inhuman claws which assure nothing will escape their grasp."
+
+single_description: "{@f|They have} a snake-like {@side} arm, with shimmering smooth scales tightly wrapped over fibrous muscle. {@f|Their} long slender fingers are tipped with with small inhuman claws that assure nothing will escape their grasp."
+uniform_description: "{@f|They have} snake-like arms, with shimmering smooth scales tightly wrapped over potent cords of fibrous muscle. {@f|Their} long slender fingers are tipped with with small inhuman claws that assure nothing will escape their grasp."

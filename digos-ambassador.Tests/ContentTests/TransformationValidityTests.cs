@@ -20,9 +20,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.IO;
 using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Tests.ContentTests.Data;
-using DIGOS.Ambassador.Tools;
+using DIGOS.Ambassador.Tests.TestBases.Content;
+using DIGOS.Ambassador.Transformations;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -30,17 +34,116 @@ using Xunit;
 
 namespace DIGOS.Ambassador.Tests.ContentTests
 {
-	public class TransformationValidityTests
+	public class TransformationValidityTests : TransformationValidityTestBase
 	{
-		private TransformationFileVerifier Verifier = new TransformationFileVerifier();
+		[Theory]
+		[ClassData(typeof(TransformationDataProvider))]
+		public void TransformationFileIsValid(string transformationFile)
+		{
+			var result = this.Verifier.VerifyFile<Transformation>(transformationFile);
+
+			Assert.True(result.IsSuccess, result.Exception?.Message ?? "Unknown failure.");
+		}
 
 		[Theory]
 		[ClassData(typeof(TransformationDataProvider))]
-		public void TransformationFileIsValid(string speciesFile)
+		public void TransformationFileIsInCorrectFolder(string transformationFile)
 		{
-			var result = this.Verifier.VerifyFile<Transformation>(speciesFile);
+			var folderName = Directory.GetParent(transformationFile).Name;
+			var transformation = Deserialize<Transformation>(transformationFile);
 
-			Assert.True(result.IsSuccess, result.Exception?.Message ?? "Unknown failure.");
+			Assert.Equal(transformation.Species.Name, folderName);
+		}
+
+		[Theory]
+		[ClassData(typeof(TransformationDataProvider))]
+		public void TransformationFileIsCorrectlyNamed(string transformationFile)
+		{
+			var bodypartName = Path.GetFileNameWithoutExtension(transformationFile);
+			Assert.True(Enum.TryParse<Bodypart>(bodypartName, out var bodypart), "The file name must be a valid body part.");
+
+			var transformation = Deserialize<Transformation>(transformationFile);
+			Assert.Equal(bodypart, transformation.Part);
+		}
+
+		[Theory]
+		[ClassData(typeof(TransformationDataProvider))]
+		public void TransformationHasRequiredConditionalFields(string transformationFile)
+		{
+			var transformation = Deserialize<Transformation>(transformationFile);
+
+			if (!(transformation.DefaultPattern is null))
+			{
+				Assert.NotNull(transformation.DefaultPatternColour);
+			}
+
+			if (transformation.Part.IsChiral())
+			{
+				Assert.NotNull(transformation.UniformShiftMessage);
+				Assert.NotNull(transformation.UniformGrowMessage);
+				Assert.NotNull(transformation.UniformDescription);
+			}
+			else
+			{
+				Assert.Null(transformation.UniformShiftMessage);
+				Assert.Null(transformation.UniformGrowMessage);
+				Assert.Null(transformation.UniformDescription);
+			}
+		}
+
+		[Theory]
+		[ClassData(typeof(TransformationDataProvider))]
+		public void TransformationHasCorrectlyMarkedAdultStatus(string transformationFile)
+		{
+			var transformation = Deserialize<Transformation>(transformationFile);
+			if (transformation.Part == Bodypart.Penis || transformation.Part == Bodypart.Vagina)
+			{
+				Assert.True(transformation.IsNSFW);
+			}
+		}
+
+		[Theory]
+		[ClassData(typeof(TransformationDataProvider))]
+		public void TransformationMessagesAreCorrectlyFormatted(string transformationFile)
+		{
+			var transformation = Deserialize<Transformation>(transformationFile);
+
+			Assert.True(transformation.Description.EndsWith('.'), "Text fields must end with a dot.");
+			Assert.True(transformation.SingleDescription.EndsWith('.'));
+
+			if (transformation.Part.IsChiral())
+			{
+				Assert.True(transformation.UniformShiftMessage?.EndsWith('.'), "Text fields must end with a dot.");
+				Assert.True(transformation.UniformGrowMessage?.EndsWith('.'), "Text fields must end with a dot.");
+				Assert.True(transformation.UniformDescription?.EndsWith('.'), "Text fields must end with a dot.");
+			}
+			else
+			{
+				Assert.True(transformation.ShiftMessage.EndsWith('.'), "Text fields must end with a dot.");
+				Assert.True(transformation.GrowMessage.EndsWith('.'), "Text fields must end with a dot.");
+			}
+		}
+
+		[Theory]
+		[ClassData(typeof(TransformationDataProvider))]
+		public void TransformationMessagesAreShortEnough(string transformationFile)
+		{
+			var transformation = Deserialize<Transformation>(transformationFile);
+
+			Assert.True(transformation.Description.Length < 1800, "Messages must be less than 1800 characters.");
+			Assert.True(transformation.SingleDescription.Length < 1800);
+
+			if (transformation.Part.IsChiral())
+			{
+				Assert.True(transformation.UniformShiftMessage?.Length < 1800, "Messages must be less than 1800 characters.");
+				Assert.True(transformation.UniformGrowMessage?.Length < 1800, "Messages must be less than 1800 characters.");
+				Assert.True(transformation.UniformDescription?.Length < 1800, "Messages must be less than 1800 characters.");
+			}
+			else
+			{
+				Assert.True(transformation.ShiftMessage.Length < 1800, "Messages must be less than 1800 characters.");
+				Assert.True(transformation.GrowMessage.Length < 1800, "Messages must be less than 1800 characters.");
+			}
 		}
 	}
 }

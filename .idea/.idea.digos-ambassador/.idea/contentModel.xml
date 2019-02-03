@@ -56,6 +56,19 @@
                 <e p="Teeth.yml" t="Include" />
                 <e p="Vagina.yml" t="Include" />
               </e>
+              <e p="snake" t="Include">
+                <e p="Arm.yml" t="Include" />
+                <e p="Body.yml" t="Include" />
+                <e p="Ear.yml" t="Include" />
+                <e p="Eye.yml" t="Include" />
+                <e p="Face.yml" t="Include" />
+                <e p="Leg.yml" t="Include" />
+                <e p="Penis.yml" t="Include" />
+                <e p="Species.yml" t="Include" />
+                <e p="Tail.yml" t="Include" />
+                <e p="Teeth.yml" t="Include" />
+                <e p="Vagina.yml" t="Include" />
+              </e>
               <e p="template" t="Include">
                 <e p="Arm.yml" t="Include" />
                 <e p="Body.yml" t="Include" />
@@ -63,6 +76,19 @@
                 <e p="Face.yml" t="Include" />
                 <e p="Leg.yml" t="Include" />
                 <e p="Species.yml" t="Include" />
+              </e>
+              <e p="wolf" t="Include">
+                <e p="Arm.yml" t="Include" />
+                <e p="Body.yml" t="Include" />
+                <e p="Ear.yml" t="Include" />
+                <e p="Eye.yml" t="Include" />
+                <e p="Face.yml" t="Include" />
+                <e p="Leg.yml" t="Include" />
+                <e p="Penis.yml" t="Include" />
+                <e p="Species.yml" t="Include" />
+                <e p="Tail.yml" t="Include" />
+                <e p="Teeth.yml" t="Include" />
+                <e p="Vagina.yml" t="Include" />
               </e>
             </e>
             <e p="Templates" t="Include">
@@ -440,6 +466,9 @@
         </e>
         <e p="TestBases" t="Include">
           <e p="CharacterServiceTestBase.cs" t="Include" />
+          <e p="Content" t="Include">
+            <e p="TransformationValidityTestBase.cs" t="Include" />
+          </e>
           <e p="DatabaseDependantTestBase.cs" t="Include" />
           <e p="OwnedEntityServiceTestBase.cs" t="Include" />
           <e p="PermissionServiceTestBase.cs" t="Include" />
