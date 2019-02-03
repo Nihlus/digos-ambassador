@@ -42,6 +42,16 @@ namespace DIGOS.Ambassador.Tests.ContentTests
 
 		[Theory]
 		[ClassData(typeof(SpeciesDataProvider))]
+		public void SpeciesFileIsInCorrectFolder(string speciesFile)
+		{
+			var folderName = Directory.GetParent(speciesFile).Name;
+			var species = Deserialize<Species>(speciesFile);
+
+			Assert.Equal(species.Name, folderName);
+		}
+
+		[Theory]
+		[ClassData(typeof(SpeciesDataProvider))]
 		public void SpeciesFileIsValid(string speciesFile)
 		{
 			var result = this.Verifier.VerifyFile<Species>(speciesFile);
