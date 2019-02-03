@@ -466,6 +466,9 @@
         </e>
         <e p="TestBases" t="Include">
           <e p="CharacterServiceTestBase.cs" t="Include" />
+          <e p="Content" t="Include">
+            <e p="TransformationValidityTestBase.cs" t="Include" />
+          </e>
           <e p="DatabaseDependantTestBase.cs" t="Include" />
           <e p="OwnedEntityServiceTestBase.cs" t="Include" />
           <e p="PermissionServiceTestBase.cs" t="Include" />

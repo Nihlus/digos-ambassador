@@ -31,10 +31,8 @@ using Xunit;
 
 namespace DIGOS.Ambassador.Tests.ContentTests
 {
-	public class SpeciesValidityTests
+	public class SpeciesValidityTests : TransformationValidityTests
 	{
-		private TransformationFileVerifier Verifier = new TransformationFileVerifier();
-
 		[Theory]
 		[ClassData(typeof(SpeciesDataProvider))]
 		public void SpeciesFolderHasASpeciesFile(string speciesFile)
