@@ -11,4 +11,4 @@ uniform_shift_message: "You watch as {@target}'s eyes morph in their sockets, sh
 uniform_grow_message: "The blank indents on {@target}'s face split and unzip, revealing a set of rapidly forming eyes. The irises and pupils are round and lucid, with a {@colour} colour that contrasts sharply with the pupil. The piercing contrast makes you feel as if they could stare right through you."
 
 single_description: "The iris is round and lucid, with a {@colour} colour that contrasts with the pupil to present a piercing impression."
-uniform_description: "{@target}'s eyes are round and awake, cooly scanning their surroundings. {@f|Their} irises are a {@colour} colour, and give off a wild and piercing impression."
+uniform_description: "{@target}'s eyes are round and awake, coolly scanning their surroundings. {@f|Their} irises are a {@colour} colour, and give off a wild and piercing impression."
