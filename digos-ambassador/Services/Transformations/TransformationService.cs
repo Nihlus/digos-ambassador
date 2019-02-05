@@ -799,7 +799,7 @@ namespace DIGOS.Ambassador.Services
 				if (await IsSpeciesNameUniqueAsync(db, species.Name))
 				{
 					// Add a new specices
-					db.Species.Add(species);
+					await db.Species.AddAsync(species);
 					++addedSpecies;
 				}
 				else
@@ -807,27 +807,12 @@ namespace DIGOS.Ambassador.Services
 					// There's an existing species with this name
 					var existingSpecies = (await GetSpeciesByNameAsync(db, species.Name)).Entity;
 
-					int updatedFields = 0;
+					species.ID = existingSpecies.ID;
 
-					// Update its fields with the info in the bundled species
-					if (!existingSpecies.Description.Equals(species.Description, StringComparison.OrdinalIgnoreCase))
-					{
-						existingSpecies.Description = species.Description;
-						++updatedFields;
-					}
+					var existingEntry = db.Entry(existingSpecies);
+					existingEntry.CurrentValues.SetValues(existingSpecies);
 
-					// The extra reference equality check is due to the fact that the parent can be null
-					bool shouldUpdateParent =
-						(existingSpecies.Parent is null ^ species.Parent is null)
-						|| (!(existingSpecies.Parent is null) && !existingSpecies.Parent.IsSameSpeciesAs(species.Parent));
-
-					if (shouldUpdateParent)
-					{
-						existingSpecies.Parent = species.Parent;
-						++updatedFields;
-					}
-
-					if (updatedFields > 0)
+					if (existingEntry.State == EntityState.Modified)
 					{
 						++updatedSpecies;
 					}
@@ -853,7 +838,7 @@ namespace DIGOS.Ambassador.Services
 					if (await IsPartAndSpeciesCombinationUniqueAsync(db, transformation.Part, transformation.Species))
 					{
 						// Add a new transformation
-						db.Transformations.Add(transformation);
+						await db.Transformations.AddAsync(transformation);
 						++addedTransformations;
 					}
 					else
@@ -869,57 +854,13 @@ namespace DIGOS.Ambassador.Services
 							)
 						).Entity.First();
 
-						int updatedFields = 0;
+						// Override the new data's ID to match the existing one
+						transformation.ID = existingTransformation.ID;
 
-						if (!existingTransformation.Description.Equals(transformation.Description, StringComparison.OrdinalIgnoreCase))
-						{
-							existingTransformation.Description = transformation.Description;
-							++updatedFields;
-						}
+						var existingEntry = db.Entry(existingTransformation);
+						existingEntry.CurrentValues.SetValues(transformation);
 
-						if (existingTransformation.IsNSFW != transformation.IsNSFW)
-						{
-							existingTransformation.IsNSFW = transformation.IsNSFW;
-							++updatedFields;
-						}
-
-						if (!existingTransformation.ShiftMessage.Equals(transformation.ShiftMessage, StringComparison.OrdinalIgnoreCase))
-						{
-							existingTransformation.ShiftMessage = transformation.ShiftMessage;
-							++updatedFields;
-						}
-
-						if (!existingTransformation.GrowMessage.Equals(transformation.GrowMessage, StringComparison.OrdinalIgnoreCase))
-						{
-							existingTransformation.GrowMessage = transformation.GrowMessage;
-							++updatedFields;
-						}
-
-						if (!string.Equals(existingTransformation.UniformShiftMessage, transformation.UniformShiftMessage, StringComparison.OrdinalIgnoreCase))
-						{
-							existingTransformation.UniformShiftMessage = transformation.UniformShiftMessage;
-							++updatedFields;
-						}
-
-						if (!string.Equals(existingTransformation.UniformGrowMessage, transformation.UniformGrowMessage, StringComparison.OrdinalIgnoreCase))
-						{
-							existingTransformation.UniformGrowMessage = transformation.UniformGrowMessage;
-							++updatedFields;
-						}
-
-						if (!existingTransformation.SingleDescription.Equals(transformation.SingleDescription, StringComparison.OrdinalIgnoreCase))
-						{
-							existingTransformation.SingleDescription = transformation.SingleDescription;
-							++updatedFields;
-						}
-
-						if (existingTransformation.UniformDescription != null && !existingTransformation.UniformDescription.Equals(transformation.UniformDescription, StringComparison.OrdinalIgnoreCase))
-						{
-							existingTransformation.UniformDescription = transformation.UniformDescription;
-							++updatedFields;
-						}
-
-						if (updatedFields > 0)
+						if (existingEntry.State == EntityState.Modified)
 						{
 							++updatedTransformations;
 						}
