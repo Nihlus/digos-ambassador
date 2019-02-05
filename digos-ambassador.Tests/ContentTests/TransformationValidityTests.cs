@@ -68,6 +68,14 @@ namespace DIGOS.Ambassador.Tests.ContentTests
 
 		[Theory]
 		[ClassData(typeof(TransformationDataProvider))]
+		public void TransformationTransformsNonChiralBodypart(string transformationFile)
+		{
+			var transformation = Deserialize<Transformation>(transformationFile);
+			Assert.False(transformation.Part.IsComposite());
+		}
+
+		[Theory]
+		[ClassData(typeof(TransformationDataProvider))]
 		public void TransformationHasRequiredConditionalFields(string transformationFile)
 		{
 			var transformation = Deserialize<Transformation>(transformationFile);
