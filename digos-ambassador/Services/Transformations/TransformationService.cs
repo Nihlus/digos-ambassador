@@ -798,7 +798,7 @@ namespace DIGOS.Ambassador.Services
 			{
 				if (await IsSpeciesNameUniqueAsync(db, species.Name))
 				{
-					// Add a new specices
+					// Add a new species
 					await db.Species.AddAsync(species);
 					++addedSpecies;
 				}
