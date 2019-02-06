@@ -525,7 +525,12 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "The character has no default appearance.");
 			}
 
-			character.CurrentAppearance = character.DefaultAppearance;
+			if (!(character.CurrentAppearance is null))
+			{
+				db.Remove(character.CurrentAppearance);
+			}
+
+			character.CurrentAppearance = Appearance.CopyFrom(character.DefaultAppearance);
 			await db.SaveChangesAsync();
 
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
@@ -548,7 +553,13 @@ namespace DIGOS.Ambassador.Services
 				return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "The character doesn't have an altered appearance.");
 			}
 
-			character.DefaultAppearance = character.CurrentAppearance;
+			if (!(character.DefaultAppearance is null))
+			{
+				db.Remove(character.DefaultAppearance);
+			}
+
+			character.DefaultAppearance = Appearance.CopyFrom(character.CurrentAppearance);
+
 			await db.SaveChangesAsync();
 
 			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);

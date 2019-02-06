@@ -47,6 +47,7 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// <summary>
 		/// Gets or sets the parts that compose this appearance.
 		/// </summary>
+		[NotNull, ItemNotNull]
 		public List<AppearanceComponent> Components { get; set; }
 
 		/// <summary>
@@ -68,6 +69,36 @@ namespace DIGOS.Ambassador.Database.Appearances
 		/// Gets or sets how muscular a character appears to be, on a 0 to 1 scale.
 		/// </summary>
 		public double Muscularity { get; set; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Appearance"/> class.
+		/// </summary>
+		public Appearance()
+		{
+			this.Components = new List<AppearanceComponent>();
+		}
+
+		/// <summary>
+		/// Creates a new appearance from a source appearance.
+		/// </summary>
+		/// <param name="sourceAppearance">The source appearance.</param>
+		/// <returns>The new appearance.</returns>
+		[NotNull]
+		public static Appearance CopyFrom([NotNull] Appearance sourceAppearance)
+		{
+			var componentCopies = sourceAppearance.Components.Select(AppearanceComponent.CopyFrom).ToList();
+
+			var newAppearance = new Appearance
+			{
+				Components = componentCopies,
+				Height = sourceAppearance.Height,
+				Weight = sourceAppearance.Weight,
+				GenderScale = sourceAppearance.GenderScale,
+				Muscularity = sourceAppearance.Muscularity
+			};
+
+			return newAppearance;
+		}
 
 		/// <summary>
 		/// Creates a default appearance using the template species (a featureless, agendered species).

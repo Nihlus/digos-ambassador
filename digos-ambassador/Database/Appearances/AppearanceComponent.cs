@@ -96,6 +96,25 @@ namespace DIGOS.Ambassador.Database.Appearances
 		}
 
 		/// <summary>
+		/// Copies the appearance of the given component and creates a new component based on it.
+		/// </summary>
+		/// <param name="other">The other component.</param>
+		/// <returns>A new component with the same settings.</returns>
+		[NotNull]
+		public static AppearanceComponent CopyFrom([NotNull] AppearanceComponent other)
+		{
+			return new AppearanceComponent
+			{
+				Transformation = other.Transformation,
+				Chirality = other.Chirality,
+				BaseColour = other.BaseColour,
+				Pattern = other.Pattern,
+				PatternColour = other.PatternColour,
+				Size = other.Size
+			};
+		}
+
+		/// <summary>
 		/// Creates a new <see cref="AppearanceComponent"/> from a transformation of a bodypart.
 		/// </summary>
 		/// <param name="transformation">The transformation.</param>

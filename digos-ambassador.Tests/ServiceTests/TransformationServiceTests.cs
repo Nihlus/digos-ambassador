@@ -559,7 +559,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 			[Fact]
 			public async Task CanSetDefaultAppearance()
 			{
-				var alteredAppearance = new Appearance();
+				var alteredAppearance = new Appearance
+				{
+					Height = 10
+				};
+
 				this.Character.CurrentAppearance = alteredAppearance;
 
 				var result = await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
@@ -571,7 +575,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				Assert.True(result.IsSuccess);
 				Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
 				Assert.NotNull(this.Character.DefaultAppearance);
-				Assert.Same(alteredAppearance, this.Character.DefaultAppearance);
+				Assert.Equal(10, this.Character.DefaultAppearance.Height);
 			}
 
 			[Fact]
@@ -1223,6 +1227,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 				this.Character = new Character
 				{
 					Name = "Test",
+					DefaultAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
 					CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
 					Owner = owner,
 					PronounProviderFamily = "Feminine"
@@ -1348,6 +1353,115 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
 				Assert.NotNull(result.ShiftMessage);
 				Assert.NotEmpty(result.ShiftMessage);
+			}
+
+			[Fact]
+			public async Task ShiftingBodypartDoesNotAlterDefaultAppearance()
+			{
+				await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"shark"
+				);
+
+				Assert.NotEqual
+				(
+					"shark",
+					this.Character.DefaultAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+				);
+			}
+
+			[Fact]
+			public async Task CanResetAppearance()
+			{
+				await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"shark"
+				);
+
+				await this.Transformations.ResetCharacterFormAsync
+				(
+					this.Database,
+					this.Character
+				);
+
+				Assert.NotEqual
+				(
+					"shark",
+					this.Character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+				);
+			}
+
+			[Fact]
+			public async Task CanSetCustomDefaultAppearance()
+			{
+				await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"shark"
+				);
+
+				await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
+				(
+					this.Database,
+					this.Character
+				);
+
+				Assert.Equal
+				(
+					"shark",
+					this.Character.DefaultAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+				);
+			}
+
+			[Fact]
+			public async Task CanResetToCustomDefaultAppearance()
+			{
+				await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"shark"
+				);
+
+				await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
+				(
+					this.Database,
+					this.Character
+				);
+
+				await this.Transformations.ShiftBodypartAsync
+				(
+					this.Database,
+					this.Context,
+					this.Character,
+					Bodypart.Face,
+					"shark-dronie"
+				);
+
+				await this.Transformations.ResetCharacterFormAsync
+				(
+					this.Database,
+					this.Character
+				);
+
+				Assert.Equal
+				(
+					"shark",
+					this.Character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+				);
 			}
 		}
 

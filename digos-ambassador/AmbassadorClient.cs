@@ -49,6 +49,7 @@ using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
 using log4net;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;

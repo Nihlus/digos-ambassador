@@ -494,7 +494,17 @@ namespace DIGOS.Ambassador.Services
 
 			var defaultAppearance = getDefaultAppearanceResult.Entity;
 			character.DefaultAppearance = defaultAppearance;
-			character.CurrentAppearance = defaultAppearance;
+
+			// The default and current appearances must be different objects, or the end up pointing to the same
+			// database record, which is not desired.
+			var getCurrentAppearanceResult = await Appearance.CreateDefaultAsync(db, this.Transformations);
+			if (!getCurrentAppearanceResult.IsSuccess)
+			{
+				return CreateEntityResult<Character>.FromError(getCurrentAppearanceResult);
+			}
+
+			var currentAppearance = getCurrentAppearanceResult.Entity;
+			character.CurrentAppearance = currentAppearance;
 
 			owner.Characters.Add(character);
 			await db.Characters.AddAsync(character);
