@@ -678,7 +678,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		[UsedImplicitly]
 		[Alias("set-default", "save-default")]
-		[Command("set-default")]
+		[Command("set-default", RunMode = Async)]
 		[Summary("Sets your current appearance as your current character's default one.")]
 		public async Task SetCurrentAppearanceAsDefaultAsync()
 		{
@@ -706,7 +706,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="shouldOptIn">Whether or not to opt in by default.</param>
 		[UsedImplicitly]
-		[Command("default-opt-in")]
+		[Command("default-opt-in", RunMode = Async)]
 		[Summary("Sets your default setting for opting in or out of transformations on servers you join.")]
 		[RequireContext(Guild)]
 		public async Task SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
@@ -727,7 +727,7 @@ namespace DIGOS.Ambassador.Modules
 		/// Opts into the transformation module on this server.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("opt-in")]
+		[Command("opt-in", RunMode = Async)]
 		[Summary("Opts into the transformation module on this server.")]
 		[RequireContext(Guild)]
 		public async Task OptInToTransformationsAsync()
@@ -744,7 +744,7 @@ namespace DIGOS.Ambassador.Modules
 		/// Opts into the transformation module on this server.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("opt-out")]
+		[Command("opt-out", RunMode = Async)]
 		[Summary("Opts out of the transformation module on this server.")]
 		[RequireContext(Guild)]
 		public async Task OptOutOfTransformationsAsync()
@@ -762,7 +762,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="protectionType">The protection type to use.</param>
 		[UsedImplicitly]
-		[Command("default-protection")]
+		[Command("default-protection", RunMode = Async)]
 		[Summary("Sets your default protection type for transformations on servers you join. Available types are Whitelist and Blacklist.")]
 		public async Task SetDefaultProtectionTypeAsync(ProtectionType protectionType)
 		{
@@ -781,7 +781,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="protectionType">The protection type to use.</param>
 		[UsedImplicitly]
-		[Command("protection")]
+		[Command("protection", RunMode = Async)]
 		[Summary("Sets your protection type for transformations. Available types are Whitelist and Blacklist.")]
 		[RequireContext(Guild)]
 		public async Task SetProtectionTypeAsync(ProtectionType protectionType)
@@ -801,7 +801,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="user">The user to whitelist.</param>
 		[UsedImplicitly]
-		[Command("whitelist")]
+		[Command("whitelist", RunMode = Async)]
 		[Summary("Whitelists a user, allowing them to transform you.")]
 		public async Task WhitelistUserAsync([NotNull] IUser user)
 		{
@@ -820,7 +820,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="user">The user to blacklist.</param>
 		[UsedImplicitly]
-		[Command("blacklist")]
+		[Command("blacklist", RunMode = Async)]
 		[Summary("Blacklists a user, preventing them from transforming you.")]
 		public async Task BlacklistUserAsync([NotNull] IUser user)
 		{
@@ -838,7 +838,7 @@ namespace DIGOS.Ambassador.Modules
 		/// Updates the transformation database with the bundled definitions.
 		/// </summary>
 		[UsedImplicitly]
-		[Command("update-db")]
+		[Command("update-db", RunMode = Async)]
 		[Summary("Updates the transformation database with the bundled definitions.")]
 		[RequireOwner]
 		public async Task UpdateTransformationDatabaseAsync()

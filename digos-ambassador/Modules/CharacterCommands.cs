@@ -105,7 +105,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		[UsedImplicitly]
 		[Alias("available-pronouns", "pronouns")]
-		[Command("available-pronouns")]
+		[Command("available-pronouns", RunMode = Async)]
 		[Summary("Shows available pronoun families that can be used with characters.")]
 		public async Task ShowAvailablePronounFamiliesAsync()
 		{
@@ -451,7 +451,7 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="character">The character to view the gallery of.</param>
 		[UsedImplicitly]
 		[Alias("view-gallery", "gallery")]
-		[Command("view-gallery")]
+		[Command("view-gallery", RunMode = Async)]
 		[Summary("View the images in a character's gallery.")]
 		[RequireContext(Guild)]
 		public async Task ViewCharacterGalleryAsync([NotNull] Character character)
@@ -483,7 +483,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="character">The character.</param>
 		[UsedImplicitly]
-		[Command("list-images")]
+		[Command("list-images", RunMode = Async)]
 		[Summary("Lists the images in a character's gallery.")]
 		[RequireContext(Guild)]
 		public async Task ListImagesAsync([NotNull] Character character)
@@ -624,7 +624,7 @@ namespace DIGOS.Ambassador.Modules
 		/// <param name="character">The character to transfer.</param>
 		[UsedImplicitly]
 		[Alias("transfer-ownership", "transfer")]
-		[Command("transfer-ownership")]
+		[Command("transfer-ownership", RunMode = Async)]
 		[Summary("Transfers ownership of the named character to another user.")]
 		[RequireContext(Guild)]
 		[RequirePermission(Permission.TransferCharacter)]
