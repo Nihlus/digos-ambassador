@@ -1,6 +1,6 @@
 part: Leg
 species: shark-dronie
-description: "Transforms the target's {@side} leg into that of a shark dronie."
+description: "Transforms the target's leg into that of a shark dronie."
 default_base_colour: "deep purple"
 is_nsfw: false
 

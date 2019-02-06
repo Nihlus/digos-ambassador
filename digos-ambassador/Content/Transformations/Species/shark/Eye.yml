@@ -1,6 +1,6 @@
 part: Eye
 species: shark
-description: "Transforms the target's {@side} eye into that of an anthro shark."
+description: "Transforms the target's eye into that of an anthro shark."
 default_base_colour: "light blue"
 is_nsfw: false
 

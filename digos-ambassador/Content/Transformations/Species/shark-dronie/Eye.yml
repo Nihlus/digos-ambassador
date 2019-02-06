@@ -1,6 +1,6 @@
 part: Eye
 species: shark-dronie
-description: "Transforms the target's {@side} eye into that of a shark dronie."
+description: "Transforms the target's eye into that of a shark dronie."
 default_base_colour: "fluorescent purple"
 is_nsfw: false
 

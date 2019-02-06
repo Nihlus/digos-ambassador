@@ -1,6 +1,6 @@
 part: Ear
 species: shark-dronie
-description: "Transforms the target's {@side} ear into that of a shark dronie."
+description: "Transforms the target's ear into that of a shark dronie."
 default_base_colour: "deep purple"
 is_nsfw: false
 

@@ -1,6 +1,6 @@
 part: Arm
 species: wolf
-description: "Transforms the target's {@side} arm into that of an anthro wolf."
+description: "Transforms the target's arm into that of an anthro wolf."
 default_base_colour: "grey"
 is_nsfw: false
 

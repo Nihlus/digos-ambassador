@@ -1,6 +1,6 @@
 part: Leg
 species: wolf
-description: "Transforms the target's {@side} leg into that of an anthro wolf."
+description: "Transforms the target's leg into that of an anthro wolf."
 default_base_colour: "grey"
 is_nsfw: false
 

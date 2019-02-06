@@ -1,6 +1,6 @@
 part: Leg
 species: snake
-description: "Transforms the target's {@side} leg into that of an anthro snake."
+description: "Transforms the target's leg into that of an anthro snake."
 default_base_colour: "green"
 is_nsfw: false
 

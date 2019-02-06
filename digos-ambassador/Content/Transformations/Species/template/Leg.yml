@@ -1,6 +1,6 @@
 part: Leg
 species: template
-description: "Transforms the target's {@side} leg into a blank template."
+description: "Transforms the target's leg into a blank template."
 default_base_colour: "grey"
 is_nsfw: false
 

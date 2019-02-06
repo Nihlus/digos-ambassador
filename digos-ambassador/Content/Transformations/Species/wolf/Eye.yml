@@ -1,6 +1,6 @@
 part: Eye
 species: wolf
-description: "Transforms the target's {@side} eye into that of an anthro wolf."
+description: "Transforms the target's eye into that of an anthro wolf."
 default_base_colour: "amber"
 is_nsfw: false
 
