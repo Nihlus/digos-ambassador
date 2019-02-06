@@ -59,10 +59,11 @@
     <Delete Files="$(OutputPath)\System.Net.Http.dll" Condition="'$(OS)' == 'Unix'" />
   </Target>
   <PropertyGroup>
-    <DocGenerator>dotnet $(ProjectDir)..\digos-ambassador.Doc\bin\Debug\netcoreapp2.0\DIGOS.Ambassador.Doc.dll</DocGenerator>
+    <DocGeneratorAssembly>$(ProjectDir)..\digos-ambassador.Doc\bin\Debug\netcoreapp2.0\DIGOS.Ambassador.Doc.dll</DocGeneratorAssembly>
+    <DocGenerator>dotnet $(DocGeneratorAssembly)</DocGenerator>
   </PropertyGroup>
-  <Target Name="GenerateDocs" AfterTargets="PostBuildEvent" Condition="Exists('$(DocGenerator)')">
-    <Exec Command="dotnet $(DocGenerator) --assembly $(OutputPath)$(AssemblyName)$(TargetExt) --output $(ProjectDir)..\docs" />
+  <Target Name="GenerateDocs" AfterTargets="PostBuildEvent" Condition="Exists('$(DocGeneratorAssembly)')">
+    <Exec Command="$(DocGenerator) --assembly $(OutputPath)$(AssemblyName)$(TargetExt) --output $(ProjectDir)../docs" ContinueOnError="true"/>
   </Target>
   <Import Project="..\msbuild\netfx-mono.props" />
 </Project>
