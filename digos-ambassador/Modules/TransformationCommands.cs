@@ -519,7 +519,7 @@ namespace DIGOS.Ambassador.Modules
 		/// Lists the available transformation species.
 		/// </summary>
 		[UsedImplicitly]
-		[Alias("list-available", "list-species", "species")]
+		[Alias("list-available", "list-species", "species", "list")]
 		[Command("list-available", RunMode = Async)]
 		[Summary("Lists the available transformation species.")]
 		public async Task ListAvailableTransformationsAsync()
@@ -533,10 +533,15 @@ namespace DIGOS.Ambassador.Modules
 			{
 				eb.WithDescription("There are no available species.");
 			}
+			else
+			{
+				eb.WithDescription("Use the name inside the parens when transforming body parts.");
+			}
 
 			foreach (var species in availableSpecies)
 			{
-				eb.AddField(species.Name.Humanize(LetterCasing.Title), species.Description);
+				var speciesName = $"{species.Name.Humanize(LetterCasing.Title)} ({species.Name})";
+				eb.AddField(speciesName, species.Description);
 			}
 
 			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
@@ -547,7 +552,7 @@ namespace DIGOS.Ambassador.Modules
 		/// </summary>
 		/// <param name="bodyPart">The part to list available transformations for. Optional.</param>
 		[UsedImplicitly]
-		[Alias("list-available")]
+		[Alias("list-available", "list-species", "species", "list")]
 		[Command("list-available", RunMode = Async)]
 		[Summary("Lists the available transformations for a given bodypart.")]
 		public async Task ListAvailableTransformationsAsync
@@ -565,10 +570,15 @@ namespace DIGOS.Ambassador.Modules
 			{
 				eb.WithDescription("There are no available transformations for this bodypart.");
 			}
+			else
+			{
+				eb.WithDescription("Use the name inside the parens when transforming body parts.");
+			}
 
 			foreach (var transformation in transformations)
 			{
-				eb.AddField(transformation.Species.Name.Humanize(LetterCasing.Title), transformation.Description);
+				var speciesName = $"{transformation.Species.Name.Humanize(LetterCasing.Title)} ({transformation.Species.Name})";
+				eb.AddField(speciesName, transformation.Description);
 			}
 
 			await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
