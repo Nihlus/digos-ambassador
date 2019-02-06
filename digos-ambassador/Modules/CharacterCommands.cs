@@ -783,6 +783,31 @@ namespace DIGOS.Ambassador.Modules
 				}
 
 				await this.Feedback.SendConfirmationAsync(this.Context, "Character nickname set.");
+
+				// Update the user's active nickname if they are currently this character, and don't have the same nick
+				if (this.Context.User is IGuildUser guildUser && guildUser.Nickname != newCharacterNickname)
+				{
+					if (!character.IsCurrent)
+					{
+						return;
+					}
+
+					var updateUserNickResult = await this.Discord.SetUserNicknameAsync
+					(
+						this.Context,
+						guildUser,
+						newCharacterNickname
+					);
+
+					if (!updateUserNickResult.IsSuccess)
+					{
+						await this.Feedback.SendWarningAsync
+						(
+							this.Context,
+							"Your character nickname has been updated, but I couldn't update your current real nickname due to permission issues (or something else). You'll have to do it yourself :("
+						);
+					}
+				}
 			}
 
 			/// <summary>

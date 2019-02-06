@@ -234,6 +234,8 @@
           <e p="20180604182540_AddUserConsentTable.cs" t="Include" />
           <e p="20190203160716_AddUniformTFMessages.Designer.cs" t="Include" />
           <e p="20190203160716_AddUniformTFMessages.cs" t="Include" />
+          <e p="20190206171934_FixBadAppearanceData.Designer.cs" t="Include" />
+          <e p="20190206171934_FixBadAppearanceData.cs" t="Include" />
           <e p="GlobalInfoContextModelSnapshot.cs" t="Include" />
         </e>
         <e p="Modules" t="Include">
