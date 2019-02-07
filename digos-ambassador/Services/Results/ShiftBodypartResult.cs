@@ -25,70 +25,70 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Represents an attempt to shift a part of a character's body.
-	/// </summary>
-	public struct ShiftBodypartResult : IResult
-	{
-		/// <inheritdoc />
-		public CommandError? Error { get; }
+    /// <summary>
+    /// Represents an attempt to shift a part of a character's body.
+    /// </summary>
+    public struct ShiftBodypartResult : IResult
+    {
+        /// <inheritdoc />
+        public CommandError? Error { get; }
 
-		/// <inheritdoc />
-		public string ErrorReason { get; }
+        /// <inheritdoc />
+        public string ErrorReason { get; }
 
-		/// <inheritdoc />
-		public bool IsSuccess => !this.Error.HasValue;
+        /// <inheritdoc />
+        public bool IsSuccess => !this.Error.HasValue;
 
-		/// <summary>
-		/// Gets the shifting message.
-		/// </summary>
-		public string ShiftMessage { get; }
+        /// <summary>
+        /// Gets the shifting message.
+        /// </summary>
+        public string ShiftMessage { get; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ShiftBodypartResult"/> struct.
-		/// </summary>
-		/// <param name="shiftMessage">The message to display to the user when shifting.</param>
-		/// <param name="error">The error (if any).</param>
-		/// <param name="errorReason">A more detailed error description.</param>
-		private ShiftBodypartResult([CanBeNull] string shiftMessage, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
-		{
-			this.ShiftMessage = shiftMessage;
-			this.Error = error;
-			this.ErrorReason = errorReason;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ShiftBodypartResult"/> struct.
+        /// </summary>
+        /// <param name="shiftMessage">The message to display to the user when shifting.</param>
+        /// <param name="error">The error (if any).</param>
+        /// <param name="errorReason">A more detailed error description.</param>
+        private ShiftBodypartResult([CanBeNull] string shiftMessage, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
+        {
+            this.ShiftMessage = shiftMessage;
+            this.Error = error;
+            this.ErrorReason = errorReason;
+        }
 
-		/// <summary>
-		/// Creates a new successful result.
-		/// </summary>
-		/// <returns>A successful result.</returns>
-		/// <param name="shiftMessage">The message to display to the user when shifting.</param>
-		[Pure]
-		public static ShiftBodypartResult FromSuccess([NotNull] string shiftMessage)
-		{
-			return new ShiftBodypartResult(shiftMessage, null, null);
-		}
+        /// <summary>
+        /// Creates a new successful result.
+        /// </summary>
+        /// <returns>A successful result.</returns>
+        /// <param name="shiftMessage">The message to display to the user when shifting.</param>
+        [Pure]
+        public static ShiftBodypartResult FromSuccess([NotNull] string shiftMessage)
+        {
+            return new ShiftBodypartResult(shiftMessage, null, null);
+        }
 
-		/// <summary>
-		/// Creates a failed result.
-		/// </summary>
-		/// <param name="error">The error that caused the failure.</param>
-		/// <param name="reason">A more detailed error reason.</param>
-		/// <returns>A failed result.</returns>
-		[Pure]
-		public static ShiftBodypartResult FromError(CommandError error, [NotNull] string reason)
-		{
-			return new ShiftBodypartResult(null, error, reason);
-		}
+        /// <summary>
+        /// Creates a failed result.
+        /// </summary>
+        /// <param name="error">The error that caused the failure.</param>
+        /// <param name="reason">A more detailed error reason.</param>
+        /// <returns>A failed result.</returns>
+        [Pure]
+        public static ShiftBodypartResult FromError(CommandError error, [NotNull] string reason)
+        {
+            return new ShiftBodypartResult(null, error, reason);
+        }
 
-		/// <summary>
-		/// Creates a failed result based on another result.
-		/// </summary>
-		/// <param name="result">The result to base this result off of.</param>
-		/// <returns>A failed result.</returns>
-		[Pure]
-		public static ShiftBodypartResult FromError([NotNull] IResult result)
-		{
-			return new ShiftBodypartResult(null, result.Error, result.ErrorReason);
-		}
-	}
+        /// <summary>
+        /// Creates a failed result based on another result.
+        /// </summary>
+        /// <param name="result">The result to base this result off of.</param>
+        /// <returns>A failed result.</returns>
+        [Pure]
+        public static ShiftBodypartResult FromError([NotNull] IResult result)
+        {
+            return new ShiftBodypartResult(null, result.Error, result.ErrorReason);
+        }
+    }
 }

@@ -27,77 +27,77 @@ using System.Collections.Generic;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Holds binary file signatures.
-	/// </summary>
-	public static class FileSignatures
-	{
-		/// <summary>
-		/// The header signature of a PDF file.
-		/// </summary>
-		public static readonly byte[] PDF = { 0x25, 0x50, 0x44, 0x46 };
+    /// <summary>
+    /// Holds binary file signatures.
+    /// </summary>
+    public static class FileSignatures
+    {
+        /// <summary>
+        /// The header signature of a PDF file.
+        /// </summary>
+        public static readonly byte[] PDF = { 0x25, 0x50, 0x44, 0x46 };
 
-		/// <summary>
-		/// Animated GIF, version 87.
-		/// </summary>
-		public static readonly byte[] GIF87 = { 0x47, 0x49, 0x46, 0x38, 0x37, 0x61 };
+        /// <summary>
+        /// Animated GIF, version 87.
+        /// </summary>
+        public static readonly byte[] GIF87 = { 0x47, 0x49, 0x46, 0x38, 0x37, 0x61 };
 
-		/// <summary>
-		/// Animated GIF, version 89.
-		/// </summary>
-		public static readonly byte[] GIF89 = { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61 };
+        /// <summary>
+        /// Animated GIF, version 89.
+        /// </summary>
+        public static readonly byte[] GIF89 = { 0x47, 0x49, 0x46, 0x38, 0x39, 0x61 };
 
-		/// <summary>
-		/// TIFF Image, Little Endian.
-		/// </summary>
-		public static readonly byte[] TIFF_LE = { 0x49, 0x49, 0x2A, 0x00 };
+        /// <summary>
+        /// TIFF Image, Little Endian.
+        /// </summary>
+        public static readonly byte[] TIFF_LE = { 0x49, 0x49, 0x2A, 0x00 };
 
-		/// <summary>
-		/// TIFF Image, Big Endian.
-		/// </summary>
-		public static readonly byte[] TIFF_BE = { 0x4D, 0x4D, 0x00, 0x2A };
+        /// <summary>
+        /// TIFF Image, Big Endian.
+        /// </summary>
+        public static readonly byte[] TIFF_BE = { 0x4D, 0x4D, 0x00, 0x2A };
 
-		/// <summary>
-		/// RAW JPEG.
-		/// </summary>
-		public static readonly byte[] JPEG_RAW = { 0xFF, 0xD8, 0xFF, 0xDB };
+        /// <summary>
+        /// RAW JPEG.
+        /// </summary>
+        public static readonly byte[] JPEG_RAW = { 0xFF, 0xD8, 0xFF, 0xDB };
 
-		/// <summary>
-		/// JFIF JPEG.
-		/// </summary>
-		public static readonly byte[] JPEG_FIF = { 0xFF, 0xD8, 0xFF, 0xE0 };
+        /// <summary>
+        /// JFIF JPEG.
+        /// </summary>
+        public static readonly byte[] JPEG_FIF = { 0xFF, 0xD8, 0xFF, 0xE0 };
 
-		/// <summary>
-		/// EXIF JPEG.
-		/// </summary>
-		public static readonly byte[] JPEG_XIF = { 0xFF, 0xD8, 0xFF, 0xE1 };
+        /// <summary>
+        /// EXIF JPEG.
+        /// </summary>
+        public static readonly byte[] JPEG_XIF = { 0xFF, 0xD8, 0xFF, 0xE1 };
 
-		/// <summary>
-		/// Portable Network Graphics.
-		/// </summary>
-		public static readonly byte[] PNG = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+        /// <summary>
+        /// Portable Network Graphics.
+        /// </summary>
+        public static readonly byte[] PNG = { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
 
-		/// <summary>
-		/// Photoshop binary file.
-		/// </summary>
-		public static readonly byte[] PSD = { 0x38, 0x42, 0x50, 0x53 };
+        /// <summary>
+        /// Photoshop binary file.
+        /// </summary>
+        public static readonly byte[] PSD = { 0x38, 0x42, 0x50, 0x53 };
 
-		/// <summary>
-		/// Windows bitmap.
-		/// </summary>
-		public static readonly byte[] BMP = { 0x42, 0x4D };
+        /// <summary>
+        /// Windows bitmap.
+        /// </summary>
+        public static readonly byte[] BMP = { 0x42, 0x4D };
 
-		/// <summary>
-		/// Gets all image signatures.
-		/// </summary>
-		public static readonly IEnumerable<byte[]> ImageSignatures = new[]
-		{
-			GIF87, GIF89,
-			TIFF_LE, TIFF_BE,
-			JPEG_RAW, JPEG_FIF, JPEG_XIF,
-			PNG,
-			PSD,
-			BMP
-		};
-	}
+        /// <summary>
+        /// Gets all image signatures.
+        /// </summary>
+        public static readonly IEnumerable<byte[]> ImageSignatures = new[]
+        {
+            GIF87, GIF89,
+            TIFF_LE, TIFF_BE,
+            JPEG_RAW, JPEG_FIF, JPEG_XIF,
+            PNG,
+            PSD,
+            BMP
+        };
+    }
 }

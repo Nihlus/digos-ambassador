@@ -24,11 +24,11 @@ using System;
 
 namespace DIGOS.Ambassador.Attributes
 {
-	/// <summary>
-	/// An attribute which marks a bodypart as gendered.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field)]
-	public class GenderedAttribute : Attribute
-	{
-	}
+    /// <summary>
+    /// An attribute which marks a bodypart as gendered.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public class GenderedAttribute : Attribute
+    {
+    }
 }

@@ -24,25 +24,25 @@ using System;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents emphasis types for markdown text.
-	/// </summary>
-	[Flags]
-	public enum EmphasisType
-	{
-		/// <summary>
-		/// Italic (cursive) text.
-		/// </summary>
-		Italic = 0x1,
+    /// <summary>
+    /// Represents emphasis types for markdown text.
+    /// </summary>
+    [Flags]
+    public enum EmphasisType
+    {
+        /// <summary>
+        /// Italic (cursive) text.
+        /// </summary>
+        Italic = 0x1,
 
-		/// <summary>
-		/// Bold text.
-		/// </summary>
-		Bold = 0x2,
+        /// <summary>
+        /// Bold text.
+        /// </summary>
+        Bold = 0x2,
 
-		/// <summary>
-		/// Struck text.
-		/// </summary>
-		Strikethrough = 0x4
-	}
+        /// <summary>
+        /// Struck text.
+        /// </summary>
+        Strikethrough = 0x4
+    }
 }

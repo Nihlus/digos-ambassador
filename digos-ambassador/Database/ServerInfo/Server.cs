@@ -31,58 +31,58 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.ServerInfo
 {
-	/// <summary>
-	/// Represents stored settings for a Discord server.
-	/// </summary>
-	public class Server : IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents stored settings for a Discord server.
+    /// </summary>
+    public class Server : IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the globally unique guild ID of the server.
-		/// </summary>
-		public virtual long DiscordID { get; set; }
+        /// <summary>
+        /// Gets or sets the globally unique guild ID of the server.
+        /// </summary>
+        public virtual long DiscordID { get; set; }
 
-		/// <summary>
-		/// Gets or sets a value indicating whether or not the server allows NSFW content globally.
-		/// </summary>
-		public bool IsNSFW { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether or not the server allows NSFW content globally.
+        /// </summary>
+        public bool IsNSFW { get; set; }
 
-		/// <summary>
-		/// Gets or sets a value indicating whether or not the server should suppress permission warnings.
-		/// </summary>
-		public bool SuppressPermissonWarnings { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether or not the server should suppress permission warnings.
+        /// </summary>
+        public bool SuppressPermissonWarnings { get; set; }
 
-		/// <summary>
-		/// Gets or sets the users known to the bot on this server.
-		/// </summary>
-		public List<User> KnownUsers { get; set; }
+        /// <summary>
+        /// Gets or sets the users known to the bot on this server.
+        /// </summary>
+        public List<User> KnownUsers { get; set; }
 
-		/// <summary>
-		/// Determines whether or not a given user is known to this server.
-		/// </summary>
-		/// <param name="user">The user.</param>
-		/// <returns>true if the user is known; otherwise, false.</returns>
-		public bool IsUserKnown([NotNull] IUser user)
-		{
-			return this.KnownUsers.Any(u => u.DiscordID == (long)user.Id);
-		}
+        /// <summary>
+        /// Determines whether or not a given user is known to this server.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <returns>true if the user is known; otherwise, false.</returns>
+        public bool IsUserKnown([NotNull] IUser user)
+        {
+            return this.KnownUsers.Any(u => u.DiscordID == (long)user.Id);
+        }
 
-		/// <summary>
-		/// Creates a default server entity based on a Discord guild.
-		/// </summary>
-		/// <param name="discordServer">The Discord server.</param>
-		/// <returns>A default server entity with some information filled in.</returns>
-		[Pure]
-		[NotNull]
-		public static Server CreateDefault([NotNull] IGuild discordServer)
-		{
-			return new Server
-			{
-				DiscordID = (long)discordServer.Id,
-				IsNSFW = true,
-			};
-		}
-	}
+        /// <summary>
+        /// Creates a default server entity based on a Discord guild.
+        /// </summary>
+        /// <param name="discordServer">The Discord server.</param>
+        /// <returns>A default server entity with some information filled in.</returns>
+        [Pure]
+        [NotNull]
+        public static Server CreateDefault([NotNull] IGuild discordServer)
+        {
+            return new Server
+            {
+                DiscordID = (long)discordServer.Id,
+                IsNSFW = true,
+            };
+        }
+    }
 }

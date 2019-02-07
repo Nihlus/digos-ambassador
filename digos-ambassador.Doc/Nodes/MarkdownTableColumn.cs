@@ -22,28 +22,28 @@
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a column in a table.
-	/// </summary>
-	public class MarkdownTableColumn
-	{
-		/// <summary>
-		/// Gets or sets the title of the column.
-		/// </summary>
-		public string Title { get; set; }
+    /// <summary>
+    /// Represents a column in a table.
+    /// </summary>
+    public class MarkdownTableColumn
+    {
+        /// <summary>
+        /// Gets or sets the title of the column.
+        /// </summary>
+        public string Title { get; set; }
 
-		/// <summary>
-		/// Gets or sets the alignment of the column.
-		/// </summary>
-		public ColumnAlignment Alignment { get; set; }
+        /// <summary>
+        /// Gets or sets the alignment of the column.
+        /// </summary>
+        public ColumnAlignment Alignment { get; set; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MarkdownTableColumn"/> class.
-		/// </summary>
-		/// <param name="title">The title.</param>
-		public MarkdownTableColumn(string title)
-		{
-			this.Title = title;
-		}
-	}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MarkdownTableColumn"/> class.
+        /// </summary>
+        /// <param name="title">The title.</param>
+        public MarkdownTableColumn(string title)
+        {
+            this.Title = title;
+        }
+    }
 }

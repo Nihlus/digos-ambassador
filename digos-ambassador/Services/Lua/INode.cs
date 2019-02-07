@@ -22,21 +22,21 @@
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Represents a node in a lua table tree structure.
-	/// </summary>
-	public interface INode
-	{
-		/// <summary>
-		/// Gets or sets the name of the node.
-		/// </summary>
-		string Name { get; set; }
+    /// <summary>
+    /// Represents a node in a lua table tree structure.
+    /// </summary>
+    public interface INode
+    {
+        /// <summary>
+        /// Gets or sets the name of the node.
+        /// </summary>
+        string Name { get; set; }
 
-		/// <summary>
-		/// Formats the node into a lua string.
-		/// </summary>
-		/// <param name="pretty">Whether or not the format should be in a pretty format.</param>
-		/// <returns>A lua string.</returns>
-		string Format(bool pretty = false);
-	}
+        /// <summary>
+        /// Formats the node into a lua string.
+        /// </summary>
+        /// <param name="pretty">Whether or not the format should be in a pretty format.</param>
+        /// <returns>A lua string.</returns>
+        string Format(bool pretty = false);
+    }
 }

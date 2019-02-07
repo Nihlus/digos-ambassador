@@ -26,21 +26,21 @@ using Discord;
 
 namespace DIGOS.Ambassador.Wizards
 {
-	/// <summary>
-	/// Represents an interactive wizard.
-	/// </summary>
-	public interface IWizard : IEmoteConsumer
-	{
-		/// <summary>
-		/// Gets the emotes that should be active for the current page.
-		/// </summary>
-		/// <returns>The emotes.</returns>
-		IEnumerable<IEmote> GetCurrentPageEmotes();
+    /// <summary>
+    /// Represents an interactive wizard.
+    /// </summary>
+    public interface IWizard : IEmoteConsumer
+    {
+        /// <summary>
+        /// Gets the emotes that should be active for the current page.
+        /// </summary>
+        /// <returns>The emotes.</returns>
+        IEnumerable<IEmote> GetCurrentPageEmotes();
 
-			/// <summary>
-		/// Gets the current page in the wizard.
-		/// </summary>
-		/// <returns>The current page.</returns>
-		Task<Embed> GetCurrentPageAsync();
-	}
+            /// <summary>
+        /// Gets the current page in the wizard.
+        /// </summary>
+        /// <returns>The current page.</returns>
+        Task<Embed> GetCurrentPageAsync();
+    }
 }

@@ -24,23 +24,23 @@ using System.Collections.Generic;
 
 namespace DIGOS.Ambassador.Extensions
 {
-	/// <summary>
-	/// Extensions to the <see cref="KeyValuePair{TKey, TValue}"/> class.
-	/// </summary>
-	public static class KeyValuePairExtensions
-	{
-		/// <summary>
-		/// Deconstructs a key-value pair into a value tuple.
-		/// </summary>
-		/// <param name="this">The pair.</param>
-		/// <param name="key">Will be filled with the key.</param>
-		/// <param name="value">Will be filled with the value.</param>
-		/// <typeparam name="TKey">The type of the key.</typeparam>
-		/// <typeparam name="TValue">The type of the value.</typeparam>
-		public static void Deconstruct<TKey, TValue>(this KeyValuePair<TKey, TValue> @this, out TKey key, out TValue value)
-		{
-			key = @this.Key;
-			value = @this.Value;
-		}
-	}
+    /// <summary>
+    /// Extensions to the <see cref="KeyValuePair{TKey, TValue}"/> class.
+    /// </summary>
+    public static class KeyValuePairExtensions
+    {
+        /// <summary>
+        /// Deconstructs a key-value pair into a value tuple.
+        /// </summary>
+        /// <param name="this">The pair.</param>
+        /// <param name="key">Will be filled with the key.</param>
+        /// <param name="value">Will be filled with the value.</param>
+        /// <typeparam name="TKey">The type of the key.</typeparam>
+        /// <typeparam name="TValue">The type of the value.</typeparam>
+        public static void Deconstruct<TKey, TValue>(this KeyValuePair<TKey, TValue> @this, out TKey key, out TValue value)
+        {
+            key = @this.Key;
+            value = @this.Value;
+        }
+    }
 }

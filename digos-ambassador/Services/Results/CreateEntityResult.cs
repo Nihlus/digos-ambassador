@@ -25,77 +25,77 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Represents an attempt to create an entity and save it in the database.
-	/// </summary>
-	/// <typeparam name="T">The entity type to encapsulate.</typeparam>
-	public struct CreateEntityResult<T> : IResult where T : class
-	{
-		/// <summary>
-		/// Gets the entity that was retrieved.
-		/// </summary>
-		public T Entity { get; }
+    /// <summary>
+    /// Represents an attempt to create an entity and save it in the database.
+    /// </summary>
+    /// <typeparam name="T">The entity type to encapsulate.</typeparam>
+    public struct CreateEntityResult<T> : IResult where T : class
+    {
+        /// <summary>
+        /// Gets the entity that was retrieved.
+        /// </summary>
+        public T Entity { get; }
 
-		/// <inheritdoc />
-		public CommandError? Error { get; }
+        /// <inheritdoc />
+        public CommandError? Error { get; }
 
-		/// <inheritdoc />
-		public string ErrorReason { get; }
+        /// <inheritdoc />
+        public string ErrorReason { get; }
 
-		/// <inheritdoc />
-		public bool IsSuccess => !this.Error.HasValue;
+        /// <inheritdoc />
+        public bool IsSuccess => !this.Error.HasValue;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CreateEntityResult{T}"/> struct.
-		/// </summary>
-		/// <param name="entity">The entity.</param>
-		/// <param name="error">The error (if any).</param>
-		/// <param name="errorReason">A more detailed error description.</param>
-		private CreateEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
-		{
-			this.Entity = entity;
-			this.Error = error;
-			this.ErrorReason = errorReason;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CreateEntityResult{T}"/> struct.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="error">The error (if any).</param>
+        /// <param name="errorReason">A more detailed error description.</param>
+        private CreateEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
+        {
+            this.Entity = entity;
+            this.Error = error;
+            this.ErrorReason = errorReason;
+        }
 
-		/// <summary>
-		/// Creates a new successful result.
-		/// </summary>
-		/// <param name="entity">The roleplay that was retrieved.</param>
-		/// <returns>A successful result.</returns>
-		[Pure]
-		public static CreateEntityResult<T> FromSuccess([NotNull] T entity)
-		{
-			return new CreateEntityResult<T>(entity, null, null);
-		}
+        /// <summary>
+        /// Creates a new successful result.
+        /// </summary>
+        /// <param name="entity">The roleplay that was retrieved.</param>
+        /// <returns>A successful result.</returns>
+        [Pure]
+        public static CreateEntityResult<T> FromSuccess([NotNull] T entity)
+        {
+            return new CreateEntityResult<T>(entity, null, null);
+        }
 
-		/// <summary>
-		/// Creates a failed result.
-		/// </summary>
-		/// <param name="error">The error that caused the failure.</param>
-		/// <param name="reason">A more detailed error reason.</param>
-		/// <returns>A failed result.</returns>
-		[Pure]
-		public static CreateEntityResult<T> FromError(CommandError error, [NotNull] string reason)
-		{
-			return new CreateEntityResult<T>(null, error, reason);
-		}
+        /// <summary>
+        /// Creates a failed result.
+        /// </summary>
+        /// <param name="error">The error that caused the failure.</param>
+        /// <param name="reason">A more detailed error reason.</param>
+        /// <returns>A failed result.</returns>
+        [Pure]
+        public static CreateEntityResult<T> FromError(CommandError error, [NotNull] string reason)
+        {
+            return new CreateEntityResult<T>(null, error, reason);
+        }
 
-		/// <summary>
-		/// Creates a failed result based on another result.
-		/// </summary>
-		/// <param name="result">The result to base this result off of.</param>
-		/// <returns>A failed result.</returns>
-		[Pure]
-		public static CreateEntityResult<T> FromError([NotNull] IResult result)
-		{
-			return new CreateEntityResult<T>(null, result.Error, result.ErrorReason);
-		}
+        /// <summary>
+        /// Creates a failed result based on another result.
+        /// </summary>
+        /// <param name="result">The result to base this result off of.</param>
+        /// <returns>A failed result.</returns>
+        [Pure]
+        public static CreateEntityResult<T> FromError([NotNull] IResult result)
+        {
+            return new CreateEntityResult<T>(null, result.Error, result.ErrorReason);
+        }
 
-		/// <inheritdoc />
-		public override string ToString()
-		{
-			return this.IsSuccess ? "Success" : $"{this.Error}: {this.ErrorReason}";
-		}
-	}
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.IsSuccess ? "Success" : $"{this.Error}: {this.ErrorReason}";
+        }
+    }
 }

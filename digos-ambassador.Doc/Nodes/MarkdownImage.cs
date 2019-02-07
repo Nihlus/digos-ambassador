@@ -24,30 +24,30 @@ using DIGOS.Ambassador.Extensions;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a markdown image.
-	/// </summary>
-	public class MarkdownImage : MarkdownLink
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MarkdownImage"/> class.
-		/// </summary>
-		/// <param name="destination">The destination.</param>
-		/// <param name="text">The visible text.</param>
-		public MarkdownImage(string destination, string text)
-			: base(destination, text)
-		{
-		}
+    /// <summary>
+    /// Represents a markdown image.
+    /// </summary>
+    public class MarkdownImage : MarkdownLink
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MarkdownImage"/> class.
+        /// </summary>
+        /// <param name="destination">The destination.</param>
+        /// <param name="text">The visible text.</param>
+        public MarkdownImage(string destination, string text)
+            : base(destination, text)
+        {
+        }
 
-		/// <inheritdoc />
-		public override string Compile()
-		{
-			if (this.Tooltip.IsNullOrWhitespace())
-			{
-				return $"![{this.Text}]({this.Destination})";
-			}
+        /// <inheritdoc />
+        public override string Compile()
+        {
+            if (this.Tooltip.IsNullOrWhitespace())
+            {
+                return $"![{this.Text}]({this.Destination})";
+            }
 
-			return $"![{this.Text}]({this.Destination} \"{this.Tooltip}\")";
-		}
-	}
+            return $"![{this.Text}]({this.Destination} \"{this.Tooltip}\")";
+        }
+    }
 }

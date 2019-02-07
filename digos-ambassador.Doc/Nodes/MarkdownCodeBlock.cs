@@ -24,26 +24,26 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a markdown code block with syntax highlighting.
-	/// </summary>
-	public class MarkdownCodeBlock : IMarkdownNode
-	{
-		/// <summary>
-		/// Gets or sets the syntax highlighting to use.
-		/// </summary>
-		public string Highlighting { get; set; }
+    /// <summary>
+    /// Represents a markdown code block with syntax highlighting.
+    /// </summary>
+    public class MarkdownCodeBlock : IMarkdownNode
+    {
+        /// <summary>
+        /// Gets or sets the syntax highlighting to use.
+        /// </summary>
+        public string Highlighting { get; set; }
 
-		/// <summary>
-		/// Gets or sets the code content.
-		/// </summary>
-		public IMarkdownNode Content { get; set; }
+        /// <summary>
+        /// Gets or sets the code content.
+        /// </summary>
+        public IMarkdownNode Content { get; set; }
 
-		/// <inheritdoc />
-		[NotNull]
-		public string Compile()
-		{
-			return $"```{this.Highlighting}\n{this.Content.Compile()}\n```";
-		}
-	}
+        /// <inheritdoc />
+        [NotNull]
+        public string Compile()
+        {
+            return $"```{this.Highlighting}\n{this.Content.Compile()}\n```";
+        }
+    }
 }

@@ -28,42 +28,42 @@ using static DIGOS.Ambassador.Transformations.Bodypart;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// A token that gets replaced with a character's physical sex.
-	/// </summary>
-	[TokenIdentifier("sex")]
-	public class SexToken : ReplacableTextToken<SexToken>
-	{
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			var genderedParts = character.CurrentAppearance.Components
-				.Where(c => !c.Bodypart.IsGenderNeutral())
-				.Select(c => c.Bodypart)
-				.ToList();
+    /// <summary>
+    /// A token that gets replaced with a character's physical sex.
+    /// </summary>
+    [TokenIdentifier("sex")]
+    public class SexToken : ReplacableTextToken<SexToken>
+    {
+        /// <inheritdoc />
+        public override string GetText(Character character, AppearanceComponent component)
+        {
+            var genderedParts = character.CurrentAppearance.Components
+                .Where(c => !c.Bodypart.IsGenderNeutral())
+                .Select(c => c.Bodypart)
+                .ToList();
 
-			if (!genderedParts.Any())
-			{
-				return "sexless";
-			}
+            if (!genderedParts.Any())
+            {
+                return "sexless";
+            }
 
-			if (genderedParts.Contains(Penis) && genderedParts.Contains(Vagina))
-			{
-				return "herm";
-			}
+            if (genderedParts.Contains(Penis) && genderedParts.Contains(Vagina))
+            {
+                return "herm";
+            }
 
-			if (genderedParts.Contains(Penis))
-			{
-				return "male";
-			}
+            if (genderedParts.Contains(Penis))
+            {
+                return "male";
+            }
 
-			return "female";
-		}
+            return "female";
+        }
 
-		/// <inheritdoc />
-		protected override SexToken Initialize(string data)
-		{
-			return this;
-		}
-	}
+        /// <inheritdoc />
+        protected override SexToken Initialize(string data)
+        {
+            return this;
+        }
+    }
 }

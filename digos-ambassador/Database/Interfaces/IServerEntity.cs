@@ -22,14 +22,14 @@
 
 namespace DIGOS.Ambassador.Database.Interfaces
 {
-	/// <summary>
-	/// Represents an EF entity unique to a server.
-	/// </summary>
-	public interface IServerEntity : IEFEntity
-	{
-		/// <summary>
-		/// Gets or sets the Discord server ID.
-		/// </summary>
-		long ServerID { get; set; }
-	}
+    /// <summary>
+    /// Represents an EF entity unique to a server.
+    /// </summary>
+    public interface IServerEntity : IEFEntity
+    {
+        /// <summary>
+        /// Gets or sets the Discord server ID.
+        /// </summary>
+        long ServerID { get; set; }
+    }
 }

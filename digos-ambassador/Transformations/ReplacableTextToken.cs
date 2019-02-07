@@ -29,53 +29,53 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// Base implementation of replacable text tokens, allowing static initialization.
-	/// </summary>
-	/// <typeparam name="T">A class inheriting from this class.</typeparam>
-	public abstract class ReplacableTextToken<T> : IReplaceableTextToken where T : ReplacableTextToken<T>
-	{
-		/// <inheritdoc />
-		public int Start { get; set; }
+    /// <summary>
+    /// Base implementation of replacable text tokens, allowing static initialization.
+    /// </summary>
+    /// <typeparam name="T">A class inheriting from this class.</typeparam>
+    public abstract class ReplacableTextToken<T> : IReplaceableTextToken where T : ReplacableTextToken<T>
+    {
+        /// <inheritdoc />
+        public int Start { get; set; }
 
-		/// <inheritdoc />
-		public int Length { get; set; }
+        /// <inheritdoc />
+        public int Length { get; set; }
 
-		/// <inheritdoc />
-		[NotNull]
-		public abstract string GetText(Character character, AppearanceComponent component);
+        /// <inheritdoc />
+        [NotNull]
+        public abstract string GetText(Character character, AppearanceComponent component);
 
-		/// <inheritdoc />
-		[NotNull]
-		public virtual Task<string> GetTextAsync(Character character, AppearanceComponent component)
-		{
-			return Task.Run(() => GetText(character, component));
-		}
+        /// <inheritdoc />
+        [NotNull]
+        public virtual Task<string> GetTextAsync(Character character, AppearanceComponent component)
+        {
+            return Task.Run(() => GetText(character, component));
+        }
 
-		/// <summary>
-		/// Initializes the token with generic data coming from the text.
-		/// </summary>
-		/// <param name="data">Generic data.</param>
-		/// <returns>An initialized instance of a token.</returns>
-		[NotNull]
-		protected abstract T Initialize([CanBeNull] string data);
+        /// <summary>
+        /// Initializes the token with generic data coming from the text.
+        /// </summary>
+        /// <param name="data">Generic data.</param>
+        /// <returns>An initialized instance of a token.</returns>
+        [NotNull]
+        protected abstract T Initialize([CanBeNull] string data);
 
-		/// <summary>
-		/// Creates a new, initialized token from the given start and end positions, along with generic data.
-		/// </summary>
-		/// <param name="start">The index in the original text where the token starts.</param>
-		/// <param name="length">The length of the original token.</param>
-		/// <param name="data">Generic data.</param>
-		/// <param name="services">The application's service collection.</param>
-		/// <returns>An initialized instance of a token.</returns>
-		[NotNull]
-		public static T CreateFrom(int start, int length, [CanBeNull] string data, IServiceProvider services)
-		{
-			var token = (ReplacableTextToken<T>)ActivatorUtilities.CreateInstance(services, typeof(T));
-			token.Start = start;
-			token.Length = length;
+        /// <summary>
+        /// Creates a new, initialized token from the given start and end positions, along with generic data.
+        /// </summary>
+        /// <param name="start">The index in the original text where the token starts.</param>
+        /// <param name="length">The length of the original token.</param>
+        /// <param name="data">Generic data.</param>
+        /// <param name="services">The application's service collection.</param>
+        /// <returns>An initialized instance of a token.</returns>
+        [NotNull]
+        public static T CreateFrom(int start, int length, [CanBeNull] string data, IServiceProvider services)
+        {
+            var token = (ReplacableTextToken<T>)ActivatorUtilities.CreateInstance(services, typeof(T));
+            token.Start = start;
+            token.Length = length;
 
-			return token.Initialize(data);
-		}
-	}
+            return token.Initialize(data);
+        }
+    }
 }

@@ -24,16 +24,16 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a horizontal rule in.
-	/// </summary>
-	public class MarkdownHorizontalRule : IMarkdownNode
-	{
-		/// <inheritdoc />
-		[NotNull]
-		public string Compile()
-		{
-			return "---";
-		}
-	}
+    /// <summary>
+    /// Represents a horizontal rule in.
+    /// </summary>
+    public class MarkdownHorizontalRule : IMarkdownNode
+    {
+        /// <inheritdoc />
+        [NotNull]
+        public string Compile()
+        {
+            return "---";
+        }
+    }
 }

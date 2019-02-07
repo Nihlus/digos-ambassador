@@ -22,19 +22,19 @@
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// Represents protection types for interactions between users.
-	/// </summary>
-	public enum ProtectionType
-	{
-		/// <summary>
-		/// Blacklist-based protection·
-		/// </summary>
-		Blacklist,
+    /// <summary>
+    /// Represents protection types for interactions between users.
+    /// </summary>
+    public enum ProtectionType
+    {
+        /// <summary>
+        /// Blacklist-based protection·
+        /// </summary>
+        Blacklist,
 
-		/// <summary>
-		/// Whitelist-based protection.
-		/// </summary>
-		Whitelist
-	}
+        /// <summary>
+        /// Whitelist-based protection.
+        /// </summary>
+        Whitelist
+    }
 }

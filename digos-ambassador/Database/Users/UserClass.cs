@@ -22,29 +22,29 @@
 
 namespace DIGOS.Ambassador.Database.Users
 {
-	/// <summary>
-	/// Represents a user's class within the DIGOS 'verse.
-	/// </summary>
-	public enum UserClass
-	{
-		/// <summary>
-		/// The user does not have a specific class.
-		/// </summary>
-		Other,
+    /// <summary>
+    /// Represents a user's class within the DIGOS 'verse.
+    /// </summary>
+    public enum UserClass
+    {
+        /// <summary>
+        /// The user does not have a specific class.
+        /// </summary>
+        Other,
 
-		/// <summary>
-		/// The user is part of the DIGOS infrastructure. Reserved for bots.
-		/// </summary>
-		DIGOSInfrastructure,
+        /// <summary>
+        /// The user is part of the DIGOS infrastructure. Reserved for bots.
+        /// </summary>
+        DIGOSInfrastructure,
 
-		/// <summary>
-		/// The user is a DIGOS dronie, linked to a unit.
-		/// </summary>
-		DIGOSDronie,
+        /// <summary>
+        /// The user is a DIGOS dronie, linked to a unit.
+        /// </summary>
+        DIGOSDronie,
 
-		/// <summary>
-		/// The user is a DIGOS unit with a canon character.
-		/// </summary>
-		DIGOSUnit,
-	}
+        /// <summary>
+        /// The user is a DIGOS unit with a canon character.
+        /// </summary>
+        DIGOSUnit,
+    }
 }

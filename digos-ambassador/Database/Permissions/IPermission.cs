@@ -27,32 +27,32 @@ using DIGOS.Ambassador.Permissions;
 
 namespace DIGOS.Ambassador.Database.Permissions
 {
-	/// <summary>
-	/// Member interface for permissions.
-	/// </summary>
-	public interface IPermission
-	{
-		/// <summary>
-		/// Gets or sets the discord ID of the user that this permission has been granted to.
-		/// </summary>
-		long UserDiscordID { get; set; }
+    /// <summary>
+    /// Member interface for permissions.
+    /// </summary>
+    public interface IPermission
+    {
+        /// <summary>
+        /// Gets or sets the discord ID of the user that this permission has been granted to.
+        /// </summary>
+        long UserDiscordID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the granted permission.
-		/// </summary>
-		Permission Permission { get; set; }
+        /// <summary>
+        /// Gets or sets the granted permission.
+        /// </summary>
+        Permission Permission { get; set; }
 
-		/// <summary>
-		/// Gets or sets the allowed targets.
-		/// </summary>
-		PermissionTarget Target { get; set; }
-	}
+        /// <summary>
+        /// Gets or sets the allowed targets.
+        /// </summary>
+        PermissionTarget Target { get; set; }
+    }
 
-	/// <summary>
-	/// Equation interface for permissions.
-	/// </summary>
-	/// <typeparam name="T">The type of the permission class.</typeparam>
-	public interface IPermission<T> : IEquatable<T>, IPermission where T : IPermission<T>
-	{
-	}
+    /// <summary>
+    /// Equation interface for permissions.
+    /// </summary>
+    /// <typeparam name="T">The type of the permission class.</typeparam>
+    public interface IPermission<T> : IEquatable<T>, IPermission where T : IPermission<T>
+    {
+    }
 }

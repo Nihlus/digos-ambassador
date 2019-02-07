@@ -26,22 +26,22 @@ using CommandLine;
 
 namespace DIGOS.Ambassador.Doc
 {
-	/// <summary>
-	/// The main program class.
-	/// </summary>
-	internal static class Program
-	{
-		private static Options Options;
+    /// <summary>
+    /// The main program class.
+    /// </summary>
+    internal static class Program
+    {
+        private static Options Options;
 
-		private static async Task Main(string[] args)
-		{
-			Parser.Default.ParseArguments<Options>(args)
-				.WithParsed(r => Options = r);
+        private static async Task Main(string[] args)
+        {
+            Parser.Default.ParseArguments<Options>(args)
+                .WithParsed(r => Options = r);
 
-			var assembly = Assembly.LoadFrom(Options.AssemblyPath);
+            var assembly = Assembly.LoadFrom(Options.AssemblyPath);
 
-			var generator = new ModuleDocumentationGenerator(assembly, Options.OutputPath);
-			await generator.GenerateDocumentationAsync();
-		}
-	}
+            var generator = new ModuleDocumentationGenerator(assembly, Options.OutputPath);
+            await generator.GenerateDocumentationAsync();
+        }
+    }
 }

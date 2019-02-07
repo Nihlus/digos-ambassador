@@ -32,67 +32,67 @@ using Parser = CommandLine.Parser;
 
 namespace DIGOS.Ambassador.Tools
 {
-	/// <summary>
-	/// The main class.
-	/// </summary>
-	internal static class Program
-	{
-		private static CommandLineOptions Options;
+    /// <summary>
+    /// The main class.
+    /// </summary>
+    internal static class Program
+    {
+        private static CommandLineOptions Options;
 
-		private static int Main(string[] args)
-		{
-			Parser.Default.ParseArguments<CommandLineOptions>(args)
-			.WithParsed(r => Options = r);
+        private static int Main(string[] args)
+        {
+            Parser.Default.ParseArguments<CommandLineOptions>(args)
+            .WithParsed(r => Options = r);
 
-			var verifier = new TransformationFileVerifier();
+            var verifier = new TransformationFileVerifier();
 
-			var path = Path.GetFullPath(Options.VerifyPath);
-			DetermineConditionResult verifyResult;
-			if (File.Exists(path))
-			{
-				// run file verification
-				verifyResult = verifier.VerifyFile<Transformation>(path);
-				if (!verifyResult.IsSuccess)
-				{
-					verifyResult = verifier.VerifyFile<Species>(path);
-				}
-			}
-			else if (Directory.Exists(path))
-			{
-				// run directory verification
-				verifyResult = verifier.VerifyFilesInDirectory(path);
-			}
-			else
-			{
-				Console.ForegroundColor = ConsoleColor.Yellow;
-				Console.WriteLine($"Input not found.");
-				return -2;
-			}
+            var path = Path.GetFullPath(Options.VerifyPath);
+            DetermineConditionResult verifyResult;
+            if (File.Exists(path))
+            {
+                // run file verification
+                verifyResult = verifier.VerifyFile<Transformation>(path);
+                if (!verifyResult.IsSuccess)
+                {
+                    verifyResult = verifier.VerifyFile<Species>(path);
+                }
+            }
+            else if (Directory.Exists(path))
+            {
+                // run directory verification
+                verifyResult = verifier.VerifyFilesInDirectory(path);
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"Input not found.");
+                return -2;
+            }
 
-			if (!verifyResult.IsSuccess)
-			{
-				Console.ForegroundColor = ConsoleColor.Red;
-				if (verifyResult.Error == CommandError.Exception)
-				{
-					Console.WriteLine($"File \"{verifyResult.ErrorReason}\" failed verification.");
+            if (!verifyResult.IsSuccess)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                if (verifyResult.Error == CommandError.Exception)
+                {
+                    Console.WriteLine($"File \"{verifyResult.ErrorReason}\" failed verification.");
 
-					var yamlException = (YamlException)verifyResult.Exception ?? throw new ArgumentNullException();
-					var errorMessage = (yamlException.InnerException is null)
-						? yamlException.Message
-						: yamlException.InnerException.Message;
+                    var yamlException = (YamlException)verifyResult.Exception ?? throw new ArgumentNullException();
+                    var errorMessage = (yamlException.InnerException is null)
+                        ? yamlException.Message
+                        : yamlException.InnerException.Message;
 
-					Console.WriteLine($"Error at {yamlException.Start}: {errorMessage}");
+                    Console.WriteLine($"Error at {yamlException.Start}: {errorMessage}");
 
-					return -1;
-				}
+                    return -1;
+                }
 
-				Console.WriteLine(verifyResult.ErrorReason);
-				return 3;
-			}
+                Console.WriteLine(verifyResult.ErrorReason);
+                return 3;
+            }
 
-			Console.ForegroundColor = ConsoleColor.Green;
-			Console.WriteLine($"Target file(s) look fine.");
-			return 0;
-		}
-	}
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"Target file(s) look fine.");
+            return 0;
+        }
+    }
 }

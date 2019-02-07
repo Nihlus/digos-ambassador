@@ -28,61 +28,61 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Roleplaying
 {
-	/// <summary>
-	/// Represents a saved user message.
-	/// </summary>
-	public class UserMessage : IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents a saved user message.
+    /// </summary>
+    public class UserMessage : IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the unique Discord message ID.
-		/// </summary>
-		public long DiscordMessageID { get; set; }
+        /// <summary>
+        /// Gets or sets the unique Discord message ID.
+        /// </summary>
+        public long DiscordMessageID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the author of the message.
-		/// </summary>
-		public long AuthorDiscordID { get; set; }
+        /// <summary>
+        /// Gets or sets the author of the message.
+        /// </summary>
+        public long AuthorDiscordID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the timestamp of the message.
-		/// </summary>
-		public DateTimeOffset Timestamp { get; set; }
+        /// <summary>
+        /// Gets or sets the timestamp of the message.
+        /// </summary>
+        public DateTimeOffset Timestamp { get; set; }
 
-		/// <summary>
-		/// Gets or sets the author's nickname at the time of sending.
-		/// </summary>
-		public string AuthorNickname { get; set; }
+        /// <summary>
+        /// Gets or sets the author's nickname at the time of sending.
+        /// </summary>
+        public string AuthorNickname { get; set; }
 
-		/// <summary>
-		/// Gets or sets the contents of the message.
-		/// </summary>
-		public string Contents { get; set; }
+        /// <summary>
+        /// Gets or sets the contents of the message.
+        /// </summary>
+        public string Contents { get; set; }
 
-		/// <summary>
-		/// Creates a new <see cref="UserMessage"/> from the specified Discord message.
-		/// </summary>
-		/// <param name="message">The message to create from.</param>
-		/// <param name="authorNickname">The current display name of the author.</param>
-		/// <returns>A new UserMessage.</returns>
-		[NotNull]
-		[Pure]
-		public static UserMessage FromDiscordMessage
-		(
-			[NotNull] IMessage message,
-			[NotNull] string authorNickname
-		)
-		{
-			return new UserMessage
-			{
-				DiscordMessageID = (long)message.Id,
-				AuthorDiscordID = (long)message.Author.Id,
-				Timestamp = message.Timestamp,
-				AuthorNickname = authorNickname,
-				Contents = message.Content
-			};
-		}
-	}
+        /// <summary>
+        /// Creates a new <see cref="UserMessage"/> from the specified Discord message.
+        /// </summary>
+        /// <param name="message">The message to create from.</param>
+        /// <param name="authorNickname">The current display name of the author.</param>
+        /// <returns>A new UserMessage.</returns>
+        [NotNull]
+        [Pure]
+        public static UserMessage FromDiscordMessage
+        (
+            [NotNull] IMessage message,
+            [NotNull] string authorNickname
+        )
+        {
+            return new UserMessage
+            {
+                DiscordMessageID = (long)message.Id,
+                AuthorDiscordID = (long)message.Author.Id,
+                Timestamp = message.Timestamp,
+                AuthorNickname = authorNickname,
+                Contents = message.Content
+            };
+        }
+    }
 }

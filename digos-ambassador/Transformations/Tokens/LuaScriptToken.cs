@@ -27,66 +27,66 @@ using DIGOS.Ambassador.Services;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// Represents a token which executes a named lua code script and gets replaced with the result.
-	/// </summary>
-	[TokenIdentifier("script", "sc")]
-	public class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
-	{
-		private readonly ContentService Content;
-		private readonly LuaService Lua;
+    /// <summary>
+    /// Represents a token which executes a named lua code script and gets replaced with the result.
+    /// </summary>
+    [TokenIdentifier("script", "sc")]
+    public class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
+    {
+        private readonly ContentService Content;
+        private readonly LuaService Lua;
 
-		/// <summary>
-		/// Gets the name of the script to execute.
-		/// </summary>
-		public string ScriptName { get; private set; }
+        /// <summary>
+        /// Gets the name of the script to execute.
+        /// </summary>
+        public string ScriptName { get; private set; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="LuaScriptToken"/> class.
-		/// </summary>
-		/// <param name="luaService">The lua execution service.</param>
-		/// <param name="content">The application's content service.</param>
-		public LuaScriptToken(LuaService luaService, ContentService content)
-		{
-			this.Lua = luaService;
-			this.Content = content;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LuaScriptToken"/> class.
+        /// </summary>
+        /// <param name="luaService">The lua execution service.</param>
+        /// <param name="content">The application's content service.</param>
+        public LuaScriptToken(LuaService luaService, ContentService content)
+        {
+            this.Lua = luaService;
+            this.Content = content;
+        }
 
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			return GetTextAsync(character, component).GetAwaiter().GetResult();
-		}
+        /// <inheritdoc />
+        public override string GetText(Character character, AppearanceComponent component)
+        {
+            return GetTextAsync(character, component).GetAwaiter().GetResult();
+        }
 
-		/// <inheritdoc />
-		public override async Task<string> GetTextAsync(Character character, AppearanceComponent component)
-		{
-			if (component is null)
-			{
-				return string.Empty;
-			}
+        /// <inheritdoc />
+        public override async Task<string> GetTextAsync(Character character, AppearanceComponent component)
+        {
+            if (component is null)
+            {
+                return string.Empty;
+            }
 
-			var scriptPath = this.Content.GetLuaScriptPath(component.Transformation, this.ScriptName);
-			var result = await this.Lua.ExecuteScriptAsync
-			(
-				scriptPath,
-				(nameof(character), character),
-				(nameof(component), component)
-			);
+            var scriptPath = this.Content.GetLuaScriptPath(component.Transformation, this.ScriptName);
+            var result = await this.Lua.ExecuteScriptAsync
+            (
+                scriptPath,
+                (nameof(character), character),
+                (nameof(component), component)
+            );
 
-			if (!result.IsSuccess)
-			{
-				return $"[{result.ErrorReason}]";
-			}
+            if (!result.IsSuccess)
+            {
+                return $"[{result.ErrorReason}]";
+            }
 
-			return result.Entity;
-		}
+            return result.Entity;
+        }
 
-		/// <inheritdoc />
-		protected override LuaScriptToken Initialize(string data)
-		{
-			this.ScriptName = data ?? string.Empty;
-			return this;
-		}
-	}
+        /// <inheritdoc />
+        protected override LuaScriptToken Initialize(string data)
+        {
+            this.ScriptName = data ?? string.Empty;
+            return this;
+        }
+    }
 }

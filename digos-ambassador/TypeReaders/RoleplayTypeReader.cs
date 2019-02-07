@@ -35,24 +35,24 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.TypeReaders
 {
-	/// <summary>
-	/// Reads owned roleplays as command arguments. The name "current" is reserved, and will retrieve the current
-	/// roleplay.
-	/// </summary>
-	public sealed class RoleplayTypeReader : OwnedEntityTypeReader<IUser, Roleplay>
-	{
-		/// <inheritdoc />
-		protected override async Task<RetrieveEntityResult<Roleplay>> RetrieveEntityAsync(IUser entityOwner, string entityName, ICommandContext context, IServiceProvider services)
-		{
-			var roleplayService = services.GetRequiredService<RoleplayService>();
-			var db = services.GetRequiredService<GlobalInfoContext>();
+    /// <summary>
+    /// Reads owned roleplays as command arguments. The name "current" is reserved, and will retrieve the current
+    /// roleplay.
+    /// </summary>
+    public sealed class RoleplayTypeReader : OwnedEntityTypeReader<IUser, Roleplay>
+    {
+        /// <inheritdoc />
+        protected override async Task<RetrieveEntityResult<Roleplay>> RetrieveEntityAsync(IUser entityOwner, string entityName, ICommandContext context, IServiceProvider services)
+        {
+            var roleplayService = services.GetRequiredService<RoleplayService>();
+            var db = services.GetRequiredService<GlobalInfoContext>();
 
-			if (!entityName.IsNullOrWhitespace() && string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
-			{
-				return await roleplayService.GetActiveRoleplayAsync(db, context);
-			}
+            if (!entityName.IsNullOrWhitespace() && string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
+            {
+                return await roleplayService.GetActiveRoleplayAsync(db, context);
+            }
 
-			return await roleplayService.GetBestMatchingRoleplayAsync(db, context, entityOwner, entityName);
-		}
-	}
+            return await roleplayService.GetBestMatchingRoleplayAsync(db, context, entityOwner, entityName);
+        }
+    }
 }

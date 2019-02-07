@@ -28,57 +28,57 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
-	/// <summary>
-	/// Extension methods for streams.
-	/// </summary>
-	public static class StreamExtensions
-	{
-		/// <summary>
-		/// Determines whether or not a given stream has a given signature at a given offset. Used for verifying file
-		/// formats.
-		/// </summary>
-		/// <param name="this">The stream.</param>
-		/// <param name="signature">The binary signature.</param>
-		/// <param name="offset">The offset at which to search.</param>
-		/// <returns>true if the stream has the signature; otherwise, false.</returns>
-		/// <exception cref="ArgumentException">
-		/// Thrown if the stream does not support seeking or reading, or if no signature data is provided.
-		/// </exception>
-		/// <exception cref="ArgumentOutOfRangeException">
-		/// Thrown if reading the given signature at the given offset would fall outside of the stream.
-		/// </exception>
-		[Pure]
-		public static async Task<bool> HasSignatureAsync([NotNull] this Stream @this, [NotNull] byte[] signature, long offset = 0)
-		{
-			if (!@this.CanSeek)
-			{
-				throw new ArgumentException("The stream does not support seeking.", nameof(@this));
-			}
+    /// <summary>
+    /// Extension methods for streams.
+    /// </summary>
+    public static class StreamExtensions
+    {
+        /// <summary>
+        /// Determines whether or not a given stream has a given signature at a given offset. Used for verifying file
+        /// formats.
+        /// </summary>
+        /// <param name="this">The stream.</param>
+        /// <param name="signature">The binary signature.</param>
+        /// <param name="offset">The offset at which to search.</param>
+        /// <returns>true if the stream has the signature; otherwise, false.</returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown if the stream does not support seeking or reading, or if no signature data is provided.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown if reading the given signature at the given offset would fall outside of the stream.
+        /// </exception>
+        [Pure]
+        public static async Task<bool> HasSignatureAsync([NotNull] this Stream @this, [NotNull] byte[] signature, long offset = 0)
+        {
+            if (!@this.CanSeek)
+            {
+                throw new ArgumentException("The stream does not support seeking.", nameof(@this));
+            }
 
-			if (!@this.CanRead)
-			{
-				throw new ArgumentException("The stream does not support reading.", nameof(@this));
-			}
+            if (!@this.CanRead)
+            {
+                throw new ArgumentException("The stream does not support reading.", nameof(@this));
+            }
 
-			if (signature.Length <= 0)
-			{
-				throw new ArgumentException("No signature data provided.", nameof(signature));
-			}
+            if (signature.Length <= 0)
+            {
+                throw new ArgumentException("No signature data provided.", nameof(signature));
+            }
 
-			if (offset + signature.Length > @this.Length)
-			{
-				throw new ArgumentOutOfRangeException(nameof(offset), "Reading the signature at the given offset would fall outside of the stream.");
-			}
+            if (offset + signature.Length > @this.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset), "Reading the signature at the given offset would fall outside of the stream.");
+            }
 
-			long originalPosition = @this.Position;
-			var signatureBuffer = new byte[signature.Length];
+            long originalPosition = @this.Position;
+            var signatureBuffer = new byte[signature.Length];
 
-			@this.Seek(offset, SeekOrigin.Begin);
-			await @this.ReadAsync(signatureBuffer, 0, signatureBuffer.Length);
+            @this.Seek(offset, SeekOrigin.Begin);
+            await @this.ReadAsync(signatureBuffer, 0, signatureBuffer.Length);
 
-			@this.Seek(originalPosition, SeekOrigin.Begin);
+            @this.Seek(originalPosition, SeekOrigin.Begin);
 
-			return signatureBuffer.SequenceEqual(signature);
-		}
-	}
+            return signatureBuffer.SequenceEqual(signature);
+        }
+    }
 }

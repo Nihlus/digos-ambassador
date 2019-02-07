@@ -24,27 +24,27 @@ using DIGOS.Ambassador.Database.Interfaces;
 
 namespace DIGOS.Ambassador.Database.Dossiers
 {
-	/// <summary>
-	/// Represents a dossier entry.
-	/// </summary>
-	public class Dossier : IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents a dossier entry.
+    /// </summary>
+    public class Dossier : IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the title of the dossier.
-		/// </summary>
-		public string Title { get; set; }
+        /// <summary>
+        /// Gets or sets the title of the dossier.
+        /// </summary>
+        public string Title { get; set; }
 
-		/// <summary>
-		/// Gets or sets the summary of the dossier.
-		/// </summary>
-		public string Summary { get; set; }
+        /// <summary>
+        /// Gets or sets the summary of the dossier.
+        /// </summary>
+        public string Summary { get; set; }
 
-		/// <summary>
-		/// Gets or sets the absolute file path to the dossier.
-		/// </summary>
-		public string Path { get; set; }
-	}
+        /// <summary>
+        /// Gets or sets the absolute file path to the dossier.
+        /// </summary>
+        public string Path { get; set; }
+    }
 }

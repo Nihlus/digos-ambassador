@@ -28,91 +28,91 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
-	/// <summary>
-	/// Asynchronous file operations.
-	/// </summary>
-	public static class FileAsync
-	{
-		/// <summary>
-		/// This is the same default buffer size as
-		/// <see cref="StreamReader"/> and <see cref="FileStream"/>.
-		/// </summary>
-		private const int DefaultBufferSize = 4096;
+    /// <summary>
+    /// Asynchronous file operations.
+    /// </summary>
+    public static class FileAsync
+    {
+        /// <summary>
+        /// This is the same default buffer size as
+        /// <see cref="StreamReader"/> and <see cref="FileStream"/>.
+        /// </summary>
+        private const int DefaultBufferSize = 4096;
 
-		/// <summary>
-		/// Indicates that
-		/// 1. The file is to be used for asynchronous reading.
-		/// 2. The file is to be accessed sequentially from beginning to end.
-		/// </summary>
-		private const FileOptions DefaultOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
+        /// <summary>
+        /// Indicates that
+        /// 1. The file is to be used for asynchronous reading.
+        /// 2. The file is to be accessed sequentially from beginning to end.
+        /// </summary>
+        private const FileOptions DefaultOptions = FileOptions.Asynchronous | FileOptions.SequentialScan;
 
-		/// <summary>
-		/// Asynchronously reads all lines from the given file.
-		/// </summary>
-		/// <param name="path">The path to the file.</param>
-		/// <returns>The contents of the file.</returns>
-		[NotNull]
-		public static Task<string[]> ReadAllLinesAsync(string path)
-		{
-			return ReadAllLinesAsync(path, Encoding.UTF8);
-		}
+        /// <summary>
+        /// Asynchronously reads all lines from the given file.
+        /// </summary>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The contents of the file.</returns>
+        [NotNull]
+        public static Task<string[]> ReadAllLinesAsync(string path)
+        {
+            return ReadAllLinesAsync(path, Encoding.UTF8);
+        }
 
-		/// <summary>
-		/// Asynchronously reads all lines from the given file.
-		/// </summary>
-		/// <param name="path">The path to the file.</param>
-		/// <param name="encoding">The encoding of the file.</param>
-		/// <returns>The contents of the file.</returns>
-		[ItemNotNull]
-		public static async Task<string[]> ReadAllLinesAsync(string path, [NotNull] Encoding encoding)
-		{
-			var lines = new List<string>();
+        /// <summary>
+        /// Asynchronously reads all lines from the given file.
+        /// </summary>
+        /// <param name="path">The path to the file.</param>
+        /// <param name="encoding">The encoding of the file.</param>
+        /// <returns>The contents of the file.</returns>
+        [ItemNotNull]
+        public static async Task<string[]> ReadAllLinesAsync(string path, [NotNull] Encoding encoding)
+        {
+            var lines = new List<string>();
 
-			// Open the FileStream with the same FileMode, FileAccess
-			// and FileShare as a call to File.OpenText would've done.
-			using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
-			{
-				using (var reader = new StreamReader(stream, encoding))
-				{
-					string line;
-					while ((line = await reader.ReadLineAsync()) != null)
-					{
-						lines.Add(line);
-					}
-				}
-			}
+            // Open the FileStream with the same FileMode, FileAccess
+            // and FileShare as a call to File.OpenText would've done.
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
+            {
+                using (var reader = new StreamReader(stream, encoding))
+                {
+                    string line;
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        lines.Add(line);
+                    }
+                }
+            }
 
-			return lines.ToArray();
-		}
+            return lines.ToArray();
+        }
 
-		/// <summary>
-		/// Asynchronously reads all text from the given file.
-		/// </summary>
-		/// <param name="path">The path to the file.</param>
-		/// <returns>The contents of the file.</returns>
-		[NotNull]
-		public static Task<string> ReadAllTextAsync(string path)
-		{
-			return ReadAllTextAsync(path, Encoding.UTF8);
-		}
+        /// <summary>
+        /// Asynchronously reads all text from the given file.
+        /// </summary>
+        /// <param name="path">The path to the file.</param>
+        /// <returns>The contents of the file.</returns>
+        [NotNull]
+        public static Task<string> ReadAllTextAsync(string path)
+        {
+            return ReadAllTextAsync(path, Encoding.UTF8);
+        }
 
-		/// <summary>
-		/// Asynchronously reads all text from the given file.
-		/// </summary>
-		/// <param name="path">The path to the file.</param>
-		/// <param name="encoding">The encoding of the file.</param>
-		/// <returns>The contents of the file.</returns>
-		public static async Task<string> ReadAllTextAsync(string path, [NotNull] Encoding encoding)
-		{
-			// Open the FileStream with the same FileMode, FileAccess
-			// and FileShare as a call to File.OpenText would've done.
-			using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
-			{
-				using (var reader = new StreamReader(stream, encoding))
-				{
-					return await reader.ReadToEndAsync();
-				}
-			}
-		}
-	}
+        /// <summary>
+        /// Asynchronously reads all text from the given file.
+        /// </summary>
+        /// <param name="path">The path to the file.</param>
+        /// <param name="encoding">The encoding of the file.</param>
+        /// <returns>The contents of the file.</returns>
+        public static async Task<string> ReadAllTextAsync(string path, [NotNull] Encoding encoding)
+        {
+            // Open the FileStream with the same FileMode, FileAccess
+            // and FileShare as a call to File.OpenText would've done.
+            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
+            {
+                using (var reader = new StreamReader(stream, encoding))
+                {
+                    return await reader.ReadToEndAsync();
+                }
+            }
+        }
+    }
 }

@@ -22,19 +22,19 @@
 
 namespace DIGOS.Ambassador.Wizards
 {
-	/// <summary>
-	/// Represents the state that the kink wizard is in.
-	/// </summary>
-	public enum KinkWizardState
-	{
-		/// <summary>
-		/// The category selection page.
-		/// </summary>
-		CategorySelection,
+    /// <summary>
+    /// Represents the state that the kink wizard is in.
+    /// </summary>
+    public enum KinkWizardState
+    {
+        /// <summary>
+        /// The category selection page.
+        /// </summary>
+        CategorySelection,
 
-		/// <summary>
-		/// The kink preference selection page.
-		/// </summary>
-		KinkPreference
-	}
+        /// <summary>
+        /// The kink preference selection page.
+        /// </summary>
+        KinkPreference
+    }
 }

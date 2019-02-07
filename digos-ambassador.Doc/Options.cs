@@ -24,21 +24,21 @@ using CommandLine;
 
 namespace DIGOS.Ambassador.Doc
 {
-	/// <summary>
-	/// Holds CLI options for the program
-	/// </summary>
-	public class Options
-	{
-		/// <summary>
-		/// Gets or sets the path to the assembly that documentation should be generated from.
-		/// </summary>
-		[Option('i', "assembly", Required = true)]
-		public string AssemblyPath { get; set; }
+    /// <summary>
+    /// Holds CLI options for the program
+    /// </summary>
+    public class Options
+    {
+        /// <summary>
+        /// Gets or sets the path to the assembly that documentation should be generated from.
+        /// </summary>
+        [Option('i', "assembly", Required = true)]
+        public string AssemblyPath { get; set; }
 
-		/// <summary>
-		/// Gets or sets the path where documentation files should be emitted.
-		/// </summary>
-		[Option('o', "output", Required = true)]
-		public string OutputPath { get; set; }
-	}
+        /// <summary>
+        /// Gets or sets the path where documentation files should be emitted.
+        /// </summary>
+        [Option('o', "output", Required = true)]
+        public string OutputPath { get; set; }
+    }
 }

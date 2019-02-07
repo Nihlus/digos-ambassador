@@ -28,26 +28,26 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
-	/// <summary>
-	/// Acts as a precondition for owned entities, limiting their use to their owners.
-	/// </summary>
-	public class RequireEntityOwnerAttribute : ParameterPreconditionAttribute
-	{
-		/// <inheritdoc />
-		[NotNull]
-		public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, ParameterInfo parameter, object value, IServiceProvider services)
-		{
-			if (!(value is IOwnedNamedEntity entity))
-			{
-				return Task.FromResult(PreconditionResult.FromError("The value isn't an owned entity."));
-			}
+    /// <summary>
+    /// Acts as a precondition for owned entities, limiting their use to their owners.
+    /// </summary>
+    public class RequireEntityOwnerAttribute : ParameterPreconditionAttribute
+    {
+        /// <inheritdoc />
+        [NotNull]
+        public override Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, ParameterInfo parameter, object value, IServiceProvider services)
+        {
+            if (!(value is IOwnedNamedEntity entity))
+            {
+                return Task.FromResult(PreconditionResult.FromError("The value isn't an owned entity."));
+            }
 
-			if (entity.IsOwner(context.User))
-			{
-				return Task.FromResult(PreconditionResult.FromSuccess());
-			}
+            if (entity.IsOwner(context.User))
+            {
+                return Task.FromResult(PreconditionResult.FromSuccess());
+            }
 
-			return Task.FromResult(PreconditionResult.FromError("You don't have permission to do that."));
-		}
-	}
+            return Task.FromResult(PreconditionResult.FromError("You don't have permission to do that."));
+        }
+    }
 }

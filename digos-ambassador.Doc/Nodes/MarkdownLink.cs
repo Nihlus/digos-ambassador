@@ -25,47 +25,47 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a link.
-	/// </summary>
-	public class MarkdownLink : IMarkdownNode
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MarkdownLink"/> class.
-		/// </summary>
-		/// <param name="destination">The link destination.</param>
-		/// <param name="text">The link text.</param>
-		public MarkdownLink(string destination, string text)
-		{
-			this.Destination = destination;
-			this.Text = text;
-		}
+    /// <summary>
+    /// Represents a link.
+    /// </summary>
+    public class MarkdownLink : IMarkdownNode
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MarkdownLink"/> class.
+        /// </summary>
+        /// <param name="destination">The link destination.</param>
+        /// <param name="text">The link text.</param>
+        public MarkdownLink(string destination, string text)
+        {
+            this.Destination = destination;
+            this.Text = text;
+        }
 
-		/// <summary>
-		/// Gets or sets the link destination.
-		/// </summary>
-		public string Destination { get; set; }
+        /// <summary>
+        /// Gets or sets the link destination.
+        /// </summary>
+        public string Destination { get; set; }
 
-		/// <summary>
-		/// Gets or sets the visible text of the link.
-		/// </summary>
-		public string Text { get; set; }
+        /// <summary>
+        /// Gets or sets the visible text of the link.
+        /// </summary>
+        public string Text { get; set; }
 
-		/// <summary>
-		/// Gets or sets the link's hover tooltip.
-		/// </summary>
-		public string Tooltip { get; set; }
+        /// <summary>
+        /// Gets or sets the link's hover tooltip.
+        /// </summary>
+        public string Tooltip { get; set; }
 
-		/// <inheritdoc />
-		[NotNull]
-		public virtual string Compile()
-		{
-			if (this.Tooltip.IsNullOrWhitespace())
-			{
-				return $"[{this.Text}]({this.Destination})";
-			}
+        /// <inheritdoc />
+        [NotNull]
+        public virtual string Compile()
+        {
+            if (this.Tooltip.IsNullOrWhitespace())
+            {
+                return $"[{this.Text}]({this.Destination})";
+            }
 
-			return $"[{this.Text}]({this.Destination} \"{this.Tooltip}\")";
-		}
-	}
+            return $"[{this.Text}]({this.Destination} \"{this.Tooltip}\")";
+        }
+    }
 }

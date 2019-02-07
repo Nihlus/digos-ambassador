@@ -35,23 +35,23 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.TypeReaders
 {
-	/// <summary>
-	/// Reads owned characters as command arguments.
-	/// </summary>
-	public sealed class CharacterTypeReader : OwnedEntityTypeReader<IUser, Character>
-	{
-		/// <inheritdoc />
-		protected override async Task<RetrieveEntityResult<Character>> RetrieveEntityAsync(IUser entityOwner, string entityName, ICommandContext context, IServiceProvider services)
-		{
-			var characterService = services.GetRequiredService<CharacterService>();
-			var db = services.GetRequiredService<GlobalInfoContext>();
+    /// <summary>
+    /// Reads owned characters as command arguments.
+    /// </summary>
+    public sealed class CharacterTypeReader : OwnedEntityTypeReader<IUser, Character>
+    {
+        /// <inheritdoc />
+        protected override async Task<RetrieveEntityResult<Character>> RetrieveEntityAsync(IUser entityOwner, string entityName, ICommandContext context, IServiceProvider services)
+        {
+            var characterService = services.GetRequiredService<CharacterService>();
+            var db = services.GetRequiredService<GlobalInfoContext>();
 
-			if (!entityName.IsNullOrWhitespace() && string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
-			{
-				return await characterService.GetCurrentCharacterAsync(db, context, context.User);
-			}
+            if (!entityName.IsNullOrWhitespace() && string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
+            {
+                return await characterService.GetCurrentCharacterAsync(db, context, context.User);
+            }
 
-			return await characterService.GetBestMatchingCharacterAsync(db, context, entityOwner, entityName);
-		}
-	}
+            return await characterService.GetBestMatchingCharacterAsync(db, context, entityOwner, entityName);
+        }
+    }
 }

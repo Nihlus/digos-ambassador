@@ -26,30 +26,30 @@ using DIGOS.Ambassador.Database.Users;
 
 namespace DIGOS.Ambassador.Database.Transformations
 {
-	/// <summary>
-	/// Represents a protection entry, that is, a user that has been whitelisted or blacklisted by another user in the
-	/// TF module.
-	/// </summary>
-	public class UserProtectionEntry : IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents a protection entry, that is, a user that has been whitelisted or blacklisted by another user in the
+    /// TF module.
+    /// </summary>
+    public class UserProtectionEntry : IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the global protection entry that the user has been listed in.
-		/// </summary>
-		[Required]
-		public GlobalUserProtection GlobalProtection { get; set; }
+        /// <summary>
+        /// Gets or sets the global protection entry that the user has been listed in.
+        /// </summary>
+        [Required]
+        public GlobalUserProtection GlobalProtection { get; set; }
 
-		/// <summary>
-		/// Gets or sets the user that's listed in the global protection entry.
-		/// </summary>
-		[Required]
-		public User User { get; set; }
+        /// <summary>
+        /// Gets or sets the user that's listed in the global protection entry.
+        /// </summary>
+        [Required]
+        public User User { get; set; }
 
-		/// <summary>
-		/// Gets or sets the type of listing.
-		/// </summary>
-		public ListingType Type { get; set; }
-	}
+        /// <summary>
+        /// Gets or sets the type of listing.
+        /// </summary>
+        public ListingType Type { get; set; }
+    }
 }

@@ -26,25 +26,25 @@ using static DIGOS.Ambassador.Transformations.Chirality;
 
 namespace DIGOS.Ambassador.Extensions
 {
-	/// <summary>
-	/// Extension methods for the <see cref="Chirality"/> enum.
-	/// </summary>
-	public static class ChiralityExtensions
-	{
-		/// <summary>
-		/// Gets the inverse chirality of the given chirality.
-		/// </summary>
-		/// <param name="this">The chirality.</param>
-		/// <returns>The inverse chirality.</returns>
-		public static Chirality Opposite(this Chirality @this)
-		{
-			switch (@this)
-			{
-				case Left: return Right;
-				case Right: return Left;
-				case Center: return Center;
-				default: throw new ArgumentOutOfRangeException(nameof(@this), @this, "Unknown chirality.");
-			}
-		}
-	}
+    /// <summary>
+    /// Extension methods for the <see cref="Chirality"/> enum.
+    /// </summary>
+    public static class ChiralityExtensions
+    {
+        /// <summary>
+        /// Gets the inverse chirality of the given chirality.
+        /// </summary>
+        /// <param name="this">The chirality.</param>
+        /// <returns>The inverse chirality.</returns>
+        public static Chirality Opposite(this Chirality @this)
+        {
+            switch (@this)
+            {
+                case Left: return Right;
+                case Right: return Left;
+                case Center: return Center;
+                default: throw new ArgumentOutOfRangeException(nameof(@this), @this, "Unknown chirality.");
+            }
+        }
+    }
 }

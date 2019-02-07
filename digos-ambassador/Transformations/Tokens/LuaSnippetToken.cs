@@ -28,57 +28,57 @@ using DIGOS.Ambassador.Services;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// Represents a token which executes an inline snippet of lua code and gets replaced with the result.
-	/// </summary>
-	[TokenIdentifier("snippet", "lua", "sn")]
-	public class LuaSnippetToken : ReplacableTextToken<LuaSnippetToken>
-	{
-		private readonly LuaService Lua;
+    /// <summary>
+    /// Represents a token which executes an inline snippet of lua code and gets replaced with the result.
+    /// </summary>
+    [TokenIdentifier("snippet", "lua", "sn")]
+    public class LuaSnippetToken : ReplacableTextToken<LuaSnippetToken>
+    {
+        private readonly LuaService Lua;
 
-		/// <summary>
-		/// Gets the snippet of lua code to execute.
-		/// </summary>
-		public string Snippet { get; private set; }
+        /// <summary>
+        /// Gets the snippet of lua code to execute.
+        /// </summary>
+        public string Snippet { get; private set; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="LuaSnippetToken"/> class.
-		/// </summary>
-		/// <param name="luaService">The lua execution service.</param>
-		public LuaSnippetToken(LuaService luaService)
-		{
-			this.Lua = luaService;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LuaSnippetToken"/> class.
+        /// </summary>
+        /// <param name="luaService">The lua execution service.</param>
+        public LuaSnippetToken(LuaService luaService)
+        {
+            this.Lua = luaService;
+        }
 
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			return GetTextAsync(character, component).GetAwaiter().GetResult();
-		}
+        /// <inheritdoc />
+        public override string GetText(Character character, AppearanceComponent component)
+        {
+            return GetTextAsync(character, component).GetAwaiter().GetResult();
+        }
 
-		/// <inheritdoc />
-		public override async Task<string> GetTextAsync(Character character, AppearanceComponent component)
-		{
-			var result = await this.Lua.ExecuteSnippetAsync
-			(
-				this.Snippet,
-				(nameof(character), character),
-				(nameof(component), component)
-			);
+        /// <inheritdoc />
+        public override async Task<string> GetTextAsync(Character character, AppearanceComponent component)
+        {
+            var result = await this.Lua.ExecuteSnippetAsync
+            (
+                this.Snippet,
+                (nameof(character), character),
+                (nameof(component), component)
+            );
 
-			if (!result.IsSuccess)
-			{
-				return $"[{result.ErrorReason}]";
-			}
+            if (!result.IsSuccess)
+            {
+                return $"[{result.ErrorReason}]";
+            }
 
-			return result.Entity;
-		}
+            return result.Entity;
+        }
 
-		/// <inheritdoc />
-		protected override LuaSnippetToken Initialize(string data)
-		{
-			this.Snippet = data ?? string.Empty;
-			return this;
-		}
-	}
+        /// <inheritdoc />
+        protected override LuaSnippetToken Initialize(string data)
+        {
+            this.Snippet = data ?? string.Empty;
+            return this;
+        }
+    }
 }

@@ -24,22 +24,22 @@ using DIGOS.Ambassador.Database.Interfaces;
 
 namespace DIGOS.Ambassador.Database.Users
 {
-	/// <summary>
-	/// Holds information about whether or not a user has granted consent to store user data.
-	/// </summary>
-	public class UserConsent : IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Holds information about whether or not a user has granted consent to store user data.
+    /// </summary>
+    public class UserConsent : IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the Discord ID of the user.
-		/// </summary>
-		public long DiscordID { get; set; }
+        /// <summary>
+        /// Gets or sets the Discord ID of the user.
+        /// </summary>
+        public long DiscordID { get; set; }
 
-		/// <summary>
-		/// Gets or sets a value indicating whether or not the user has consented.
-		/// </summary>
-		public bool HasConsented { get; set; }
-	}
+        /// <summary>
+        /// Gets or sets a value indicating whether or not the user has consented.
+        /// </summary>
+        public bool HasConsented { get; set; }
+    }
 }

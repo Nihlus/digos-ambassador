@@ -27,45 +27,45 @@ using Xunit;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
-	/// <summary>
-	/// Serves as a test base for character service tests.
-	/// </summary>
-	public abstract class CharacterServiceTestBase : DatabaseDependantTestBase, IAsyncLifetime
-	{
-		/// <summary>
-		/// Gets the character service object.
-		/// </summary>
-		protected CharacterService Characters { get; }
+    /// <summary>
+    /// Serves as a test base for character service tests.
+    /// </summary>
+    public abstract class CharacterServiceTestBase : DatabaseDependantTestBase, IAsyncLifetime
+    {
+        /// <summary>
+        /// Gets the character service object.
+        /// </summary>
+        protected CharacterService Characters { get; }
 
-		/// <summary>
-		/// Gets the command service dependency.
-		/// </summary>
-		protected CommandService Commands { get; }
+        /// <summary>
+        /// Gets the command service dependency.
+        /// </summary>
+        protected CommandService Commands { get; }
 
-		private readonly TransformationService Transformations;
+        private readonly TransformationService Transformations;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CharacterServiceTestBase"/> class.
-		/// </summary>
-		protected CharacterServiceTestBase()
-		{
-			this.Commands = new CommandService();
-			var content = new ContentService();
-			this.Transformations = new TransformationService(content);
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CharacterServiceTestBase"/> class.
+        /// </summary>
+        protected CharacterServiceTestBase()
+        {
+            this.Commands = new CommandService();
+            var content = new ContentService();
+            this.Transformations = new TransformationService(content);
 
-			this.Characters = new CharacterService(this.Commands, new OwnedEntityService(), content, this.Transformations);
-		}
+            this.Characters = new CharacterService(this.Commands, new OwnedEntityService(), content, this.Transformations);
+        }
 
-		/// <inheritdoc />
-		public virtual async Task InitializeAsync()
-		{
-			await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
-		}
+        /// <inheritdoc />
+        public virtual async Task InitializeAsync()
+        {
+            await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
+        }
 
-		/// <inheritdoc />
-		public virtual Task DisposeAsync()
-		{
-			return Task.CompletedTask;
-		}
-	}
+        /// <inheritdoc />
+        public virtual Task DisposeAsync()
+        {
+            return Task.CompletedTask;
+        }
+    }
 }

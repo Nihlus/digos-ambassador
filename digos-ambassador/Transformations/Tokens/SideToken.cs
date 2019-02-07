@@ -26,27 +26,27 @@ using Humanizer;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// A token that gets replaced with the transformation's chirality
-	/// </summary>
-	[TokenIdentifier("side", "chirality")]
-	public class SideToken : ReplacableTextToken<SideToken>
-	{
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			if (component is null)
-			{
-				return string.Empty;
-			}
+    /// <summary>
+    /// A token that gets replaced with the transformation's chirality
+    /// </summary>
+    [TokenIdentifier("side", "chirality")]
+    public class SideToken : ReplacableTextToken<SideToken>
+    {
+        /// <inheritdoc />
+        public override string GetText(Character character, AppearanceComponent component)
+        {
+            if (component is null)
+            {
+                return string.Empty;
+            }
 
-			return component.Chirality.Humanize().Transform(To.LowerCase);
-		}
+            return component.Chirality.Humanize().Transform(To.LowerCase);
+        }
 
-		/// <inheritdoc />
-		protected override SideToken Initialize(string data)
-		{
-			return this;
-		}
-	}
+        /// <inheritdoc />
+        protected override SideToken Initialize(string data)
+        {
+            return this;
+        }
+    }
 }

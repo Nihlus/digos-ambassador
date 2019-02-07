@@ -41,285 +41,285 @@ using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
 namespace DIGOS.Ambassador.Modules
 {
-	/// <summary>
-	/// User-related commands, such as viewing or editing info about a specific user.
-	/// </summary>
-	[UsedImplicitly]
-	[Group("user")]
-	[Summary("User-related commands, such as viewing or editing info about a specific user.")]
-	public class UserCommands : ModuleBase<SocketCommandContext>
-	{
-		private readonly GlobalInfoContext Database;
-		private readonly UserFeedbackService Feedback;
+    /// <summary>
+    /// User-related commands, such as viewing or editing info about a specific user.
+    /// </summary>
+    [UsedImplicitly]
+    [Group("user")]
+    [Summary("User-related commands, such as viewing or editing info about a specific user.")]
+    public class UserCommands : ModuleBase<SocketCommandContext>
+    {
+        private readonly GlobalInfoContext Database;
+        private readonly UserFeedbackService Feedback;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="UserCommands"/> class.
-		/// </summary>
-		/// <param name="database">A database context from the context pool.</param>
-		/// <param name="feedback">The user feedback service.</param>
-		public UserCommands(GlobalInfoContext database, UserFeedbackService feedback)
-		{
-			this.Database = database;
-			this.Feedback = feedback;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserCommands"/> class.
+        /// </summary>
+        /// <param name="database">A database context from the context pool.</param>
+        /// <param name="feedback">The user feedback service.</param>
+        public UserCommands(GlobalInfoContext database, UserFeedbackService feedback)
+        {
+            this.Database = database;
+            this.Feedback = feedback;
+        }
 
-		/// <summary>
-		/// Shows known information about the invoking user.
-		/// </summary>
-		[UsedImplicitly]
-		[Command("info", RunMode = RunMode.Async)]
-		[Summary("Shows known information about the invoking user.")]
-		public async Task ShowInfoAsync()
-		{
-			var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
-			await ShowUserInfoAsync(this.Context.Message.Author, user);
-		}
+        /// <summary>
+        /// Shows known information about the invoking user.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("info", RunMode = RunMode.Async)]
+        [Summary("Shows known information about the invoking user.")]
+        public async Task ShowInfoAsync()
+        {
+            var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+            await ShowUserInfoAsync(this.Context.Message.Author, user);
+        }
 
-		/// <summary>
-		/// Shows known information about the mentioned user.
-		/// </summary>
-		/// <param name="discordUser">The Discord user to show the info of.</param>
-		[UsedImplicitly]
-		[Command("info", RunMode = RunMode.Async)]
-		[Summary("Shows known information about the target user.")]
-		public async Task ShowInfoAsync([NotNull] IUser discordUser)
-		{
-			var user = await this.Database.GetOrRegisterUserAsync(discordUser);
-			await ShowUserInfoAsync(discordUser, user);
-		}
+        /// <summary>
+        /// Shows known information about the mentioned user.
+        /// </summary>
+        /// <param name="discordUser">The Discord user to show the info of.</param>
+        [UsedImplicitly]
+        [Command("info", RunMode = RunMode.Async)]
+        [Summary("Shows known information about the target user.")]
+        public async Task ShowInfoAsync([NotNull] IUser discordUser)
+        {
+            var user = await this.Database.GetOrRegisterUserAsync(discordUser);
+            await ShowUserInfoAsync(discordUser, user);
+        }
 
-		/// <summary>
-		/// Shows a nicely formatted info block about a user.
-		/// </summary>
-		/// <param name="discordUser">The Discord user to show the info of.</param>
-		/// <param name="user">The stored information about the user.</param>
-		private async Task ShowUserInfoAsync([NotNull] IUser discordUser, [NotNull] User user)
-		{
-			var eb = new EmbedBuilder();
+        /// <summary>
+        /// Shows a nicely formatted info block about a user.
+        /// </summary>
+        /// <param name="discordUser">The Discord user to show the info of.</param>
+        /// <param name="user">The stored information about the user.</param>
+        private async Task ShowUserInfoAsync([NotNull] IUser discordUser, [NotNull] User user)
+        {
+            var eb = new EmbedBuilder();
 
-			eb.WithAuthor(discordUser);
-			eb.WithThumbnailUrl(discordUser.GetAvatarUrl());
+            eb.WithAuthor(discordUser);
+            eb.WithThumbnailUrl(discordUser.GetAvatarUrl());
 
-			switch (user.Class)
-			{
-				case UserClass.Other:
-				{
-					eb.WithColor(1.0f, 1.0f, 1.0f); // White
-					break;
-				}
-				case UserClass.DIGOSInfrastructure:
-				{
-					eb.WithColor(Color.Purple);
-					break;
-				}
-				case UserClass.DIGOSDronie:
-				{
-					eb.WithColor(Color.DarkOrange);
-					break;
-				}
-				case UserClass.DIGOSUnit:
-				{
-					eb.WithColor(Color.DarkPurple);
-					break;
-				}
-				default:
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-			}
+            switch (user.Class)
+            {
+                case UserClass.Other:
+                {
+                    eb.WithColor(1.0f, 1.0f, 1.0f); // White
+                    break;
+                }
+                case UserClass.DIGOSInfrastructure:
+                {
+                    eb.WithColor(Color.Purple);
+                    break;
+                }
+                case UserClass.DIGOSDronie:
+                {
+                    eb.WithColor(Color.DarkOrange);
+                    break;
+                }
+                case UserClass.DIGOSUnit:
+                {
+                    eb.WithColor(Color.DarkPurple);
+                    break;
+                }
+                default:
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+            }
 
-			eb.AddField("Name", discordUser.Username);
-			eb.AddField("Class", user.Class.Humanize().Transform(To.TitleCase));
+            eb.AddField("Name", discordUser.Username);
+            eb.AddField("Class", user.Class.Humanize().Transform(To.TitleCase));
 
-			string timezoneValue;
-			if (user.Timezone is null)
-			{
-				timezoneValue = "No timezone set.";
-			}
-			else
-			{
-				timezoneValue = "UTC";
-				if (user.Timezone >= 0)
-				{
-					timezoneValue += "+";
-				}
+            string timezoneValue;
+            if (user.Timezone is null)
+            {
+                timezoneValue = "No timezone set.";
+            }
+            else
+            {
+                timezoneValue = "UTC";
+                if (user.Timezone >= 0)
+                {
+                    timezoneValue += "+";
+                }
 
-				timezoneValue += user.Timezone.Value;
-			}
-			eb.AddField("Timezone", timezoneValue);
+                timezoneValue += user.Timezone.Value;
+            }
+            eb.AddField("Timezone", timezoneValue);
 
-			string bioValue;
-			if (string.IsNullOrEmpty(user.Bio))
-			{
-				bioValue = "No bio set.";
-			}
-			else
-			{
-				bioValue = user.Bio;
-			}
+            string bioValue;
+            if (string.IsNullOrEmpty(user.Bio))
+            {
+                bioValue = "No bio set.";
+            }
+            else
+            {
+                bioValue = user.Bio;
+            }
 
-			eb.AddField("Bio", bioValue);
+            eb.AddField("Bio", bioValue);
 
-			await this.Feedback.SendEmbedAsync(this.Context, eb.Build());
-		}
+            await this.Feedback.SendEmbedAsync(this.Context, eb.Build());
+        }
 
-		/// <summary>
-		/// User info edit and set commands
-		/// </summary>
-		[UsedImplicitly]
-		[Group("set")]
-		public class SetCommands : ModuleBase<SocketCommandContext>
-		{
-			[ProvidesContext]
-			private readonly GlobalInfoContext Database;
-			private readonly UserFeedbackService Feedback;
+        /// <summary>
+        /// User info edit and set commands
+        /// </summary>
+        [UsedImplicitly]
+        [Group("set")]
+        public class SetCommands : ModuleBase<SocketCommandContext>
+        {
+            [ProvidesContext]
+            private readonly GlobalInfoContext Database;
+            private readonly UserFeedbackService Feedback;
 
-			/// <summary>
-			/// Initializes a new instance of the <see cref="SetCommands"/> class.
-			/// </summary>
-			/// <param name="database">A database context from the context pool.</param>
-			/// <param name="feedback">The user feedback service.</param>
-			public SetCommands(GlobalInfoContext database, UserFeedbackService feedback)
-			{
-				this.Database = database;
-				this.Feedback = feedback;
-			}
+            /// <summary>
+            /// Initializes a new instance of the <see cref="SetCommands"/> class.
+            /// </summary>
+            /// <param name="database">A database context from the context pool.</param>
+            /// <param name="feedback">The user feedback service.</param>
+            public SetCommands(GlobalInfoContext database, UserFeedbackService feedback)
+            {
+                this.Database = database;
+                this.Feedback = feedback;
+            }
 
-			/// <summary>
-			/// Sets the invoking user's class.
-			/// </summary>
-			/// <param name="userClass">The user's new class.</param>
-			[UsedImplicitly]
-			[Command("class", RunMode = RunMode.Async)]
-			[Summary("Sets the invoking user's class.")]
-			[RequirePermission(Permission.SetClass)]
-			public async Task SetUserClassAsync
-			(
-				[OverrideTypeReader(typeof(HumanizerEnumTypeReader<UserClass>))]
-				UserClass userClass
-			)
-			{
-				// Add the user to the user database if they're not already in it
-				var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+            /// <summary>
+            /// Sets the invoking user's class.
+            /// </summary>
+            /// <param name="userClass">The user's new class.</param>
+            [UsedImplicitly]
+            [Command("class", RunMode = RunMode.Async)]
+            [Summary("Sets the invoking user's class.")]
+            [RequirePermission(Permission.SetClass)]
+            public async Task SetUserClassAsync
+            (
+                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<UserClass>))]
+                UserClass userClass
+            )
+            {
+                // Add the user to the user database if they're not already in it
+                var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
 
-				user.Class = userClass;
+                user.Class = userClass;
 
-				await this.Database.SaveChangesAsync();
+                await this.Database.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Class updated.");
-			}
+                await this.Feedback.SendConfirmationAsync(this.Context, "Class updated.");
+            }
 
-			/// <summary>
-			/// Sets the target user's class.
-			/// </summary>
-			/// <param name="discordUser">The Discord user to change the class of.</param>
-			/// <param name="userClass">The user's new class.</param>
-			[UsedImplicitly]
-			[Command("class", RunMode = RunMode.Async)]
-			[Summary("Sets the target user's class.")]
-			[RequireContext(ContextType.Guild)]
-			[RequirePermission(Permission.SetClass, PermissionTarget.Other)]
-			public async Task SetUserClassAsync
-			(
-				[NotNull]
-				IUser discordUser,
-				[OverrideTypeReader(typeof(HumanizerEnumTypeReader<UserClass>))]
-				UserClass userClass
-			)
-			{
-				// Add the user to the user database if they're not already in it
-				var user = await this.Database.GetOrRegisterUserAsync(discordUser);
+            /// <summary>
+            /// Sets the target user's class.
+            /// </summary>
+            /// <param name="discordUser">The Discord user to change the class of.</param>
+            /// <param name="userClass">The user's new class.</param>
+            [UsedImplicitly]
+            [Command("class", RunMode = RunMode.Async)]
+            [Summary("Sets the target user's class.")]
+            [RequireContext(ContextType.Guild)]
+            [RequirePermission(Permission.SetClass, PermissionTarget.Other)]
+            public async Task SetUserClassAsync
+            (
+                [NotNull]
+                IUser discordUser,
+                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<UserClass>))]
+                UserClass userClass
+            )
+            {
+                // Add the user to the user database if they're not already in it
+                var user = await this.Database.GetOrRegisterUserAsync(discordUser);
 
-				user.Class = userClass;
+                user.Class = userClass;
 
-				await this.Database.SaveChangesAsync();
+                await this.Database.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Class of {discordUser.Mention} updated.");
-			}
+                await this.Feedback.SendConfirmationAsync(this.Context, $"Class of {discordUser.Mention} updated.");
+            }
 
-			/// <summary>
-			/// Sets the invoking user's bio.
-			/// </summary>
-			/// <param name="bio">The user's new bio.</param>
-			[UsedImplicitly]
-			[Command("bio", RunMode = RunMode.Async)]
-			[Summary("Sets the invoking user's bio.")]
-			[RequirePermission(Permission.EditUser)]
-			public async Task SetUserBioAsync([NotNull] string bio)
-			{
-				// Add the user to the user database if they're not already in it
-				var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+            /// <summary>
+            /// Sets the invoking user's bio.
+            /// </summary>
+            /// <param name="bio">The user's new bio.</param>
+            [UsedImplicitly]
+            [Command("bio", RunMode = RunMode.Async)]
+            [Summary("Sets the invoking user's bio.")]
+            [RequirePermission(Permission.EditUser)]
+            public async Task SetUserBioAsync([NotNull] string bio)
+            {
+                // Add the user to the user database if they're not already in it
+                var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
 
-				user.Bio = bio;
+                user.Bio = bio;
 
-				await this.Database.SaveChangesAsync();
+                await this.Database.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Bio updated.");
-			}
+                await this.Feedback.SendConfirmationAsync(this.Context, "Bio updated.");
+            }
 
-			/// <summary>
-			/// Sets the target user's bio.
-			/// </summary>
-			/// <param name="discordUser">The Discord user to change the bio of.</param>
-			/// <param name="bio">The user's new bio.</param>
-			[UsedImplicitly]
-			[Command("bio", RunMode = RunMode.Async)]
-			[Summary("Sets the target user's bio.")]
-			[RequireContext(ContextType.Guild)]
-			[RequirePermission(Permission.EditUser, PermissionTarget.Other)]
-			public async Task SetUserBioAsync([NotNull] IUser discordUser, [NotNull] string bio)
-			{
-				// Add the user to the user database if they're not already in it
-				var user = await this.Database.GetOrRegisterUserAsync(discordUser);
+            /// <summary>
+            /// Sets the target user's bio.
+            /// </summary>
+            /// <param name="discordUser">The Discord user to change the bio of.</param>
+            /// <param name="bio">The user's new bio.</param>
+            [UsedImplicitly]
+            [Command("bio", RunMode = RunMode.Async)]
+            [Summary("Sets the target user's bio.")]
+            [RequireContext(ContextType.Guild)]
+            [RequirePermission(Permission.EditUser, PermissionTarget.Other)]
+            public async Task SetUserBioAsync([NotNull] IUser discordUser, [NotNull] string bio)
+            {
+                // Add the user to the user database if they're not already in it
+                var user = await this.Database.GetOrRegisterUserAsync(discordUser);
 
-				user.Bio = bio;
+                user.Bio = bio;
 
-				await this.Database.SaveChangesAsync();
+                await this.Database.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Bio of {discordUser.Mention} updated.");
-			}
+                await this.Feedback.SendConfirmationAsync(this.Context, $"Bio of {discordUser.Mention} updated.");
+            }
 
-			/// <summary>
-			/// Sets the invoking user's UTC timezone hour offset.
-			/// </summary>
-			/// <param name="timezone">The user's new timezone hour offset.</param>
-			[UsedImplicitly]
-			[Command("timezone", RunMode = RunMode.Async)]
-			[Summary("Sets the invoking user's UTC timezone hour offset.")]
-			[RequirePermission(Permission.EditUser)]
-			public async Task SetUserTimezoneAsync(int timezone)
-			{
-				// Add the user to the user database if they're not already in it
-				var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+            /// <summary>
+            /// Sets the invoking user's UTC timezone hour offset.
+            /// </summary>
+            /// <param name="timezone">The user's new timezone hour offset.</param>
+            [UsedImplicitly]
+            [Command("timezone", RunMode = RunMode.Async)]
+            [Summary("Sets the invoking user's UTC timezone hour offset.")]
+            [RequirePermission(Permission.EditUser)]
+            public async Task SetUserTimezoneAsync(int timezone)
+            {
+                // Add the user to the user database if they're not already in it
+                var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
 
-				user.Timezone = timezone;
+                user.Timezone = timezone;
 
-				await this.Database.SaveChangesAsync();
+                await this.Database.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Timezone updated.");
-			}
+                await this.Feedback.SendConfirmationAsync(this.Context, "Timezone updated.");
+            }
 
-			/// <summary>
-			/// Sets the target user's UTC timezone hour offset.
-			/// </summary>
-			/// <param name="discordUser">The Discord user to change the timezone of.</param>
-			/// <param name="timezone">The user's new timezone hour offset.</param>
-			[UsedImplicitly]
-			[Command("timezone", RunMode = RunMode.Async)]
-			[Summary("Sets the target user's UTC timezone hour offset.")]
-			[RequireContext(ContextType.Guild)]
-			[RequirePermission(Permission.EditUser, PermissionTarget.Other)]
-			public async Task SetUserTimezoneAsync([NotNull] IUser discordUser, int timezone)
-			{
-				// Add the user to the user database if they're not already in it
-				var user = await this.Database.GetOrRegisterUserAsync(discordUser);
+            /// <summary>
+            /// Sets the target user's UTC timezone hour offset.
+            /// </summary>
+            /// <param name="discordUser">The Discord user to change the timezone of.</param>
+            /// <param name="timezone">The user's new timezone hour offset.</param>
+            [UsedImplicitly]
+            [Command("timezone", RunMode = RunMode.Async)]
+            [Summary("Sets the target user's UTC timezone hour offset.")]
+            [RequireContext(ContextType.Guild)]
+            [RequirePermission(Permission.EditUser, PermissionTarget.Other)]
+            public async Task SetUserTimezoneAsync([NotNull] IUser discordUser, int timezone)
+            {
+                // Add the user to the user database if they're not already in it
+                var user = await this.Database.GetOrRegisterUserAsync(discordUser);
 
-				user.Timezone = timezone;
+                user.Timezone = timezone;
 
-				await this.Database.SaveChangesAsync();
+                await this.Database.SaveChangesAsync();
 
-				await this.Feedback.SendConfirmationAsync(this.Context, $"Timezone of {discordUser.Mention} updated.");
-			}
-		}
-	}
+                await this.Feedback.SendConfirmationAsync(this.Context, $"Timezone of {discordUser.Mention} updated.");
+            }
+        }
+    }
 }

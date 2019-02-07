@@ -22,19 +22,19 @@
 
 namespace DIGOS.Ambassador.Database.Transformations
 {
-	/// <summary>
-	/// Represents a value indicating whether a user is on another user's blacklist or whitelist.
-	/// </summary>
-	public enum ListingType
-	{
-		/// <summary>
-		/// The user is blacklisted.
-		/// </summary>
-		Blacklist,
+    /// <summary>
+    /// Represents a value indicating whether a user is on another user's blacklist or whitelist.
+    /// </summary>
+    public enum ListingType
+    {
+        /// <summary>
+        /// The user is blacklisted.
+        /// </summary>
+        Blacklist,
 
-		/// <summary>
-		/// The user is whitelisted.
-		/// </summary>
-		Whitelist
-	}
+        /// <summary>
+        /// The user is whitelisted.
+        /// </summary>
+        Whitelist
+    }
 }

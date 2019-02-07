@@ -26,82 +26,82 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a paragraph of text.
-	/// </summary>
-	public class MarkdownParagraph : IMarkdownNode
-	{
-		/// <summary>
-		/// Gets a list of the text compontents in the paragraph.
-		/// </summary>
-		public List<MarkdownText> Components { get; } = new List<MarkdownText>();
+    /// <summary>
+    /// Represents a paragraph of text.
+    /// </summary>
+    public class MarkdownParagraph : IMarkdownNode
+    {
+        /// <summary>
+        /// Gets a list of the text compontents in the paragraph.
+        /// </summary>
+        public List<MarkdownText> Components { get; } = new List<MarkdownText>();
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MarkdownParagraph"/> class.
-		/// </summary>
-		public MarkdownParagraph()
-		{
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MarkdownParagraph"/> class.
+        /// </summary>
+        public MarkdownParagraph()
+        {
+        }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MarkdownParagraph"/> class.
-		/// </summary>
-		/// <param name="text">The text in the paragraph.</param>
-		public MarkdownParagraph(string text)
-		{
-			AppendText(text);
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MarkdownParagraph"/> class.
+        /// </summary>
+        /// <param name="text">The text in the paragraph.</param>
+        public MarkdownParagraph(string text)
+        {
+            AppendText(text);
+        }
 
-		/// <inheritdoc />
-		[NotNull]
-		public string Compile()
-		{
-			return $"{this.Components.Select(c => c.Compile()).Aggregate((a, b) => a + b)}";
-		}
+        /// <inheritdoc />
+        [NotNull]
+        public string Compile()
+        {
+            return $"{this.Components.Select(c => c.Compile()).Aggregate((a, b) => a + b)}";
+        }
 
-		/// <summary>
-		/// Appends a piece of text to the paragraph.
-		/// </summary>
-		/// <param name="text">The text to append.</param>
-		/// <returns>The paragraph, with the text appended.</returns>
-		[NotNull]
-		public MarkdownParagraph AppendText(MarkdownText text)
-		{
-			this.Components.Add(text);
-			return this;
-		}
+        /// <summary>
+        /// Appends a piece of text to the paragraph.
+        /// </summary>
+        /// <param name="text">The text to append.</param>
+        /// <returns>The paragraph, with the text appended.</returns>
+        [NotNull]
+        public MarkdownParagraph AppendText(MarkdownText text)
+        {
+            this.Components.Add(text);
+            return this;
+        }
 
-		/// <summary>
-		/// Appends a piece of text to the paragraph.
-		/// </summary>
-		/// <param name="text">The text to append.</param>
-		/// <returns>The paragraph, with the text appended.</returns>
-		[NotNull]
-		public MarkdownParagraph AppendText(string text)
-		{
-			return AppendText(new MarkdownText(text));
-		}
+        /// <summary>
+        /// Appends a piece of text to the paragraph.
+        /// </summary>
+        /// <param name="text">The text to append.</param>
+        /// <returns>The paragraph, with the text appended.</returns>
+        [NotNull]
+        public MarkdownParagraph AppendText(string text)
+        {
+            return AppendText(new MarkdownText(text));
+        }
 
-		/// <summary>
-		/// Appends a piece of text, followed by a line break.
-		/// </summary>
-		/// <param name="text">The text.</param>
-		/// <returns>The paragrpah, with the text appended.</returns>
-		[NotNull]
-		public MarkdownParagraph AppendLine(MarkdownText text)
-		{
-			return AppendText(text).AppendText("\n\n");
-		}
+        /// <summary>
+        /// Appends a piece of text, followed by a line break.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <returns>The paragrpah, with the text appended.</returns>
+        [NotNull]
+        public MarkdownParagraph AppendLine(MarkdownText text)
+        {
+            return AppendText(text).AppendText("\n\n");
+        }
 
-		/// <summary>
-		/// Appends a piece of text, followed by a line break.
-		/// </summary>
-		/// <param name="text">The text.</param>
-		/// <returns>The paragrpah, with the text appended.</returns>
-		[NotNull]
-		public MarkdownParagraph AppendLine(string text)
-		{
-			return AppendText(text).AppendText("\n\n");
-		}
-	}
+        /// <summary>
+        /// Appends a piece of text, followed by a line break.
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <returns>The paragrpah, with the text appended.</returns>
+        [NotNull]
+        public MarkdownParagraph AppendLine(string text)
+        {
+            return AppendText(text).AppendText("\n\n");
+        }
+    }
 }

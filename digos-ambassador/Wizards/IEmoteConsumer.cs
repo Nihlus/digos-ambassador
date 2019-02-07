@@ -26,21 +26,21 @@ using Discord;
 
 namespace DIGOS.Ambassador.Wizards
 {
-	/// <summary>
-	/// Interface for classes that consume emotes.
-	/// </summary>
-	public interface IEmoteConsumer
-	{
-		/// <summary>
-		/// Gets the set of accepted emotes.
-		/// </summary>
-		IReadOnlyCollection<IEmote> AcceptedEmotes { get; }
+    /// <summary>
+    /// Interface for classes that consume emotes.
+    /// </summary>
+    public interface IEmoteConsumer
+    {
+        /// <summary>
+        /// Gets the set of accepted emotes.
+        /// </summary>
+        IReadOnlyCollection<IEmote> AcceptedEmotes { get; }
 
-		/// <summary>
-		/// Consumes the given emote, performing some associated action.
-		/// </summary>
-		/// <param name="emote">The emote.</param>
-		/// <returns>A task that must be awaited.</returns>
-		Task<bool> ConsumeEmoteAsync(IEmote emote);
-	}
+        /// <summary>
+        /// Consumes the given emote, performing some associated action.
+        /// </summary>
+        /// <param name="emote">The emote.</param>
+        /// <returns>A task that must be awaited.</returns>
+        Task<bool> ConsumeEmoteAsync(IEmote emote);
+    }
 }

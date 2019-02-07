@@ -29,42 +29,42 @@ using Discord.WebSocket;
 
 namespace DIGOS.Ambassador.Interactivity
 {
-	/// <summary>
-	/// Represents an interactive message.
-	/// </summary>
-	public abstract class InteractiveMessage : IInteractiveMessage
-	{
-		/// <summary>
-		/// Gets the context of the message.
-		/// </summary>
-		public SocketCommandContext Context { get; }
+    /// <summary>
+    /// Represents an interactive message.
+    /// </summary>
+    public abstract class InteractiveMessage : IInteractiveMessage
+    {
+        /// <summary>
+        /// Gets the context of the message.
+        /// </summary>
+        public SocketCommandContext Context { get; }
 
-		/// <summary>
-		/// Gets the interacivity service.
-		/// </summary>
-		protected InteractiveService Interactive { get; }
+        /// <summary>
+        /// Gets the interacivity service.
+        /// </summary>
+        protected InteractiveService Interactive { get; }
 
-		/// <inheritdoc />
-		public IUserMessage Message { get; protected set; }
+        /// <inheritdoc />
+        public IUserMessage Message { get; protected set; }
 
-		/// <inheritdoc />
-		public IReactionCallback ReactionCallback { get; protected set; }
+        /// <inheritdoc />
+        public IReactionCallback ReactionCallback { get; protected set; }
 
-		/// <inheritdoc />
-		public TimeSpan? Timeout { get; protected set; }
+        /// <inheritdoc />
+        public TimeSpan? Timeout { get; protected set; }
 
-		/// <inheritdoc />
-		public abstract Task<IUserMessage> DisplayAsync(ISocketMessageChannel socketMessageChannel);
+        /// <inheritdoc />
+        public abstract Task<IUserMessage> DisplayAsync(ISocketMessageChannel socketMessageChannel);
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="InteractiveMessage"/> class.
-		/// </summary>
-		/// <param name="context">The context.</param>
-		/// <param name="interactiveService">The interactive service.</param>
-		protected InteractiveMessage(SocketCommandContext context, InteractiveService interactiveService)
-		{
-			this.Context = context;
-			this.Interactive = interactiveService;
-		}
-	}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InteractiveMessage"/> class.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="interactiveService">The interactive service.</param>
+        protected InteractiveMessage(SocketCommandContext context, InteractiveService interactiveService)
+        {
+            this.Context = context;
+            this.Interactive = interactiveService;
+        }
+    }
 }

@@ -27,49 +27,49 @@ using DIGOS.Ambassador.Database.Characters;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// A token that gets replaced with a species.
-	/// </summary>
-	[TokenIdentifier("species", "s")]
-	public class SpeciesToken : ReplacableTextToken<SpeciesToken>
-	{
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			var speciesShares = new Dictionary<string, int>();
+    /// <summary>
+    /// A token that gets replaced with a species.
+    /// </summary>
+    [TokenIdentifier("species", "s")]
+    public class SpeciesToken : ReplacableTextToken<SpeciesToken>
+    {
+        /// <inheritdoc />
+        public override string GetText(Character character, AppearanceComponent component)
+        {
+            var speciesShares = new Dictionary<string, int>();
 
-			foreach (var characterComponent in character.CurrentAppearance.Components)
-			{
-				var speciesName = characterComponent.Transformation.Species.Name;
+            foreach (var characterComponent in character.CurrentAppearance.Components)
+            {
+                var speciesName = characterComponent.Transformation.Species.Name;
 
-				if (speciesShares.ContainsKey(speciesName))
-				{
-					speciesShares[speciesName]++;
-				}
-				else
-				{
-					speciesShares.Add(speciesName, 1);
-				}
-			}
+                if (speciesShares.ContainsKey(speciesName))
+                {
+                    speciesShares[speciesName]++;
+                }
+                else
+                {
+                    speciesShares.Add(speciesName, 1);
+                }
+            }
 
-			if (!speciesShares.Any())
-			{
-				return "person";
-			}
+            if (!speciesShares.Any())
+            {
+                return "person";
+            }
 
-			int totalPoints = speciesShares.Values.Sum();
+            int totalPoints = speciesShares.Values.Sum();
 
-			// pick the species with the largest share
-			var largestSpecies = speciesShares.OrderByDescending(kvp => kvp.Value).FirstOrDefault();
-			var shareByPercentage = largestSpecies.Value / (double)totalPoints;
+            // pick the species with the largest share
+            var largestSpecies = speciesShares.OrderByDescending(kvp => kvp.Value).FirstOrDefault();
+            var shareByPercentage = largestSpecies.Value / (double)totalPoints;
 
-			return $"{largestSpecies.Key}{(shareByPercentage <= 0.50 ? "-morph" : string.Empty)}";
-		}
+            return $"{largestSpecies.Key}{(shareByPercentage <= 0.50 ? "-morph" : string.Empty)}";
+        }
 
-		/// <inheritdoc />
-		protected override SpeciesToken Initialize(string data)
-		{
-			return this;
-		}
-	}
+        /// <inheritdoc />
+        protected override SpeciesToken Initialize(string data)
+        {
+            return this;
+        }
+    }
 }

@@ -25,28 +25,28 @@ using Discord.Commands;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
-	/// <summary>
-	/// Serves as a test base for roleplay service tests.
-	/// </summary>
-	public class RoleplayServiceTestBase
-	{
-		/// <summary>
-		/// Gets the roleplay service object.
-		/// </summary>
-		protected RoleplayService Roleplays { get; }
+    /// <summary>
+    /// Serves as a test base for roleplay service tests.
+    /// </summary>
+    public class RoleplayServiceTestBase
+    {
+        /// <summary>
+        /// Gets the roleplay service object.
+        /// </summary>
+        protected RoleplayService Roleplays { get; }
 
-		/// <summary>
-		/// Gets the command service dependency.
-		/// </summary>
-		protected CommandService Commands { get; }
+        /// <summary>
+        /// Gets the command service dependency.
+        /// </summary>
+        protected CommandService Commands { get; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RoleplayServiceTestBase"/> class.
-		/// </summary>
-		protected RoleplayServiceTestBase()
-		{
-			this.Commands = new CommandService();
-			this.Roleplays = new RoleplayService(this.Commands, new OwnedEntityService());
-		}
-	}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleplayServiceTestBase"/> class.
+        /// </summary>
+        protected RoleplayServiceTestBase()
+        {
+            this.Commands = new CommandService();
+            this.Roleplays = new RoleplayService(this.Commands, new OwnedEntityService());
+        }
+    }
 }

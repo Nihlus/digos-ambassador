@@ -31,57 +31,57 @@ using YamlDotNet.Serialization;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// YAML deserialization converter for species objects.
-	/// </summary>
-	public class SpeciesYamlConverter : IYamlTypeConverter
-	{
-		private GlobalInfoContext Database { get; }
+    /// <summary>
+    /// YAML deserialization converter for species objects.
+    /// </summary>
+    public class SpeciesYamlConverter : IYamlTypeConverter
+    {
+        private GlobalInfoContext Database { get; }
 
-		private TransformationService Transformation { get; }
+        private TransformationService Transformation { get; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="SpeciesYamlConverter"/> class.
-		/// </summary>
-		/// <param name="database">The database.</param>
-		/// <param name="transformation">The transformation service</param>
-		public SpeciesYamlConverter(GlobalInfoContext database, TransformationService transformation)
-		{
-			this.Database = database;
-			this.Transformation = transformation;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SpeciesYamlConverter"/> class.
+        /// </summary>
+        /// <param name="database">The database.</param>
+        /// <param name="transformation">The transformation service</param>
+        public SpeciesYamlConverter(GlobalInfoContext database, TransformationService transformation)
+        {
+            this.Database = database;
+            this.Transformation = transformation;
+        }
 
-		/// <inheritdoc />
-		public bool Accepts(Type type)
-		{
-			return type == typeof(Species);
-		}
+        /// <inheritdoc />
+        public bool Accepts(Type type)
+        {
+            return type == typeof(Species);
+        }
 
-		/// <inheritdoc />
-		public object ReadYaml(IParser parser, Type type)
-		{
-			var speciesName = parser.Allow<Scalar>().Value;
+        /// <inheritdoc />
+        public object ReadYaml(IParser parser, Type type)
+        {
+            var speciesName = parser.Allow<Scalar>().Value;
 
-			if (speciesName is null)
-			{
-				return null;
-			}
+            if (speciesName is null)
+            {
+                return null;
+            }
 
-			var getSpeciesResult = this.Transformation.GetSpeciesByName(this.Database, speciesName);
-			if (!getSpeciesResult.IsSuccess)
-			{
-				throw new InvalidOperationException(getSpeciesResult.ErrorReason);
-			}
+            var getSpeciesResult = this.Transformation.GetSpeciesByName(this.Database, speciesName);
+            if (!getSpeciesResult.IsSuccess)
+            {
+                throw new InvalidOperationException(getSpeciesResult.ErrorReason);
+            }
 
-			return getSpeciesResult.Entity;
-		}
+            return getSpeciesResult.Entity;
+        }
 
-		/// <inheritdoc />
-		public void WriteYaml([NotNull] IEmitter emitter, object value, Type type)
-		{
-			var species = (Species)value;
+        /// <inheritdoc />
+        public void WriteYaml([NotNull] IEmitter emitter, object value, Type type)
+        {
+            var species = (Species)value;
 
-			emitter.Emit(new Scalar(species.Name));
-		}
-	}
+            emitter.Emit(new Scalar(species.Name));
+        }
+    }
 }

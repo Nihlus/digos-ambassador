@@ -26,20 +26,20 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
-	/// <summary>
-	/// Extension methods for the <see cref="HttpException"/> class.
-	/// </summary>
-	public static class HttpExceptionExtensions
-	{
-		/// <summary>
-		/// Determines whether or not the given <see cref="HttpException"/> was caused by the receiving user not
-		/// accepting DMs from non-friends (e.g, we're not allowed to send messages to the user.
-		/// </summary>
-		/// <param name="this">The exception.</param>
-		/// <returns>true if it was caused by the user not accepting DMs; Otherwise, false.</returns>
-		public static bool WasCausedByDMsNotAccepted([NotNull] this HttpException @this)
-		{
-			return @this.HttpCode == HttpStatusCode.Forbidden && @this.DiscordCode == 50007;
-		}
-	}
+    /// <summary>
+    /// Extension methods for the <see cref="HttpException"/> class.
+    /// </summary>
+    public static class HttpExceptionExtensions
+    {
+        /// <summary>
+        /// Determines whether or not the given <see cref="HttpException"/> was caused by the receiving user not
+        /// accepting DMs from non-friends (e.g, we're not allowed to send messages to the user.
+        /// </summary>
+        /// <param name="this">The exception.</param>
+        /// <returns>true if it was caused by the user not accepting DMs; Otherwise, false.</returns>
+        public static bool WasCausedByDMsNotAccepted([NotNull] this HttpException @this)
+        {
+            return @this.HttpCode == HttpStatusCode.Forbidden && @this.DiscordCode == 50007;
+        }
+    }
 }

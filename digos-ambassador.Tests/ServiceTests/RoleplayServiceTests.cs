@@ -27,82 +27,82 @@ using DIGOS.Ambassador.Tests.TestBases;
 
 namespace DIGOS.Ambassador.Tests.ServiceTests
 {
-	public class RoleplayServiceTests
-	{
-		public class CreateRoleplayAsync : RoleplayServiceTestBase
-		{
-		}
+    public class RoleplayServiceTests
+    {
+        public class CreateRoleplayAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class AddToOrUpdateMessageInRoleplayAsync : RoleplayServiceTestBase
-		{
-		}
+        public class AddToOrUpdateMessageInRoleplayAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class GetBestMatchingRoleplayAsync : RoleplayServiceTestBase
-		{
-		}
+        public class GetBestMatchingRoleplayAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class GetNamedRoleplayAsync : RoleplayServiceTestBase
-		{
-		}
+        public class GetNamedRoleplayAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class GetActiveRoleplayAsync : RoleplayServiceTestBase
-		{
-		}
+        public class GetActiveRoleplayAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class HasActiveRoleplayAsync : RoleplayServiceTestBase
-		{
-		}
+        public class HasActiveRoleplayAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class IsRoleplayNameUniqueForUserAsync : RoleplayServiceTestBase
-		{
-		}
+        public class IsRoleplayNameUniqueForUserAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class GetRoleplays : RoleplayServiceTestBase
-		{
-		}
+        public class GetRoleplays : RoleplayServiceTestBase
+        {
+        }
 
-		public class GetUserRoleplays : RoleplayServiceTestBase
-		{
-		}
+        public class GetUserRoleplays : RoleplayServiceTestBase
+        {
+        }
 
-		public class GetUserRoleplaybyNameAsync : RoleplayServiceTestBase
-		{
-		}
+        public class GetUserRoleplaybyNameAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class KickUserFromRoleplayAsync : RoleplayServiceTestBase
-		{
-		}
+        public class KickUserFromRoleplayAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class RemoveUserFromRoleplayAsync : RoleplayServiceTestBase
-		{
-		}
+        public class RemoveUserFromRoleplayAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class AddUserToRoleplayAsync : RoleplayServiceTestBase
-		{
-		}
+        public class AddUserToRoleplayAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class InviteUserAsync : RoleplayServiceTestBase
-		{
-		}
+        public class InviteUserAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class TransferRoleplayOwnershipAsync : RoleplayServiceTestBase
-		{
-		}
+        public class TransferRoleplayOwnershipAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class SetRoleplayNameAsync : RoleplayServiceTestBase
-		{
-		}
+        public class SetRoleplayNameAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class SetRoleplaySummaryAsync : RoleplayServiceTestBase
-		{
-		}
+        public class SetRoleplaySummaryAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class SetRoleplayIsNSFWAsync : RoleplayServiceTestBase
-		{
-		}
+        public class SetRoleplayIsNSFWAsync : RoleplayServiceTestBase
+        {
+        }
 
-		public class SetRoleplayIsPublicAsync : RoleplayServiceTestBase
-		{
-		}
-	}
+        public class SetRoleplayIsPublicAsync : RoleplayServiceTestBase
+        {
+        }
+    }
 }

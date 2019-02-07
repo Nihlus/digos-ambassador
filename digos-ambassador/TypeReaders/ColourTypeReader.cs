@@ -28,21 +28,21 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.TypeReaders
 {
-	/// <summary>
-	/// Reads owned characters as command arguments.
-	/// </summary>
-	public sealed class ColourTypeReader : TypeReader
-	{
-		/// <inheritdoc />
-		[NotNull]
-		public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
-		{
-			if (!Colour.TryParse(input, out var colour))
-			{
-				return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Failed to parse a valid colour."));
-			}
+    /// <summary>
+    /// Reads owned characters as command arguments.
+    /// </summary>
+    public sealed class ColourTypeReader : TypeReader
+    {
+        /// <inheritdoc />
+        [NotNull]
+        public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
+        {
+            if (!Colour.TryParse(input, out var colour))
+            {
+                return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Failed to parse a valid colour."));
+            }
 
-			return Task.FromResult(TypeReaderResult.FromSuccess(colour));
-		}
-	}
+            return Task.FromResult(TypeReaderResult.FromSuccess(colour));
+        }
+    }
 }

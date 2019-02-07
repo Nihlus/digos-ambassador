@@ -27,35 +27,35 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// Represents a replacable token in text.
-	/// </summary>
-	public interface IReplaceableTextToken
-	{
-		/// <summary>
-		/// Gets or sets the start index of the token in the text.
-		/// </summary>
-		int Start { get; set; }
+    /// <summary>
+    /// Represents a replacable token in text.
+    /// </summary>
+    public interface IReplaceableTextToken
+    {
+        /// <summary>
+        /// Gets or sets the start index of the token in the text.
+        /// </summary>
+        int Start { get; set; }
 
-		/// <summary>
-		/// Gets or sets the length of the original token.
-		/// </summary>
-		int Length { get; set; }
+        /// <summary>
+        /// Gets or sets the length of the original token.
+        /// </summary>
+        int Length { get; set; }
 
-		/// <summary>
-		/// Gets the text that the token should be replaced with.
-		/// </summary>
-		/// <param name="character">The character that the text should be relevant for.</param>
-		/// <param name="component">The component that the text originates from.</param>
-		/// <returns>The text that the token should be replaced with.</returns>
-		string GetText([NotNull] Character character, [CanBeNull] AppearanceComponent component);
+        /// <summary>
+        /// Gets the text that the token should be replaced with.
+        /// </summary>
+        /// <param name="character">The character that the text should be relevant for.</param>
+        /// <param name="component">The component that the text originates from.</param>
+        /// <returns>The text that the token should be replaced with.</returns>
+        string GetText([NotNull] Character character, [CanBeNull] AppearanceComponent component);
 
-		/// <summary>
-		/// Gets the text that the token should be replaced with.
-		/// </summary>
-		/// <param name="character">The character that the text should be relevant for.</param>
-		/// <param name="component">The component that the text originates from.</param>
-		/// <returns>The text that the token should be replaced with.</returns>
-		Task<string> GetTextAsync([NotNull] Character character, [CanBeNull] AppearanceComponent component);
-	}
+        /// <summary>
+        /// Gets the text that the token should be replaced with.
+        /// </summary>
+        /// <param name="character">The character that the text should be relevant for.</param>
+        /// <param name="component">The component that the text originates from.</param>
+        /// <returns>The text that the token should be replaced with.</returns>
+        Task<string> GetTextAsync([NotNull] Character character, [CanBeNull] AppearanceComponent component);
+    }
 }

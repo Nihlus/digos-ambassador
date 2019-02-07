@@ -24,34 +24,34 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Provides masculine pronouns.
-	/// </summary>
-	[UsedImplicitly]
-	public class MasculinePronounProvider : PronounProvider
-	{
-		/// <inheritdoc />
-		[NotNull]
-		public override string Family => "Masculine";
+    /// <summary>
+    /// Provides masculine pronouns.
+    /// </summary>
+    [UsedImplicitly]
+    public class MasculinePronounProvider : PronounProvider
+    {
+        /// <inheritdoc />
+        [NotNull]
+        public override string Family => "Masculine";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "he is" : "he";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "he is" : "he";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetObjectForm() => "him";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetObjectForm() => "him";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetPossessiveAdjectiveForm() => "his";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetPossessiveAdjectiveForm() => "his";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "he has" : "his";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "he has" : "his";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetReflexiveForm() => "himself";
-	}
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetReflexiveForm() => "himself";
+    }
 }

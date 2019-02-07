@@ -22,24 +22,24 @@
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents alignment of markdown columns.
-	/// </summary>
-	public enum ColumnAlignment
-	{
-		/// <summary>
-		/// Left-aligned.
-		/// </summary>
-		Left,
+    /// <summary>
+    /// Represents alignment of markdown columns.
+    /// </summary>
+    public enum ColumnAlignment
+    {
+        /// <summary>
+        /// Left-aligned.
+        /// </summary>
+        Left,
 
-		/// <summary>
-		/// Right-aligned.
-		/// </summary>
-		Right,
+        /// <summary>
+        /// Right-aligned.
+        /// </summary>
+        Right,
 
-		/// <summary>
-		/// Center aligned.
-		/// </summary>
-		Centered
-	}
+        /// <summary>
+        /// Center aligned.
+        /// </summary>
+        Centered
+    }
 }

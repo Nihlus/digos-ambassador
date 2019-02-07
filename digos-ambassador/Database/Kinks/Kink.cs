@@ -27,107 +27,107 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Kinks
 {
-	/// <summary>
-	/// Represents a sexual kink or fetish.
-	/// </summary>
-	public class Kink : IEquatable<Kink>, IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents a sexual kink or fetish.
+    /// </summary>
+    public class Kink : IEquatable<Kink>, IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the category the kink belongs to.
-		/// </summary>
-		public KinkCategory Category { get; set; }
+        /// <summary>
+        /// Gets or sets the category the kink belongs to.
+        /// </summary>
+        public KinkCategory Category { get; set; }
 
-		/// <summary>
-		/// Gets or sets the F-List ID of the kink.
-		/// </summary>
-		public uint FListID { get; set; }
+        /// <summary>
+        /// Gets or sets the F-List ID of the kink.
+        /// </summary>
+        public uint FListID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the name of the kink.
-		/// </summary>
-		public string Name { get; set; }
+        /// <summary>
+        /// Gets or sets the name of the kink.
+        /// </summary>
+        public string Name { get; set; }
 
-		/// <summary>
-		/// Gets or sets the full description of the kink.
-		/// </summary>
-		public string Description { get; set; }
+        /// <summary>
+        /// Gets or sets the full description of the kink.
+        /// </summary>
+        public string Description { get; set; }
 
-		/// <inheritdoc />
-		[Pure]
-		public bool Equals(Kink other)
-		{
-			if (ReferenceEquals(null, other))
-			{
-				return false;
-			}
+        /// <inheritdoc />
+        [Pure]
+        public bool Equals(Kink other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
 
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
 
-			return this.Category == other.Category && this.FListID == other.FListID && string.Equals(this.Name, other.Name) && string.Equals(this.Description, other.Description);
-		}
+            return this.Category == other.Category && this.FListID == other.FListID && string.Equals(this.Name, other.Name) && string.Equals(this.Description, other.Description);
+        }
 
-		/// <inheritdoc />
-		[SuppressMessage("ReSharper", "ArrangeThisQualifier", Justification = "Used for explicit differentiation between compared objects.")]
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(null, obj))
-			{
-				return false;
-			}
+        /// <inheritdoc />
+        [SuppressMessage("ReSharper", "ArrangeThisQualifier", Justification = "Used for explicit differentiation between compared objects.")]
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
 
-			if (ReferenceEquals(this, obj))
-			{
-				return true;
-			}
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
 
-			if (obj.GetType() != this.GetType())
-			{
-				return false;
-			}
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
 
-			return Equals((Kink)obj);
-		}
+            return Equals((Kink)obj);
+        }
 
-		/// <inheritdoc />
-		[SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Class is an entity.")]
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hashCode = (int)this.Category;
-				hashCode = (hashCode * 397) ^ (int)this.FListID;
-				hashCode = (hashCode * 397) ^ (this.Name != null ? this.Name.GetHashCode() : 0);
-				hashCode = (hashCode * 397) ^ (this.Description != null ? this.Description.GetHashCode() : 0);
-				return hashCode;
-			}
-		}
+        /// <inheritdoc />
+        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Class is an entity.")]
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = (int)this.Category;
+                hashCode = (hashCode * 397) ^ (int)this.FListID;
+                hashCode = (hashCode * 397) ^ (this.Name != null ? this.Name.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (this.Description != null ? this.Description.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
 
-		/// <summary>
-		/// Compares the equality of two <see cref="Kink"/> objects.
-		/// </summary>
-		/// <param name="left">The first object.</param>
-		/// <param name="right">The second object.</param>
-		/// <returns>true if the objects are equal; otherwise, false.</returns>
-		public static bool operator ==([CanBeNull] Kink left, [CanBeNull] Kink right)
-		{
-			return Equals(left, right);
-		}
+        /// <summary>
+        /// Compares the equality of two <see cref="Kink"/> objects.
+        /// </summary>
+        /// <param name="left">The first object.</param>
+        /// <param name="right">The second object.</param>
+        /// <returns>true if the objects are equal; otherwise, false.</returns>
+        public static bool operator ==([CanBeNull] Kink left, [CanBeNull] Kink right)
+        {
+            return Equals(left, right);
+        }
 
-		/// <summary>
-		/// Compares the inequality of two <see cref="Kink"/> objects.
-		/// </summary>
-		/// <param name="left">The first object.</param>
-		/// <param name="right">The second object.</param>
-		/// <returns>true if the objects are equal; otherwise, false.</returns>
-		public static bool operator !=([CanBeNull] Kink left, [CanBeNull] Kink right)
-		{
-			return !Equals(left, right);
-		}
-	}
+        /// <summary>
+        /// Compares the inequality of two <see cref="Kink"/> objects.
+        /// </summary>
+        /// <param name="left">The first object.</param>
+        /// <param name="right">The second object.</param>
+        /// <returns>true if the objects are equal; otherwise, false.</returns>
+        public static bool operator !=([CanBeNull] Kink left, [CanBeNull] Kink right)
+        {
+            return !Equals(left, right);
+        }
+    }
 }

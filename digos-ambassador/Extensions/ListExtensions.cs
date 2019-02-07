@@ -26,22 +26,22 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
-	/// <summary>
-	/// Extension methods for lists.
-	/// </summary>
-	public static class ListExtensions
-	{
-		/// <summary>
-		/// Picks a random value from the list.
-		/// </summary>
-		/// <param name="list">The list to pick from.</param>
-		/// <typeparam name="T">The type contained in the list.</typeparam>
-		/// <returns>A random value.</returns>
-		[Pure]
-		public static T PickRandom<T>([NotNull] this IList<T> list)
-		{
-			var random = new Random();
-			return list[random.Next(0, list.Count)];
-		}
-	}
+    /// <summary>
+    /// Extension methods for lists.
+    /// </summary>
+    public static class ListExtensions
+    {
+        /// <summary>
+        /// Picks a random value from the list.
+        /// </summary>
+        /// <param name="list">The list to pick from.</param>
+        /// <typeparam name="T">The type contained in the list.</typeparam>
+        /// <returns>A random value.</returns>
+        [Pure]
+        public static T PickRandom<T>([NotNull] this IList<T> list)
+        {
+            var random = new Random();
+            return list[random.Next(0, list.Count)];
+        }
+    }
 }

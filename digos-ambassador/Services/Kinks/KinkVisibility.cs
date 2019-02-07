@@ -22,24 +22,24 @@
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Holds options for the visibility of a user's kink list.
-	/// </summary>
-	public enum KinkVisibility
-	{
-		/// <summary>
-		/// Anyone can view your kinks.
-		/// </summary>
-		All,
+    /// <summary>
+    /// Holds options for the visibility of a user's kink list.
+    /// </summary>
+    public enum KinkVisibility
+    {
+        /// <summary>
+        /// Anyone can view your kinks.
+        /// </summary>
+        All,
 
-		/// <summary>
-		/// Only your friends can view your kinks.
-		/// </summary>
-		Friends,
+        /// <summary>
+        /// Only your friends can view your kinks.
+        /// </summary>
+        Friends,
 
-		/// <summary>
-		/// Only people on your whitelist can view your kinks.
-		/// </summary>
-		Whitelist
-	}
+        /// <summary>
+        /// Only people on your whitelist can view your kinks.
+        /// </summary>
+        Whitelist
+    }
 }

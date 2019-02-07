@@ -25,26 +25,26 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a row in a table.
-	/// </summary>
-	public class MarkdownTableRow
-	{
-		/// <summary>
-		/// Gets a list of the cells in the row.
-		/// </summary>
-		public List<IMarkdownNode> Cells { get; } = new List<IMarkdownNode>();
+    /// <summary>
+    /// Represents a row in a table.
+    /// </summary>
+    public class MarkdownTableRow
+    {
+        /// <summary>
+        /// Gets a list of the cells in the row.
+        /// </summary>
+        public List<IMarkdownNode> Cells { get; } = new List<IMarkdownNode>();
 
-		/// <summary>
-		/// Appends a new cell to the row.
-		/// </summary>
-		/// <param name="cell">The cell to append.</param>
-		/// <returns>The row, with the cell appended.</returns>
-		[NotNull]
-		public MarkdownTableRow AppendCell(IMarkdownNode cell)
-		{
-			this.Cells.Add(cell);
-			return this;
-		}
-	}
+        /// <summary>
+        /// Appends a new cell to the row.
+        /// </summary>
+        /// <param name="cell">The cell to append.</param>
+        /// <returns>The row, with the cell appended.</returns>
+        [NotNull]
+        public MarkdownTableRow AppendCell(IMarkdownNode cell)
+        {
+            this.Cells.Add(cell);
+            return this;
+        }
+    }
 }

@@ -30,65 +30,65 @@ using YamlDotNet.Serialization;
 
 namespace DIGOS.Ambassador.Database.Appearances
 {
-	/// <summary>
-	/// Represents a colour shade with an optional modifier.
-	/// </summary>
-	public class Colour : IEFEntity, IColour
-	{
-		/// <inheritdoc />
-		[YamlIgnore]
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents a colour shade with an optional modifier.
+    /// </summary>
+    public class Colour : IEFEntity, IColour
+    {
+        /// <inheritdoc />
+        [YamlIgnore]
+        public long ID { get; set; }
 
-		/// <inheritdoc />
-		public Shade Shade { get; set; }
+        /// <inheritdoc />
+        public Shade Shade { get; set; }
 
-		/// <inheritdoc />
-		[CanBeNull]
-		public ShadeModifier? Modifier { get; set; }
+        /// <inheritdoc />
+        [CanBeNull]
+        public ShadeModifier? Modifier { get; set; }
 
-		/// <summary>
-		/// Attempts to parse the given input into a colour.
-		/// </summary>
-		/// <param name="input">The input text to parse.</param>
-		/// <param name="colour">The output colour.</param>
-		/// <returns>true if the parsing was successful; otherwise, false.</returns>
-		[Pure]
-		[ContractAnnotation("input:null => false")]
-		public static bool TryParse([CanBeNull] string input, [CanBeNull] out Colour colour)
-		{
-			colour = new Colour();
+        /// <summary>
+        /// Attempts to parse the given input into a colour.
+        /// </summary>
+        /// <param name="input">The input text to parse.</param>
+        /// <param name="colour">The output colour.</param>
+        /// <returns>true if the parsing was successful; otherwise, false.</returns>
+        [Pure]
+        [ContractAnnotation("input:null => false")]
+        public static bool TryParse([CanBeNull] string input, [CanBeNull] out Colour colour)
+        {
+            colour = new Colour();
 
-			if (input.IsNullOrWhitespace())
-			{
-				colour = null;
-				return false;
-			}
+            if (input.IsNullOrWhitespace())
+            {
+                colour = null;
+                return false;
+            }
 
-			// First, break the input up into parts based on spaces
-			var parts = input.Split(' ');
+            // First, break the input up into parts based on spaces
+            var parts = input.Split(' ');
 
-			// Check for a modifier
-			if (Enum.TryParse(parts[0], true, out ShadeModifier modifier))
-			{
-				colour.Modifier = modifier;
-				parts = parts.Skip(1).ToArray();
-			}
+            // Check for a modifier
+            if (Enum.TryParse(parts[0], true, out ShadeModifier modifier))
+            {
+                colour.Modifier = modifier;
+                parts = parts.Skip(1).ToArray();
+            }
 
-			// Then check for a known shade
-			if (!Enum.TryParse(string.Join(string.Empty, parts), true, out Shade shade))
-			{
-				colour = null;
-				return false;
-			}
+            // Then check for a known shade
+            if (!Enum.TryParse(string.Join(string.Empty, parts), true, out Shade shade))
+            {
+                colour = null;
+                return false;
+            }
 
-			colour.Shade = shade;
-			return true;
-		}
+            colour.Shade = shade;
+            return true;
+        }
 
-		/// <inheritdoc />
-		public override string ToString()
-		{
-			return $"{(this.Modifier is null ? string.Empty : this.Modifier.Humanize())} {this.Shade.Humanize()}".Trim().Humanize(LetterCasing.LowerCase);
-		}
-	}
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{(this.Modifier is null ? string.Empty : this.Modifier.Humanize())} {this.Shade.Humanize()}".Trim().Humanize(LetterCasing.LowerCase);
+        }
+    }
 }

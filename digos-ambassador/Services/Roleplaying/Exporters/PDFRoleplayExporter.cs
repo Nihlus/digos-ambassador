@@ -39,160 +39,160 @@ using MoreLinq;
 
 namespace DIGOS.Ambassador.Services.Exporters
 {
-	/// <summary>
-	/// Exports roleplays in PDF format.
-	/// </summary>
-	public class PDFRoleplayExporter : RoleplayExporterBase
-	{
-		private const float DefaultParagraphSpacing = 8.0f;
-		private static readonly Font StandardFont = new Font(Font.FontFamily.HELVETICA, 11.0f);
-		private static readonly Font ItalicFont = new Font(Font.FontFamily.HELVETICA, 11.0f, Font.ITALIC);
-		private static readonly Font TitleFont = new Font(Font.FontFamily.HELVETICA, 48.0f, Font.BOLD);
+    /// <summary>
+    /// Exports roleplays in PDF format.
+    /// </summary>
+    public class PDFRoleplayExporter : RoleplayExporterBase
+    {
+        private const float DefaultParagraphSpacing = 8.0f;
+        private static readonly Font StandardFont = new Font(Font.FontFamily.HELVETICA, 11.0f);
+        private static readonly Font ItalicFont = new Font(Font.FontFamily.HELVETICA, 11.0f, Font.ITALIC);
+        private static readonly Font TitleFont = new Font(Font.FontFamily.HELVETICA, 48.0f, Font.BOLD);
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="PDFRoleplayExporter"/> class.
-		/// </summary>
-		/// <param name="context">The context of the export operation.</param>
-		public PDFRoleplayExporter(ICommandContext context)
-			: base(context)
-		{
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PDFRoleplayExporter"/> class.
+        /// </summary>
+        /// <param name="context">The context of the export operation.</param>
+        public PDFRoleplayExporter(ICommandContext context)
+            : base(context)
+        {
+        }
 
-		/// <inheritdoc />
-		public override async Task<ExportedRoleplay> ExportAsync(Roleplay roleplay)
-		{
-			// Create our document
-			var pdfDoc = new Document();
+        /// <inheritdoc />
+        public override async Task<ExportedRoleplay> ExportAsync(Roleplay roleplay)
+        {
+            // Create our document
+            var pdfDoc = new Document();
 
-			var filePath = Path.GetTempFileName();
-			using (var of = File.Create(filePath))
-			{
-				using (PdfWriter.GetInstance(pdfDoc, of))
-				{
-					pdfDoc.Open();
+            var filePath = Path.GetTempFileName();
+            using (var of = File.Create(filePath))
+            {
+                using (PdfWriter.GetInstance(pdfDoc, of))
+                {
+                    pdfDoc.Open();
 
-					var owner = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
+                    var owner = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
 
-					pdfDoc.AddAuthor(owner.Nickname);
-					pdfDoc.AddCreationDate();
-					pdfDoc.AddCreator("DIGOS Ambassador");
-					pdfDoc.AddTitle(roleplay.Name);
+                    pdfDoc.AddAuthor(owner.Nickname);
+                    pdfDoc.AddCreationDate();
+                    pdfDoc.AddCreator("DIGOS Ambassador");
+                    pdfDoc.AddTitle(roleplay.Name);
 
-					var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
+                    var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
 
-					pdfDoc.Add(CreateTitle(roleplay.Name));
-					pdfDoc.Add(CreateParticipantList(joinedUsers));
+                    pdfDoc.Add(CreateTitle(roleplay.Name));
+                    pdfDoc.Add(CreateParticipantList(joinedUsers));
 
-					pdfDoc.NewPage();
+                    pdfDoc.NewPage();
 
-					var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
-					foreach (var message in messages)
-					{
-						pdfDoc.Add(CreateMessage(message.AuthorNickname, message.Contents));
-					}
+                    var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
+                    foreach (var message in messages)
+                    {
+                        pdfDoc.Add(CreateMessage(message.AuthorNickname, message.Contents));
+                    }
 
-					pdfDoc.Close();
-				}
-			}
+                    pdfDoc.Close();
+                }
+            }
 
-			var resultFile = File.OpenRead(filePath);
-			var exported = new ExportedRoleplay(roleplay.Name, ExportFormat.PDF, resultFile);
-			return exported;
-		}
+            var resultFile = File.OpenRead(filePath);
+            var exported = new ExportedRoleplay(roleplay.Name, ExportFormat.PDF, resultFile);
+            return exported;
+        }
 
-		/// <summary>
-		/// Creates a title that can be inserted into a PDF document.
-		/// </summary>
-		/// <param name="title">The title.</param>
-		/// <returns>The resulting paragraph.</returns>
-		[NotNull]
-		private Paragraph CreateTitle(string title)
-		{
-			var chunk = new Chunk(title, TitleFont);
+        /// <summary>
+        /// Creates a title that can be inserted into a PDF document.
+        /// </summary>
+        /// <param name="title">The title.</param>
+        /// <returns>The resulting paragraph.</returns>
+        [NotNull]
+        private Paragraph CreateTitle(string title)
+        {
+            var chunk = new Chunk(title, TitleFont);
 
-			var para = new Paragraph(chunk)
-			{
-				SpacingAfter = DefaultParagraphSpacing
-			};
+            var para = new Paragraph(chunk)
+            {
+                SpacingAfter = DefaultParagraphSpacing
+            };
 
-			return para;
-		}
+            return para;
+        }
 
-		[NotNull]
-		private Paragraph CreateParticipantList([NotNull] IEnumerable<IGuildUser> participants)
-		{
-			var paragraph = new Paragraph
-			{
-				SpacingAfter = DefaultParagraphSpacing
-			};
+        [NotNull]
+        private Paragraph CreateParticipantList([NotNull] IEnumerable<IGuildUser> participants)
+        {
+            var paragraph = new Paragraph
+            {
+                SpacingAfter = DefaultParagraphSpacing
+            };
 
-			var participantsTitleChunk = new Chunk("Participants: \n", StandardFont);
-			paragraph.Add(participantsTitleChunk);
+            var participantsTitleChunk = new Chunk("Participants: \n", StandardFont);
+            paragraph.Add(participantsTitleChunk);
 
-			foreach (var participant in participants)
-			{
-				var content = $"{participant.Username}\n";
-				var participantChunk = new Chunk(content, ItalicFont);
+            foreach (var participant in participants)
+            {
+                var content = $"{participant.Username}\n";
+                var participantChunk = new Chunk(content, ItalicFont);
 
-				paragraph.Add(participantChunk);
-			}
+                paragraph.Add(participantChunk);
+            }
 
-			return paragraph;
-		}
+            return paragraph;
+        }
 
-		[NotNull]
-		private Paragraph CreateMessage([NotNull] string author, [NotNull] string contents)
-		{
-			var authorChunk = new Chunk($"{author} \n", ItalicFont);
+        [NotNull]
+        private Paragraph CreateMessage([NotNull] string author, [NotNull] string contents)
+        {
+            var authorChunk = new Chunk($"{author} \n", ItalicFont);
 
-			var para = new Paragraph
-			{
-				SpacingAfter = DefaultParagraphSpacing
-			};
+            var para = new Paragraph
+            {
+                SpacingAfter = DefaultParagraphSpacing
+            };
 
-			para.Add(authorChunk);
-			para.Add(FormatContentString(contents));
+            para.Add(authorChunk);
+            para.Add(FormatContentString(contents));
 
-			para.SpacingAfter = 8.0f;
+            para.SpacingAfter = 8.0f;
 
-			return para;
-		}
+            return para;
+        }
 
-		[NotNull]
-		private Paragraph FormatContentString([NotNull] string contents)
-		{
-			var splits = contents.Split(new[] { "```" }, StringSplitOptions.None).Select(s => s.TrimStart('\n')).ToList();
-			var paragraph = new Paragraph();
+        [NotNull]
+        private Paragraph FormatContentString([NotNull] string contents)
+        {
+            var splits = contents.Split(new[] { "```" }, StringSplitOptions.None).Select(s => s.TrimStart('\n')).ToList();
+            var paragraph = new Paragraph();
 
-			for (var i = 0; i < splits.Count; ++i)
-			{
-				if (splits[i].IsNullOrWhitespace())
-				{
-					continue;
-				}
+            for (var i = 0; i < splits.Count; ++i)
+            {
+                if (splits[i].IsNullOrWhitespace())
+                {
+                    continue;
+                }
 
-				if (i % 2 == 1)
-				{
-					var subPara = new Paragraph();
-					var spacingChunk = new Chunk("\n", StandardFont);
+                if (i % 2 == 1)
+                {
+                    var subPara = new Paragraph();
+                    var spacingChunk = new Chunk("\n", StandardFont);
 
-					var chunk = new Chunk($"{splits[i]}", ItalicFont);
-					chunk.SetBackground(BaseColor.LIGHT_GRAY, 4, 4, 4, 4);
+                    var chunk = new Chunk($"{splits[i]}", ItalicFont);
+                    chunk.SetBackground(BaseColor.LIGHT_GRAY, 4, 4, 4, 4);
 
-					subPara.Add(spacingChunk);
-					subPara.Add(chunk);
-					subPara.Add(spacingChunk);
+                    subPara.Add(spacingChunk);
+                    subPara.Add(chunk);
+                    subPara.Add(spacingChunk);
 
-					paragraph.Add(subPara);
-				}
-				else
-				{
-					var chunk = new Chunk(splits[i], StandardFont);
-					paragraph.Add(chunk);
-				}
-			}
+                    paragraph.Add(subPara);
+                }
+                else
+                {
+                    var chunk = new Chunk(splits[i], StandardFont);
+                    paragraph.Add(chunk);
+                }
+            }
 
-			return paragraph;
-		}
-	}
+            return paragraph;
+        }
+    }
 }

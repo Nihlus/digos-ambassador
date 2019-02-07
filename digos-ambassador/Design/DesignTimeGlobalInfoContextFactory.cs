@@ -27,18 +27,18 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace DIGOS.Ambassador.Design
 {
-	/// <summary>
-	/// Design-time factory for <see cref="GlobalInfoContext"/> instances.
-	/// </summary>
-	public class DesignTimeGlobalInfoContextFactory : IDesignTimeDbContextFactory<GlobalInfoContext>
-	{
-		/// <inheritdoc />
-		[NotNull]
-		public GlobalInfoContext CreateDbContext(string[] args)
-		{
-			var options = GlobalInfoContext.ConfigureOptions(new DbContextOptionsBuilder<GlobalInfoContext>()).Options;
+    /// <summary>
+    /// Design-time factory for <see cref="GlobalInfoContext"/> instances.
+    /// </summary>
+    public class DesignTimeGlobalInfoContextFactory : IDesignTimeDbContextFactory<GlobalInfoContext>
+    {
+        /// <inheritdoc />
+        [NotNull]
+        public GlobalInfoContext CreateDbContext(string[] args)
+        {
+            var options = GlobalInfoContext.ConfigureOptions(new DbContextOptionsBuilder<GlobalInfoContext>()).Options;
 
-			return new GlobalInfoContext(options);
-		}
-	}
+            return new GlobalInfoContext(options);
+        }
+    }
 }

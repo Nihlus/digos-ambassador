@@ -24,34 +24,34 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Provides ze and zir pronouns.
-	/// </summary>
-	[UsedImplicitly]
-	public class ZeZirPronounProvider : PronounProvider
-	{
-		/// <inheritdoc />
-		[NotNull]
-		public override string Family => "Ze and zir";
+    /// <summary>
+    /// Provides ze and zir pronouns.
+    /// </summary>
+    [UsedImplicitly]
+    public class ZeZirPronounProvider : PronounProvider
+    {
+        /// <inheritdoc />
+        [NotNull]
+        public override string Family => "Ze and zir";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ze is" : "ze";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ze is" : "ze";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetObjectForm() => "zir";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetObjectForm() => "zir";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetPossessiveAdjectiveForm() => "zir";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetPossessiveAdjectiveForm() => "zir";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "ze has" : "zirs";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "ze has" : "zirs";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetReflexiveForm() => "zirself";
-	}
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetReflexiveForm() => "zirself";
+    }
 }

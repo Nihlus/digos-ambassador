@@ -29,34 +29,34 @@ using static DIGOS.Ambassador.Permissions.PermissionTarget;
 
 namespace DIGOS.Ambassador.Permissions
 {
-	/// <summary>
-	/// Helper class for assigning new users their default permissions.
-	/// </summary>
-	public static class DefaultPermissions
-	{
-		private static readonly List<Permission> Permissions = new List<Permission>
-		{
-			EditUser,
-			CreateCharacter,
-			DeleteCharacter,
-			ImportCharacter,
-			EditCharacter,
-			TransferCharacter,
-			AssumeCharacter,
-			CreateRoleplay,
-			DeleteRoleplay,
-			JoinRoleplay,
-			EditRoleplay,
-			ReplayRoleplay,
-			StartStopRoleplay,
-			TransferRoleplay,
-			KickRoleplayMember
-		};
+    /// <summary>
+    /// Helper class for assigning new users their default permissions.
+    /// </summary>
+    public static class DefaultPermissions
+    {
+        private static readonly List<Permission> Permissions = new List<Permission>
+        {
+            EditUser,
+            CreateCharacter,
+            DeleteCharacter,
+            ImportCharacter,
+            EditCharacter,
+            TransferCharacter,
+            AssumeCharacter,
+            CreateRoleplay,
+            DeleteRoleplay,
+            JoinRoleplay,
+            EditRoleplay,
+            ReplayRoleplay,
+            StartStopRoleplay,
+            TransferRoleplay,
+            KickRoleplayMember
+        };
 
-		/// <summary>
-		/// Gets the default set of local permissions.
-		/// </summary>
-		[NotNull]
-		public static IReadOnlyList<LocalPermission> DefaultPermissionSet => Permissions.Select(p => new LocalPermission { Permission = p, Target = Self }).ToList();
-	}
+        /// <summary>
+        /// Gets the default set of local permissions.
+        /// </summary>
+        [NotNull]
+        public static IReadOnlyList<LocalPermission> DefaultPermissionSet => Permissions.Select(p => new LocalPermission { Permission = p, Target = Self }).ToList();
+    }
 }

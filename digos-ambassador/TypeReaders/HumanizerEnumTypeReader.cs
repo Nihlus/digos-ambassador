@@ -28,26 +28,26 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.TypeReaders
 {
-	/// <summary>
-	/// Reads enums using Humanizer's DehumanizeTo function.
-	/// </summary>
-	/// <typeparam name="T">The enum type.</typeparam>
-	public class HumanizerEnumTypeReader<T> : TypeReader where T : struct, IComparable, IFormattable
-	{
-		/// <inheritdoc />
-		[NotNull]
-		public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
-		{
-			try
-			{
-				var result = input.DehumanizeTo<T>();
-				return Task.FromResult(TypeReaderResult.FromSuccess(result));
-			}
-			catch (NoMatchFoundException)
-			{
-				var message = $"Couldn't parse \"{input}\" as an enum of type \"{typeof(T).Name}\"";
-				return Task.FromResult(TypeReaderResult.FromError(CommandError.ObjectNotFound, message));
-			}
-		}
-	}
+    /// <summary>
+    /// Reads enums using Humanizer's DehumanizeTo function.
+    /// </summary>
+    /// <typeparam name="T">The enum type.</typeparam>
+    public class HumanizerEnumTypeReader<T> : TypeReader where T : struct, IComparable, IFormattable
+    {
+        /// <inheritdoc />
+        [NotNull]
+        public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
+        {
+            try
+            {
+                var result = input.DehumanizeTo<T>();
+                return Task.FromResult(TypeReaderResult.FromSuccess(result));
+            }
+            catch (NoMatchFoundException)
+            {
+                var message = $"Couldn't parse \"{input}\" as an enum of type \"{typeof(T).Name}\"";
+                return Task.FromResult(TypeReaderResult.FromError(CommandError.ObjectNotFound, message));
+            }
+        }
+    }
 }

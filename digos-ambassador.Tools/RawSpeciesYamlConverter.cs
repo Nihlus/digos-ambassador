@@ -29,40 +29,40 @@ using YamlDotNet.Serialization;
 
 namespace DIGOS.Ambassador.Tools
 {
-	/// <summary>
-	/// YAML deserialization converter for species objects. This just reads a dummy type to allow file verification.
-	/// </summary>
-	public class RawSpeciesYamlConverter : IYamlTypeConverter
-	{
-		/// <inheritdoc />
-		public bool Accepts(Type type)
-		{
-			return type == typeof(Species);
-		}
+    /// <summary>
+    /// YAML deserialization converter for species objects. This just reads a dummy type to allow file verification.
+    /// </summary>
+    public class RawSpeciesYamlConverter : IYamlTypeConverter
+    {
+        /// <inheritdoc />
+        public bool Accepts(Type type)
+        {
+            return type == typeof(Species);
+        }
 
-		/// <inheritdoc />
-		[CanBeNull]
-		public object ReadYaml(IParser parser, Type type)
-		{
-			var speciesName = parser.Allow<Scalar>().Value;
+        /// <inheritdoc />
+        [CanBeNull]
+        public object ReadYaml(IParser parser, Type type)
+        {
+            var speciesName = parser.Allow<Scalar>().Value;
 
-			if (speciesName is null)
-			{
-				return null;
-			}
+            if (speciesName is null)
+            {
+                return null;
+            }
 
-			return new Species
-			{
-				Name = speciesName
-			};
-		}
+            return new Species
+            {
+                Name = speciesName
+            };
+        }
 
-		/// <inheritdoc />
-		public void WriteYaml([NotNull] IEmitter emitter, object value, Type type)
-		{
-			var species = (Species)value;
+        /// <inheritdoc />
+        public void WriteYaml([NotNull] IEmitter emitter, object value, Type type)
+        {
+            var species = (Species)value;
 
-			emitter.Emit(new Scalar(species.Name));
-		}
-	}
+            emitter.Emit(new Scalar(species.Name));
+        }
+    }
 }

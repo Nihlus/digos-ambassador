@@ -25,33 +25,33 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Data
 {
-	/// <summary>
-	/// Represents an image.
-	/// </summary>
-	public class Image : IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents an image.
+    /// </summary>
+    public class Image : IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the name of the image.
-		/// </summary>
-		public string Name { get; set; }
+        /// <summary>
+        /// Gets or sets the name of the image.
+        /// </summary>
+        public string Name { get; set; }
 
-		/// <summary>
-		/// Gets or sets the caption of the image.
-		/// </summary>
-		public string Caption { get; set; }
+        /// <summary>
+        /// Gets or sets the caption of the image.
+        /// </summary>
+        public string Caption { get; set; }
 
-		/// <summary>
-		/// Gets or sets a value indicating whether or not the image is NSFW.
-		/// </summary>
-		public bool IsNSFW { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether or not the image is NSFW.
+        /// </summary>
+        public bool IsNSFW { get; set; }
 
-		/// <summary>
-		/// Gets or sets the online URL of the image.
-		/// </summary>
-		[CanBeNull]
-		public string Url { get; set; }
-	}
+        /// <summary>
+        /// Gets or sets the online URL of the image.
+        /// </summary>
+        [CanBeNull]
+        public string Url { get; set; }
+    }
 }

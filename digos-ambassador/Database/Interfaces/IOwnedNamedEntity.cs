@@ -26,49 +26,49 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Interfaces
 {
-	/// <summary>
-	/// Represents an entity that is owned by a user, and has a unique name within the context of that user. The name
-	/// is case-insensitive.
-	/// </summary>
-	public interface IOwnedNamedEntity
-	{
-		/// <summary>
-		/// Gets or sets the user that owns this entity.
-		/// </summary>
-		User Owner { get; set; }
+    /// <summary>
+    /// Represents an entity that is owned by a user, and has a unique name within the context of that user. The name
+    /// is case-insensitive.
+    /// </summary>
+    public interface IOwnedNamedEntity
+    {
+        /// <summary>
+        /// Gets or sets the user that owns this entity.
+        /// </summary>
+        User Owner { get; set; }
 
-		/// <summary>
-		/// Gets the user-unique name of the entity.
-		/// </summary>
-		string Name { get; }
+        /// <summary>
+        /// Gets the user-unique name of the entity.
+        /// </summary>
+        string Name { get; }
 
-		/// <summary>
-		/// Gets the display name of the type that the entity is (e.g, character, roleplay, etc)
-		/// </summary>
-		string EntityTypeDisplayName { get; }
+        /// <summary>
+        /// Gets the display name of the type that the entity is (e.g, character, roleplay, etc)
+        /// </summary>
+        string EntityTypeDisplayName { get; }
 
-		/// <summary>
-		/// Determines whether or not the given user is the owner of the entity.
-		/// </summary>
-		/// <param name="user">The user.</param>
-		/// <returns>true if the user is the owner; otherwise, false.</returns>
-		[Pure]
-		bool IsOwner([NotNull] User user);
+        /// <summary>
+        /// Determines whether or not the given user is the owner of the entity.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <returns>true if the user is the owner; otherwise, false.</returns>
+        [Pure]
+        bool IsOwner([NotNull] User user);
 
-		/// <summary>
-		/// Determines whether or not the given user is the owner of the entity.
-		/// </summary>
-		/// <param name="user">The user.</param>
-		/// <returns>true if the user is the owner; otherwise, false.</returns>
-		[Pure]
-		bool IsOwner([NotNull] IUser user);
+        /// <summary>
+        /// Determines whether or not the given user is the owner of the entity.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <returns>true if the user is the owner; otherwise, false.</returns>
+        [Pure]
+        bool IsOwner([NotNull] IUser user);
 
-		/// <summary>
-		/// Determines whether or not the given user ID is the owner of the entity.
-		/// </summary>
-		/// <param name="userID">The ID of the user.</param>
-		/// <returns>true if the user is the owner; otherwise, false.</returns>
-		[Pure]
-		bool IsOwner(long userID);
-	}
+        /// <summary>
+        /// Determines whether or not the given user ID is the owner of the entity.
+        /// </summary>
+        /// <param name="userID">The ID of the user.</param>
+        /// <returns>true if the user is the owner; otherwise, false.</returns>
+        [Pure]
+        bool IsOwner(long userID);
+    }
 }

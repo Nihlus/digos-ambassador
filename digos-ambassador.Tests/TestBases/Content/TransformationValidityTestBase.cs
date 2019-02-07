@@ -32,42 +32,42 @@ using YamlDotNet.Serialization.NodeDeserializers;
 
 namespace DIGOS.Ambassador.Tests.TestBases.Content
 {
-	/// <summary>
-	/// Acts as a base for transformation validity tests.
-	/// </summary>
-	public class TransformationValidityTestBase
-	{
-		/// <summary>
-		/// Gets an instance of a file verifier.
-		/// </summary>
-		protected TransformationFileVerifier Verifier { get; } = new TransformationFileVerifier();
+    /// <summary>
+    /// Acts as a base for transformation validity tests.
+    /// </summary>
+    public class TransformationValidityTestBase
+    {
+        /// <summary>
+        /// Gets an instance of a file verifier.
+        /// </summary>
+        protected TransformationFileVerifier Verifier { get; } = new TransformationFileVerifier();
 
-		/// <summary>
-		/// Deserializes a transformation object from the given file. The file is assumed to exist and be valid.
-		/// </summary>
-		/// <param name="file">The file.</param>
-		/// <typeparam name="T">The transformation object type.</typeparam>
-		/// <returns>The object.</returns>
-		protected T Deserialize<T>(string file)
-		{
-			using (var sr = new StreamReader(File.OpenRead(file)))
-			{
-				var deserB = new DeserializerBuilder()
-					.WithTypeConverter(new ColourYamlConverter())
-					.WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-					.WithNamingConvention(new UnderscoredNamingConvention());
+        /// <summary>
+        /// Deserializes a transformation object from the given file. The file is assumed to exist and be valid.
+        /// </summary>
+        /// <param name="file">The file.</param>
+        /// <typeparam name="T">The transformation object type.</typeparam>
+        /// <returns>The object.</returns>
+        protected T Deserialize<T>(string file)
+        {
+            using (var sr = new StreamReader(File.OpenRead(file)))
+            {
+                var deserB = new DeserializerBuilder()
+                    .WithTypeConverter(new ColourYamlConverter())
+                    .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
+                    .WithNamingConvention(new UnderscoredNamingConvention());
 
-				if (typeof(T) != typeof(Species))
-				{
-					deserB = deserB.WithTypeConverter(new RawSpeciesYamlConverter());
-				}
+                if (typeof(T) != typeof(Species))
+                {
+                    deserB = deserB.WithTypeConverter(new RawSpeciesYamlConverter());
+                }
 
-				var deser = deserB.Build();
+                var deser = deserB.Build();
 
-				string content = sr.ReadToEnd();
+                string content = sr.ReadToEnd();
 
-				return deser.Deserialize<T>(content);
-			}
-		}
-	}
+                return deser.Deserialize<T>(content);
+            }
+        }
+    }
 }

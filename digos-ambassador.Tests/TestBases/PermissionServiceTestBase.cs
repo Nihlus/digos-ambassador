@@ -24,22 +24,22 @@ using DIGOS.Ambassador.Services;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
-	/// <summary>
-	/// Serves as a test base for permission service tests.
-	/// </summary>
-	public abstract class PermissionServiceTestBase : DatabaseDependantTestBase
-	{
-		/// <summary>
-		/// Gets the permission service instance.
-		/// </summary>
-		protected PermissionService Permissions { get; }
+    /// <summary>
+    /// Serves as a test base for permission service tests.
+    /// </summary>
+    public abstract class PermissionServiceTestBase : DatabaseDependantTestBase
+    {
+        /// <summary>
+        /// Gets the permission service instance.
+        /// </summary>
+        protected PermissionService Permissions { get; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="PermissionServiceTestBase"/> class.
-		/// </summary>
-		protected PermissionServiceTestBase()
-		{
-			this.Permissions = new PermissionService();
-		}
-	}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PermissionServiceTestBase"/> class.
+        /// </summary>
+        protected PermissionServiceTestBase()
+        {
+            this.Permissions = new PermissionService();
+        }
+    }
 }

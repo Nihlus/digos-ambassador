@@ -27,54 +27,54 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Pagination
 {
-	/// <summary>
-	/// Represents a paginated gallery of embeds.
-	/// </summary>
-	public class PaginatedEmbed : IPager<EmbedBuilder, PaginatedEmbed>
-	{
-		/// <inheritdoc />
-		public IList<EmbedBuilder> Pages { get; set; }
+    /// <summary>
+    /// Represents a paginated gallery of embeds.
+    /// </summary>
+    public class PaginatedEmbed : IPager<EmbedBuilder, PaginatedEmbed>
+    {
+        /// <inheritdoc />
+        public IList<EmbedBuilder> Pages { get; set; }
 
-		/// <inheritdoc />
-		public PaginatedAppearanceOptions Options { get; set; } = PaginatedAppearanceOptions.Default;
+        /// <inheritdoc />
+        public PaginatedAppearanceOptions Options { get; set; } = PaginatedAppearanceOptions.Default;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="PaginatedEmbed"/> class.
-		/// </summary>
-		/// <param name="embeds">The embeds to paginate.</param>
-		public PaginatedEmbed(IList<EmbedBuilder> embeds)
-		{
-			this.Pages = embeds;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PaginatedEmbed"/> class.
+        /// </summary>
+        /// <param name="embeds">The embeds to paginate.</param>
+        public PaginatedEmbed(IList<EmbedBuilder> embeds)
+        {
+            this.Pages = embeds;
+        }
 
-		/// <inheritdoc />
-		[NotNull]
-		public PaginatedEmbed WithPage(EmbedBuilder page)
-		{
-			this.Pages.Add(page);
-			return this;
-		}
+        /// <inheritdoc />
+        [NotNull]
+        public PaginatedEmbed WithPage(EmbedBuilder page)
+        {
+            this.Pages.Add(page);
+            return this;
+        }
 
-		/// <inheritdoc />
-		[NotNull]
-		public PaginatedEmbed WithPages([NotNull] IEnumerable<EmbedBuilder> pages)
-		{
-			foreach (var page in pages)
-			{
-				WithPage(page);
-			}
+        /// <inheritdoc />
+        [NotNull]
+        public PaginatedEmbed WithPages([NotNull] IEnumerable<EmbedBuilder> pages)
+        {
+            foreach (var page in pages)
+            {
+                WithPage(page);
+            }
 
-			return this;
-		}
+            return this;
+        }
 
-		/// <inheritdoc />
-		public Embed BuildEmbed(int page)
-		{
-			var currentPage = this.Pages[page];
+        /// <inheritdoc />
+        public Embed BuildEmbed(int page)
+        {
+            var currentPage = this.Pages[page];
 
-			return currentPage
-			.WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page + 1, this.Pages.Count))
-			.Build();
-		}
-	}
+            return currentPage
+            .WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page + 1, this.Pages.Count))
+            .Build();
+        }
+    }
 }

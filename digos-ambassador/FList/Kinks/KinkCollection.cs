@@ -26,39 +26,39 @@ using Newtonsoft.Json;
 
 namespace DIGOS.Ambassador.FList.Kinks
 {
-	/// <summary>
-	/// Represents a JSON kink collection from the F-list API, organized into categories.
-	/// </summary>
-	public class KinkCollection
-	{
-		/// <summary>
-		/// Gets or sets the error that the API returned, if any.
-		/// </summary>
-		[JsonProperty("error")]
-		public string Error { get; set; }
+    /// <summary>
+    /// Represents a JSON kink collection from the F-list API, organized into categories.
+    /// </summary>
+    public class KinkCollection
+    {
+        /// <summary>
+        /// Gets or sets the error that the API returned, if any.
+        /// </summary>
+        [JsonProperty("error")]
+        public string Error { get; set; }
 
-		/// <summary>
-		/// Gets or sets the kink categories.
-		/// </summary>
-		[JsonProperty("kinks")]
-		public Dictionary<string, FListKinkCategory> KinkCategories { get; set; }
+        /// <summary>
+        /// Gets or sets the kink categories.
+        /// </summary>
+        [JsonProperty("kinks")]
+        public Dictionary<string, FListKinkCategory> KinkCategories { get; set; }
 
-		/// <summary>
-		/// Creates a new <see cref="KinkCollection"/> from the given JSON string.
-		/// </summary>
-		/// <param name="json">The serialized kink collection.</param>
-		/// <returns>A deserialized kink collection.</returns>
-		[Pure]
-		[NotNull]
-		public static KinkCollection FromJson([NotNull] string json)
-		{
-			var settings = new JsonSerializerSettings
-			{
-				MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
-				DateParseHandling = DateParseHandling.None,
-			};
+        /// <summary>
+        /// Creates a new <see cref="KinkCollection"/> from the given JSON string.
+        /// </summary>
+        /// <param name="json">The serialized kink collection.</param>
+        /// <returns>A deserialized kink collection.</returns>
+        [Pure]
+        [NotNull]
+        public static KinkCollection FromJson([NotNull] string json)
+        {
+            var settings = new JsonSerializerSettings
+            {
+                MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
+                DateParseHandling = DateParseHandling.None,
+            };
 
-			return JsonConvert.DeserializeObject<KinkCollection>(json, settings);
-		}
-	}
+            return JsonConvert.DeserializeObject<KinkCollection>(json, settings);
+        }
+    }
 }

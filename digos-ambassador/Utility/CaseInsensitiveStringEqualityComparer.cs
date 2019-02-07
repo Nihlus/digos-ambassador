@@ -25,31 +25,31 @@ using System.Collections.Generic;
 
 namespace DIGOS.Ambassador.Utility
 {
-	/// <summary>
-	/// Compares strings on a case-insensitive basis.
-	/// </summary>
-	public class CaseInsensitiveStringEqualityComparer : IEqualityComparer<string>
-	{
-		/// <inheritdoc />
-		public bool Equals(string x, string y)
-		{
-			if (x is null && y is null)
-			{
-				return true;
-			}
+    /// <summary>
+    /// Compares strings on a case-insensitive basis.
+    /// </summary>
+    public class CaseInsensitiveStringEqualityComparer : IEqualityComparer<string>
+    {
+        /// <inheritdoc />
+        public bool Equals(string x, string y)
+        {
+            if (x is null && y is null)
+            {
+                return true;
+            }
 
-			if (x is null || y is null)
-			{
-				return false;
-			}
+            if (x is null || y is null)
+            {
+                return false;
+            }
 
-			return x.Equals(y, StringComparison.OrdinalIgnoreCase);
-		}
+            return x.Equals(y, StringComparison.OrdinalIgnoreCase);
+        }
 
-		/// <inheritdoc />
-		public int GetHashCode(string obj)
-		{
-			return obj.ToLowerInvariant().GetHashCode();
-		}
-	}
+        /// <inheritdoc />
+        public int GetHashCode(string obj)
+        {
+            return obj.ToLowerInvariant().GetHashCode();
+        }
+    }
 }

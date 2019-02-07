@@ -27,27 +27,27 @@ using Humanizer;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// A token that gets replaced with a pattern name.
-	/// </summary>
-	[TokenIdentifier("pattern", "p")]
-	public class PatternToken : ReplacableTextToken<PatternToken>
-	{
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			if (component is null)
-			{
-				throw new ArgumentNullException(nameof(component));
-			}
+    /// <summary>
+    /// A token that gets replaced with a pattern name.
+    /// </summary>
+    [TokenIdentifier("pattern", "p")]
+    public class PatternToken : ReplacableTextToken<PatternToken>
+    {
+        /// <inheritdoc />
+        public override string GetText(Character character, AppearanceComponent component)
+        {
+            if (component is null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
 
-			return component.Pattern.ToString().Humanize().Transform(To.LowerCase);
-		}
+            return component.Pattern.ToString().Humanize().Transform(To.LowerCase);
+        }
 
-		/// <inheritdoc />
-		protected override PatternToken Initialize(string data)
-		{
-			return this;
-		}
-	}
+        /// <inheritdoc />
+        protected override PatternToken Initialize(string data)
+        {
+            return this;
+        }
+    }
 }

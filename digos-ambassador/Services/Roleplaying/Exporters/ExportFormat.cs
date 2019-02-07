@@ -22,29 +22,29 @@
 
 namespace DIGOS.Ambassador.Services.Exporters
 {
-	/// <summary>
-	/// A format that roleplays can be exported to.
-	/// </summary>
-	public enum ExportFormat
-	{
-		/// <summary>
-		/// A PDF file.
-		/// </summary>
-		PDF,
+    /// <summary>
+    /// A format that roleplays can be exported to.
+    /// </summary>
+    public enum ExportFormat
+    {
+        /// <summary>
+        /// A PDF file.
+        /// </summary>
+        PDF,
 
-		/// <summary>
-		/// A plaintext file.
-		/// </summary>
-		Plaintext,
+        /// <summary>
+        /// A plaintext file.
+        /// </summary>
+        Plaintext,
 
-		/// <summary>
-		/// A JSON file.
-		/// </summary>
-		JSON,
+        /// <summary>
+        /// A JSON file.
+        /// </summary>
+        JSON,
 
-		/// <summary>
-		/// An ODT file.
-		/// </summary>
-		ODT
-	}
+        /// <summary>
+        /// An ODT file.
+        /// </summary>
+        ODT
+    }
 }

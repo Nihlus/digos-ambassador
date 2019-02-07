@@ -34,214 +34,214 @@ using WebSocketSharp;
 
 namespace DIGOS.Ambassador.Utility
 {
-	/// <summary>
-	/// WebSocket provider using websocket-sharp.
-	/// </summary>
-	public class WebSocketSharpProvider : IWebSocketClient, IDisposable
-	{
-		/// <inheritdoc />
-		public event Func<byte[], int, int, Task> BinaryMessage;
+    /// <summary>
+    /// WebSocket provider using websocket-sharp.
+    /// </summary>
+    public class WebSocketSharpProvider : IWebSocketClient, IDisposable
+    {
+        /// <inheritdoc />
+        public event Func<byte[], int, int, Task> BinaryMessage;
 
-		/// <inheritdoc />
-		public event Func<string, Task> TextMessage;
+        /// <inheritdoc />
+        public event Func<string, Task> TextMessage;
 
-		/// <inheritdoc />
-		public event Func<Exception, Task> Closed;
+        /// <inheritdoc />
+        public event Func<Exception, Task> Closed;
 
-		private readonly SemaphoreSlim Lock;
-		private readonly Dictionary<string, string> Headers;
-		private readonly ManualResetEventSlim WaitUntilConnect;
+        private readonly SemaphoreSlim Lock;
+        private readonly Dictionary<string, string> Headers;
+        private readonly ManualResetEventSlim WaitUntilConnect;
 
-		private WebSocket Client;
-		private CancellationTokenSource CancelTokenSource;
-		private CancellationToken CancelToken;
-		private CancellationToken ParentToken;
+        private WebSocket Client;
+        private CancellationTokenSource CancelTokenSource;
+        private CancellationToken CancelToken;
+        private CancellationToken ParentToken;
 
-		private bool IsDisposed;
+        private bool IsDisposed;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="WebSocketSharpProvider"/> class.
-		/// </summary>
-		public WebSocketSharpProvider()
-		{
-			this.Headers = new Dictionary<string, string>();
-			this.Lock = new SemaphoreSlim(1, 1);
-			this.CancelTokenSource = new CancellationTokenSource();
-			this.CancelToken = CancellationToken.None;
-			this.ParentToken = CancellationToken.None;
-			this.WaitUntilConnect = new ManualResetEventSlim();
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="WebSocketSharpProvider"/> class.
+        /// </summary>
+        public WebSocketSharpProvider()
+        {
+            this.Headers = new Dictionary<string, string>();
+            this.Lock = new SemaphoreSlim(1, 1);
+            this.CancelTokenSource = new CancellationTokenSource();
+            this.CancelToken = CancellationToken.None;
+            this.ParentToken = CancellationToken.None;
+            this.WaitUntilConnect = new ManualResetEventSlim();
+        }
 
-		/// <inheritdoc />
-		public void SetHeader([NotNull] string key, string value)
-		{
-			this.Headers[key] = value;
-		}
+        /// <inheritdoc />
+        public void SetHeader([NotNull] string key, string value)
+        {
+            this.Headers[key] = value;
+        }
 
-		/// <inheritdoc />
-		public void SetCancelToken(CancellationToken cancelToken)
-		{
-			this.ParentToken = cancelToken;
-			this.CancelToken = CancellationTokenSource.CreateLinkedTokenSource
-			(
-				this.ParentToken,
-				this.CancelTokenSource.Token
-			)
-			.Token;
-		}
+        /// <inheritdoc />
+        public void SetCancelToken(CancellationToken cancelToken)
+        {
+            this.ParentToken = cancelToken;
+            this.CancelToken = CancellationTokenSource.CreateLinkedTokenSource
+            (
+                this.ParentToken,
+                this.CancelTokenSource.Token
+            )
+            .Token;
+        }
 
-		/// <inheritdoc />
-		public async Task ConnectAsync(string host)
-		{
-			await this.Lock.WaitAsync().ConfigureAwait(false);
-			try
-			{
-				await ConnectInternalAsync(host).ConfigureAwait(false);
-			}
-			finally
-			{
-				this.Lock.Release();
-			}
-		}
+        /// <inheritdoc />
+        public async Task ConnectAsync(string host)
+        {
+            await this.Lock.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                await ConnectInternalAsync(host).ConfigureAwait(false);
+            }
+            finally
+            {
+                this.Lock.Release();
+            }
+        }
 
-		private async Task ConnectInternalAsync(string host)
-		{
-			await DisconnectInternalAsync().ConfigureAwait(false);
+        private async Task ConnectInternalAsync(string host)
+        {
+            await DisconnectInternalAsync().ConfigureAwait(false);
 
-			this.CancelTokenSource = new CancellationTokenSource();
-			this.CancelToken = CancellationTokenSource.CreateLinkedTokenSource
-				(
-					this.ParentToken,
-					this.CancelTokenSource.Token
-				)
-				.Token;
+            this.CancelTokenSource = new CancellationTokenSource();
+            this.CancelToken = CancellationTokenSource.CreateLinkedTokenSource
+                (
+                    this.ParentToken,
+                    this.CancelTokenSource.Token
+                )
+                .Token;
 
-			this.Client = new WebSocket(host)
-			{
-				CustomHeaders = this.Headers.ToList()
-			};
-			this.Client.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
+            this.Client = new WebSocket(host)
+            {
+                CustomHeaders = this.Headers.ToList()
+            };
+            this.Client.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 
-			this.Client.OnMessage += OnMessage;
-			this.Client.OnOpen += OnConnected;
-			this.Client.OnClose += OnClosed;
+            this.Client.OnMessage += OnMessage;
+            this.Client.OnOpen += OnConnected;
+            this.Client.OnClose += OnClosed;
 
-			this.Client.Connect();
-			this.WaitUntilConnect.Wait(this.CancelToken);
-		}
+            this.Client.Connect();
+            this.WaitUntilConnect.Wait(this.CancelToken);
+        }
 
-		/// <inheritdoc />
-		public async Task DisconnectAsync()
-		{
-			await this.Lock.WaitAsync().ConfigureAwait(false);
-			try
-			{
-				await DisconnectInternalAsync().ConfigureAwait(false);
-			}
-			finally
-			{
-				this.Lock.Release();
-			}
-		}
+        /// <inheritdoc />
+        public async Task DisconnectAsync()
+        {
+            await this.Lock.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                await DisconnectInternalAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                this.Lock.Release();
+            }
+        }
 
-		[NotNull]
-		private Task DisconnectInternalAsync()
-		{
-			this.CancelTokenSource.Cancel();
-			if (this.Client is null)
-			{
-				return Task.CompletedTask;
-			}
+        [NotNull]
+        private Task DisconnectInternalAsync()
+        {
+            this.CancelTokenSource.Cancel();
+            if (this.Client is null)
+            {
+                return Task.CompletedTask;
+            }
 
-			if (this.Client.ReadyState == WebSocketState.Open)
-			{
-				this.Client.Close();
-			}
+            if (this.Client.ReadyState == WebSocketState.Open)
+            {
+                this.Client.Close();
+            }
 
-			this.Client.OnMessage -= OnMessage;
-			this.Client.OnOpen -= OnConnected;
-			this.Client.OnClose -= OnClosed;
+            this.Client.OnMessage -= OnMessage;
+            this.Client.OnOpen -= OnConnected;
+            this.Client.OnClose -= OnClosed;
 
-			this.Client = null;
-			this.WaitUntilConnect.Reset();
+            this.Client = null;
+            this.WaitUntilConnect.Reset();
 
-			return Task.CompletedTask;
-		}
+            return Task.CompletedTask;
+        }
 
-		private void OnMessage(object sender, [NotNull] MessageEventArgs messageEventArgs)
-		{
-			if (messageEventArgs.IsBinary)
-			{
-				OnBinaryMessage(messageEventArgs);
-			}
-			else if (messageEventArgs.IsText)
-			{
-				OnTextMessage(messageEventArgs);
-			}
-		}
+        private void OnMessage(object sender, [NotNull] MessageEventArgs messageEventArgs)
+        {
+            if (messageEventArgs.IsBinary)
+            {
+                OnBinaryMessage(messageEventArgs);
+            }
+            else if (messageEventArgs.IsText)
+            {
+                OnTextMessage(messageEventArgs);
+            }
+        }
 
-		/// <inheritdoc />
-		public async Task SendAsync([NotNull] byte[] data, int index, int count, bool isText)
-		{
-			await this.Lock.WaitAsync(this.CancelToken).ConfigureAwait(false);
-			try
-			{
-				if (isText)
-				{
-					this.Client.Send(Encoding.UTF8.GetString(data, index, count));
-				}
-				else
-				{
-					this.Client.Send(data.Skip(index).Take(count).ToArray());
-				}
-			}
-			finally
-			{
-				this.Lock.Release();
-			}
-		}
+        /// <inheritdoc />
+        public async Task SendAsync([NotNull] byte[] data, int index, int count, bool isText)
+        {
+            await this.Lock.WaitAsync(this.CancelToken).ConfigureAwait(false);
+            try
+            {
+                if (isText)
+                {
+                    this.Client.Send(Encoding.UTF8.GetString(data, index, count));
+                }
+                else
+                {
+                    this.Client.Send(data.Skip(index).Take(count).ToArray());
+                }
+            }
+            finally
+            {
+                this.Lock.Release();
+            }
+        }
 
-		private void OnTextMessage(MessageEventArgs e)
-		{
-			this.TextMessage?.Invoke(e.Data).GetAwaiter().GetResult();
-		}
+        private void OnTextMessage(MessageEventArgs e)
+        {
+            this.TextMessage?.Invoke(e.Data).GetAwaiter().GetResult();
+        }
 
-		private void OnBinaryMessage(MessageEventArgs e)
-		{
-			this.BinaryMessage?.Invoke(e.RawData, 0, e.RawData.Length).GetAwaiter().GetResult();
-		}
+        private void OnBinaryMessage(MessageEventArgs e)
+        {
+            this.BinaryMessage?.Invoke(e.RawData, 0, e.RawData.Length).GetAwaiter().GetResult();
+        }
 
-		private void OnConnected(object sender, EventArgs e)
-		{
-			this.WaitUntilConnect.Set();
-		}
+        private void OnConnected(object sender, EventArgs e)
+        {
+            this.WaitUntilConnect.Set();
+        }
 
-		private void OnClosed(object sender, [NotNull] CloseEventArgs e)
-		{
-			if (e.WasClean)
-			{
-				this.Closed?.Invoke(null).GetAwaiter().GetResult();
-				return;
-			}
+        private void OnClosed(object sender, [NotNull] CloseEventArgs e)
+        {
+            if (e.WasClean)
+            {
+                this.Closed?.Invoke(null).GetAwaiter().GetResult();
+                return;
+            }
 
-			var ex = new WebSocketClosedException(e.Code, e.Reason);
-			this.Closed?.Invoke(ex).GetAwaiter().GetResult();
-		}
+            var ex = new WebSocketClosedException(e.Code, e.Reason);
+            this.Closed?.Invoke(ex).GetAwaiter().GetResult();
+        }
 
-		/// <inheritdoc />
-		public void Dispose()
-		{
-			if (this.IsDisposed)
-			{
-				return;
-			}
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            if (this.IsDisposed)
+            {
+                return;
+            }
 
-			DisconnectInternalAsync().GetAwaiter().GetResult();
+            DisconnectInternalAsync().GetAwaiter().GetResult();
 
-			((IDisposable)this.Client)?.Dispose();
-			this.Client = null;
+            ((IDisposable)this.Client)?.Dispose();
+            this.Client = null;
 
-			this.IsDisposed = true;
-		}
-	}
+            this.IsDisposed = true;
+        }
+    }
 }

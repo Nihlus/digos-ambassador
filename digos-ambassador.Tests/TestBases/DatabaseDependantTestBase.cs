@@ -26,32 +26,32 @@ using DIGOS.Ambassador.Tests.Database;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
-	/// <summary>
-	/// Serves as a test base for tests that depend on a database context.
-	/// </summary>
-	public abstract class DatabaseDependantTestBase : IDisposable
-	{
-		private readonly MockedDatabase DatabaseMock;
+    /// <summary>
+    /// Serves as a test base for tests that depend on a database context.
+    /// </summary>
+    public abstract class DatabaseDependantTestBase : IDisposable
+    {
+        private readonly MockedDatabase DatabaseMock;
 
-		/// <summary>
-		/// Gets the mocked database connection for this test.
-		/// </summary>
-		protected GlobalInfoContext Database { get; }
+        /// <summary>
+        /// Gets the mocked database connection for this test.
+        /// </summary>
+        protected GlobalInfoContext Database { get; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DatabaseDependantTestBase"/> class.
-		/// </summary>
-		protected DatabaseDependantTestBase()
-		{
-			this.DatabaseMock = new MockedDatabase();
-			this.Database = this.DatabaseMock.GetDatabaseContext();
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseDependantTestBase"/> class.
+        /// </summary>
+        protected DatabaseDependantTestBase()
+        {
+            this.DatabaseMock = new MockedDatabase();
+            this.Database = this.DatabaseMock.GetDatabaseContext();
+        }
 
-		/// <inheritdoc />
-		public void Dispose()
-		{
-			this.Database?.Dispose();
-			this.DatabaseMock?.Dispose();
-		}
-	}
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            this.Database?.Dispose();
+            this.DatabaseMock?.Dispose();
+        }
+    }
 }

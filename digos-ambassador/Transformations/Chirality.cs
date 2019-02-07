@@ -22,24 +22,24 @@
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// Represents the chirality of a component.
-	/// </summary>
-	public enum Chirality
-	{
-		/// <summary>
-		/// The component is in the middle, and is not chiral.
-		/// </summary>
-		Center,
+    /// <summary>
+    /// Represents the chirality of a component.
+    /// </summary>
+    public enum Chirality
+    {
+        /// <summary>
+        /// The component is in the middle, and is not chiral.
+        /// </summary>
+        Center,
 
-		/// <summary>
-		/// The component is on the left side.
-		/// </summary>
-		Left,
+        /// <summary>
+        /// The component is on the left side.
+        /// </summary>
+        Left,
 
-		/// <summary>
-		/// The component is on the right side.
-		/// </summary>
-		Right
-	}
+        /// <summary>
+        /// The component is on the right side.
+        /// </summary>
+        Right
+    }
 }

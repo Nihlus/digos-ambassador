@@ -24,16 +24,16 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Provides sie and hir pronouns.
-	/// </summary>
-	[UsedImplicitly]
-	public class SieHirPronounProvider : SheHirPronounProvider
-	{
-		/// <inheritdoc />
-		public override string Family => "Sie and hir";
+    /// <summary>
+    /// Provides sie and hir pronouns.
+    /// </summary>
+    [UsedImplicitly]
+    public class SieHirPronounProvider : SheHirPronounProvider
+    {
+        /// <inheritdoc />
+        public override string Family => "Sie and hir";
 
-		/// <inheritdoc />
-		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "sie is" : "sie";
-	}
+        /// <inheritdoc />
+        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "sie is" : "sie";
+    }
 }

@@ -24,27 +24,27 @@ using Newtonsoft.Json;
 
 namespace DIGOS.Ambassador.FList.Kinks
 {
-	/// <summary>
-	/// Represents a JSON kink from the F-list API.
-	/// </summary>
-	public class FListKink
-	{
-		/// <summary>
-		/// Gets or sets the description of the kink.
-		/// </summary>
-		[JsonProperty("description")]
-		public string Description { get; set; }
+    /// <summary>
+    /// Represents a JSON kink from the F-list API.
+    /// </summary>
+    public class FListKink
+    {
+        /// <summary>
+        /// Gets or sets the description of the kink.
+        /// </summary>
+        [JsonProperty("description")]
+        public string Description { get; set; }
 
-		/// <summary>
-		/// Gets or sets the ID of the kink.
-		/// </summary>
-		[JsonProperty("kink_id")]
-		public uint KinkId { get; set; }
+        /// <summary>
+        /// Gets or sets the ID of the kink.
+        /// </summary>
+        [JsonProperty("kink_id")]
+        public uint KinkId { get; set; }
 
-		/// <summary>
-		/// Gets or sets the name of the kink.
-		/// </summary>
-		[JsonProperty("name")]
-		public string Name { get; set; }
-	}
+        /// <summary>
+        /// Gets or sets the name of the kink.
+        /// </summary>
+        [JsonProperty("name")]
+        public string Name { get; set; }
+    }
 }

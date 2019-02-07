@@ -28,27 +28,27 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services.Exporters
 {
-	/// <summary>
-	/// Base class for roleplay exporters.
-	/// </summary>
-	public abstract class RoleplayExporterBase : IRoleplayExporter
-	{
-		/// <summary>
-		/// Gets the context of the export operation.
-		/// </summary>
-		protected ICommandContext Context { get; }
+    /// <summary>
+    /// Base class for roleplay exporters.
+    /// </summary>
+    public abstract class RoleplayExporterBase : IRoleplayExporter
+    {
+        /// <summary>
+        /// Gets the context of the export operation.
+        /// </summary>
+        protected ICommandContext Context { get; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RoleplayExporterBase"/> class.
-		/// </summary>
-		/// <param name="context">The context of the export operation.</param>
-		protected RoleplayExporterBase(ICommandContext context)
-		{
-			this.Context = context;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleplayExporterBase"/> class.
+        /// </summary>
+        /// <param name="context">The context of the export operation.</param>
+        protected RoleplayExporterBase(ICommandContext context)
+        {
+            this.Context = context;
+        }
 
-		/// <inheritdoc />
-		[ItemNotNull]
-		public abstract Task<ExportedRoleplay> ExportAsync(Roleplay roleplay);
-	}
+        /// <inheritdoc />
+        [ItemNotNull]
+        public abstract Task<ExportedRoleplay> ExportAsync(Roleplay roleplay);
+    }
 }

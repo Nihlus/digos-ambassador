@@ -24,31 +24,31 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Represents a named node.
-	/// </summary>
-	/// <typeparam name="T">The type of value the node holds.</typeparam>
-	public abstract class NamedNode<T> : INode
-	{
-		/// <inheritdoc />
-		public string Name { get; set; }
+    /// <summary>
+    /// Represents a named node.
+    /// </summary>
+    /// <typeparam name="T">The type of value the node holds.</typeparam>
+    public abstract class NamedNode<T> : INode
+    {
+        /// <inheritdoc />
+        public string Name { get; set; }
 
-		/// <summary>
-		/// Gets or sets the value of the node.
-		/// </summary>
-		public T Value { get; set; }
+        /// <summary>
+        /// Gets or sets the value of the node.
+        /// </summary>
+        public T Value { get; set; }
 
-		/// <inheritdoc />
-		[NotNull]
-		public virtual string Format(bool pretty = false)
-		{
-			return this.Value.ToString();
-		}
+        /// <inheritdoc />
+        [NotNull]
+        public virtual string Format(bool pretty = false)
+        {
+            return this.Value.ToString();
+        }
 
-		/// <inheritdoc />
-		public override string ToString()
-		{
-			return Format();
-		}
-	}
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return Format();
+        }
+    }
 }

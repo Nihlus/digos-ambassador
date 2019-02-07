@@ -22,19 +22,19 @@
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents markdown list types.
-	/// </summary>
-	public enum ListType
-	{
-		/// <summary>
-		/// A list with numbered elements.
-		/// </summary>
-		Numbered,
+    /// <summary>
+    /// Represents markdown list types.
+    /// </summary>
+    public enum ListType
+    {
+        /// <summary>
+        /// A list with numbered elements.
+        /// </summary>
+        Numbered,
 
-		/// <summary>
-		/// A bullet point list.
-		/// </summary>
-		Bullet
-	}
+        /// <summary>
+        /// A bullet point list.
+        /// </summary>
+        Bullet
+    }
 }

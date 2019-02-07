@@ -31,36 +31,36 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
-	/// <summary>
-	/// This attribute can be attached to Discord.Net.Commands module commands to restrict them to certain predefined
-	/// permissions.
-	/// </summary>
-	public class RequirePermissionAttribute : PrioritizedPreconditionAttribute
-	{
-		private readonly (Permission Permission, PermissionTarget Target) RequiredPermission;
+    /// <summary>
+    /// This attribute can be attached to Discord.Net.Commands module commands to restrict them to certain predefined
+    /// permissions.
+    /// </summary>
+    public class RequirePermissionAttribute : PrioritizedPreconditionAttribute
+    {
+        private readonly (Permission Permission, PermissionTarget Target) RequiredPermission;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RequirePermissionAttribute"/> class.
-		/// </summary>
-		/// <param name="permission">The required permission.</param>
-		/// <param name="target">The required target scope.</param>
-		public RequirePermissionAttribute(Permission permission, PermissionTarget target = PermissionTarget.Self)
-		{
-			this.RequiredPermission = (permission, target);
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequirePermissionAttribute"/> class.
+        /// </summary>
+        /// <param name="permission">The required permission.</param>
+        /// <param name="target">The required target scope.</param>
+        public RequirePermissionAttribute(Permission permission, PermissionTarget target = PermissionTarget.Self)
+        {
+            this.RequiredPermission = (permission, target);
+        }
 
-		/// <inheritdoc />
-		protected override async Task<PreconditionResult> CheckPrioritizedPermissions([NotNull] ICommandContext context, CommandInfo command, IServiceProvider services)
-		{
-			var permissionService = services.GetRequiredService<PermissionService>();
-			var db = services.GetRequiredService<GlobalInfoContext>();
+        /// <inheritdoc />
+        protected override async Task<PreconditionResult> CheckPrioritizedPermissions([NotNull] ICommandContext context, CommandInfo command, IServiceProvider services)
+        {
+            var permissionService = services.GetRequiredService<PermissionService>();
+            var db = services.GetRequiredService<GlobalInfoContext>();
 
-			if (await permissionService.HasPermissionAsync(db, context.Guild, context.User, this.RequiredPermission))
-			{
-				return PreconditionResult.FromSuccess();
-			}
+            if (await permissionService.HasPermissionAsync(db, context.Guild, context.User, this.RequiredPermission))
+            {
+                return PreconditionResult.FromSuccess();
+            }
 
-			return PreconditionResult.FromError("You don't have permission to run that command.");
-		}
-	}
+            return PreconditionResult.FromError("You don't have permission to run that command.");
+        }
+    }
 }

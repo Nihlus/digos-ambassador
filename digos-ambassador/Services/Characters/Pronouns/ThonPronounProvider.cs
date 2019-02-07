@@ -24,34 +24,34 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Provides thon pronouns.
-	/// </summary>
-	[UsedImplicitly]
-	public class ThonPronounProvider : PronounProvider
-	{
-		/// <inheritdoc />
-		[NotNull]
-		public override string Family => "Thon";
+    /// <summary>
+    /// Provides thon pronouns.
+    /// </summary>
+    [UsedImplicitly]
+    public class ThonPronounProvider : PronounProvider
+    {
+        /// <inheritdoc />
+        [NotNull]
+        public override string Family => "Thon";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "thon is" : "thon";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "thon is" : "thon";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetObjectForm() => "thon";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetObjectForm() => "thon";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetPossessiveAdjectiveForm() => "thons";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetPossessiveAdjectiveForm() => "thons";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "thon has" : "thon's";
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "thon has" : "thon's";
 
-		/// <inheritdoc />
-		[NotNull]
-		public override string GetReflexiveForm() => "thonself";
-	}
+        /// <inheritdoc />
+        [NotNull]
+        public override string GetReflexiveForm() => "thonself";
+    }
 }

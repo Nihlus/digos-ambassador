@@ -24,26 +24,26 @@ using System.Text;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a markdown block quote.
-	/// </summary>
-	public class MarkdownBlockQuote : IMarkdownNode
-	{
-		/// <summary>
-		/// Gets or sets the quoted content.
-		/// </summary>
-		public IMarkdownNode Content { get; set; }
+    /// <summary>
+    /// Represents a markdown block quote.
+    /// </summary>
+    public class MarkdownBlockQuote : IMarkdownNode
+    {
+        /// <summary>
+        /// Gets or sets the quoted content.
+        /// </summary>
+        public IMarkdownNode Content { get; set; }
 
-		/// <inheritdoc />
-		public string Compile()
-		{
-			var sb = new StringBuilder();
-			foreach (var line in this.Content.Compile().Split('\n'))
-			{
-				sb.AppendLine($"> {line}");
-			}
+        /// <inheritdoc />
+        public string Compile()
+        {
+            var sb = new StringBuilder();
+            foreach (var line in this.Content.Compile().Split('\n'))
+            {
+                sb.AppendLine($"> {line}");
+            }
 
-			return sb.ToString();
-		}
-	}
+            return sb.ToString();
+        }
+    }
 }

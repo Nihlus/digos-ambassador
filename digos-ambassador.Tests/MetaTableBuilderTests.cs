@@ -29,20 +29,20 @@ using Xunit;
 
 namespace DIGOS.Ambassador.Tests
 {
-	public class MetaTableBuilderTests
-	{
-		[Fact]
-		public void CanBuildMetaTable()
-		{
-			const string expected = "env = { test = test,string = { format = string.format,subtable = { format = string.subtable.format } } }";
-			var entries = new[] { "test", "string.format", "string.subtable.format" };
-			var builder = new MetaTableBuilder();
+    public class MetaTableBuilderTests
+    {
+        [Fact]
+        public void CanBuildMetaTable()
+        {
+            const string expected = "env = { test = test,string = { format = string.format,subtable = { format = string.subtable.format } } }";
+            var entries = new[] { "test", "string.format", "string.subtable.format" };
+            var builder = new MetaTableBuilder();
 
-			builder = entries.Aggregate(builder, (current, entry) => current.WithEntry(entry));
+            builder = entries.Aggregate(builder, (current, entry) => current.WithEntry(entry));
 
-			var result = builder.Build();
+            var result = builder.Build();
 
-			Assert.Equal(expected, result);
-		}
-	}
+            Assert.Equal(expected, result);
+        }
+    }
 }

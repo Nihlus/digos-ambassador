@@ -29,103 +29,103 @@ using YamlDotNet.Serialization;
 
 namespace DIGOS.Ambassador.Database.Transformations
 {
-	/// <summary>
-	/// Represents an individual partial transformation.
-	/// </summary>
-	public class Transformation : IEFEntity
-	{
-		/// <inheritdoc />
-		[YamlIgnore]
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents an individual partial transformation.
+    /// </summary>
+    public class Transformation : IEFEntity
+    {
+        /// <inheritdoc />
+        [YamlIgnore]
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the bodypart that this transformation affects.
-		/// </summary>
-		[Required]
-		public Bodypart Part { get; set; }
+        /// <summary>
+        /// Gets or sets the bodypart that this transformation affects.
+        /// </summary>
+        [Required]
+        public Bodypart Part { get; set; }
 
-		/// <summary>
-		/// Gets or sets the species that this transformation belongs to.
-		/// </summary>
-		[Required]
-		public Species Species { get; set; }
+        /// <summary>
+        /// Gets or sets the species that this transformation belongs to.
+        /// </summary>
+        [Required]
+        public Species Species { get; set; }
 
-		/// <summary>
-		/// Gets or sets a short description of the transformation.
-		/// </summary>
-		[Required]
-		public string Description { get; set; }
+        /// <summary>
+        /// Gets or sets a short description of the transformation.
+        /// </summary>
+        [Required]
+        public string Description { get; set; }
 
-		/// <summary>
-		/// Gets or sets the default base colour of the transformation.
-		/// </summary>
-		[Required]
-		[YamlMember(Alias = "default_base_colour")]
-		public Colour DefaultBaseColour { get; set; }
+        /// <summary>
+        /// Gets or sets the default base colour of the transformation.
+        /// </summary>
+        [Required]
+        [YamlMember(Alias = "default_base_colour")]
+        public Colour DefaultBaseColour { get; set; }
 
-		/// <summary>
-		/// Gets or sets the default pattern of the transformation (if any).
-		/// </summary>
-		[YamlMember(Alias = "default_pattern")]
-		public Pattern? DefaultPattern { get; set; }
+        /// <summary>
+        /// Gets or sets the default pattern of the transformation (if any).
+        /// </summary>
+        [YamlMember(Alias = "default_pattern")]
+        public Pattern? DefaultPattern { get; set; }
 
-		/// <summary>
-		/// Gets or sets the default colour of the pattern (if any).
-		/// </summary>
-		[YamlMember(Alias = "default_pattern_colour")]
-		public Colour DefaultPatternColour { get; set; }
+        /// <summary>
+        /// Gets or sets the default colour of the pattern (if any).
+        /// </summary>
+        [YamlMember(Alias = "default_pattern_colour")]
+        public Colour DefaultPatternColour { get; set; }
 
-		/// <summary>
-		/// Gets or sets a value indicating whether this transformation is NSFW.
-		/// </summary>
-		[Required]
-		[YamlMember(Alias = "is_nsfw")]
-		public bool IsNSFW { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether this transformation is NSFW.
+        /// </summary>
+        [Required]
+        [YamlMember(Alias = "is_nsfw")]
+        public bool IsNSFW { get; set; }
 
-		/// <summary>
-		/// Gets or sets the text of the message when an existing bodypart shifts into this one.
-		/// </summary>
-		[Required]
-		[YamlMember(Alias = "shift_message")]
-		public string ShiftMessage { get; set; }
+        /// <summary>
+        /// Gets or sets the text of the message when an existing bodypart shifts into this one.
+        /// </summary>
+        [Required]
+        [YamlMember(Alias = "shift_message")]
+        public string ShiftMessage { get; set; }
 
-		/// <summary>
-		/// Gets or sets the text of the message when this bodypart is added where none existed before.
-		/// </summary>
-		[Required]
-		[YamlMember(Alias = "grow_message")]
-		public string GrowMessage { get; set; }
+        /// <summary>
+        /// Gets or sets the text of the message when this bodypart is added where none existed before.
+        /// </summary>
+        [Required]
+        [YamlMember(Alias = "grow_message")]
+        public string GrowMessage { get; set; }
 
-		/// <summary>
-		/// Gets or sets the uniform shift message, used when two chiral parts shift together.
-		/// </summary>
-		[CanBeNull]
-		public string UniformShiftMessage { get; set; }
+        /// <summary>
+        /// Gets or sets the uniform shift message, used when two chiral parts shift together.
+        /// </summary>
+        [CanBeNull]
+        public string UniformShiftMessage { get; set; }
 
-		/// <summary>
-		/// Gets or sets the uniform grow message, used when two chiral parts grow together.
-		/// </summary>
-		[CanBeNull]
-		public string UniformGrowMessage { get; set; }
+        /// <summary>
+        /// Gets or sets the uniform grow message, used when two chiral parts grow together.
+        /// </summary>
+        [CanBeNull]
+        public string UniformGrowMessage { get; set; }
 
-		/// <summary>
-		/// Gets or sets the text of the description when the species of the complementary bodyparts don't match.
-		/// </summary>
-		[Required]
-		[YamlMember(Alias = "single_description")]
-		public string SingleDescription { get; set; }
+        /// <summary>
+        /// Gets or sets the text of the description when the species of the complementary bodyparts don't match.
+        /// </summary>
+        [Required]
+        [YamlMember(Alias = "single_description")]
+        public string SingleDescription { get; set; }
 
-		/// <summary>
-		/// Gets or sets the text of the description when the species of the complementary bodyparts match.
-		/// </summary>
-		[YamlMember(Alias = "uniform_description")]
-		[CanBeNull]
-		public string UniformDescription { get; set; }
+        /// <summary>
+        /// Gets or sets the text of the description when the species of the complementary bodyparts match.
+        /// </summary>
+        [YamlMember(Alias = "uniform_description")]
+        [CanBeNull]
+        public string UniformDescription { get; set; }
 
-		/// <inheritdoc />
-		public override string ToString()
-		{
-			return $"{this.Species.Name} - {this.Part}";
-		}
-	}
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{this.Species.Name} - {this.Part}";
+        }
+    }
 }

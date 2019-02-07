@@ -28,75 +28,75 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc
 {
-	/// <summary>
-	/// Represents a page of markdown content.
-	/// </summary>
-	public class MarkdownPage
-	{
-		/// <summary>
-		/// Gets or sets the name of the page.
-		/// </summary>
-		[NotNull]
-		public string Name { get; set; }
+    /// <summary>
+    /// Represents a page of markdown content.
+    /// </summary>
+    public class MarkdownPage
+    {
+        /// <summary>
+        /// Gets or sets the name of the page.
+        /// </summary>
+        [NotNull]
+        public string Name { get; set; }
 
-		/// <summary>
-		/// Gets or sets the title of the page.
-		/// </summary>
-		[NotNull]
-		public string Title { get; set; }
+        /// <summary>
+        /// Gets or sets the title of the page.
+        /// </summary>
+        [NotNull]
+        public string Title { get; set; }
 
-		/// <summary>
-		/// Gets or sets the page footer.
-		/// </summary>
-		[CanBeNull]
-		public string Footer { get; set; }
+        /// <summary>
+        /// Gets or sets the page footer.
+        /// </summary>
+        [CanBeNull]
+        public string Footer { get; set; }
 
-		private readonly List<MarkdownSection> Sections = new List<MarkdownSection>();
+        private readonly List<MarkdownSection> Sections = new List<MarkdownSection>();
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MarkdownPage"/> class.
-		/// </summary>
-		/// <param name="name">The name of the page.</param>
-		/// <param name="title">The title of the page.</param>
-		public MarkdownPage([NotNull] string name, [NotNull] string title)
-		{
-			this.Name = name;
-			this.Title = title;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MarkdownPage"/> class.
+        /// </summary>
+        /// <param name="name">The name of the page.</param>
+        /// <param name="title">The title of the page.</param>
+        public MarkdownPage([NotNull] string name, [NotNull] string title)
+        {
+            this.Name = name;
+            this.Title = title;
+        }
 
-		/// <summary>
-		/// Compiles the contents of the page into Markdown text.
-		/// </summary>
-		/// <returns>The page, as markdown text.</returns>
-		public string Compile()
-		{
-			var sb = new StringBuilder();
+        /// <summary>
+        /// Compiles the contents of the page into Markdown text.
+        /// </summary>
+        /// <returns>The page, as markdown text.</returns>
+        public string Compile()
+        {
+            var sb = new StringBuilder();
 
-			sb.AppendLine(new MarkdownHeader(this.Title, 1, true).Compile());
-			foreach (var section in this.Sections)
-			{
-				sb.AppendLine(section.Compile());
-				sb.AppendLine();
-			}
+            sb.AppendLine(new MarkdownHeader(this.Title, 1, true).Compile());
+            foreach (var section in this.Sections)
+            {
+                sb.AppendLine(section.Compile());
+                sb.AppendLine();
+            }
 
-			if (!this.Footer.IsNullOrWhitespace())
-			{
-				sb.AppendLine(this.Footer);
-			}
+            if (!this.Footer.IsNullOrWhitespace())
+            {
+                sb.AppendLine(this.Footer);
+            }
 
-			return sb.ToString().TrimEnd();
-		}
+            return sb.ToString().TrimEnd();
+        }
 
-		/// <summary>
-		/// Appends a section to the page.
-		/// </summary>
-		/// <param name="section">The section.</param>
-		/// <returns>The page, with the section appended.</returns>
-		[NotNull]
-		public MarkdownPage AppendSection(MarkdownSection section)
-		{
-			this.Sections.Add(section);
-			return this;
-		}
-	}
+        /// <summary>
+        /// Appends a section to the page.
+        /// </summary>
+        /// <param name="section">The section.</param>
+        /// <returns>The page, with the section appended.</returns>
+        [NotNull]
+        public MarkdownPage AppendSection(MarkdownSection section)
+        {
+            this.Sections.Add(section);
+            return this;
+        }
+    }
 }

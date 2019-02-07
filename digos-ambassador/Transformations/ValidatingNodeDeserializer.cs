@@ -27,32 +27,32 @@ using YamlDotNet.Serialization;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// A node deserializer which validates its input as it goes.
-	/// </summary>
-	public class ValidatingNodeDeserializer : INodeDeserializer
-	{
-		private readonly INodeDeserializer NodeDeserializer;
+    /// <summary>
+    /// A node deserializer which validates its input as it goes.
+    /// </summary>
+    public class ValidatingNodeDeserializer : INodeDeserializer
+    {
+        private readonly INodeDeserializer NodeDeserializer;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ValidatingNodeDeserializer"/> class.
-		/// </summary>
-		/// <param name="nodeDeserializer">The node deserializer.</param>
-		public ValidatingNodeDeserializer(INodeDeserializer nodeDeserializer)
-		{
-			this.NodeDeserializer = nodeDeserializer;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ValidatingNodeDeserializer"/> class.
+        /// </summary>
+        /// <param name="nodeDeserializer">The node deserializer.</param>
+        public ValidatingNodeDeserializer(INodeDeserializer nodeDeserializer)
+        {
+            this.NodeDeserializer = nodeDeserializer;
+        }
 
-		/// <inheritdoc />
-		public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
-		{
-			if (this.NodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
-			{
-				var context = new ValidationContext(value, null, null);
-				Validator.ValidateObject(value, context, true);
-				return true;
-			}
-			return false;
-		}
-	}
+        /// <inheritdoc />
+        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
+        {
+            if (this.NodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
+            {
+                var context = new ValidationContext(value, null, null);
+                Validator.ValidateObject(value, context, true);
+                return true;
+            }
+            return false;
+        }
+    }
 }

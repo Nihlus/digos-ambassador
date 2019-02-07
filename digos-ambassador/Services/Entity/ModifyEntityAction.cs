@@ -22,19 +22,19 @@
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Enumerates which actions can be taken when an entity is modified.
-	/// </summary>
-	public enum ModifyEntityAction
-	{
-		/// <summary>
-		/// A new entity was added.
-		/// </summary>
-		Added,
+    /// <summary>
+    /// Enumerates which actions can be taken when an entity is modified.
+    /// </summary>
+    public enum ModifyEntityAction
+    {
+        /// <summary>
+        /// A new entity was added.
+        /// </summary>
+        Added,
 
-		/// <summary>
-		/// An existing entity was edited.
-		/// </summary>
-		Edited
-	}
+        /// <summary>
+        /// An existing entity was edited.
+        /// </summary>
+        Edited
+    }
 }

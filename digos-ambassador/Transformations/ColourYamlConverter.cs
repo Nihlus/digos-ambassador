@@ -29,40 +29,40 @@ using YamlDotNet.Serialization;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// YAML deserialization converter for colour objects.
-	/// </summary>
-	public class ColourYamlConverter : IYamlTypeConverter
-	{
-		/// <inheritdoc />
-		public bool Accepts(Type type)
-		{
-			return type == typeof(Colour);
-		}
+    /// <summary>
+    /// YAML deserialization converter for colour objects.
+    /// </summary>
+    public class ColourYamlConverter : IYamlTypeConverter
+    {
+        /// <inheritdoc />
+        public bool Accepts(Type type)
+        {
+            return type == typeof(Colour);
+        }
 
-		/// <inheritdoc />
-		[CanBeNull]
-		public object ReadYaml(IParser parser, Type type)
-		{
-			var rawColour = parser.Allow<Scalar>().Value;
+        /// <inheritdoc />
+        [CanBeNull]
+        public object ReadYaml(IParser parser, Type type)
+        {
+            var rawColour = parser.Allow<Scalar>().Value;
 
-			if (rawColour is null)
-			{
-				return null;
-			}
+            if (rawColour is null)
+            {
+                return null;
+            }
 
-			if (!Colour.TryParse(rawColour, out Colour value))
-			{
-				throw new ArgumentException("Failed to parse a valid colour.");
-			}
+            if (!Colour.TryParse(rawColour, out Colour value))
+            {
+                throw new ArgumentException("Failed to parse a valid colour.");
+            }
 
-			return value;
-		}
+            return value;
+        }
 
-		/// <inheritdoc />
-		public void WriteYaml([NotNull] IEmitter emitter, [NotNull] object value, Type type)
-		{
-			emitter.Emit(new Scalar(value.ToString()));
-		}
-	}
+        /// <inheritdoc />
+        public void WriteYaml([NotNull] IEmitter emitter, [NotNull] object value, Type type)
+        {
+            emitter.Emit(new Scalar(value.ToString()));
+        }
+    }
 }

@@ -25,48 +25,48 @@ using Moq;
 
 namespace DIGOS.Ambassador.Tests.Utility
 {
-	/// <summary>
-	/// Helper methods for mocking objects.
-	/// </summary>
-	public static class MockHelper
-	{
-		/// <summary>
-		/// Creates a simple mocked <see cref="IUser"/> object with the given ID.
-		/// </summary>
-		/// <param name="id">The ID of the object.</param>
-		/// <returns>A mocked object.</returns>
-		public static IUser CreateDiscordUser(long id)
-		{
-			var mock = new Mock<IUser>();
-			mock.Setup(u => u.Id).Returns((ulong)id);
+    /// <summary>
+    /// Helper methods for mocking objects.
+    /// </summary>
+    public static class MockHelper
+    {
+        /// <summary>
+        /// Creates a simple mocked <see cref="IUser"/> object with the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the object.</param>
+        /// <returns>A mocked object.</returns>
+        public static IUser CreateDiscordUser(long id)
+        {
+            var mock = new Mock<IUser>();
+            mock.Setup(u => u.Id).Returns((ulong)id);
 
-			return mock.Object;
-		}
+            return mock.Object;
+        }
 
-		/// <summary>
-		/// Creates a simple mocked <see cref="IGuildUser"/> object with the given ID.
-		/// </summary>
-		/// <param name="id">The ID of the object.</param>
-		/// <returns>A mocked object.</returns>
-		public static IGuildUser CreateDiscordGuildUser(long id)
-		{
-			var mock = new Mock<IGuildUser>();
-			mock.Setup(u => u.Id).Returns((ulong)id);
+        /// <summary>
+        /// Creates a simple mocked <see cref="IGuildUser"/> object with the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the object.</param>
+        /// <returns>A mocked object.</returns>
+        public static IGuildUser CreateDiscordGuildUser(long id)
+        {
+            var mock = new Mock<IGuildUser>();
+            mock.Setup(u => u.Id).Returns((ulong)id);
 
-			return mock.Object;
-		}
+            return mock.Object;
+        }
 
-		/// <summary>
-		/// Creates a simple mocked <see cref="IGuild"/> object with the given ID.
-		/// </summary>
-		/// <param name="id">The ID of the object.</param>
-		/// <returns>A mocked object.</returns>
-		public static IGuild CreateDiscordGuild(long id)
-		{
-			var mock = new Mock<IGuild>();
-			mock.Setup(u => u.Id).Returns((ulong)id);
+        /// <summary>
+        /// Creates a simple mocked <see cref="IGuild"/> object with the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the object.</param>
+        /// <returns>A mocked object.</returns>
+        public static IGuild CreateDiscordGuild(long id)
+        {
+            var mock = new Mock<IGuild>();
+            mock.Setup(u => u.Id).Returns((ulong)id);
 
-			return mock.Object;
-		}
-	}
+            return mock.Object;
+        }
+    }
 }

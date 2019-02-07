@@ -29,61 +29,61 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
-	/// <summary>
-	/// Represents a prioritized precondition that is ordered and tested by its priority.
-	/// </summary>
-	public abstract class PrioritizedPreconditionAttribute : PreconditionAttribute
-	{
-		/// <summary>
-		/// Gets or sets the priority of this precondition. Higher priorities are tested first.
-		/// </summary>
-		public int Priority { get; set; }
+    /// <summary>
+    /// Represents a prioritized precondition that is ordered and tested by its priority.
+    /// </summary>
+    public abstract class PrioritizedPreconditionAttribute : PreconditionAttribute
+    {
+        /// <summary>
+        /// Gets or sets the priority of this precondition. Higher priorities are tested first.
+        /// </summary>
+        public int Priority { get; set; }
 
-		/// <inheritdoc />
-		public sealed override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, [NotNull] CommandInfo command, IServiceProvider services)
-		{
-			var prioPreconditions = command.Preconditions.Where(a => a is PrioritizedPreconditionAttribute).Cast<PrioritizedPreconditionAttribute>();
+        /// <inheritdoc />
+        public sealed override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, [NotNull] CommandInfo command, IServiceProvider services)
+        {
+            var prioPreconditions = command.Preconditions.Where(a => a is PrioritizedPreconditionAttribute).Cast<PrioritizedPreconditionAttribute>();
 
-			foreach (var prioConditionGroup in prioPreconditions.GroupBy(p => p.Group, StringComparer.Ordinal))
-			{
-				if (prioConditionGroup.Key is null)
-				{
-					// Just check the permissions as normal
-					foreach (var prioPrecondition in prioConditionGroup.OrderBy(p => p.Priority))
-					{
-						var checkResult = await prioPrecondition.CheckPrioritizedPermissions(context, command, services);
-						if (!checkResult.IsSuccess)
-						{
-							return checkResult;
-						}
-					}
-				}
-				else
-				{
-					var results = new List<PreconditionResult>();
-					foreach (var prioPrecondition in prioConditionGroup.OrderBy(p => p.Priority))
-					{
-						results.Add(await prioPrecondition.CheckPrioritizedPermissions(context, command, services));
-					}
+            foreach (var prioConditionGroup in prioPreconditions.GroupBy(p => p.Group, StringComparer.Ordinal))
+            {
+                if (prioConditionGroup.Key is null)
+                {
+                    // Just check the permissions as normal
+                    foreach (var prioPrecondition in prioConditionGroup.OrderBy(p => p.Priority))
+                    {
+                        var checkResult = await prioPrecondition.CheckPrioritizedPermissions(context, command, services);
+                        if (!checkResult.IsSuccess)
+                        {
+                            return checkResult;
+                        }
+                    }
+                }
+                else
+                {
+                    var results = new List<PreconditionResult>();
+                    foreach (var prioPrecondition in prioConditionGroup.OrderBy(p => p.Priority))
+                    {
+                        results.Add(await prioPrecondition.CheckPrioritizedPermissions(context, command, services));
+                    }
 
-					if (!results.Any(p => p.IsSuccess))
-					{
-						return PreconditionGroupResult.FromError($"Prioritized precondition group \"{prioConditionGroup.Key}\" failed.", results);
-					}
-				}
-			}
+                    if (!results.Any(p => p.IsSuccess))
+                    {
+                        return PreconditionGroupResult.FromError($"Prioritized precondition group \"{prioConditionGroup.Key}\" failed.", results);
+                    }
+                }
+            }
 
-			return PreconditionResult.FromSuccess();
-		}
+            return PreconditionResult.FromSuccess();
+        }
 
-		/// <summary>
-		/// Checks the permissions of this specific attribute. Calling <see cref="CheckPermissionsAsync"/> will hijack the
-		/// process and check all prioritized preconditions as well.
-		/// </summary>
-		/// <param name="context">The command context.</param>
-		/// <param name="command">The invoked command.</param>
-		/// <param name="services">The services.</param>
-		/// <returns>The result of the permission check.</returns>
-		protected abstract Task<PreconditionResult> CheckPrioritizedPermissions(ICommandContext context, CommandInfo command, IServiceProvider services);
-	}
+        /// <summary>
+        /// Checks the permissions of this specific attribute. Calling <see cref="CheckPermissionsAsync"/> will hijack the
+        /// process and check all prioritized preconditions as well.
+        /// </summary>
+        /// <param name="context">The command context.</param>
+        /// <param name="command">The invoked command.</param>
+        /// <param name="services">The services.</param>
+        /// <returns>The result of the permission check.</returns>
+        protected abstract Task<PreconditionResult> CheckPrioritizedPermissions(ICommandContext context, CommandInfo command, IServiceProvider services);
+    }
 }

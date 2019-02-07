@@ -22,34 +22,34 @@
 
 namespace DIGOS.Ambassador.Database.Kinks
 {
-	/// <summary>
-	/// Represents a user's preference for a certain sexual kink or fetish.
-	/// </summary>
-	public enum KinkPreference
-	{
-		/// <summary>
-		/// The user has no preference, either for or against this kink.
-		/// </summary>
-		NoPreference,
+    /// <summary>
+    /// Represents a user's preference for a certain sexual kink or fetish.
+    /// </summary>
+    public enum KinkPreference
+    {
+        /// <summary>
+        /// The user has no preference, either for or against this kink.
+        /// </summary>
+        NoPreference,
 
-		/// <summary>
-		/// The user will not participate in or reciprocate this kink.
-		/// </summary>
-		No,
+        /// <summary>
+        /// The user will not participate in or reciprocate this kink.
+        /// </summary>
+        No,
 
-		/// <summary>
-		/// The user may be open to participating in or reciprocating this kink, depending on other factors.
-		/// </summary>
-		Maybe,
+        /// <summary>
+        /// The user may be open to participating in or reciprocating this kink, depending on other factors.
+        /// </summary>
+        Maybe,
 
-		/// <summary>
-		/// The user would participate in or reciprocate this kink.
-		/// </summary>
-		Like,
+        /// <summary>
+        /// The user would participate in or reciprocate this kink.
+        /// </summary>
+        Like,
 
-		/// <summary>
-		/// The user is very interested in this kink.
-		/// </summary>
-		Favourite
-	}
+        /// <summary>
+        /// The user is very interested in this kink.
+        /// </summary>
+        Favourite
+    }
 }

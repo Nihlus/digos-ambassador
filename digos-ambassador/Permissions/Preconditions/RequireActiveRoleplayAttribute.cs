@@ -30,45 +30,45 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
-	/// <summary>
-	/// Restricts the usage of a command to the owner of the currently active roleplay. Furthermore, it also requires a
-	/// roleplay to be current.
-	/// </summary>
-	public class RequireActiveRoleplayAttribute : PreconditionAttribute
-	{
-		private readonly bool RequireOwner;
+    /// <summary>
+    /// Restricts the usage of a command to the owner of the currently active roleplay. Furthermore, it also requires a
+    /// roleplay to be current.
+    /// </summary>
+    public class RequireActiveRoleplayAttribute : PreconditionAttribute
+    {
+        private readonly bool RequireOwner;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RequireActiveRoleplayAttribute"/> class.
-		/// </summary>
-		/// <param name="requireOwner">Whether or not it is required that the current roleplay is owned by the invoker.</param>
-		public RequireActiveRoleplayAttribute(bool requireOwner = false)
-		{
-			this.RequireOwner = requireOwner;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequireActiveRoleplayAttribute"/> class.
+        /// </summary>
+        /// <param name="requireOwner">Whether or not it is required that the current roleplay is owned by the invoker.</param>
+        public RequireActiveRoleplayAttribute(bool requireOwner = false)
+        {
+            this.RequireOwner = requireOwner;
+        }
 
-		/// <inheritdoc />
-		public override async Task<PreconditionResult> CheckPermissionsAsync([NotNull] ICommandContext context, CommandInfo command, IServiceProvider services)
-		{
-			var roleplayService = services.GetRequiredService<RoleplayService>();
-			var db = services.GetRequiredService<GlobalInfoContext>();
+        /// <inheritdoc />
+        public override async Task<PreconditionResult> CheckPermissionsAsync([NotNull] ICommandContext context, CommandInfo command, IServiceProvider services)
+        {
+            var roleplayService = services.GetRequiredService<RoleplayService>();
+            var db = services.GetRequiredService<GlobalInfoContext>();
 
-			var result = await roleplayService.GetActiveRoleplayAsync(db, context);
-			if (!result.IsSuccess)
-			{
-				return PreconditionResult.FromError(result);
-			}
+            var result = await roleplayService.GetActiveRoleplayAsync(db, context);
+            if (!result.IsSuccess)
+            {
+                return PreconditionResult.FromError(result);
+            }
 
-			if (this.RequireOwner)
-			{
-				var roleplay = result.Entity;
-				if (roleplay.Owner.DiscordID != (long)context.User.Id)
-				{
-					return PreconditionResult.FromError("Only the roleplay owner can do that.");
-				}
-			}
+            if (this.RequireOwner)
+            {
+                var roleplay = result.Entity;
+                if (roleplay.Owner.DiscordID != (long)context.User.Id)
+                {
+                    return PreconditionResult.FromError("Only the roleplay owner can do that.");
+                }
+            }
 
-			return PreconditionResult.FromSuccess();
-		}
-	}
+            return PreconditionResult.FromSuccess();
+        }
+    }
 }

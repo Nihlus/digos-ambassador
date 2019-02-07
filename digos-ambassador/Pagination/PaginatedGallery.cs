@@ -29,59 +29,59 @@ using Image = DIGOS.Ambassador.Database.Data.Image;
 
 namespace DIGOS.Ambassador.Pagination
 {
-	/// <summary>
-	/// Represents a paginated gallery of images.
-	/// </summary>
-	public class PaginatedGallery : IPager<Image, PaginatedGallery>
-	{
-		/// <inheritdoc />
-		public IList<Image> Pages { get; set; } = new List<Image>();
+    /// <summary>
+    /// Represents a paginated gallery of images.
+    /// </summary>
+    public class PaginatedGallery : IPager<Image, PaginatedGallery>
+    {
+        /// <inheritdoc />
+        public IList<Image> Pages { get; set; } = new List<Image>();
 
-		/// <inheritdoc />
-		public PaginatedAppearanceOptions Options { get; set; } = PaginatedAppearanceOptions.Default;
+        /// <inheritdoc />
+        public PaginatedAppearanceOptions Options { get; set; } = PaginatedAppearanceOptions.Default;
 
-		/// <summary>
-		/// Gets or sets the colour of the gallery's embed.
-		/// </summary>
-		public Color Color { get; set; } = Color.Default;
+        /// <summary>
+        /// Gets or sets the colour of the gallery's embed.
+        /// </summary>
+        public Color Color { get; set; } = Color.Default;
 
-		/// <summary>
-		/// Gets or sets the title of the gallery.
-		/// </summary>
-		public string Title { get; set; } = string.Empty;
+        /// <summary>
+        /// Gets or sets the title of the gallery.
+        /// </summary>
+        public string Title { get; set; } = string.Empty;
 
-		/// <inheritdoc />
-		[NotNull]
-		public PaginatedGallery WithPage(Image page)
-		{
-			this.Pages.Add(page);
-			return this;
-		}
+        /// <inheritdoc />
+        [NotNull]
+        public PaginatedGallery WithPage(Image page)
+        {
+            this.Pages.Add(page);
+            return this;
+        }
 
-		/// <inheritdoc />
-		[NotNull]
-		public PaginatedGallery WithPages([NotNull] IEnumerable<Image> pages)
-		{
-			foreach (var page in pages)
-			{
-				WithPage(page);
-			}
+        /// <inheritdoc />
+        [NotNull]
+        public PaginatedGallery WithPages([NotNull] IEnumerable<Image> pages)
+        {
+            foreach (var page in pages)
+            {
+                WithPage(page);
+            }
 
-			return this;
-		}
+            return this;
+        }
 
-		/// <inheritdoc />
-		public Embed BuildEmbed(int page)
-		{
-			var currentImage = this.Pages[page];
+        /// <inheritdoc />
+        public Embed BuildEmbed(int page)
+        {
+            var currentImage = this.Pages[page];
 
-			return new EmbedBuilder()
-				.WithColor(this.Color)
-				.WithTitle($"{this.Title} | {currentImage.Name}")
-				.WithDescription(currentImage.Caption)
-				.WithImageUrl(currentImage.Url)
-				.WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page, this.Pages.Count))
-				.Build();
-		}
-	}
+            return new EmbedBuilder()
+                .WithColor(this.Color)
+                .WithTitle($"{this.Title} | {currentImage.Name}")
+                .WithDescription(currentImage.Caption)
+                .WithImageUrl(currentImage.Url)
+                .WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page, this.Pages.Count))
+                .Build();
+        }
+    }
 }

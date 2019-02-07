@@ -24,60 +24,60 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a markdown header.
-	/// </summary>
-	public class MarkdownHeader : IMarkdownNode
-	{
-		/// <summary>
-		/// Gets or sets the level of the header.
-		/// </summary>
-		public int Level { get; set; }
+    /// <summary>
+    /// Represents a markdown header.
+    /// </summary>
+    public class MarkdownHeader : IMarkdownNode
+    {
+        /// <summary>
+        /// Gets or sets the level of the header.
+        /// </summary>
+        public int Level { get; set; }
 
-		/// <summary>
-		/// Gets or sets a value indicating whether the header should be underlined. Only affects levels 1 and 2.
-		/// </summary>
-		public bool Underline { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether the header should be underlined. Only affects levels 1 and 2.
+        /// </summary>
+        public bool Underline { get; set; }
 
-		/// <summary>
-		/// Gets or sets the title text of the header.
-		/// </summary>
-		[NotNull]
-		public MarkdownText Title { get; set; }
+        /// <summary>
+        /// Gets or sets the title text of the header.
+        /// </summary>
+        [NotNull]
+        public MarkdownText Title { get; set; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MarkdownHeader"/> class.
-		/// </summary>
-		/// <param name="title">The title.</param>
-		/// <param name="level">The level.</param>
-		/// <param name="underline">Whether or not the header should be underlined.</param>
-		public MarkdownHeader(string title, int level, bool underline = false)
-		{
-			this.Title = new MarkdownText(title);
-			this.Level = level;
-			this.Underline = underline;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MarkdownHeader"/> class.
+        /// </summary>
+        /// <param name="title">The title.</param>
+        /// <param name="level">The level.</param>
+        /// <param name="underline">Whether or not the header should be underlined.</param>
+        public MarkdownHeader(string title, int level, bool underline = false)
+        {
+            this.Title = new MarkdownText(title);
+            this.Level = level;
+            this.Underline = underline;
+        }
 
-		/// <inheritdoc />
-		[NotNull]
-		public string Compile()
-		{
-			if (this.Underline && this.Level <= 2)
-			{
-				switch (this.Level)
-				{
-					case 1:
-					{
-						return $"{this.Title.Compile()}\n{new string('=', this.Title.Compile().Length)}";
-					}
-					case 2:
-					{
-						return $"{this.Title.Compile()}\n{new string('-', this.Title.Compile().Length)}";
-					}
-				}
-			}
+        /// <inheritdoc />
+        [NotNull]
+        public string Compile()
+        {
+            if (this.Underline && this.Level <= 2)
+            {
+                switch (this.Level)
+                {
+                    case 1:
+                    {
+                        return $"{this.Title.Compile()}\n{new string('=', this.Title.Compile().Length)}";
+                    }
+                    case 2:
+                    {
+                        return $"{this.Title.Compile()}\n{new string('-', this.Title.Compile().Length)}";
+                    }
+                }
+            }
 
-			return $"{new string('#', this.Level)} {this.Title.Compile()}";
-		}
-	}
+            return $"{new string('#', this.Level)} {this.Title.Compile()}";
+        }
+    }
 }

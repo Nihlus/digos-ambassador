@@ -26,34 +26,34 @@ using Xunit;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
-	/// <summary>
-	/// Serves as a test base for transformation service tests.
-	/// </summary>
-	public abstract class TransformationServiceTestBase : DatabaseDependantTestBase, IAsyncLifetime
-	{
-		/// <summary>
-		/// Gets the transformation service object.
-		/// </summary>
-		protected TransformationService Transformations { get; }
+    /// <summary>
+    /// Serves as a test base for transformation service tests.
+    /// </summary>
+    public abstract class TransformationServiceTestBase : DatabaseDependantTestBase, IAsyncLifetime
+    {
+        /// <summary>
+        /// Gets the transformation service object.
+        /// </summary>
+        protected TransformationService Transformations { get; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="TransformationServiceTestBase"/> class.
-		/// </summary>
-		protected TransformationServiceTestBase()
-		{
-			this.Transformations = new TransformationService(new ContentService());
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransformationServiceTestBase"/> class.
+        /// </summary>
+        protected TransformationServiceTestBase()
+        {
+            this.Transformations = new TransformationService(new ContentService());
+        }
 
-		/// <inheritdoc />
-		public virtual async Task InitializeAsync()
-		{
-			await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
-		}
+        /// <inheritdoc />
+        public virtual async Task InitializeAsync()
+        {
+            await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
+        }
 
-		/// <inheritdoc />
-		public virtual Task DisposeAsync()
-		{
-			return Task.CompletedTask;
-		}
-	}
+        /// <inheritdoc />
+        public virtual Task DisposeAsync()
+        {
+            return Task.CompletedTask;
+        }
+    }
 }

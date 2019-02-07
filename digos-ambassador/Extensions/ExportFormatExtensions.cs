@@ -26,43 +26,43 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
-	/// <summary>
-	/// Holds extension methods for <see cref="ExportFormat"/>.
-	/// </summary>
-	public static class ExportFormatExtensions
-	{
-		/// <summary>
-		/// Gets the file extension for the given export format.
-		/// </summary>
-		/// <param name="format">The format.</param>
-		/// <returns>The extension.</returns>
-		/// <exception cref="NotImplementedException">Thrown if the format has not been implemented.</exception>
-		[NotNull]
-		public static string GetFileExtension(this ExportFormat format)
-		{
-			switch (format)
-			{
-				case ExportFormat.PDF:
-				{
-					return "pdf";
-				}
-				case ExportFormat.Plaintext:
-				{
-					return "txt";
-				}
-				case ExportFormat.JSON:
-				{
-					return "json";
-				}
-				case ExportFormat.ODT:
-				{
-					return "odt";
-				}
-				default:
-				{
-					throw new NotImplementedException();
-				}
-			}
-		}
-	}
+    /// <summary>
+    /// Holds extension methods for <see cref="ExportFormat"/>.
+    /// </summary>
+    public static class ExportFormatExtensions
+    {
+        /// <summary>
+        /// Gets the file extension for the given export format.
+        /// </summary>
+        /// <param name="format">The format.</param>
+        /// <returns>The extension.</returns>
+        /// <exception cref="NotImplementedException">Thrown if the format has not been implemented.</exception>
+        [NotNull]
+        public static string GetFileExtension(this ExportFormat format)
+        {
+            switch (format)
+            {
+                case ExportFormat.PDF:
+                {
+                    return "pdf";
+                }
+                case ExportFormat.Plaintext:
+                {
+                    return "txt";
+                }
+                case ExportFormat.JSON:
+                {
+                    return "json";
+                }
+                case ExportFormat.ODT:
+                {
+                    return "odt";
+                }
+                default:
+                {
+                    throw new NotImplementedException();
+                }
+            }
+        }
+    }
 }

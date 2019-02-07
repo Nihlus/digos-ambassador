@@ -24,16 +24,16 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Provides ze and hir pronouns.
-	/// </summary>
-	[UsedImplicitly]
-	public class ZeHirPronounProvider : SheHirPronounProvider
-	{
-		/// <inheritdoc />
-		public override string Family => "Ze and hir";
+    /// <summary>
+    /// Provides ze and hir pronouns.
+    /// </summary>
+    [UsedImplicitly]
+    public class ZeHirPronounProvider : SheHirPronounProvider
+    {
+        /// <inheritdoc />
+        public override string Family => "Ze and hir";
 
-		/// <inheritdoc />
-		public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ze is" : "ze";
-	}
+        /// <inheritdoc />
+        public override string GetSubjectForm(bool withVerb = false) => withVerb ? "ze is" : "ze";
+    }
 }

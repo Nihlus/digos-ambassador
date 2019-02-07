@@ -22,15 +22,15 @@
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Provides variant Spivak pronouns.
-	/// </summary>
-	public class SpivakVariantPronounProvider : ElversonPronounProvider
-	{
-		/// <inheritdoc />
-		public override string Family => "SpivakVariant";
+    /// <summary>
+    /// Provides variant Spivak pronouns.
+    /// </summary>
+    public class SpivakVariantPronounProvider : ElversonPronounProvider
+    {
+        /// <inheritdoc />
+        public override string Family => "SpivakVariant";
 
-		/// <inheritdoc />
-		public override string GetReflexiveForm() => "eirself";
-	}
+        /// <inheritdoc />
+        public override string GetReflexiveForm() => "eirself";
+    }
 }

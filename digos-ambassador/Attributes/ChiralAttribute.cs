@@ -24,11 +24,11 @@ using System;
 
 namespace DIGOS.Ambassador.Attributes
 {
-	/// <summary>
-	/// An attribute which marks a bodypart as chiral.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Field)]
-	public class ChiralAttribute : Attribute
-	{
-	}
+    /// <summary>
+    /// An attribute which marks a bodypart as chiral.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field)]
+    public class ChiralAttribute : Attribute
+    {
+    }
 }

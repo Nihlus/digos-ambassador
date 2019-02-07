@@ -26,24 +26,24 @@ using System.IO;
 
 namespace DIGOS.Ambassador.Tests.ContentTests.Data
 {
-	/// <summary>
-	/// Provides a feed of paths to bundled species files for use as test parameters.
-	/// </summary>
-	public class SpeciesDataProvider : IEnumerable<object[]>
-	{
-		/// <inheritdoc/>
-		public IEnumerator<object[]> GetEnumerator()
-		{
-			var baseContentPath = Path.Combine("Content", "Transformations", "Species");
-			var speciesDirectories = Directory.EnumerateDirectories(baseContentPath);
+    /// <summary>
+    /// Provides a feed of paths to bundled species files for use as test parameters.
+    /// </summary>
+    public class SpeciesDataProvider : IEnumerable<object[]>
+    {
+        /// <inheritdoc/>
+        public IEnumerator<object[]> GetEnumerator()
+        {
+            var baseContentPath = Path.Combine("Content", "Transformations", "Species");
+            var speciesDirectories = Directory.EnumerateDirectories(baseContentPath);
 
-			foreach (var speciesDirectory in speciesDirectories)
-			{
-				yield return new object[] { Path.Combine(speciesDirectory, "Species.yml") };
-			}
-		}
+            foreach (var speciesDirectory in speciesDirectories)
+            {
+                yield return new object[] { Path.Combine(speciesDirectory, "Species.yml") };
+            }
+        }
 
-		/// <inheritdoc/>
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-	}
+        /// <inheritdoc/>
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
 }

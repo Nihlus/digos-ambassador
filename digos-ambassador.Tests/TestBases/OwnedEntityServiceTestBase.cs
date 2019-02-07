@@ -24,22 +24,22 @@ using DIGOS.Ambassador.Services;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
-	/// <summary>
-	/// Serves as a test base for owned entity service tests.
-	/// </summary>
-	public abstract class OwnedEntityServiceTestBase : DatabaseDependantTestBase
-	{
-		/// <summary>
-		/// Gets the owned entity service object.
-		/// </summary>
-		protected OwnedEntityService Entities { get; }
+    /// <summary>
+    /// Serves as a test base for owned entity service tests.
+    /// </summary>
+    public abstract class OwnedEntityServiceTestBase : DatabaseDependantTestBase
+    {
+        /// <summary>
+        /// Gets the owned entity service object.
+        /// </summary>
+        protected OwnedEntityService Entities { get; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="OwnedEntityServiceTestBase"/> class.
-		/// </summary>
-		protected OwnedEntityServiceTestBase()
-		{
-			this.Entities = new OwnedEntityService();
-		}
-	}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OwnedEntityServiceTestBase"/> class.
+        /// </summary>
+        protected OwnedEntityServiceTestBase()
+        {
+            this.Entities = new OwnedEntityService();
+        }
+    }
 }

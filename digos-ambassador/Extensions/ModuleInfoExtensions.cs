@@ -26,32 +26,32 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
-	/// <summary>
-	/// Extension methods for the <see cref="ModuleInfo"/> class.
-	/// </summary>
-	public static class ModuleInfoExtensions
-	{
-		/// <summary>
-		/// Gets the top-level modules from a given list of modules. This is a recursive function.
-		/// </summary>
-		/// <param name="childModules">The modules to start searching in.</param>
-		/// <returns>The top-level methods.</returns>
-		public static IEnumerable<ModuleInfo> GetTopLevelModules([NotNull] this IEnumerable<ModuleInfo> childModules)
-		{
-			foreach (var childModule in childModules)
-			{
-				if (childModule.IsSubmodule)
-				{
-					foreach (var parentModule in GetTopLevelModules(new List<ModuleInfo> { childModule.Parent }))
-					{
-						yield return parentModule;
-					}
-				}
-				else
-				{
-					yield return childModule;
-				}
-			}
-		}
-	}
+    /// <summary>
+    /// Extension methods for the <see cref="ModuleInfo"/> class.
+    /// </summary>
+    public static class ModuleInfoExtensions
+    {
+        /// <summary>
+        /// Gets the top-level modules from a given list of modules. This is a recursive function.
+        /// </summary>
+        /// <param name="childModules">The modules to start searching in.</param>
+        /// <returns>The top-level methods.</returns>
+        public static IEnumerable<ModuleInfo> GetTopLevelModules([NotNull] this IEnumerable<ModuleInfo> childModules)
+        {
+            foreach (var childModule in childModules)
+            {
+                if (childModule.IsSubmodule)
+                {
+                    foreach (var parentModule in GetTopLevelModules(new List<ModuleInfo> { childModule.Parent }))
+                    {
+                        yield return parentModule;
+                    }
+                }
+                else
+                {
+                    yield return childModule;
+                }
+            }
+        }
+    }
 }

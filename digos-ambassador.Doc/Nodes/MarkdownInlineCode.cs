@@ -24,30 +24,30 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents inline code formatting.
-	/// </summary>
-	public class MarkdownInlineCode : IMarkdownNode
-	{
-		/// <summary>
-		/// Gets or sets the inlined content.
-		/// </summary>
-		public IMarkdownNode Content { get; set; }
+    /// <summary>
+    /// Represents inline code formatting.
+    /// </summary>
+    public class MarkdownInlineCode : IMarkdownNode
+    {
+        /// <summary>
+        /// Gets or sets the inlined content.
+        /// </summary>
+        public IMarkdownNode Content { get; set; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MarkdownInlineCode"/> class.
-		/// </summary>
-		/// <param name="content">The text to inline.</param>
-		public MarkdownInlineCode(string content)
-		{
-			this.Content = new MarkdownText(content);
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MarkdownInlineCode"/> class.
+        /// </summary>
+        /// <param name="content">The text to inline.</param>
+        public MarkdownInlineCode(string content)
+        {
+            this.Content = new MarkdownText(content);
+        }
 
-		/// <inheritdoc />
-		[NotNull]
-		public string Compile()
-		{
-			return $"`{this.Content.Compile()}`";
-		}
-	}
+        /// <inheritdoc />
+        [NotNull]
+        public string Compile()
+        {
+            return $"`{this.Content.Compile()}`";
+        }
+    }
 }

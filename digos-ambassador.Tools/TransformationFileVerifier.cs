@@ -36,82 +36,82 @@ using YamlDotNet.Serialization.NodeDeserializers;
 
 namespace DIGOS.Ambassador.Tools
 {
-	/// <summary>
-	/// Verifies transformation content files.
-	/// </summary>
-	public class TransformationFileVerifier
-	{
-		/// <summary>
-		/// Verifies the content of the given file, treating it as a transformation file.
-		/// </summary>
-		/// <param name="file">The path to the file.</param>
-		/// <typeparam name="T">The class to verify the file as.</typeparam>
-		/// <returns>A condition result, which may or may not have succeeded.</returns>
-		public DetermineConditionResult VerifyFile<T>(string file)
-		{
-			using (var sr = new StreamReader(File.OpenRead(file)))
-			{
-				var deserB = new DeserializerBuilder()
-					.WithTypeConverter(new ColourYamlConverter())
-					.WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-					.WithNamingConvention(new UnderscoredNamingConvention());
+    /// <summary>
+    /// Verifies transformation content files.
+    /// </summary>
+    public class TransformationFileVerifier
+    {
+        /// <summary>
+        /// Verifies the content of the given file, treating it as a transformation file.
+        /// </summary>
+        /// <param name="file">The path to the file.</param>
+        /// <typeparam name="T">The class to verify the file as.</typeparam>
+        /// <returns>A condition result, which may or may not have succeeded.</returns>
+        public DetermineConditionResult VerifyFile<T>(string file)
+        {
+            using (var sr = new StreamReader(File.OpenRead(file)))
+            {
+                var deserB = new DeserializerBuilder()
+                    .WithTypeConverter(new ColourYamlConverter())
+                    .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
+                    .WithNamingConvention(new UnderscoredNamingConvention());
 
-				if (typeof(T) != typeof(Species))
-				{
-					deserB = deserB.WithTypeConverter(new RawSpeciesYamlConverter());
-				}
+                if (typeof(T) != typeof(Species))
+                {
+                    deserB = deserB.WithTypeConverter(new RawSpeciesYamlConverter());
+                }
 
-				var deser = deserB.Build();
+                var deser = deserB.Build();
 
-				string content = sr.ReadToEnd();
+                string content = sr.ReadToEnd();
 
-				try
-				{
-					deser.Deserialize<T>(content);
-				}
-				catch (YamlException yex)
-				{
-					return DetermineConditionResult.FromError(yex, Path.GetFileName(file));
-				}
-			}
+                try
+                {
+                    deser.Deserialize<T>(content);
+                }
+                catch (YamlException yex)
+                {
+                    return DetermineConditionResult.FromError(yex, Path.GetFileName(file));
+                }
+            }
 
-			return DetermineConditionResult.FromSuccess();
-		}
+            return DetermineConditionResult.FromSuccess();
+        }
 
-		/// <summary>
-		/// Verifies all yaml files in the given directory.
-		/// </summary>
-		/// <param name="directory">The directory to load files from.</param>
-		/// <returns>A condition result, which may or may not have succeeded.</returns>
-		public DetermineConditionResult VerifyFilesInDirectory(string directory)
-		{
-			var files = Directory.EnumerateFiles(directory, "*.yml", SearchOption.AllDirectories).Where(p => !p.EndsWith("Species.yml")).ToList();
+        /// <summary>
+        /// Verifies all yaml files in the given directory.
+        /// </summary>
+        /// <param name="directory">The directory to load files from.</param>
+        /// <returns>A condition result, which may or may not have succeeded.</returns>
+        public DetermineConditionResult VerifyFilesInDirectory(string directory)
+        {
+            var files = Directory.EnumerateFiles(directory, "*.yml", SearchOption.AllDirectories).Where(p => !p.EndsWith("Species.yml")).ToList();
 
-			if (files.Count <= 0)
-			{
-				return DetermineConditionResult.FromError(CommandError.ObjectNotFound, "No files to verify in input directory.");
-			}
+            if (files.Count <= 0)
+            {
+                return DetermineConditionResult.FromError(CommandError.ObjectNotFound, "No files to verify in input directory.");
+            }
 
-			foreach (var file in files)
-			{
-				var verificationResult = VerifyFile<Transformation>(file);
-				if (!verificationResult.IsSuccess)
-				{
-					return verificationResult;
-				}
-			}
+            foreach (var file in files)
+            {
+                var verificationResult = VerifyFile<Transformation>(file);
+                if (!verificationResult.IsSuccess)
+                {
+                    return verificationResult;
+                }
+            }
 
-			var speciesPath = Path.Combine(directory, "Species.yml");
-			if (File.Exists(speciesPath))
-			{
-				var speciesVerificationResult = VerifyFile<Species>(speciesPath);
-				if (!speciesVerificationResult.IsSuccess)
-				{
-					return speciesVerificationResult;
-				}
-			}
+            var speciesPath = Path.Combine(directory, "Species.yml");
+            if (File.Exists(speciesPath))
+            {
+                var speciesVerificationResult = VerifyFile<Species>(speciesPath);
+                if (!speciesVerificationResult.IsSuccess)
+                {
+                    return speciesVerificationResult;
+                }
+            }
 
-			return DetermineConditionResult.FromSuccess();
-		}
-	}
+            return DetermineConditionResult.FromSuccess();
+        }
+    }
 }

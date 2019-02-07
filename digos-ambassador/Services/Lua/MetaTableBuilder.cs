@@ -26,80 +26,80 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Builds a lua metatable from a list of values and functions names.
-	/// </summary>
-	public class MetaTableBuilder
-	{
-		private readonly List<string> Entries = new List<string>();
+    /// <summary>
+    /// Builds a lua metatable from a list of values and functions names.
+    /// </summary>
+    public class MetaTableBuilder
+    {
+        private readonly List<string> Entries = new List<string>();
 
-		/// <summary>
-		/// Adds a unique entry to the builder.
-		/// </summary>
-		/// <param name="entry">The entry.</param>
-		/// <returns>The builder with the entry.</returns>
-		[NotNull]
-		public MetaTableBuilder WithEntry(string entry)
-		{
-			if (!this.Entries.Contains(entry))
-			{
-				this.Entries.Add(entry);
-			}
+        /// <summary>
+        /// Adds a unique entry to the builder.
+        /// </summary>
+        /// <param name="entry">The entry.</param>
+        /// <returns>The builder with the entry.</returns>
+        [NotNull]
+        public MetaTableBuilder WithEntry(string entry)
+        {
+            if (!this.Entries.Contains(entry))
+            {
+                this.Entries.Add(entry);
+            }
 
-			return this;
-		}
+            return this;
+        }
 
-		/// <summary>
-		/// Builds the metatable.
-		/// </summary>
-		/// <param name="pretty">Whether or not the output should be in a pretty format.</param>
-		/// <returns>The metatable as a formatted string.</returns>
-		[NotNull]
-		public string Build(bool pretty = false)
-		{
-			var metatable = new TableNode
-			{
-				Name = "env"
-			};
+        /// <summary>
+        /// Builds the metatable.
+        /// </summary>
+        /// <param name="pretty">Whether or not the output should be in a pretty format.</param>
+        /// <returns>The metatable as a formatted string.</returns>
+        [NotNull]
+        public string Build(bool pretty = false)
+        {
+            var metatable = new TableNode
+            {
+                Name = "env"
+            };
 
-			foreach (var entry in this.Entries)
-			{
-				PopulateSubNodes(metatable, entry, entry);
-			}
+            foreach (var entry in this.Entries)
+            {
+                PopulateSubNodes(metatable, entry, entry);
+            }
 
-			return metatable.Format(pretty);
-		}
+            return metatable.Format(pretty);
+        }
 
-		private void PopulateSubNodes([NotNull] TableNode parent, [NotNull] string value, string originalValue)
-		{
-			var components = value.Split('.');
-			if (components.Length == 1)
-			{
-				var valueNode = new ValueNode<string>
-				{
-					Name = value,
-					Value = originalValue
-				};
+        private void PopulateSubNodes([NotNull] TableNode parent, [NotNull] string value, string originalValue)
+        {
+            var components = value.Split('.');
+            if (components.Length == 1)
+            {
+                var valueNode = new ValueNode<string>
+                {
+                    Name = value,
+                    Value = originalValue
+                };
 
-				parent.Value.Add(valueNode);
-				return;
-			}
+                parent.Value.Add(valueNode);
+                return;
+            }
 
-			var subnode = parent.Value.FirstOrDefault(t => t.Name == components.First());
-			if (subnode is null)
-			{
-				subnode = new TableNode
-				{
-					Name = components.First()
-				};
+            var subnode = parent.Value.FirstOrDefault(t => t.Name == components.First());
+            if (subnode is null)
+            {
+                subnode = new TableNode
+                {
+                    Name = components.First()
+                };
 
-				parent.Value.Add(subnode);
-			}
+                parent.Value.Add(subnode);
+            }
 
-			if (subnode is TableNode subtable)
-			{
-				PopulateSubNodes(subtable, string.Join(".", components.Skip(1)), originalValue);
-			}
-		}
-	}
+            if (subnode is TableNode subtable)
+            {
+                PopulateSubNodes(subtable, string.Join(".", components.Skip(1)), originalValue);
+            }
+        }
+    }
 }

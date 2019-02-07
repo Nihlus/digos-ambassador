@@ -24,111 +24,111 @@ using System.ComponentModel;
 
 namespace DIGOS.Ambassador.Permissions
 {
-	/// <summary>
-	/// Represents different permissions specific to the ambassador.
-	/// </summary>
-	public enum Permission
-	{
-		/// <summary>
-		/// Allows the user to grant and revoke permissions. This is a dangerous permission to have.
-		/// </summary>
-		[Description("Allows the user to grant and revoke permissions. This is a dangerous permission to have.")]
-		ManagePermissions,
+    /// <summary>
+    /// Represents different permissions specific to the ambassador.
+    /// </summary>
+    public enum Permission
+    {
+        /// <summary>
+        /// Allows the user to grant and revoke permissions. This is a dangerous permission to have.
+        /// </summary>
+        [Description("Allows the user to grant and revoke permissions. This is a dangerous permission to have.")]
+        ManagePermissions,
 
-		/// <summary>
-		/// Allows the user to set classes.
-		/// </summary>
-		[Description("Allows the user to set classes.")]
-		SetClass,
+        /// <summary>
+        /// Allows the user to set classes.
+        /// </summary>
+        [Description("Allows the user to set classes.")]
+        SetClass,
 
-		/// <summary>
-		/// Allows the user to create characters.
-		/// </summary>
-		[Description("Allows the user to create characters.")]
-		CreateCharacter,
+        /// <summary>
+        /// Allows the user to create characters.
+        /// </summary>
+        [Description("Allows the user to create characters.")]
+        CreateCharacter,
 
-		/// <summary>
-		/// Allows the user to import characters from supported services.
-		/// </summary>
-		[Description("Allows the user to import characters from supported services.")]
-		ImportCharacter,
+        /// <summary>
+        /// Allows the user to import characters from supported services.
+        /// </summary>
+        [Description("Allows the user to import characters from supported services.")]
+        ImportCharacter,
 
-		/// <summary>
-		/// Allows the user to delete characters.
-		/// </summary>
-		[Description("Allows the user to delete characters.")]
-		DeleteCharacter,
+        /// <summary>
+        /// Allows the user to delete characters.
+        /// </summary>
+        [Description("Allows the user to delete characters.")]
+        DeleteCharacter,
 
-		/// <summary>
-		/// Allows the user to edit characters.
-		/// </summary>
-		[Description("Allows the user to edit characters.")]
-		EditCharacter,
+        /// <summary>
+        /// Allows the user to edit characters.
+        /// </summary>
+        [Description("Allows the user to edit characters.")]
+        EditCharacter,
 
-		/// <summary>
-		/// Allows the user to transfer ownership of characters.
-		/// </summary>
-		[Description("Allows the user to transfer ownership of characters.")]
-		TransferCharacter,
+        /// <summary>
+        /// Allows the user to transfer ownership of characters.
+        /// </summary>
+        [Description("Allows the user to transfer ownership of characters.")]
+        TransferCharacter,
 
-		/// <summary>
-		/// Allows the user to assume the form of a character.
-		/// </summary>
-		[Description("Allows the user to assume the form of a character.")]
-		AssumeCharacter,
+        /// <summary>
+        /// Allows the user to assume the form of a character.
+        /// </summary>
+        [Description("Allows the user to assume the form of a character.")]
+        AssumeCharacter,
 
-		/// <summary>
-		/// Allows the user to edit user information.
-		/// </summary>
-		[Description("Allows the user to edit user information.")]
-		EditUser,
+        /// <summary>
+        /// Allows the user to edit user information.
+        /// </summary>
+        [Description("Allows the user to edit user information.")]
+        EditUser,
 
-		/// <summary>
-		/// Allows the user to create roleplays.
-		/// </summary>
-		[Description("Allows the user to create roleplays.")]
-		CreateRoleplay,
+        /// <summary>
+        /// Allows the user to create roleplays.
+        /// </summary>
+        [Description("Allows the user to create roleplays.")]
+        CreateRoleplay,
 
-		/// <summary>
-		/// Allows the user to delete roleplays.
-		/// </summary>
-		[Description("Allows the user to delete roleplays.")]
-		DeleteRoleplay,
+        /// <summary>
+        /// Allows the user to delete roleplays.
+        /// </summary>
+        [Description("Allows the user to delete roleplays.")]
+        DeleteRoleplay,
 
-		/// <summary>
-		/// Allows the user to join roleplays.
-		/// </summary>
-		[Description("Allows the user to join roleplays.")]
-		JoinRoleplay,
+        /// <summary>
+        /// Allows the user to join roleplays.
+        /// </summary>
+        [Description("Allows the user to join roleplays.")]
+        JoinRoleplay,
 
-		/// <summary>
-		/// Allows the user to replay roleplays.
-		/// </summary>
-		[Description("Allows the user to replay roleplays.")]
-		ReplayRoleplay,
+        /// <summary>
+        /// Allows the user to replay roleplays.
+        /// </summary>
+        [Description("Allows the user to replay roleplays.")]
+        ReplayRoleplay,
 
-		/// <summary>
-		/// Allows the user to edit roleplay information.
-		/// </summary>
-		[Description("Allows the user to edit roleplay information.")]
-		EditRoleplay,
+        /// <summary>
+        /// Allows the user to edit roleplay information.
+        /// </summary>
+        [Description("Allows the user to edit roleplay information.")]
+        EditRoleplay,
 
-		/// <summary>
-		/// Allows the user to kick members of roleplays.
-		/// </summary>
-		[Description("Allows the user to kick members of roleplays.")]
-		KickRoleplayMember,
+        /// <summary>
+        /// Allows the user to kick members of roleplays.
+        /// </summary>
+        [Description("Allows the user to kick members of roleplays.")]
+        KickRoleplayMember,
 
-		/// <summary>
-		/// Allows the user to start and stop roleplays.
-		/// </summary>
-		[Description("Allows the user to start and stop roleplays.")]
-		StartStopRoleplay,
+        /// <summary>
+        /// Allows the user to start and stop roleplays.
+        /// </summary>
+        [Description("Allows the user to start and stop roleplays.")]
+        StartStopRoleplay,
 
-		/// <summary>
-		/// Allows the user to transfer ownership of roleplays.
-		/// </summary>
-		[Description("Allows the user to transfer ownership of roleplays.")]
-		TransferRoleplay,
-	}
+        /// <summary>
+        /// Allows the user to transfer ownership of roleplays.
+        /// </summary>
+        [Description("Allows the user to transfer ownership of roleplays.")]
+        TransferRoleplay,
+    }
 }

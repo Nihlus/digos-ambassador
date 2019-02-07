@@ -38,288 +38,288 @@ using static Discord.Commands.RunMode;
 
 namespace DIGOS.Ambassador.Modules
 {
-	/// <summary>
-	/// Commands for viewing, adding, and editing dossier entries.
-	/// </summary>
-	[Group("dossier")]
-	[Summary("Commands for viewing, adding, and editing dossier entries.")]
-	public class DossierCommands : ModuleBase<SocketCommandContext>
-	{
-		[ProvidesContext]
-		private readonly GlobalInfoContext Database;
-		private readonly UserFeedbackService Feedback;
-		private readonly ContentService Content;
-		private readonly DossierService Dossiers;
+    /// <summary>
+    /// Commands for viewing, adding, and editing dossier entries.
+    /// </summary>
+    [Group("dossier")]
+    [Summary("Commands for viewing, adding, and editing dossier entries.")]
+    public class DossierCommands : ModuleBase<SocketCommandContext>
+    {
+        [ProvidesContext]
+        private readonly GlobalInfoContext Database;
+        private readonly UserFeedbackService Feedback;
+        private readonly ContentService Content;
+        private readonly DossierService Dossiers;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DossierCommands"/> class.
-		/// </summary>
-		/// <param name="database">A database context from the context pool.</param>
-		/// <param name="feedback">The feedback service.</param>
-		/// <param name="content">The content service.</param>
-		/// <param name="dossiers">The dossier service.</param>
-		public DossierCommands(GlobalInfoContext database, UserFeedbackService feedback, ContentService content, DossierService dossiers)
-		{
-			this.Database = database;
-			this.Feedback = feedback;
-			this.Content = content;
-			this.Dossiers = dossiers;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DossierCommands"/> class.
+        /// </summary>
+        /// <param name="database">A database context from the context pool.</param>
+        /// <param name="feedback">The feedback service.</param>
+        /// <param name="content">The content service.</param>
+        /// <param name="dossiers">The dossier service.</param>
+        public DossierCommands(GlobalInfoContext database, UserFeedbackService feedback, ContentService content, DossierService dossiers)
+        {
+            this.Database = database;
+            this.Feedback = feedback;
+            this.Content = content;
+            this.Dossiers = dossiers;
+        }
 
-		/// <summary>
-		/// Lists the available dossiers.
-		/// </summary>
-		[UsedImplicitly]
-		[Command("list", RunMode = Async)]
-		[Summary("Lists the available dossiers.")]
-		public async Task ListDossiersAsync()
-		{
-			var eb = BuildDossierListEmbed(this.Database.Dossiers);
-			await this.Feedback.SendEmbedAsync(this.Context, eb);
-		}
+        /// <summary>
+        /// Lists the available dossiers.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("list", RunMode = Async)]
+        [Summary("Lists the available dossiers.")]
+        public async Task ListDossiersAsync()
+        {
+            var eb = BuildDossierListEmbed(this.Database.Dossiers);
+            await this.Feedback.SendEmbedAsync(this.Context, eb);
+        }
 
-		[NotNull]
-		private Embed BuildDossierListEmbed([NotNull][ItemNotNull]IEnumerable<Dossier> dossiers)
-		{
-			var eb = this.Feedback.CreateEmbedBase();
-			eb.WithTitle("Dossier Database");
+        [NotNull]
+        private Embed BuildDossierListEmbed([NotNull][ItemNotNull]IEnumerable<Dossier> dossiers)
+        {
+            var eb = this.Feedback.CreateEmbedBase();
+            eb.WithTitle("Dossier Database");
 
-			foreach (var dossier in dossiers)
-			{
-				eb.AddField(dossier.Title, dossier.Summary);
-			}
+            foreach (var dossier in dossiers)
+            {
+                eb.AddField(dossier.Title, dossier.Summary);
+            }
 
-			if (!eb.Fields.Any())
-			{
-				eb.WithDescription("No dossiers found.");
-			}
+            if (!eb.Fields.Any())
+            {
+                eb.WithDescription("No dossiers found.");
+            }
 
-			return eb.Build();
-		}
+            return eb.Build();
+        }
 
-		/// <summary>
-		/// Views the named dossier.
-		/// </summary>
-		/// <param name="title">The title of the dossier to view.</param>
-		[UsedImplicitly]
-		[Alias("view", "show")]
-		[Command("view", RunMode = Async)]
-		[Summary("Views the named dossier.")]
-		public async Task ViewDossierAsync([NotNull] string title)
-		{
-			var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
-			if (!getDossierResult.IsSuccess)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-				return;
-			}
+        /// <summary>
+        /// Views the named dossier.
+        /// </summary>
+        /// <param name="title">The title of the dossier to view.</param>
+        [UsedImplicitly]
+        [Alias("view", "show")]
+        [Command("view", RunMode = Async)]
+        [Summary("Views the named dossier.")]
+        public async Task ViewDossierAsync([NotNull] string title)
+        {
+            var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
+            if (!getDossierResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+                return;
+            }
 
-			var dossier = getDossierResult.Entity;
+            var dossier = getDossierResult.Entity;
 
-			var eb = BuildDossierEmbed(dossier);
-			await this.Feedback.SendEmbedAsync(this.Context, eb);
+            var eb = BuildDossierEmbed(dossier);
+            await this.Feedback.SendEmbedAsync(this.Context, eb);
 
-			var dossierDataResult = this.Content.GetDossierStream(dossier);
-			if (!dossierDataResult.IsSuccess)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, dossierDataResult.ErrorReason);
-				return;
-			}
+            var dossierDataResult = this.Content.GetDossierStream(dossier);
+            if (!dossierDataResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, dossierDataResult.ErrorReason);
+                return;
+            }
 
-			using (var dossierData = dossierDataResult.Entity)
-			{
-				await this.Context.Channel.SendFileAsync(dossierData, $"{dossier.Title}.pdf");
-			}
-		}
+            using (var dossierData = dossierDataResult.Entity)
+            {
+                await this.Context.Channel.SendFileAsync(dossierData, $"{dossier.Title}.pdf");
+            }
+        }
 
-		[NotNull]
-		private Embed BuildDossierEmbed([NotNull] Dossier dossier)
-		{
-			var eb = this.Feedback.CreateEmbedBase();
-			eb.WithTitle(dossier.Title);
-			eb.WithDescription(dossier.Summary);
+        [NotNull]
+        private Embed BuildDossierEmbed([NotNull] Dossier dossier)
+        {
+            var eb = this.Feedback.CreateEmbedBase();
+            eb.WithTitle(dossier.Title);
+            eb.WithDescription(dossier.Summary);
 
-			return eb.Build();
-		}
+            return eb.Build();
+        }
 
-		/// <summary>
-		/// Adds a new dossier with the given title and summary. A PDF with the full dossier can be attached.
-		/// </summary>
-		/// <param name="title">The title.</param>
-		/// <param name="summary">The summary.</param>
-		[UsedImplicitly]
-		[Alias("add", "create")]
-		[Command("add", RunMode = Async)]
-		[Summary("Adds a new dossier with the given title and summary. A PDF with the full dossier can be attached.")]
-		[RequireOwner]
-		public async Task AddDossierAsync([NotNull] string title, [NotNull] string summary = "No summary set.")
-		{
-			var dossierCreationResult = await this.Dossiers.CreateDossierAsync(this.Database, title, summary);
-			if (!dossierCreationResult.IsSuccess)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, dossierCreationResult.ErrorReason);
-				return;
-			}
+        /// <summary>
+        /// Adds a new dossier with the given title and summary. A PDF with the full dossier can be attached.
+        /// </summary>
+        /// <param name="title">The title.</param>
+        /// <param name="summary">The summary.</param>
+        [UsedImplicitly]
+        [Alias("add", "create")]
+        [Command("add", RunMode = Async)]
+        [Summary("Adds a new dossier with the given title and summary. A PDF with the full dossier can be attached.")]
+        [RequireOwner]
+        public async Task AddDossierAsync([NotNull] string title, [NotNull] string summary = "No summary set.")
+        {
+            var dossierCreationResult = await this.Dossiers.CreateDossierAsync(this.Database, title, summary);
+            if (!dossierCreationResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, dossierCreationResult.ErrorReason);
+                return;
+            }
 
-			var dossier = dossierCreationResult.Entity;
+            var dossier = dossierCreationResult.Entity;
 
-			var modifyResult = await this.Dossiers.SetDossierDataAsync(this.Database, dossier, this.Context);
-			if (!modifyResult.IsSuccess)
-			{
-				if (modifyResult.Error == CommandError.Exception)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-					await this.Dossiers.DeleteDossierAsync(this.Database, dossier);
-					return;
-				}
+            var modifyResult = await this.Dossiers.SetDossierDataAsync(this.Database, dossier, this.Context);
+            if (!modifyResult.IsSuccess)
+            {
+                if (modifyResult.Error == CommandError.Exception)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
+                    await this.Dossiers.DeleteDossierAsync(this.Database, dossier);
+                    return;
+                }
 
-				await this.Feedback.SendWarningAsync(this.Context, modifyResult.ErrorReason);
-			}
+                await this.Feedback.SendWarningAsync(this.Context, modifyResult.ErrorReason);
+            }
 
-			await this.Feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" added.");
-		}
+            await this.Feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" added.");
+        }
 
-		/// <summary>
-		/// Removes the dossier with the given title.
-		/// </summary>
-		/// <param name="title">The title.</param>
-		[UsedImplicitly]
-		[Alias("remove", "delete")]
-		[Command("remove", RunMode = Async)]
-		[Summary("Removes the dossier with the given title.")]
-		[RequireOwner]
-		public async Task RemoveDossierAsync([NotNull] string title)
-		{
-			var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
-			if (!getDossierResult.IsSuccess)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-				return;
-			}
+        /// <summary>
+        /// Removes the dossier with the given title.
+        /// </summary>
+        /// <param name="title">The title.</param>
+        [UsedImplicitly]
+        [Alias("remove", "delete")]
+        [Command("remove", RunMode = Async)]
+        [Summary("Removes the dossier with the given title.")]
+        [RequireOwner]
+        public async Task RemoveDossierAsync([NotNull] string title)
+        {
+            var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
+            if (!getDossierResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+                return;
+            }
 
-			var dossier = getDossierResult.Entity;
-			var deleteDossierResult = await this.Dossiers.DeleteDossierAsync(this.Database, dossier);
-			if (!deleteDossierResult.IsSuccess)
-			{
-				await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-				return;
-			}
+            var dossier = getDossierResult.Entity;
+            var deleteDossierResult = await this.Dossiers.DeleteDossierAsync(this.Database, dossier);
+            if (!deleteDossierResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+                return;
+            }
 
-			await this.Feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" deleted.");
-		}
+            await this.Feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" deleted.");
+        }
 
-		/// <summary>
-		/// Setters for dossier properties.
-		/// </summary>
-		[Group("set")]
-		public class SetCommands : ModuleBase<SocketCommandContext>
-		{
-			[ProvidesContext]
-			private readonly GlobalInfoContext Database;
-			private readonly UserFeedbackService Feedback;
-			private readonly DossierService Dossiers;
+        /// <summary>
+        /// Setters for dossier properties.
+        /// </summary>
+        [Group("set")]
+        public class SetCommands : ModuleBase<SocketCommandContext>
+        {
+            [ProvidesContext]
+            private readonly GlobalInfoContext Database;
+            private readonly UserFeedbackService Feedback;
+            private readonly DossierService Dossiers;
 
-			/// <summary>
-			/// Initializes a new instance of the <see cref="SetCommands"/> class.
-			/// </summary>
-			/// <param name="database">A database context from the context pool.</param>
-			/// <param name="feedback">The feedback service.</param>
-			/// <param name="dossiers">The dossier service.</param>
-			public SetCommands(GlobalInfoContext database, UserFeedbackService feedback, DossierService dossiers)
-			{
-				this.Database = database;
-				this.Feedback = feedback;
-				this.Dossiers = dossiers;
-			}
+            /// <summary>
+            /// Initializes a new instance of the <see cref="SetCommands"/> class.
+            /// </summary>
+            /// <param name="database">A database context from the context pool.</param>
+            /// <param name="feedback">The feedback service.</param>
+            /// <param name="dossiers">The dossier service.</param>
+            public SetCommands(GlobalInfoContext database, UserFeedbackService feedback, DossierService dossiers)
+            {
+                this.Database = database;
+                this.Feedback = feedback;
+                this.Dossiers = dossiers;
+            }
 
-			/// <summary>
-			/// Sets the title of the given dossier.
-			/// </summary>
-			/// <param name="title">The title of the dossier to edit.</param>
-			/// <param name="newTitle">The new title of the dossier.</param>
-			[UsedImplicitly]
-			[Command("title", RunMode = Async)]
-			[Summary("Sets the title of the given dossier.")]
-			[RequireOwner]
-			public async Task SetTitleAsync([NotNull] string title, [NotNull] string newTitle)
-			{
-				var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
-				if (!getDossierResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-					return;
-				}
+            /// <summary>
+            /// Sets the title of the given dossier.
+            /// </summary>
+            /// <param name="title">The title of the dossier to edit.</param>
+            /// <param name="newTitle">The new title of the dossier.</param>
+            [UsedImplicitly]
+            [Command("title", RunMode = Async)]
+            [Summary("Sets the title of the given dossier.")]
+            [RequireOwner]
+            public async Task SetTitleAsync([NotNull] string title, [NotNull] string newTitle)
+            {
+                var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
+                if (!getDossierResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+                    return;
+                }
 
-				var dossier = getDossierResult.Entity;
+                var dossier = getDossierResult.Entity;
 
-				var modifyResult = await this.Dossiers.SetDossierTitleAsync(this.Database, dossier, newTitle);
-				if (!modifyResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-					return;
-				}
+                var modifyResult = await this.Dossiers.SetDossierTitleAsync(this.Database, dossier, newTitle);
+                if (!modifyResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
+                    return;
+                }
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "New dossier title set.");
-			}
+                await this.Feedback.SendConfirmationAsync(this.Context, "New dossier title set.");
+            }
 
-			/// <summary>
-			/// Sets the summary of the given dossier.
-			/// </summary>
-			/// <param name="title">The title of the dossier to edit.</param>
-			/// <param name="newSummary">The new summary of the dossier.</param>
-			[UsedImplicitly]
-			[Command("summary", RunMode = Async)]
-			[Summary("Sets the summary of the given dossier.")]
-			[RequireOwner]
-			public async Task SetSummaryAsync([NotNull] string title, [NotNull] string newSummary)
-			{
-				var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
-				if (!getDossierResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-					return;
-				}
+            /// <summary>
+            /// Sets the summary of the given dossier.
+            /// </summary>
+            /// <param name="title">The title of the dossier to edit.</param>
+            /// <param name="newSummary">The new summary of the dossier.</param>
+            [UsedImplicitly]
+            [Command("summary", RunMode = Async)]
+            [Summary("Sets the summary of the given dossier.")]
+            [RequireOwner]
+            public async Task SetSummaryAsync([NotNull] string title, [NotNull] string newSummary)
+            {
+                var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
+                if (!getDossierResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+                    return;
+                }
 
-				var dossier = getDossierResult.Entity;
+                var dossier = getDossierResult.Entity;
 
-				var modifyResult = await this.Dossiers.SetDossierSummaryAsync(this.Database, dossier, newSummary);
-				if (!modifyResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-					return;
-				}
+                var modifyResult = await this.Dossiers.SetDossierSummaryAsync(this.Database, dossier, newSummary);
+                if (!modifyResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
+                    return;
+                }
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "New dossier summary set.");
-			}
+                await this.Feedback.SendConfirmationAsync(this.Context, "New dossier summary set.");
+            }
 
-			/// <summary>
-			/// Sets the data of the given dossier. Attach a PDF to the command.
-			/// </summary>
-			/// <param name="title">The title of the dossier to edit.</param>
-			[UsedImplicitly]
-			[Command("data", RunMode = Async)]
-			[Summary("Sets the data of the given dossier. Attach a PDF to the command.")]
-			[RequireOwner]
-			public async Task SetFileAsync([NotNull] string title)
-			{
-				var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
-				if (!getDossierResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-					return;
-				}
+            /// <summary>
+            /// Sets the data of the given dossier. Attach a PDF to the command.
+            /// </summary>
+            /// <param name="title">The title of the dossier to edit.</param>
+            [UsedImplicitly]
+            [Command("data", RunMode = Async)]
+            [Summary("Sets the data of the given dossier. Attach a PDF to the command.")]
+            [RequireOwner]
+            public async Task SetFileAsync([NotNull] string title)
+            {
+                var getDossierResult = await this.Dossiers.GetDossierByTitleAsync(this.Database, title);
+                if (!getDossierResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
+                    return;
+                }
 
-				var dossier = getDossierResult.Entity;
+                var dossier = getDossierResult.Entity;
 
-				var modifyResult = await this.Dossiers.SetDossierDataAsync(this.Database, dossier, this.Context);
-				if (!modifyResult.IsSuccess)
-				{
-					await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-					return;
-				}
+                var modifyResult = await this.Dossiers.SetDossierDataAsync(this.Database, dossier, this.Context);
+                if (!modifyResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
+                    return;
+                }
 
-				await this.Feedback.SendConfirmationAsync(this.Context, "Dossier data set.");
-			}
-		}
-	}
+                await this.Feedback.SendConfirmationAsync(this.Context, "Dossier data set.");
+            }
+        }
+    }
 }

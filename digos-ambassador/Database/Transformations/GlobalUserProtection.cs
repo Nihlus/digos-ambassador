@@ -31,65 +31,65 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Transformations
 {
-	/// <summary>
-	/// Holds global protection data for a specific user.
-	/// </summary>
-	public class GlobalUserProtection : IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Holds global protection data for a specific user.
+    /// </summary>
+    public class GlobalUserProtection : IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the user that owns this protection data.
-		/// </summary>
-		[Required]
-		public User User { get; set; }
+        /// <summary>
+        /// Gets or sets the user that owns this protection data.
+        /// </summary>
+        [Required]
+        public User User { get; set; }
 
-		/// <summary>
-		/// Gets or sets the default protection type to use on new servers.
-		/// </summary>
-		public ProtectionType DefaultType { get; set; }
+        /// <summary>
+        /// Gets or sets the default protection type to use on new servers.
+        /// </summary>
+        public ProtectionType DefaultType { get; set; }
 
-		/// <summary>
-		/// Gets or sets a value indicating whether or not the user should be opted in by default.
-		/// </summary>
-		public bool DefaultOptIn { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether or not the user should be opted in by default.
+        /// </summary>
+        public bool DefaultOptIn { get; set; }
 
-		/// <summary>
-		/// Gets or sets the list of users that are listed in this protection entry.
-		/// </summary>
-		public List<UserProtectionEntry> UserListing { get; set; }
+        /// <summary>
+        /// Gets or sets the list of users that are listed in this protection entry.
+        /// </summary>
+        public List<UserProtectionEntry> UserListing { get; set; }
 
-		/// <summary>
-		/// Gets the list of users that are allowed to transform the owner.
-		/// </summary>
-		[NotNull, NotMapped]
-		public IEnumerable<User> Whitelist =>
-			this.UserListing.Where(u => u.Type == ListingType.Whitelist).Select(u => u.User);
+        /// <summary>
+        /// Gets the list of users that are allowed to transform the owner.
+        /// </summary>
+        [NotNull, NotMapped]
+        public IEnumerable<User> Whitelist =>
+            this.UserListing.Where(u => u.Type == ListingType.Whitelist).Select(u => u.User);
 
-		/// <summary>
-		/// Gets the list of users that are prohibited from transforming the owner.
-		/// </summary>
-		[NotNull, NotMapped]
-		public IEnumerable<User> Blacklist =>
-				this.UserListing.Where(u => u.Type == ListingType.Blacklist).Select(u => u.User);
+        /// <summary>
+        /// Gets the list of users that are prohibited from transforming the owner.
+        /// </summary>
+        [NotNull, NotMapped]
+        public IEnumerable<User> Blacklist =>
+                this.UserListing.Where(u => u.Type == ListingType.Blacklist).Select(u => u.User);
 
-		/// <summary>
-		/// Creates a default global protection object for the given user.
-		/// </summary>
-		/// <param name="user">The user.</param>
-		/// <returns>A default user protection object.</returns>
-		[Pure]
-		[NotNull]
-		public static GlobalUserProtection CreateDefault([NotNull] User user)
-		{
-			return new GlobalUserProtection
-			{
-				User = user,
-				DefaultType = ProtectionType.Blacklist,
-				DefaultOptIn = false,
-				UserListing = new List<UserProtectionEntry>()
-			};
-		}
-	}
+        /// <summary>
+        /// Creates a default global protection object for the given user.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <returns>A default user protection object.</returns>
+        [Pure]
+        [NotNull]
+        public static GlobalUserProtection CreateDefault([NotNull] User user)
+        {
+            return new GlobalUserProtection
+            {
+                User = user,
+                DefaultType = ProtectionType.Blacklist,
+                DefaultOptIn = false,
+                UserListing = new List<UserProtectionEntry>()
+            };
+        }
+    }
 }

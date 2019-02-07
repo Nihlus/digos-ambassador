@@ -31,32 +31,32 @@ using Xunit;
 
 namespace DIGOS.Ambassador.Tests.ContentTests
 {
-	public class SpeciesValidityTests : TransformationValidityTests
-	{
-		[Theory]
-		[ClassData(typeof(SpeciesDataProvider))]
-		public void SpeciesFolderHasASpeciesFile(string speciesFile)
-		{
-			Assert.True(File.Exists(speciesFile));
-		}
+    public class SpeciesValidityTests : TransformationValidityTests
+    {
+        [Theory]
+        [ClassData(typeof(SpeciesDataProvider))]
+        public void SpeciesFolderHasASpeciesFile(string speciesFile)
+        {
+            Assert.True(File.Exists(speciesFile));
+        }
 
-		[Theory]
-		[ClassData(typeof(SpeciesDataProvider))]
-		public void SpeciesFileIsInCorrectFolder(string speciesFile)
-		{
-			var folderName = Directory.GetParent(speciesFile).Name;
-			var species = Deserialize<Species>(speciesFile);
+        [Theory]
+        [ClassData(typeof(SpeciesDataProvider))]
+        public void SpeciesFileIsInCorrectFolder(string speciesFile)
+        {
+            var folderName = Directory.GetParent(speciesFile).Name;
+            var species = Deserialize<Species>(speciesFile);
 
-			Assert.Equal(species.Name, folderName);
-		}
+            Assert.Equal(species.Name, folderName);
+        }
 
-		[Theory]
-		[ClassData(typeof(SpeciesDataProvider))]
-		public void SpeciesFileIsValid(string speciesFile)
-		{
-			var result = this.Verifier.VerifyFile<Species>(speciesFile);
+        [Theory]
+        [ClassData(typeof(SpeciesDataProvider))]
+        public void SpeciesFileIsValid(string speciesFile)
+        {
+            var result = this.Verifier.VerifyFile<Species>(speciesFile);
 
-			Assert.True(result.IsSuccess, result.ErrorReason);
-		}
-	}
+            Assert.True(result.IsSuccess, result.ErrorReason);
+        }
+    }
 }

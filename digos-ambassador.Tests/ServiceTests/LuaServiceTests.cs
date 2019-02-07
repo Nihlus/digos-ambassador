@@ -30,62 +30,62 @@ using Xunit;
 
 namespace DIGOS.Ambassador.Tests.ServiceTests
 {
-	public class LuaServiceTests
-	{
-		private readonly LuaService Lua;
+    public class LuaServiceTests
+    {
+        private readonly LuaService Lua;
 
-		public LuaServiceTests()
-		{
-			this.Lua = new LuaService(new Mock<ContentService>().Object);
-		}
+        public LuaServiceTests()
+        {
+            this.Lua = new LuaService(new Mock<ContentService>().Object);
+        }
 
-		[Fact]
-		public async Task CanExecuteSimpleCode()
-		{
-			const string code = "return \"test\"";
+        [Fact]
+        public async Task CanExecuteSimpleCode()
+        {
+            const string code = "return \"test\"";
 
-			var result = await this.Lua.ExecuteSnippetAsync(code);
-			Assert.True(result.IsSuccess);
-			Assert.Equal("test", result.Entity);
-		}
+            var result = await this.Lua.ExecuteSnippetAsync(code);
+            Assert.True(result.IsSuccess);
+            Assert.Equal("test", result.Entity);
+        }
 
-		[Fact]
-		public async Task TimesOutLongRunningScripts()
-		{
-			const string code = "while (true) do end";
+        [Fact]
+        public async Task TimesOutLongRunningScripts()
+        {
+            const string code = "while (true) do end";
 
-			var result = await this.Lua.ExecuteSnippetAsync(code);
-			Assert.False(result.IsSuccess);
-		}
+            var result = await this.Lua.ExecuteSnippetAsync(code);
+            Assert.False(result.IsSuccess);
+        }
 
-		[Fact]
-		public async Task ScriptUsingAPINotOnWhitelistFails()
-		{
-			const string code = "setfenv({})";
+        [Fact]
+        public async Task ScriptUsingAPINotOnWhitelistFails()
+        {
+            const string code = "setfenv({})";
 
-			var result = await this.Lua.ExecuteSnippetAsync(code);
-			Assert.False(result.IsSuccess);
-		}
+            var result = await this.Lua.ExecuteSnippetAsync(code);
+            Assert.False(result.IsSuccess);
+        }
 
-		[Fact]
-		public async Task ScriptUsingAPIOnWhitelistSucceeds()
-		{
-			const string code = "return string.lower(\"ABC\")";
+        [Fact]
+        public async Task ScriptUsingAPIOnWhitelistSucceeds()
+        {
+            const string code = "return string.lower(\"ABC\")";
 
-			var result = await this.Lua.ExecuteSnippetAsync(code);
-			Assert.True(result.IsSuccess);
-			Assert.Equal("abc", result.Entity);
-		}
+            var result = await this.Lua.ExecuteSnippetAsync(code);
+            Assert.True(result.IsSuccess);
+            Assert.Equal("abc", result.Entity);
+        }
 
-		[Fact]
-		public async Task CanAccessPassedVariables()
-		{
-			int variable = 10;
-			const string code = "return variable";
+        [Fact]
+        public async Task CanAccessPassedVariables()
+        {
+            int variable = 10;
+            const string code = "return variable";
 
-			var result = await this.Lua.ExecuteSnippetAsync(code, (nameof(variable), variable));
-			Assert.True(result.IsSuccess);
-			Assert.Equal("10", result.Entity);
-		}
-	}
+            var result = await this.Lua.ExecuteSnippetAsync(code, (nameof(variable), variable));
+            Assert.True(result.IsSuccess);
+            Assert.Equal("10", result.Entity);
+        }
+    }
 }

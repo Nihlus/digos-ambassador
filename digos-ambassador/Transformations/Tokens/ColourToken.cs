@@ -26,57 +26,57 @@ using DIGOS.Ambassador.Database.Characters;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// A token that gets replaced with a colour.
-	/// </summary>
-	[TokenIdentifier("colour", "c")]
-	public class ColourToken : ReplacableTextToken<ColourToken>
-	{
-		/// <summary>
-		/// Gets the form of the pronoun.
-		/// </summary>
-		public string Part { get; private set; }
+    /// <summary>
+    /// A token that gets replaced with a colour.
+    /// </summary>
+    [TokenIdentifier("colour", "c")]
+    public class ColourToken : ReplacableTextToken<ColourToken>
+    {
+        /// <summary>
+        /// Gets the form of the pronoun.
+        /// </summary>
+        public string Part { get; private set; }
 
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			if (component is null)
-			{
-				throw new ArgumentNullException(nameof(component));
-			}
+        /// <inheritdoc />
+        public override string GetText(Character character, AppearanceComponent component)
+        {
+            if (component is null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
 
-			switch (this.Part)
-			{
-				case "base":
-				{
-					return component.BaseColour.ToString();
-				}
-				case "pattern":
-				{
-					return component.PatternColour?.ToString() ?? string.Empty;
-				}
-				default:
-				{
-					throw new ArgumentOutOfRangeException();
-				}
-			}
-		}
+            switch (this.Part)
+            {
+                case "base":
+                {
+                    return component.BaseColour.ToString();
+                }
+                case "pattern":
+                {
+                    return component.PatternColour?.ToString() ?? string.Empty;
+                }
+                default:
+                {
+                    throw new ArgumentOutOfRangeException();
+                }
+            }
+        }
 
-		/// <inheritdoc />
-		protected override ColourToken Initialize(string data)
-		{
-			if (data is null)
-			{
-				this.Part = "base";
-				return this;
-			}
+        /// <inheritdoc />
+        protected override ColourToken Initialize(string data)
+        {
+            if (data is null)
+            {
+                this.Part = "base";
+                return this;
+            }
 
-			if (data.Equals("base") | string.Equals(data, "pattern"))
-			{
-				this.Part = data;
-			}
+            if (data.Equals("base") | string.Equals(data, "pattern"))
+            {
+                this.Part = data;
+            }
 
-			return this;
-		}
-	}
+            return this;
+        }
+    }
 }

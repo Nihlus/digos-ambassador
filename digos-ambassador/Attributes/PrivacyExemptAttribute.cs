@@ -24,12 +24,12 @@ using System;
 
 namespace DIGOS.Ambassador.Attributes
 {
-	/// <summary>
-	/// If a method is decorated with this attribute, it is exempt from privacy consent. The method must not store or
-	/// access any user data.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Method)]
-	public class PrivacyExemptAttribute : Attribute
-	{
-	}
+    /// <summary>
+    /// If a method is decorated with this attribute, it is exempt from privacy consent. The method must not store or
+    /// access any user data.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    public class PrivacyExemptAttribute : Attribute
+    {
+    }
 }

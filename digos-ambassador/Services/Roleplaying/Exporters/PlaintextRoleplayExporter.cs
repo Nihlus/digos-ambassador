@@ -31,56 +31,56 @@ using MoreLinq;
 
 namespace DIGOS.Ambassador.Services.Exporters
 {
-	/// <summary>
-	/// Exports roleplays in plaintext format.
-	/// </summary>
-	public class PlaintextRoleplayExporter : RoleplayExporterBase
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="PlaintextRoleplayExporter"/> class.
-		/// </summary>
-		/// <param name="context">The command context for this export operation.</param>
-		public PlaintextRoleplayExporter(ICommandContext context)
-			: base(context)
-		{
-		}
+    /// <summary>
+    /// Exports roleplays in plaintext format.
+    /// </summary>
+    public class PlaintextRoleplayExporter : RoleplayExporterBase
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PlaintextRoleplayExporter"/> class.
+        /// </summary>
+        /// <param name="context">The command context for this export operation.</param>
+        public PlaintextRoleplayExporter(ICommandContext context)
+            : base(context)
+        {
+        }
 
-		/// <inheritdoc />
-		public override async Task<ExportedRoleplay> ExportAsync(Roleplay roleplay)
-		{
-			var owner = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
+        /// <inheritdoc />
+        public override async Task<ExportedRoleplay> ExportAsync(Roleplay roleplay)
+        {
+            var owner = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
 
-			var filePath = Path.GetTempFileName();
-			using (var of = File.Create(filePath))
-			{
-				using (var ofw = new StreamWriter(of))
-				{
-					await ofw.WriteLineAsync($"Roleplay name: {roleplay.Name}");
-					await ofw.WriteLineAsync($"Owner: {owner.Username}");
+            var filePath = Path.GetTempFileName();
+            using (var of = File.Create(filePath))
+            {
+                using (var ofw = new StreamWriter(of))
+                {
+                    await ofw.WriteLineAsync($"Roleplay name: {roleplay.Name}");
+                    await ofw.WriteLineAsync($"Owner: {owner.Username}");
 
-					var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
+                    var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
 
-					await ofw.WriteLineAsync("Participants:");
-					foreach (var participant in joinedUsers)
-					{
-						await ofw.WriteLineAsync(participant.Username);
-					}
+                    await ofw.WriteLineAsync("Participants:");
+                    foreach (var participant in joinedUsers)
+                    {
+                        await ofw.WriteLineAsync(participant.Username);
+                    }
 
-					await ofw.WriteLineAsync();
-					await ofw.WriteLineAsync();
+                    await ofw.WriteLineAsync();
+                    await ofw.WriteLineAsync();
 
-					var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
-					foreach (var message in messages)
-					{
-						await ofw.WriteLineAsync($"{message.AuthorNickname}: \n{message.Contents}");
-						await ofw.WriteLineAsync();
-					}
-				}
-			}
+                    var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
+                    foreach (var message in messages)
+                    {
+                        await ofw.WriteLineAsync($"{message.AuthorNickname}: \n{message.Contents}");
+                        await ofw.WriteLineAsync();
+                    }
+                }
+            }
 
-			var resultFile = File.OpenRead(filePath);
-			var exported = new ExportedRoleplay(roleplay.Name, ExportFormat.Plaintext, resultFile);
-			return exported;
-		}
-	}
+            var resultFile = File.OpenRead(filePath);
+            var exported = new ExportedRoleplay(roleplay.Name, ExportFormat.Plaintext, resultFile);
+            return exported;
+        }
+    }
 }

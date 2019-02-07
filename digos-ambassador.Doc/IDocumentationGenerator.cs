@@ -24,20 +24,20 @@ using System.Threading.Tasks;
 
 namespace DIGOS.Ambassador.Doc
 {
-	/// <summary>
-	/// Interface for documentation generators.
-	/// </summary>
-	public interface IDocumentationGenerator
-	{
-		/// <summary>
-		/// Generates the documentation from the associated assembly.
-		/// </summary>
-		void GenerateDocumentation();
+    /// <summary>
+    /// Interface for documentation generators.
+    /// </summary>
+    public interface IDocumentationGenerator
+    {
+        /// <summary>
+        /// Generates the documentation from the associated assembly.
+        /// </summary>
+        void GenerateDocumentation();
 
-		/// <summary>
-		/// Generates the documentation from the associated assembly.
-		/// </summary>
-		/// <returns>A task that must be awaited.</returns>
-		Task GenerateDocumentationAsync();
-	}
+        /// <summary>
+        /// Generates the documentation from the associated assembly.
+        /// </summary>
+        /// <returns>A task that must be awaited.</returns>
+        Task GenerateDocumentationAsync();
+    }
 }

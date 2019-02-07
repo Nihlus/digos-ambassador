@@ -22,19 +22,19 @@
 
 namespace DIGOS.Ambassador.Database.Appearances
 {
-	/// <summary>
-	/// Represents a transformation colour.
-	/// </summary>
-	public interface IColour
-	{
-		/// <summary>
-		/// Gets the shade of the colour.
-		/// </summary>
-		Shade Shade { get; }
+    /// <summary>
+    /// Represents a transformation colour.
+    /// </summary>
+    public interface IColour
+    {
+        /// <summary>
+        /// Gets the shade of the colour.
+        /// </summary>
+        Shade Shade { get; }
 
-		/// <summary>
-		/// Gets the colour modifier.
-		/// </summary>
-		ShadeModifier? Modifier { get; }
-	}
+        /// <summary>
+        /// Gets the colour modifier.
+        /// </summary>
+        ShadeModifier? Modifier { get; }
+    }
 }

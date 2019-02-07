@@ -26,42 +26,42 @@ using Discord.Addons.Interactive;
 
 namespace DIGOS.Ambassador.Pagination
 {
-	/// <summary>
-	/// Interface for paginated content.
-	/// </summary>
-	/// <typeparam name="T1">The type of content in the pager.</typeparam>
-	/// <typeparam name="T2">The type of the pager.</typeparam>
-	public interface IPager<T1, out T2> where T2 : IPager<T1, T2>
-	{
-		/// <summary>
-		/// Gets the pages in the pager.
-		/// </summary>
-		IList<T1> Pages { get; }
+    /// <summary>
+    /// Interface for paginated content.
+    /// </summary>
+    /// <typeparam name="T1">The type of content in the pager.</typeparam>
+    /// <typeparam name="T2">The type of the pager.</typeparam>
+    public interface IPager<T1, out T2> where T2 : IPager<T1, T2>
+    {
+        /// <summary>
+        /// Gets the pages in the pager.
+        /// </summary>
+        IList<T1> Pages { get; }
 
-		/// <summary>
-		/// Gets or sets the appearance options for the pager.
-		/// </summary>
-		PaginatedAppearanceOptions Options { get; set; }
+        /// <summary>
+        /// Gets or sets the appearance options for the pager.
+        /// </summary>
+        PaginatedAppearanceOptions Options { get; set; }
 
-		/// <summary>
-		/// Appends a page to the pager.
-		/// </summary>
-		/// <param name="page">The page to add.</param>
-		/// <returns>The pager with the page.</returns>
-		T2 WithPage(T1 page);
+        /// <summary>
+        /// Appends a page to the pager.
+        /// </summary>
+        /// <param name="page">The page to add.</param>
+        /// <returns>The pager with the page.</returns>
+        T2 WithPage(T1 page);
 
-		/// <summary>
-		/// Appends a set of pages to the pager.
-		/// </summary>
-		/// <param name="pages">The pages to add.</param>
-		/// <returns>The pager with the pages.</returns>
-		T2 WithPages(IEnumerable<T1> pages);
+        /// <summary>
+        /// Appends a set of pages to the pager.
+        /// </summary>
+        /// <param name="pages">The pages to add.</param>
+        /// <returns>The pager with the pages.</returns>
+        T2 WithPages(IEnumerable<T1> pages);
 
-		/// <summary>
-		/// Builds the embed for the pager content.
-		/// </summary>
-		/// <param name="page">The index of the page to display.</param>
-		/// <returns>An embed to show to the user.</returns>
-		Embed BuildEmbed(int page);
-	}
+        /// <summary>
+        /// Builds the embed for the pager content.
+        /// </summary>
+        /// <param name="page">The index of the page to display.</param>
+        /// <returns>An embed to show to the user.</returns>
+        Embed BuildEmbed(int page);
+    }
 }

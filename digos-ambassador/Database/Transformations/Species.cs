@@ -28,69 +28,69 @@ using YamlDotNet.Serialization;
 
 namespace DIGOS.Ambassador.Database.Transformations
 {
-	/// <summary>
-	/// Represents a single species (i.e, associated transformations)
-	/// </summary>
-	public class Species : IEFEntity
-	{
-		/// <inheritdoc />
-		[YamlIgnore]
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents a single species (i.e, associated transformations)
+    /// </summary>
+    public class Species : IEFEntity
+    {
+        /// <inheritdoc />
+        [YamlIgnore]
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the parent species.
-		/// </summary>
-		[CanBeNull]
-		public Species Parent { get; set; }
+        /// <summary>
+        /// Gets or sets the parent species.
+        /// </summary>
+        [CanBeNull]
+        public Species Parent { get; set; }
 
-		/// <summary>
-		/// Gets or sets the name of the species.
-		/// </summary>
-		[Required]
-		public string Name { get; set; }
+        /// <summary>
+        /// Gets or sets the name of the species.
+        /// </summary>
+        [Required]
+        public string Name { get; set; }
 
-		/// <summary>
-		/// Gets or sets the description of the species.
-		/// </summary>
-		[Required]
-		public string Description { get; set; }
+        /// <summary>
+        /// Gets or sets the description of the species.
+        /// </summary>
+        [Required]
+        public string Description { get; set; }
 
-		/// <summary>
-		/// Gets the depth of this species in the parent chain.
-		/// </summary>
-		/// <returns>The depth of the species.</returns>
-		[Pure]
-		public uint GetSpeciesDepth()
-		{
-			if (this.Parent is null)
-			{
-				return 0;
-			}
+        /// <summary>
+        /// Gets the depth of this species in the parent chain.
+        /// </summary>
+        /// <returns>The depth of the species.</returns>
+        [Pure]
+        public uint GetSpeciesDepth()
+        {
+            if (this.Parent is null)
+            {
+                return 0;
+            }
 
-			return this.Parent.GetSpeciesDepth() + 1;
-		}
+            return this.Parent.GetSpeciesDepth() + 1;
+        }
 
-		/// <summary>
-		/// Determines whether or not two species are the same by comparing their names.
-		/// </summary>
-		/// <param name="species">The species to compare with.</param>
-		/// <returns>true if the species are the same; otherwise, false.</returns>
-		[Pure]
-		[ContractAnnotation("species:null => false")]
-		public bool IsSameSpeciesAs([CanBeNull] Species species)
-		{
-			if (species is null)
-			{
-				return false;
-			}
+        /// <summary>
+        /// Determines whether or not two species are the same by comparing their names.
+        /// </summary>
+        /// <param name="species">The species to compare with.</param>
+        /// <returns>true if the species are the same; otherwise, false.</returns>
+        [Pure]
+        [ContractAnnotation("species:null => false")]
+        public bool IsSameSpeciesAs([CanBeNull] Species species)
+        {
+            if (species is null)
+            {
+                return false;
+            }
 
-			return string.Equals(this.Name, species.Name, StringComparison.OrdinalIgnoreCase);
-		}
+            return string.Equals(this.Name, species.Name, StringComparison.OrdinalIgnoreCase);
+        }
 
-		/// <inheritdoc />
-		public override string ToString()
-		{
-			return this.Name;
-		}
-	}
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.Name;
+        }
+    }
 }

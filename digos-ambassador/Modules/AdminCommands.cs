@@ -34,44 +34,44 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DIGOS.Ambassador.Modules
 {
-	/// <summary>
-	/// Administrative commands that directly affect the bot on a global scale.
-	/// </summary>
-	[UsedImplicitly]
-	[Group("admin")]
-	[Summary("Administrative commands that directly affect the bot on a global scale.")]
-	public class AdminCommands : ModuleBase<SocketCommandContext>
-	{
-		[ProvidesContext]
-		private readonly GlobalInfoContext Database;
-		private readonly UserFeedbackService Feedback;
+    /// <summary>
+    /// Administrative commands that directly affect the bot on a global scale.
+    /// </summary>
+    [UsedImplicitly]
+    [Group("admin")]
+    [Summary("Administrative commands that directly affect the bot on a global scale.")]
+    public class AdminCommands : ModuleBase<SocketCommandContext>
+    {
+        [ProvidesContext]
+        private readonly GlobalInfoContext Database;
+        private readonly UserFeedbackService Feedback;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="AdminCommands"/> class.
-		/// </summary>
-		/// <param name="database">A database context from the context pool.</param>
-		/// <param name="feedback">The user feedback service.</param>
-		public AdminCommands(GlobalInfoContext database, UserFeedbackService feedback)
-		{
-			this.Database = database;
-			this.Feedback = feedback;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AdminCommands"/> class.
+        /// </summary>
+        /// <param name="database">A database context from the context pool.</param>
+        /// <param name="feedback">The user feedback service.</param>
+        public AdminCommands(GlobalInfoContext database, UserFeedbackService feedback)
+        {
+            this.Database = database;
+            this.Feedback = feedback;
+        }
 
-		/// <summary>
-		/// Wipes the database, resetting it to its initial state.
-		/// </summary>
-		[UsedImplicitly]
-		[Alias("wipe-db", "reset-db")]
-		[Command("wipe-db")]
-		[Summary("Wipes the database, resetting it to its initial state.")]
-		[RequireContext(ContextType.DM)]
-		[RequireOwner]
-		public async Task ResetDatabaseAsync()
-		{
-			await this.Database.Database.EnsureDeletedAsync();
-			await this.Database.Database.MigrateAsync();
+        /// <summary>
+        /// Wipes the database, resetting it to its initial state.
+        /// </summary>
+        [UsedImplicitly]
+        [Alias("wipe-db", "reset-db")]
+        [Command("wipe-db")]
+        [Summary("Wipes the database, resetting it to its initial state.")]
+        [RequireContext(ContextType.DM)]
+        [RequireOwner]
+        public async Task ResetDatabaseAsync()
+        {
+            await this.Database.Database.EnsureDeletedAsync();
+            await this.Database.Database.MigrateAsync();
 
-			await this.Feedback.SendConfirmationAsync(this.Context, "Database reset.");
-		}
-	}
+            await this.Feedback.SendConfirmationAsync(this.Context, "Database reset.");
+        }
+    }
 }

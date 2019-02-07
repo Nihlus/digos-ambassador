@@ -27,38 +27,38 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Users
 {
-	/// <summary>
-	/// Represents a user's kink, along with their preference for it.
-	/// </summary>
-	public class UserKink : IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents a user's kink, along with their preference for it.
+    /// </summary>
+    public class UserKink : IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the kink.
-		/// </summary>
-		[Required]
-		public Kink Kink { get; set; }
+        /// <summary>
+        /// Gets or sets the kink.
+        /// </summary>
+        [Required]
+        public Kink Kink { get; set; }
 
-		/// <summary>
-		/// Gets or sets the user's preference for the kink.
-		/// </summary>
-		public KinkPreference Preference { get; set; }
+        /// <summary>
+        /// Gets or sets the user's preference for the kink.
+        /// </summary>
+        public KinkPreference Preference { get; set; }
 
-		/// <summary>
-		/// Creates a new <see cref="UserKink"/> from the given <see cref="Kink"/>.
-		/// </summary>
-		/// <param name="kink">The kink.</param>
-		/// <returns>The user kink.</returns>
-		[NotNull]
-		public static UserKink CreateFrom(Kink kink)
-		{
-			return new UserKink
-			{
-				Kink = kink,
-				Preference = KinkPreference.NoPreference
-			};
-		}
-	}
+        /// <summary>
+        /// Creates a new <see cref="UserKink"/> from the given <see cref="Kink"/>.
+        /// </summary>
+        /// <param name="kink">The kink.</param>
+        /// <returns>The user kink.</returns>
+        [NotNull]
+        public static UserKink CreateFrom(Kink kink)
+        {
+            return new UserKink
+            {
+                Kink = kink,
+                Preference = KinkPreference.NoPreference
+            };
+        }
+    }
 }

@@ -27,16 +27,16 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc
 {
-	/// <summary>
-	/// Dummy type reader for custom types.
-	/// </summary>
-	public class DummyTypeReader : TypeReader
-	{
-		/// <inheritdoc />
-		[CanBeNull]
-		public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
-		{
-			return null;
-		}
-	}
+    /// <summary>
+    /// Dummy type reader for custom types.
+    /// </summary>
+    public class DummyTypeReader : TypeReader
+    {
+        /// <inheritdoc />
+        [CanBeNull]
+        public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
+        {
+            return null;
+        }
+    }
 }

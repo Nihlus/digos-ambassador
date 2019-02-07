@@ -22,24 +22,24 @@
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// The grammatical person of a form.
-	/// </summary>
-	public enum GrammaticalPerson
-	{
-		/// <summary>
-		/// First-person.
-		/// </summary>
-		First,
+    /// <summary>
+    /// The grammatical person of a form.
+    /// </summary>
+    public enum GrammaticalPerson
+    {
+        /// <summary>
+        /// First-person.
+        /// </summary>
+        First,
 
-		/// <summary>
-		/// Second-person.
-		/// </summary>
-		Second,
+        /// <summary>
+        /// Second-person.
+        /// </summary>
+        Second,
 
-		/// <summary>
-		/// Third-person.
-		/// </summary>
-		Third
-	}
+        /// <summary>
+        /// Third-person.
+        /// </summary>
+        Third
+    }
 }

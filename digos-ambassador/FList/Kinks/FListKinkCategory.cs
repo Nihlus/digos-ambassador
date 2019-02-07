@@ -24,21 +24,21 @@ using Newtonsoft.Json;
 
 namespace DIGOS.Ambassador.FList.Kinks
 {
-	/// <summary>
-	/// Represents a JSON kink category from the F-list API.
-	/// </summary>
-	public class FListKinkCategory
-	{
-		/// <summary>
-		/// Gets or sets the category name.
-		/// </summary>
-		[JsonProperty("group")]
-		public string Group { get; set; }
+    /// <summary>
+    /// Represents a JSON kink category from the F-list API.
+    /// </summary>
+    public class FListKinkCategory
+    {
+        /// <summary>
+        /// Gets or sets the category name.
+        /// </summary>
+        [JsonProperty("group")]
+        public string Group { get; set; }
 
-		/// <summary>
-		/// Gets or sets the kinks in the category.
-		/// </summary>
-		[JsonProperty("items")]
-		public FListKink[] Kinks { get; set; }
-	}
+        /// <summary>
+        /// Gets or sets the kinks in the category.
+        /// </summary>
+        [JsonProperty("items")]
+        public FListKink[] Kinks { get; set; }
+    }
 }

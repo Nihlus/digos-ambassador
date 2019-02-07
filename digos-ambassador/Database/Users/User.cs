@@ -27,48 +27,48 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Users
 {
-	/// <summary>
-	/// Represents globally accessible information about a user.
-	/// </summary>
-	public class User : IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents globally accessible information about a user.
+    /// </summary>
+    public class User : IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the Discord ID of the user.
-		/// </summary>
-		public long DiscordID { get; set; }
+        /// <summary>
+        /// Gets or sets the Discord ID of the user.
+        /// </summary>
+        public long DiscordID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the class of the user within the DIGOS 'verse.
-		/// </summary>
-		public UserClass Class { get; set; }
+        /// <summary>
+        /// Gets or sets the class of the user within the DIGOS 'verse.
+        /// </summary>
+        public UserClass Class { get; set; }
 
-		/// <summary>
-		/// Gets or sets the biography of the user. This contains useful information that the users provide themselves.
-		/// </summary>
-		public string Bio { get; set; }
+        /// <summary>
+        /// Gets or sets the biography of the user. This contains useful information that the users provide themselves.
+        /// </summary>
+        public string Bio { get; set; }
 
-		/// <summary>
-		/// Gets or sets the current timezone of the user. This is an hour offset ( + or - ) to UTC/GMT.
-		/// </summary>
-		[CanBeNull]
-		public int? Timezone { get; set; }
+        /// <summary>
+        /// Gets or sets the current timezone of the user. This is an hour offset ( + or - ) to UTC/GMT.
+        /// </summary>
+        [CanBeNull]
+        public int? Timezone { get; set; }
 
-		/// <summary>
-		/// Gets or sets the user's default character.
-		/// </summary>
-		public Character DefaultCharacter { get; set; }
+        /// <summary>
+        /// Gets or sets the user's default character.
+        /// </summary>
+        public Character DefaultCharacter { get; set; }
 
-		/// <summary>
-		/// Gets or sets the characters that the user owns.
-		/// </summary>
-		public List<Character> Characters { get; set; }
+        /// <summary>
+        /// Gets or sets the characters that the user owns.
+        /// </summary>
+        public List<Character> Characters { get; set; }
 
-		/// <summary>
-		/// Gets or sets the kinks or fetishes of a user, as well as their preferences for each.
-		/// </summary>
-		public List<UserKink> Kinks { get; set; }
-	}
+        /// <summary>
+        /// Gets or sets the kinks or fetishes of a user, as well as their preferences for each.
+        /// </summary>
+        public List<UserKink> Kinks { get; set; }
+    }
 }

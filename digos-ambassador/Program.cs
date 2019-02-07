@@ -31,89 +31,89 @@ using log4net;
 
 namespace DIGOS.Ambassador
 {
-	/// <summary>
-	/// The main entry point class of the program.
-	/// </summary>
-	internal static class Program
-	{
-		/// <summary>
-		/// Logger instance for this class.
-		/// </summary>
-		private static readonly ILog Log = LogManager.GetLogger(typeof(Program));
+    /// <summary>
+    /// The main entry point class of the program.
+    /// </summary>
+    internal static class Program
+    {
+        /// <summary>
+        /// Logger instance for this class.
+        /// </summary>
+        private static readonly ILog Log = LogManager.GetLogger(typeof(Program));
 
-		/// <summary>
-		/// The main entry point of the program.
-		/// </summary>
-		/// <returns>A task.</returns>
-		public static async Task Main()
-		{
-			// Connect to uncaught exceptions for logging
-			AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+        /// <summary>
+        /// The main entry point of the program.
+        /// </summary>
+        /// <returns>A task.</returns>
+        public static async Task Main()
+        {
+            // Connect to uncaught exceptions for logging
+            AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
-			// Configure logging
-			var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
-			log4net.Config.XmlConfigurator.Configure(logRepository, new FileInfo("app.config"));
+            // Configure logging
+            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+            log4net.Config.XmlConfigurator.Configure(logRepository, new FileInfo("app.config"));
 
-			// Log.Debug($"Starting up. Running on {RuntimeInformation.OSDescription}");
+            // Log.Debug($"Starting up. Running on {RuntimeInformation.OSDescription}");
 
-			// Initialize
-			var contentService = new ContentService();
-			try
-			{
-				await contentService.InitializeAsync();
-			}
-			catch (FileNotFoundException fex)
-			{
-				Log.Error("Could not initialize content service.", fex);
-				return;
-			}
+            // Initialize
+            var contentService = new ContentService();
+            try
+            {
+                await contentService.InitializeAsync();
+            }
+            catch (FileNotFoundException fex)
+            {
+                Log.Error("Could not initialize content service.", fex);
+                return;
+            }
 
-			var ambassadorClient = new AmbassadorClient(contentService);
-			await ambassadorClient.LoginAsync();
-			await ambassadorClient.StartAsync();
+            var ambassadorClient = new AmbassadorClient(contentService);
+            await ambassadorClient.LoginAsync();
+            await ambassadorClient.StartAsync();
 
-			// Wait for shutdown
-			await Task.Delay(-1);
-		}
+            // Wait for shutdown
+            await Task.Delay(-1);
+        }
 
-		/// <summary>
-		/// Event handler for all unhandled exceptions that may be encountered during runtime. While there should never
-		/// be any unhandled exceptions in an ideal program, unexpected issues can and will arise. This handler logs
-		/// the exception and all relevant information to a logfile and prints it to the console for debugging purposes.
-		/// </summary>
-		/// <param name="sender">The sending object.</param>
-		/// <param name="unhandledExceptionEventArgs">The event object containing the information about the exception.</param>
-		private static void OnUnhandledException(object sender, [NotNull] UnhandledExceptionEventArgs unhandledExceptionEventArgs)
-		{
-			// Force english exception output
-			System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-			System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+        /// <summary>
+        /// Event handler for all unhandled exceptions that may be encountered during runtime. While there should never
+        /// be any unhandled exceptions in an ideal program, unexpected issues can and will arise. This handler logs
+        /// the exception and all relevant information to a logfile and prints it to the console for debugging purposes.
+        /// </summary>
+        /// <param name="sender">The sending object.</param>
+        /// <param name="unhandledExceptionEventArgs">The event object containing the information about the exception.</param>
+        private static void OnUnhandledException(object sender, [NotNull] UnhandledExceptionEventArgs unhandledExceptionEventArgs)
+        {
+            // Force english exception output
+            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
-			Log.Fatal("----------------");
-			Log.Fatal("FATAL UNHANDLED EXCEPTION!");
-			Log.Fatal("Something has gone terribly, terribly wrong during runtime.");
-			Log.Fatal("The following is what information could be gathered by the program before crashing.");
-			Log.Fatal("Please report this to <jarl.gullberg@gmail.com> or via GitHub. Include the full log and a " +
-					  "description of what you were doing when it happened.");
+            Log.Fatal("----------------");
+            Log.Fatal("FATAL UNHANDLED EXCEPTION!");
+            Log.Fatal("Something has gone terribly, terribly wrong during runtime.");
+            Log.Fatal("The following is what information could be gathered by the program before crashing.");
+            Log.Fatal("Please report this to <jarl.gullberg@gmail.com> or via GitHub. Include the full log and a " +
+                      "description of what you were doing when it happened.");
 
-			if (!(unhandledExceptionEventArgs.ExceptionObject is Exception unhandledException))
-			{
-				Log.Fatal("The unhandled exception was null. Call a priest.");
-				return;
-			}
+            if (!(unhandledExceptionEventArgs.ExceptionObject is Exception unhandledException))
+            {
+                Log.Fatal("The unhandled exception was null. Call a priest.");
+                return;
+            }
 
-			Log.Fatal($"Exception type: {unhandledException.GetType().FullName}");
-			Log.Fatal($"Exception Message: {unhandledException.Message}");
-			Log.Fatal($"Exception Stacktrace: {unhandledException.StackTrace}");
+            Log.Fatal($"Exception type: {unhandledException.GetType().FullName}");
+            Log.Fatal($"Exception Message: {unhandledException.Message}");
+            Log.Fatal($"Exception Stacktrace: {unhandledException.StackTrace}");
 
-			if (unhandledException.InnerException is null)
-			{
-				return;
-			}
+            if (unhandledException.InnerException is null)
+            {
+                return;
+            }
 
-			Log.Fatal($"Inner exception type: {unhandledException.InnerException.GetType().FullName}");
-			Log.Fatal($"Inner exception Message: {unhandledException.InnerException.Message}");
-			Log.Fatal($"Inner exception Stacktrace: {unhandledException.InnerException.StackTrace}");
-		}
-	}
+            Log.Fatal($"Inner exception type: {unhandledException.InnerException.GetType().FullName}");
+            Log.Fatal($"Inner exception Message: {unhandledException.InnerException.Message}");
+            Log.Fatal($"Inner exception Stacktrace: {unhandledException.InnerException.StackTrace}");
+        }
+    }
 }

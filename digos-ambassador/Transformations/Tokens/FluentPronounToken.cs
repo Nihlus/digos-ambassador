@@ -27,81 +27,81 @@ using DIGOS.Ambassador.Services;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// A token that gets replaced with the correct pronoun based on a fluent parsing method.
-	/// </summary>
-	[TokenIdentifier("fluent", "f")]
-	public class FluentPronounToken : ReplacableTextToken<FluentPronounToken>
-	{
-		private readonly CharacterService Characters;
+    /// <summary>
+    /// A token that gets replaced with the correct pronoun based on a fluent parsing method.
+    /// </summary>
+    [TokenIdentifier("fluent", "f")]
+    public class FluentPronounToken : ReplacableTextToken<FluentPronounToken>
+    {
+        private readonly CharacterService Characters;
 
-		/// <summary>
-		/// Gets the form of the pronoun.
-		/// </summary>
-		public PronounForm Form { get; private set; }
+        /// <summary>
+        /// Gets the form of the pronoun.
+        /// </summary>
+        public PronounForm Form { get; private set; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="FluentPronounToken"/> class.
-		/// </summary>
-		/// <param name="characters">The character service.</param>
-		public FluentPronounToken(CharacterService characters)
-		{
-			this.Characters = characters;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FluentPronounToken"/> class.
+        /// </summary>
+        /// <param name="characters">The character service.</param>
+        public FluentPronounToken(CharacterService characters)
+        {
+            this.Characters = characters;
+        }
 
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			var pronounProvider = this.Characters.GetPronounProvider(character);
+        /// <inheritdoc />
+        public override string GetText(Character character, AppearanceComponent component)
+        {
+            var pronounProvider = this.Characters.GetPronounProvider(character);
 
-			return pronounProvider.GetForm(this.Form);
-		}
+            return pronounProvider.GetForm(this.Form);
+        }
 
-		/// <inheritdoc />
-		protected override FluentPronounToken Initialize(string data)
-		{
-			if (data is null)
-			{
-				this.Form = PronounForm.Subject;
-				return this;
-			}
+        /// <inheritdoc />
+        protected override FluentPronounToken Initialize(string data)
+        {
+            if (data is null)
+            {
+                this.Form = PronounForm.Subject;
+                return this;
+            }
 
-			if (data.Equals("they", StringComparison.OrdinalIgnoreCase))
-			{
-				this.Form = PronounForm.Subject;
-			}
+            if (data.Equals("they", StringComparison.OrdinalIgnoreCase))
+            {
+                this.Form = PronounForm.Subject;
+            }
 
-			if (data.Equals("they are", StringComparison.OrdinalIgnoreCase))
-			{
-				this.Form = PronounForm.SubjectVerb;
-			}
+            if (data.Equals("they are", StringComparison.OrdinalIgnoreCase))
+            {
+                this.Form = PronounForm.SubjectVerb;
+            }
 
-			if (data.Equals("them", StringComparison.OrdinalIgnoreCase))
-			{
-				this.Form = PronounForm.Object;
-			}
+            if (data.Equals("them", StringComparison.OrdinalIgnoreCase))
+            {
+                this.Form = PronounForm.Object;
+            }
 
-			if (data.Equals("their", StringComparison.OrdinalIgnoreCase))
-			{
-				this.Form = PronounForm.PossessiveAdjective;
-			}
+            if (data.Equals("their", StringComparison.OrdinalIgnoreCase))
+            {
+                this.Form = PronounForm.PossessiveAdjective;
+            }
 
-			if (data.Equals("they have", StringComparison.OrdinalIgnoreCase))
-			{
-				this.Form = PronounForm.PossessiveVerb;
-			}
+            if (data.Equals("they have", StringComparison.OrdinalIgnoreCase))
+            {
+                this.Form = PronounForm.PossessiveVerb;
+            }
 
-			if (data.Equals("theirs", StringComparison.OrdinalIgnoreCase))
-			{
-				this.Form = PronounForm.Possessive;
-			}
+            if (data.Equals("theirs", StringComparison.OrdinalIgnoreCase))
+            {
+                this.Form = PronounForm.Possessive;
+            }
 
-			if (data.Equals("themselves", StringComparison.OrdinalIgnoreCase))
-			{
-				this.Form = PronounForm.Reflexive;
-			}
+            if (data.Equals("themselves", StringComparison.OrdinalIgnoreCase))
+            {
+                this.Form = PronounForm.Reflexive;
+            }
 
-			return this;
-		}
-	}
+            return this;
+        }
+    }
 }

@@ -29,32 +29,32 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Interactivity
 {
-	/// <summary>
-	/// Interface for interactive messages.
-	/// </summary>
-	public interface IInteractiveMessage
-	{
-		/// <summary>
-		/// Gets the underlying message.
-		/// </summary>
-		IUserMessage Message { get; }
+    /// <summary>
+    /// Interface for interactive messages.
+    /// </summary>
+    public interface IInteractiveMessage
+    {
+        /// <summary>
+        /// Gets the underlying message.
+        /// </summary>
+        IUserMessage Message { get; }
 
-		/// <summary>
-		/// Gets the reaction callback for the message, if any.
-		/// </summary>
-		[CanBeNull]
-		IReactionCallback ReactionCallback { get; }
+        /// <summary>
+        /// Gets the reaction callback for the message, if any.
+        /// </summary>
+        [CanBeNull]
+        IReactionCallback ReactionCallback { get; }
 
-		/// <summary>
-		/// Gets the timeout after which the message should be deleted, if any.
-		/// </summary>
-		TimeSpan? Timeout { get; }
+        /// <summary>
+        /// Gets the timeout after which the message should be deleted, if any.
+        /// </summary>
+        TimeSpan? Timeout { get; }
 
-		/// <summary>
-		/// Displays the message in the given channel.
-		/// </summary>
-		/// <param name="channel">The channel to send the message to.</param>
-		/// <returns>A user message.</returns>
-		Task<IUserMessage> DisplayAsync(ISocketMessageChannel channel);
-	}
+        /// <summary>
+        /// Displays the message in the given channel.
+        /// </summary>
+        /// <param name="channel">The channel to send the message to.</param>
+        /// <returns>A user message.</returns>
+        Task<IUserMessage> DisplayAsync(ISocketMessageChannel channel);
+    }
 }

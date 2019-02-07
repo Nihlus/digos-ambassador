@@ -22,29 +22,29 @@
 
 namespace DIGOS.Ambassador.Database.Roleplaying
 {
-	/// <summary>
-	/// Represents the status of a participant in a roleplay.
-	/// </summary>
-	public enum ParticipantStatus
-	{
-		/// <summary>
-		/// The user isn't participating in the roleplay. They may have been a part of it previously, but isn't anymore.
-		/// </summary>
-		None,
+    /// <summary>
+    /// Represents the status of a participant in a roleplay.
+    /// </summary>
+    public enum ParticipantStatus
+    {
+        /// <summary>
+        /// The user isn't participating in the roleplay. They may have been a part of it previously, but isn't anymore.
+        /// </summary>
+        None,
 
-		/// <summary>
-		/// The user has been invited to the roleplay, but has not yet joined.
-		/// </summary>
-		Invited,
+        /// <summary>
+        /// The user has been invited to the roleplay, but has not yet joined.
+        /// </summary>
+        Invited,
 
-		/// <summary>
-		/// The user has joined the roleplay.
-		/// </summary>
-		Joined,
+        /// <summary>
+        /// The user has joined the roleplay.
+        /// </summary>
+        Joined,
 
-		/// <summary>
-		/// The user has been kicked from the roleplay, and cannot rejoin unless reinvited.
-		/// </summary>
-		Kicked
-	}
+        /// <summary>
+        /// The user has been kicked from the roleplay, and cannot rejoin unless reinvited.
+        /// </summary>
+        Kicked
+    }
 }

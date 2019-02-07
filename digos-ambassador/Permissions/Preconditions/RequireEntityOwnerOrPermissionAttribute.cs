@@ -33,62 +33,62 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Permissions.Preconditions
 {
-	/// <summary>
-	/// Acts as a precondition for owned entities, limiting their use to their owners or users with explicit permission.
-	/// </summary>
-	public class RequireEntityOwnerOrPermissionAttribute : ParameterPreconditionAttribute
-	{
-		/// <summary>
-		/// Gets the required permission.
-		/// </summary>
-		public Permission Permission { get;  }
+    /// <summary>
+    /// Acts as a precondition for owned entities, limiting their use to their owners or users with explicit permission.
+    /// </summary>
+    public class RequireEntityOwnerOrPermissionAttribute : ParameterPreconditionAttribute
+    {
+        /// <summary>
+        /// Gets the required permission.
+        /// </summary>
+        public Permission Permission { get;  }
 
-		/// <summary>
-		/// Gets the required target.
-		/// </summary>
-		public PermissionTarget Target { get; }
+        /// <summary>
+        /// Gets the required target.
+        /// </summary>
+        public PermissionTarget Target { get; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RequireEntityOwnerOrPermissionAttribute"/> class.
-		/// </summary>
-		/// <param name="permission">The permission to require.</param>
-		/// <param name="target">The target to require.</param>
-		public RequireEntityOwnerOrPermissionAttribute(Permission permission, PermissionTarget target)
-		{
-			this.Permission = permission;
-			this.Target = target;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RequireEntityOwnerOrPermissionAttribute"/> class.
+        /// </summary>
+        /// <param name="permission">The permission to require.</param>
+        /// <param name="target">The target to require.</param>
+        public RequireEntityOwnerOrPermissionAttribute(Permission permission, PermissionTarget target)
+        {
+            this.Permission = permission;
+            this.Target = target;
+        }
 
-		/// <inheritdoc />
-		public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, ParameterInfo parameter, object value, IServiceProvider services)
-		{
-			if (!(value is IOwnedNamedEntity entity))
-			{
-				return PreconditionResult.FromError("The value isn't an owned entity.");
-			}
+        /// <inheritdoc />
+        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, ParameterInfo parameter, object value, IServiceProvider services)
+        {
+            if (!(value is IOwnedNamedEntity entity))
+            {
+                return PreconditionResult.FromError("The value isn't an owned entity.");
+            }
 
-			var permissionService = services.GetRequiredService<PermissionService>();
-			var db = services.GetRequiredService<GlobalInfoContext>();
+            var permissionService = services.GetRequiredService<PermissionService>();
+            var db = services.GetRequiredService<GlobalInfoContext>();
 
-			if (entity.IsOwner(context.User))
-			{
-				return PreconditionResult.FromSuccess();
-			}
+            if (entity.IsOwner(context.User))
+            {
+                return PreconditionResult.FromSuccess();
+            }
 
-			bool hasPermission = await permissionService.HasPermissionAsync
-			(
-				db,
-				context.Guild,
-				context.User,
-				(this.Permission, this.Target)
-			);
+            bool hasPermission = await permissionService.HasPermissionAsync
+            (
+                db,
+                context.Guild,
+                context.User,
+                (this.Permission, this.Target)
+            );
 
-			if (!hasPermission)
-			{
-				return PreconditionResult.FromError("You don't have permission to do that.");
-			}
+            if (!hasPermission)
+            {
+                return PreconditionResult.FromError("You don't have permission to do that.");
+            }
 
-			return PreconditionResult.FromSuccess();
-		}
-	}
+            return PreconditionResult.FromSuccess();
+        }
+    }
 }

@@ -27,49 +27,49 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Roleplaying
 {
-	/// <summary>
-	/// Represents a join entry for a user that has participated in a roleplay in any way.
-	/// </summary>
-	public class RoleplayParticipant : IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents a join entry for a user that has participated in a roleplay in any way.
+    /// </summary>
+    public class RoleplayParticipant : IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the roleplay that the user is a part of.
-		/// </summary>
-		[Required]
-		public Roleplay Roleplay { get; set; }
+        /// <summary>
+        /// Gets or sets the roleplay that the user is a part of.
+        /// </summary>
+        [Required]
+        public Roleplay Roleplay { get; set; }
 
-		/// <summary>
-		/// Gets or sets the user that is part of the roleplay.
-		/// </summary>
-		[Required]
-		public User User { get; set; }
+        /// <summary>
+        /// Gets or sets the user that is part of the roleplay.
+        /// </summary>
+        [Required]
+        public User User { get; set; }
 
-		/// <summary>
-		/// Gets or sets the current status of the user in the roleplay.
-		/// </summary>
-		public ParticipantStatus Status { get; set; }
+        /// <summary>
+        /// Gets or sets the current status of the user in the roleplay.
+        /// </summary>
+        public ParticipantStatus Status { get; set; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RoleplayParticipant"/> class.
-		/// </summary>
-		public RoleplayParticipant()
-		{
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleplayParticipant"/> class.
+        /// </summary>
+        public RoleplayParticipant()
+        {
+        }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RoleplayParticipant"/> class.
-		/// </summary>
-		/// <param name="roleplay">The roleplay that the user is participating in.</param>
-		/// <param name="user">The user that is participating in the roleplay.</param>
-		/// <param name="status">The status of the user.</param>
-		public RoleplayParticipant([NotNull] Roleplay roleplay, [NotNull] User user, ParticipantStatus status)
-		{
-			this.Roleplay = roleplay;
-			this.User = user;
-			this.Status = status;
-		}
-	}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleplayParticipant"/> class.
+        /// </summary>
+        /// <param name="roleplay">The roleplay that the user is participating in.</param>
+        /// <param name="user">The user that is participating in the roleplay.</param>
+        /// <param name="status">The status of the user.</param>
+        public RoleplayParticipant([NotNull] Roleplay roleplay, [NotNull] User user, ParticipantStatus status)
+        {
+            this.Roleplay = roleplay;
+            this.User = user;
+            this.Status = status;
+        }
+    }
 }

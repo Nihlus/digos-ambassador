@@ -32,94 +32,94 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Handles integration with Discord.
-	/// </summary>
-	public class DiscordService
-	{
-		private static readonly HttpClient Client = new HttpClient();
+    /// <summary>
+    /// Handles integration with Discord.
+    /// </summary>
+    public class DiscordService
+    {
+        private static readonly HttpClient Client = new HttpClient();
 
-		static DiscordService()
-		{
-			Client.Timeout = TimeSpan.FromSeconds(4);
-		}
+        static DiscordService()
+        {
+            Client.Timeout = TimeSpan.FromSeconds(4);
+        }
 
-		/// <summary>
-		/// Gets the byte stream from an attachment.
-		/// </summary>
-		/// <param name="attachment">The attachment to get.</param>
-		/// <returns>A retrieval result which may or may not have succeeded.</returns>
-		[Pure]
-		[MustUseReturnValue("The resulting stream must be disposed.")]
-		public async Task<RetrieveEntityResult<Stream>> GetAttachmentStreamAsync([NotNull] Attachment attachment)
-		{
-			try
-			{
-				var stream = await Client.GetStreamAsync(attachment.Url);
-				return RetrieveEntityResult<Stream>.FromSuccess(stream);
-			}
-			catch (HttpRequestException hex)
-			{
-				return RetrieveEntityResult<Stream>.FromError(CommandError.Exception, hex.ToString());
-			}
-			catch (TaskCanceledException)
-			{
-				return RetrieveEntityResult<Stream>.FromError(CommandError.Unsuccessful, "The download operation timed out.");
-			}
-		}
+        /// <summary>
+        /// Gets the byte stream from an attachment.
+        /// </summary>
+        /// <param name="attachment">The attachment to get.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        [Pure]
+        [MustUseReturnValue("The resulting stream must be disposed.")]
+        public async Task<RetrieveEntityResult<Stream>> GetAttachmentStreamAsync([NotNull] Attachment attachment)
+        {
+            try
+            {
+                var stream = await Client.GetStreamAsync(attachment.Url);
+                return RetrieveEntityResult<Stream>.FromSuccess(stream);
+            }
+            catch (HttpRequestException hex)
+            {
+                return RetrieveEntityResult<Stream>.FromError(CommandError.Exception, hex.ToString());
+            }
+            catch (TaskCanceledException)
+            {
+                return RetrieveEntityResult<Stream>.FromError(CommandError.Unsuccessful, "The download operation timed out.");
+            }
+        }
 
-		/// <summary>
-		/// Sets the nickname of the given user.
-		/// </summary>
-		/// <param name="context">The context in which the user is.</param>
-		/// <param name="guildUser">The guild user to set the nick of.</param>
-		/// <param name="nickname">The nickname to set.</param>
-		/// <returns>A modification result which may or may not have succeeded.</returns>
-		public async Task<ModifyEntityResult> SetUserNicknameAsync
-		(
-			[NotNull] SocketCommandContext context,
-			[NotNull] IGuildUser guildUser,
-			[CanBeNull] string nickname
-		)
-		{
-			if (!HasPermission(context, GuildPermission.ManageNicknames))
-			{
-				return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I'm not allowed to set nicknames on this server.");
-			}
+        /// <summary>
+        /// Sets the nickname of the given user.
+        /// </summary>
+        /// <param name="context">The context in which the user is.</param>
+        /// <param name="guildUser">The guild user to set the nick of.</param>
+        /// <param name="nickname">The nickname to set.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetUserNicknameAsync
+        (
+            [NotNull] SocketCommandContext context,
+            [NotNull] IGuildUser guildUser,
+            [CanBeNull] string nickname
+        )
+        {
+            if (!HasPermission(context, GuildPermission.ManageNicknames))
+            {
+                return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I'm not allowed to set nicknames on this server.");
+            }
 
-			if (context.Guild.OwnerId == guildUser.Id)
-			{
-				return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I can't set the nickname of the server's owner.");
-			}
+            if (context.Guild.OwnerId == guildUser.Id)
+            {
+                return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I can't set the nickname of the server's owner.");
+            }
 
-			try
-			{
-				await guildUser.ModifyAsync(u => u.Nickname = nickname);
-			}
-			catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
-			{
-				return ModifyEntityResult.FromError(CommandError.Exception, "I couldn't modify the nickname due to a priority issue.");
-			}
+            try
+            {
+                await guildUser.ModifyAsync(u => u.Nickname = nickname);
+            }
+            catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
+            {
+                return ModifyEntityResult.FromError(CommandError.Exception, "I couldn't modify the nickname due to a priority issue.");
+            }
 
-			return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
-		}
+            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+        }
 
-		/// <summary>
-		/// Determines whether or not the ambassador has the given permission in the given context.
-		/// </summary>
-		/// <param name="context">The command context.</param>
-		/// <param name="guildPermission">The permission to check.</param>
-		/// <returns>true if she has permission; otherwise, false.</returns>
-		[Pure]
-		public bool HasPermission([NotNull] SocketCommandContext context, GuildPermission guildPermission)
-		{
-			var amby = context.Guild.GetUser(context.Client.CurrentUser.Id) as IGuildUser;
-			if (amby is null)
-			{
-				return false;
-			}
+        /// <summary>
+        /// Determines whether or not the ambassador has the given permission in the given context.
+        /// </summary>
+        /// <param name="context">The command context.</param>
+        /// <param name="guildPermission">The permission to check.</param>
+        /// <returns>true if she has permission; otherwise, false.</returns>
+        [Pure]
+        public bool HasPermission([NotNull] SocketCommandContext context, GuildPermission guildPermission)
+        {
+            var amby = context.Guild.GetUser(context.Client.CurrentUser.Id) as IGuildUser;
+            if (amby is null)
+            {
+                return false;
+            }
 
-			return amby.GuildPermissions.Has(guildPermission);
-		}
-	}
+            return amby.GuildPermissions.Has(guildPermission);
+        }
+    }
 }

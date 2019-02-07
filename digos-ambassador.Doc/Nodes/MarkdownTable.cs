@@ -26,99 +26,99 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a table of rows.
-	/// </summary>
-	public class MarkdownTable : IMarkdownNode
-	{
-		/// <summary>
-		/// Gets the list of rows in the table.
-		/// </summary>
-		public List<MarkdownTableRow> Rows { get; } = new List<MarkdownTableRow>();
+    /// <summary>
+    /// Represents a table of rows.
+    /// </summary>
+    public class MarkdownTable : IMarkdownNode
+    {
+        /// <summary>
+        /// Gets the list of rows in the table.
+        /// </summary>
+        public List<MarkdownTableRow> Rows { get; } = new List<MarkdownTableRow>();
 
-		/// <summary>
-		/// Gets the list of columns in the table.
-		/// </summary>
-		public List<MarkdownTableColumn> Columns { get; } = new List<MarkdownTableColumn>();
+        /// <summary>
+        /// Gets the list of columns in the table.
+        /// </summary>
+        public List<MarkdownTableColumn> Columns { get; } = new List<MarkdownTableColumn>();
 
-		/// <inheritdoc />
-		public string Compile()
-		{
-			var sb = new StringBuilder();
-			sb.Append("|");
+        /// <inheritdoc />
+        public string Compile()
+        {
+            var sb = new StringBuilder();
+            sb.Append("|");
 
-			// Build the header
-			foreach (var column in this.Columns)
-			{
-				sb.Append($" {column.Title} |");
-			}
+            // Build the header
+            foreach (var column in this.Columns)
+            {
+                sb.Append($" {column.Title} |");
+            }
 
-			sb.AppendLine();
-			sb.Append("|");
-			foreach (var column in this.Columns)
-			{
-				switch (column.Alignment)
-				{
-					case ColumnAlignment.Left:
-					{
-						sb.Append(" --- |");
-						break;
-					}
-					case ColumnAlignment.Right:
-					{
-						sb.Append(" ---: |");
-						break;
-					}
-					case ColumnAlignment.Centered:
-					{
-						sb.Append(" :--- |");
-						break;
-					}
-				}
-			}
+            sb.AppendLine();
+            sb.Append("|");
+            foreach (var column in this.Columns)
+            {
+                switch (column.Alignment)
+                {
+                    case ColumnAlignment.Left:
+                    {
+                        sb.Append(" --- |");
+                        break;
+                    }
+                    case ColumnAlignment.Right:
+                    {
+                        sb.Append(" ---: |");
+                        break;
+                    }
+                    case ColumnAlignment.Centered:
+                    {
+                        sb.Append(" :--- |");
+                        break;
+                    }
+                }
+            }
 
-			foreach (var row in this.Rows)
-			{
-				sb.AppendLine();
-				sb.Append("|");
-				for (int i = 0; i < this.Columns.Count; ++i)
-				{
-					if (i < row.Cells.Count)
-					{
-						sb.Append($" {row.Cells[i].Compile()} |");
-					}
-					else
-					{
-						sb.Append(" |");
-					}
-				}
-			}
+            foreach (var row in this.Rows)
+            {
+                sb.AppendLine();
+                sb.Append("|");
+                for (int i = 0; i < this.Columns.Count; ++i)
+                {
+                    if (i < row.Cells.Count)
+                    {
+                        sb.Append($" {row.Cells[i].Compile()} |");
+                    }
+                    else
+                    {
+                        sb.Append(" |");
+                    }
+                }
+            }
 
-			return sb.ToString();
-		}
+            return sb.ToString();
+        }
 
-		/// <summary>
-		/// Appends a column to the table.
-		/// </summary>
-		/// <param name="column">The column.</param>
-		/// <returns>The table, with the column appended.</returns>
-		[NotNull]
-		public MarkdownTable AppendColumn([NotNull] MarkdownTableColumn column)
-		{
-			this.Columns.Add(column);
-			return this;
-		}
+        /// <summary>
+        /// Appends a column to the table.
+        /// </summary>
+        /// <param name="column">The column.</param>
+        /// <returns>The table, with the column appended.</returns>
+        [NotNull]
+        public MarkdownTable AppendColumn([NotNull] MarkdownTableColumn column)
+        {
+            this.Columns.Add(column);
+            return this;
+        }
 
-		/// <summary>
-		/// Appends a row to the table.
-		/// </summary>
-		/// <param name="row">The row.</param>
-		/// <returns>The table, with the row appended.</returns>
-		[NotNull]
-		public MarkdownTable AppendRow([NotNull] MarkdownTableRow row)
-		{
-			this.Rows.Add(row);
-			return this;
-		}
-	}
+        /// <summary>
+        /// Appends a row to the table.
+        /// </summary>
+        /// <param name="row">The row.</param>
+        /// <returns>The table, with the row appended.</returns>
+        [NotNull]
+        public MarkdownTable AppendRow([NotNull] MarkdownTableRow row)
+        {
+            this.Rows.Add(row);
+            return this;
+        }
+    }
 }

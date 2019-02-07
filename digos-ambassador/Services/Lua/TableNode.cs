@@ -25,29 +25,29 @@ using System.Linq;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Represents a named table, which holds a list of nodes.
-	/// </summary>
-	public class TableNode : NamedNode<List<INode>>
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="TableNode"/> class.
-		/// </summary>
-		public TableNode()
-		{
-			this.Value = new List<INode>();
-		}
+    /// <summary>
+    /// Represents a named table, which holds a list of nodes.
+    /// </summary>
+    public class TableNode : NamedNode<List<INode>>
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TableNode"/> class.
+        /// </summary>
+        public TableNode()
+        {
+            this.Value = new List<INode>();
+        }
 
-		/// <inheritdoc />
-		public override string Format(bool pretty = false)
-		{
-			var separator = ",";
-			if (pretty)
-			{
-				separator = ",\n";
-			}
+        /// <inheritdoc />
+        public override string Format(bool pretty = false)
+        {
+            var separator = ",";
+            if (pretty)
+            {
+                separator = ",\n";
+            }
 
-			return $"{this.Name} = {{ {string.Join(separator, this.Value.Select(n => n.Format()))} }}";
-		}
-	}
+            return $"{this.Name} = {{ {string.Join(separator, this.Value.Select(n => n.Format()))} }}";
+        }
+    }
 }

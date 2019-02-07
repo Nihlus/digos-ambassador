@@ -22,16 +22,16 @@
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Represents a named node that holds a value.
-	/// </summary>
-	/// <typeparam name="T">The type of value.</typeparam>
-	public class ValueNode<T> : NamedNode<T>
-	{
-		/// <inheritdoc />
-		public override string Format(bool pretty = false)
-		{
-			return $"{this.Name} = {this.Value.ToString()}";
-		}
-	}
+    /// <summary>
+    /// Represents a named node that holds a value.
+    /// </summary>
+    /// <typeparam name="T">The type of value.</typeparam>
+    public class ValueNode<T> : NamedNode<T>
+    {
+        /// <inheritdoc />
+        public override string Format(bool pretty = false)
+        {
+            return $"{this.Name} = {this.Value.ToString()}";
+        }
+    }
 }

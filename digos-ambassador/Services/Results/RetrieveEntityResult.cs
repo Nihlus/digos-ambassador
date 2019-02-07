@@ -26,96 +26,96 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Services
 {
-	/// <summary>
-	/// Represents an attempt to retrieve a roleplay from the database.
-	/// </summary>
-	/// <typeparam name="T">The entity type to encapsulate.</typeparam>
-	public struct RetrieveEntityResult<T> : IResult where T : class
-	{
-		/// <summary>
-		/// Gets the entity that was retrieved.
-		/// </summary>
-		public T Entity { get; }
+    /// <summary>
+    /// Represents an attempt to retrieve a roleplay from the database.
+    /// </summary>
+    /// <typeparam name="T">The entity type to encapsulate.</typeparam>
+    public struct RetrieveEntityResult<T> : IResult where T : class
+    {
+        /// <summary>
+        /// Gets the entity that was retrieved.
+        /// </summary>
+        public T Entity { get; }
 
-		/// <inheritdoc />
-		public CommandError? Error { get; }
+        /// <inheritdoc />
+        public CommandError? Error { get; }
 
-		/// <inheritdoc />
-		public string ErrorReason { get; }
+        /// <inheritdoc />
+        public string ErrorReason { get; }
 
-		/// <inheritdoc />
-		public bool IsSuccess => !this.Error.HasValue;
+        /// <inheritdoc />
+        public bool IsSuccess => !this.Error.HasValue;
 
-		/// <summary>
-		/// Gets the exception that caused the error, if any.
-		/// </summary>
-		[CanBeNull]
-		public Exception Exception { get; }
+        /// <summary>
+        /// Gets the exception that caused the error, if any.
+        /// </summary>
+        [CanBeNull]
+        public Exception Exception { get; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="RetrieveEntityResult{T}"/> struct.
-		/// </summary>
-		/// <param name="entity">The entity.</param>
-		/// <param name="error">The error (if any).</param>
-		/// <param name="errorReason">A more detailed error description.</param>
-		/// <param name="exception">The exception that caused the error (if any).</param>
-		private RetrieveEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
-		{
-			this.Entity = entity;
-			this.Error = error;
-			this.ErrorReason = errorReason;
-			this.Exception = exception;
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RetrieveEntityResult{T}"/> struct.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <param name="error">The error (if any).</param>
+        /// <param name="errorReason">A more detailed error description.</param>
+        /// <param name="exception">The exception that caused the error (if any).</param>
+        private RetrieveEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+        {
+            this.Entity = entity;
+            this.Error = error;
+            this.ErrorReason = errorReason;
+            this.Exception = exception;
+        }
 
-		/// <summary>
-		/// Creates a new successful result.
-		/// </summary>
-		/// <param name="entity">The roleplay that was retrieved.</param>
-		/// <returns>A successful result.</returns>
-		[Pure]
-		public static RetrieveEntityResult<T> FromSuccess([NotNull] T entity)
-		{
-			return new RetrieveEntityResult<T>(entity, null, null);
-		}
+        /// <summary>
+        /// Creates a new successful result.
+        /// </summary>
+        /// <param name="entity">The roleplay that was retrieved.</param>
+        /// <returns>A successful result.</returns>
+        [Pure]
+        public static RetrieveEntityResult<T> FromSuccess([NotNull] T entity)
+        {
+            return new RetrieveEntityResult<T>(entity, null, null);
+        }
 
-		/// <summary>
-		/// Creates a failed result.
-		/// </summary>
-		/// <param name="error">The error that caused the failure.</param>
-		/// <param name="reason">A more detailed error reason.</param>
-		/// <returns>A failed result.</returns>
-		[Pure]
-		public static RetrieveEntityResult<T> FromError(CommandError error, [NotNull] string reason)
-		{
-			return new RetrieveEntityResult<T>(null, error, reason);
-		}
+        /// <summary>
+        /// Creates a failed result.
+        /// </summary>
+        /// <param name="error">The error that caused the failure.</param>
+        /// <param name="reason">A more detailed error reason.</param>
+        /// <returns>A failed result.</returns>
+        [Pure]
+        public static RetrieveEntityResult<T> FromError(CommandError error, [NotNull] string reason)
+        {
+            return new RetrieveEntityResult<T>(null, error, reason);
+        }
 
-		/// <summary>
-		/// Creates a failed result based on another result.
-		/// </summary>
-		/// <param name="result">The result to base this result off of.</param>
-		/// <returns>A failed result.</returns>
-		[Pure]
-		public static RetrieveEntityResult<T> FromError([NotNull] IResult result)
-		{
-			return new RetrieveEntityResult<T>(null, result.Error, result.ErrorReason);
-		}
+        /// <summary>
+        /// Creates a failed result based on another result.
+        /// </summary>
+        /// <param name="result">The result to base this result off of.</param>
+        /// <returns>A failed result.</returns>
+        [Pure]
+        public static RetrieveEntityResult<T> FromError([NotNull] IResult result)
+        {
+            return new RetrieveEntityResult<T>(null, result.Error, result.ErrorReason);
+        }
 
-		/// <summary>
-		/// Creates a failed result based on an exception.
-		/// </summary>
-		/// <param name="exception">The exception to base this result off of.</param>
-		/// <returns>A failed result.</returns>
-		[Pure]
-		public static RetrieveEntityResult<T> FromError([NotNull] Exception exception)
-		{
-			return new RetrieveEntityResult<T>(null, CommandError.Exception, exception.Message, exception);
-		}
+        /// <summary>
+        /// Creates a failed result based on an exception.
+        /// </summary>
+        /// <param name="exception">The exception to base this result off of.</param>
+        /// <returns>A failed result.</returns>
+        [Pure]
+        public static RetrieveEntityResult<T> FromError([NotNull] Exception exception)
+        {
+            return new RetrieveEntityResult<T>(null, CommandError.Exception, exception.Message, exception);
+        }
 
-		/// <inheritdoc />
-		public override string ToString()
-		{
-			return this.IsSuccess ? "Success" : $"{this.Error}: {this.ErrorReason}";
-		}
-	}
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.IsSuccess ? "Success" : $"{this.Error}: {this.ErrorReason}";
+        }
+    }
 }

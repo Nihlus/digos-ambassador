@@ -26,20 +26,20 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
-	/// <summary>
-	/// Extensions for the <see cref="IUser"/> interface.
-	/// </summary>
-	public static class DiscordUserExtensions
-	{
-		/// <summary>
-		/// Determines whether or not the given user is the same as the bot user.
-		/// </summary>
-		/// <param name="this">The user.</param>
-		/// <param name="context">The context of the check.</param>
-		/// <returns>true if the user is the same as the bot user; otherwise, false.</returns>
-		public static bool IsMe([NotNull] this IUser @this, [NotNull] ICommandContext context)
-		{
-			return @this.Id == context.Client.CurrentUser.Id;
-		}
-	}
+    /// <summary>
+    /// Extensions for the <see cref="IUser"/> interface.
+    /// </summary>
+    public static class DiscordUserExtensions
+    {
+        /// <summary>
+        /// Determines whether or not the given user is the same as the bot user.
+        /// </summary>
+        /// <param name="this">The user.</param>
+        /// <param name="context">The context of the check.</param>
+        /// <returns>true if the user is the same as the bot user; otherwise, false.</returns>
+        public static bool IsMe([NotNull] this IUser @this, [NotNull] ICommandContext context)
+        {
+            return @this.Id == context.Client.CurrentUser.Id;
+        }
+    }
 }

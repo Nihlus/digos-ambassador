@@ -24,15 +24,15 @@ using CommandLine;
 
 namespace DIGOS.Ambassador.Tools
 {
-	/// <summary>
-	/// Options for the command line.
-	/// </summary>
-	public class CommandLineOptions
-	{
-		/// <summary>
-		/// Gets or sets the path to the file or directory to verify.
-		/// </summary>
-		[Option('v', "verify", HelpText = "Sets the path to the file or directory to verify.", Required = true)]
-		public string VerifyPath { get; set; }
-	}
+    /// <summary>
+    /// Options for the command line.
+    /// </summary>
+    public class CommandLineOptions
+    {
+        /// <summary>
+        /// Gets or sets the path to the file or directory to verify.
+        /// </summary>
+        [Option('v', "verify", HelpText = "Sets the path to the file or directory to verify.", Required = true)]
+        public string VerifyPath { get; set; }
+    }
 }

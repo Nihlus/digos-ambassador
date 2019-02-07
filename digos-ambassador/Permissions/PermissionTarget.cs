@@ -24,25 +24,25 @@ using System;
 
 namespace DIGOS.Ambassador.Permissions
 {
-	/// <summary>
-	/// Represents target permissions for commands.
-	/// </summary>
-	[Flags]
-	public enum PermissionTarget
-	{
-		/// <summary>
-		/// Does not allow execution of the command.
-		/// </summary>
-		None = 0,
+    /// <summary>
+    /// Represents target permissions for commands.
+    /// </summary>
+    [Flags]
+    public enum PermissionTarget
+    {
+        /// <summary>
+        /// Does not allow execution of the command.
+        /// </summary>
+        None = 0,
 
-		/// <summary>
-		/// Allows execution of a command exclusively on the invoking user.
-		/// </summary>
-		Self = 1,
+        /// <summary>
+        /// Allows execution of a command exclusively on the invoking user.
+        /// </summary>
+        Self = 1,
 
-		/// <summary>
-		/// Allows execution of a command on other users.
-		/// </summary>
-		Other = 2
-	}
+        /// <summary>
+        /// Allows execution of a command on other users.
+        /// </summary>
+        Other = 2
+    }
 }

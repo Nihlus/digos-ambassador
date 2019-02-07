@@ -25,16 +25,16 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Interfaces
 {
-	/// <summary>
-	/// Simple interface for enforcing a unique ID in EF entity classes.
-	/// </summary>
-	public interface IEFEntity
-	{
-		/// <summary>
-		/// Gets or sets the unique database ID for this entity.
-		/// </summary>
-		[Key]
-		[UsedImplicitly]
-		long ID { get; set; }
-	}
+    /// <summary>
+    /// Simple interface for enforcing a unique ID in EF entity classes.
+    /// </summary>
+    public interface IEFEntity
+    {
+        /// <summary>
+        /// Gets or sets the unique database ID for this entity.
+        /// </summary>
+        [Key]
+        [UsedImplicitly]
+        long ID { get; set; }
+    }
 }

@@ -27,104 +27,104 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Permissions
 {
-	/// <summary>
-	/// Represents a server-specific granted permission.
-	/// </summary>
-	public class LocalPermission : IPermission<LocalPermission>, IEFEntity
-	{
-		/// <inheritdoc />
-		public long ID { get; set; }
+    /// <summary>
+    /// Represents a server-specific granted permission.
+    /// </summary>
+    public class LocalPermission : IPermission<LocalPermission>, IEFEntity
+    {
+        /// <inheritdoc />
+        public long ID { get; set; }
 
-		/// <summary>
-		/// Gets or sets the the server that this permission has been granted on.
-		/// </summary>
-		public long ServerDiscordID { get; set; }
+        /// <summary>
+        /// Gets or sets the the server that this permission has been granted on.
+        /// </summary>
+        public long ServerDiscordID { get; set; }
 
-		/// <inheritdoc />
-		public long UserDiscordID { get; set; }
+        /// <inheritdoc />
+        public long UserDiscordID { get; set; }
 
-		/// <inheritdoc />
-		public Permission Permission { get; set; }
+        /// <inheritdoc />
+        public Permission Permission { get; set; }
 
-		/// <inheritdoc />
-		public PermissionTarget Target { get; set; }
+        /// <inheritdoc />
+        public PermissionTarget Target { get; set; }
 
-		/// <inheritdoc />
-		public bool Equals(LocalPermission other)
-		{
-			if (ReferenceEquals(null, other))
-			{
-				return false;
-			}
+        /// <inheritdoc />
+        public bool Equals(LocalPermission other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
 
-			if (ReferenceEquals(this, other))
-			{
-				return true;
-			}
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
 
-			return
-				this.Permission == other.Permission &&
-				this.Target == other.Target &&
-				this.ServerDiscordID == other.ServerDiscordID &&
-				this.UserDiscordID == other.UserDiscordID;
-		}
+            return
+                this.Permission == other.Permission &&
+                this.Target == other.Target &&
+                this.ServerDiscordID == other.ServerDiscordID &&
+                this.UserDiscordID == other.UserDiscordID;
+        }
 
-		/// <inheritdoc />
-		[SuppressMessage("ReSharper", "ArrangeThisQualifier", Justification = "Used for explicit differentiation between compared objects.")]
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(null, obj))
-			{
-				return false;
-			}
+        /// <inheritdoc />
+        [SuppressMessage("ReSharper", "ArrangeThisQualifier", Justification = "Used for explicit differentiation between compared objects.")]
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
 
-			if (ReferenceEquals(this, obj))
-			{
-				return true;
-			}
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
 
-			if (obj.GetType() != this.GetType())
-			{
-				return false;
-			}
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
 
-			return Equals((LocalPermission)obj);
-		}
+            return Equals((LocalPermission)obj);
+        }
 
-		/// <inheritdoc />
-		[SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Class is an entity.")]
-		public override int GetHashCode()
-		{
-			unchecked
-			{
-				int hashCode = (int)this.Permission;
-				hashCode = (hashCode * 397) ^ (int)this.Target;
-				hashCode = (hashCode * 397) ^ this.UserDiscordID.GetHashCode();
-				hashCode = (hashCode * 397) ^ this.ServerDiscordID.GetHashCode();
-				return hashCode;
-			}
-		}
+        /// <inheritdoc />
+        [SuppressMessage("ReSharper", "NonReadonlyMemberInGetHashCode", Justification = "Class is an entity.")]
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = (int)this.Permission;
+                hashCode = (hashCode * 397) ^ (int)this.Target;
+                hashCode = (hashCode * 397) ^ this.UserDiscordID.GetHashCode();
+                hashCode = (hashCode * 397) ^ this.ServerDiscordID.GetHashCode();
+                return hashCode;
+            }
+        }
 
-		/// <summary>
-		/// Compares the equality of two <see cref="LocalPermission"/> objects.
-		/// </summary>
-		/// <param name="left">The first object.</param>
-		/// <param name="right">The second object.</param>
-		/// <returns>true if the objects are equal; otherwise, false.</returns>
-		public static bool operator ==([CanBeNull] LocalPermission left, [CanBeNull] LocalPermission right)
-		{
-			return Equals(left, right);
-		}
+        /// <summary>
+        /// Compares the equality of two <see cref="LocalPermission"/> objects.
+        /// </summary>
+        /// <param name="left">The first object.</param>
+        /// <param name="right">The second object.</param>
+        /// <returns>true if the objects are equal; otherwise, false.</returns>
+        public static bool operator ==([CanBeNull] LocalPermission left, [CanBeNull] LocalPermission right)
+        {
+            return Equals(left, right);
+        }
 
-		/// <summary>
-		/// Compares the inequality of two <see cref="LocalPermission"/> objects.
-		/// </summary>
-		/// <param name="left">The first object.</param>
-		/// <param name="right">The second object.</param>
-		/// <returns>true if the objects are equal; otherwise, false.</returns>
-		public static bool operator !=([CanBeNull] LocalPermission left, [CanBeNull] LocalPermission right)
-		{
-			return !Equals(left, right);
-		}
-	}
+        /// <summary>
+        /// Compares the inequality of two <see cref="LocalPermission"/> objects.
+        /// </summary>
+        /// <param name="left">The first object.</param>
+        /// <param name="right">The second object.</param>
+        /// <returns>true if the objects are equal; otherwise, false.</returns>
+        public static bool operator !=([CanBeNull] LocalPermission left, [CanBeNull] LocalPermission right)
+        {
+            return !Equals(left, right);
+        }
+    }
 }

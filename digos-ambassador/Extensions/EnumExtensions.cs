@@ -26,34 +26,34 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
 {
-	/// <summary>
-	/// Extensions for the <see cref="Enum"/> class.
-	/// </summary>
-	public static class EnumExtensions
-	{
-		/// <summary>
-		/// Gets a custom attribute of type <typeparamref name="T"/> from the given enum value.
-		/// </summary>
-		/// <param name="value">The value.</param>
-		/// <typeparam name="T">The attribute type</typeparam>
-		/// <returns>The attribute.</returns>
-		[CanBeNull]
-		public static T GetCustomAttribute<T>([NotNull] this Enum value) where T : Attribute
-		{
-			var enumType = value.GetType();
-			var name = Enum.GetName(enumType, value);
-			return enumType.GetField(name).GetCustomAttributes(false).OfType<T>().SingleOrDefault();
-		}
+    /// <summary>
+    /// Extensions for the <see cref="Enum"/> class.
+    /// </summary>
+    public static class EnumExtensions
+    {
+        /// <summary>
+        /// Gets a custom attribute of type <typeparamref name="T"/> from the given enum value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <typeparam name="T">The attribute type</typeparam>
+        /// <returns>The attribute.</returns>
+        [CanBeNull]
+        public static T GetCustomAttribute<T>([NotNull] this Enum value) where T : Attribute
+        {
+            var enumType = value.GetType();
+            var name = Enum.GetName(enumType, value);
+            return enumType.GetField(name).GetCustomAttributes(false).OfType<T>().SingleOrDefault();
+        }
 
-		/// <summary>
-		/// Determines whether or not the given enum value has a custom attribute of type <typeparamref name="T"/>.
-		/// </summary>
-		/// <param name="value">The value.</param>
-		/// <typeparam name="T">The type.</typeparam>
-		/// <returns>true if the value has an attribute; otherwise, false.</returns>
-		public static bool HasCustomAttribute<T>([NotNull] this Enum value) where T : Attribute
-		{
-			return !(value.GetCustomAttribute<T>() is null);
-		}
-	}
+        /// <summary>
+        /// Determines whether or not the given enum value has a custom attribute of type <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <typeparam name="T">The type.</typeparam>
+        /// <returns>true if the value has an attribute; otherwise, false.</returns>
+        public static bool HasCustomAttribute<T>([NotNull] this Enum value) where T : Attribute
+        {
+            return !(value.GetCustomAttribute<T>() is null);
+        }
+    }
 }

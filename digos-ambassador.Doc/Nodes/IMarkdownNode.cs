@@ -22,15 +22,15 @@
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a node in a markdown document.
-	/// </summary>
-	public interface IMarkdownNode
-	{
-		/// <summary>
-		/// Compiles the node into Markdown text.
-		/// </summary>
-		/// <returns>Markdown text.</returns>
-		string Compile();
-	}
+    /// <summary>
+    /// Represents a node in a markdown document.
+    /// </summary>
+    public interface IMarkdownNode
+    {
+        /// <summary>
+        /// Compiles the node into Markdown text.
+        /// </summary>
+        /// <returns>Markdown text.</returns>
+        string Compile();
+    }
 }

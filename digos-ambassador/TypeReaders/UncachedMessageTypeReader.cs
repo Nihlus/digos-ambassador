@@ -28,24 +28,24 @@ using Discord.Commands;
 
 namespace DIGOS.Ambassador.TypeReaders
 {
-	/// <summary>
-	/// Reads an IMessage, downloading it if neccesary.
-	/// </summary>
-	/// <typeparam name="T">A type implementing <see cref="IMessage"/>.</typeparam>
-	public class UncachedMessageTypeReader<T> : TypeReader where T : class, IMessage
-	{
-		/// <inheritdoc />
-		public override async Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
-		{
-			if (ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out ulong id))
-			{
-				if (await context.Channel.GetMessageAsync(id).ConfigureAwait(false) is T message)
-				{
-					return TypeReaderResult.FromSuccess(message);
-				}
-			}
+    /// <summary>
+    /// Reads an IMessage, downloading it if neccesary.
+    /// </summary>
+    /// <typeparam name="T">A type implementing <see cref="IMessage"/>.</typeparam>
+    public class UncachedMessageTypeReader<T> : TypeReader where T : class, IMessage
+    {
+        /// <inheritdoc />
+        public override async Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
+        {
+            if (ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out ulong id))
+            {
+                if (await context.Channel.GetMessageAsync(id).ConfigureAwait(false) is T message)
+                {
+                    return TypeReaderResult.FromSuccess(message);
+                }
+            }
 
-			return TypeReaderResult.FromError(CommandError.ObjectNotFound, "Message not found.");
-		}
-	}
+            return TypeReaderResult.FromError(CommandError.ObjectNotFound, "Message not found.");
+        }
+    }
 }

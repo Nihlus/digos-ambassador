@@ -26,22 +26,22 @@ using DIGOS.Ambassador.Extensions;
 
 namespace DIGOS.Ambassador.Transformations
 {
-	/// <summary>
-	/// A token that gets replaced with the target's name or nickname.
-	/// </summary>
-	[TokenIdentifier("target", "t")]
-	public class TargetToken : ReplacableTextToken<TargetToken>
-	{
-		/// <inheritdoc />
-		public override string GetText(Character character, AppearanceComponent component)
-		{
-			return character.Nickname.IsNullOrWhitespace() ? character.Name : character.Nickname;
-		}
+    /// <summary>
+    /// A token that gets replaced with the target's name or nickname.
+    /// </summary>
+    [TokenIdentifier("target", "t")]
+    public class TargetToken : ReplacableTextToken<TargetToken>
+    {
+        /// <inheritdoc />
+        public override string GetText(Character character, AppearanceComponent component)
+        {
+            return character.Nickname.IsNullOrWhitespace() ? character.Name : character.Nickname;
+        }
 
-		/// <inheritdoc />
-		protected override TargetToken Initialize(string data)
-		{
-			return this;
-		}
-	}
+        /// <inheritdoc />
+        protected override TargetToken Initialize(string data)
+        {
+            return this;
+        }
+    }
 }

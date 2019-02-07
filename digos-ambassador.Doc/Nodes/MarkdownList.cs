@@ -27,76 +27,76 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a list of items.
-	/// </summary>
-	public class MarkdownList : IMarkdownNode
-	{
-		/// <summary>
-		/// Gets the item in the list.
-		/// </summary>
-		public List<IMarkdownNode> Items { get; } = new List<IMarkdownNode>();
+    /// <summary>
+    /// Represents a list of items.
+    /// </summary>
+    public class MarkdownList : IMarkdownNode
+    {
+        /// <summary>
+        /// Gets the item in the list.
+        /// </summary>
+        public List<IMarkdownNode> Items { get; } = new List<IMarkdownNode>();
 
-		/// <summary>
-		/// Gets or sets the type of list this is.
-		/// </summary>
-		public ListType Type { get; set; }
+        /// <summary>
+        /// Gets or sets the type of list this is.
+        /// </summary>
+        public ListType Type { get; set; }
 
-		/// <inheritdoc />
-		public string Compile()
-		{
-			var sb = new StringBuilder();
-			var itemNumber = 1;
-			foreach (var item in this.Items)
-			{
-				var itemLines = item.Compile().Split('\n');
-				switch (this.Type)
-				{
-					case ListType.Numbered:
-					{
-						sb.AppendLine($"{itemNumber}. {itemLines.First()}");
-						break;
-					}
-					case ListType.Bullet:
-					{
-						sb.AppendLine($"* {itemLines.First()}");
-						break;
-					}
-				}
+        /// <inheritdoc />
+        public string Compile()
+        {
+            var sb = new StringBuilder();
+            var itemNumber = 1;
+            foreach (var item in this.Items)
+            {
+                var itemLines = item.Compile().Split('\n');
+                switch (this.Type)
+                {
+                    case ListType.Numbered:
+                    {
+                        sb.AppendLine($"{itemNumber}. {itemLines.First()}");
+                        break;
+                    }
+                    case ListType.Bullet:
+                    {
+                        sb.AppendLine($"* {itemLines.First()}");
+                        break;
+                    }
+                }
 
-				foreach (var line in itemLines.Skip(1))
-				{
-					switch (this.Type)
-					{
-						case ListType.Numbered:
-						{
-							sb.AppendLine($"{new string(' ', $"{itemNumber}.".Length)} {line}");
-							break;
-						}
-						case ListType.Bullet:
-						{
-							sb.AppendLine($"{new string(' ', "*".Length)} {line}");
-							break;
-						}
-					}
-				}
+                foreach (var line in itemLines.Skip(1))
+                {
+                    switch (this.Type)
+                    {
+                        case ListType.Numbered:
+                        {
+                            sb.AppendLine($"{new string(' ', $"{itemNumber}.".Length)} {line}");
+                            break;
+                        }
+                        case ListType.Bullet:
+                        {
+                            sb.AppendLine($"{new string(' ', "*".Length)} {line}");
+                            break;
+                        }
+                    }
+                }
 
-				++itemNumber;
-			}
+                ++itemNumber;
+            }
 
-			return sb.ToString();
-		}
+            return sb.ToString();
+        }
 
-		/// <summary>
-		/// Appends a new item to the list.
-		/// </summary>
-		/// <param name="item">The item to append.</param>
-		/// <returns>The list, with the item appended.</returns>
-		[NotNull]
-		public MarkdownList AppendItem([NotNull] IMarkdownNode item)
-		{
-			this.Items.Add(item);
-			return this;
-		}
-	}
+        /// <summary>
+        /// Appends a new item to the list.
+        /// </summary>
+        /// <param name="item">The item to append.</param>
+        /// <returns>The list, with the item appended.</returns>
+        [NotNull]
+        public MarkdownList AppendItem([NotNull] IMarkdownNode item)
+        {
+            this.Items.Add(item);
+            return this;
+        }
+    }
 }

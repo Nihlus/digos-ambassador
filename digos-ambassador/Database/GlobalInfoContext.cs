@@ -44,391 +44,391 @@ using Image = DIGOS.Ambassador.Database.Data.Image;
 
 namespace DIGOS.Ambassador.Database
 {
-	/// <summary>
-	/// Database context for global information.
-	/// </summary>
-	public class GlobalInfoContext : DbContext
-	{
-		/// <summary>
-		/// Gets or sets the table where the user information is stored.
-		/// </summary>
-		public DbSet<User> Users
-		{
-			get;
+    /// <summary>
+    /// Database context for global information.
+    /// </summary>
+    public class GlobalInfoContext : DbContext
+    {
+        /// <summary>
+        /// Gets or sets the table where the user information is stored.
+        /// </summary>
+        public DbSet<User> Users
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where characters are stored.
-		/// </summary>
-		public DbSet<Character> Characters
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where characters are stored.
+        /// </summary>
+        public DbSet<Character> Characters
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where kinks are stored.
-		/// </summary>
-		public DbSet<Kink> Kinks
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where kinks are stored.
+        /// </summary>
+        public DbSet<Kink> Kinks
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where server-specific settings are stored.
-		/// </summary>
-		public DbSet<Server> Servers
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where server-specific settings are stored.
+        /// </summary>
+        public DbSet<Server> Servers
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where granted local permissions are stored.
-		/// </summary>
-		public DbSet<LocalPermission> LocalPermissions
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where granted local permissions are stored.
+        /// </summary>
+        public DbSet<LocalPermission> LocalPermissions
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where granted global permissions are stored.
-		/// </summary>
-		public DbSet<GlobalPermission> GlobalPermissions
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where granted global permissions are stored.
+        /// </summary>
+        public DbSet<GlobalPermission> GlobalPermissions
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where roleplays are stored.
-		/// </summary>
-		public DbSet<Roleplay> Roleplays
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where roleplays are stored.
+        /// </summary>
+        public DbSet<Roleplay> Roleplays
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where dossier metadata is stored.
-		/// </summary>
-		public DbSet<Dossier> Dossiers
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where dossier metadata is stored.
+        /// </summary>
+        public DbSet<Dossier> Dossiers
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where images are stored.
-		/// </summary>
-		public DbSet<Image> Images
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where images are stored.
+        /// </summary>
+        public DbSet<Image> Images
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where transformation species are stored.
-		/// </summary>
-		public DbSet<Species> Species
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where transformation species are stored.
+        /// </summary>
+        public DbSet<Species> Species
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where transformations are stored.
-		/// </summary>
-		public DbSet<Transformation> Transformations
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where transformations are stored.
+        /// </summary>
+        public DbSet<Transformation> Transformations
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where global transformation protections are stored.
-		/// </summary>
-		public DbSet<GlobalUserProtection> GlobalUserProtections
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where global transformation protections are stored.
+        /// </summary>
+        public DbSet<GlobalUserProtection> GlobalUserProtections
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where server-specific transformation protections are stored.
-		/// </summary>
-		public DbSet<ServerUserProtection> ServerUserProtections
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where server-specific transformation protections are stored.
+        /// </summary>
+        public DbSet<ServerUserProtection> ServerUserProtections
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Gets or sets the table where user consents are stored.
-		/// </summary>
-		public DbSet<UserConsent> UserConsents
-		{
-			get;
+        /// <summary>
+        /// Gets or sets the table where user consents are stored.
+        /// </summary>
+        public DbSet<UserConsent> UserConsents
+        {
+            get;
 
-			[UsedImplicitly]
-			set;
-		}
+            [UsedImplicitly]
+            set;
+        }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
-		/// </summary>
-		/// <param name="options">The context options.</param>
-		public GlobalInfoContext([NotNull] DbContextOptions options)
-			: base(options)
-		{
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
+        /// </summary>
+        /// <param name="options">The context options.</param>
+        public GlobalInfoContext([NotNull] DbContextOptions options)
+            : base(options)
+        {
+        }
 
-		/// <summary>
-		/// Updates the kink database, adding in new entries. Duplicates are not added.
-		/// </summary>
-		/// <param name="newKinks">The new kinks.</param>
-		/// <returns>The number of updated kinks.</returns>
-		public async Task<int> UpdateKinksAsync([NotNull] [ItemNotNull] IEnumerable<Kink> newKinks)
-		{
-			foreach (var kink in newKinks)
-			{
-				if (!await this.Kinks.AnyAsync(k => k.FListID == kink.FListID))
-				{
-					await this.Kinks.AddAsync(kink);
-				}
-			}
+        /// <summary>
+        /// Updates the kink database, adding in new entries. Duplicates are not added.
+        /// </summary>
+        /// <param name="newKinks">The new kinks.</param>
+        /// <returns>The number of updated kinks.</returns>
+        public async Task<int> UpdateKinksAsync([NotNull] [ItemNotNull] IEnumerable<Kink> newKinks)
+        {
+            foreach (var kink in newKinks)
+            {
+                if (!await this.Kinks.AnyAsync(k => k.FListID == kink.FListID))
+                {
+                    await this.Kinks.AddAsync(kink);
+                }
+            }
 
-			return await SaveChangesAsync();
-		}
+            return await SaveChangesAsync();
+        }
 
-		/// <summary>
-		/// Determines whether or not a Discord server is stored in the database.
-		/// </summary>
-		/// <param name="discordServer">The Discord server.</param>
-		/// <returns><value>true</value> if the server is stored; otherwise, <value>false</value>.</returns>
-		[Pure]
-		public async Task<bool> IsServerKnownAsync([NotNull] IGuild discordServer)
-		{
-			return await this.Servers.AnyAsync(u => u.DiscordID == (long)discordServer.Id);
-		}
+        /// <summary>
+        /// Determines whether or not a Discord server is stored in the database.
+        /// </summary>
+        /// <param name="discordServer">The Discord server.</param>
+        /// <returns><value>true</value> if the server is stored; otherwise, <value>false</value>.</returns>
+        [Pure]
+        public async Task<bool> IsServerKnownAsync([NotNull] IGuild discordServer)
+        {
+            return await this.Servers.AnyAsync(u => u.DiscordID == (long)discordServer.Id);
+        }
 
-		/// <summary>
-		/// Gets an existing set of information about a Discord server, or registers it with the database if one is not found.
-		/// </summary>
-		/// <param name="discordServer">The Discord server.</param>
-		/// <returns>Stored information about the server.</returns>
-		[ItemNotNull]
-		public async Task<Server> GetOrRegisterServerAsync([NotNull] IGuild discordServer)
-		{
-			if (!await IsServerKnownAsync(discordServer))
-			{
-				return await AddServerAsync(discordServer);
-			}
+        /// <summary>
+        /// Gets an existing set of information about a Discord server, or registers it with the database if one is not found.
+        /// </summary>
+        /// <param name="discordServer">The Discord server.</param>
+        /// <returns>Stored information about the server.</returns>
+        [ItemNotNull]
+        public async Task<Server> GetOrRegisterServerAsync([NotNull] IGuild discordServer)
+        {
+            if (!await IsServerKnownAsync(discordServer))
+            {
+                return await AddServerAsync(discordServer);
+            }
 
-			return await GetServerAsync(discordServer);
-		}
+            return await GetServerAsync(discordServer);
+        }
 
-		/// <summary>
-		/// Gets a stored server from the database that matches the given Discord server.
-		/// </summary>
-		/// <param name="discordServer">The Discord server.</param>
-		/// <returns>Stored information about the server.</returns>
-		[Pure]
-		[ItemNotNull]
-		public async Task<Server> GetServerAsync([NotNull] IGuild discordServer)
-		{
-			return await this.Servers.FirstAsync(u => u.DiscordID == (long)discordServer.Id);
-		}
+        /// <summary>
+        /// Gets a stored server from the database that matches the given Discord server.
+        /// </summary>
+        /// <param name="discordServer">The Discord server.</param>
+        /// <returns>Stored information about the server.</returns>
+        [Pure]
+        [ItemNotNull]
+        public async Task<Server> GetServerAsync([NotNull] IGuild discordServer)
+        {
+            return await this.Servers.FirstAsync(u => u.DiscordID == (long)discordServer.Id);
+        }
 
-		/// <summary>
-		/// Adds a Discord server to the database.
-		/// </summary>
-		/// <param name="discordServer">The Discord server.</param>
-		/// <returns>The freshly created information about the server.</returns>
-		/// <exception cref="ArgumentException">Thrown if the server already exists in the database.</exception>
-		[ItemNotNull]
-		public async Task<Server> AddServerAsync([NotNull] IGuild discordServer)
-		{
-			if (await IsServerKnownAsync(discordServer))
-			{
-				throw new ArgumentException($"A server with the ID {discordServer.Id} has already been added to the database.", nameof(discordServer));
-			}
+        /// <summary>
+        /// Adds a Discord server to the database.
+        /// </summary>
+        /// <param name="discordServer">The Discord server.</param>
+        /// <returns>The freshly created information about the server.</returns>
+        /// <exception cref="ArgumentException">Thrown if the server already exists in the database.</exception>
+        [ItemNotNull]
+        public async Task<Server> AddServerAsync([NotNull] IGuild discordServer)
+        {
+            if (await IsServerKnownAsync(discordServer))
+            {
+                throw new ArgumentException($"A server with the ID {discordServer.Id} has already been added to the database.", nameof(discordServer));
+            }
 
-			var server = Server.CreateDefault(discordServer);
+            var server = Server.CreateDefault(discordServer);
 
-			await this.Servers.AddAsync(server);
+            await this.Servers.AddAsync(server);
 
-			await SaveChangesAsync();
+            await SaveChangesAsync();
 
-			return await GetServerAsync(discordServer);
-		}
+            return await GetServerAsync(discordServer);
+        }
 
-		/// <summary>
-		/// Determines whether or not a Discord user is stored in the database.
-		/// </summary>
-		/// <param name="discordUser">The Discord user.</param>
-		/// <returns><value>true</value> if the user is stored; otherwise, <value>false</value>.</returns>
-		[Pure]
-		public async Task<bool> IsUserKnownAsync([NotNull] IUser discordUser)
-		{
-			return await this.Users.AnyAsync(u => u.DiscordID == (long)discordUser.Id);
-		}
+        /// <summary>
+        /// Determines whether or not a Discord user is stored in the database.
+        /// </summary>
+        /// <param name="discordUser">The Discord user.</param>
+        /// <returns><value>true</value> if the user is stored; otherwise, <value>false</value>.</returns>
+        [Pure]
+        public async Task<bool> IsUserKnownAsync([NotNull] IUser discordUser)
+        {
+            return await this.Users.AnyAsync(u => u.DiscordID == (long)discordUser.Id);
+        }
 
-		/// <summary>
-		/// Gets an existing set of information about a Discord user, or registers them with the database if one is not found.
-		/// </summary>
-		/// <param name="discordUser">The Discord user.</param>
-		/// <returns>Stored information about the user.</returns>
-		[ItemNotNull]
-		public async Task<User> GetOrRegisterUserAsync([NotNull] IUser discordUser)
-		{
-			if (!await IsUserKnownAsync(discordUser))
-			{
-				return await AddUserAsync(discordUser);
-			}
+        /// <summary>
+        /// Gets an existing set of information about a Discord user, or registers them with the database if one is not found.
+        /// </summary>
+        /// <param name="discordUser">The Discord user.</param>
+        /// <returns>Stored information about the user.</returns>
+        [ItemNotNull]
+        public async Task<User> GetOrRegisterUserAsync([NotNull] IUser discordUser)
+        {
+            if (!await IsUserKnownAsync(discordUser))
+            {
+                return await AddUserAsync(discordUser);
+            }
 
-			return await GetUser(discordUser);
-		}
+            return await GetUser(discordUser);
+        }
 
-		/// <summary>
-		/// Gets a stored user from the database that matches the given Discord user.
-		/// </summary>
-		/// <param name="discordUser">The Discord user.</param>
-		/// <returns>Stored information about the user.</returns>
-		[Pure]
-		[ItemNotNull]
-		public async Task<User> GetUser([NotNull] IUser discordUser)
-		{
-			return await this.Users
-				.Include(u => u.DefaultCharacter)
-				.Include(u => u.Characters)
-				.Include(u => u.Kinks).ThenInclude(k => k.Kink)
-				.OrderBy(u => u.ID)
-				.FirstAsync
-				(
-					u =>
-						u.DiscordID == (long)discordUser.Id
-				);
-		}
+        /// <summary>
+        /// Gets a stored user from the database that matches the given Discord user.
+        /// </summary>
+        /// <param name="discordUser">The Discord user.</param>
+        /// <returns>Stored information about the user.</returns>
+        [Pure]
+        [ItemNotNull]
+        public async Task<User> GetUser([NotNull] IUser discordUser)
+        {
+            return await this.Users
+                .Include(u => u.DefaultCharacter)
+                .Include(u => u.Characters)
+                .Include(u => u.Kinks).ThenInclude(k => k.Kink)
+                .OrderBy(u => u.ID)
+                .FirstAsync
+                (
+                    u =>
+                        u.DiscordID == (long)discordUser.Id
+                );
+        }
 
-		/// <summary>
-		/// Adds a Discord user to the database.
-		/// </summary>
-		/// <param name="discordUser">The Discord user.</param>
-		/// <returns>The freshly created information about the user.</returns>
-		/// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
-		[ItemNotNull]
-		public async Task<User> AddUserAsync([NotNull] IUser discordUser)
-		{
-			if (await IsUserKnownAsync(discordUser))
-			{
-				throw new ArgumentException($"A user with the ID {discordUser.Id} has already been added to the database.", nameof(discordUser));
-			}
+        /// <summary>
+        /// Adds a Discord user to the database.
+        /// </summary>
+        /// <param name="discordUser">The Discord user.</param>
+        /// <returns>The freshly created information about the user.</returns>
+        /// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
+        [ItemNotNull]
+        public async Task<User> AddUserAsync([NotNull] IUser discordUser)
+        {
+            if (await IsUserKnownAsync(discordUser))
+            {
+                throw new ArgumentException($"A user with the ID {discordUser.Id} has already been added to the database.", nameof(discordUser));
+            }
 
-			var newUser = new User
-			{
-				DiscordID = (long)discordUser.Id,
-				Class = UserClass.Other,
-				Bio = null,
-				Timezone = null
-			};
+            var newUser = new User
+            {
+                DiscordID = (long)discordUser.Id,
+                Class = UserClass.Other,
+                Bio = null,
+                Timezone = null
+            };
 
-			await this.Users.AddAsync(newUser);
+            await this.Users.AddAsync(newUser);
 
-			await SaveChangesAsync();
+            await SaveChangesAsync();
 
-			return await GetUser(discordUser);
-		}
+            return await GetUser(discordUser);
+        }
 
-		/// <summary>
-		/// Configures the given options builder to match the settings required for the <see cref="GlobalInfoContext"/>.
-		/// </summary>
-		/// <param name="optionsBuilder">The builder to configure.</param>
-		/// <returns>The builder, configured.</returns>
-		[NotNull]
-		public static DbContextOptionsBuilder ConfigureOptions([NotNull] DbContextOptionsBuilder optionsBuilder)
-		{
-			var passfilePath = Path.Combine("Content", "database.credentials");
-			if (!File.Exists(passfilePath))
-			{
-				throw new FileNotFoundException("Could not find PostgreSQL credentials.", passfilePath);
-			}
+        /// <summary>
+        /// Configures the given options builder to match the settings required for the <see cref="GlobalInfoContext"/>.
+        /// </summary>
+        /// <param name="optionsBuilder">The builder to configure.</param>
+        /// <returns>The builder, configured.</returns>
+        [NotNull]
+        public static DbContextOptionsBuilder ConfigureOptions([NotNull] DbContextOptionsBuilder optionsBuilder)
+        {
+            var passfilePath = Path.Combine("Content", "database.credentials");
+            if (!File.Exists(passfilePath))
+            {
+                throw new FileNotFoundException("Could not find PostgreSQL credentials.", passfilePath);
+            }
 
-			var passfileContents = File.ReadAllText(passfilePath).Split(':');
-			if (passfileContents.Length != 5)
-			{
-				throw new InvalidDataException("The credential file was of an invalid format.");
-			}
+            var passfileContents = File.ReadAllText(passfilePath).Split(':');
+            if (passfileContents.Length != 5)
+            {
+                throw new InvalidDataException("The credential file was of an invalid format.");
+            }
 
-			var password = passfileContents[4];
+            var password = passfileContents[4];
 
-			optionsBuilder.UseNpgsql($"Server=localhost;Database=amby;Username=amby;Password={password}");
+            optionsBuilder.UseNpgsql($"Server=localhost;Database=amby;Username=amby;Password={password}");
 
-			return optionsBuilder;
-		}
+            return optionsBuilder;
+        }
 
-		/// <inheritdoc />
-		protected override void OnConfiguring([NotNull] DbContextOptionsBuilder optionsBuilder)
-		{
-			if (!optionsBuilder.IsConfigured)
-			{
-				ConfigureOptions(optionsBuilder);
-			}
-		}
+        /// <inheritdoc />
+        protected override void OnConfiguring([NotNull] DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                ConfigureOptions(optionsBuilder);
+            }
+        }
 
-		/// <inheritdoc />
-		protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<User>().HasMany(u => u.Characters).WithOne(u => u.Owner);
-			modelBuilder.Entity<User>()
-				.HasOne(u => u.DefaultCharacter)
-				.WithOne()
-				.HasForeignKey(typeof(User).FullName, "DefaultCharacterID");
+        /// <inheritdoc />
+        protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>().HasMany(u => u.Characters).WithOne(u => u.Owner);
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.DefaultCharacter)
+                .WithOne()
+                .HasForeignKey(typeof(User).FullName, "DefaultCharacterID");
 
-			modelBuilder.Entity<User>().Property(typeof(long?), "DefaultCharacterID").IsRequired(false);
-			modelBuilder.Entity<User>().HasMany(u => u.Kinks).WithOne().IsRequired();
+            modelBuilder.Entity<User>().Property(typeof(long?), "DefaultCharacterID").IsRequired(false);
+            modelBuilder.Entity<User>().HasMany(u => u.Kinks).WithOne().IsRequired();
 
-			modelBuilder.Entity<Character>().HasOne(ch => ch.Owner).WithMany(u => u.Characters);
+            modelBuilder.Entity<Character>().HasOne(ch => ch.Owner).WithMany(u => u.Characters);
 
-			modelBuilder.Entity<Roleplay>().HasOne(u => u.Owner).WithMany();
-			modelBuilder.Entity<Roleplay>().HasMany(u => u.ParticipatingUsers).WithOne(p => p.Roleplay);
-			modelBuilder.Entity<Roleplay>().HasMany(r => r.Messages).WithOne().IsRequired();
+            modelBuilder.Entity<Roleplay>().HasOne(u => u.Owner).WithMany();
+            modelBuilder.Entity<Roleplay>().HasMany(u => u.ParticipatingUsers).WithOne(p => p.Roleplay);
+            modelBuilder.Entity<Roleplay>().HasMany(r => r.Messages).WithOne().IsRequired();
 
-			modelBuilder.Entity<RoleplayParticipant>().HasOne(u => u.User).WithMany();
+            modelBuilder.Entity<RoleplayParticipant>().HasOne(u => u.User).WithMany();
 
-			modelBuilder.Entity<GlobalUserProtection>().HasMany(p => p.UserListing).WithOne(u => u.GlobalProtection);
-			modelBuilder.Entity<UserProtectionEntry>().HasOne(u => u.User).WithMany();
+            modelBuilder.Entity<GlobalUserProtection>().HasMany(p => p.UserListing).WithOne(u => u.GlobalProtection);
+            modelBuilder.Entity<UserProtectionEntry>().HasOne(u => u.User).WithMany();
 
-			modelBuilder.Entity<Appearance>().HasMany(a => a.Components).WithOne().IsRequired();
-		}
-	}
+            modelBuilder.Entity<Appearance>().HasMany(a => a.Components).WithOne().IsRequired();
+        }
+    }
 }

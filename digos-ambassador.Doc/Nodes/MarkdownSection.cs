@@ -26,68 +26,68 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Nodes
 {
-	/// <summary>
-	/// Represents a section of markdown content with a header.
-	/// </summary>
-	public class MarkdownSection : IMarkdownNode
-	{
-		/// <summary>
-		/// Gets or sets the header of the section.
-		/// </summary>
-		public MarkdownHeader Header { get; set; }
+    /// <summary>
+    /// Represents a section of markdown content with a header.
+    /// </summary>
+    public class MarkdownSection : IMarkdownNode
+    {
+        /// <summary>
+        /// Gets or sets the header of the section.
+        /// </summary>
+        public MarkdownHeader Header { get; set; }
 
-		private readonly List<IMarkdownNode> Content = new List<IMarkdownNode>();
+        private readonly List<IMarkdownNode> Content = new List<IMarkdownNode>();
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MarkdownSection"/> class.
-		/// </summary>
-		/// <param name="title">The title of the section.</param>
-		/// <param name="level">The level of the section header.</param>
-		public MarkdownSection(string title, int level = 1)
-		{
-			this.Header = new MarkdownHeader(title, level);
-		}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MarkdownSection"/> class.
+        /// </summary>
+        /// <param name="title">The title of the section.</param>
+        /// <param name="level">The level of the section header.</param>
+        public MarkdownSection(string title, int level = 1)
+        {
+            this.Header = new MarkdownHeader(title, level);
+        }
 
-		/// <inheritdoc />
-		public string Compile()
-		{
-			var sb = new StringBuilder();
-			sb.AppendLine(this.Header.Compile());
-			foreach (var contentNode in this.Content)
-			{
-				sb.AppendLine(contentNode.Compile());
-				sb.AppendLine();
-			}
+        /// <inheritdoc />
+        public string Compile()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(this.Header.Compile());
+            foreach (var contentNode in this.Content)
+            {
+                sb.AppendLine(contentNode.Compile());
+                sb.AppendLine();
+            }
 
-			return sb.ToString().TrimEnd();
-		}
+            return sb.ToString().TrimEnd();
+        }
 
-		/// <summary>
-		/// Appends a piece of content to the section.
-		/// </summary>
-		/// <param name="content">The content.</param>
-		/// <returns>The section, with the content appended.</returns>
-		[NotNull]
-		public MarkdownSection AppendContent([NotNull] IMarkdownNode content)
-		{
-			this.Content.Add(content);
-			return this;
-		}
+        /// <summary>
+        /// Appends a piece of content to the section.
+        /// </summary>
+        /// <param name="content">The content.</param>
+        /// <returns>The section, with the content appended.</returns>
+        [NotNull]
+        public MarkdownSection AppendContent([NotNull] IMarkdownNode content)
+        {
+            this.Content.Add(content);
+            return this;
+        }
 
-		/// <summary>
-		/// Appends a range of content to the section.
-		/// </summary>
-		/// <param name="content">The content.</param>
-		/// <returns>The section, with all the content appended.</returns>
-		[NotNull]
-		public MarkdownSection AppendContentRange([NotNull, ItemNotNull] IEnumerable<IMarkdownNode> content)
-		{
-			foreach (var node in content)
-			{
-				AppendContent(node);
-			}
+        /// <summary>
+        /// Appends a range of content to the section.
+        /// </summary>
+        /// <param name="content">The content.</param>
+        /// <returns>The section, with all the content appended.</returns>
+        [NotNull]
+        public MarkdownSection AppendContentRange([NotNull, ItemNotNull] IEnumerable<IMarkdownNode> content)
+        {
+            foreach (var node in content)
+            {
+                AppendContent(node);
+            }
 
-			return this;
-		}
-	}
+            return this;
+        }
+    }
 }
