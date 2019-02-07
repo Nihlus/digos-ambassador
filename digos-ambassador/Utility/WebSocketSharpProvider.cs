@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Utility
     /// <summary>
     /// WebSocket provider using websocket-sharp.
     /// </summary>
-    public class WebSocketSharpProvider : IWebSocketClient, IDisposable
+    public class WebSocketSharpProvider : IWebSocketClient
     {
         /// <inheritdoc />
         public event Func<byte[], int, int, Task> BinaryMessage;

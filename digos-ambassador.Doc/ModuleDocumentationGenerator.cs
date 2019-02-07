@@ -222,7 +222,7 @@ namespace DIGOS.Ambassador.Doc
         }
 
         /// <summary>
-        /// Saves the given page to disk in the folder specifed by <see cref="OutputPath"/>.
+        /// Saves the given page to disk in the folder specified by <see cref="OutputPath"/>.
         /// </summary>
         /// <param name="page">The page to save.</param>
         /// <param name="subdirectory">The subdirectory to save it in, if any.</param>
