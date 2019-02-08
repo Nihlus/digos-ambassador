@@ -280,7 +280,7 @@ namespace DIGOS.Ambassador.Services
                 return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
             }
 
-            if (currentComponent.BaseColour == colour)
+            if (currentComponent.BaseColour.IsSameColourAs(colour))
             {
                 return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The bodypart is already that colour.");
             }
@@ -382,7 +382,7 @@ namespace DIGOS.Ambassador.Services
                 return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The bodypart doesn't have a pattern.");
             }
 
-            if (currentComponent.PatternColour == patternColour)
+            if (!(currentComponent.PatternColour is null) && currentComponent.PatternColour.IsSameColourAs(patternColour))
             {
                 return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The pattern is already that colour.");
             }

@@ -47,6 +47,17 @@ namespace DIGOS.Ambassador.Database.Appearances
         public ShadeModifier? Modifier { get; set; }
 
         /// <summary>
+        /// Determines whether this colour is the same colour as the given one.
+        /// </summary>
+        /// <param name="other">The other colour.</param>
+        /// <returns>true if the colours are the same; otherwise, false.</returns>
+        [Pure]
+        public bool IsSameColourAs([NotNull] Colour other)
+        {
+            return this.Shade == other.Shade && this.Modifier == other.Modifier;
+        }
+
+        /// <summary>
         /// Attempts to parse the given input into a colour.
         /// </summary>
         /// <param name="input">The input text to parse.</param>
