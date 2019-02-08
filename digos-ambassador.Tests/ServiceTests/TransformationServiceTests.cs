@@ -611,7 +611,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task CanResetForm()
             {
-                var defaultAppearance = new Appearance();
+                var defaultAppearance = new Appearance
+                {
+                    Height = 256
+                };
+
                 this.Character.DefaultAppearance = defaultAppearance;
 
                 var result = await this.Transformations.ResetCharacterFormAsync(this.Database, this.Character);
@@ -619,7 +623,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 Assert.True(result.IsSuccess);
                 Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
                 Assert.NotNull(this.Character.CurrentAppearance);
-                Assert.Same(this.Character.DefaultAppearance, this.Character.CurrentAppearance);
+                Assert.Equal(this.Character.DefaultAppearance.Height, this.Character.CurrentAppearance.Height);
             }
 
             [Fact]
