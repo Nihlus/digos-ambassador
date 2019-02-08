@@ -553,6 +553,36 @@ namespace DIGOS.Ambassador.Services
         }
 
         /// <summary>
+        /// Clears the default character from the given user.
+        /// </summary>
+        /// <param name="db">The database containing the characters.</param>
+        /// <param name="context">The context of the operation.</param>
+        /// <param name="targetUser">The user to clear the default character of.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> ClearDefaultCharacterForUserAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] ICommandContext context,
+            [NotNull] User targetUser
+        )
+        {
+            var isCurrentUser = context.Message.Author.Id == (ulong)targetUser.DiscordID;
+            if (targetUser.DefaultCharacter is null)
+            {
+                var errorMessage = isCurrentUser
+                    ? "You don't have a default character."
+                    : "That user doesn't have a default character.";
+
+                return ModifyEntityResult.FromError(CommandError.ObjectNotFound, errorMessage);
+            }
+
+            targetUser.DefaultCharacter = null;
+            await db.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+        }
+
+        /// <summary>
         /// Sets the name of the given character.
         /// </summary>
         /// <param name="db">The database containing the characters.</param>

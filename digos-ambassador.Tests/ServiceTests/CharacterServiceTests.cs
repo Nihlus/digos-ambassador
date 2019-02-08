@@ -1543,6 +1543,154 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             }
         }
 
+        public class SetDefaultCharacterForUserAsync : CharacterServiceTestBase
+        {
+            private const string CharacterName = "Test";
+
+            private readonly IUser Owner = MockHelper.CreateDiscordUser(0);
+            private readonly IGuild Guild = MockHelper.CreateDiscordGuild(1);
+
+            private User User;
+            private Character Character;
+
+            public override async Task InitializeAsync()
+            {
+                this.User = await this.Database.GetOrRegisterUserAsync(this.Owner);
+
+                this.Character = new Character
+                {
+                    Name = CharacterName,
+                    Owner = this.User,
+                    ServerID = (long)this.Guild.Id
+                };
+
+                this.Database.Characters.Add(this.Character);
+                await this.Database.SaveChangesAsync();
+            }
+
+            [Fact]
+            public async Task CanSetDefaultCharacter()
+            {
+                var contextMock = new Mock<ICommandContext>();
+                contextMock.Setup(c => c.Message.Author.Id).Returns(this.Owner.Id);
+
+                var context = contextMock.Object;
+
+                var result = await this.Characters.SetDefaultCharacterForUserAsync
+                (
+                    this.Database,
+                    context,
+                    this.Character,
+                    this.User
+                );
+
+                Assert.True(result.IsSuccess);
+                Assert.Same(this.Character, this.User.DefaultCharacter);
+            }
+
+            [Fact]
+            public async Task ReturnsErrorIfDefaultCharacterIsAlreadySetToTheSameCharacter()
+            {
+                var contextMock = new Mock<ICommandContext>();
+                contextMock.Setup(c => c.Message.Author.Id).Returns(this.Owner.Id);
+
+                var context = contextMock.Object;
+
+                await this.Characters.SetDefaultCharacterForUserAsync
+                (
+                    this.Database,
+                    context,
+                    this.Character,
+                    this.User
+                );
+
+                var result = await this.Characters.SetDefaultCharacterForUserAsync
+                (
+                    this.Database,
+                    context,
+                    this.Character,
+                    this.User
+                );
+
+                Assert.False(result.IsSuccess);
+                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
+                Assert.Same(this.Character, this.User.DefaultCharacter);
+            }
+        }
+
+        public class ClearDefaultCharacterForUserAsync : CharacterServiceTestBase
+        {
+            private const string CharacterName = "Test";
+
+            private readonly IUser Owner = MockHelper.CreateDiscordUser(0);
+            private readonly IGuild Guild = MockHelper.CreateDiscordGuild(1);
+
+            private User User;
+            private Character Character;
+
+            public override async Task InitializeAsync()
+            {
+                this.User = await this.Database.GetOrRegisterUserAsync(this.Owner);
+
+                this.Character = new Character
+                {
+                    Name = CharacterName,
+                    Owner = this.User,
+                    ServerID = (long)this.Guild.Id
+                };
+
+                this.Database.Characters.Add(this.Character);
+                await this.Database.SaveChangesAsync();
+            }
+
+            [Fact]
+            public async Task CanClearDefaultCharacter()
+            {
+                var contextMock = new Mock<ICommandContext>();
+                contextMock.Setup(c => c.Message.Author.Id).Returns(this.Owner.Id);
+
+                var context = contextMock.Object;
+
+                await this.Characters.SetDefaultCharacterForUserAsync
+                (
+                    this.Database,
+                    context,
+                    this.Character,
+                    this.User
+                );
+
+                var result = await this.Characters.ClearDefaultCharacterForUserAsync
+                (
+                    this.Database,
+                    context,
+                    this.User
+                );
+
+                Assert.True(result.IsSuccess);
+                Assert.Null(this.User.DefaultCharacter);
+            }
+
+            [Fact]
+            public async Task ReturnsErrorIfDefaultCharacterIsNotSet()
+            {
+                var contextMock = new Mock<ICommandContext>();
+                contextMock.Setup(c => c.Message.Author.Id).Returns(this.Owner.Id);
+
+                var context = contextMock.Object;
+
+                var result = await this.Characters.ClearDefaultCharacterForUserAsync
+                (
+                    this.Database,
+                    context,
+                    this.User
+                );
+
+                Assert.False(result.IsSuccess);
+                Assert.Equal(CommandError.ObjectNotFound, result.Error);
+                Assert.Null(this.User.DefaultCharacter);
+            }
+        }
+
         public class AddImageToCharacterAsync : CharacterServiceTestBase
         {
         }

@@ -409,6 +409,28 @@ namespace DIGOS.Ambassador.Modules
         }
 
         /// <summary>
+        /// Clears your default form.
+        /// </summary>
+        [UsedImplicitly]
+        [Alias("clear-default", "drop-default")]
+        [Command("clear-default", RunMode = Async)]
+        [Summary("Clears your default form.")]
+        [RequireContext(Guild)]
+        public async Task ClearDefaultCharacterAsync()
+        {
+            var user = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+
+            var result = await this.Characters.ClearDefaultCharacterForUserAsync(this.Database, this.Context, user);
+            if (!result.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                return;
+            }
+
+            await this.Feedback.SendConfirmationAsync(this.Context, "Default character cleared.");
+        }
+
+        /// <summary>
         /// Clears any active characters from you, restoring your default form.
         /// </summary>
         [UsedImplicitly]
