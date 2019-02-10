@@ -22,6 +22,7 @@
 
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
@@ -35,11 +36,11 @@ namespace DIGOS.Ambassador.Extensions
         /// Determines whether or not the given user is the same as the bot user.
         /// </summary>
         /// <param name="this">The user.</param>
-        /// <param name="context">The context of the check.</param>
+        /// <param name="client">The context of the check.</param>
         /// <returns>true if the user is the same as the bot user; otherwise, false.</returns>
-        public static bool IsMe([NotNull] this IUser @this, [NotNull] ICommandContext context)
+        public static bool IsMe([NotNull] this IUser @this, [NotNull] IDiscordClient client)
         {
-            return @this.Id == context.Client.CurrentUser.Id;
+            return @this.Id == client.CurrentUser.Id;
         }
     }
 }

@@ -30,12 +30,13 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.FList.Kinks;
+using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.TypeReaders;
 using DIGOS.Ambassador.Wizards;
 
 using Discord;
-using Discord.Addons.Interactive;
 using Discord.Commands;
 
 using JetBrains.Annotations;
@@ -52,12 +53,14 @@ namespace DIGOS.Ambassador.Modules
     /// </summary>
     [Group("kink")]
     [Summary("Commands for viewing and configuring user kinks.")]
-    public class KinkCommands : InteractiveBase<SocketCommandContext>
+    public class KinkCommands : ModuleBase<SocketCommandContext>
     {
         [ProvidesContext]
         private readonly GlobalInfoContext Database;
         private readonly KinkService Kinks;
         private readonly UserFeedbackService Feedback;
+
+        private readonly InteractivityService Interactivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KinkCommands"/> class.
@@ -65,11 +68,19 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="database">A database context from the context pool.</param>
         /// <param name="kinks">The application's kink service.</param>
         /// <param name="feedback">The application's feedback service.</param>
-        public KinkCommands(GlobalInfoContext database, KinkService kinks, UserFeedbackService feedback)
+        /// <param name="interactivity">The interactivity service.</param>
+        public KinkCommands
+        (
+            GlobalInfoContext database,
+            KinkService kinks,
+            UserFeedbackService feedback,
+            InteractivityService interactivity
+        )
         {
             this.Database = database;
             this.Kinks = kinks;
             this.Feedback = feedback;
+            this.Interactivity = interactivity;
         }
 
         /// <summary>
@@ -149,8 +160,9 @@ namespace DIGOS.Ambassador.Modules
             }
 
             var display = this.Kinks.BuildKinkOverlapEmbed(this.Context.User, otherUser, overlap);
+            var paginatedMessage = new PaginatedMessage<EmbedBuilder, PaginatedEmbed>(this.Feedback, display);
 
-            await this.Interactive.SendPrivatePaginatedMessageAsync(this.Context, this.Feedback, display);
+            await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, paginatedMessage);
         }
 
         /// <summary>
@@ -193,7 +205,9 @@ namespace DIGOS.Ambassador.Modules
             }
 
             var paginatedKinks = this.Kinks.BuildPaginatedUserKinkEmbed(withPreference);
-            await this.Interactive.SendPrivatePaginatedMessageAsync(this.Context, this.Feedback, paginatedKinks);
+            var paginatedMessage = new PaginatedMessage<EmbedBuilder, PaginatedEmbed>(this.Feedback, paginatedKinks);
+
+            await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, paginatedMessage);
         }
 
         /// <summary>
@@ -236,11 +250,18 @@ namespace DIGOS.Ambassador.Modules
         [UsedImplicitly]
         [Command("wizard", RunMode = Async)]
         [Summary("Runs an interactive wizard for setting kink preferences.")]
-        [RequireContext(DM)]
         public async Task RunKinkWizardAsync()
         {
-            var wizard = new KinkWizard(this.Database, this.Context, this.Feedback, this.Kinks, this.Interactive);
-            await this.Interactive.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, wizard);
+            var wizard = new KinkWizard
+            (
+                this.Database,
+                this.Feedback,
+                this.Kinks,
+                this.Interactivity,
+                this.Context.User
+            );
+
+            await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, wizard);
         }
 
         /// <summary>

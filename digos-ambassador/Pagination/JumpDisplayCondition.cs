@@ -1,8 +1,8 @@
-﻿//
-//  IEmoteConsumer.cs
+//
+//  JumpDisplayCondition.cs
 //
 //  Author:
-//        Jarl Gullberg <jarl.gullberg@gmail.com>
+//       Jarl Gullberg <jarl.gullberg@gmail.com>
 //
 //  Copyright (c) 2017 Jarl Gullberg
 //
@@ -20,27 +20,26 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Discord;
-
-namespace DIGOS.Ambassador.Wizards
+namespace DIGOS.Ambassador.Pagination
 {
     /// <summary>
-    /// Interface for classes that consume emotes.
+    /// Represents a condition under which a jump button will be displayed.
     /// </summary>
-    public interface IEmoteConsumer
+    public enum JumpDisplayCondition
     {
         /// <summary>
-        /// Gets the set of accepted emotes.
+        /// A jump button will never be displayed.
         /// </summary>
-        IReadOnlyCollection<IEmote> AcceptedEmotes { get; }
+        Never,
 
         /// <summary>
-        /// Consumes the given emote, performing some associated action.
+        /// A jump button will be displayed if the bot can manage messages.
         /// </summary>
-        /// <param name="emote">The emote.</param>
-        /// <returns>A task that must be awaited.</returns>
-        Task<bool> ConsumeEmoteAsync(IEmote emote);
+        WithManageMessages,
+
+        /// <summary>
+        /// A jump button will always be displayed.
+        /// </summary>
+        Always
     }
 }

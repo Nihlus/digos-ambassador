@@ -29,14 +29,13 @@ using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Modules;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
-using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
-
 using Microsoft.Extensions.DependencyInjection;
 using MockQueryable.Moq;
 using Moq;
@@ -234,7 +233,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     .AddSingleton<UserFeedbackService>()
                     .AddSingleton<OwnedEntityService>()
                     .AddSingleton<TransformationService>()
-                    .AddSingleton<InteractiveService>()
+                    .AddSingleton<InteractivityService>()
                     .AddSingleton<CharacterService>()
                     .AddSingleton(new DiscordSocketClient())
                     .BuildServiceProvider();

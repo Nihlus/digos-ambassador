@@ -186,7 +186,7 @@
           <e p="ExportFormatExtensions.cs" t="Include" />
           <e p="FileAsync.cs" t="Include" />
           <e p="HttpExceptionExtensions.cs" t="Include" />
-          <e p="InteractiveServiceExtensions.cs" t="Include" />
+          <e p="InteractivityServiceExtensions.cs" t="Include" />
           <e p="KeyValuePairExtensions.cs" t="Include" />
           <e p="ListExtensions.cs" t="Include" />
           <e p="ModuleInfoExtensions.cs" t="Include" />
@@ -200,10 +200,6 @@
             <e p="FListKinkCategory.cs" t="Include" />
             <e p="KinkCollection.cs" t="Include" />
           </e>
-        </e>
-        <e p="Interactivity" t="Include">
-          <e p="IInteractiveMessage.cs" t="Include" />
-          <e p="InteractiveMessage.cs" t="Include" />
         </e>
         <e p="Migrations" t="Include">
           <e p="20180527144603_InitialCreatePostgreSQL.Designer.cs" t="Include" />
@@ -242,6 +238,7 @@
           <e p="AdminCommands.cs" t="Include" />
           <e p="CharacterCommands.cs" t="Include" />
           <e p="DossierCommands.cs" t="Include" />
+          <e p="HelpCommands.cs" t="Include" />
           <e p="KinkCommands.cs" t="Include" />
           <e p="MiscellaneousCommands.cs" t="Include" />
           <e p="PermissionCommands.cs" t="Include" />
@@ -252,9 +249,11 @@
         </e>
         <e p="Pagination" t="Include">
           <e p="IPager.cs" t="Include" />
-          <e p="PaginatedCallback.cs" t="Include" />
+          <e p="JumpDisplayCondition.cs" t="Include" />
+          <e p="PaginatedAppearanceOptions.cs" t="Include" />
           <e p="PaginatedEmbed.cs" t="Include" />
           <e p="PaginatedGallery.cs" t="Include" />
+          <e p="PaginatedMessage.cs" t="Include" />
         </e>
         <e p="Permissions" t="Include">
           <e p="DefaultPermissions.cs" t="Include" />
@@ -309,6 +308,13 @@
           </e>
           <e p="Feedback" t="Include">
             <e p="UserFeedbackService.cs" t="Include" />
+          </e>
+          <e p="Interactivity" t="Include">
+            <e p="InteractivityService.cs" t="Include" />
+            <e p="Messages" t="Include">
+              <e p="IInteractiveMessage.cs" t="Include" />
+              <e p="InteractiveMessage.cs" t="Include" />
+            </e>
           </e>
           <e p="Kinks" t="Include">
             <e p="KinkService.cs" t="Include" />
@@ -392,11 +398,9 @@
           <e p="WebSocketSharpProvider.cs" t="Include" />
         </e>
         <e p="Wizards" t="Include">
-          <e p="IEmoteConsumer.cs" t="Include" />
           <e p="IWizard.cs" t="Include" />
           <e p="KinkWizard.cs" t="Include" />
           <e p="KinkWizardState.cs" t="Include" />
-          <e p="WizardCallback.cs" t="Include" />
         </e>
         <e p="app.config" t="Include" />
         <e p="bin" t="ExcludeRecursive" />

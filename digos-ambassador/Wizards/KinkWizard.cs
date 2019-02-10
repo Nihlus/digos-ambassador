@@ -29,13 +29,14 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Interactivity;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Interactivity;
+using DIGOS.Ambassador.Services.Interactivity.Messages;
 
 using Discord;
-using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
+
 using Humanizer;
 using JetBrains.Annotations;
 
@@ -50,6 +51,10 @@ namespace DIGOS.Ambassador.Wizards
         private readonly GlobalInfoContext Database;
         private readonly UserFeedbackService Feedback;
         private readonly KinkService Kinks;
+
+        private readonly InteractivityService Interactivity;
+
+        private readonly IUser TargetUser;
 
         private static readonly Emoji Next = new Emoji("\x25B6");
         private static readonly Emoji Previous = new Emoji("\x25C0");
@@ -67,15 +72,17 @@ namespace DIGOS.Ambassador.Wizards
         private static readonly Emoji Exit = new Emoji("\x23F9");
         private static readonly Emoji Info = new Emoji("\x2139");
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the currently accepted emotes.
+        /// </summary>
         [NotNull]
-        public IReadOnlyCollection<IEmote> AcceptedEmotes => GetCurrentPageEmotes().ToList();
+        private IReadOnlyCollection<IEmote> AcceptedEmotes => GetCurrentPageEmotes().ToList();
 
         /// <summary>
         /// Gets the emotes that are currently rejected by the wizard.
         /// </summary>
         [NotNull]
-        public IReadOnlyCollection<IEmote> CurrrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
+        private IReadOnlyCollection<IEmote> CurrrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
 
         private readonly Embed LoadingEmbed;
 
@@ -91,16 +98,25 @@ namespace DIGOS.Ambassador.Wizards
         /// Initializes a new instance of the <see cref="KinkWizard"/> class.
         /// </summary>
         /// <param name="database">A database context from the context pool.</param>
-        /// <param name="context">The context.</param>
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="kinkService">The kink service.</param>
         /// <param name="interactiveService">The interactive service.</param>
-        public KinkWizard(GlobalInfoContext database, SocketCommandContext context, UserFeedbackService feedback, KinkService kinkService, InteractiveService interactiveService)
-            : base(context, interactiveService)
+        /// <param name="targetUser">The target user.</param>
+        public KinkWizard
+        (
+            GlobalInfoContext database,
+            UserFeedbackService feedback,
+            KinkService kinkService,
+            InteractivityService interactiveService,
+            IUser targetUser
+        )
         {
             this.Database = database;
             this.Feedback = feedback;
             this.Kinks = kinkService;
+            this.Interactivity = interactiveService;
+
+            this.TargetUser = targetUser;
 
             this.State = KinkWizardState.CategorySelection;
 
@@ -112,7 +128,7 @@ namespace DIGOS.Ambassador.Wizards
         }
 
         /// <inheritdoc />
-        public override async Task<IUserMessage> DisplayAsync([NotNull] ISocketMessageChannel channel)
+        protected override async Task<IUserMessage> DisplayAsync([NotNull] IMessageChannel channel)
         {
             if (!(this.Message is null))
             {
@@ -120,23 +136,15 @@ namespace DIGOS.Ambassador.Wizards
             }
 
             this.Categories = (await this.Kinks.GetKinkCategoriesAsync(this.Database)).ToList();
-
             this.State = KinkWizardState.CategorySelection;
 
-            this.Message = await channel.SendMessageAsync(string.Empty, embed: this.LoadingEmbed).ConfigureAwait(false);
-            this.ReactionCallback = new WizardCallback(this.Context, this);
-
-            await UpdateVisibleMessage();
-
-            return this.Message;
+            return await channel.SendMessageAsync(string.Empty, embed: this.LoadingEmbed).ConfigureAwait(false);
         }
 
-        private async Task UpdateVisibleMessage(bool shouldModifyContents = true)
+        /// <inheritdoc />
+        protected override async Task UpdateAsync()
         {
-            if (shouldModifyContents)
-            {
-                await this.Message.ModifyAsync(m => m.Embed = this.LoadingEmbed);
-            }
+            await this.Message.ModifyAsync(m => m.Embed = this.LoadingEmbed);
 
             foreach (var emote in this.CurrrentlyRejectedEmotes)
             {
@@ -145,7 +153,7 @@ namespace DIGOS.Ambassador.Wizards
                     continue;
                 }
 
-                await this.Message.RemoveReactionAsync(emote, this.Context.Client.CurrentUser);
+                await this.Message.RemoveReactionAsync(emote, this.Interactivity.Client.CurrentUser);
             }
 
             foreach (var emote in this.AcceptedEmotes)
@@ -158,49 +166,38 @@ namespace DIGOS.Ambassador.Wizards
                 await this.Message.AddReactionAsync(emote);
             }
 
-            if (shouldModifyContents)
-            {
-                var newEmbed = await GetCurrentPageAsync();
-                await this.Message.ModifyAsync(m => m.Embed = newEmbed);
-            }
+            var newEmbed = await GetCurrentPageAsync();
+            await this.Message.ModifyAsync(m => m.Embed = newEmbed);
         }
 
         /// <inheritdoc />
-        public async Task<bool> ConsumeEmoteAsync([NotNull] IEmote emote)
+        public override Task HandleAddedInteractionAsync(SocketReaction reaction)
         {
-            if (emote.Equals(Exit))
+            if (reaction.Emote.Equals(Exit))
             {
-                this.Interactive.RemoveReactionCallback(this.Message);
-                await this.Message.DeleteAsync().ConfigureAwait(false);
-
-                return true;
+                this.Interactivity.DeleteInteractiveMessageAsync(this);
             }
 
-            if (emote.Equals(Info))
+            if (reaction.Emote.Equals(Info))
             {
-                await DisplayHelpTextAsync();
-                return false;
+                return DisplayHelpTextAsync();
             }
 
             switch (this.State)
             {
                 case KinkWizardState.CategorySelection:
                 {
-                    await ConsumeCategoryInteractionAsync(emote);
-                    break;
+                    return ConsumeCategoryInteractionAsync(reaction.Emote);
                 }
                 case KinkWizardState.KinkPreference:
                 {
-                    await ConsumePreferenceInteractionAsync(emote);
-                    break;
+                    return ConsumePreferenceInteractionAsync(reaction.Emote);
                 }
                 default:
                 {
                     throw new ArgumentOutOfRangeException();
                 }
             }
-
-            return false;
         }
 
         private async Task ConsumePreferenceInteractionAsync([NotNull] IEmote emote)
@@ -208,7 +205,7 @@ namespace DIGOS.Ambassador.Wizards
             if (emote.Equals(Back))
             {
                 this.State = KinkWizardState.CategorySelection;
-                await UpdateVisibleMessage();
+                await UpdateAsync();
                 return;
             }
 
@@ -247,14 +244,14 @@ namespace DIGOS.Ambassador.Wizards
                 {
                     this.CurrentFListKinkID = -1;
                     this.State = KinkWizardState.CategorySelection;
-                    await this.Feedback.SendConfirmationAndDeleteAsync(this.Context, this.Interactive, "All done in that category!");
+                    await this.Feedback.SendConfirmationAndDeleteAsync(this.MessageContext, "All done in that category!");
                 }
                 else
                 {
                     this.CurrentFListKinkID = (int)getNextKinkResult.Entity.FListID;
                 }
 
-                await UpdateVisibleMessage();
+                await UpdateAsync();
             }
         }
 
@@ -313,8 +310,7 @@ namespace DIGOS.Ambassador.Wizards
                 {
                     await this.Feedback.SendWarningAndDeleteAsync
                     (
-                        this.Context,
-                        this.Interactive,
+                        this.MessageContext,
                         "There aren't any categories in the database.",
                         TimeSpan.FromSeconds(10)
                     );
@@ -324,30 +320,35 @@ namespace DIGOS.Ambassador.Wizards
 
                 await this.Feedback.SendConfirmationAndDeleteAsync
                 (
-                    this.Context,
-                    this.Interactive,
+                    this.MessageContext,
                     "Please enter a category name.",
                     TimeSpan.FromSeconds(45)
                 );
 
-                var message = await this.Interactive.NextMessageAsync(this.Context, timeout: TimeSpan.FromSeconds(45));
+                var messageResult = await this.Interactivity.GetNextMessageAsync
+                (
+                    this.MessageContext.Channel,
+                    timeout: TimeSpan.FromSeconds(45)
+                );
 
-                var tryStartCategoryResult = await OpenCategory(message.Content);
-                if (!tryStartCategoryResult.IsSuccess)
+                if (messageResult.IsSuccess)
                 {
-                    await this.Feedback.SendWarningAndDeleteAsync
-                    (
-                        this.Context,
-                        this.Interactive,
-                        tryStartCategoryResult.ErrorReason,
-                        TimeSpan.FromSeconds(10)
-                    );
+                    var tryStartCategoryResult = await OpenCategory(messageResult.Entity.Content);
+                    if (!tryStartCategoryResult.IsSuccess)
+                    {
+                        await this.Feedback.SendWarningAndDeleteAsync
+                        (
+                            this.MessageContext,
+                            tryStartCategoryResult.ErrorReason,
+                            TimeSpan.FromSeconds(10)
+                        );
 
-                    return;
+                        return;
+                    }
                 }
             }
 
-            await UpdateVisibleMessage();
+            await UpdateAsync();
         }
 
         private async Task<ExecuteResult> OpenCategory(string categoryName)
@@ -363,7 +364,7 @@ namespace DIGOS.Ambassador.Wizards
                 return ExecuteResult.FromError(CommandError.ParseFailed, "Could not parse kink category.");
             }
 
-            var getKinkResult = await this.Kinks.GetFirstKinkWithoutPreferenceInCategoryAsync(this.Database, this.Context.User, category);
+            var getKinkResult = await this.Kinks.GetFirstKinkWithoutPreferenceInCategoryAsync(this.Database, this.TargetUser, category);
             if (!getKinkResult.IsSuccess)
             {
                 getKinkResult = await this.Kinks.GetFirstKinkInCategoryAsync(this.Database, category);
@@ -428,15 +429,15 @@ namespace DIGOS.Ambassador.Wizards
                 }
             }
 
-            await this.Interactive.ReplyAndDeleteAsync(this.Context, string.Empty, false, eb.Build(), TimeSpan.FromSeconds(30));
+            await this.Feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb.Build(), TimeSpan.FromSeconds(30));
         }
 
         private async Task SetCurrentKinkPreference(KinkPreference preference)
         {
-            var getUserKinkResult = await this.Kinks.GetUserKinkByFListIDAsync(this.Database, this.Context.User, this.CurrentFListKinkID);
+            var getUserKinkResult = await this.Kinks.GetUserKinkByFListIDAsync(this.Database, this.TargetUser, this.CurrentFListKinkID);
             if (!getUserKinkResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAndDeleteAsync(this.Context, this.Interactive, getUserKinkResult.ErrorReason);
+                await this.Feedback.SendErrorAndDeleteAsync(this.MessageContext, getUserKinkResult.ErrorReason);
                 return;
             }
 
@@ -444,7 +445,7 @@ namespace DIGOS.Ambassador.Wizards
             var setPreferenceResult = await this.Kinks.SetKinkPreferenceAsync(this.Database, userKink, preference);
             if (!setPreferenceResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAndDeleteAsync(this.Context, this.Interactive, setPreferenceResult.ErrorReason);
+                await this.Feedback.SendErrorAndDeleteAsync(this.MessageContext, setPreferenceResult.ErrorReason);
             }
         }
 
@@ -522,10 +523,10 @@ namespace DIGOS.Ambassador.Wizards
                 }
                 case KinkWizardState.KinkPreference:
                 {
-                    var getUserKinkResult = await this.Kinks.GetUserKinkByFListIDAsync(this.Database, this.Context.User, this.CurrentFListKinkID);
+                    var getUserKinkResult = await this.Kinks.GetUserKinkByFListIDAsync(this.Database, this.TargetUser, this.CurrentFListKinkID);
                     if (!getUserKinkResult.IsSuccess)
                     {
-                        await this.Feedback.SendErrorAndDeleteAsync(this.Context, this.Interactive, "Failed to get the user kink.", TimeSpan.FromSeconds(10));
+                        await this.Feedback.SendErrorAndDeleteAsync(this.MessageContext, "Failed to get the user kink.", TimeSpan.FromSeconds(10));
                         this.State = KinkWizardState.CategorySelection;
 
                         // Recursively calling at this point is safe, since we will get the emotes from the category page.

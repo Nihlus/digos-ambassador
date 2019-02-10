@@ -23,7 +23,6 @@
 // Originally licensed under the ISC license; modified from https://github.com/foxbot/Discord.Addons.Interactive
 using System.Collections.Generic;
 using Discord;
-using Discord.Addons.Interactive;
 using JetBrains.Annotations;
 using Image = DIGOS.Ambassador.Database.Data.Image;
 
@@ -80,7 +79,7 @@ namespace DIGOS.Ambassador.Pagination
                 .WithTitle($"{this.Title} | {currentImage.Name}")
                 .WithDescription(currentImage.Caption)
                 .WithImageUrl(currentImage.Url)
-                .WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page, this.Pages.Count))
+                .WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page + 1, this.Pages.Count))
                 .Build();
         }
     }

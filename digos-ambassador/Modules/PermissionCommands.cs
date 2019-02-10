@@ -96,7 +96,7 @@ namespace DIGOS.Ambassador.Modules
             var embed = CreateHumanizedPermissionEmbedBase(this.Permissions.GetLocalUserPermissions(this.Database, this.Context.User, this.Context.Guild));
             embed.WithAuthor(this.Context.Message.Author);
 
-            await this.Feedback.SendEmbedAsync(this.Context, embed.Build());
+            await this.Feedback.SendEmbedAsync(this.Context.Channel, embed.Build());
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace DIGOS.Ambassador.Modules
             var embed = CreateHumanizedPermissionEmbedBase(this.Permissions.GetLocalUserPermissions(this.Database, discordUser, this.Context.Guild));
             embed.WithAuthor(discordUser);
 
-            await this.Feedback.SendEmbedAsync(this.Context, embed.Build());
+            await this.Feedback.SendEmbedAsync(this.Context.Channel, embed.Build());
         }
 
         [NotNull]

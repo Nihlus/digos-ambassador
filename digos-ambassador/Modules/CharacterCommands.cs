@@ -32,11 +32,12 @@ using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Interactivity;
 
 using Discord;
-using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.Net;
+
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
@@ -64,7 +65,7 @@ namespace DIGOS.Ambassador.Modules
         "\n" +
         "You can also substitute any character name for \"current\", and your active character will be used instead."
     )]
-    public class CharacterCommands : InteractiveBase<SocketCommandContext>
+    public class CharacterCommands : ModuleBase<SocketCommandContext>
     {
         private readonly DiscordService Discord;
 
@@ -76,6 +77,8 @@ namespace DIGOS.Ambassador.Modules
 
         private readonly CharacterService Characters;
 
+        private readonly InteractivityService Interactivity;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterCommands"/> class.
         /// </summary>
@@ -84,13 +87,15 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="discordService">The Discord integration service.</param>
         /// <param name="feedbackService">The feedback service.</param>
         /// <param name="characterService">The character service.</param>
+        /// <param name="interactivity">The interactivity service.</param>
         public CharacterCommands
         (
             GlobalInfoContext database,
             ContentService contentService,
             DiscordService discordService,
             UserFeedbackService feedbackService,
-            CharacterService characterService
+            CharacterService characterService,
+            InteractivityService interactivity
         )
         {
             this.Database = database;
@@ -98,6 +103,7 @@ namespace DIGOS.Ambassador.Modules
             this.Discord = discordService;
             this.Feedback = feedbackService;
             this.Characters = characterService;
+            this.Interactivity = interactivity;
         }
 
         /// <summary>
@@ -118,7 +124,7 @@ namespace DIGOS.Ambassador.Modules
                 string.Join("\n", pronounProviders.Select(p => $"**{p.Family}**"))
             );
 
-            await this.Feedback.SendEmbedAsync(this.Context, eb.Build());
+            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
         }
 
         /// <summary>
@@ -196,7 +202,7 @@ namespace DIGOS.Ambassador.Modules
             else
             {
                 eb.AddField("Description", character.Description);
-                await this.Feedback.SendEmbedAsync(this.Context, eb.Build());
+                await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
             }
         }
 
@@ -322,7 +328,7 @@ namespace DIGOS.Ambassador.Modules
                 eb.WithDescription("You don't have any characters.");
             }
 
-            await this.Feedback.SendEmbedAsync(this.Context, eb.Build());
+            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
         }
 
         /// <summary>
@@ -493,11 +499,13 @@ namespace DIGOS.Ambassador.Modules
                 new PaginatedAppearanceOptions
                 {
                     FooterFormat = "Image {0}/{1}",
-                    InformationText = "Use the reactions to navigate the gallery."
+                    HelpText = "Use the reactions to navigate the gallery."
                 }
             };
 
-            await this.Interactive.SendPrivatePaginatedMessageAsync(this.Context, this.Feedback, gallery);
+            var message = new PaginatedMessage<DIGOS.Ambassador.Database.Data.Image, PaginatedGallery>(this.Feedback, gallery);
+
+            await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, message);
         }
 
         /// <summary>

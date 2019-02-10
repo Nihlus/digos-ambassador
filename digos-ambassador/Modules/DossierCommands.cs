@@ -75,7 +75,7 @@ namespace DIGOS.Ambassador.Modules
         public async Task ListDossiersAsync()
         {
             var eb = BuildDossierListEmbed(this.Database.Dossiers);
-            await this.Feedback.SendEmbedAsync(this.Context, eb);
+            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb);
         }
 
         [NotNull]
@@ -117,7 +117,7 @@ namespace DIGOS.Ambassador.Modules
             var dossier = getDossierResult.Entity;
 
             var eb = BuildDossierEmbed(dossier);
-            await this.Feedback.SendEmbedAsync(this.Context, eb);
+            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb);
 
             var dossierDataResult = this.Content.GetDossierStream(dossier);
             if (!dossierDataResult.IsSuccess)

@@ -28,7 +28,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Discord.Addons.Interactive" Version="1.0.1" />
     <PackageReference Include="Discord.Net" Version="2.0.0" />
     <PackageReference Include="Discord.Net.Commands" Version="2.0.0" />
     <PackageReference Include="Humanizer" Version="2.5.16" />
@@ -63,7 +62,7 @@
     <DocGenerator>dotnet $(DocGeneratorAssembly)</DocGenerator>
   </PropertyGroup>
   <Target Name="GenerateDocs" AfterTargets="PostBuildEvent" Condition="Exists('$(DocGeneratorAssembly)')">
-    <Exec Command="$(DocGenerator) --assembly $(OutputPath)$(AssemblyName)$(TargetExt) --output $(ProjectDir)../docs" ContinueOnError="true"/>
+    <Exec Command="$(DocGenerator) --assembly $(OutputPath)$(AssemblyName)$(TargetExt) --output $(ProjectDir)../docs" ContinueOnError="true" />
   </Target>
   <Import Project="..\msbuild\netfx-mono.props" />
 </Project>

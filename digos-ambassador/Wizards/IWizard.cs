@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Wizards
     /// <summary>
     /// Represents an interactive wizard.
     /// </summary>
-    public interface IWizard : IEmoteConsumer
+    public interface IWizard
     {
         /// <summary>
         /// Gets the emotes that should be active for the current page.

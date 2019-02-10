@@ -28,9 +28,8 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Extensions;
 
 using Discord;
-using Discord.Addons.Interactive;
 using Discord.Commands;
-
+using Discord.WebSocket;
 using JetBrains.Annotations;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -46,75 +45,67 @@ namespace DIGOS.Ambassador.Services
         /// Sends an error message, and deletes it after a specified timeout.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="interactivity">The interactivity service.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
         public async Task SendErrorAndDeleteAsync
         (
-            [NotNull] SocketCommandContext context,
-            [NotNull] InteractiveService interactivity,
+            [NotNull] ICommandContext context,
             [NotNull] string contents,
             [CanBeNull] TimeSpan? timeout = null
         )
         {
-            await SendEmbedAndDeleteAsync(context, interactivity, Color.Red, contents, timeout);
+            await SendEmbedAndDeleteAsync(context, Color.Red, contents, timeout);
         }
 
         /// <summary>
         /// Sends a warning message, and deletes it after a specified timeout.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="interactivity">The interactivity service.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
         public async Task SendWarningAndDeleteAsync
         (
-            [NotNull] SocketCommandContext context,
-            [NotNull] InteractiveService interactivity,
+            [NotNull] ICommandContext context,
             [NotNull] string contents,
             [CanBeNull] TimeSpan? timeout = null
         )
         {
-            await SendEmbedAndDeleteAsync(context, interactivity, Color.Orange, contents, timeout);
+            await SendEmbedAndDeleteAsync(context, Color.Orange, contents, timeout);
         }
 
         /// <summary>
         /// Sends a confirmation message, and deletes it after a specified timeout.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="interactivity">The interactivity service.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
         public async Task SendConfirmationAndDeleteAsync
         (
-            [NotNull] SocketCommandContext context,
-            [NotNull] InteractiveService interactivity,
+            [NotNull] ICommandContext context,
             [NotNull] string contents,
             [CanBeNull] TimeSpan? timeout = null
         )
         {
-            await SendEmbedAndDeleteAsync(context, interactivity, Color.DarkPurple, contents, timeout);
+            await SendEmbedAndDeleteAsync(context, Color.DarkPurple, contents, timeout);
         }
 
         /// <summary>
         /// Sends an embed, and deletes it after a specified timeout.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="interactivity">The interactivity service.</param>
         /// <param name="colour">The colour of the embed.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
         public async Task SendEmbedAndDeleteAsync
         (
-            [NotNull] SocketCommandContext context,
-            [NotNull] InteractiveService interactivity,
+            [NotNull] ICommandContext context,
             Color colour,
             [NotNull] string contents,
             [CanBeNull] TimeSpan? timeout = null
         )
         {
             var eb = CreateFeedbackEmbed(context.User, colour, contents);
-            await interactivity.ReplyAndDeleteAsync(context, string.Empty, false, eb, timeout);
+            await SendEmbedAndDeleteAsync(context.Channel, eb, timeout);
         }
 
         /// <summary>
@@ -122,7 +113,7 @@ namespace DIGOS.Ambassador.Services
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
-        public async Task SendConfirmationAsync([NotNull] SocketCommandContext context, [NotNull] string contents)
+        public async Task SendConfirmationAsync([NotNull] ICommandContext context, [NotNull] string contents)
         {
             await SendEmbedAsync(context, Color.DarkPurple, contents);
         }
@@ -132,7 +123,7 @@ namespace DIGOS.Ambassador.Services
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
-        public async Task SendErrorAsync([NotNull] SocketCommandContext context, [NotNull] string contents)
+        public async Task SendErrorAsync([NotNull] ICommandContext context, [NotNull] string contents)
         {
             await SendEmbedAsync(context, Color.Red, contents);
         }
@@ -142,7 +133,7 @@ namespace DIGOS.Ambassador.Services
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
-        public async Task SendWarningAsync([NotNull] SocketCommandContext context, [NotNull] string contents)
+        public async Task SendWarningAsync([NotNull] ICommandContext context, [NotNull] string contents)
         {
             await SendEmbedAsync(context, Color.Orange, contents);
         }
@@ -152,7 +143,7 @@ namespace DIGOS.Ambassador.Services
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
-        public async Task SendInfoAsync([NotNull] SocketCommandContext context, [NotNull] string contents)
+        public async Task SendInfoAsync([NotNull] ICommandContext context, [NotNull] string contents)
         {
             await SendEmbedAsync(context, Color.Blue, contents);
         }
@@ -160,17 +151,39 @@ namespace DIGOS.Ambassador.Services
         /// <summary>
         /// Sends an embed.
         /// </summary>
-        /// <param name="context">The context of the send operation.</param>
+        /// <param name="channel">The context of the send operation.</param>
         /// <param name="eb">The embed to send.</param>
-        public async Task SendEmbedAsync([NotNull] SocketCommandContext context, [NotNull] Embed eb)
+        public async Task SendEmbedAsync([NotNull] IMessageChannel channel, [NotNull] Embed eb)
         {
-            await context.Channel.SendMessageAsync(string.Empty, false, eb);
+            await channel.SendMessageAsync(string.Empty, false, eb);
         }
 
-        private async Task SendEmbedAsync([NotNull] SocketCommandContext context, Color color, [NotNull] string contents)
+        /// <summary>
+        /// Sends an embed to the given channel, and deletes it after a certain timeout.
+        /// </summary>
+        /// <param name="channel">The channel to send the embed to.</param>
+        /// <param name="eb">The embed.</param>
+        /// <param name="timeout">The timeout after which the embed will be deleted. Defaults to 15 seconds.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task SendEmbedAndDeleteAsync
+        (
+            [NotNull] IMessageChannel channel,
+            [NotNull] Embed eb,
+            TimeSpan? timeout = null
+        )
+        {
+            timeout = timeout ?? TimeSpan.FromSeconds(15.0);
+
+            var message = await channel.SendMessageAsync(string.Empty, embed: eb);
+            _ = Task.Delay(timeout.Value)
+                .ContinueWith(_ => message.DeleteAsync().ConfigureAwait(false))
+                .ConfigureAwait(false);
+        }
+
+        private async Task SendEmbedAsync([NotNull] ICommandContext context, Color color, [NotNull] string contents)
         {
             var eb = CreateFeedbackEmbed(context.Message.Author, color, contents);
-            await SendEmbedAsync(context, eb);
+            await SendEmbedAsync(context.Channel, eb);
         }
 
         /// <summary>
@@ -232,7 +245,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An embed.</returns>
         [Pure]
         [NotNull]
-        public Embed CreateCommandUsageEmbed([NotNull] IReadOnlyList<CommandMatch> matchingCommands)
+        public Embed CreateCommandUsageEmbed([NotNull] IEnumerable<CommandMatch> matchingCommands)
         {
             var eb = CreateEmbedBase();
             eb.WithTitle("Perhaps you meant one of the following?");

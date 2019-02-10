@@ -35,13 +35,13 @@ using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;
 using DIGOS.Ambassador.Utility;
 
 using Discord;
-using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
@@ -87,7 +87,7 @@ namespace DIGOS.Ambassador
 
         private readonly DossierService Dossiers;
 
-        private readonly InteractiveService Interactive;
+        private readonly InteractivityService Interactivity;
 
         private readonly TransformationService Transformation;
 
@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador
 
             this.Feedback = new UserFeedbackService();
             this.Dossiers = new DossierService(this.Content);
-            this.Interactive = new InteractiveService(this.Client);
+            this.Interactivity = new InteractivityService(this.Client);
 
             this.Lua = new LuaService(this.Content);
             this.Kinks = new KinkService(this.Feedback);
@@ -148,7 +148,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton(this.Characters)
                 .AddSingleton(this.Feedback)
                 .AddSingleton(this.Dossiers)
-                .AddSingleton(this.Interactive)
+                .AddSingleton(this.Interactivity)
                 .AddSingleton(this.Transformation)
                 .AddSingleton(this.Lua)
                 .AddSingleton(this.Kinks)

@@ -105,7 +105,7 @@ namespace DIGOS.Ambassador.Modules
 
             var roleplay = getCurrentRoleplayResult.Entity;
             var eb = CreateRoleplayInfoEmbed(roleplay);
-            await this.Feedback.SendEmbedAsync(this.Context, eb);
+            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb);
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace DIGOS.Ambassador.Modules
         public async Task ShowRoleplayAsync([NotNull] Roleplay roleplay)
         {
             var eb = CreateRoleplayInfoEmbed(roleplay);
-            await this.Feedback.SendEmbedAsync(this.Context, eb);
+            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb);
         }
 
         [NotNull]
@@ -178,7 +178,7 @@ namespace DIGOS.Ambassador.Modules
                 eb.WithDescription("You don't have any roleplays.");
             }
 
-            await this.Feedback.SendEmbedAsync(this.Context, eb.Build());
+            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
         }
 
         /// <summary>

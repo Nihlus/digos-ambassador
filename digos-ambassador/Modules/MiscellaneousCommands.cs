@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -47,27 +46,19 @@ namespace DIGOS.Ambassador.Modules
     [Summary("Assorted commands that don't really fit anywhere - just for fun, testing, etc.")]
     public class MiscellaneousCommands : ModuleBase<SocketCommandContext>
     {
-        private readonly CommandService Commands;
-
         private readonly ContentService Content;
-
-        private readonly IServiceProvider Services;
 
         private readonly UserFeedbackService Feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MiscellaneousCommands"/> class.
         /// </summary>
-        /// <param name="commands">The command service.</param>
         /// <param name="content">The content service.</param>
         /// <param name="feedback">The user feedback service.</param>
-        /// <param name="services">The service provider.</param>
-        public MiscellaneousCommands(CommandService commands, ContentService content, UserFeedbackService feedback, IServiceProvider services)
+        public MiscellaneousCommands(ContentService content, UserFeedbackService feedback)
         {
-            this.Commands = commands;
             this.Content = content;
             this.Feedback = feedback;
-            this.Services = services;
         }
 
         /// <summary>
@@ -171,7 +162,7 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Boops the user.")]
         public async Task BoopAsync([NotNull] IUser target)
         {
-            if (target.IsMe(this.Context))
+            if (target.IsMe(this.Context.Client))
             {
                 await this.Feedback.SendConfirmationAsync(this.Context, "...seriously?");
                 await this.Feedback.SendConfirmationAsync(this.Context, $"*boops {this.Context.User.Mention}*");
@@ -191,7 +182,7 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Baps the user.")]
         public async Task BapAsync([NotNull] IUser target)
         {
-            if (target.IsMe(this.Context))
+            if (target.IsMe(this.Context.Client))
             {
                 await this.Feedback.SendConfirmationAsync(this.Context, "...seriously?");
                 await this.Feedback.SendConfirmationAsync(this.Context, $"**baps {this.Context.User.Mention}**");
@@ -238,157 +229,6 @@ namespace DIGOS.Ambassador.Modules
             );
 
             await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
-        }
-
-        /// <summary>
-        /// Lists available commands modules.
-        /// </summary>
-        [UsedImplicitly]
-        [Alias("help", "halp", "hlep", "commands")]
-        [Command("help", RunMode = RunMode.Async)]
-        [Summary("Lists available command modules.")]
-        public async Task HelpAsync()
-        {
-            var eb = this.Feedback.CreateEmbedBase();
-
-            eb.WithTitle("Available command modules");
-            eb.WithDescription
-            (
-                "To view commands in a specific module, use \"!help <topic>\", where the topic is a search string.\n" +
-                "\n" +
-                "Each command (in bold) can take zero or more parameters. These are listed after the short description " +
-                "that follows each command. Parameters in brackets are optional."
-            );
-
-            foreach (var module in this.Commands.Modules.Where(m => !m.IsSubmodule))
-            {
-                eb.AddField(module.Name, module.Summary);
-            }
-
-            await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
-        }
-
-        /// <summary>
-        /// Lists available commands based on a search string.
-        /// </summary>
-        /// <param name="searchText">The text to search the command handler for.</param>
-        [UsedImplicitly]
-        [Alias("help", "halp", "hlep", "commands")]
-        [Command("help", RunMode = RunMode.Async)]
-        [Summary("Lists available commands that match the given search text.")]
-        public async Task HelpAsync([CanBeNull] string searchText)
-        {
-            IReadOnlyList<CommandInfo> searchResults;
-            if (searchText.IsNullOrEmpty())
-            {
-                searchResults = this.Commands.Modules.SelectMany(m => m.Commands).ToList();
-            }
-            else
-            {
-                searchResults = this.Commands.Commands.Where
-                (
-                    c =>
-                    c.Aliases.Any
-                    (
-                        a =>
-                        a.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                    )
-                    || c.Module.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                )
-                .Distinct().ToList();
-            }
-
-            var userChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
-
-            if (searchResults.Count <= 0)
-            {
-                await this.Feedback.SendWarningAsync(this.Context, "No matching commands found.");
-                return;
-            }
-
-            var modules = searchResults.Select(ci => ci.Module).GetTopLevelModules().Distinct();
-
-            foreach (var module in modules)
-            {
-                var availableEmbed = new EmbedBuilder();
-
-                var relevantModuleAliases = module.Aliases.Skip(1);
-                var moduleExtraAliases = module.Aliases.Count > 1
-                    ? $"(you can also use {relevantModuleAliases.Humanize("or")} instead of {module.Name})"
-                    : string.Empty;
-
-                availableEmbed.WithColor(Color.Blue);
-                availableEmbed.WithDescription($"Available commands in {module.Name} {moduleExtraAliases}");
-
-                var unavailableEmbed = new EmbedBuilder();
-
-                unavailableEmbed.WithColor(Color.Red);
-                unavailableEmbed.WithDescription($"Unavailable commands in {module.Name} {moduleExtraAliases}");
-
-                var matchingCommandsInModule = module.Commands.Union
-                (
-                    module.Submodules.SelectMany
-                    (
-                        sm => sm.Commands
-                    )
-                )
-                .Where(c => searchResults.Contains(c));
-
-                foreach (var command in matchingCommandsInModule)
-                {
-                    var relevantAliases = command.Aliases.Skip(1).Where(a => a.StartsWith(command.Module.Aliases.First())).ToList();
-                    var prefix = relevantAliases.Count > 1
-                        ? "as well as"
-                        : "or";
-
-                    var commandExtraAliases = relevantAliases.Any()
-                        ? $"({prefix} {relevantAliases.Humanize("or")})"
-                        : string.Empty;
-
-                    var commandDisplayAliases = $"{command.Aliases.First()} {commandExtraAliases}";
-
-                    var hasPermission = await command.CheckPreconditionsAsync(this.Context, this.Services);
-                    if (hasPermission.IsSuccess)
-                    {
-                        availableEmbed.AddField(commandDisplayAliases, $"{command.Summary}\n{this.Feedback.BuildParameterList(command)}");
-                    }
-                    else
-                    {
-                        unavailableEmbed.AddField(commandDisplayAliases, $"*{hasPermission.ErrorReason}*\n\n{command.Summary} \n{this.Feedback.BuildParameterList(command)}");
-                    }
-                }
-
-                try
-                {
-                    if (availableEmbed.Fields.Count > 0)
-                    {
-                        await userChannel.SendMessageAsync(string.Empty, false, availableEmbed.Build());
-                    }
-
-                    if (unavailableEmbed.Fields.Count > 0)
-                    {
-                        await userChannel.SendMessageAsync(string.Empty, false, unavailableEmbed.Build());
-                    }
-                }
-                catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
-                {
-                    if (!this.Context.IsPrivate)
-                    {
-                        await this.Feedback.SendWarningAsync(this.Context, "I can't do that, since you don't accept DMs from non-friends on this server.");
-                    }
-
-                    return;
-                }
-                finally
-                {
-                    await userChannel.CloseAsync();
-                }
-            }
-
-            if (!this.Context.IsPrivate)
-            {
-                await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
-            }
         }
     }
 }
