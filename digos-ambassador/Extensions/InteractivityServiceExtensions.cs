@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Services;
@@ -60,7 +61,7 @@ namespace DIGOS.Ambassador.Extensions
             try
             {
                 var eb = feedback.CreateFeedbackEmbed(context.User, Color.DarkPurple, "Loading...");
-                await feedback.SendEmbedAndDeleteAsync(userChannel, eb);
+                await feedback.SendEmbedAndDeleteAsync(userChannel, eb, TimeSpan.Zero);
 
                 await @this.SendInteractiveMessageAsync(userChannel, message);
 

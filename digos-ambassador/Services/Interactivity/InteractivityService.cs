@@ -158,15 +158,15 @@ namespace DIGOS.Ambassador.Services.Interactivity
         /// <param name="channel">The channel the message was deleted in.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [NotNull]
-        private Task OnMessageDeleted(Cacheable<IMessage, ulong> message, [NotNull] ISocketMessageChannel channel)
+        private async Task OnMessageDeleted(Cacheable<IMessage, ulong> message, [NotNull] ISocketMessageChannel channel)
         {
-            var deletedMessages = this.TrackedMessages.Where(m => m.Message.Id == message.Id);
+            var userMessage = await message.GetOrDownloadAsync();
+
+            var deletedMessages = this.TrackedMessages.Where(m => m.Message.Id == userMessage.Id);
             foreach (var deletedMessage in deletedMessages)
             {
                 this.TrackedMessages.Remove(deletedMessage);
             }
-
-            return Task.CompletedTask;
         }
 
         /// <summary>
