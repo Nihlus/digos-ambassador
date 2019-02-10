@@ -161,7 +161,7 @@ namespace DIGOS.Ambassador.Wizards
         }
 
         /// <summary>
-        /// Builes a set of pre-formatted pages for the commands in the given module.
+        /// Builds a set of pre-formatted pages for the commands in the given module.
         /// </summary>
         /// <param name="module">The module that contains the commands.</param>
         /// <returns>A list of pages, where each page is a list of embed fields.</returns>
