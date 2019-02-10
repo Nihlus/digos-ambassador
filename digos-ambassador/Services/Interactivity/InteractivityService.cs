@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.Services.Interactivity
     /// <summary>
     /// Acts as a Discord plugin for interactive messages.
     /// </summary>
-    public class InteractivityService
+    public class InteractivityService : IDisposable
     {
         private readonly IList<IInteractiveMessage> TrackedMessages;
 
@@ -161,6 +161,10 @@ namespace DIGOS.Ambassador.Services.Interactivity
         private async Task OnMessageDeleted(Cacheable<IMessage, ulong> message, [NotNull] ISocketMessageChannel channel)
         {
             var userMessage = await message.GetOrDownloadAsync();
+            if (userMessage is null)
+            {
+                return;
+            }
 
             var deletedMessages = this.TrackedMessages.Where(m => m.Message?.Id == userMessage.Id);
             foreach (var deletedMessage in deletedMessages)
@@ -194,6 +198,10 @@ namespace DIGOS.Ambassador.Services.Interactivity
                 async () =>
                 {
                     var userMessage = await message.GetOrDownloadAsync();
+                    if (userMessage is null)
+                    {
+                        return;
+                    }
 
                     var relevantMessages = this.TrackedMessages.Where(m => m.Message?.Id == userMessage.Id);
                     var handlerTasks = relevantMessages
@@ -231,6 +239,10 @@ namespace DIGOS.Ambassador.Services.Interactivity
                 async () =>
                 {
                     var userMessage = await message.GetOrDownloadAsync();
+                    if (userMessage is null)
+                    {
+                        return;
+                    }
 
                     var relevantMessages = this.TrackedMessages.Where(m => m.Message?.Id == userMessage.Id);
                     var handlerTasks = relevantMessages
@@ -241,6 +253,14 @@ namespace DIGOS.Ambassador.Services.Interactivity
             );
 
             return Task.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            this.Client.ReactionAdded -= OnReactionAdded;
+            this.Client.ReactionRemoved -= OnReactionRemoved;
+            this.Client.MessageDeleted -= OnMessageDeleted;
         }
     }
 }

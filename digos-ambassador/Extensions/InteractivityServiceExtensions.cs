@@ -63,12 +63,12 @@ namespace DIGOS.Ambassador.Extensions
                 var eb = feedback.CreateFeedbackEmbed(context.User, Color.DarkPurple, "Loading...");
                 await feedback.SendEmbedAndDeleteAsync(userChannel, eb, TimeSpan.Zero);
 
-                await @this.SendInteractiveMessageAsync(userChannel, message);
-
                 if (!(context.Channel is IDMChannel))
                 {
-                    await feedback.SendConfirmationAsync(context, "Please check your private messages");
+                    _ = feedback.SendConfirmationAsync(context, "Please check your private messages.");
                 }
+
+                await @this.SendInteractiveMessageAsync(userChannel, message);
             }
             catch (HttpException hex)
             {
