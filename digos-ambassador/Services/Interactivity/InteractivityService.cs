@@ -162,7 +162,7 @@ namespace DIGOS.Ambassador.Services.Interactivity
         {
             var userMessage = await message.GetOrDownloadAsync();
 
-            var deletedMessages = this.TrackedMessages.Where(m => m.Message.Id == userMessage.Id);
+            var deletedMessages = this.TrackedMessages.Where(m => m.Message?.Id == userMessage.Id);
             foreach (var deletedMessage in deletedMessages)
             {
                 this.TrackedMessages.Remove(deletedMessage);
@@ -195,7 +195,7 @@ namespace DIGOS.Ambassador.Services.Interactivity
                 {
                     var userMessage = await message.GetOrDownloadAsync();
 
-                    var relevantMessages = this.TrackedMessages.Where(m => m.Message.Id == userMessage.Id);
+                    var relevantMessages = this.TrackedMessages.Where(m => m.Message?.Id == userMessage.Id);
                     var handlerTasks = relevantMessages
                         .Select(relevantMessage => relevantMessage.HandleRemovedInteractionAsync(reaction));
 
@@ -232,7 +232,7 @@ namespace DIGOS.Ambassador.Services.Interactivity
                 {
                     var userMessage = await message.GetOrDownloadAsync();
 
-                    var relevantMessages = this.TrackedMessages.Where(m => m.Message.Id == userMessage.Id);
+                    var relevantMessages = this.TrackedMessages.Where(m => m.Message?.Id == userMessage.Id);
                     var handlerTasks = relevantMessages
                         .Select(relevantMessage => relevantMessage.HandleAddedInteractionAsync(reaction)).ToList();
 
