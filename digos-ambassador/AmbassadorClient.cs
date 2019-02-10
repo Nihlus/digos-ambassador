@@ -235,7 +235,7 @@ namespace DIGOS.Ambassador
                 return;
             }
 
-            if (arg.Author.IsBot)
+            if (arg.Author.IsBot || arg.Author.IsWebhook)
             {
                 return;
             }

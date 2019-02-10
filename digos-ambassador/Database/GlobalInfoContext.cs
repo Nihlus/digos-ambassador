@@ -311,6 +311,11 @@ namespace DIGOS.Ambassador.Database
         [ItemNotNull]
         public async Task<User> GetOrRegisterUserAsync([NotNull] IUser discordUser)
         {
+            if (discordUser.IsBot || discordUser.IsWebhook)
+            {
+                throw new InvalidOperationException("A bot or webhook user cannot be registered.");
+            }
+
             if (!await IsUserKnownAsync(discordUser))
             {
                 return await AddUserAsync(discordUser);
