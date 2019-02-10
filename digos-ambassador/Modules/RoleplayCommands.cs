@@ -53,10 +53,9 @@ namespace DIGOS.Ambassador.Modules
     [UsedImplicitly]
     [Alias("roleplay", "rp")]
     [Group("roleplay")]
-    [Summary
+    [Summary("Commands for interacting with and managing channel roleplays.")]
+    [Remarks
     (
-        "Commands for interacting with and managing channel roleplays.\n" +
-        "\n" +
         "Parameters which take a roleplay can be specified in two ways - by just the name, which will search your " +
         "roleplays, and by mention and name, which will search the given user's roleplays. For example,\n" +
         "\n" +

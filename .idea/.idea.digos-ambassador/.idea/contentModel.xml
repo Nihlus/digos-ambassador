@@ -398,6 +398,8 @@
           <e p="WebSocketSharpProvider.cs" t="Include" />
         </e>
         <e p="Wizards" t="Include">
+          <e p="HelpWizard.cs" t="Include" />
+          <e p="HelpWizardState.cs" t="Include" />
           <e p="IWizard.cs" t="Include" />
           <e p="KinkWizard.cs" t="Include" />
           <e p="KinkWizardState.cs" t="Include" />

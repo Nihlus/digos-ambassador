@@ -28,10 +28,12 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
+using DIGOS.Ambassador.Wizards;
 
 using Discord;
 using Discord.Commands;
 using Discord.Net;
+
 using Humanizer;
 using JetBrains.Annotations;
 
@@ -82,23 +84,10 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Lists available command modules.")]
         public async Task HelpAsync()
         {
-            var eb = this.Feedback.CreateEmbedBase();
+            var modules = this.Commands.Modules.Where(m => !m.IsSubmodule).ToList();
+            var helpWizard = new HelpWizard(modules, this.Feedback);
 
-            eb.WithTitle("Available command modules");
-            eb.WithDescription
-            (
-                "To view commands in a specific module, use \"!help <topic>\", where the topic is a search string.\n" +
-                "\n" +
-                "Each command (in bold) can take zero or more parameters. These are listed after the short description " +
-                "that follows each command. Parameters in brackets are optional."
-            );
-
-            foreach (var module in this.Commands.Modules.Where(m => !m.IsSubmodule))
-            {
-                eb.AddField(module.Name, module.Summary);
-            }
-
-            await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
+            await this.Interactive.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, helpWizard);
         }
 
         /// <summary>

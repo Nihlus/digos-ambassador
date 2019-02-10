@@ -1,5 +1,5 @@
-﻿//
-//  IWizard.cs
+//
+//  HelpWizardState.cs
 //
 //  Author:
 //        Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,30 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Discord;
-using JetBrains.Annotations;
-
 namespace DIGOS.Ambassador.Wizards
 {
     /// <summary>
-    /// Represents an interactive wizard.
+    /// Defines the various states the help wizard can be in.
     /// </summary>
-    public interface IWizard
+    public enum HelpWizardState
     {
         /// <summary>
-        /// Gets the emotes that should be active for the current page.
+        /// The wizard is listing modules.
         /// </summary>
-        /// <returns>The emotes.</returns>
-        [NotNull, ItemNotNull]
-        IEnumerable<IEmote> GetCurrentPageEmotes();
+        ModuleListing,
 
         /// <summary>
-        /// Gets the current page in the wizard.
+        /// The wizard is listing commands.
         /// </summary>
-        /// <returns>The current page.</returns>
-        [NotNull, ItemNotNull]
-        Task<Embed> GetCurrentPageAsync();
+        CommandListing
     }
 }

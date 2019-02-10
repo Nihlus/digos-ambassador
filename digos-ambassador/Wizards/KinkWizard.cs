@@ -144,6 +144,11 @@ namespace DIGOS.Ambassador.Wizards
         /// <inheritdoc />
         protected override async Task UpdateAsync()
         {
+            if (this.Message is null)
+            {
+                return;
+            }
+
             await this.Message.ModifyAsync(m => m.Embed = this.LoadingEmbed);
 
             foreach (var emote in this.CurrrentlyRejectedEmotes)
@@ -187,11 +192,11 @@ namespace DIGOS.Ambassador.Wizards
             {
                 case KinkWizardState.CategorySelection:
                 {
-                    return ConsumeCategoryInteractionAsync(reaction.Emote);
+                    return ConsumeCategoryInteractionAsync(reaction);
                 }
                 case KinkWizardState.KinkPreference:
                 {
-                    return ConsumePreferenceInteractionAsync(reaction.Emote);
+                    return ConsumePreferenceInteractionAsync(reaction);
                 }
                 default:
                 {
@@ -200,8 +205,10 @@ namespace DIGOS.Ambassador.Wizards
             }
         }
 
-        private async Task ConsumePreferenceInteractionAsync([NotNull] IEmote emote)
+        private async Task ConsumePreferenceInteractionAsync([NotNull] SocketReaction reaction)
         {
+            var emote = reaction.Emote;
+
             if (emote.Equals(Back))
             {
                 this.State = KinkWizardState.CategorySelection;
@@ -255,8 +262,10 @@ namespace DIGOS.Ambassador.Wizards
             }
         }
 
-        private async Task ConsumeCategoryInteractionAsync([NotNull] IEmote emote)
+        private async Task ConsumeCategoryInteractionAsync([NotNull] SocketReaction reaction)
         {
+            var emote = reaction.Emote;
+
             if (emote.Equals(Next))
             {
                 if (this.CurrentCategoryOffset + 3 >= this.Categories.Count)
@@ -306,6 +315,8 @@ namespace DIGOS.Ambassador.Wizards
             }
             else if (emote.Equals(EnterCategory))
             {
+                bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
+
                 if (!this.Categories.Any())
                 {
                     await this.Feedback.SendWarningAndDeleteAsync
@@ -328,7 +339,8 @@ namespace DIGOS.Ambassador.Wizards
                 var messageResult = await this.Interactivity.GetNextMessageAsync
                 (
                     this.MessageContext.Channel,
-                    timeout: TimeSpan.FromSeconds(45)
+                    Filter,
+                    TimeSpan.FromSeconds(45)
                 );
 
                 if (messageResult.IsSuccess)

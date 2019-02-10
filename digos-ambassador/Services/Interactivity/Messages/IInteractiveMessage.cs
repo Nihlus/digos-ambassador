@@ -35,6 +35,7 @@ namespace DIGOS.Ambassador.Services.Interactivity.Messages
         /// <summary>
         /// Gets the message that the interactive message wraps.
         /// </summary>
+        [CanBeNull]
         IUserMessage Message { get; }
 
         /// <summary>
@@ -43,12 +44,14 @@ namespace DIGOS.Ambassador.Services.Interactivity.Messages
         /// <param name="service">The interactivity service that manages this message.</param>
         /// <param name="channel">The channel.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [NotNull]
         Task SendAsync([NotNull] InteractivityService service, [NotNull] IMessageChannel channel);
 
         /// <summary>
         /// Deletes the interactive message.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [NotNull]
         Task DeleteAsync();
 
         /// <summary>

@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Services.Interactivity.Messages
         }
 
         /// <summary>
-        /// Displays the message in the given channel
+        /// Displays the message in the given channel.
         /// </summary>
         /// <param name="channel">The channel.</param>
         /// <returns>The displayed message.</returns>

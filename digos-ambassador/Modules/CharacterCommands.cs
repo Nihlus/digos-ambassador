@@ -53,10 +53,9 @@ namespace DIGOS.Ambassador.Modules
     [UsedImplicitly]
     [Alias("character", "char", "ch")]
     [Group("character")]
-    [Summary
+    [Summary("Commands for creating, editing, and interacting with user characters.")]
+    [Remarks
     (
-        "Commands for creating, editing, and interacting with user characters.\n" +
-        "\n" +
         "Parameters which take a character can be specified in two ways - by just the name, which will search your " +
         "characters, and by mention and name, which will search the given user's characters. For example,\n" +
         "\n" +
