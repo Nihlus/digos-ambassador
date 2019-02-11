@@ -48,11 +48,10 @@ namespace DIGOS.Ambassador.Modules
     [Summary("Help-related commands that explain other commands or modules.")]
     public class HelpCommands : ModuleBase<SocketCommandContext>
     {
-        private readonly IServiceProvider Services;
-
         private readonly CommandService Commands;
         private readonly UserFeedbackService Feedback;
         private readonly InteractivityService Interactive;
+        private readonly HelpService Help;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HelpCommands"/> class.
@@ -61,18 +60,19 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="services">All available services.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="interactive">The interactive service.</param>
+        /// <param name="help">The help service.</param>
         public HelpCommands
         (
             [NotNull] CommandService commands,
-            [NotNull] IServiceProvider services,
             [NotNull] UserFeedbackService feedback,
-            [NotNull] InteractivityService interactive
+            [NotNull] InteractivityService interactive,
+            [NotNull] HelpService help
         )
         {
             this.Commands = commands;
-            this.Services = services;
             this.Feedback = feedback;
             this.Interactive = interactive;
+            this.Help = help;
         }
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Modules
         public async Task HelpAsync()
         {
             var modules = this.Commands.Modules.Where(m => !m.IsSubmodule).ToList();
-            var helpWizard = new HelpWizard(modules, this.Feedback);
+            var helpWizard = new HelpWizard(modules, this.Feedback, this.Help);
 
             await this.Interactive.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, helpWizard);
         }
@@ -98,118 +98,46 @@ namespace DIGOS.Ambassador.Modules
         [UsedImplicitly]
         [Command(RunMode = RunMode.Async)]
         [Summary("Lists available commands that match the given search text.")]
-        public async Task HelpAsync([CanBeNull] string searchText)
+        public async Task HelpAsync([CanBeNull, Remainder] string searchText)
         {
-            IReadOnlyList<CommandInfo> searchResults;
-            if (searchText.IsNullOrEmpty())
+            searchText = searchText.Unquote();
+
+            var modules = this.Commands.Modules.Where(m => !m.IsSubmodule).ToList();
+
+            var moduleSearchTerms = modules.Select
+            (
+                m => new List<string>(m.Aliases) { m.Name }
+            )
+            .SelectMany(t => t);
+
+            var getModuleResult = moduleSearchTerms.BestLevenshteinMatch(searchText, 0.5);
+            if (getModuleResult.IsSuccess)
             {
-                searchResults = this.Commands.Modules.SelectMany(m => m.Commands).ToList();
-            }
-            else
-            {
-                searchResults = this.Commands.Commands.Where
+                var helpWizard = new HelpWizard(modules, this.Feedback, this.Help);
+                await helpWizard.OpenModule(getModuleResult.Entity);
+                await this.Interactive.SendPrivateInteractiveMessageAsync
                 (
-                    c =>
-                    c.Aliases.Any
-                    (
-                        a =>
-                        a.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                    )
-                    || c.Module.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
-                )
-                .Distinct().ToList();
-            }
+                    this.Context,
+                    this.Feedback,
+                    helpWizard
+                );
 
-            var userChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
-
-            if (searchResults.Count <= 0)
-            {
-                await this.Feedback.SendWarningAsync(this.Context, "No matching commands found.");
                 return;
             }
 
-            var modules = searchResults.Select(ci => ci.Module).GetTopLevelModules().Distinct();
-
-            foreach (var module in modules)
+            var commandSearchTerms = modules.SelectMany(m => m.Commands.SelectMany(c => c.Aliases));
+            var findCommandResult = commandSearchTerms.BestLevenshteinMatch(searchText, 0.5);
+            if (findCommandResult.IsSuccess)
             {
-                var availableEmbed = new EmbedBuilder();
+                var command = modules
+                    .Select(m => m.Commands.Where(c => c.Aliases.Contains(findCommandResult.Entity)))
+                    .First(l => l.Any())
+                    .First();
 
-                var relevantModuleAliases = module.Aliases.Skip(1);
-                var moduleExtraAliases = module.Aliases.Count > 1
-                    ? $"(you can also use {relevantModuleAliases.Humanize("or")} instead of {module.Name})"
-                    : string.Empty;
+                var eb = this.Feedback.CreateEmbedBase();
+                eb.AddField(this.Help.CreateCommandInfoEmbed(command));
 
-                availableEmbed.WithColor(Color.Blue);
-                availableEmbed.WithDescription($"Available commands in {module.Name} {moduleExtraAliases}");
-
-                var unavailableEmbed = new EmbedBuilder();
-
-                unavailableEmbed.WithColor(Color.Red);
-                unavailableEmbed.WithDescription($"Unavailable commands in {module.Name} {moduleExtraAliases}");
-
-                var matchingCommandsInModule = module.Commands.Union
-                (
-                    module.Submodules.SelectMany
-                    (
-                        sm => sm.Commands
-                    )
-                )
-                .Where(c => searchResults.Contains(c));
-
-                foreach (var command in matchingCommandsInModule)
-                {
-                    var relevantAliases = command.Aliases.Skip(1).Where(a => a.StartsWith(command.Module.Aliases.First())).ToList();
-                    var prefix = relevantAliases.Count > 1
-                        ? "as well as"
-                        : "or";
-
-                    var commandExtraAliases = relevantAliases.Any()
-                        ? $"({prefix} {relevantAliases.Humanize("or")})"
-                        : string.Empty;
-
-                    var commandDisplayAliases = $"{command.Aliases.First()} {commandExtraAliases}";
-
-                    var hasPermission = await command.CheckPreconditionsAsync(this.Context, this.Services);
-                    if (hasPermission.IsSuccess)
-                    {
-                        availableEmbed.AddField(commandDisplayAliases, $"{command.Summary}\n{this.Feedback.BuildParameterList(command)}");
-                    }
-                    else
-                    {
-                        unavailableEmbed.AddField(commandDisplayAliases, $"*{hasPermission.ErrorReason}*\n\n{command.Summary} \n{this.Feedback.BuildParameterList(command)}");
-                    }
-                }
-
-                try
-                {
-                    if (availableEmbed.Fields.Count > 0)
-                    {
-                        await userChannel.SendMessageAsync(string.Empty, false, availableEmbed.Build());
-                    }
-
-                    if (unavailableEmbed.Fields.Count > 0)
-                    {
-                        await userChannel.SendMessageAsync(string.Empty, false, unavailableEmbed.Build());
-                    }
-                }
-                catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
-                {
-                    if (!this.Context.IsPrivate)
-                    {
-                        await this.Feedback.SendWarningAsync(this.Context, "I can't do that, since you don't accept DMs from non-friends on this server.");
-                    }
-
-                    return;
-                }
-                finally
-                {
-                    await userChannel.CloseAsync();
-                }
-            }
-
-            if (!this.Context.IsPrivate)
-            {
-                await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
+                await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
             }
         }
     }

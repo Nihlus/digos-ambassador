@@ -309,6 +309,7 @@
           <e p="Feedback" t="Include">
             <e p="UserFeedbackService.cs" t="Include" />
           </e>
+          <e p="HelpService.cs" t="Include" />
           <e p="Interactivity" t="Include">
             <e p="InteractivityService.cs" t="Include" />
             <e p="Messages" t="Include">

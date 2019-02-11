@@ -21,6 +21,8 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions
@@ -65,6 +67,36 @@ namespace DIGOS.Ambassador.Extensions
         public static bool Contains([CanBeNull] this string @this, [CanBeNull] string search, StringComparison comparer)
         {
             return @this != null && search != null && @this.IndexOf(search, comparer) >= 0;
+        }
+
+        /// <summary>
+        /// Removes surrounding quotes from a given string, if they exist.
+        /// </summary>
+        /// <param name="this">The string.</param>
+        /// <param name="quoteChars">The quote characters.</param>
+        /// <returns>The unquoted string.</returns>
+        [CanBeNull]
+        [ContractAnnotation("this : null => null; this : notnull => notnull")]
+        public static string Unquote([CanBeNull] this string @this, IReadOnlyCollection<char> quoteChars = null)
+        {
+            quoteChars = quoteChars ?? new[] { '‘', '\'', '’', '“', '”', '\"' };
+
+            if (@this is null)
+            {
+                return null;
+            }
+
+            if (@this.IsNullOrWhitespace())
+            {
+                return @this;
+            }
+
+            if (quoteChars.Contains(@this[0]) && quoteChars.Contains(@this.Last()))
+            {
+                return @this.Substring(1, @this.Length - 2);
+            }
+
+            return @this;
         }
     }
 }

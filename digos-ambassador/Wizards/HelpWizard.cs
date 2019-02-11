@@ -33,9 +33,8 @@ using DIGOS.Ambassador.Services.Interactivity.Messages;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Humanizer;
+
 using JetBrains.Annotations;
-using MoreLinq;
 
 namespace DIGOS.Ambassador.Wizards
 {
@@ -44,6 +43,12 @@ namespace DIGOS.Ambassador.Wizards
     /// </summary>
     public class HelpWizard : InteractiveMessage, IWizard
     {
+        [NotNull]
+        private readonly UserFeedbackService Feedback;
+
+        [NotNull]
+        private readonly HelpService Help;
+
         private static readonly Emoji First = new Emoji("\x23EE");
         private static readonly Emoji Next = new Emoji("\x25B6");
         private static readonly Emoji Previous = new Emoji("\x25C0");
@@ -65,9 +70,6 @@ namespace DIGOS.Ambassador.Wizards
         /// </summary>
         [NotNull]
         private IReadOnlyCollection<IEmote> CurrrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
-
-        [NotNull]
-        private readonly UserFeedbackService Feedback;
 
         [NotNull, ItemNotNull]
         private readonly IReadOnlyList<ModuleInfo> Modules;
@@ -105,14 +107,17 @@ namespace DIGOS.Ambassador.Wizards
         /// </summary>
         /// <param name="modules">The modules available in the bot.</param>
         /// <param name="feedback">The feedback service.</param>
+        /// <param name="help">The help service.</param>
         public HelpWizard
         (
             [NotNull, ItemNotNull] IReadOnlyList<ModuleInfo> modules,
-            [NotNull] UserFeedbackService feedback
+            [NotNull] UserFeedbackService feedback,
+            [NotNull] HelpService help
         )
         {
             this.Modules = modules;
             this.Feedback = feedback;
+            this.Help = help;
 
             var eb = new EmbedBuilder();
             eb.WithTitle("Help & Information");
@@ -171,36 +176,12 @@ namespace DIGOS.Ambassador.Wizards
 
             var currentPage = new List<EmbedFieldBuilder>();
             var currentContentLength = 0;
+
             foreach (var command in module.Commands)
             {
-                var relevantAliases = command.Aliases.Skip(1).Where(a => a.StartsWith(command.Module.Aliases.First())).ToList();
-                var prefix = relevantAliases.Count > 1
-                    ? "as well as"
-                    : "or";
+                var helpField = this.Help.CreateCommandInfoEmbed(command);
 
-                var commandExtraAliases = relevantAliases.Any()
-                    ? $"({prefix} {relevantAliases.Humanize("or")})"
-                    : string.Empty;
-
-                var commandDisplayAliases = $"{command.Aliases.First()} {commandExtraAliases}";
-
-                var commandInfoContent = this.Feedback.BuildParameterList(command);
-
-                var contexts = command.Preconditions
-                    .Where(a => a is RequireContextAttribute)
-                    .Cast<RequireContextAttribute>()
-                    .SingleOrDefault()?.Contexts;
-
-                if (!(contexts is null))
-                {
-                    var separateContexts = contexts.ToString().Split(',');
-                    separateContexts = separateContexts.Select(c => c.Pluralize()).ToArray();
-
-                    commandInfoContent += '\n';
-                    commandInfoContent += $"*This command can only be used in {separateContexts.Humanize()}.*".Transform(To.SentenceCase);
-                }
-
-                var commandContentLength = commandDisplayAliases.Length + commandInfoContent.Length;
+                var commandContentLength = helpField.Name.Length + ((string)helpField.Value).Length;
 
                 if (currentPage.Count >= 5 || (currentContentLength + commandContentLength) > 1300)
                 {
@@ -210,8 +191,7 @@ namespace DIGOS.Ambassador.Wizards
                     currentContentLength = 0;
                 }
 
-                var ebf = new EmbedFieldBuilder().WithName(commandDisplayAliases).WithValue(commandInfoContent);
-                currentPage.Add(ebf);
+                currentPage.Add(helpField);
 
                 currentContentLength += commandContentLength;
 
@@ -474,7 +454,12 @@ namespace DIGOS.Ambassador.Wizards
             await UpdateAsync();
         }
 
-        private async Task<ExecuteResult> OpenModule(string moduleName)
+        /// <summary>
+        /// Attempts to open the information page for the given module in the wizard.
+        /// </summary>
+        /// <param name="moduleName">The name of the module.</param>
+        /// <returns>A execution result which may or may not have succeeded.</returns>
+        public Task<ExecuteResult> OpenModule(string moduleName)
         {
             var moduleSearchTerms = this.Modules.Select
             (
@@ -485,7 +470,7 @@ namespace DIGOS.Ambassador.Wizards
             var getModuleResult = moduleSearchTerms.BestLevenshteinMatch(moduleName, 0.75);
             if (!getModuleResult.IsSuccess)
             {
-                return ExecuteResult.FromError(getModuleResult);
+                return Task.FromResult(ExecuteResult.FromError(getModuleResult));
             }
 
             var bestMatch = getModuleResult.Entity;
@@ -502,7 +487,7 @@ namespace DIGOS.Ambassador.Wizards
 
             this.State = HelpWizardState.CommandListing;
 
-            return ExecuteResult.FromSuccess();
+            return Task.FromResult(ExecuteResult.FromSuccess());
         }
 
         [SuppressMessage("Style", "SA1118", Justification = "Large text blocks.")]

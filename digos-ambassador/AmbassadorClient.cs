@@ -101,6 +101,8 @@ namespace DIGOS.Ambassador
 
         private readonly PrivacyService Privacy;
 
+        private readonly HelpService Help;
+
         // ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 
         /// <summary>
@@ -139,6 +141,8 @@ namespace DIGOS.Ambassador
 
             this.Privacy = new PrivacyService();
 
+            this.Help = new HelpService(this.Feedback);
+
             this.Services = new ServiceCollection()
                 .AddSingleton(this.Client)
                 .AddSingleton(this.DiscordIntegration)
@@ -154,6 +158,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton(this.Kinks)
                 .AddSingleton(this.Permissions)
                 .AddSingleton(this.Privacy)
+                .AddSingleton(this.Help)
                 .AddDbContextPool<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
                 .BuildServiceProvider();
 
@@ -338,7 +343,7 @@ namespace DIGOS.Ambassador
                             (
                                 string.Empty,
                                 false,
-                                this.Feedback.CreateCommandUsageEmbed(searchResult.Commands)
+                                this.Help.CreateCommandUsageEmbed(searchResult.Commands)
                             );
                         }
                         catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
