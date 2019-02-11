@@ -95,7 +95,14 @@ namespace DIGOS.Ambassador.Services
             bool isNSFW,
             bool isPublic)
         {
-            var owner = await db.GetOrRegisterUserAsync(context.Message.Author);
+            var getOwnerResult = await db.GetOrRegisterUserAsync(context.User);
+            if (!getOwnerResult.IsSuccess)
+            {
+                return CreateEntityResult<Roleplay>.FromError(getOwnerResult);
+            }
+
+            var owner = getOwnerResult.Entity;
+
             var roleplay = new Roleplay
             {
                 Owner = owner,
@@ -538,7 +545,14 @@ namespace DIGOS.Ambassador.Services
             var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)newUser.Id);
             if (participantEntry is null)
             {
-                var user = await db.GetOrRegisterUserAsync(newUser);
+                var getUserResult = await db.GetOrRegisterUserAsync(newUser);
+                if (!getUserResult.IsSuccess)
+                {
+                    return ExecuteResult.FromError(getUserResult);
+                }
+
+                var user = getUserResult.Entity;
+
                 participantEntry = new RoleplayParticipant(roleplay, user, ParticipantStatus.Joined);
                 roleplay.ParticipatingUsers.Add(participantEntry);
             }
@@ -580,7 +594,14 @@ namespace DIGOS.Ambassador.Services
             var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)invitedUser.Id);
             if (participantEntry is null)
             {
-                var user = await db.GetOrRegisterUserAsync(invitedUser);
+                var getUserResult = await db.GetOrRegisterUserAsync(invitedUser);
+                if (!getUserResult.IsSuccess)
+                {
+                    return ExecuteResult.FromError(getUserResult);
+                }
+
+                var user = getUserResult.Entity;
+
                 participantEntry = new RoleplayParticipant(roleplay, user, ParticipantStatus.Invited);
                 roleplay.ParticipatingUsers.Add(participantEntry);
             }

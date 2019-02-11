@@ -711,7 +711,15 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
         {
-            var protection = await this.Transformation.GetOrCreateGlobalUserProtectionAsync(this.Database, this.Context.User);
+            var getProtectionResult = await this.Transformation.GetOrCreateGlobalUserProtectionAsync(this.Database, this.Context.User);
+            if (!getProtectionResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
+                return;
+            }
+
+            var protection = getProtectionResult.Entity;
+
             protection.DefaultOptIn = shouldOptIn;
 
             await this.Database.SaveChangesAsync();
@@ -732,7 +740,14 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task OptInToTransformationsAsync()
         {
-            var protection = await this.Transformation.GetOrCreateServerUserProtectionAsync(this.Database, this.Context.User, this.Context.Guild);
+            var getProtectionResult = await this.Transformation.GetOrCreateServerUserProtectionAsync(this.Database, this.Context.User, this.Context.Guild);
+            if (!getProtectionResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
+                return;
+            }
+
+            var protection = getProtectionResult.Entity;
             protection.HasOptedIn = true;
 
             await this.Database.SaveChangesAsync();
@@ -749,7 +764,14 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task OptOutOfTransformationsAsync()
         {
-            var protection = await this.Transformation.GetOrCreateServerUserProtectionAsync(this.Database, this.Context.User, this.Context.Guild);
+            var getProtectionResult = await this.Transformation.GetOrCreateServerUserProtectionAsync(this.Database, this.Context.User, this.Context.Guild);
+            if (!getProtectionResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
+                return;
+            }
+
+            var protection = getProtectionResult.Entity;
             protection.HasOptedIn = false;
 
             await this.Database.SaveChangesAsync();

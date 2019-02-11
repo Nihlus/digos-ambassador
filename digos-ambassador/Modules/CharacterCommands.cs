@@ -401,7 +401,14 @@ namespace DIGOS.Ambassador.Modules
         {
             this.Database.Attach(character);
 
-            var user = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+            var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+            if (!getUserResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                return;
+            }
+
+            var user = getUserResult.Entity;
 
             var result = await this.Characters.SetDefaultCharacterForUserAsync(this.Database, this.Context, character, user);
             if (!result.IsSuccess)
@@ -423,7 +430,14 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ClearDefaultCharacterAsync()
         {
-            var user = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+            var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+            if (!getUserResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                return;
+            }
+
+            var user = getUserResult.Entity;
 
             var result = await this.Characters.ClearDefaultCharacterForUserAsync(this.Database, this.Context, user);
             if (!result.IsSuccess)
@@ -445,7 +459,14 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ClearCharacterFormAsync()
         {
-            var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+            var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+            if (!getUserResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                return;
+            }
+
+            var user = getUserResult.Entity;
 
             await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Context.Message.Author, this.Context.Guild);
 

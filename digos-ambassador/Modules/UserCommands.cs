@@ -71,7 +71,14 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Shows known information about the invoking user.")]
         public async Task ShowInfoAsync()
         {
-            var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+            var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+            if (!getUserResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                return;
+            }
+
+            var user = getUserResult.Entity;
             await ShowUserInfoAsync(this.Context.Message.Author, user);
         }
 
@@ -84,7 +91,14 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Shows known information about the target user.")]
         public async Task ShowInfoAsync([NotNull] IUser discordUser)
         {
-            var user = await this.Database.GetOrRegisterUserAsync(discordUser);
+            var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
+            if (!getUserResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                return;
+            }
+
+            var user = getUserResult.Entity;
             await ShowUserInfoAsync(discordUser, user);
         }
 
@@ -200,7 +214,14 @@ namespace DIGOS.Ambassador.Modules
             )
             {
                 // Add the user to the user database if they're not already in it
-                var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+                var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+                if (!getUserResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    return;
+                }
+
+                var user = getUserResult.Entity;
 
                 user.Class = userClass;
 
@@ -228,7 +249,14 @@ namespace DIGOS.Ambassador.Modules
             )
             {
                 // Add the user to the user database if they're not already in it
-                var user = await this.Database.GetOrRegisterUserAsync(discordUser);
+                var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
+                if (!getUserResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    return;
+                }
+
+                var user = getUserResult.Entity;
 
                 user.Class = userClass;
 
@@ -248,7 +276,14 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetUserBioAsync([NotNull] string bio)
             {
                 // Add the user to the user database if they're not already in it
-                var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+                var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+                if (!getUserResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    return;
+                }
+
+                var user = getUserResult.Entity;
 
                 user.Bio = bio;
 
@@ -270,7 +305,14 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetUserBioAsync([NotNull] IUser discordUser, [NotNull] string bio)
             {
                 // Add the user to the user database if they're not already in it
-                var user = await this.Database.GetOrRegisterUserAsync(discordUser);
+                var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
+                if (!getUserResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    return;
+                }
+
+                var user = getUserResult.Entity;
 
                 user.Bio = bio;
 
@@ -290,7 +332,14 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetUserTimezoneAsync(int timezone)
             {
                 // Add the user to the user database if they're not already in it
-                var user = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+                var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+                if (!getUserResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    return;
+                }
+
+                var user = getUserResult.Entity;
 
                 user.Timezone = timezone;
 
@@ -312,7 +361,14 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetUserTimezoneAsync([NotNull] IUser discordUser, int timezone)
             {
                 // Add the user to the user database if they're not already in it
-                var user = await this.Database.GetOrRegisterUserAsync(discordUser);
+                var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
+                if (!getUserResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    return;
+                }
+
+                var user = getUserResult.Entity;
 
                 user.Timezone = timezone;
 

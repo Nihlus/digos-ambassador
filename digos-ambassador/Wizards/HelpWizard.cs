@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Extensions;
@@ -177,11 +178,21 @@ namespace DIGOS.Ambassador.Wizards
             var currentPage = new List<EmbedFieldBuilder>();
             var currentContentLength = 0;
 
-            foreach (var command in module.Commands)
+            var commandGroups = module.Commands.GroupBy(c => c.Aliases.OrderByDescending(a => a).First()).ToList();
+
+            foreach (var commandGroup in commandGroups)
             {
-                var helpField = this.Help.CreateCommandInfoEmbed(command);
+                var helpField = this.Help.CreateCommandInfoEmbedField(commandGroup.First());
 
                 var commandContentLength = helpField.Name.Length + ((string)helpField.Value).Length;
+
+                if (commandGroup.Count() > 1)
+                {
+                    var hint = "*This command has multiple variants.*";
+
+                    helpField.WithValue((string)helpField.Value + "\n" + hint);
+                    commandContentLength += hint.Length;
+                }
 
                 if (currentPage.Count >= 5 || (currentContentLength + commandContentLength) > 1300)
                 {
@@ -195,7 +206,7 @@ namespace DIGOS.Ambassador.Wizards
 
                 currentContentLength += commandContentLength;
 
-                if (command == module.Commands.Last() && !pages.Contains(currentPage))
+                if (commandGroup == commandGroups.Last() && !pages.Contains(currentPage))
                 {
                     pages.Add(currentPage);
                 }
@@ -271,7 +282,12 @@ namespace DIGOS.Ambassador.Wizards
                 {
                     var eb = this.Feedback.CreateEmbedBase();
                     eb.WithTitle($"Available commands in {this.CurrentModule.Name}");
-                    eb.WithDescription($"{this.CurrentModule.Remarks}");
+
+                    var description = $"Click {EnterModule} and type in a command to see detailed information." +
+                                      "\n\n" +
+                                      $"{this.CurrentModule.Remarks}";
+
+                    eb.WithDescription(description);
 
                     var pages = this.CommandListPages[this.CurrentModule];
                     var page = pages[this.CommandListOffset];
@@ -364,6 +380,73 @@ namespace DIGOS.Ambassador.Wizards
             else if (emote.Equals(Last))
             {
                 this.CommandListOffset = this.CommandListPages[this.CurrentModule].Count - 1;
+            }
+            else if (emote.Equals(EnterModule))
+            {
+                bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
+
+                if (!this.CurrentModule.Commands.Any())
+                {
+                    await this.Feedback.SendWarningAndDeleteAsync
+                    (
+                        this.MessageContext,
+                        "There aren't any commands available in the module.",
+                        TimeSpan.FromSeconds(10)
+                    );
+
+                    return;
+                }
+
+                await this.Feedback.SendConfirmationAndDeleteAsync
+                (
+                    this.MessageContext,
+                    "Please enter a command name.",
+                    TimeSpan.FromSeconds(45)
+                );
+
+                var messageResult = await this.Interactivity.GetNextMessageAsync
+                (
+                    this.MessageContext.Channel,
+                    Filter,
+                    TimeSpan.FromSeconds(45)
+                );
+
+                if (messageResult.IsSuccess)
+                {
+                    var searchText = messageResult.Entity.Content;
+                    var commandSearchTerms = this.CurrentModule.Commands.Select(c => c.GetActualName());
+
+                    var findCommandResult = commandSearchTerms.BestLevenshteinMatch(searchText, 0.5);
+                    if (findCommandResult.IsSuccess)
+                    {
+                        var foundName = findCommandResult.Entity;
+
+                        var commandGroup = this.CurrentModule.Commands
+                            .Where(c => c.GetActualName() == foundName)
+                            .GroupBy(c => c.Aliases.OrderByDescending(a => a).First())
+                            .First();
+
+                        var eb = this.Help.CreateDetailedCommandInfoEmbed(commandGroup);
+
+                        await this.Feedback.SendEmbedAndDeleteAsync
+                        (
+                            this.MessageContext.Channel,
+                            eb.Build(),
+                            TimeSpan.FromSeconds(45)
+                        );
+                    }
+                    else
+                    {
+                        var eb = this.Feedback.CreateEmbedBase(Color.Orange);
+                        eb.WithDescription("I couldn't find a sufficiently close command to that.");
+
+                        await this.Feedback.SendEmbedAndDeleteAsync
+                        (
+                            this.MessageContext.Channel,
+                            eb.Build()
+                        );
+                    }
+                }
             }
 
             await UpdateAsync();
@@ -518,7 +601,8 @@ namespace DIGOS.Ambassador.Wizards
                     eb.AddField
                     (
                         "Usage",
-                        "Use the navigation buttons to scroll through the available commands. To go back " +
+                        "Use the navigation buttons to scroll through the available commands. To view " +
+                        $"detailed information about a command, press {EnterModule} and type in the name. To go back " +
                         $"to the module list, press {Back}." +
                         "\n" +
                         $"You can quit at any point by pressing {Exit}."
@@ -549,11 +633,11 @@ namespace DIGOS.Ambassador.Wizards
             {
                 case HelpWizardState.ModuleListing:
                 {
-                    return new[] { First, Previous, Next, Last, EnterModule, Info, Exit };
+                    return new[] { First, Previous, Next, Last, Info, Exit, EnterModule };
                 }
                 case HelpWizardState.CommandListing:
                 {
-                    return new[] { First, Previous, Next, Last, Back, Info, Exit };
+                    return new[] { First, Previous, Next, Last, Info, Exit, EnterModule,  Back };
                 }
                 default:
                 {
@@ -573,7 +657,7 @@ namespace DIGOS.Ambassador.Wizards
                 }
                 case HelpWizardState.CommandListing:
                 {
-                    return new[] { EnterModule };
+                    return new IEmote[] { };
                 }
                 default:
                 {

@@ -225,6 +225,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var commands = new CommandService();
 
+                var client = new DiscordSocketClient();
+
                 this.Services = new ServiceCollection()
                     .AddSingleton(this.Database)
                     .AddSingleton<ContentService>()
@@ -235,7 +237,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     .AddSingleton<TransformationService>()
                     .AddSingleton<InteractivityService>()
                     .AddSingleton<CharacterService>()
-                    .AddSingleton(new DiscordSocketClient())
+                    .AddSingleton(client)
+                    .AddSingleton<BaseSocketClient>(client)
                     .BuildServiceProvider();
 
                 commands.AddTypeReader<Character>(new CharacterTypeReader());

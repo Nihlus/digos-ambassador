@@ -437,7 +437,14 @@ namespace DIGOS.Ambassador.Services
             [CanBeNull] string characterDescription
         )
         {
-            var owner = await db.GetOrRegisterUserAsync(context.Message.Author);
+            var getOwnerResult = await db.GetOrRegisterUserAsync(context.Message.Author);
+            if (!getOwnerResult.IsSuccess)
+            {
+                return CreateEntityResult<Character>.FromError(getOwnerResult);
+            }
+
+            var owner = getOwnerResult.Entity;
+
             var character = new Character
             {
                 Owner = owner,

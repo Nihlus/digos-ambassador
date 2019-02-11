@@ -290,7 +290,14 @@ namespace DIGOS.Ambassador
                     return;
                 }
 
-                var user = await db.GetOrRegisterUserAsync(arg.Author);
+                var registerUserResult = await db.GetOrRegisterUserAsync(arg.Author);
+                if (!registerUserResult.IsSuccess)
+                {
+                    return;
+                }
+
+                var user = registerUserResult.Entity;
+
                 var server = await db.GetOrRegisterServerAsync(guild);
 
                 if (server.KnownUsers is null)

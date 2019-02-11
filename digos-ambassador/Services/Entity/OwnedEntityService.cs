@@ -109,8 +109,13 @@ namespace DIGOS.Ambassador.Services
                 );
             }
 
-            var newUser = await db.GetOrRegisterUserAsync(newOwner);
-            entity.Owner = newUser;
+            var createUserResult = await db.GetOrRegisterUserAsync(newOwner);
+            if (!createUserResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(createUserResult);
+            }
+
+            entity.Owner = createUserResult.Entity;
 
             await db.SaveChangesAsync();
 

@@ -129,13 +129,16 @@ namespace DIGOS.Ambassador.Modules
             var findCommandResult = commandSearchTerms.BestLevenshteinMatch(searchText, 0.5);
             if (findCommandResult.IsSuccess)
             {
-                var command = modules
+                var foundAlias = findCommandResult.Entity;
+
+                var commandGroup = modules
                     .Select(m => m.Commands.Where(c => c.Aliases.Contains(findCommandResult.Entity)))
                     .First(l => l.Any())
+                    .Where(c => c.Aliases.Contains(foundAlias))
+                    .GroupBy(c => c.Aliases.OrderByDescending(a => a).First())
                     .First();
 
-                var eb = this.Feedback.CreateEmbedBase();
-                eb.AddField(this.Help.CreateCommandInfoEmbed(command));
+                var eb = this.Help.CreateDetailedCommandInfoEmbed(commandGroup);
 
                 await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
             }

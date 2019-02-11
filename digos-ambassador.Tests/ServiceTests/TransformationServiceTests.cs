@@ -270,7 +270,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.NotEmpty(this.Database.ServerUserProtections);
-                Assert.Same(result, this.Database.ServerUserProtections.First());
+                Assert.Same(result.Entity, this.Database.ServerUserProtections.First());
             }
 
             [Fact]
@@ -283,7 +283,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     this.Guild
                 );
 
-                Assert.Equal((long)this.Guild.Id, result.Server.DiscordID);
+                Assert.Equal((long)this.Guild.Id, result.Entity.Server.DiscordID);
             }
 
             [Fact]
@@ -296,7 +296,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     this.Guild
                 );
 
-                Assert.Equal((long)this.User.Id, result.User.DiscordID);
+                Assert.Equal((long)this.User.Id, result.Entity.User.DiscordID);
             }
 
             [Fact]
@@ -318,13 +318,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     this.Guild
                 );
 
-                Assert.Same(created, retrieved);
+                Assert.Same(created.Entity, retrieved.Entity);
             }
 
             [Fact]
             public async Task CreatedObjectRespectsGlobalDefaults()
             {
-                var user = await this.Database.GetOrRegisterUserAsync(this.User);
+                var user = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
 
                 var globalSetting = new GlobalUserProtection
                 {
@@ -343,9 +343,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     this.Guild
                 );
 
-                Assert.Equal(globalSetting.DefaultOptIn, localSetting.HasOptedIn);
-                Assert.Equal(globalSetting.DefaultType, localSetting.Type);
-                Assert.Same(globalSetting.User, localSetting.User);
+                Assert.Equal(globalSetting.DefaultOptIn, localSetting.Entity.HasOptedIn);
+                Assert.Equal(globalSetting.DefaultType, localSetting.Entity.Type);
+                Assert.Same(globalSetting.User, localSetting.Entity.User);
             }
         }
 
@@ -361,7 +361,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, this.User);
 
                 Assert.NotEmpty(this.Database.GlobalUserProtections);
-                Assert.Same(result, this.Database.GlobalUserProtections.First());
+                Assert.Same(result.Entity, this.Database.GlobalUserProtections.First());
             }
 
             [Fact]
@@ -369,7 +369,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, this.User);
 
-                Assert.Equal((long)this.User.Id, result.User.DiscordID);
+                Assert.Equal((long)this.User.Id, result.Entity.User.DiscordID);
             }
 
             [Fact]
@@ -381,7 +381,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 // Get it from the database
                 var retrieved = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, this.User);
 
-                Assert.Same(created, retrieved);
+                Assert.Same(created.Entity, retrieved.Entity);
             }
         }
 
@@ -549,7 +549,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+                this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
 
                 this.Character = new Character { Owner = this.Owner };
                 this.Database.Characters.Add(this.Character);
@@ -601,7 +601,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+                this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
 
                 this.Character = new Character { Owner = this.Owner };
                 this.Database.Characters.Add(this.Character);
@@ -794,7 +794,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     user,
                     this.Guild
                 );
-                protection.HasOptedIn = true;
+                protection.Entity.HasOptedIn = true;
 
                 await this.Database.SaveChangesAsync();
             }
@@ -853,10 +853,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     this.Owner,
                     this.Guild
                 );
-                protection.HasOptedIn = true;
+                protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+                var owner = (await this.Database.GetOrRegisterUserAsync(this.Owner)).Entity;
                 this.Character = new Character
                 {
                     Name = "Test",
@@ -1002,10 +1002,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     this.Guild
                 );
 
-                protection.HasOptedIn = true;
+                protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+                var owner = (await this.Database.GetOrRegisterUserAsync(this.Owner)).Entity;
                 this.Character = new Character
                 {
                     Name = "Test",
@@ -1224,10 +1224,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     this.Guild
                 );
 
-                protection.HasOptedIn = true;
+                protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+                var owner = (await this.Database.GetOrRegisterUserAsync(this.Owner)).Entity;
                 this.Character = new Character
                 {
                     Name = "Test",
@@ -1539,10 +1539,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     this.Guild
                 );
 
-                protection.HasOptedIn = true;
+                protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+                var owner = (await this.Database.GetOrRegisterUserAsync(this.Owner)).Entity;
                 this.Character = new Character
                 {
                     Name = "Test",
@@ -1727,10 +1727,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     this.Guild
                 );
 
-                protection.HasOptedIn = true;
+                protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+                var owner = (await this.Database.GetOrRegisterUserAsync(this.Owner)).Entity;
                 this.Character = new Character
                 {
                     Name = "Test",
@@ -1946,10 +1946,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     this.Guild
                 );
 
-                protection.HasOptedIn = true;
+                protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = await this.Database.GetOrRegisterUserAsync(this.Owner);
+                var owner = (await this.Database.GetOrRegisterUserAsync(this.Owner)).Entity;
                 this.Character = new Character
                 {
                     Name = "Test",

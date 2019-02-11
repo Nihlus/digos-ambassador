@@ -35,9 +35,10 @@ using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Services;
 
 using Discord;
-
+using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Image = DIGOS.Ambassador.Database.Data.Image;
@@ -309,19 +310,19 @@ namespace DIGOS.Ambassador.Database
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>Stored information about the user.</returns>
         [ItemNotNull]
-        public async Task<User> GetOrRegisterUserAsync([NotNull] IUser discordUser)
+        public async Task<RetrieveEntityResult<User>> GetOrRegisterUserAsync([NotNull] IUser discordUser)
         {
             if (discordUser.IsBot || discordUser.IsWebhook)
             {
-                throw new InvalidOperationException("A bot or webhook user cannot be registered.");
+                return RetrieveEntityResult<User>.FromError(CommandError.UnmetPrecondition, "A bot or webhook user cannot be registered.");
             }
 
             if (!await IsUserKnownAsync(discordUser))
             {
-                return await AddUserAsync(discordUser);
+                return RetrieveEntityResult<User>.FromSuccess(await AddUserAsync(discordUser));
             }
 
-            return await GetUser(discordUser);
+            return RetrieveEntityResult<User>.FromSuccess(await GetUser(discordUser));
         }
 
         /// <summary>

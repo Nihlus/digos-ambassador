@@ -414,13 +414,26 @@ namespace DIGOS.Ambassador.Services
             [NotNull] IUser targetUser
         )
         {
-            var localProtection = await GetOrCreateServerUserProtectionAsync(db, targetUser, discordServer);
+            var getLocalProtectionResult = await GetOrCreateServerUserProtectionAsync(db, targetUser, discordServer);
+            if (!getLocalProtectionResult.IsSuccess)
+            {
+                return DetermineConditionResult.FromError(getLocalProtectionResult);
+            }
+
+            var localProtection = getLocalProtectionResult.Entity;
+
             if (!localProtection.HasOptedIn)
             {
                 return DetermineConditionResult.FromError("The target hasn't opted into transformations.");
             }
 
-            var globalProtection = await GetOrCreateGlobalUserProtectionAsync(db, targetUser);
+            var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(db, targetUser);
+            if (!getGlobalProtectionResult.IsSuccess)
+            {
+                return DetermineConditionResult.FromError(getGlobalProtectionResult);
+            }
+
+            var globalProtection = getGlobalProtectionResult.Entity;
             switch (localProtection.Type)
             {
                 case ProtectionType.Blacklist:
@@ -579,7 +592,14 @@ namespace DIGOS.Ambassador.Services
             ProtectionType protectionType
         )
         {
-            var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+            var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+            if (!getGlobalProtectionResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getGlobalProtectionResult);
+            }
+
+            var protection = getGlobalProtectionResult.Entity;
+
             if (protection.DefaultType == protectionType)
             {
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, $"{protectionType.Humanize()} is already your default setting.");
@@ -607,7 +627,14 @@ namespace DIGOS.Ambassador.Services
             ProtectionType protectionType
         )
         {
-            var protection = await GetOrCreateServerUserProtectionAsync(db, discordUser, discordServer);
+            var getServerProtectionResult = await GetOrCreateServerUserProtectionAsync(db, discordUser, discordServer);
+            if (!getServerProtectionResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getServerProtectionResult);
+            }
+
+            var protection = getServerProtectionResult.Entity;
+
             if (protection.Type == protectionType)
             {
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, $"{protectionType.Humanize()} is already your current setting.");
@@ -638,7 +665,14 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You can't whitelist yourself.");
             }
 
-            var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+            var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+            if (!getGlobalProtectionResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getGlobalProtectionResult);
+            }
+
+            var protection = getGlobalProtectionResult.Entity;
+
             if (protection.Whitelist.Any(u => u.DiscordID == (long)whitelistedUser.Id))
             {
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already whitelisted that user.");
@@ -647,7 +681,14 @@ namespace DIGOS.Ambassador.Services
             var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == (long)discordUser.Id);
             if (protectionEntry is null)
             {
-                var user = await db.GetOrRegisterUserAsync(whitelistedUser);
+                var getUserResult = await db.GetOrRegisterUserAsync(whitelistedUser);
+                if (!getUserResult.IsSuccess)
+                {
+                    return ModifyEntityResult.FromError(getUserResult);
+                }
+
+                var user = getUserResult.Entity;
+
                 protectionEntry = new UserProtectionEntry
                 {
                     GlobalProtection = protection,
@@ -686,7 +727,14 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You can't blacklist yourself.");
             }
 
-            var protection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+            var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+            if (!getGlobalProtectionResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getGlobalProtectionResult);
+            }
+
+            var protection = getGlobalProtectionResult.Entity;
+
             if (protection.Blacklist.Any(u => u.DiscordID == (long)blacklistedUser.Id))
             {
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already blacklisted that user.");
@@ -695,7 +743,14 @@ namespace DIGOS.Ambassador.Services
             var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == (long)discordUser.Id);
             if (protectionEntry is null)
             {
-                var user = await db.GetOrRegisterUserAsync(blacklistedUser);
+                var getUserResult = await db.GetOrRegisterUserAsync(blacklistedUser);
+                if (!getUserResult.IsSuccess)
+                {
+                    return ModifyEntityResult.FromError(getUserResult);
+                }
+
+                var user = getUserResult.Entity;
+
                 protectionEntry = new UserProtectionEntry
                 {
                     GlobalProtection = protection,
@@ -721,8 +776,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <param name="discordUser">The user.</param>
         /// <returns>Global protection data for the given user.</returns>
-        [ItemNotNull]
-        public async Task<GlobalUserProtection> GetOrCreateGlobalUserProtectionAsync
+        public async Task<RetrieveEntityResult<GlobalUserProtection>> GetOrCreateGlobalUserProtectionAsync
         (
             [NotNull] GlobalInfoContext db,
             [NotNull] IUser discordUser
@@ -735,16 +789,23 @@ namespace DIGOS.Ambassador.Services
 
             if (!(protection is null))
             {
-                return protection;
+                return RetrieveEntityResult<GlobalUserProtection>.FromSuccess(protection);
             }
 
-            var user = await db.GetOrRegisterUserAsync(discordUser);
+            var getUserResult = await db.GetOrRegisterUserAsync(discordUser);
+            if (!getUserResult.IsSuccess)
+            {
+                return RetrieveEntityResult<GlobalUserProtection>.FromError(getUserResult);
+            }
+
+            var user = getUserResult.Entity;
+
             protection = GlobalUserProtection.CreateDefault(user);
 
             await db.GlobalUserProtections.AddAsync(protection);
             await db.SaveChangesAsync();
 
-            return protection;
+            return RetrieveEntityResult<GlobalUserProtection>.FromSuccess(protection);
         }
 
         /// <summary>
@@ -754,8 +815,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="discordUser">The user.</param>
         /// <param name="guild">The server.</param>
         /// <returns>Server-specific protection data for the given user.</returns>
-        [ItemNotNull]
-        public async Task<ServerUserProtection> GetOrCreateServerUserProtectionAsync
+        public async Task<RetrieveEntityResult<ServerUserProtection>> GetOrCreateServerUserProtectionAsync
         (
             [NotNull] GlobalInfoContext db,
             [NotNull] IUser discordUser,
@@ -773,17 +833,24 @@ namespace DIGOS.Ambassador.Services
 
             if (!(protection is null))
             {
-                return protection;
+                return RetrieveEntityResult<ServerUserProtection>.FromSuccess(protection);
             }
 
             var server = await db.GetOrRegisterServerAsync(guild);
-            var globalProtection = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+            var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
+            if (!getGlobalProtectionResult.IsSuccess)
+            {
+                return RetrieveEntityResult<ServerUserProtection>.FromError(getGlobalProtectionResult);
+            }
+
+            var globalProtection = getGlobalProtectionResult.Entity;
+
             protection = ServerUserProtection.CreateDefault(globalProtection, server);
 
             await db.ServerUserProtections.AddAsync(protection);
             await db.SaveChangesAsync();
 
-            return protection;
+            return RetrieveEntityResult<ServerUserProtection>.FromSuccess(protection);
         }
 
         /// <summary>

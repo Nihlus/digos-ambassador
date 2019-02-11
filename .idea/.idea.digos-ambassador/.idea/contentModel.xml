@@ -180,6 +180,7 @@
         <e p="Extensions" t="Include">
           <e p="BodypartExtensions.cs" t="Include" />
           <e p="ChiralityExtensions.cs" t="Include" />
+          <e p="CommandInfoExtensions.cs" t="Include" />
           <e p="DiscordUserExtensions.cs" t="Include" />
           <e p="EnumExtensions.cs" t="Include" />
           <e p="EnumerableExtensions.cs" t="Include" />

@@ -148,8 +148,23 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Shows the kinks which overlap between you and the given user.")]
         public async Task ShowKinkOverlap([NotNull] IUser otherUser)
         {
-            var userKinks = await this.Kinks.GetUserKinksAsync(this.Database, this.Context.User);
-            var otherUserKinks = await this.Kinks.GetUserKinksAsync(this.Database, otherUser);
+            var getUserKinksResult = await this.Kinks.GetUserKinksAsync(this.Database, this.Context.User);
+            if (!getUserKinksResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getUserKinksResult.ErrorReason);
+                return;
+            }
+
+            var userKinks = getUserKinksResult.Entity;
+
+            var getOtherUserKinksResult = await this.Kinks.GetUserKinksAsync(this.Database, otherUser);
+            if (!getOtherUserKinksResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getOtherUserKinksResult.ErrorReason);
+                return;
+            }
+
+            var otherUserKinks = getOtherUserKinksResult.Entity;
 
             var overlap = userKinks.Intersect(otherUserKinks, new UserKinkOverlapEqualityComparer()).ToList();
 
@@ -195,7 +210,15 @@ namespace DIGOS.Ambassador.Modules
             KinkPreference preference
         )
         {
-            var userKinks = await this.Kinks.GetUserKinksAsync(this.Database, otherUser);
+            var getUserKinksResult = await this.Kinks.GetUserKinksAsync(this.Database, otherUser);
+            if (!getUserKinksResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, getUserKinksResult.ErrorReason);
+                return;
+            }
+
+            var userKinks = getUserKinksResult.Entity;
+
             var withPreference = userKinks.Where(k => k.Preference == preference).ToList();
 
             if (!withPreference.Any())

@@ -49,15 +49,34 @@ namespace DIGOS.Ambassador.Services
         }
 
         /// <summary>
-        /// Creates an informational embed field about a command.
+        /// Creates a simplified command info embed field.
         /// </summary>
         /// <param name="command">The command.</param>
-        /// <returns>The embed field.</returns>
-        public EmbedFieldBuilder CreateCommandInfoEmbed([NotNull] CommandInfo command)
+        /// <returns>The field builder.</returns>
+        [NotNull]
+        public EmbedFieldBuilder CreateCommandInfoEmbedField([NotNull] CommandInfo command)
         {
-            var relevantAliases = command.Aliases
+            var fieldBuilder = new EmbedFieldBuilder();
+
+            fieldBuilder.WithName(command.GetActualName());
+            fieldBuilder.WithValue(command.Summary);
+
+            return fieldBuilder;
+        }
+
+        /// <summary>
+        /// Creates an informational embed field about a command.
+        /// </summary>
+        /// <param name="commandGroup">The command.</param>
+        /// <returns>The embed field.</returns>
+        [NotNull]
+        public EmbedBuilder CreateDetailedCommandInfoEmbed([NotNull] IGrouping<string, CommandInfo> commandGroup)
+        {
+            var eb = this.Feedback.CreateEmbedBase();
+
+            var relevantAliases = commandGroup.SelectMany(c => c.Aliases).Distinct()
                 .Skip(1)
-                .Where(a => a.StartsWith(command.Module.Aliases.First()))
+                .Where(a => a.StartsWith(commandGroup.First().Module.Aliases.First()))
                 .ToList();
 
             var prefix = relevantAliases.Count > 1
@@ -68,26 +87,53 @@ namespace DIGOS.Ambassador.Services
                 ? $"({prefix} {relevantAliases.Humanize("or")})"
                 : string.Empty;
 
-            var commandDisplayAliases = $"{command.Aliases.First()} {commandExtraAliases}";
+            eb.WithTitle($"{commandGroup.Key} {commandExtraAliases}");
 
-            var commandInfoContent = BuildParameterList(command);
+            eb.WithDescription
+            (
+                "All the variants of the command are shown below. Text in italics after a variant are parameters, and" +
+                " are listed in more detail below the command itself.\n" +
+                "\n" +
+                "Parameters inside [brackets] are optional, and can be omitted.\n" +
+                "\u200b"
+            );
 
-            var contexts = command.Preconditions
-                .Where(a => a is RequireContextAttribute)
-                .Cast<RequireContextAttribute>()
-                .SingleOrDefault()?.Contexts;
-
-            if (!(contexts is null))
+            foreach (var variant in commandGroup)
             {
-                var separateContexts = contexts.ToString().Split(',');
-                separateContexts = separateContexts.Select(c => c.Pluralize()).ToArray();
+                eb.AddField($"{variant.Name} {BuildParameterList(variant)}", variant.Summary);
 
-                commandInfoContent += '\n';
-                commandInfoContent += $"*This command can only be used in {separateContexts.Humanize()}.*"
-                    .Transform(To.SentenceCase);
+                var parameterList = BuildDetailedParameterList(variant).ToList();
+                if (parameterList.Any())
+                {
+                    eb.AddField("Parameters", string.Join(", \n", parameterList));
+                }
+
+                var contexts = variant.Preconditions
+                    .Where(a => a is RequireContextAttribute)
+                    .Cast<RequireContextAttribute>()
+                    .SingleOrDefault()?.Contexts;
+
+                if (!(contexts is null))
+                {
+                    var separateContexts = contexts.ToString().Split(',');
+                    separateContexts = separateContexts.Select(c => c.Pluralize()).ToArray();
+
+                    var restrictions = $"*Can only be used in {separateContexts.Humanize()}.*"
+                        .Transform(To.SentenceCase);
+
+                    eb.AddField("Restrictions", restrictions);
+                }
+
+                if (variant != commandGroup.Last())
+                {
+                    var previousField = eb.Fields.Last();
+
+                    // Add a spacer
+                    previousField.WithValue($"{previousField.Value}\n\u200b");
+                }
             }
 
-            return new EmbedFieldBuilder().WithName(commandDisplayAliases).WithValue(commandInfoContent);
+            return eb;
         }
 
         /// <summary>
@@ -111,22 +157,27 @@ namespace DIGOS.Ambassador.Services
         }
 
         /// <summary>
-        /// Builds a human-readable parameter list for a command.
+        /// Builds a simplified human-readable parameter list for a command.
         /// </summary>
-        /// <param name="commandInfo">The command to get the parameters from.</param>
+        /// <param name="command">The command to get the parameters from.</param>
         /// <returns>A humanized parameter list.</returns>
         [Pure]
         [NotNull]
-        public string BuildParameterList([NotNull] CommandInfo commandInfo)
+        public string BuildParameterList([NotNull] CommandInfo command)
         {
+            if (!command.Parameters.Any())
+            {
+                return string.Empty;
+            }
+
             var result = string.Join
             (
-                ", ",
-                commandInfo.Parameters.Select
+                " ",
+                command.Parameters.Select
                 (
                     p =>
                     {
-                        var parameterInfo = $"{p.Type.Humanize()} {p.Name}";
+                        var parameterInfo = $"{p.Name}";
                         if (p.IsOptional)
                         {
                             parameterInfo = $"[{parameterInfo}]";
@@ -137,12 +188,41 @@ namespace DIGOS.Ambassador.Services
                 )
             );
 
-            if (result.IsNullOrWhitespace())
+            return $"*{result}*";
+        }
+
+        /// <summary>
+        /// Builds a detailed human-readable parameter list for a command.
+        /// </summary>
+        /// <param name="command">The command to get the parameters from.</param>
+        /// <returns>A humanized parameter list.</returns>
+        [Pure]
+        [NotNull, ItemNotNull]
+        public IEnumerable<string> BuildDetailedParameterList([NotNull] CommandInfo command)
+        {
+            if (!command.Parameters.Any())
             {
-                return "No parameters";
+                yield break;
             }
 
-            return result;
+            var parameters = command.Parameters.Select
+            (
+                p =>
+                {
+                    var parameterInfo = $"{p.Type.Humanize()} *{p.Name}*";
+                    if (p.IsOptional)
+                    {
+                        parameterInfo = $"[{parameterInfo}]";
+                    }
+
+                    return parameterInfo;
+                }
+            );
+
+            foreach (var parameter in parameters)
+            {
+                yield return parameter;
+            }
         }
     }
 }

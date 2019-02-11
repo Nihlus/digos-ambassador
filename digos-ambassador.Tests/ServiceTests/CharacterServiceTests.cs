@@ -416,7 +416,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+                this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
 
                 this.Character = new Character
                 {
@@ -483,7 +483,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+                this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
             }
 
             [Fact]
@@ -884,6 +884,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
+                var client = new DiscordSocketClient();
+
                 this.Services = new ServiceCollection()
                     .AddSingleton(this.Database)
                     .AddSingleton<ContentService>()
@@ -894,7 +896,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     .AddSingleton<TransformationService>()
                     .AddSingleton<InteractivityService>()
                     .AddSingleton<CharacterService>()
-                    .AddSingleton(new DiscordSocketClient())
+                    .AddSingleton(client)
+                    .AddSingleton<BaseSocketClient>(client)
                     .BuildServiceProvider();
 
                 this.Commands.AddTypeReader<Character>(new CharacterTypeReader());
@@ -980,7 +983,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+                this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
                 this.Character = new Character { AvatarUrl = AvatarURL, Owner = this.Owner };
 
                 this.Database.Characters.Add(this.Character);
@@ -1045,7 +1048,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+                this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
                 this.Character = new Character { Nickname = Nickname, Owner = this.Owner };
 
                 this.Database.Characters.Add(this.Character);
@@ -1118,7 +1121,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+                this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
                 this.Character = new Character { Summary = Summary, Owner = this.Owner };
 
                 this.Database.Characters.Add(this.Character);
@@ -1191,7 +1194,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+                this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
                 this.Character = new Character { Description = Description, Owner = this.Owner };
 
                 this.Database.Characters.Add(this.Character);
@@ -1258,7 +1261,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 this.Characters.WithPronounProvider(new TheyPronounProvider());
                 this.Characters.WithPronounProvider(new ZeHirPronounProvider());
 
-                this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+                this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
                 this.Character = new Character { PronounProviderFamily = PronounFamily, Owner = this.Owner };
 
                 this.Database.Characters.Add(this.Character);
@@ -1332,7 +1335,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.Owner = await this.Database.GetOrRegisterUserAsync(this.User);
+                this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
                 this.Character = new Character { IsNSFW = IsNSFW, Owner = this.Owner };
 
                 this.Database.Characters.Add(this.Character);
@@ -1557,7 +1560,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.User = await this.Database.GetOrRegisterUserAsync(this.Owner);
+                this.User = (await this.Database.GetOrRegisterUserAsync(this.Owner)).Entity;
 
                 this.Character = new Character
                 {
@@ -1632,7 +1635,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.User = await this.Database.GetOrRegisterUserAsync(this.Owner);
+                this.User = (await this.Database.GetOrRegisterUserAsync(this.Owner)).Entity;
 
                 this.Character = new Character
                 {
