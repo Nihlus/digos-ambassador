@@ -57,7 +57,6 @@ namespace DIGOS.Ambassador.Modules
         /// Initializes a new instance of the <see cref="HelpCommands"/> class.
         /// </summary>
         /// <param name="commands">The command service.</param>
-        /// <param name="services">All available services.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="interactive">The interactive service.</param>
         /// <param name="help">The help service.</param>

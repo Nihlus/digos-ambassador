@@ -30,7 +30,6 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Services.Interactivity.Messages;
 
 using Discord;
@@ -51,8 +50,6 @@ namespace DIGOS.Ambassador.Wizards
         private readonly GlobalInfoContext Database;
         private readonly UserFeedbackService Feedback;
         private readonly KinkService Kinks;
-
-        private readonly InteractivityService Interactivity;
 
         private readonly IUser TargetUser;
 
@@ -100,21 +97,18 @@ namespace DIGOS.Ambassador.Wizards
         /// <param name="database">A database context from the context pool.</param>
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="kinkService">The kink service.</param>
-        /// <param name="interactiveService">The interactive service.</param>
         /// <param name="targetUser">The target user.</param>
         public KinkWizard
         (
             GlobalInfoContext database,
             UserFeedbackService feedback,
             KinkService kinkService,
-            InteractivityService interactiveService,
             IUser targetUser
         )
         {
             this.Database = database;
             this.Feedback = feedback;
             this.Kinks = kinkService;
-            this.Interactivity = interactiveService;
 
             this.TargetUser = targetUser;
 

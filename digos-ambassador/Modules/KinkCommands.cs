@@ -280,7 +280,6 @@ namespace DIGOS.Ambassador.Modules
                 this.Database,
                 this.Feedback,
                 this.Kinks,
-                this.Interactivity,
                 this.Context.User
             );
 
