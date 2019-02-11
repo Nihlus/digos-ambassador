@@ -314,7 +314,11 @@ namespace DIGOS.Ambassador.Database
         {
             if (discordUser.IsBot || discordUser.IsWebhook)
             {
-                return RetrieveEntityResult<User>.FromError(CommandError.UnmetPrecondition, "A bot or webhook user cannot be registered.");
+                return RetrieveEntityResult<User>.FromError
+                (
+                    CommandError.UnmetPrecondition,
+                    "Users cannot be viewed or created for bots or webhooks."
+                );
             }
 
             if (!await IsUserKnownAsync(discordUser))
