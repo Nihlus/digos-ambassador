@@ -459,7 +459,6 @@ namespace DIGOS.Ambassador.Wizards
         /// Gets the emotes that are associated with the current page.
         /// </summary>
         /// <returns>A set of emotes.</returns>
-        [NotNull]
         public IEnumerable<IEmote> GetCurrentPageEmotes()
         {
             switch (this.State)

@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,12 +28,7 @@ using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Wizards;
-
-using Discord;
 using Discord.Commands;
-using Discord.Net;
-
-using Humanizer;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Modules

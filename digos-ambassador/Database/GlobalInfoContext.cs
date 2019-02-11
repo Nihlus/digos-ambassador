@@ -309,7 +309,6 @@ namespace DIGOS.Ambassador.Database
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>Stored information about the user.</returns>
-        [ItemNotNull]
         public async Task<RetrieveEntityResult<User>> GetOrRegisterUserAsync([NotNull] IUser discordUser)
         {
             if (discordUser.IsBot || discordUser.IsWebhook)

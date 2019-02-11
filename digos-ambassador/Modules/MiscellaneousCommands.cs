@@ -20,8 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Extensions;
@@ -30,7 +28,6 @@ using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
-using Humanizer;
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
 

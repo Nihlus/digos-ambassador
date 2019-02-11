@@ -22,8 +22,6 @@
 
 using System;
 using System.Threading.Tasks;
-
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity.Messages;
 

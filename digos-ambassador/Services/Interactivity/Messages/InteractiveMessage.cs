@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -60,6 +61,11 @@ namespace DIGOS.Ambassador.Services.Interactivity.Messages
         /// <inheritdoc />
         public Task DeleteAsync()
         {
+            if (this.Message is null)
+            {
+                throw new InvalidOperationException("The message hasn't been sent yet.");
+            }
+
             return this.Message.DeleteAsync();
         }
 

@@ -21,8 +21,6 @@
 //
 
 using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Extensions

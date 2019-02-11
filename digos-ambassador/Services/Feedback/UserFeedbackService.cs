@@ -21,15 +21,9 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-
-using DIGOS.Ambassador.Extensions;
-
 using Discord;
 using Discord.Commands;
-using Discord.WebSocket;
 using JetBrains.Annotations;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
