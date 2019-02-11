@@ -150,7 +150,11 @@ namespace DIGOS.Ambassador.Services
 
             foreach (var matchingCommand in matchingCommands)
             {
-                eb.AddField($"{matchingCommand.Alias}", BuildParameterList(matchingCommand.Command));
+                eb.AddField
+                (
+                    $"{matchingCommand.Alias} {BuildParameterList(matchingCommand.Command)}",
+                    matchingCommand.Command.Summary
+                );
             }
 
             return eb.Build();
