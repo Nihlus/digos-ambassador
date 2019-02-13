@@ -174,7 +174,11 @@ namespace DIGOS.Ambassador.Services
         /// <param name="variables">Any variables to pass to the snippet as globals.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [NotNull]
-        public Task<RetrieveEntityResult<string>> ExecuteSnippetAsync(string snippet, params (string name, object value)[] variables)
+        public Task<RetrieveEntityResult<string>> ExecuteSnippetAsync
+        (
+            string snippet,
+            params (string name, object value)[] variables
+        )
         {
             return Task.Run
             (
@@ -194,16 +198,28 @@ namespace DIGOS.Ambassador.Services
 
                         if (!(result is null) && result.EndsWith("timeout!"))
                         {
-                            return RetrieveEntityResult<string>.FromError(CommandError.Unsuccessful, "Timed out while waiting for the script to complete.");
+                            return RetrieveEntityResult<string>.FromError
+                            (
+                                CommandError.Unsuccessful,
+                                "Timed out while waiting for the script to complete."
+                            );
                         }
 
                         string erroringFunction = this.GetErroringFunctionRegex.Match(result ?? string.Empty).Value;
                         if (!this.FunctionWhitelist.Contains(erroringFunction))
                         {
-                            return RetrieveEntityResult<string>.FromError(CommandError.UnmetPrecondition, "Usage of that API is prohibited.");
+                            return RetrieveEntityResult<string>.FromError
+                            (
+                                CommandError.UnmetPrecondition,
+                                $"Usage of {erroringFunction} is prohibited."
+                            );
                         }
 
-                        return RetrieveEntityResult<string>.FromError(CommandError.ParseFailed, $"Lua error: {result}");
+                        return RetrieveEntityResult<string>.FromError
+                        (
+                            CommandError.ParseFailed,
+                            $"Lua error: {result}"
+                        );
                     }
                 }
             );
