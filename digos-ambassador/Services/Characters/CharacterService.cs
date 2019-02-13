@@ -1158,5 +1158,65 @@ namespace DIGOS.Ambassador.Services
 
             return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
         }
+
+        /// <summary>
+        /// Sets the custom role of a character.
+        /// TODO: Write unit test
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="character">The character.</param>
+        /// <param name="characterRole">The role to set.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetCharacterRoleAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] Character character,
+            [NotNull] CharacterRole characterRole
+        )
+        {
+            if (character.Role == characterRole)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.Unsuccessful,
+                    "The character already has that role."
+                );
+            }
+
+            character.Role = characterRole;
+
+            await db.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+        }
+
+        /// <summary>
+        /// Clears the custom role of a character.
+        /// TODO: Write unit test
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="character">The character.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> ClearCharacterRoleAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] Character character
+        )
+        {
+            if (character.Role is null)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.Unsuccessful,
+                    "The character doesn't have a role set."
+                );
+            }
+
+            character.Role = null;
+
+            await db.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+        }
     }
 }
