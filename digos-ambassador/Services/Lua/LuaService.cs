@@ -146,10 +146,36 @@ namespace DIGOS.Ambassador.Services
             state.DoString
             (
                 @"
+                local debug = require ""debug""
+
+                if not setfenv then -- Lua 5.2+
+                    -- based on http://lua-users.org/lists/lua-l/2010-06/msg00314.html
+                    -- this assumes f is a function
+                    local function findenv(f)
+                        local level = 1
+                        repeat
+                            local name, value = debug.getupvalue(f, level)
+                            if name == '_ENV' then return level, value end
+                            level = level + 1
+                        until name == nil
+                        return nil end
+                    getfenv = function (f) return(select(2, findenv(f)) or _G) end
+                    setfenv = function (f, t)
+                        local level = findenv(f)
+                        if level then debug.setupvalue(f, level, t) end
+                        return f end
+                end
+
                 function run(untrusted_code)
-                    if untrusted_code:byte(1) == 27 then return nil, ""binary bytecode prohibited"" end
-                    local untrusted_function, message = loadstring(untrusted_code)
-                    if not untrusted_function then return nil, message end
+                    if untrusted_code:byte(1) == 27 then
+                        return nil, ""binary bytecode prohibited""
+                    end
+
+                    local untrusted_function, message = load(untrusted_code)
+                    if not untrusted_function then
+                        return nil, message
+                    end
+
                     setfenv(untrusted_function, env)
                     return pcall(untrusted_function)
                 end

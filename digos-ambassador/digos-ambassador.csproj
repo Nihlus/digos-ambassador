@@ -40,7 +40,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
     <PackageReference Include="morelinq" Version="3.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="NLua_Safe" Version="1.3.2.1" />
+    <PackageReference Include="NLua" Version="1.4.9" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta006" />
     <PackageReference Include="WebSocketSharp.CustomHeaders.Standard" Version="1.0.2" />
