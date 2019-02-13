@@ -1010,5 +1010,153 @@ namespace DIGOS.Ambassador.Services
 
             return CreateEntityResult<Character>.FromSuccess(getCharacterResult.Entity);
         }
+
+        /// <summary>
+        /// Creates a new character role from the given Discord role and access condition.
+        /// TODO: Write unit test
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="role">The discord role.</param>
+        /// <param name="access">The access conditions.</param>
+        /// <returns>A creation result which may or may not have succeeded.</returns>
+        public async Task<CreateEntityResult<CharacterRole>> CreateCharacterRoleAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] IRole role,
+            RoleAccess access
+        )
+        {
+            var getExistingRoleResult = await GetCharacterRoleAsync(db, role);
+            if (getExistingRoleResult.IsSuccess)
+            {
+                return CreateEntityResult<CharacterRole>.FromError
+                (
+                    CommandError.MultipleMatches,
+                    "That role is already registered as a character role."
+                );
+            }
+
+            var server = await db.GetOrRegisterServerAsync(role.Guild);
+
+            var characterRole = new CharacterRole
+            {
+                Server = server,
+                DiscordID = (long)role.Id,
+                Access = access
+            };
+
+            await db.CharacterRoles.AddAsync(characterRole);
+            await db.SaveChangesAsync();
+
+            return CreateEntityResult<CharacterRole>.FromSuccess(characterRole);
+        }
+
+        /// <summary>
+        /// Deletes the character role for the given Discord role.
+        /// TODO: Write unit test.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="role">The character role.</param>
+        /// <returns>A deletion result which may or may not have succeeded.</returns>
+        public async Task<DeleteEntityResult> DeleteCharacterRoleAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] CharacterRole role
+        )
+        {
+            db.CharacterRoles.Remove(role);
+            await db.SaveChangesAsync();
+
+            return DeleteEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Gets an existing character role from the database.
+        /// TODO: Write unit test.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="role">The discord role.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<CharacterRole>> GetCharacterRoleAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] IRole role
+        )
+        {
+            var characterRole = await db.CharacterRoles
+                .Include(r => r.Server)
+                .FirstOrDefaultAsync(r => r.Server.DiscordID == (long)role.Guild.Id && r.DiscordID == (long)role.Id);
+
+            if (characterRole is null)
+            {
+                return RetrieveEntityResult<CharacterRole>.FromError
+                (
+                    CommandError.ObjectNotFound,
+                    "That role is not registered as a character role."
+                );
+            }
+
+            return RetrieveEntityResult<CharacterRole>.FromSuccess(characterRole);
+        }
+
+        /// <summary>
+        /// Sets the access conditions for the given character role.
+        /// TODO: Write unit test
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="role">The character role.</param>
+        /// <param name="access">The access conditions.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetCharacterRoleAccessAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] CharacterRole role,
+            RoleAccess access
+        )
+        {
+            if (role.Access == access)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.Unsuccessful,
+                    "The role already has those access conditions."
+                );
+            }
+
+            role.Access = access;
+            await db.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+        }
+
+        /// <summary>
+        /// Sets the Discord role for the given character role.
+        /// TODO: Write unit test
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="characterRole">The character role.</param>
+        /// <param name="role">The discord.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetCharacterRoleRoleAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] CharacterRole characterRole,
+            [NotNull] IRole role
+        )
+        {
+            if (characterRole.DiscordID == (long)role.Id)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.Unsuccessful,
+                    "The role already has that discord role."
+                );
+            }
+
+            characterRole.DiscordID = (long)role.Id;
+            await db.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+        }
     }
 }

@@ -205,6 +205,17 @@ namespace DIGOS.Ambassador.Database
         }
 
         /// <summary>
+        /// Gets or sets the table where character roles are stored.
+        /// </summary>
+        public DbSet<CharacterRole> CharacterRoles
+        {
+            get;
+
+            [UsedImplicitly]
+            set;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
         /// </summary>
         /// <param name="options">The context options.</param>

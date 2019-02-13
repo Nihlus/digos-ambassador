@@ -109,6 +109,12 @@ namespace DIGOS.Ambassador.Database.Characters
         public string PronounProviderFamily { get; set; }
 
         /// <summary>
+        /// Gets or sets a custom role that gets applied along with the character, similar to a nickname.
+        /// </summary>
+        [CanBeNull]
+        public CharacterRole Role { get; set; }
+
+        /// <summary>
         /// Determines whether or not the character has a given bodypart in their current appearance.
         /// </summary>
         /// <param name="bodypart">The bodypart to check for.</param>
