@@ -103,6 +103,7 @@ namespace DIGOS.Ambassador.Services
             "os.time",
         };
 
+        [NotNull]
         private readonly ContentService ContentService;
 
         private readonly Regex GetErroringFunctionRegex =
@@ -112,7 +113,7 @@ namespace DIGOS.Ambassador.Services
         /// Initializes a new instance of the <see cref="LuaService"/> class.
         /// </summary>
         /// <param name="contentService">The application's content service.</param>
-        public LuaService(ContentService contentService)
+        public LuaService([NotNull] ContentService contentService)
         {
             this.ContentService = contentService;
         }
@@ -144,7 +145,8 @@ namespace DIGOS.Ambassador.Services
 
             state.DoString
             (
-                @"function run(untrusted_code)
+                @"
+                function run(untrusted_code)
                     if untrusted_code:byte(1) == 27 then return nil, ""binary bytecode prohibited"" end
                     local untrusted_function, message = loadstring(untrusted_code)
                     if not untrusted_function then return nil, message end
@@ -157,7 +159,8 @@ namespace DIGOS.Ambassador.Services
             // Add a script timeout after 1e8 VM instructions
             state.DoString
             (
-                @"function f()
+                @"
+                function f()
                     error(""timeout!"")
                 end
                 debug.sethook(f,"""", 1e8)
@@ -176,8 +179,8 @@ namespace DIGOS.Ambassador.Services
         [NotNull]
         public Task<RetrieveEntityResult<string>> ExecuteSnippetAsync
         (
-            string snippet,
-            params (string name, object value)[] variables
+            [NotNull] string snippet,
+            [NotNull] params (string name, object value)[] variables
         )
         {
             return Task.Run
@@ -231,7 +234,12 @@ namespace DIGOS.Ambassador.Services
         /// <param name="scriptPath">The path to the file which should be executed.</param>
         /// <param name="variables">Any variables to pass to the script as globals.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync([NotNull] [PathReference] string scriptPath, params (string name, object value)[] variables)
+        [NotNull]
+        public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync
+        (
+            [NotNull, PathReference] string scriptPath,
+            [NotNull] params (string name, object value)[] variables
+        )
         {
             var getScriptResult = this.ContentService.OpenLocalStream(scriptPath);
             if (!getScriptResult.IsSuccess)
