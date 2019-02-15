@@ -699,6 +699,151 @@ namespace DIGOS.Ambassador.Modules
         }
 
         /// <summary>
+        /// Role-related commands.
+        /// </summary>
+        public class RoleCommands : ModuleBase<SocketCommandContext>
+        {
+            private readonly GlobalInfoContext Database;
+            private readonly DiscordService Discord;
+
+            private readonly UserFeedbackService Feedback;
+
+            private readonly CharacterService Characters;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RoleCommands"/> class.
+            /// </summary>
+            /// <param name="database">A database context from the context pool.</param>
+            /// <param name="discordService">The Discord integration service.</param>
+            /// <param name="feedbackService">The feedback service.</param>
+            /// <param name="characterService">The character service.</param>
+            public RoleCommands
+            (
+                GlobalInfoContext database,
+                DiscordService discordService,
+                UserFeedbackService feedbackService,
+                CharacterService characterService
+            )
+            {
+                this.Database = database;
+                this.Discord = discordService;
+                this.Feedback = feedbackService;
+                this.Characters = characterService;
+            }
+
+            /// <summary>
+            /// Creates a new character role linked to a Discord role.
+            /// </summary>
+            /// <param name="discordRole">The discord role.</param>
+            /// <param name="access">The access for the role.</param>
+            [UsedImplicitly]
+            [Command("create", RunMode = Async)]
+            [Summary("Creates a new character role linked to a Discord role.")]
+            [RequireContext(Guild)]
+            [RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "You must be allowed to manage roles.")]
+            public async Task CreateCharacterRoleAsync
+            (
+                [NotNull] IRole discordRole,
+                RoleAccess access = RoleAccess.Open
+            )
+            {
+                var createRoleResult = await this.Characters.CreateCharacterRoleAsync
+                (
+                    this.Database,
+                    discordRole,
+                    access
+                );
+
+                if (!createRoleResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, createRoleResult.ErrorReason);
+                    return;
+                }
+
+                await this.Feedback.SendConfirmationAsync(this.Context, "Character role created.");
+            }
+
+            /// <summary>
+            /// Deletes the character role for a given discord role.
+            /// </summary>
+            /// <param name="discordRole">The discord role.</param>
+            [UsedImplicitly]
+            [Alias("delete", "remove", "erase")]
+            [Command("delete", RunMode = Async)]
+            [Summary("Deletes the character role for a given discord role.")]
+            [RequireContext(Guild)]
+            [RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "You must be allowed to manage roles.")]
+            public async Task DeleteCharacterRoleAsync
+            (
+                [NotNull] IRole discordRole
+            )
+            {
+                var getExistingRoleResult = await this.Characters.GetCharacterRoleAsync(this.Database, discordRole);
+                if (!getExistingRoleResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getExistingRoleResult.ErrorReason);
+                    return;
+                }
+
+                var deleteRoleResult = await this.Characters.DeleteCharacterRoleAsync
+                (
+                    this.Database,
+                    getExistingRoleResult.Entity
+                );
+
+                if (!deleteRoleResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, deleteRoleResult.ErrorReason);
+                    return;
+                }
+
+                await this.Feedback.SendConfirmationAsync(this.Context, "Character role deleted.");
+            }
+
+            /// <summary>
+            /// Sets the access conditions for the given role.
+            /// </summary>
+            /// <param name="discordRole">The discord role.</param>
+            /// <param name="access">The new access conditions.</param>
+            [UsedImplicitly]
+            [Command("access", RunMode = Async)]
+            [Summary("Sets the access conditions for the given role.")]
+            [RequireContext(Guild)]
+            [RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "You must be allowed to manage roles.")]
+            public async Task SetCharacterRoleAccess
+            (
+                [NotNull] IRole discordRole,
+                RoleAccess access
+            )
+            {
+                var getExistingRoleResult = await this.Characters.GetCharacterRoleAsync(this.Database, discordRole);
+                if (!getExistingRoleResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getExistingRoleResult.ErrorReason);
+                    return;
+                }
+
+                var setRoleAccessResult = await this.Characters.SetCharacterRoleAccessAsync
+                (
+                    this.Database,
+                    getExistingRoleResult.Entity,
+                    access
+                );
+
+                if (!setRoleAccessResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, setRoleAccessResult.ErrorReason);
+                    return;
+                }
+
+                await this.Feedback.SendConfirmationAsync
+                (
+                    this.Context, "Character role access conditions set."
+                );
+            }
+        }
+
+        /// <summary>
         /// Property setter commands for characters.
         /// </summary>
         [UsedImplicitly]

@@ -1130,36 +1130,6 @@ namespace DIGOS.Ambassador.Services
         }
 
         /// <summary>
-        /// Sets the Discord role for the given character role.
-        /// TODO: Write unit test
-        /// </summary>
-        /// <param name="db">The database.</param>
-        /// <param name="characterRole">The character role.</param>
-        /// <param name="role">The discord.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterRoleRoleAsync
-        (
-            [NotNull] GlobalInfoContext db,
-            [NotNull] CharacterRole characterRole,
-            [NotNull] IRole role
-        )
-        {
-            if (characterRole.DiscordID == (long)role.Id)
-            {
-                return ModifyEntityResult.FromError
-                (
-                    CommandError.Unsuccessful,
-                    "The role already has that discord role."
-                );
-            }
-
-            characterRole.DiscordID = (long)role.Id;
-            await db.SaveChangesAsync();
-
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
-        }
-
-        /// <summary>
         /// Sets the custom role of a character.
         /// TODO: Write unit test
         /// </summary>
