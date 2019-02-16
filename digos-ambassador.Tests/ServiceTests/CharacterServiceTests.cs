@@ -181,7 +181,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulResultIfOwnerIsNullAndMoreThanOneCharacterWithThatNameExists()
+            public async Task ReturnsInvokersCharacterIfOwnerIsNullAndMoreThanOneCharacterWithThatNameExists()
             {
                 var anotherCharacter = new Character
                 {
@@ -195,8 +195,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, this.Context, null, CharacterName);
 
-                Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.MultipleMatches, result.Error);
+                Assert.True(result.IsSuccess);
+                Assert.Same(this.Character, result.Entity);
             }
 
             [Fact]
