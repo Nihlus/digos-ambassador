@@ -166,6 +166,21 @@ namespace DIGOS.Ambassador.Services
 
             if (characterOwner is null)
             {
+                // Search the invoker's characters first
+                var invoker = context.User;
+                var invokerCharacterResult = await GetUserCharacterByNameAsync
+                (
+                    db,
+                    context,
+                    invoker,
+                    characterName
+                );
+
+                if (invokerCharacterResult.IsSuccess)
+                {
+                    return invokerCharacterResult;
+                }
+
                 return await GetNamedCharacterAsync(db, characterName, context.Guild);
             }
 
