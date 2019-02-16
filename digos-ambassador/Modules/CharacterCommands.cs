@@ -853,7 +853,7 @@ namespace DIGOS.Ambassador.Modules
                     "These are the roles you can apply to your characters to automatically switch you to that role " +
                     "when you assume the character.\n" +
                     "\n" +
-                    "In order to avoid mentioning everyone that has the role, use the numerical ID instead of the" +
+                    "In order to avoid mentioning everyone that has the role, use the numerical ID instead of the " +
                     "actual mention. The ID is listed below along with the role."
                 );
 
