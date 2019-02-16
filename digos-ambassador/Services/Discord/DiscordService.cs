@@ -21,7 +21,9 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -98,7 +100,129 @@ namespace DIGOS.Ambassador.Services
             }
             catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
             {
-                return ModifyEntityResult.FromError(CommandError.Exception, "I couldn't modify the nickname due to a priority issue.");
+                return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I couldn't modify the nickname due to a priority issue.");
+            }
+
+            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+        }
+
+        /// <summary>
+        /// Adds the given role to the given user.
+        /// </summary>
+        /// <param name="context">The command context.</param>
+        /// <param name="guildUser">The user.</param>
+        /// <param name="role">The role.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> AddUserRoleAsync
+        (
+            [NotNull] SocketCommandContext context,
+            [NotNull] IGuildUser guildUser,
+            [NotNull] IRole role
+        )
+        {
+            if (!HasPermission(context, GuildPermission.ManageRoles))
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.UnmetPrecondition, "I'm not allowed to manage roles on this server."
+                );
+            }
+
+            if (guildUser.RoleIds.Contains(role.Id))
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.Unsuccessful,
+                    "The user already has that role."
+                );
+            }
+
+            try
+            {
+                await guildUser.ModifyAsync
+                (
+                    u =>
+                    {
+                        IEnumerable<IRole> existingRoles = new List<IRole>();
+                        if (u.Roles.IsSpecified)
+                        {
+                            existingRoles = u.Roles.Value;
+                        }
+
+                        var newRoles = new List<IRole> { role };
+
+                        u.Roles = new Optional<IEnumerable<IRole>>(existingRoles.Concat(newRoles));
+                    }
+                );
+            }
+            catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.UnmetPrecondition,
+                    "I couldn't modify the roles due to a priority issue."
+                );
+            }
+
+            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+        }
+
+        /// <summary>
+        /// Removes the given role from the given user.
+        /// </summary>
+        /// <param name="context">The command context.</param>
+        /// <param name="guildUser">The user.</param>
+        /// <param name="role">The role.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> RemoveUserRoleAsync
+        (
+            [NotNull] SocketCommandContext context,
+            [NotNull] IGuildUser guildUser,
+            [NotNull] IRole role
+        )
+        {
+            if (!HasPermission(context, GuildPermission.ManageRoles))
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.UnmetPrecondition, "I'm not allowed to manage roles on this server."
+                );
+            }
+
+            if (!guildUser.RoleIds.Contains(role.Id))
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.Unsuccessful,
+                    "The user doesn't have that role."
+                );
+            }
+
+            try
+            {
+                await guildUser.ModifyAsync
+                (
+                    u =>
+                    {
+                        IEnumerable<IRole> existingRoles = new List<IRole>();
+                        if (u.Roles.IsSpecified)
+                        {
+                            existingRoles = u.Roles.Value;
+                        }
+
+                        var removedRoles = new List<IRole> { role };
+
+                        u.Roles = new Optional<IEnumerable<IRole>>(existingRoles.Except(removedRoles));
+                    }
+                );
+            }
+            catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.UnmetPrecondition,
+                    "I couldn't modify the roles due to a priority issue."
+                );
             }
 
             return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);

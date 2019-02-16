@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -348,11 +349,26 @@ namespace DIGOS.Ambassador.Modules
         {
             this.Database.Attach(character);
 
+            var getPreviousCharacterResult = await this.Characters.GetCurrentCharacterAsync
+            (
+                this.Database,
+                this.Context,
+                this.Context.User
+            );
+
+            CharacterRole previousRole = null;
+            if (getPreviousCharacterResult.IsSuccess)
+            {
+                previousRole = getPreviousCharacterResult.Entity.Role;
+            }
+
             await this.Characters.MakeCharacterCurrentOnServerAsync(this.Database, this.Context, this.Context.Guild, character);
 
-            if (!character.Nickname.IsNullOrWhitespace() && this.Context.Message.Author is IGuildUser guildUser)
+            var guildUser = (IGuildUser)this.Context.User;
+            var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+
+            if (!character.Nickname.IsNullOrWhitespace())
             {
-                var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
                 var modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, character.Nickname);
                 if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
                 {
@@ -360,9 +376,57 @@ namespace DIGOS.Ambassador.Modules
                 }
             }
 
-            await this.Database.SaveChangesAsync();
+            if (!(previousRole is null))
+            {
+                var previousDiscordRole = this.Context.Guild.GetRole((ulong)previousRole.DiscordID);
+                var removePreviousRoleResult = await this.Discord.RemoveUserRoleAsync
+                (
+                    this.Context,
+                    guildUser,
+                    previousDiscordRole
+                );
 
-            await this.Feedback.SendConfirmationAsync(this.Context, $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}.");
+                if (!removePreviousRoleResult.IsSuccess)
+                {
+                    if (removePreviousRoleResult.Error != CommandError.UnmetPrecondition)
+                    {
+                        await this.Feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
+                    }
+                    else if (!currentServer.SuppressPermissonWarnings)
+                    {
+                        await this.Feedback.SendWarningAsync(this.Context, removePreviousRoleResult.ErrorReason);
+                    }
+                }
+            }
+
+            if (!(character.Role is null))
+            {
+                var newDiscordRole = this.Context.Guild.GetRole((ulong)character.Role.DiscordID);
+                var addNewRoleResult = await this.Discord.AddUserRoleAsync
+                (
+                    this.Context,
+                    guildUser,
+                    newDiscordRole
+                );
+
+                if (!addNewRoleResult.IsSuccess)
+                {
+                    if (addNewRoleResult.Error != CommandError.UnmetPrecondition)
+                    {
+                        await this.Feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
+                    }
+                    else if (!currentServer.SuppressPermissonWarnings)
+                    {
+                        await this.Feedback.SendWarningAsync(this.Context, addNewRoleResult.ErrorReason);
+                    }
+                }
+            }
+
+            await this.Feedback.SendConfirmationAsync
+            (
+                this.Context,
+                $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}."
+            );
         }
 
         /// <summary>
@@ -468,7 +532,19 @@ namespace DIGOS.Ambassador.Modules
 
             var user = getUserResult.Entity;
 
-            await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Context.Message.Author, this.Context.Guild);
+            var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync
+            (
+                this.Database,
+                this.Context,
+                this.Context.User
+            );
+
+            var result = await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Context.Message.Author, this.Context.Guild);
+            if (!result.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                return;
+            }
 
             if (this.Context.Message.Author is IGuildUser guildUser)
             {
@@ -487,6 +563,28 @@ namespace DIGOS.Ambassador.Modules
                 if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
                 {
                     await this.Feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
+                }
+
+                if (getCurrentCharacterResult.IsSuccess)
+                {
+                    var previousRole = getCurrentCharacterResult.Entity.Role;
+                    if (!(previousRole is null))
+                    {
+                        var previousDiscordRole = this.Context.Guild.GetRole((ulong)previousRole.DiscordID);
+                        var modifyRolesResult = await this.Discord.RemoveUserRoleAsync
+                        (
+                            this.Context, guildUser, previousDiscordRole
+                        );
+
+                        if (!modifyRolesResult.IsSuccess)
+                        {
+                            if (modifyRolesResult.Error == CommandError.UnmetPrecondition &&
+                                !currentServer.SuppressPermissonWarnings)
+                            {
+                                await this.Feedback.SendWarningAsync(this.Context, modifyRolesResult.ErrorReason);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -701,6 +799,8 @@ namespace DIGOS.Ambassador.Modules
         /// <summary>
         /// Role-related commands.
         /// </summary>
+        [UsedImplicitly]
+        [Group("role")]
         public class RoleCommands : ModuleBase<SocketCommandContext>
         {
             private readonly GlobalInfoContext Database;
@@ -810,7 +910,7 @@ namespace DIGOS.Ambassador.Modules
             [Summary("Sets the access conditions for the given role.")]
             [RequireContext(Guild)]
             [RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "You must be allowed to manage roles.")]
-            public async Task SetCharacterRoleAccess
+            public async Task SetCharacterRoleAccessAsync
             (
                 [NotNull] IRole discordRole,
                 RoleAccess access
@@ -840,6 +940,57 @@ namespace DIGOS.Ambassador.Modules
                 (
                     this.Context, "Character role access conditions set."
                 );
+            }
+
+            /// <summary>
+            /// Clears the role from a character.
+            /// </summary>
+            /// <param name="character">The character.</param>
+            [UsedImplicitly]
+            [Command("clear", RunMode = Async)]
+            [Summary("Clears the role from a character.")]
+            [RequireContext(Guild)]
+            [RequirePermission(Permission.EditCharacter)]
+            public async Task ClearCharacterRoleAsync
+            (
+                [NotNull]
+                [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+                Character character
+            )
+            {
+                this.Database.Attach(character);
+
+                var previousRole = character.Role;
+
+                var result = await this.Characters.ClearCharacterRoleAsync(this.Database, character);
+                if (!result.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    return;
+                }
+
+                var guildUser = (IGuildUser)this.Context.User;
+                var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+
+                if (!(previousRole is null))
+                {
+                    var previousDiscordRole = this.Context.Guild.GetRole((ulong)previousRole.DiscordID);
+                    var modifyRolesResult = await this.Discord.RemoveUserRoleAsync
+                    (
+                        this.Context, guildUser, previousDiscordRole
+                    );
+
+                    if (!modifyRolesResult.IsSuccess)
+                    {
+                        if (modifyRolesResult.Error == CommandError.UnmetPrecondition &&
+                            !currentServer.SuppressPermissonWarnings)
+                        {
+                            await this.Feedback.SendWarningAsync(this.Context, modifyRolesResult.ErrorReason);
+                        }
+                    }
+                }
+
+                await this.Feedback.SendConfirmationAsync(this.Context, "Character role cleared.");
             }
         }
 
@@ -1147,6 +1298,114 @@ namespace DIGOS.Ambassador.Modules
                 }
 
                 await this.Feedback.SendConfirmationAsync(this.Context, "Preferred pronoun set.");
+            }
+
+            /// <summary>
+            /// Sets the given character's display role.
+            /// </summary>
+            /// <param name="character">The character.</param>
+            /// <param name="discordRole">The role.</param>
+            [UsedImplicitly]
+            [Command("role", RunMode = Async)]
+            [Summary("Sets the given character's display role.")]
+            [RequireContext(Guild)]
+            [RequirePermission(Permission.EditCharacter)]
+            public async Task SetCharacterRoleAsync
+            (
+                [NotNull]
+                [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+                Character character,
+                [NotNull]
+                IRole discordRole
+            )
+            {
+                this.Database.Attach(character);
+
+                var previousRole = character.Role;
+
+                var getRoleResult = await this.Characters.GetCharacterRoleAsync(this.Database, discordRole);
+                if (!getRoleResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getRoleResult.ErrorReason);
+                    return;
+                }
+
+                var commandInvoker = (IGuildUser)this.Context.User;
+                var characterOwner = (IGuildUser)this.Context.Guild.GetUser((ulong)character.Owner.DiscordID);
+                var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+
+                var role = getRoleResult.Entity;
+                if (role.Access == RoleAccess.Restricted)
+                {
+                    if (!commandInvoker.GuildPermissions.ManageRoles)
+                    {
+                        await this.Feedback.SendErrorAsync
+                        (
+                            this.Context,
+                            "That role is restricted, and you must be able to manage roles to use it."
+                        );
+
+                        return;
+                    }
+                }
+
+                var setRoleResult = await this.Characters.SetCharacterRoleAsync(this.Database, character, role);
+                if (!setRoleResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, setRoleResult.ErrorReason);
+                    return;
+                }
+
+                if (character.IsCurrent)
+                {
+                    if (!(previousRole is null))
+                    {
+                        var previousDiscordRole = this.Context.Guild.GetRole((ulong)previousRole.DiscordID);
+                        var removePreviousRoleResult = await this.Discord.RemoveUserRoleAsync
+                        (
+                            this.Context,
+                            characterOwner,
+                            previousDiscordRole
+                        );
+
+                        if (!removePreviousRoleResult.IsSuccess)
+                        {
+                            if (removePreviousRoleResult.Error != CommandError.UnmetPrecondition)
+                            {
+                                await this.Feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
+                            }
+                            else if (!currentServer.SuppressPermissonWarnings)
+                            {
+                                await this.Feedback.SendWarningAsync(this.Context, removePreviousRoleResult.ErrorReason);
+                            }
+                        }
+                    }
+
+                    if (!(character.Role is null))
+                    {
+                        var newDiscordRole = this.Context.Guild.GetRole((ulong)character.Role.DiscordID);
+                        var addNewRoleResult = await this.Discord.AddUserRoleAsync
+                        (
+                            this.Context,
+                            characterOwner,
+                            newDiscordRole
+                        );
+
+                        if (!addNewRoleResult.IsSuccess)
+                        {
+                            if (addNewRoleResult.Error != CommandError.UnmetPrecondition)
+                            {
+                                await this.Feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
+                            }
+                            else if (!currentServer.SuppressPermissonWarnings)
+                            {
+                                await this.Feedback.SendWarningAsync(this.Context, addNewRoleResult.ErrorReason);
+                            }
+                        }
+                    }
+                }
+
+                await this.Feedback.SendConfirmationAsync(this.Context, "Character role set.");
             }
         }
     }

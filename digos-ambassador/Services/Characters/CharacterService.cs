@@ -263,6 +263,7 @@ namespace DIGOS.Ambassador.Services
             return db.Characters
                 .Include(c => c.Owner)
                 .Include(c => c.Images)
+                .Include(c => c.Role).ThenInclude(r => r.Server)
                 .Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.BaseColour)
                 .Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.PatternColour)
                 .Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.Transformation.Species)
@@ -358,7 +359,7 @@ namespace DIGOS.Ambassador.Services
         {
             if (!await HasActiveCharacterOnServerAsync(db, discordUser, discordServer))
             {
-                return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "The character isn't current on this server.");
+                return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "There's no current character on this server.");
             }
 
             var currentCharactersOnServer = GetUserCharacters(db, discordUser, discordServer).Where(ch => ch.IsCurrent);
