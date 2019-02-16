@@ -230,6 +230,11 @@ namespace DIGOS.Ambassador.Modules
 
             eb.AddField("Preferred pronouns", character.PronounProviderFamily);
 
+            if (!(character.Role is null))
+            {
+               eb.AddField("Role", $"<@&{character.Role.DiscordID}>");
+            }
+
             return eb;
         }
 
@@ -830,6 +835,52 @@ namespace DIGOS.Ambassador.Modules
                 this.Discord = discordService;
                 this.Feedback = feedbackService;
                 this.Characters = characterService;
+            }
+
+            /// <summary>
+            /// Lists the available character roles.
+            /// </summary>
+            [UsedImplicitly]
+            [Command("list", RunMode = Async)]
+            [RequireContext(Guild)]
+            public async Task ListAvailableRolesAsync()
+            {
+                var eb = this.Feedback.CreateEmbedBase();
+
+                eb.WithTitle("Available character roles");
+                eb.WithDescription
+                (
+                    "These are the roles you can apply to your characters to automatically switch you to that role " +
+                    "when you assume the character.\n" +
+                    "\n" +
+                    "In order to avoid mentioning everyone that has the role, use the numerical ID instead of the" +
+                    "actual mention. The ID is listed below along with the role."
+                );
+
+                if (!await this.Database.CharacterRoles.AnyAsync())
+                {
+                    eb.WithFooter("There aren't any character roles available in this server.");
+                }
+                else
+                {
+                    foreach (var characterRole in this.Database.CharacterRoles)
+                    {
+                        var discordRole = this.Context.Guild.GetRole((ulong)characterRole.DiscordID);
+
+                        var ef = new EmbedFieldBuilder();
+                        ef.WithName($"{discordRole.Name} ({discordRole.Id})");
+
+                        var roleStatus = characterRole.Access == RoleAccess.Open
+                            ? "open to everyone"
+                            : "restricted";
+
+                        ef.WithValue($"*This role is {roleStatus}.*");
+
+                        eb.AddField(ef);
+                    }
+                }
+
+                await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
             }
 
             /// <summary>
