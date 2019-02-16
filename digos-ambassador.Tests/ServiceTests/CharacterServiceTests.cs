@@ -1696,16 +1696,344 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             }
         }
 
-        public class AddImageToCharacterAsync : CharacterServiceTestBase
+        public class CreateCharacterRoleAsync : CharacterServiceTestBase
         {
+            private readonly IGuild DiscordGuild;
+            private readonly IRole DiscordRole;
+
+            public CreateCharacterRoleAsync()
+            {
+                this.DiscordGuild = MockHelper.CreateDiscordGuild(0);
+                this.DiscordRole = MockHelper.CreateDiscordRole(1, this.DiscordGuild);
+            }
+
+            [Fact]
+            public async Task CanCreateRole()
+            {
+                var result = await this.Characters.CreateCharacterRoleAsync
+                (
+                    this.Database,
+                    this.DiscordRole,
+                    RoleAccess.Open
+                );
+
+                Assert.True(result.IsSuccess);
+                Assert.Equal((long)this.DiscordRole.Id, result.Entity.DiscordID);
+            }
+
+            [Fact]
+            public async Task CreatedRoleHasCorrectAccess()
+            {
+                foreach (var enumValue in Enum.GetValues(typeof(RoleAccess)).Cast<RoleAccess>())
+                {
+                    var result = await this.Characters.CreateCharacterRoleAsync
+                    (
+                        this.Database,
+                        this.DiscordRole,
+                        enumValue
+                    );
+
+                    Assert.True(result.IsSuccess);
+                    Assert.Equal(enumValue, result.Entity.Access);
+
+                    await this.Characters.DeleteCharacterRoleAsync(this.Database, result.Entity);
+                }
+            }
+
+            [Fact]
+            public async Task CreatingRoleWhenRoleAlreadyExistsReturnsError()
+            {
+                await this.Characters.CreateCharacterRoleAsync
+                (
+                    this.Database,
+                    this.DiscordRole,
+                    RoleAccess.Open
+                );
+
+                var result = await this.Characters.CreateCharacterRoleAsync
+                (
+                    this.Database,
+                    this.DiscordRole,
+                    RoleAccess.Open
+                );
+
+                Assert.False(result.IsSuccess);
+                Assert.Equal(CommandError.MultipleMatches, result.Error);
+            }
         }
 
-        public class RemoveImageFromCharacterAsync : CharacterServiceTestBase
+        public class DeleteCharacterRoleAsync : CharacterServiceTestBase
         {
+            private CharacterRole Role;
+
+            public override async Task InitializeAsync()
+            {
+                var guild = MockHelper.CreateDiscordGuild(0);
+                var discordRole = MockHelper.CreateDiscordRole(1, guild);
+
+                var result = await this.Characters.CreateCharacterRoleAsync
+                (
+                    this.Database,
+                    discordRole,
+                    RoleAccess.Open
+                );
+
+                this.Role = result.Entity;
+            }
+
+            [Fact]
+            public void StartsWithRoleInDatabase()
+            {
+                Assert.Same(this.Role, this.Database.CharacterRoles.First());
+            }
+
+            [Fact]
+            public async Task CanDeleteRole()
+            {
+                var result = await this.Characters.DeleteCharacterRoleAsync(this.Database, this.Role);
+
+                Assert.True(result.IsSuccess);
+                Assert.Empty(this.Database.CharacterRoles);
+            }
         }
 
-        public class CreateCharacterFromAppearanceAsync : CharacterServiceTestBase
+        public class GetCharacterRoleAsync : CharacterServiceTestBase
         {
+            private readonly IGuild DiscordGuild;
+            private readonly IRole DiscordRole;
+            private readonly IRole UnregisteredDiscordRole;
+
+            private CharacterRole Role;
+
+            public GetCharacterRoleAsync()
+            {
+                this.DiscordGuild = MockHelper.CreateDiscordGuild(0);
+                this.DiscordRole = MockHelper.CreateDiscordRole(1, this.DiscordGuild);
+                this.UnregisteredDiscordRole = MockHelper.CreateDiscordRole(2, this.DiscordGuild);
+            }
+
+            public override async Task InitializeAsync()
+            {
+                var result = await this.Characters.CreateCharacterRoleAsync
+                (
+                    this.Database,
+                    this.DiscordRole,
+                    RoleAccess.Open
+                );
+
+                this.Role = result.Entity;
+            }
+
+            [Fact]
+            public async Task GetsCorrectRole()
+            {
+                var result = await this.Characters.GetCharacterRoleAsync(this.Database, this.DiscordRole);
+
+                Assert.True(result.IsSuccess);
+                Assert.Same(this.Role, result.Entity);
+            }
+
+            [Fact]
+            public async Task ReturnsErrorIfRoleIsNotRegistered()
+            {
+                var result = await this.Characters.GetCharacterRoleAsync
+                (
+                    this.Database,
+                    this.UnregisteredDiscordRole
+                );
+
+                Assert.False(result.IsSuccess);
+                Assert.Equal(CommandError.ObjectNotFound, result.Error);
+            }
+        }
+
+        public class SetCharacterRoleAccessAsync : CharacterServiceTestBase
+        {
+            private readonly IRole DiscordRole;
+
+            private CharacterRole Role;
+
+            public SetCharacterRoleAccessAsync()
+            {
+                var guild = MockHelper.CreateDiscordGuild(0);
+                this.DiscordRole = MockHelper.CreateDiscordRole(1, guild);
+            }
+
+            public override async Task InitializeAsync()
+            {
+                var result = await this.Characters.CreateCharacterRoleAsync
+                (
+                    this.Database,
+                    this.DiscordRole,
+                    RoleAccess.Open
+                );
+
+                this.Role = result.Entity;
+            }
+
+            [Fact]
+            public async Task CanSetAccess()
+            {
+                var getExistingRoleResult = await this.Characters.GetCharacterRoleAsync
+                (
+                    this.Database,
+                    this.DiscordRole
+                );
+
+                var existingRole = getExistingRoleResult.Entity;
+
+                Assert.Equal(RoleAccess.Open, existingRole.Access);
+
+                var result = await this.Characters.SetCharacterRoleAccessAsync
+                (
+                    this.Database,
+                    existingRole,
+                    RoleAccess.Restricted
+                );
+
+                Assert.True(result.IsSuccess);
+                Assert.Equal(RoleAccess.Restricted, existingRole.Access);
+            }
+        }
+
+        public class SetCharacterRoleAsync : CharacterServiceTestBase
+        {
+            private const string CharacterName = "Test";
+
+            private readonly IUser Owner = MockHelper.CreateDiscordUser(0);
+            private readonly IGuild Guild = MockHelper.CreateDiscordGuild(1);
+
+            private Character Character;
+            private CharacterRole Role;
+
+            public override async Task InitializeAsync()
+            {
+                var user = (await this.Database.GetOrRegisterUserAsync(this.Owner)).Entity;
+
+                this.Character = new Character
+                {
+                    Name = CharacterName,
+                    Owner = user,
+                    ServerID = (long)this.Guild.Id
+                };
+
+                this.Database.Characters.Add(this.Character);
+
+                var createRoleResult = await this.Characters.CreateCharacterRoleAsync
+                (
+                    this.Database,
+                    MockHelper.CreateDiscordRole(2, this.Guild),
+                    RoleAccess.Open
+                );
+
+                this.Role = createRoleResult.Entity;
+
+                await this.Database.SaveChangesAsync();
+            }
+
+            [Fact]
+            public async Task CanSetCharacterRole()
+            {
+                var result = await this.Characters.SetCharacterRoleAsync
+                (
+                    this.Database,
+                    this.Character,
+                    this.Role
+                );
+
+                Assert.True(result.IsSuccess);
+                Assert.Same(this.Role, this.Character.Role);
+            }
+
+            [Fact]
+            public async Task ReturnsErrorIfCharacterAlreadyHasSameRole()
+            {
+                await this.Characters.SetCharacterRoleAsync
+                (
+                    this.Database,
+                    this.Character,
+                    this.Role
+                );
+
+                var result = await this.Characters.SetCharacterRoleAsync
+                (
+                    this.Database,
+                    this.Character,
+                    this.Role
+                );
+
+                Assert.False(result.IsSuccess);
+                Assert.Equal(CommandError.Unsuccessful, result.Error);
+            }
+        }
+
+        public class ClearCharacterRoleAsync : CharacterServiceTestBase
+        {
+            private const string CharacterName = "Test";
+
+            private readonly IUser Owner = MockHelper.CreateDiscordUser(0);
+            private readonly IGuild Guild = MockHelper.CreateDiscordGuild(1);
+
+            private Character Character;
+            private CharacterRole Role;
+
+            public override async Task InitializeAsync()
+            {
+                var user = (await this.Database.GetOrRegisterUserAsync(this.Owner)).Entity;
+
+                this.Character = new Character
+                {
+                    Name = CharacterName,
+                    Owner = user,
+                    ServerID = (long)this.Guild.Id
+                };
+
+                this.Database.Characters.Add(this.Character);
+
+                var createRoleResult = await this.Characters.CreateCharacterRoleAsync
+                (
+                    this.Database,
+                    MockHelper.CreateDiscordRole(2, this.Guild),
+                    RoleAccess.Open
+                );
+
+                this.Role = createRoleResult.Entity;
+
+                await this.Database.SaveChangesAsync();
+            }
+
+            [Fact]
+            public async Task CanClearCharacterRole()
+            {
+                await this.Characters.SetCharacterRoleAsync
+                (
+                    this.Database,
+                    this.Character,
+                    this.Role
+                );
+
+                var result = await this.Characters.ClearCharacterRoleAsync
+                (
+                    this.Database,
+                    this.Character
+                );
+
+                Assert.True(result.IsSuccess);
+                Assert.Null(this.Character.Role);
+            }
+
+            [Fact]
+            public async Task ReturnsErrorIfCharacterDoesNotHaveARole()
+            {
+                var result = await this.Characters.ClearCharacterRoleAsync
+                (
+                    this.Database,
+                    this.Character
+                );
+
+                Assert.False(result.IsSuccess);
+                Assert.Equal(CommandError.Unsuccessful, result.Error);
+            }
         }
     }
 }

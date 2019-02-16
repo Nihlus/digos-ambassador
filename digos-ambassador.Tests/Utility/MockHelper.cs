@@ -21,6 +21,7 @@
 //
 
 using Discord;
+using JetBrains.Annotations;
 using Moq;
 
 namespace DIGOS.Ambassador.Tests.Utility
@@ -65,6 +66,25 @@ namespace DIGOS.Ambassador.Tests.Utility
         {
             var mock = new Mock<IGuild>();
             mock.Setup(u => u.Id).Returns((ulong)id);
+
+            return mock.Object;
+        }
+
+        /// <summary>
+        /// Creates a simple mocked <see cref="IRole"/> object with the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the object.</param>
+        /// <param name="guild">The guild of the role.</param>
+        /// <returns>A mocked object.</returns>
+        public static IRole CreateDiscordRole(int id, [CanBeNull] IGuild guild = null)
+        {
+            var mock = new Mock<IRole>();
+            mock.Setup(r => r.Id).Returns((ulong)id);
+
+            if (!(guild is null))
+            {
+                mock.Setup(r => r.Guild).Returns(guild);
+            }
 
             return mock.Object;
         }
