@@ -130,11 +130,7 @@ namespace DIGOS.Ambassador.Services
 
             if (guildUser.RoleIds.Contains(role.Id))
             {
-                return ModifyEntityResult.FromError
-                (
-                    CommandError.Unsuccessful,
-                    "The user already has that role."
-                );
+                return ModifyEntityResult.FromSuccess(ModifyEntityAction.None);
             }
 
             try
@@ -191,11 +187,7 @@ namespace DIGOS.Ambassador.Services
 
             if (!guildUser.RoleIds.Contains(role.Id))
             {
-                return ModifyEntityResult.FromError
-                (
-                    CommandError.Unsuccessful,
-                    "The user doesn't have that role."
-                );
+                return ModifyEntityResult.FromSuccess(ModifyEntityAction.None);
             }
 
             try

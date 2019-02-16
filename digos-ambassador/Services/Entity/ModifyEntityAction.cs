@@ -35,6 +35,11 @@ namespace DIGOS.Ambassador.Services
         /// <summary>
         /// An existing entity was edited.
         /// </summary>
-        Edited
+        Edited,
+
+        /// <summary>
+        /// No change was required.
+        /// </summary>
+        None
     }
 }
