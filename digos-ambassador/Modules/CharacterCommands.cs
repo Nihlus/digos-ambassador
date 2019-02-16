@@ -40,6 +40,7 @@ using Discord.Commands;
 using Discord.Net;
 
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
@@ -885,6 +886,11 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
+                var currentCharactersWithRole = await this.Characters.GetCharacters(this.Database, this.Context.Guild)
+                    .Where(c => c.Role.ID == getExistingRoleResult.Entity.ID)
+                    .Where(c => c.IsCurrent)
+                    .ToListAsync();
+
                 var deleteRoleResult = await this.Characters.DeleteCharacterRoleAsync
                 (
                     this.Database,
@@ -895,6 +901,14 @@ namespace DIGOS.Ambassador.Modules
                 {
                     await this.Feedback.SendErrorAsync(this.Context, deleteRoleResult.ErrorReason);
                     return;
+                }
+
+                foreach (var character in currentCharactersWithRole)
+                {
+                    var owner = this.Context.Guild.GetUser((ulong)character.Owner.DiscordID);
+                    var role = this.Context.Guild.GetRole((ulong)getExistingRoleResult.Entity.DiscordID);
+
+                    await this.Discord.RemoveUserRoleAsync(this.Context, owner, role);
                 }
 
                 await this.Feedback.SendConfirmationAsync(this.Context, "Character role deleted.");
