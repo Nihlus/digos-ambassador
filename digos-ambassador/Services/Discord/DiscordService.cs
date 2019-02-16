@@ -135,21 +135,7 @@ namespace DIGOS.Ambassador.Services
 
             try
             {
-                await guildUser.ModifyAsync
-                (
-                    u =>
-                    {
-                        IEnumerable<IRole> existingRoles = new List<IRole>();
-                        if (u.Roles.IsSpecified)
-                        {
-                            existingRoles = u.Roles.Value;
-                        }
-
-                        var newRoles = new List<IRole> { role };
-
-                        u.Roles = new Optional<IEnumerable<IRole>>(existingRoles.Concat(newRoles));
-                    }
-                );
+                await guildUser.AddRoleAsync(role);
             }
             catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
             {
@@ -192,21 +178,7 @@ namespace DIGOS.Ambassador.Services
 
             try
             {
-                await guildUser.ModifyAsync
-                (
-                    u =>
-                    {
-                        IEnumerable<IRole> existingRoles = new List<IRole>();
-                        if (u.Roles.IsSpecified)
-                        {
-                            existingRoles = u.Roles.Value;
-                        }
-
-                        var removedRoles = new List<IRole> { role };
-
-                        u.Roles = new Optional<IEnumerable<IRole>>(existingRoles.Except(removedRoles));
-                    }
-                );
+                await guildUser.RemoveRoleAsync(role);
             }
             catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
             {
