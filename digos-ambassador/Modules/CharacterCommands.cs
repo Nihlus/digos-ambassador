@@ -148,6 +148,13 @@ namespace DIGOS.Ambassador.Modules
             var character = retrieveCurrentCharacterResult.Entity;
             var eb = CreateCharacterInfoEmbed(character);
 
+            // Override the colour if a role is set.
+            if (!(character.Role is null))
+            {
+                var roleColour = this.Context.Guild.GetRole((ulong)character.Role.DiscordID).Color;
+                eb.WithColor(roleColour);
+            }
+
             await ShowCharacterAsync(character, eb);
         }
 
@@ -164,6 +171,13 @@ namespace DIGOS.Ambassador.Modules
         public async Task ShowCharacterAsync([NotNull] Character character)
         {
             var eb = CreateCharacterInfoEmbed(character);
+
+            // Override the colour if a role is set
+            if (!(character.Role is null))
+            {
+                var roleColour = this.Context.Guild.GetRole((ulong)character.Role.DiscordID).Color;
+                eb.WithColor(roleColour);
+            }
 
             await ShowCharacterAsync(character, eb);
         }
