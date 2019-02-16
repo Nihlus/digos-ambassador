@@ -1013,7 +1013,6 @@ namespace DIGOS.Ambassador.Services
 
         /// <summary>
         /// Creates a new character role from the given Discord role and access condition.
-        /// TODO: Write unit test
         /// </summary>
         /// <param name="db">The database.</param>
         /// <param name="role">The discord role.</param>
@@ -1053,7 +1052,6 @@ namespace DIGOS.Ambassador.Services
 
         /// <summary>
         /// Deletes the character role for the given Discord role.
-        /// TODO: Write unit test.
         /// </summary>
         /// <param name="db">The database.</param>
         /// <param name="role">The character role.</param>
@@ -1072,7 +1070,6 @@ namespace DIGOS.Ambassador.Services
 
         /// <summary>
         /// Gets an existing character role from the database.
-        /// TODO: Write unit test.
         /// </summary>
         /// <param name="db">The database.</param>
         /// <param name="role">The discord role.</param>
@@ -1101,7 +1098,6 @@ namespace DIGOS.Ambassador.Services
 
         /// <summary>
         /// Sets the access conditions for the given character role.
-        /// TODO: Write unit test
         /// </summary>
         /// <param name="db">The database.</param>
         /// <param name="role">The character role.</param>
@@ -1131,7 +1127,6 @@ namespace DIGOS.Ambassador.Services
 
         /// <summary>
         /// Sets the custom role of a character.
-        /// TODO: Write unit test
         /// </summary>
         /// <param name="db">The database.</param>
         /// <param name="character">The character.</param>
@@ -1162,7 +1157,6 @@ namespace DIGOS.Ambassador.Services
 
         /// <summary>
         /// Clears the custom role of a character.
-        /// TODO: Write unit test
         /// </summary>
         /// <param name="db">The database.</param>
         /// <param name="character">The character.</param>
