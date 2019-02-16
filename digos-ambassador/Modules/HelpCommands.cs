@@ -118,14 +118,14 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            var commandSearchTerms = modules.SelectMany(m => m.Commands.SelectMany(c => c.Aliases));
+            var commandSearchTerms = modules.SelectMany(m => m.GetAllCommands().SelectMany(c => c.Aliases));
             var findCommandResult = commandSearchTerms.BestLevenshteinMatch(searchText, 0.5);
             if (findCommandResult.IsSuccess)
             {
                 var foundAlias = findCommandResult.Entity;
 
                 var commandGroup = modules
-                    .Select(m => m.Commands.Where(c => c.Aliases.Contains(findCommandResult.Entity)))
+                    .Select(m => m.GetAllCommands().Where(c => c.Aliases.Contains(findCommandResult.Entity)))
                     .First(l => l.Any())
                     .Where(c => c.Aliases.Contains(foundAlias))
                     .GroupBy(c => c.Aliases.OrderByDescending(a => a).First())

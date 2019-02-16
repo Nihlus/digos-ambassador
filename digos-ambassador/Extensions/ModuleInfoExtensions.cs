@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.Text;
 using Discord.Commands;
 using JetBrains.Annotations;
 
@@ -52,6 +53,45 @@ namespace DIGOS.Ambassador.Extensions
                     yield return childModule;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets all commands, including those from nested modules, from the given module.
+        /// </summary>
+        /// <param name="module">The module.</param>
+        /// <returns>The commands.</returns>
+        public static IEnumerable<CommandInfo> GetAllCommands([NotNull] this ModuleInfo module)
+        {
+            var currentCommands = new List<CommandInfo>();
+
+            currentCommands.AddRange(module.Commands);
+
+            foreach (var submodule in module.Submodules)
+            {
+                currentCommands.AddRange(submodule.GetAllCommands());
+            }
+
+            return currentCommands;
+        }
+
+        /// <summary>
+        /// Gets the full prefix of the module.
+        /// </summary>
+        /// <param name="module">The module.</param>
+        /// <returns>The full prefix.</returns>
+        public static string GetFullPrefix([NotNull] this ModuleInfo module)
+        {
+            var sb = new StringBuilder();
+
+            var current = module;
+            while (!(current is null))
+            {
+                sb.Insert(0, $"{current.Name} ");
+
+                current = current.Parent;
+            }
+
+            return sb.ToString();
         }
     }
 }

@@ -177,7 +177,10 @@ namespace DIGOS.Ambassador.Wizards
             var currentPage = new List<EmbedFieldBuilder>();
             var currentContentLength = 0;
 
-            var commandGroups = module.Commands.GroupBy(c => c.Aliases.OrderByDescending(a => a).First()).ToList();
+            var commandGroups = module
+                .GetAllCommands()
+                .GroupBy(c => c.Aliases.OrderByDescending(a => a).First())
+                .ToList();
 
             foreach (var commandGroup in commandGroups)
             {
@@ -413,7 +416,9 @@ namespace DIGOS.Ambassador.Wizards
                 if (messageResult.IsSuccess)
                 {
                     var searchText = messageResult.Entity.Content;
-                    var commandSearchTerms = this.CurrentModule.Commands.Select(c => c.GetActualName());
+                    var commandSearchTerms = this.CurrentModule
+                        .GetAllCommands()
+                        .Select(c => c.GetFullCommand());
 
                     var findCommandResult = commandSearchTerms.BestLevenshteinMatch(searchText, 0.5);
                     if (findCommandResult.IsSuccess)
@@ -421,7 +426,7 @@ namespace DIGOS.Ambassador.Wizards
                         var foundName = findCommandResult.Entity;
 
                         var commandGroup = this.CurrentModule.Commands
-                            .Where(c => c.GetActualName() == foundName)
+                            .Where(c => c.GetFullCommand() == foundName)
                             .GroupBy(c => c.Aliases.OrderByDescending(a => a).First())
                             .First();
 

@@ -58,8 +58,8 @@ namespace DIGOS.Ambassador.Services
         {
             var fieldBuilder = new EmbedFieldBuilder();
 
-            fieldBuilder.WithName(command.GetActualName());
-            fieldBuilder.WithValue(command.Summary);
+            fieldBuilder.WithName(command.GetFullCommand());
+            fieldBuilder.WithValue(command.Summary ?? "No summary available.");
 
             return fieldBuilder;
         }
@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Services
 
             foreach (var variant in commandGroup)
             {
-                eb.AddField($"{variant.Name} {BuildParameterList(variant)}", variant.Summary);
+                eb.AddField($"{variant.GetFullCommand()} {BuildParameterList(variant)}", variant.Summary);
 
                 var parameterList = BuildDetailedParameterList(variant).ToList();
                 if (parameterList.Any())

@@ -49,5 +49,18 @@ namespace DIGOS.Ambassador.Extensions
 
             return commandName;
         }
+
+        /// <summary>
+        /// Gets the full command used to invoke this command.
+        /// </summary>
+        /// <param name="this">The command.</param>
+        /// <returns>The full command.</returns>
+        [NotNull]
+        public static string GetFullCommand([NotNull] this CommandInfo @this)
+        {
+            var prefix = @this.Module.GetFullPrefix();
+
+            return $"{prefix}{@this.GetActualName()}";
+        }
     }
 }
