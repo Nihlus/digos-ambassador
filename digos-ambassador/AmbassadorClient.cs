@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Services.Users;
@@ -202,6 +203,8 @@ namespace DIGOS.Ambassador
             this.Commands.AddTypeReader<KinkPreference>(new HumanizerEnumTypeReader<KinkPreference>());
             this.Commands.AddTypeReader<Bodypart>(new HumanizerEnumTypeReader<Bodypart>());
             this.Commands.AddTypeReader<Pattern>(new HumanizerEnumTypeReader<Pattern>());
+            this.Commands.AddTypeReader<Pattern>(new HumanizerEnumTypeReader<Permission>());
+            this.Commands.AddTypeReader<Pattern>(new HumanizerEnumTypeReader<Permissions.PermissionTarget>());
 
             await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly(), this.Services);
 

@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using Discord.Commands;
 using Humanizer;
+using Humanizer.Configuration;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.TypeReaders
@@ -38,6 +39,9 @@ namespace DIGOS.Ambassador.TypeReaders
         [NotNull]
         public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
+            var defaultLocator = Configurator.EnumDescriptionPropertyLocator;
+            Configurator.EnumDescriptionPropertyLocator = info => false;
+
             try
             {
                 var result = input.DehumanizeTo<T>();
@@ -47,6 +51,10 @@ namespace DIGOS.Ambassador.TypeReaders
             {
                 var message = $"Couldn't parse \"{input}\" as an enum of type \"{typeof(T).Name}\"";
                 return Task.FromResult(TypeReaderResult.FromError(CommandError.ObjectNotFound, message));
+            }
+            finally
+            {
+                Configurator.EnumDescriptionPropertyLocator = defaultLocator;
             }
         }
     }

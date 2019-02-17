@@ -30,10 +30,10 @@ using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
-
 using Humanizer;
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
@@ -161,8 +161,10 @@ namespace DIGOS.Ambassador.Modules
             humanizedPermissions = humanizedPermissions.OrderBy(s => s).ToList();
             foreach (var permission in humanizedPermissions)
             {
-                eb.AddField(permission.Name, permission.Description);
-                eb.AddField("Allowed targets", permission.Target, true);
+                var value = $"{permission.Description}\n" +
+                            $"*Allowed targets: {permission.Target}*";
+
+                eb.AddField(permission.Name, value);
             }
 
             return eb;
@@ -204,7 +206,14 @@ namespace DIGOS.Ambassador.Modules
             [Command(RunMode = Async)]
             [Summary("Grant the targeted user the given permission.")]
             [RequirePermission(Permission.ManagePermissions, PermissionTarget.Other)]
-            public async Task Default([NotNull] IUser discordUser, Permission grantedPermission, PermissionTarget grantedTarget = PermissionTarget.Self)
+            public async Task Default
+            (
+                [NotNull] IUser discordUser,
+                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Permission>))]
+                Permission grantedPermission,
+                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
+                PermissionTarget grantedTarget = PermissionTarget.Self
+            )
             {
                 var newPermission = new LocalPermission
                 {
@@ -253,7 +262,12 @@ namespace DIGOS.Ambassador.Modules
             [Command(RunMode = Async)]
             [Summary("Revoke the given permission from the targeted user.")]
             [RequirePermission(Permission.ManagePermissions, PermissionTarget.Other)]
-            public async Task Default([NotNull] IUser discordUser, Permission revokedPermission)
+            public async Task Default
+            (
+                [NotNull] IUser discordUser,
+                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Permission>))]
+                Permission revokedPermission
+            )
             {
                 await this.Permissions.RevokeLocalPermissionAsync(this.Database, this.Context.Guild, discordUser, revokedPermission);
 
@@ -270,7 +284,14 @@ namespace DIGOS.Ambassador.Modules
             [Command("target", RunMode = Async)]
             [Summary("Revoke the given target permission from the targeted user.")]
             [RequirePermission(Permission.ManagePermissions, PermissionTarget.Other)]
-            public async Task RevokeTargetAsync([NotNull] IUser discordUser, Permission permission, PermissionTarget revokedTarget)
+            public async Task RevokeTargetAsync
+            (
+                [NotNull] IUser discordUser,
+                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Permission>))]
+                Permission permission,
+                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
+                PermissionTarget revokedTarget
+            )
             {
                 await this.Permissions.RevokeLocalPermissionTargetAsync(this.Database, this.Context.Guild, discordUser, permission, revokedTarget);
 
