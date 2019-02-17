@@ -73,6 +73,7 @@ namespace DIGOS.Ambassador.Modules
 
         /// <summary>
         /// Lists all available permissions.
+        /// TODO: Change this into an interactive pager.
         /// </summary>
         [UsedImplicitly]
         [Command("list", RunMode = Async)]
@@ -86,6 +87,7 @@ namespace DIGOS.Ambassador.Modules
 
         /// <summary>
         /// Lists all permissions that have been granted to the invoking user.
+        /// TODO: Change this into an interactive pager.
         /// </summary>
         [UsedImplicitly]
         [Command("list-granted", RunMode = Async)]
@@ -101,6 +103,7 @@ namespace DIGOS.Ambassador.Modules
 
         /// <summary>
         /// Lists all permissions that have been granted to target user.
+        /// TODO: Change this into an interactive pager.
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
         [UsedImplicitly]
