@@ -21,12 +21,12 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Permissions;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
@@ -106,9 +106,10 @@ namespace DIGOS.Ambassador.Modules
                 paginatedEmbed
             );
 
-            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
+            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (
-                this.Context.Channel,
+                this.Context,
+                this.Feedback,
                 paginatedMessage,
                 TimeSpan.FromMinutes(5)
             );
@@ -158,9 +159,10 @@ namespace DIGOS.Ambassador.Modules
                 paginatedEmbed
             );
 
-            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
+            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (
-                this.Context.Channel,
+                this.Context,
+                this.Feedback,
                 paginatedMessage,
                 TimeSpan.FromMinutes(5)
             );
