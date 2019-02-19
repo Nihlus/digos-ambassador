@@ -156,7 +156,7 @@ namespace DIGOS.Ambassador.Services
             )
             .ToList();
 
-            return new PaginatedEmbed(pages);
+            return new PaginatedEmbed().WithPages(pages);
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace DIGOS.Ambassador.Services
             )
             .ToList();
 
-            return new PaginatedEmbed(pages);
+            return new PaginatedEmbed().WithPages(pages);
         }
 
         /// <summary>

@@ -40,10 +40,9 @@ namespace DIGOS.Ambassador.Pagination
         /// <summary>
         /// Initializes a new instance of the <see cref="PaginatedEmbed"/> class.
         /// </summary>
-        /// <param name="embeds">The embeds to paginate.</param>
-        public PaginatedEmbed(IList<EmbedBuilder> embeds)
+        public PaginatedEmbed()
         {
-            this.Pages = embeds;
+            this.Pages = new List<EmbedBuilder>();
         }
 
         /// <inheritdoc />
@@ -70,6 +69,11 @@ namespace DIGOS.Ambassador.Pagination
         public Embed BuildEmbed(int page)
         {
             var currentPage = this.Pages[page];
+
+            if (!(this.Options.Author is null))
+            {
+                currentPage = currentPage.WithAuthor(this.Options.Author);
+            }
 
             return currentPage
             .WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page + 1, this.Pages.Count))

@@ -27,13 +27,16 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Permissions;
+using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
 using Discord.Commands;
+
 using Humanizer;
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
@@ -54,7 +57,10 @@ namespace DIGOS.Ambassador.Modules
     {
         [ProvidesContext]
         private readonly GlobalInfoContext Database;
+
         private readonly UserFeedbackService Feedback;
+
+        private readonly InteractivityService Interactivity;
 
         private readonly PermissionService Permissions;
 
@@ -64,16 +70,23 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="database">A database context from the context pool.</param>
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="permissions">The permission service.</param>
-        public PermissionCommands(GlobalInfoContext database, UserFeedbackService feedback, PermissionService permissions)
+        /// <param name="interactivity">The interactivity service.</param>
+        public PermissionCommands
+        (
+            GlobalInfoContext database,
+            UserFeedbackService feedback,
+            PermissionService permissions,
+            InteractivityService interactivity
+        )
         {
             this.Database = database;
             this.Feedback = feedback;
             this.Permissions = permissions;
+            this.Interactivity = interactivity;
         }
 
         /// <summary>
         /// Lists all available permissions.
-        /// TODO: Change this into an interactive pager.
         /// </summary>
         [UsedImplicitly]
         [Command("list", RunMode = Async)]
@@ -82,28 +95,37 @@ namespace DIGOS.Ambassador.Modules
         {
             var enumValues = (Permission[])Enum.GetValues(typeof(Permission));
 
-            await this.Context.Channel.SendMessageAsync(string.Empty, false, CreateHumanizedPermissionEmbedBase(enumValues).Build());
+            var fields = enumValues.Select(CreateHumanizedPermissionField);
+            var paginatedEmbed = PaginatedEmbedFactory.FromFields(fields);
+            paginatedEmbed.Options.HelpText =
+                "These are the available bot-specific permissions. Scroll through the pages by using the reactions.";
+
+            var paginatedMessage = new PaginatedMessage<EmbedBuilder, PaginatedEmbed>
+            (
+                this.Feedback,
+                paginatedEmbed
+            );
+
+            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
+            (
+                this.Context.Channel,
+                paginatedMessage,
+                TimeSpan.FromMinutes(5)
+            );
         }
 
         /// <summary>
         /// Lists all permissions that have been granted to the invoking user.
-        /// TODO: Change this into an interactive pager.
         /// </summary>
+        [NotNull]
         [UsedImplicitly]
         [Command("list-granted", RunMode = Async)]
         [Summary("Lists all permissions that have been granted to the invoking user.")]
         [RequireContext(Guild)]
-        public async Task ListGrantedPermissionsAsync()
-        {
-            var embed = CreateHumanizedPermissionEmbedBase(this.Permissions.GetLocalUserPermissions(this.Database, this.Context.User, this.Context.Guild));
-            embed.WithAuthor(this.Context.Message.Author);
-
-            await this.Feedback.SendEmbedAsync(this.Context.Channel, embed.Build());
-        }
+        public Task ListGrantedPermissionsAsync() => ListGrantedPermissionsAsync(this.Context.User);
 
         /// <summary>
         /// Lists all permissions that have been granted to target user.
-        /// TODO: Change this into an interactive pager.
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
         [UsedImplicitly]
@@ -112,65 +134,56 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ListGrantedPermissionsAsync([NotNull] IUser discordUser)
         {
-            var embed = CreateHumanizedPermissionEmbedBase(this.Permissions.GetLocalUserPermissions(this.Database, discordUser, this.Context.Guild));
-            embed.WithAuthor(discordUser);
+            var localPermissions = this.Permissions.GetLocalUserPermissions
+            (
+                this.Database,
+                discordUser,
+                this.Context.Guild
+            );
 
-            await this.Feedback.SendEmbedAsync(this.Context.Channel, embed.Build());
+            var fields = localPermissions.AsEnumerable().Select(CreateHumanizedPermissionField);
+            var paginatedEmbed = PaginatedEmbedFactory.FromFields
+            (
+                fields
+            );
+
+            paginatedEmbed.Options.HelpText =
+                "These are the permissions granted to the given user. Scroll through the pages by using the reactions.";
+
+            paginatedEmbed.Options.Author = discordUser;
+
+            var paginatedMessage = new PaginatedMessage<EmbedBuilder, PaginatedEmbed>
+            (
+                this.Feedback,
+                paginatedEmbed
+            );
+
+            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
+            (
+                this.Context.Channel,
+                paginatedMessage,
+                TimeSpan.FromMinutes(5)
+            );
         }
 
         [NotNull]
-        private EmbedBuilder CreateHumanizedPermissionEmbedBase([NotNull] IEnumerable<Permission> permissions)
+        private EmbedFieldBuilder CreateHumanizedPermissionField(Permission permission)
         {
-            var eb = this.Feedback.CreateEmbedBase();
-            var humanizedPermissions = new List<(string Name, string Description)>();
-            foreach (var permission in permissions)
-            {
-                humanizedPermissions.Add
-                (
-                    (
-                        permission.ToString().Humanize().Transform(To.TitleCase),
-                        permission.Humanize()
-                    )
-                );
-            }
-
-            humanizedPermissions = humanizedPermissions.OrderBy(s => s).ToList();
-            foreach (var permission in humanizedPermissions)
-            {
-                eb.AddField(permission.Name, permission.Description);
-            }
-
-            return eb;
+            return new EmbedFieldBuilder()
+                .WithName(permission.ToString().Humanize().Transform(To.TitleCase))
+                .WithValue(permission.Humanize());
         }
 
         [NotNull]
-        private EmbedBuilder CreateHumanizedPermissionEmbedBase([NotNull] [ItemNotNull] IEnumerable<LocalPermission> userPermissions)
+        private EmbedFieldBuilder CreateHumanizedPermissionField([NotNull] LocalPermission permission)
         {
-            var eb = this.Feedback.CreateEmbedBase();
-            var humanizedPermissions = new List<(string Name, string Description, string Target)>();
-            foreach (var userPermission in userPermissions)
-            {
-                var permission = userPermission.Permission;
-                humanizedPermissions.Add
+            return new EmbedFieldBuilder()
+                .WithName(permission.Permission.ToString().Humanize().Transform(To.TitleCase))
+                .WithValue
                 (
-                    (
-                        permission.ToString().Humanize().Transform(To.TitleCase),
-                        permission.Humanize(),
-                        userPermission.Target.Humanize()
-                    )
+                    $"{permission.Permission.Humanize()}\n" +
+                    $"*Allowed targets: {permission.Target}*"
                 );
-            }
-
-            humanizedPermissions = humanizedPermissions.OrderBy(s => s).ToList();
-            foreach (var permission in humanizedPermissions)
-            {
-                var value = $"{permission.Description}\n" +
-                            $"*Allowed targets: {permission.Target}*";
-
-                eb.AddField(permission.Name, value);
-            }
-
-            return eb;
         }
 
         /// <summary>

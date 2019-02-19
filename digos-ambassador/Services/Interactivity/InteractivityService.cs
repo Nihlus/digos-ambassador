@@ -140,6 +140,30 @@ namespace DIGOS.Ambassador.Services.Interactivity
         }
 
         /// <summary>
+        /// Sends an interactive message to the given channel and deletes it after a certain timeout.
+        /// </summary>
+        /// <param name="channel">The channel to send the message to.</param>
+        /// <param name="message">The message to send.</param>
+        /// <param name="timeout">The timeout after which the embed will be deleted. Defaults to 15 seconds.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task SendInteractiveMessageAndDeleteAsync
+        (
+            [NotNull] IMessageChannel channel,
+            [NotNull] IInteractiveMessage message,
+            [CanBeNull] TimeSpan? timeout = null
+        )
+        {
+            timeout = timeout ?? TimeSpan.FromSeconds(15.0);
+
+            this.TrackedMessages.Add(message);
+            await message.SendAsync(this, channel);
+
+            _ = Task.Delay(timeout.Value)
+                .ContinueWith(async _ => await DeleteInteractiveMessageAsync(message).ConfigureAwait(false))
+                .ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Deletes an interactive message.
         /// </summary>
         /// <param name="message">The message to delete.</param>

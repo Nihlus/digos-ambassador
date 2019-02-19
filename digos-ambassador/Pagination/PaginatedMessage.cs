@@ -35,16 +35,16 @@ namespace DIGOS.Ambassador.Pagination
     /// <summary>
     /// A page building class for paginated galleries.
     /// </summary>
-    /// <typeparam name="T1">The type of content in the pager.</typeparam>
-    /// <typeparam name="T2">The type of the pager.</typeparam>
-    public sealed class PaginatedMessage<T1, T2> : InteractiveMessage where T2 : IPager<T1, T2>
+    /// <typeparam name="TContent">The type of content in the pager.</typeparam>
+    /// <typeparam name="TType">The type of the pager.</typeparam>
+    public sealed class PaginatedMessage<TContent, TType> : InteractiveMessage where TType : IPager<TContent, TType>
     {
         /// <summary>
         /// Gets the user interaction service.
         /// </summary>
         private UserFeedbackService Feedback { get; }
 
-        private readonly IPager<T1, T2> Pager;
+        private readonly IPager<TContent, TType> Pager;
 
         private PaginatedAppearanceOptions Options => this.Pager.Options;
 
@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Pagination
         public PaginatedMessage
         (
             UserFeedbackService feedbackService,
-            IPager<T1, T2> pager
+            IPager<TContent, TType> pager
         )
         {
             this.Feedback = feedbackService;
@@ -105,6 +105,13 @@ namespace DIGOS.Ambassador.Pagination
             return message;
         }
 
+        /// <remarks>
+        /// This override forwards to the added handler, letting removed reactions act the same as added reactions.
+        /// </remarks>
+        /// <inheritdoc/>
+        public override Task HandleRemovedInteractionAsync(SocketReaction reaction) =>
+            HandleAddedInteractionAsync(reaction);
+
         /// <inheritdoc/>
         public override async Task HandleAddedInteractionAsync(SocketReaction reaction)
         {
@@ -139,6 +146,7 @@ namespace DIGOS.Ambassador.Pagination
             else if (emote.Equals(this.Options.Stop))
             {
                 await this.Interactivity.DeleteInteractiveMessageAsync(this);
+                return;
             }
             else if (emote.Equals(this.Options.Jump))
             {

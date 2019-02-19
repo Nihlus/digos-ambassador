@@ -22,6 +22,7 @@
 
 using System;
 using Discord;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Pagination
 {
@@ -94,5 +95,11 @@ namespace DIGOS.Ambassador.Pagination
         /// Gets or sets the timeout for the help message.
         /// </summary>
         public TimeSpan InfoTimeout { get; set; } = TimeSpan.FromSeconds(30.0);
+
+        /// <summary>
+        /// Gets or sets the author of the paginated message.
+        /// </summary>
+        [CanBeNull]
+        public IUser Author { get; set; }
     }
 }

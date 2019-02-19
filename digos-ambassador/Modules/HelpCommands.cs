@@ -80,7 +80,12 @@ namespace DIGOS.Ambassador.Modules
             var modules = this.Commands.Modules.Where(m => !m.IsSubmodule).ToList();
             var helpWizard = new HelpWizard(modules, this.Feedback, this.Help);
 
-            await this.Interactive.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, helpWizard);
+            await this.Interactive.SendPrivateInteractiveMessageAndDeleteAsync
+            (
+                this.Context,
+                this.Feedback,
+                helpWizard
+            );
         }
 
         /// <summary>
@@ -108,7 +113,7 @@ namespace DIGOS.Ambassador.Modules
             {
                 var helpWizard = new HelpWizard(modules, this.Feedback, this.Help);
                 await helpWizard.OpenModule(getModuleResult.Entity);
-                await this.Interactive.SendPrivateInteractiveMessageAsync
+                await this.Interactive.SendPrivateInteractiveMessageAndDeleteAsync
                 (
                     this.Context,
                     this.Feedback,

@@ -84,5 +84,54 @@ namespace DIGOS.Ambassador.Extensions
                 throw;
             }
         }
+
+        /// <summary>
+        /// Sends a paginated message to the context user's direct messaging channel, alerting them if they are
+        /// not already in it, and deletes it after a certain timeout.
+        /// </summary>
+        /// <param name="this">The interactive service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="feedback">The feedback service to use.</param>
+        /// <param name="message">The message to send.</param>
+        /// <param name="timeout">The timeout after which the embed will be deleted. Defaults to 5 minutes.</param>
+        /// <returns>The message that was sent.</returns>
+        public static async Task SendPrivateInteractiveMessageAndDeleteAsync
+        (
+            [NotNull] this InteractivityService @this,
+            [NotNull] ICommandContext context,
+            [NotNull] UserFeedbackService feedback,
+            [NotNull] InteractiveMessage message,
+            [CanBeNull] TimeSpan? timeout = null
+        )
+        {
+            timeout = timeout ?? TimeSpan.FromMinutes(5.0);
+
+            var userChannel = await context.User.GetOrCreateDMChannelAsync();
+            try
+            {
+                var eb = feedback.CreateFeedbackEmbed(context.User, Color.DarkPurple, "Loading...");
+                await feedback.SendEmbedAndDeleteAsync(userChannel, eb, TimeSpan.Zero);
+
+                if (!(context.Channel is IDMChannel))
+                {
+                    _ = feedback.SendConfirmationAsync(context, "Please check your private messages.");
+                }
+
+                await @this.SendInteractiveMessageAndDeleteAsync(userChannel, message, timeout);
+            }
+            catch (HttpException hex)
+            {
+                if (hex.WasCausedByDMsNotAccepted())
+                {
+                    await feedback.SendWarningAsync
+                    (
+                        context,
+                        "You don't accept DMs from non-friends on this server, so I'm unable to do that."
+                    );
+                }
+
+                throw;
+            }
+        }
     }
 }
