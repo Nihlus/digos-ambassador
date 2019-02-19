@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -84,7 +85,8 @@ namespace DIGOS.Ambassador.Modules
             (
                 this.Context,
                 this.Feedback,
-                helpWizard
+                helpWizard,
+                TimeSpan.FromMinutes(30)
             );
         }
 
@@ -117,7 +119,8 @@ namespace DIGOS.Ambassador.Modules
                 (
                     this.Context,
                     this.Feedback,
-                    helpWizard
+                    helpWizard,
+                    TimeSpan.FromMinutes(30)
                 );
 
                 return;
