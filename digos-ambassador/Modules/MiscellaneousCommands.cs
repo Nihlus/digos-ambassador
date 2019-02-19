@@ -129,6 +129,20 @@ namespace DIGOS.Ambassador.Modules
         }
 
         /// <summary>
+        /// Bweh!
+        /// </summary>
+        [UsedImplicitly]
+        [Command("bweh", RunMode = RunMode.Async)]
+        [Summary("Bweh!")]
+        public async Task BwehAsync()
+        {
+            var eb = this.Feedback.CreateEmbedBase();
+            eb.WithImageUrl(this.Content.BwehUri.ToString());
+
+            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+        }
+
+        /// <summary>
         /// Boops the invoking user.
         /// </summary>
         [UsedImplicitly]

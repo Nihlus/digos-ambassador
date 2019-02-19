@@ -91,6 +91,11 @@ namespace DIGOS.Ambassador.Services
         public Uri PrivacyPolicyUri { get; }
 
         /// <summary>
+        /// Gets the <see cref="Uri"/> pointing to a proper bweh.
+        /// </summary>
+        public Uri BwehUri { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ContentService"/> class.
         /// </summary>
         public ContentService()
@@ -99,6 +104,7 @@ namespace DIGOS.Ambassador.Services
             this.DefaultAvatarUri = new Uri(this.BaseRemoteContentUri, "Avatars/Default/Discord_DIGOS.png");
 
             this.AmbyPortraitUri = new Uri(this.BaseRemoteContentUri, "Portraits/amby-irbynx-3.png");
+            this.BwehUri = new Uri(this.BaseRemoteContentUri, "Portraits/bweh.png");
             this.PrivacyPolicyUri = new Uri(this.BaseRemoteContentUri, "PrivacyPolicy.pdf");
         }
 
