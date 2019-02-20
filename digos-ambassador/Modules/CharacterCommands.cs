@@ -317,6 +317,57 @@ namespace DIGOS.Ambassador.Modules
             await this.Database.SaveChangesAsync();
 
             await this.Feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
+
+            if (character.IsCurrent)
+            {
+                var owner = this.Context.Guild.GetUser((ulong)character.Owner.DiscordID);
+                var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+
+                if (!(character.Role is null))
+                {
+                    var newDiscordRole = this.Context.Guild.GetRole((ulong)character.Role.DiscordID);
+                    var removeRoleResult = await this.Discord.RemoveUserRoleAsync
+                    (
+                        this.Context,
+                        owner,
+                        newDiscordRole
+                    );
+
+                    if (!removeRoleResult.IsSuccess)
+                    {
+                        if (removeRoleResult.Error != CommandError.UnmetPrecondition)
+                        {
+                            await this.Feedback.SendErrorAsync(this.Context, removeRoleResult.ErrorReason);
+                        }
+                        else if (!currentServer.SuppressPermissonWarnings)
+                        {
+                            await this.Feedback.SendWarningAsync(this.Context, removeRoleResult.ErrorReason);
+                        }
+                    }
+                }
+
+                if (!(character.Nickname is null))
+                {
+                    var resetNickResult = await this.Discord.SetUserNicknameAsync
+                    (
+                        this.Context,
+                        owner,
+                        owner.Username
+                    );
+
+                    if (!resetNickResult.IsSuccess)
+                    {
+                        if (resetNickResult.Error != CommandError.UnmetPrecondition)
+                        {
+                            await this.Feedback.SendErrorAsync(this.Context, resetNickResult.ErrorReason);
+                        }
+                        else if (!currentServer.SuppressPermissonWarnings)
+                        {
+                            await this.Feedback.SendWarningAsync(this.Context, resetNickResult.ErrorReason);
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
