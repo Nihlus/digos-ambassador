@@ -102,19 +102,25 @@ namespace DIGOS.Ambassador.Modules
         {
             searchText = searchText.Unquote();
 
-            var modules = this.Commands.Modules.Where(m => !m.IsSubmodule).ToList();
+            var topLevelModules = this.Commands.Modules.Where(m => !m.IsSubmodule).ToList();
 
-            var moduleSearchTerms = modules.Select
+            var moduleSearchTerms = this.Commands.Modules.Select
             (
                 m => new List<string>(m.Aliases) { m.Name }
             )
             .SelectMany(t => t);
 
-            var getModuleResult = moduleSearchTerms.BestLevenshteinMatch(searchText, 0.5);
-            if (getModuleResult.IsSuccess)
+            var getModuleAliasResult = moduleSearchTerms.BestLevenshteinMatch(searchText, 0.5);
+            if (getModuleAliasResult.IsSuccess)
             {
-                var helpWizard = new HelpWizard(modules, this.Feedback, this.Help);
-                await helpWizard.OpenModule(getModuleResult.Entity);
+                var module = this.Commands.Modules.First(m => m.Aliases.Contains(getModuleAliasResult.Entity));
+                if (module.IsSubmodule)
+                {
+                    module = module.GetTopLevelModule();
+                }
+
+                var helpWizard = new HelpWizard(topLevelModules, this.Feedback, this.Help);
+                await helpWizard.OpenModule(module.Name);
                 await this.Interactive.SendPrivateInteractiveMessageAndDeleteAsync
                 (
                     this.Context,
@@ -126,13 +132,13 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            var commandSearchTerms = modules.SelectMany(m => m.GetAllCommands().SelectMany(c => c.Aliases));
+            var commandSearchTerms = topLevelModules.SelectMany(m => m.GetAllCommands().SelectMany(c => c.Aliases));
             var findCommandResult = commandSearchTerms.BestLevenshteinMatch(searchText, 0.5);
             if (findCommandResult.IsSuccess)
             {
                 var foundAlias = findCommandResult.Entity;
 
-                var commandGroup = modules
+                var commandGroup = topLevelModules
                     .Select(m => m.GetAllCommands().Where(c => c.Aliases.Contains(findCommandResult.Entity)))
                     .First(l => l.Any())
                     .Where(c => c.Aliases.Contains(foundAlias))
