@@ -214,6 +214,7 @@ namespace DIGOS.Ambassador.Pagination
         protected override async Task UpdateAsync()
         {
             var embed = this.Pager.BuildEmbed(this.CurrentPage - 1);
+
             await this.Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
         }
     }

@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -38,7 +37,7 @@ using DIGOS.Ambassador.Services.Interactivity;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
-
+using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using static Discord.Commands.ContextType;
@@ -116,16 +115,55 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Shows available pronoun families that can be used with characters.")]
         public async Task ShowAvailablePronounFamiliesAsync()
         {
-            var pronounProviders = this.Characters.GetAvailablePronounProviders();
-            var eb = this.Feedback.CreateEmbedBase();
-            eb.WithTitle("Available pronouns");
+            EmbedFieldBuilder CreatePronounField(IPronounProvider pronounProvider)
+            {
+                var ef = new EmbedFieldBuilder();
 
-            eb.WithDescription
+                ef.WithName(pronounProvider.Family);
+
+                var value = $"{pronounProvider.GetSubjectForm()} ate {pronounProvider.GetPossessiveAdjectiveForm()} " +
+                            $"pie that {pronounProvider.GetSubjectForm()} brought with " +
+                            $"{pronounProvider.GetReflexiveForm()}.";
+
+                value = value.Transform(To.SentenceCase);
+
+                ef.WithValue($"*{value}*");
+
+                return ef;
+            }
+
+            var pronounProviders = this.Characters.GetAvailablePronounProviders();
+
+            var fields = pronounProviders.Select(CreatePronounField);
+            var description = "Each field below represents a pronoun that can be used with a character. The title of " +
+                              "each field is the pronoun family that you use when selecting the pronoun, and below it" +
+                              "is a short example of how it might be used.";
+
+            var paginatedEmbed = PaginatedEmbedFactory.FromFields
             (
-                string.Join("\n", pronounProviders.Select(p => $"**{p.Family}**"))
+                fields,
+                description: description
             );
 
-            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            paginatedEmbed.Pages = paginatedEmbed.Pages
+            .Select
+            (
+                p => p.WithColor(Color.DarkPurple).WithTitle("Available pronouns")
+            )
+            .ToList();
+
+            var paginatedMessage = new PaginatedMessage<EmbedBuilder, PaginatedEmbed>
+            (
+                this.Feedback,
+                paginatedEmbed
+            );
+
+            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            (
+                this.Context,
+                this.Feedback,
+                paginatedMessage
+            );
         }
 
         /// <summary>
