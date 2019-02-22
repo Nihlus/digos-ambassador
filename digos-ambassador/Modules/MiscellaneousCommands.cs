@@ -20,14 +20,16 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
+using DIGOS.Ambassador.EmojiTools;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 
 using Discord;
-using Discord.Addons.EmojiTools;
 using Discord.Commands;
 using Discord.Net;
 using JetBrains.Annotations;
@@ -177,7 +179,16 @@ namespace DIGOS.Ambassador.Modules
         {
             string emoteUrl;
 
-            if (Emote.TryParse(emoteName, out var emote))
+            var guildEmote = this.Context.Guild.Emotes.FirstOrDefault
+            (
+                e => e.Name.Equals(emoteName, StringComparison.OrdinalIgnoreCase)
+            );
+
+            if (!(guildEmote is null))
+            {
+                emoteUrl = guildEmote.Url;
+            }
+            else if (Emote.TryParse(emoteName, out var emote))
             {
                 emoteUrl = emote.Url;
             }

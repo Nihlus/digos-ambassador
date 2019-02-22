@@ -28,7 +28,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Discord.Addons.EmojiTools" Version="2.0.2" />
     <PackageReference Include="Discord.Net" Version="2.0.0" />
     <PackageReference Include="Discord.Net.Commands" Version="2.0.0" />
     <PackageReference Include="Humanizer" Version="2.5.16" />
