@@ -485,48 +485,51 @@ namespace DIGOS.Ambassador.Modules
                 }
             }
 
-            if (!(previousRole is null))
+            if (previousRole != character.Role)
             {
-                var previousDiscordRole = this.Context.Guild.GetRole((ulong)previousRole.DiscordID);
-                var removePreviousRoleResult = await this.Discord.RemoveUserRoleAsync
-                (
-                    this.Context,
-                    guildUser,
-                    previousDiscordRole
-                );
-
-                if (!removePreviousRoleResult.IsSuccess)
+                if (!(previousRole is null))
                 {
-                    if (removePreviousRoleResult.Error != CommandError.UnmetPrecondition)
+                    var previousDiscordRole = this.Context.Guild.GetRole((ulong)previousRole.DiscordID);
+                    var removePreviousRoleResult = await this.Discord.RemoveUserRoleAsync
+                    (
+                        this.Context,
+                        guildUser,
+                        previousDiscordRole
+                    );
+
+                    if (!removePreviousRoleResult.IsSuccess)
                     {
-                        await this.Feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
-                    }
-                    else if (!currentServer.SuppressPermissonWarnings)
-                    {
-                        await this.Feedback.SendWarningAsync(this.Context, removePreviousRoleResult.ErrorReason);
+                        if (removePreviousRoleResult.Error != CommandError.UnmetPrecondition)
+                        {
+                            await this.Feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
+                        }
+                        else if (!currentServer.SuppressPermissonWarnings)
+                        {
+                            await this.Feedback.SendWarningAsync(this.Context, removePreviousRoleResult.ErrorReason);
+                        }
                     }
                 }
-            }
 
-            if (!(character.Role is null))
-            {
-                var newDiscordRole = this.Context.Guild.GetRole((ulong)character.Role.DiscordID);
-                var addNewRoleResult = await this.Discord.AddUserRoleAsync
-                (
-                    this.Context,
-                    guildUser,
-                    newDiscordRole
-                );
-
-                if (!addNewRoleResult.IsSuccess)
+                if (!(character.Role is null))
                 {
-                    if (addNewRoleResult.Error != CommandError.UnmetPrecondition)
+                    var newDiscordRole = this.Context.Guild.GetRole((ulong)character.Role.DiscordID);
+                    var addNewRoleResult = await this.Discord.AddUserRoleAsync
+                    (
+                        this.Context,
+                        guildUser,
+                        newDiscordRole
+                    );
+
+                    if (!addNewRoleResult.IsSuccess)
                     {
-                        await this.Feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
-                    }
-                    else if (!currentServer.SuppressPermissonWarnings)
-                    {
-                        await this.Feedback.SendWarningAsync(this.Context, addNewRoleResult.ErrorReason);
+                        if (addNewRoleResult.Error != CommandError.UnmetPrecondition)
+                        {
+                            await this.Feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
+                        }
+                        else if (!currentServer.SuppressPermissonWarnings)
+                        {
+                            await this.Feedback.SendWarningAsync(this.Context, addNewRoleResult.ErrorReason);
+                        }
                     }
                 }
             }
