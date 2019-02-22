@@ -651,6 +651,15 @@ namespace DIGOS.Ambassador.Modules
                 this.Context.User
             );
 
+            if (getCurrentCharacterResult.IsSuccess)
+            {
+                if (user.DefaultCharacter == getCurrentCharacterResult.Entity)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, "You're already your default form.");
+                    return;
+                }
+            }
+
             var result = await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Context.Message.Author, this.Context.Guild);
             if (!result.IsSuccess)
             {
