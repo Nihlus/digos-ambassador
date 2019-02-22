@@ -700,7 +700,14 @@ namespace DIGOS.Ambassador.Modules
                 }
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Character cleared.");
+            if (user.DefaultCharacter is null)
+            {
+                await this.Feedback.SendConfirmationAsync(this.Context, "Character cleared.");
+            }
+            else
+            {
+                await AssumeCharacterFormAsync(user.DefaultCharacter);
+            }
         }
 
         /// <summary>
