@@ -20,12 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Net.Http;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 
 using Discord;
+using Discord.Addons.EmojiTools;
 using Discord.Commands;
 using Discord.Net;
 using JetBrains.Annotations;
@@ -162,6 +164,51 @@ namespace DIGOS.Ambassador.Modules
         public async Task BapAsync()
         {
             await this.Feedback.SendConfirmationAsync(this.Context, "**baps**");
+        }
+
+        /// <summary>
+        /// Sends a jumbo version of the given emote to the chat, if available.
+        /// </summary>
+        /// <param name="emoteName">The emote.</param>
+        [UsedImplicitly]
+        [Command("jumbo", RunMode = RunMode.Async)]
+        [Summary("Sends a jumbo version of the given emote to the chat, if available.")]
+        public async Task JumboAsync(string emoteName)
+        {
+            string emoteUrl;
+
+            if (Emote.TryParse(emoteName, out var emote))
+            {
+                emoteUrl = emote.Url;
+            }
+            else
+            {
+                if (EmojiMap.Map.TryGetValue(emoteName, out var mappedEmote))
+                {
+                    emoteName = mappedEmote;
+                }
+
+                var codepoint = char.ConvertToUtf32(emoteName, 0);
+                var codepointHex = codepoint.ToString("X").ToLower();
+
+                emoteUrl = $"https://raw.githubusercontent.com/twitter/twemoji/gh-pages/2/72x72/{codepointHex}.png";
+            }
+
+            using (var client = new HttpClient())
+            {
+                var response = await client.GetAsync(emoteUrl, HttpCompletionOption.ResponseHeadersRead);
+                if (response.IsSuccessStatusCode)
+                {
+                    var eb = this.Feedback.CreateEmbedBase();
+                    eb.WithImageUrl(emoteUrl);
+
+                    await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+                }
+                else
+                {
+                    await this.Feedback.SendWarningAsync(this.Context, "Sorry, I couldn't find that emote.");
+                }
+            }
         }
 
         /// <summary>
