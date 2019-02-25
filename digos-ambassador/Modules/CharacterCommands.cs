@@ -287,6 +287,14 @@ namespace DIGOS.Ambassador.Modules
                eb.AddField("Role", $"<@&{character.Role.DiscordID}>");
             }
 
+            if (character.Images.Any())
+            {
+                eb.WithFooter
+                (
+                    $"This character has one or more images. Use \"!ch view-gallery {character.Name}\" to view them."
+                );
+            }
+
             return eb;
         }
 
