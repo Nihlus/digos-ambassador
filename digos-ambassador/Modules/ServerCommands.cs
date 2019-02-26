@@ -81,11 +81,11 @@ namespace DIGOS.Ambassador.Modules
 
             if (!(guild.SplashUrl is null))
             {
-                eb.WithImageUrl(guild.SplashUrl);
+                eb.WithThumbnailUrl(guild.SplashUrl);
             }
             else if (!(guild.IconUrl is null))
             {
-                eb.WithImageUrl(guild.IconUrl);
+                eb.WithThumbnailUrl(guild.IconUrl);
             }
 
             var getDescriptionResult = this.Servers.GetDescription(server);
