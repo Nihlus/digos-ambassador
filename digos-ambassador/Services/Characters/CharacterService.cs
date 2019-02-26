@@ -355,7 +355,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -386,7 +386,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -572,7 +572,7 @@ namespace DIGOS.Ambassador.Services
             targetUser.DefaultCharacter = newDefaultCharacter;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -602,7 +602,7 @@ namespace DIGOS.Ambassador.Services
             targetUser.DefaultCharacter = null;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -659,7 +659,7 @@ namespace DIGOS.Ambassador.Services
             character.Name = newCharacterName;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -694,7 +694,7 @@ namespace DIGOS.Ambassador.Services
             character.AvatarUrl = newCharacterAvatarUrl;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -729,7 +729,7 @@ namespace DIGOS.Ambassador.Services
             character.Nickname = newCharacterNickname;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -764,7 +764,7 @@ namespace DIGOS.Ambassador.Services
             character.Summary = newCharacterSummary;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -794,7 +794,7 @@ namespace DIGOS.Ambassador.Services
             character.Description = newCharacterDescription;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -830,7 +830,7 @@ namespace DIGOS.Ambassador.Services
             character.PronounProviderFamily = pronounProvider.Family;
 
             await db.SaveChangesAsync();
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -859,7 +859,7 @@ namespace DIGOS.Ambassador.Services
             character.IsNSFW = isNSFW;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -967,7 +967,7 @@ namespace DIGOS.Ambassador.Services
             character.Images.Add(image);
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Added);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -993,7 +993,7 @@ namespace DIGOS.Ambassador.Services
             character.Images.RemoveAll(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Added);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -1143,7 +1143,7 @@ namespace DIGOS.Ambassador.Services
             role.Access = access;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -1173,7 +1173,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -1201,7 +1201,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
     }
 }

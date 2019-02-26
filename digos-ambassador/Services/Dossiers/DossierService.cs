@@ -203,7 +203,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace DIGOS.Ambassador.Services
             dossier.Summary = newSummary;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -252,7 +252,7 @@ namespace DIGOS.Ambassador.Services
 
             if (originalDossierPath.IsNullOrWhitespace() || !File.Exists(originalDossierPath) || originalDossierPath == newDossierPath)
             {
-                return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+                return ModifyEntityResult.FromSuccess();
             }
 
             try
@@ -267,7 +267,7 @@ namespace DIGOS.Ambassador.Services
             dossier.Path = newDossierPath;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -354,7 +354,7 @@ namespace DIGOS.Ambassador.Services
                 }
             }
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
     }
 }

@@ -119,7 +119,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>

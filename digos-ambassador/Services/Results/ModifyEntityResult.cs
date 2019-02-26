@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="actionTaken">The action that was taken on the entity.</param>
         /// <returns>A successful result.</returns>
         [Pure]
-        public static ModifyEntityResult FromSuccess(ModifyEntityAction actionTaken)
+        public static ModifyEntityResult FromSuccess(ModifyEntityAction actionTaken = ModifyEntityAction.Edited)
         {
             return new ModifyEntityResult(actionTaken, null, null);
         }

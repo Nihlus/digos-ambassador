@@ -1,5 +1,5 @@
 ﻿//
-//  ModifyEntityAction.cs
+//  ServerServiceTestBase.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,21 +20,40 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Services
+using System.Threading.Tasks;
+using DIGOS.Ambassador.Services.Servers;
+using Xunit;
+
+namespace DIGOS.Ambassador.Tests.TestBases
 {
     /// <summary>
-    /// Enumerates which actions can be taken when an entity is modified.
+    /// Serves as a test base for server service tests.
     /// </summary>
-    public enum ModifyEntityAction
+    public class ServerServiceTestBase : DatabaseDependantTestBase, IAsyncLifetime
     {
         /// <summary>
-        /// An existing entity was edited.
+        /// Gets the server service object.
         /// </summary>
-        Edited,
+        protected ServerService Servers { get; }
 
         /// <summary>
-        /// No change was required.
+        /// Initializes a new instance of the <see cref="ServerServiceTestBase"/> class.
         /// </summary>
-        None
+        protected ServerServiceTestBase()
+        {
+            this.Servers = new ServerService();
+        }
+
+        /// <inheritdoc/>
+        public virtual Task InitializeAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public virtual Task DisposeAsync()
+        {
+            return Task.CompletedTask;
+        }
     }
 }

@@ -189,14 +189,14 @@ namespace DIGOS.Ambassador.Services
                 existingMessage.Contents = message.Content;
 
                 await db.SaveChangesAsync();
-                return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+                return ModifyEntityResult.FromSuccess();
             }
 
             var roleplayMessage = UserMessage.FromDiscordMessage(message, userNick);
             roleplay.Messages.Add(roleplayMessage);
 
             await db.SaveChangesAsync();
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Added);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -687,7 +687,7 @@ namespace DIGOS.Ambassador.Services
             roleplay.Name = newRoleplayName;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -712,7 +712,7 @@ namespace DIGOS.Ambassador.Services
             roleplay.Summary = newRoleplaySummary;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -737,7 +737,7 @@ namespace DIGOS.Ambassador.Services
             roleplay.IsNSFW = isNSFW;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -757,7 +757,7 @@ namespace DIGOS.Ambassador.Services
             roleplay.IsPublic = isPublic;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
     }
 }

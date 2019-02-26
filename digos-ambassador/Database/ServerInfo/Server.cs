@@ -60,6 +60,24 @@ namespace DIGOS.Ambassador.Database.ServerInfo
         public List<User> KnownUsers { get; set; }
 
         /// <summary>
+        /// Gets or sets the server's description.
+        /// </summary>
+        [CanBeNull]
+        public string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the first-join message should be sent to users when they first join
+        /// the server.
+        /// </summary>
+        public bool SendJoinMessage { get; set; }
+
+        /// <summary>
+        /// Gets or sets the server's first-join message.
+        /// </summary>
+        [CanBeNull]
+        public string JoinMessage { get; set; }
+
+        /// <summary>
         /// Determines whether or not a given user is known to this server.
         /// </summary>
         /// <param name="user">The user.</param>

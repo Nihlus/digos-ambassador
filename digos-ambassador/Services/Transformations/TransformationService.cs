@@ -546,7 +546,7 @@ namespace DIGOS.Ambassador.Services
             character.CurrentAppearance = Appearance.CopyFrom(character.DefaultAppearance);
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -575,7 +575,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -608,7 +608,7 @@ namespace DIGOS.Ambassador.Services
             protection.DefaultType = protectionType;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -643,7 +643,7 @@ namespace DIGOS.Ambassador.Services
             protection.Type = protectionType;
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -705,7 +705,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -767,7 +767,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>

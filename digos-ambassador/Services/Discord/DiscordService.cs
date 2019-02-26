@@ -103,7 +103,7 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I couldn't modify the nickname due to a priority issue.");
             }
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace DIGOS.Ambassador.Services
                 );
             }
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace DIGOS.Ambassador.Services
                 );
             }
 
-            return ModifyEntityResult.FromSuccess(ModifyEntityAction.Edited);
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
