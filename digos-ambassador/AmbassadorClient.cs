@@ -37,6 +37,7 @@ using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
+using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;
@@ -104,6 +105,8 @@ namespace DIGOS.Ambassador
 
         private readonly HelpService Help;
 
+        private readonly ServerService Servers;
+
         // ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 
         /// <summary>
@@ -144,6 +147,8 @@ namespace DIGOS.Ambassador
 
             this.Help = new HelpService(this.Feedback);
 
+            this.Servers = new ServerService();
+
             this.Services = new ServiceCollection()
                 .AddSingleton(this.Client)
                 .AddSingleton(this.DiscordIntegration)
@@ -160,6 +165,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton(this.Permissions)
                 .AddSingleton(this.Privacy)
                 .AddSingleton(this.Help)
+                .AddSingleton(this.Servers)
                 .AddDbContextPool<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
                 .BuildServiceProvider();
 
@@ -171,6 +177,8 @@ namespace DIGOS.Ambassador
 
             this.Client.MessageReceived += OnMessageReceived;
             this.Client.MessageUpdated += OnMessageUpdated;
+
+            this.Client.UserJoined += OnUserJoined;
         }
 
         /// <summary>
@@ -395,6 +403,56 @@ namespace DIGOS.Ambassador
             }
 
             await OnMessageReceived(updatedMessage);
+        }
+
+        /// <summary>
+        /// Handles new users joining.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        private async Task OnUserJoined([NotNull] SocketGuildUser user)
+        {
+            var db = this.Services.GetRequiredService<GlobalInfoContext>();
+            var server = await db.GetOrRegisterServerAsync(user.Guild);
+
+            if (!server.SendJoinMessage)
+            {
+                return;
+            }
+
+            var getJoinMessageResult = this.Servers.GetJoinMessage(server);
+            if (!getJoinMessageResult.IsSuccess)
+            {
+                return;
+            }
+
+            var userChannel = await user.GetOrCreateDMChannelAsync();
+            try
+            {
+                var eb = this.Feedback.CreateEmbedBase();
+                eb.WithDescription($"Welcome, {user.Mention}!");
+                eb.WithDescription(getJoinMessageResult.Entity);
+
+                await this.Feedback.SendEmbedAsync(userChannel, eb.Build());
+            }
+            catch (HttpException hex)
+            {
+                if (!hex.WasCausedByDMsNotAccepted())
+                {
+                    throw;
+                }
+
+                var content = $"Welcome, {user.Mention}! You have DMs disabled, so I couldn't send you the " +
+                              $"first-join message. To see it, type \"!server join-message\".";
+
+                var welcomeMessage = this.Feedback.CreateFeedbackEmbed
+                (
+                    user,
+                    Color.Orange,
+                    content
+                );
+
+                await this.Feedback.SendEmbedAsync(user.Guild.DefaultChannel, welcomeMessage);
+            }
         }
 
         /// <summary>

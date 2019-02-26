@@ -67,6 +67,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Command("show", RunMode = RunMode.Async)]
+        [Alias("show", "info")]
         [Summary("Shows general information about the current server.")]
         [RequireContext(Guild)]
         public async Task ShowServerAsync()
@@ -107,7 +108,7 @@ namespace DIGOS.Ambassador.Modules
             }
             else
             {
-                content = "No";
+                content = server.JoinMessage is null ? "No" : "No (join message set)";
             }
 
             eb.AddField("First-join Message", content);
@@ -256,8 +257,8 @@ namespace DIGOS.Ambassador.Modules
                 }
 
                 var willDo = sendJoinMessage
-                    ? "will now send first-join messages to new users."
-                    : "no longer sends first-join messages.";
+                    ? "will now send first-join messages to new users"
+                    : "no longer sends first-join messages";
 
                 await this.Feedback.SendConfirmationAsync
                 (
