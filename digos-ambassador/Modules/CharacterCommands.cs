@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -291,7 +292,7 @@ namespace DIGOS.Ambassador.Modules
             {
                 eb.WithFooter
                 (
-                    $"This character has one or more images. Use \"!ch view-gallery {character.Name}\" to view them."
+                    $"*This character has one or more images. Use \"!ch view-gallery {character.Name}\" to view them.*"
                 );
             }
 
@@ -1287,9 +1288,28 @@ namespace DIGOS.Ambassador.Modules
                     newCharacterAvatarUrl = newAvatar.Url;
                 }
 
-                character.AvatarUrl = newCharacterAvatarUrl;
+                var galleryImage = character.Images.FirstOrDefault
+                (
+                    i => i.Name.Equals(newCharacterAvatarUrl, StringComparison.OrdinalIgnoreCase)
+                );
 
-                await this.Database.SaveChangesAsync();
+                if (!(galleryImage is null))
+                {
+                    newCharacterAvatarUrl = galleryImage.Url;
+                }
+
+                var result = await this.Characters.SetCharacterAvatarAsync
+                (
+                    this.Database,
+                    character,
+                    newCharacterAvatarUrl ?? throw new ArgumentNullException(nameof(newCharacterAvatarUrl))
+                );
+
+                if (!result.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    return;
+                }
 
                 await this.Feedback.SendConfirmationAsync(this.Context, "Character avatar set.");
             }

@@ -681,6 +681,11 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new avatar url.");
             }
 
+            if (!Uri.TryCreate(newCharacterAvatarUrl, UriKind.Absolute, out _))
+            {
+                return ModifyEntityResult.FromError(CommandError.BadArgCount, "The given image URL wasn't valid.");
+            }
+
             if (character.AvatarUrl == newCharacterAvatarUrl)
             {
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character's avatar is already set to that URL.");
