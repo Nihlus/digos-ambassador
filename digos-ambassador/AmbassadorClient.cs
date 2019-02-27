@@ -451,7 +451,17 @@ namespace DIGOS.Ambassador
                     content
                 );
 
-                await this.Feedback.SendEmbedAsync(user.Guild.DefaultChannel, welcomeMessage);
+                try
+                {
+                    await this.Feedback.SendEmbedAsync(user.Guild.DefaultChannel, welcomeMessage);
+                }
+                catch (HttpException pex)
+                {
+                    if (!pex.WasCausedByMissingPermission())
+                    {
+                        throw;
+                    }
+                }
             }
         }
 

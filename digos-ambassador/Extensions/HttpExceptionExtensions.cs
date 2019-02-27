@@ -41,5 +41,16 @@ namespace DIGOS.Ambassador.Extensions
         {
             return @this.HttpCode == HttpStatusCode.Forbidden && @this.DiscordCode == 50007;
         }
+
+        /// <summary>
+        /// Determines whether or not the given <see cref="HttpException"/> was caused by the bot not having sufficient
+        /// permissions to perform the task.
+        /// </summary>
+        /// <param name="this">The exception.</param>
+        /// <returns>true if it was caused by insufficient permissions; Otherwise, false.</returns>
+        public static bool WasCausedByMissingPermission([NotNull] this HttpException @this)
+        {
+            return @this.HttpCode == HttpStatusCode.Forbidden && @this.DiscordCode == 50013;
+        }
     }
 }
