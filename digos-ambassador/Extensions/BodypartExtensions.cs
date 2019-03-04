@@ -74,6 +74,7 @@ namespace DIGOS.Ambassador.Extensions
             .SelectMany
             (
                 b =>
+
                     // ReSharper disable once PossibleNullReferenceException
                     b.GetCustomAttribute<CompositeAttribute>().ComposingParts
             );

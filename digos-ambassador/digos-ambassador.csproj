@@ -47,7 +47,7 @@
     <PackageReference Include="WebSocketSharp.CustomHeaders.Standard" Version="1.0.2" />
     <PackageReference Include="YamlDotNet" Version="5.3.0" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="$(NETCoreSdkVersion) &lt; 2.1">
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.2" />
   </ItemGroup>
   <ItemGroup>
