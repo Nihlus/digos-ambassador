@@ -42,14 +42,6 @@ namespace DIGOS.Ambassador.Database.Appearances
         public long ID { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AppearanceComponent"/> class.
-        /// </summary>
-        private AppearanceComponent()
-        {
-            this.BaseColour = new Colour();
-        }
-
-        /// <summary>
         /// Gets the bodypart that the component is.
         /// </summary>
         [NotMapped]
@@ -69,7 +61,7 @@ namespace DIGOS.Ambassador.Database.Appearances
         /// Gets or sets the base colour of the component.
         /// </summary>
         [NotNull]
-        public virtual Colour BaseColour { get; set; }
+        public virtual Colour BaseColour { get; set; } = new Colour();
 
         /// <summary>
         /// Gets or sets the pattern of the component's secondary colour (if any)

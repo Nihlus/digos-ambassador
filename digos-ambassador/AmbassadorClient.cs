@@ -311,11 +311,6 @@ namespace DIGOS.Ambassador
 
                 var server = await db.GetOrRegisterServerAsync(guild);
 
-                if (server.KnownUsers is null)
-                {
-                    server.KnownUsers = new List<User>();
-                }
-
                 // Grant permissions to new users
                 if (!server.IsUserKnown(arg.Author))
                 {
