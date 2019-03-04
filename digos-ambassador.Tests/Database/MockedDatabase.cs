@@ -48,7 +48,9 @@ namespace DIGOS.Ambassador.Tests.Database
             this.Connection = new SqliteConnection("DataSource=:memory:");
             this.Connection.Open();
 
-            this.DatabaseOptions = new DbContextOptionsBuilder<GlobalInfoContext>().UseSqlite(this.Connection).Options;
+            this.DatabaseOptions = new DbContextOptionsBuilder<GlobalInfoContext>()
+                .UseLazyLoadingProxies()
+                .UseSqlite(this.Connection).Options;
 
             using (var db = GetDatabaseContext())
             {

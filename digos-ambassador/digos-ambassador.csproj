@@ -34,8 +34,9 @@
     <PackageReference Include="iTextSharp" Version="5.5.13" />
     <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" PrivateAssets="all" />
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.2.2" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
     <PackageReference Include="morelinq" Version="3.1.0" />

@@ -411,7 +411,9 @@ namespace DIGOS.Ambassador.Database
 
             var password = passfileContents[4];
 
-            optionsBuilder.UseNpgsql($"Server=localhost;Database=amby;Username=amby;Password={password}");
+            optionsBuilder
+                .UseLazyLoadingProxies()
+                .UseNpgsql($"Server=localhost;Database=amby;Username=amby;Password={password}");
 
             return optionsBuilder;
         }
