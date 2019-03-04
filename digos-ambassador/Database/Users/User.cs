@@ -64,11 +64,13 @@ namespace DIGOS.Ambassador.Database.Users
         /// <summary>
         /// Gets or sets the characters that the user owns.
         /// </summary>
-        public virtual List<Character> Characters { get; set; }
+        [NotNull]
+        public virtual List<Character> Characters { get; set; } = new List<Character>();
 
         /// <summary>
         /// Gets or sets the kinks or fetishes of a user, as well as their preferences for each.
         /// </summary>
-        public virtual List<UserKink> Kinks { get; set; }
+        [NotNull]
+        public virtual List<UserKink> Kinks { get; set; } = new List<UserKink>();
     }
 }

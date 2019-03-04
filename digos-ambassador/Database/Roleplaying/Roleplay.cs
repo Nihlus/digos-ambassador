@@ -69,7 +69,8 @@ namespace DIGOS.Ambassador.Database.Roleplaying
         /// <summary>
         /// Gets or sets the users that are participating in the roleplay in any way.
         /// </summary>
-        public virtual List<RoleplayParticipant> ParticipatingUsers { get; set; }
+        [NotNull]
+        public virtual List<RoleplayParticipant> ParticipatingUsers { get; set; } = new List<RoleplayParticipant>();
 
         /// <summary>
         /// Gets the users that have been kicked from the roleplay.
@@ -107,7 +108,8 @@ namespace DIGOS.Ambassador.Database.Roleplaying
         /// <summary>
         /// Gets or sets the saved messages in the roleplay.
         /// </summary>
-        public virtual List<UserMessage> Messages { get; set; }
+        [NotNull]
+        public virtual List<UserMessage> Messages { get; set; } = new List<UserMessage>();
 
         /// <inheritdoc />
         public bool IsOwner(User user)

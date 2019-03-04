@@ -345,12 +345,6 @@ namespace DIGOS.Ambassador.Services
         public IQueryable<Roleplay> GetRoleplays([NotNull] GlobalInfoContext db, [NotNull] IGuild guild)
         {
             return db.Roleplays
-                .Include(rp => rp.Owner)
-                .Include(rp => rp.ParticipatingUsers)
-                .ThenInclude(p => p.Roleplay)
-                .Include(rp => rp.ParticipatingUsers)
-                .ThenInclude(p => p.User)
-                .Include(rp => rp.Messages)
                 .Where
                 (
                     rp =>

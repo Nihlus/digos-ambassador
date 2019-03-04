@@ -349,9 +349,6 @@ namespace DIGOS.Ambassador.Database
         public async Task<User> GetUser([NotNull] IUser discordUser)
         {
             return await this.Users
-                .Include(u => u.DefaultCharacter)
-                .Include(u => u.Characters)
-                .Include(u => u.Kinks).ThenInclude(k => k.Kink)
                 .OrderBy(u => u.ID)
                 .FirstAsync
                 (

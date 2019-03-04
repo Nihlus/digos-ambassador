@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Database.Appearances
         /// Gets or sets the parts that compose this appearance.
         /// </summary>
         [NotNull, ItemNotNull]
-        public virtual List<AppearanceComponent> Components { get; set; }
+        public virtual List<AppearanceComponent> Components { get; set; } = new List<AppearanceComponent>();
 
         /// <summary>
         /// Gets or sets a character's height (in meters).
@@ -69,14 +69,6 @@ namespace DIGOS.Ambassador.Database.Appearances
         /// Gets or sets how muscular a character appears to be, on a 0 to 1 scale.
         /// </summary>
         public double Muscularity { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Appearance"/> class.
-        /// </summary>
-        public Appearance()
-        {
-            this.Components = new List<AppearanceComponent>();
-        }
 
         /// <summary>
         /// Creates a new appearance from a source appearance.

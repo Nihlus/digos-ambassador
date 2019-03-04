@@ -57,7 +57,8 @@ namespace DIGOS.Ambassador.Database.ServerInfo
         /// <summary>
         /// Gets or sets the users known to the bot on this server.
         /// </summary>
-        public virtual List<User> KnownUsers { get; set; }
+        [NotNull]
+        public virtual List<User> KnownUsers { get; set; } = new List<User>();
 
         /// <summary>
         /// Gets or sets the server's description.

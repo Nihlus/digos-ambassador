@@ -276,17 +276,6 @@ namespace DIGOS.Ambassador.Services
         public IQueryable<Character> GetCharacters([NotNull] GlobalInfoContext db, IGuild guild)
         {
             return db.Characters
-                .Include(c => c.Owner)
-                .Include(c => c.Images)
-                .Include(c => c.Role).ThenInclude(r => r.Server)
-                .Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.BaseColour)
-                .Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.PatternColour)
-                .Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.Transformation.Species)
-                .Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.Transformation.DefaultBaseColour)
-                .Include(c => c.CurrentAppearance.Components).ThenInclude(co => co.Transformation.DefaultPatternColour)
-                .Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.Species)
-                .Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.DefaultBaseColour)
-                .Include(c => c.DefaultAppearance.Components).ThenInclude(co => co.Transformation.DefaultPatternColour)
                 .Where(c => c.ServerID == (long)guild.Id);
         }
 
@@ -1102,7 +1091,6 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var characterRole = await db.CharacterRoles
-                .Include(r => r.Server)
                 .FirstOrDefaultAsync(r => r.Server.DiscordID == (long)role.Guild.Id && r.DiscordID == (long)role.Id);
 
             if (characterRole is null)

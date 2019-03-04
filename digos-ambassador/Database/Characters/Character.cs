@@ -91,7 +91,8 @@ namespace DIGOS.Ambassador.Database.Characters
         /// <summary>
         /// Gets or sets the images associated with the character.
         /// </summary>
-        public virtual List<Image> Images { get; set; }
+        [NotNull]
+        public virtual List<Image> Images { get; set; } = new List<Image>();
 
         /// <summary>
         /// Gets or sets the character's default appearance.

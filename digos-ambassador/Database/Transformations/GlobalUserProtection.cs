@@ -58,7 +58,8 @@ namespace DIGOS.Ambassador.Database.Transformations
         /// <summary>
         /// Gets or sets the list of users that are listed in this protection entry.
         /// </summary>
-        public virtual List<UserProtectionEntry> UserListing { get; set; }
+        [NotNull]
+        public virtual List<UserProtectionEntry> UserListing { get; set; } = new List<UserProtectionEntry>();
 
         /// <summary>
         /// Gets the list of users that are allowed to transform the owner.

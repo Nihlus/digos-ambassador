@@ -499,7 +499,6 @@ namespace DIGOS.Ambassador.Services
         public async Task<IReadOnlyList<Species>> GetAvailableSpeciesAsync([NotNull] GlobalInfoContext db)
         {
             return await db.Species
-                .Include(s => s.Parent)
                 .ToListAsync();
         }
 
@@ -517,7 +516,6 @@ namespace DIGOS.Ambassador.Services
         )
         {
             return await db.Transformations
-                .Include(tf => tf.Species)
                 .Where(tf => tf.Part == bodyPart).ToListAsync();
         }
 
@@ -783,8 +781,6 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var protection = await db.GlobalUserProtections
-            .Include(p => p.User)
-            .Include(p => p.UserListing)
             .FirstOrDefaultAsync(p => p.User.DiscordID == (long)discordUser.Id);
 
             if (!(protection is null))
@@ -822,10 +818,7 @@ namespace DIGOS.Ambassador.Services
             [NotNull] IGuild guild
         )
         {
-            var protection = await db.ServerUserProtections
-            .Include(p => p.Server)
-            .Include(p => p.User)
-            .FirstOrDefaultAsync
+            var protection = await db.ServerUserProtections.FirstOrDefaultAsync
             (
                 p =>
                     p.User.DiscordID == (long)discordUser.Id && p.Server.DiscordID == (long)guild.Id
@@ -978,9 +971,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             var transformations = await db.Transformations
-                .Include(tf => tf.DefaultBaseColour)
-                .Include(tf => tf.DefaultPatternColour)
-                .Include(tf => tf.Species)
                 .Where(tf => bodyparts.Contains(tf.Part) && tf.Species.IsSameSpeciesAs(species))
                 .ToListAsync();
 
