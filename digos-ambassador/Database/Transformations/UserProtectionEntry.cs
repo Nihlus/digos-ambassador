@@ -39,13 +39,13 @@ namespace DIGOS.Ambassador.Database.Transformations
         /// Gets or sets the global protection entry that the user has been listed in.
         /// </summary>
         [Required]
-        public GlobalUserProtection GlobalProtection { get; set; }
+        public virtual GlobalUserProtection GlobalProtection { get; set; }
 
         /// <summary>
         /// Gets or sets the user that's listed in the global protection entry.
         /// </summary>
         [Required]
-        public User User { get; set; }
+        public virtual User User { get; set; }
 
         /// <summary>
         /// Gets or sets the type of listing.

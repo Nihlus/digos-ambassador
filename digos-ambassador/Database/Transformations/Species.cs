@@ -41,7 +41,7 @@ namespace DIGOS.Ambassador.Database.Transformations
         /// Gets or sets the parent species.
         /// </summary>
         [CanBeNull]
-        public Species Parent { get; set; }
+        public virtual Species Parent { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the species.

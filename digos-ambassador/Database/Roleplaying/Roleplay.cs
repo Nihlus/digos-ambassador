@@ -64,12 +64,12 @@ namespace DIGOS.Ambassador.Database.Roleplaying
         public long ActiveChannelID { get; set; }
 
         /// <inheritdoc />
-        public User Owner { get; set; }
+        public virtual User Owner { get; set; }
 
         /// <summary>
         /// Gets or sets the users that are participating in the roleplay in any way.
         /// </summary>
-        public List<RoleplayParticipant> ParticipatingUsers { get; set; }
+        public virtual List<RoleplayParticipant> ParticipatingUsers { get; set; }
 
         /// <summary>
         /// Gets the users that have been kicked from the roleplay.
@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
         /// <summary>
         /// Gets or sets the saved messages in the roleplay.
         /// </summary>
-        public List<UserMessage> Messages { get; set; }
+        public virtual List<UserMessage> Messages { get; set; }
 
         /// <inheritdoc />
         public bool IsOwner(User user)

@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Database.Users
         /// Gets or sets the kink.
         /// </summary>
         [Required]
-        public Kink Kink { get; set; }
+        public virtual Kink Kink { get; set; }
 
         /// <summary>
         /// Gets or sets the user's preference for the kink.

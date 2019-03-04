@@ -39,13 +39,13 @@ namespace DIGOS.Ambassador.Database.Roleplaying
         /// Gets or sets the roleplay that the user is a part of.
         /// </summary>
         [Required]
-        public Roleplay Roleplay { get; set; }
+        public virtual Roleplay Roleplay { get; set; }
 
         /// <summary>
         /// Gets or sets the user that is part of the roleplay.
         /// </summary>
         [Required]
-        public User User { get; set; }
+        public virtual User User { get; set; }
 
         /// <summary>
         /// Gets or sets the current status of the user in the roleplay.

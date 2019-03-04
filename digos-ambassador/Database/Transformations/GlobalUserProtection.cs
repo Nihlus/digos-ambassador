@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Database.Transformations
         /// Gets or sets the user that owns this protection data.
         /// </summary>
         [Required]
-        public User User { get; set; }
+        public virtual User User { get; set; }
 
         /// <summary>
         /// Gets or sets the default protection type to use on new servers.
@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Database.Transformations
         /// <summary>
         /// Gets or sets the list of users that are listed in this protection entry.
         /// </summary>
-        public List<UserProtectionEntry> UserListing { get; set; }
+        public virtual List<UserProtectionEntry> UserListing { get; set; }
 
         /// <summary>
         /// Gets the list of users that are allowed to transform the owner.

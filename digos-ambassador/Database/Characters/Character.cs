@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Database.Characters
 
         /// <inheritdoc />
         [Required]
-        public User Owner { get; set; }
+        public virtual User Owner { get; set; }
 
         /// <inheritdoc />
         public string Name { get; set; }
@@ -91,17 +91,17 @@ namespace DIGOS.Ambassador.Database.Characters
         /// <summary>
         /// Gets or sets the images associated with the character.
         /// </summary>
-        public List<Image> Images { get; set; }
+        public virtual List<Image> Images { get; set; }
 
         /// <summary>
         /// Gets or sets the character's default appearance.
         /// </summary>
-        public Appearance DefaultAppearance { get; set; }
+        public virtual Appearance DefaultAppearance { get; set; }
 
         /// <summary>
         /// Gets or sets the character's transformed appearance.
         /// </summary>
-        public Appearance CurrentAppearance { get; set; }
+        public virtual Appearance CurrentAppearance { get; set; }
 
         /// <summary>
         /// Gets or sets the preferred pronoun family of the character.
@@ -112,7 +112,7 @@ namespace DIGOS.Ambassador.Database.Characters
         /// Gets or sets a custom role that gets applied along with the character, similar to a nickname.
         /// </summary>
         [CanBeNull]
-        public CharacterRole Role { get; set; }
+        public virtual CharacterRole Role { get; set; }
 
         /// <summary>
         /// Determines whether or not the character has a given bodypart in their current appearance.

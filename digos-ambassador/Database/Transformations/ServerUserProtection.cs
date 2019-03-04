@@ -41,13 +41,13 @@ namespace DIGOS.Ambassador.Database.Transformations
         /// Gets or sets the user that owns this protection data.
         /// </summary>
         [Required]
-        public User User { get; set; }
+        public virtual User User { get; set; }
 
         /// <summary>
         /// Gets or sets the server that this protection data is valid on.
         /// </summary>
         [Required]
-        public Server Server { get; set; }
+        public virtual Server Server { get; set; }
 
         /// <summary>
         /// Gets or sets the active protection type on this server.

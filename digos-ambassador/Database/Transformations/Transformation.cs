@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Database.Transformations
         /// Gets or sets the species that this transformation belongs to.
         /// </summary>
         [Required]
-        public Species Species { get; set; }
+        public virtual Species Species { get; set; }
 
         /// <summary>
         /// Gets or sets a short description of the transformation.
@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Database.Transformations
         /// </summary>
         [Required]
         [YamlMember(Alias = "default_base_colour")]
-        public Colour DefaultBaseColour { get; set; }
+        public virtual Colour DefaultBaseColour { get; set; }
 
         /// <summary>
         /// Gets or sets the default pattern of the transformation (if any).
@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Database.Transformations
         /// Gets or sets the default colour of the pattern (if any).
         /// </summary>
         [YamlMember(Alias = "default_pattern_colour")]
-        public Colour DefaultPatternColour { get; set; }
+        public virtual Colour DefaultPatternColour { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this transformation is NSFW.

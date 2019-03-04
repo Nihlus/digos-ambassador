@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Database.Appearances
         /// Gets or sets the parts that compose this appearance.
         /// </summary>
         [NotNull, ItemNotNull]
-        public List<AppearanceComponent> Components { get; set; }
+        public virtual List<AppearanceComponent> Components { get; set; }
 
         /// <summary>
         /// Gets or sets a character's height (in meters).

@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Database.Appearances
         /// <summary>
         /// Gets or sets the component's current transformation.
         /// </summary>
-        public Transformation Transformation { get; set; }
+        public virtual Transformation Transformation { get; set; }
 
         /// <summary>
         /// Gets or sets the chirality of the component.
@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Database.Appearances
         /// Gets or sets the base colour of the component.
         /// </summary>
         [NotNull]
-        public Colour BaseColour { get; set; }
+        public virtual Colour BaseColour { get; set; }
 
         /// <summary>
         /// Gets or sets the pattern of the component's secondary colour (if any)
@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Database.Appearances
         /// Gets or sets the component's pattern colour.
         /// </summary>
         [CanBeNull]
-        public Colour PatternColour { get; set; }
+        public virtual Colour PatternColour { get; set; }
 
         /// <summary>
         /// Gets or sets the size of the component. This is, by default, a unitless value and is only contextually relevant.

@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Database.Characters
         /// <summary>
         /// Gets or sets the server that the role is on.
         /// </summary>
-        public Server Server { get; set; }
+        public virtual Server Server { get; set; }
 
         /// <summary>
         /// Gets or sets the role ID, taken from Discord.
