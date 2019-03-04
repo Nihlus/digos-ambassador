@@ -292,7 +292,7 @@ namespace DIGOS.Ambassador.Modules
             {
                 eb.WithFooter
                 (
-                    $"*This character has one or more images. Use \"!ch view-gallery {character.Name}\" to view them.*"
+                    $"This character has one or more images. Use \"!ch view-gallery {character.Name}\" to view them."
                 );
             }
 
