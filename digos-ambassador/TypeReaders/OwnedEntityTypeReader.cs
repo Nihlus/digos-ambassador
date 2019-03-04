@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
+using MoreLinq.Extensions;
 
 namespace DIGOS.Ambassador.TypeReaders
 {
@@ -59,25 +60,23 @@ namespace DIGOS.Ambassador.TypeReaders
                 entityName = input.Substring(splitIndex + 1);
 
                 // Try to parse the user
-                var userParseResult = await ReadUserAsync(context, rawUser, true);
+                var userParseResult = await ReadUserAsync(context, rawUser);
                 if (!userParseResult.IsSuccess)
                 {
                     return TypeReaderResult.FromError(userParseResult);
                 }
 
-                var highestScore = userParseResult.Values.Max(v => v.Score);
-                owner = userParseResult.Values.First(v => v.Score >= highestScore).Value as T1;
+                owner = userParseResult.Entity;
             }
             else
             {
                 // We might just have a user and not a name, so let's try parsing it
-                var userParseResult = await ReadUserAsync(context, input, true);
+                var userParseResult = await ReadUserAsync(context, input);
                 if (userParseResult.IsSuccess)
                 {
                     entityName = null;
 
-                    var highestScore = userParseResult.Values.Max(v => v.Score);
-                    owner = userParseResult.Values.First(v => v.Score >= highestScore).Value as T1;
+                    owner = userParseResult.Entity;
                 }
                 else
                 {
@@ -119,111 +118,167 @@ namespace DIGOS.Ambassador.TypeReaders
             [NotNull] IServiceProvider services
         );
 
-        private async Task<TypeReaderResult> ReadUserAsync([NotNull] ICommandContext context, string input, bool byMentionOnly = false)
+        private RetrieveEntityResult<TUser> FindBestMatchingUserBy<TUser>
+        (
+            [NotNull] IEnumerable<TUser> users,
+            [NotNull] Func<TUser, string> selector,
+            [NotNull] string value
+        )
+            where TUser : class, IUser
         {
-            var results = new Dictionary<ulong, TypeReaderValue>();
+            var values = users.Select(u => (User: u, Value: selector(u))).ToImmutableList();
 
-            IReadOnlyCollection<IUser> channelUsers =
+            var literalMatch = values.FirstOrDefault(uv => uv.Value == value).User;
+            if (!(literalMatch is null))
+            {
+                return RetrieveEntityResult<TUser>.FromSuccess(literalMatch);
+            }
+
+            var partialMatch = values.FirstOrDefault
             (
-                await context.Channel.GetUsersAsync(CacheMode.CacheOnly).FlattenAsync().ConfigureAwait(false)
-            )
-            .ToArray();
+                uv =>
+                    string.Equals(uv.Value, value, StringComparison.OrdinalIgnoreCase)
+            ).User;
 
-            IReadOnlyCollection<IGuildUser> guildUsers = ImmutableArray.Create<IGuildUser>();
+            if (!(partialMatch is null))
+            {
+                return RetrieveEntityResult<TUser>.FromSuccess(partialMatch);
+            }
 
+            return RetrieveEntityResult<TUser>.FromError(CommandError.ObjectNotFound, "No matching user found.");
+        }
+
+        private async Task<RetrieveEntityResult<IUser>> GetUserByIdAsync([NotNull] ICommandContext context, ulong id)
+        {
+            IUser user;
             if (context.Guild != null)
             {
-                guildUsers = await context.Guild.GetUsersAsync(CacheMode.CacheOnly).ConfigureAwait(false);
+                user = await context.Guild.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false);
             }
-
-            // By Mention (1.0)
-            if (MentionUtils.TryParseUser(input, out ulong id))
+            else
             {
-                if (context.Guild != null)
-                {
-                    AddResult(results, await context.Guild.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false) as T1, 1.00f);
-                }
-                else
-                {
-                    AddResult(results, await context.Channel.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false) as T1, 1.00f);
-                }
+                user = await context.Channel.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false);
             }
 
-            if (results.Count <= 0 && byMentionOnly)
+            if (user is null)
             {
-                return TypeReaderResult.FromError(CommandError.ObjectNotFound, "User not found.");
+                return RetrieveEntityResult<IUser>.FromError
+                (
+                    CommandError.ObjectNotFound,
+                    "User could not be retrieved."
+                );
             }
 
-            // By Id (0.9)
+            return RetrieveEntityResult<IUser>.FromSuccess(user);
+        }
+
+        private async Task<RetrieveEntityResult<IUser>> ReadUserAsync([NotNull] ICommandContext context, string input)
+        {
+            // By Mention
+            if (!MentionUtils.TryParseUser(input, out ulong id))
+            {
+                var getUserResult = await GetUserByIdAsync(context, id);
+                if (getUserResult.IsSuccess)
+                {
+                    return getUserResult;
+                }
+            }
+
+            // By Id
             if (ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out id))
             {
-                if (context.Guild != null)
+                var getUserResult = await GetUserByIdAsync(context, id);
+                if (getUserResult.IsSuccess)
                 {
-                    AddResult(results, await context.Guild.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false) as T1, 0.90f);
-                }
-                else
-                {
-                    AddResult(results, await context.Channel.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false) as T1, 0.90f);
+                    return getUserResult;
                 }
             }
 
-            // By Username + Discriminator (0.7-0.85)
+            return await FindBestMatchingUserAsync(context, input);
+        }
+
+        private async Task<RetrieveEntityResult<IUser>> FindBestMatchingUserAsync
+        (
+            [NotNull] ICommandContext context,
+            [NotNull] string input
+        )
+        {
+            var channelUsers = (await context.Channel.GetUsersAsync(CacheMode.CacheOnly)
+                    .FlattenAsync()
+                    .ConfigureAwait(false))
+                .ToImmutableList();
+
+            IReadOnlyCollection<IGuildUser> guildUsers = new List<IGuildUser>();
+
+            if (!(context.Guild is null))
+            {
+                guildUsers = await context.Guild.GetUsersAsync(CacheMode.CacheOnly).ConfigureAwait(false);
+                guildUsers = guildUsers.ExceptBy(channelUsers, u => u.Id).Cast<IGuildUser>().ToImmutableList();
+            }
+
+            // By Username + Discriminator
             int index = input.LastIndexOf('#');
             if (index >= 0)
             {
                 string username = input.Substring(0, index);
                 if (ushort.TryParse(input.Substring(index + 1), out ushort discriminator))
                 {
-                    var channelUser = channelUsers.FirstOrDefault(x => x.DiscriminatorValue == discriminator &&
-                        string.Equals(username, x.Username, StringComparison.OrdinalIgnoreCase));
-                    AddResult(results, channelUser as T1, channelUser?.Username == username ? 0.85f : 0.75f);
+                    var bestUser = FindBestMatchingUserBy
+                    (
+                        channelUsers.Where(u => u.DiscriminatorValue == discriminator),
+                        u => u.Username,
+                        username
+                    );
 
-                    var guildUser = guildUsers.FirstOrDefault(x => x.DiscriminatorValue == discriminator &&
-                        string.Equals(username, x.Username, StringComparison.OrdinalIgnoreCase));
-                    AddResult(results, guildUser as T1, guildUser?.Username == username ? 0.80f : 0.70f);
+                    if (bestUser.IsSuccess)
+                    {
+                        return RetrieveEntityResult<IUser>.FromSuccess(bestUser.Entity);
+                    }
+
+                    var bestGuildUser = FindBestMatchingUserBy
+                    (
+                        guildUsers.Where(u => u.DiscriminatorValue == discriminator),
+                        u => u.Username,
+                        username
+                    );
+
+                    if (bestGuildUser.IsSuccess)
+                    {
+                        return RetrieveEntityResult<IUser>.FromSuccess(bestGuildUser.Entity);
+                    }
                 }
             }
 
-            // By Username (0.5-0.6)
+            // By Username
+            var bestUserByName = FindBestMatchingUserBy(channelUsers, u => u.Username, input);
+            if (bestUserByName.IsSuccess)
             {
-                foreach (var channelUser in channelUsers.Where(x => string.Equals(input, x.Username, StringComparison.OrdinalIgnoreCase)))
-                {
-                    AddResult(results, channelUser as T1, channelUser.Username == input ? 0.65f : 0.55f);
-                }
-
-                foreach (var guildUser in guildUsers.Where(x => string.Equals(input, x.Username, StringComparison.OrdinalIgnoreCase)))
-                {
-                    AddResult(results, guildUser as T1, guildUser.Username == input ? 0.60f : 0.50f);
-                }
+                return RetrieveEntityResult<IUser>.FromSuccess(bestUserByName.Entity);
             }
 
-            // By Nickname (0.5-0.6)
+            var bestGuildUserByName = FindBestMatchingUserBy(guildUsers, gu => gu.Username, input);
+            if (bestGuildUserByName.IsSuccess)
             {
-                foreach (var channelUser in channelUsers.Where(x => string.Equals(input, (x as IGuildUser)?.Nickname, StringComparison.OrdinalIgnoreCase)))
+                return RetrieveEntityResult<IUser>.FromSuccess(bestGuildUserByName.Entity);
+            }
+
+            if (!(context.Guild is null))
+            {
+                // By Nickname
+                var bestUserByNick = FindBestMatchingUserBy(channelUsers.Cast<IGuildUser>(), u => u.Nickname, input);
+                if (bestUserByNick.IsSuccess)
                 {
-                    AddResult(results, channelUser as T1, (channelUser as IGuildUser)?.Nickname == input ? 0.65f : 0.55f);
+                    return RetrieveEntityResult<IUser>.FromSuccess(bestUserByNick.Entity);
                 }
 
-                foreach (var guildUser in guildUsers.Where(x => string.Equals(input, x.Nickname, StringComparison.OrdinalIgnoreCase)))
+                var bestGuildUserByNick = FindBestMatchingUserBy(guildUsers, gu => gu.Nickname, input);
+                if (bestGuildUserByNick.IsSuccess)
                 {
-                    AddResult(results, guildUser as T1, guildUser.Nickname == input ? 0.60f : 0.50f);
+                    return RetrieveEntityResult<IUser>.FromSuccess(bestGuildUserByNick.Entity);
                 }
             }
 
-            if (results.Count > 0)
-            {
-                return TypeReaderResult.FromSuccess(results.Values.ToImmutableArray());
-            }
-
-            return TypeReaderResult.FromError(CommandError.ObjectNotFound, "User not found.");
-        }
-
-        private void AddResult(IDictionary<ulong, TypeReaderValue> results, [CanBeNull] T1 user, float score)
-        {
-            if (user != null && !results.ContainsKey(user.Id))
-            {
-                results.Add(user.Id, new TypeReaderValue(user, score));
-            }
+            return RetrieveEntityResult<IUser>.FromError(CommandError.ObjectNotFound, "User not found.");
         }
     }
 }
