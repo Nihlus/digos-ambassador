@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -36,6 +35,7 @@ using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Behaviours;
 using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
@@ -107,6 +107,8 @@ namespace DIGOS.Ambassador
 
         private readonly ServerService Servers;
 
+        private readonly BehaviourService Behaviours;
+
         // ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 
         /// <summary>
@@ -149,6 +151,8 @@ namespace DIGOS.Ambassador
 
             this.Servers = new ServerService();
 
+            this.Behaviours = new BehaviourService();
+
             this.Services = new ServiceCollection()
                 .AddSingleton(this.Client)
                 .AddSingleton(this.DiscordIntegration)
@@ -166,6 +170,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton(this.Privacy)
                 .AddSingleton(this.Help)
                 .AddSingleton(this.Servers)
+                .AddSingleton(this.Behaviours)
                 .AddDbContextPool<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
                 .BuildServiceProvider();
 
@@ -177,8 +182,6 @@ namespace DIGOS.Ambassador
 
             this.Client.MessageReceived += OnMessageReceived;
             this.Client.MessageUpdated += OnMessageUpdated;
-
-            this.Client.UserJoined += OnUserJoined;
         }
 
         /// <summary>
@@ -215,8 +218,11 @@ namespace DIGOS.Ambassador
             this.Commands.AddTypeReader<Pattern>(new HumanizerEnumTypeReader<Permissions.PermissionTarget>());
 
             await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly(), this.Services);
+            this.Behaviours.AddBehaviours(Assembly.GetEntryAssembly(), this.Services);
 
             await this.Client.StartAsync();
+
+            await this.Behaviours.StartBehavioursAsync();
         }
 
         /// <summary>
@@ -234,6 +240,9 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the stop action.</returns>
         public async Task StopAsync()
         {
+            await this.Behaviours.StopBehavioursAsync();
+
+            await LogoutAsync();
             await this.Client.StopAsync();
         }
 
@@ -259,7 +268,6 @@ namespace DIGOS.Ambassador
             int argumentPos = 0;
             if (!(message.HasCharPrefix('!', ref argumentPos) || message.HasMentionPrefix(this.Client.CurrentUser, ref argumentPos)))
             {
-                await this.Roleplays.ConsumeMessageAsync(db, new SocketCommandContext(this.Client, message));
                 return;
             }
 
@@ -398,66 +406,6 @@ namespace DIGOS.Ambassador
             }
 
             await OnMessageReceived(updatedMessage);
-        }
-
-        /// <summary>
-        /// Handles new users joining.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        private async Task OnUserJoined([NotNull] SocketGuildUser user)
-        {
-            var db = this.Services.GetRequiredService<GlobalInfoContext>();
-            var server = await db.GetOrRegisterServerAsync(user.Guild);
-
-            if (!server.SendJoinMessage)
-            {
-                return;
-            }
-
-            var getJoinMessageResult = this.Servers.GetJoinMessage(server);
-            if (!getJoinMessageResult.IsSuccess)
-            {
-                return;
-            }
-
-            var userChannel = await user.GetOrCreateDMChannelAsync();
-            try
-            {
-                var eb = this.Feedback.CreateEmbedBase();
-                eb.WithDescription($"Welcome, {user.Mention}!");
-                eb.WithDescription(getJoinMessageResult.Entity);
-
-                await this.Feedback.SendEmbedAsync(userChannel, eb.Build());
-            }
-            catch (HttpException hex)
-            {
-                if (!hex.WasCausedByDMsNotAccepted())
-                {
-                    throw;
-                }
-
-                var content = $"Welcome, {user.Mention}! You have DMs disabled, so I couldn't send you the " +
-                              $"first-join message. To see it, type \"!server join-message\".";
-
-                var welcomeMessage = this.Feedback.CreateFeedbackEmbed
-                (
-                    user,
-                    Color.Orange,
-                    content
-                );
-
-                try
-                {
-                    await this.Feedback.SendEmbedAsync(user.Guild.DefaultChannel, welcomeMessage);
-                }
-                catch (HttpException pex)
-                {
-                    if (!pex.WasCausedByMissingPermission())
-                    {
-                        throw;
-                    }
-                }
-            }
         }
 
         /// <summary>
