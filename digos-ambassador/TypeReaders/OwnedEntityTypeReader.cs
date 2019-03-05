@@ -97,6 +97,8 @@ namespace DIGOS.Ambassador.TypeReaders
                 {
                     return TypeReaderResult.FromError(retrieveUserEntityResult);
                 }
+
+                return TypeReaderResult.FromSuccess(retrieveUserEntityResult.Entity);
             }
 
             return TypeReaderResult.FromSuccess(retrieveEntityResult.Entity);
