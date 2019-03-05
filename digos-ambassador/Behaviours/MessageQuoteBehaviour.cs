@@ -121,14 +121,15 @@ namespace DIGOS.Ambassador.Behaviours
                     continue;
                 }
 
-                var channel = this.Client.GetChannel(channelId);
+                var quotedChannel = this.Client.GetChannel(channelId);
 
-                if (!(channel is IGuildChannel guildChannel) || !(channel is ISocketMessageChannel messageChannel))
+                if (!(quotedChannel is IGuildChannel) ||
+                    !(quotedChannel is ISocketMessageChannel quotedMessageChannel))
                 {
                     continue;
                 }
 
-                var quotedMessage = await messageChannel.GetMessageAsync(messageId);
+                var quotedMessage = await quotedMessageChannel.GetMessageAsync(messageId);
                 if (quotedMessage == null || IsQuote(quotedMessage))
                 {
                     return;
@@ -137,15 +138,20 @@ namespace DIGOS.Ambassador.Behaviours
                 var embed = this.Feedback.CreateMessageQuote(quotedMessage, guildUser);
                 embed.WithTimestamp(quotedMessage.Timestamp);
 
-                await messageChannel.SendMessageAsync(string.Empty, embed: embed.Build());
+                await message.Channel.SendMessageAsync(string.Empty, embed: embed.Build());
 
                 if (message.Content != match.Value)
                 {
                     continue;
                 }
 
+                if (!(message.Channel is IGuildChannel messageGuildChannel))
+                {
+                    continue;
+                }
+
                 // It's just a single quote link, so we'll delete it
-                var guildBotUser = await guildChannel.Guild.GetUserAsync(this.Client.CurrentUser.Id);
+                var guildBotUser = await messageGuildChannel.Guild.GetUserAsync(this.Client.CurrentUser.Id);
                 if (guildBotUser.GuildPermissions.ManageMessages)
                 {
                     await message.DeleteAsync();
