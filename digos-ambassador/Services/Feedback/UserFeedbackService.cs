@@ -21,9 +21,12 @@
 //
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Humanizer;
+using Humanizer.Bytes;
 using JetBrains.Annotations;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -230,6 +233,193 @@ namespace DIGOS.Ambassador.Services
             eb.WithColor(color.Value);
 
             return eb;
+        }
+
+        /// <summary>
+        /// Creates a message quote.
+        /// </summary>
+        /// <param name="message">The message to quote.</param>
+        /// <param name="quotingUser">The user that is quoting the message.</param>
+        /// <returns>The quote.</returns>
+        public EmbedBuilder CreateMessageQuote([NotNull] IMessage message, IMentionable quotingUser)
+        {
+            var eb = new EmbedBuilder();
+
+            if (TryCopyRichEmbed(message, quotingUser, ref eb))
+            {
+                return eb;
+            }
+
+            if (!TryAddImageAttachmentInfo(message, ref eb))
+            {
+                TryAddOtherAttachmentInfo(message, ref eb);
+            }
+
+            AddContent(message, ref eb);
+            AddOtherEmbed(message, ref eb);
+            AddActivity(message, ref eb);
+            AddMeta(message, quotingUser, ref eb);
+
+            return eb;
+        }
+
+        /// <summary>
+        /// Attempts to add information about attached images, if they exist.
+        /// </summary>
+        /// <param name="message">The quoted message.</param>
+        /// <param name="embed">The embed to add the information to.</param>
+        /// <returns>true if information was added; otherwise, false.</returns>
+        private bool TryAddImageAttachmentInfo([NotNull] IMessage message, ref EmbedBuilder embed)
+        {
+            var firstAttachment = message.Attachments.FirstOrDefault();
+            if (firstAttachment is null || firstAttachment.Height is null)
+            {
+                return false;
+            }
+
+            embed.WithImageUrl(firstAttachment.Url);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to add information about an attachment, if it exists.
+        /// </summary>
+        /// <param name="message">The quoted message.</param>
+        /// <param name="embed">The embed to add the information to.</param>
+        /// <returns>true if information was added; otherwise, false.</returns>
+        private bool TryAddOtherAttachmentInfo([NotNull] IMessage message, ref EmbedBuilder embed)
+        {
+            var firstAttachment = message.Attachments.FirstOrDefault();
+            if (firstAttachment is null)
+            {
+                return false;
+            }
+
+            embed.AddField($"Attachment (Size: {new ByteSize(firstAttachment.Size)})", firstAttachment.Url);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Attempts to copy the full rich embed from a message, if it has one.
+        /// </summary>
+        /// <param name="message">The quoted message.</param>
+        /// <param name="executingUser">The user that quoted the message.</param>
+        /// <param name="embed">The embed to replace.</param>
+        /// <returns>true if a rich embed was copied; otherwise, false.</returns>
+        private bool TryCopyRichEmbed([NotNull] IMessage message, IMentionable executingUser, ref EmbedBuilder embed)
+        {
+            var firstEmbed = message.Embeds.FirstOrDefault();
+            if (firstEmbed?.Type != EmbedType.Rich)
+            {
+                return false;
+            }
+
+            embed = message.Embeds
+                .First()
+                .ToEmbedBuilder()
+                .AddField
+                (
+                    "Quoted by",
+                    $"{executingUser.Mention} from **[#{message.Channel.Name}]({message.GetJumpUrl()})**",
+                    true
+                );
+
+            if (firstEmbed.Color is null)
+            {
+                embed.Color = Color.DarkGrey;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Adds information about the activity a message was involved in, if present.
+        /// </summary>
+        /// <param name="message">The quoted message.</param>
+        /// <param name="embed">The embed to add the information to.</param>
+        private void AddActivity([NotNull] IMessage message, ref EmbedBuilder embed)
+        {
+            if (message.Activity is null)
+            {
+                return;
+            }
+
+            embed
+                .AddField("Invite Type", message.Activity.Type)
+                .AddField("Party Id", message.Activity.PartyId);
+        }
+
+        /// <summary>
+        /// Adds information about other embeds in a quoted message.
+        /// </summary>
+        /// <param name="message">The quoted message.</param>
+        /// <param name="embed">The embed to add the information to.</param>
+        private void AddOtherEmbed([NotNull] IMessage message, ref EmbedBuilder embed)
+        {
+            if (!message.Embeds.Any())
+            {
+                return;
+            }
+
+            embed
+                .AddField("Embed Type", message.Embeds.First().Type);
+        }
+
+        /// <summary>
+        /// Adds the content of the quoted message to the embed.
+        /// </summary>
+        /// <param name="message">The quoted message.</param>
+        /// <param name="embed">The embed to add the content to.</param>
+        private void AddContent([NotNull] IMessage message, ref EmbedBuilder embed)
+        {
+            if (string.IsNullOrWhiteSpace(message.Content))
+            {
+                return;
+            }
+
+            if (message.Channel is IGuildChannel guildChannel && guildChannel.Guild is IGuild guild)
+            {
+                var messageUrl = $"https://discordapp.com/channels/{guild.Id}/{guildChannel.Id}/{message.Id}";
+
+                embed.WithUrl(messageUrl);
+            }
+
+            embed.WithDescription(message.Content);
+        }
+
+        /// <summary>
+        /// Adds meta information about the quote to the embed.
+        /// </summary>
+        /// <param name="message">The quoted message.</param>
+        /// <param name="quotingUser">The quoting user.</param>
+        /// <param name="embed">The embed to add the information to.</param>
+        private void AddMeta([NotNull] IMessage message, [NotNull] IMentionable quotingUser, ref EmbedBuilder embed)
+        {
+            embed
+                .WithAuthor(message.Author)
+                .WithFooter(GetPostedTimeInfo(message))
+                .WithColor(new Color(95, 186, 125))
+                .AddField
+                (
+                    "Quoted by",
+                    $"{quotingUser.Mention} from **[#{message.Channel.Name}]({message.GetJumpUrl()})**",
+                    true
+                );
+        }
+
+        /// <summary>
+        /// Gets a formatted string that explains when the message was posted.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <returns>The formatted time.</returns>
+        [NotNull]
+        private static string GetPostedTimeInfo([NotNull] IMessage message)
+        {
+            return $"{message.Timestamp.DateTime.ToOrdinalWords()} " +
+                   $"at {message.Timestamp:HH:mm}, " +
+                   $"in #{message.Channel.Name}";
         }
     }
 }

@@ -1,5 +1,5 @@
 //
-//  RoleplayLoggingBehaviour.cs
+//  MessageQuoteBehaviour.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,43 +21,43 @@
 //
 
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+
 using Humanizer;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Behaviours
 {
     /// <summary>
-    /// Acts on user messages, logging them into an active roleplay if relevant.
+    /// Generates quotes from message links. Based on code from MODiX.
     /// </summary>
-    public class RoleplayLoggingBehaviour : BehaviourBase
+    public class MessageQuoteBehaviour : BehaviourBase
     {
-        private readonly GlobalInfoContext Database;
-        private readonly RoleplayService Roleplays;
+        private static readonly Regex Pattern = new Regex
+        (
+            @"https?://(?:(?:ptb|canary)\.)?discordapp\.com/channels/(?<GuildId>\d+)/(?<ChannelId>\d+)/(?<MessageId>\d+)",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
+        );
+
+        private readonly UserFeedbackService Feedback;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RoleplayLoggingBehaviour"/> class.
+        /// Initializes a new instance of the <see cref="MessageQuoteBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
-        /// <param name="roleplays">The roleplay service.</param>
-        /// <param name="database">The database.</param>
-        public RoleplayLoggingBehaviour
-        (
-            DiscordSocketClient client,
-            RoleplayService roleplays,
-            GlobalInfoContext database
-        )
+        /// <param name="feedback">The feedback service.</param>
+        public MessageQuoteBehaviour(DiscordSocketClient client, UserFeedbackService feedback)
             : base(client)
         {
-            this.Roleplays = roleplays;
-            this.Database = database;
+            this.Feedback = feedback;
         }
 
         /// <inheritdoc />
@@ -90,6 +90,11 @@ namespace DIGOS.Ambassador.Behaviours
                 return;
             }
 
+            if (!(message.Author is SocketGuildUser guildUser))
+            {
+                return;
+            }
+
             if (arg.Author.IsBot || arg.Author.IsWebhook)
             {
                 return;
@@ -107,7 +112,61 @@ namespace DIGOS.Ambassador.Behaviours
                 return;
             }
 
-            await this.Roleplays.ConsumeMessageAsync(this.Database, new SocketCommandContext(this.Client, message));
+            foreach (Match match in Pattern.Matches(message.Content))
+            {
+                if (!ulong.TryParse(match.Groups["GuildId"].Value, out _) ||
+                    !ulong.TryParse(match.Groups["ChannelId"].Value, out var channelId) ||
+                    !ulong.TryParse(match.Groups["MessageId"].Value, out var messageId))
+                {
+                    continue;
+                }
+
+                var channel = this.Client.GetChannel(channelId);
+
+                if (!(channel is IGuildChannel guildChannel) || !(channel is ISocketMessageChannel messageChannel))
+                {
+                    continue;
+                }
+
+                var quotedMessage = await messageChannel.GetMessageAsync(messageId);
+                if (quotedMessage == null || IsQuote(quotedMessage))
+                {
+                    return;
+                }
+
+                var embed = this.Feedback.CreateMessageQuote(quotedMessage, guildUser);
+                embed.WithTimestamp(quotedMessage.Timestamp);
+
+                await messageChannel.SendMessageAsync(string.Empty, embed: embed.Build());
+
+                if (message.Content != match.Value)
+                {
+                    continue;
+                }
+
+                // It's just a single quote link, so we'll delete it
+                var guildBotUser = await guildChannel.Guild.GetUserAsync(this.Client.CurrentUser.Id);
+                if (guildBotUser.GuildPermissions.ManageMessages)
+                {
+                    await message.DeleteAsync();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Determines if the given message is a quoted message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <returns>true if the message is a quoted message; otherwise, false.</returns>
+        private bool IsQuote([NotNull] IMessage message)
+        {
+            var hasQuoteField =
+                message
+                    .Embeds?
+                    .SelectMany(d => d.Fields)
+                    .Any(d => d.Name == "Quoted by");
+
+            return hasQuoteField.HasValue && hasQuoteField.Value;
         }
 
         /// <summary>
