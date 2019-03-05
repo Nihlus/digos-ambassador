@@ -25,10 +25,12 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Discord.WebSocket;
 
 using Humanizer;
@@ -135,26 +137,30 @@ namespace DIGOS.Ambassador.Behaviours
                     return;
                 }
 
+                if (message.Channel is IGuildChannel messageGuildChannel)
+                {
+                    var guildBotUser = await messageGuildChannel.Guild.GetUserAsync(this.Client.CurrentUser.Id);
+
+                    // It's just a single quote link, so we'll delete it
+                    if (message.Content == match.Value && guildBotUser.GuildPermissions.ManageMessages)
+                    {
+                        await message.DeleteAsync();
+                    }
+                }
+
                 var embed = this.Feedback.CreateMessageQuote(quotedMessage, guildUser);
                 embed.WithTimestamp(quotedMessage.Timestamp);
 
-                await message.Channel.SendMessageAsync(string.Empty, embed: embed.Build());
-
-                if (message.Content != match.Value)
+                try
                 {
-                    continue;
+                    await message.Channel.SendMessageAsync(string.Empty, embed: embed.Build());
                 }
-
-                if (!(message.Channel is IGuildChannel messageGuildChannel))
+                catch (HttpException hex)
                 {
-                    continue;
-                }
-
-                // It's just a single quote link, so we'll delete it
-                var guildBotUser = await messageGuildChannel.Guild.GetUserAsync(this.Client.CurrentUser.Id);
-                if (guildBotUser.GuildPermissions.ManageMessages)
-                {
-                    await message.DeleteAsync();
+                    if (!hex.WasCausedByMissingPermission())
+                    {
+                        throw;
+                    }
                 }
             }
         }
