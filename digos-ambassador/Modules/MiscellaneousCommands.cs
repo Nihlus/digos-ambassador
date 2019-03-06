@@ -154,7 +154,6 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Boops you.")]
         public async Task BoopAsync()
         {
-            throw new NotImplementedException();
             await this.Feedback.SendConfirmationAsync(this.Context, "*boop*");
         }
 
