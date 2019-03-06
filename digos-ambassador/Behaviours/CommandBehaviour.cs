@@ -98,8 +98,6 @@ namespace DIGOS.Ambassador.Behaviours
             this.Client.MessageReceived += OnMessageReceived;
             this.Client.MessageUpdated += OnMessageUpdated;
 
-            this.Commands.CommandExecuted += OnCommandExecuted;
-
             return Task.CompletedTask;
         }
 
@@ -155,7 +153,14 @@ namespace DIGOS.Ambassador.Behaviours
                     var potentialPrivacyCommand = commandSearchResult.Commands.FirstOrDefault().Command;
                     if (potentialPrivacyCommand.Attributes.Any(a => a is PrivacyExemptAttribute))
                     {
-                        await this.Commands.ExecuteAsync(context, argumentPos, this.Services);
+                        var privacyExemptCommandResult = await this.Commands.ExecuteAsync
+                        (
+                            context,
+                            argumentPos,
+                            this.Services
+                        );
+
+                        await HandleCommandResultAsync(context, privacyExemptCommandResult, argumentPos);
                         return;
                     }
 
@@ -196,7 +201,8 @@ namespace DIGOS.Ambassador.Behaviours
                 }
             }
 
-            await this.Commands.ExecuteAsync(context, argumentPos, this.Services);
+            var commandResult = await this.Commands.ExecuteAsync(context, argumentPos, this.Services);
+            await HandleCommandResultAsync(context, commandResult, argumentPos);
         }
 
         /// <summary>
