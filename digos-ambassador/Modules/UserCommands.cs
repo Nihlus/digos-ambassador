@@ -21,6 +21,8 @@
 //
 
 using System;
+using System.Globalization;
+using System.Text;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
@@ -34,6 +36,7 @@ using Discord;
 using Discord.Commands;
 
 using Humanizer;
+using Humanizer.Localisation;
 using JetBrains.Annotations;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
 
@@ -160,6 +163,7 @@ namespace DIGOS.Ambassador.Modules
 
                 timezoneValue += user.Timezone.Value;
             }
+
             eb.AddField("Timezone", timezoneValue);
 
             string bioValue;
@@ -173,6 +177,21 @@ namespace DIGOS.Ambassador.Modules
             }
 
             eb.AddField("Bio", bioValue);
+
+            var technicalInfo = new StringBuilder();
+            technicalInfo.AppendLine($"ID: {discordUser.Id}");
+
+            var span = DateTime.UtcNow - discordUser.CreatedAt;
+
+            var humanizedTimeAgo = span > TimeSpan.FromSeconds(60)
+                ? span.Humanize(maxUnit: TimeUnit.Year, culture: CultureInfo.InvariantCulture)
+                : "a few seconds";
+
+            var created = $"{humanizedTimeAgo} ago ({discordUser.CreatedAt.UtcDateTime:yyyy-MM-ddTHH:mm:ssK})\n";
+
+            technicalInfo.AppendLine($"Created: {created}");
+
+            eb.AddField("Technical Info", technicalInfo.ToString());
 
             await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
         }
