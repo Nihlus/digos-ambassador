@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Database.Interfaces
         string Name { get; }
 
         /// <summary>
-        /// Gets the display name of the type that the entity is (e.g, character, roleplay, etc)
+        /// Gets the display name of the type that the entity is (e.g, character, roleplay, etc).
         /// </summary>
         string EntityTypeDisplayName { get; }
 

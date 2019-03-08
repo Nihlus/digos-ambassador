@@ -827,7 +827,7 @@ namespace DIGOS.Ambassador.Services
         /// </summary>
         /// <param name="db">The database where the characters are stored.</param>
         /// <param name="character">The character to edit.</param>
-        /// <param name="isNSFW">Whether or not the character is NSFW</param>
+        /// <param name="isNSFW">Whether or not the character is NSFW.</param>
         /// <returns>A task that must be awaited.</returns>
         public async Task<ModifyEntityResult> SetCharacterIsNSFWAsync
         (
@@ -927,7 +927,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="imageName">The name of the image.</param>
         /// <param name="imageUrl">The url of the image.</param>
         /// <param name="imageCaption">The caption of the image.</param>
-        /// <param name="isNSFW">Whether or not the image is NSFW</param>
+        /// <param name="isNSFW">Whether or not the image is NSFW.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> AddImageToCharacterAsync
         (

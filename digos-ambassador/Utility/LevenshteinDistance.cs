@@ -26,7 +26,7 @@ using JetBrains.Annotations;
 namespace DIGOS.Ambassador.Utility
 {
     /// <summary>
-    /// Contains approximate string matching
+    /// Contains approximate string matching functions.
     /// </summary>
     public static class LevenshteinDistance
     {

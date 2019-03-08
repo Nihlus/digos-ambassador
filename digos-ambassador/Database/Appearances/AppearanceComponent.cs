@@ -64,7 +64,7 @@ namespace DIGOS.Ambassador.Database.Appearances
         public virtual Colour BaseColour { get; set; } = new Colour();
 
         /// <summary>
-        /// Gets or sets the pattern of the component's secondary colour (if any)
+        /// Gets or sets the pattern of the component's secondary colour (if any).
         /// </summary>
         [CanBeNull]
         public Pattern? Pattern { get; set; }

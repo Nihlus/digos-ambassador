@@ -29,7 +29,7 @@ using YamlDotNet.Serialization;
 namespace DIGOS.Ambassador.Database.Transformations
 {
     /// <summary>
-    /// Represents a single species (i.e, associated transformations)
+    /// Represents a single species (i.e, associated transformations).
     /// </summary>
     public class Species : IEFEntity
     {

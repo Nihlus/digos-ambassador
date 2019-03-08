@@ -25,7 +25,7 @@ using CommandLine;
 namespace DIGOS.Ambassador.Doc
 {
     /// <summary>
-    /// Holds CLI options for the program
+    /// Holds CLI options for the program.
     /// </summary>
     public class Options
     {

@@ -197,7 +197,7 @@ namespace DIGOS.Ambassador.Modules
         }
 
         /// <summary>
-        /// User info edit and set commands
+        /// User info edit and set commands.
         /// </summary>
         [UsedImplicitly]
         [Group("set")]

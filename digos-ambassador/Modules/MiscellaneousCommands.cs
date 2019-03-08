@@ -133,7 +133,7 @@ namespace DIGOS.Ambassador.Modules
         }
 
         /// <summary>
-        /// Bweh!
+        /// Bweh! A silly command.
         /// </summary>
         [UsedImplicitly]
         [Command("bweh", RunMode = RunMode.Async)]

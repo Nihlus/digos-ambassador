@@ -35,7 +35,7 @@ namespace DIGOS.Ambassador.Extensions
         /// Gets a custom attribute of type <typeparamref name="T"/> from the given enum value.
         /// </summary>
         /// <param name="value">The value.</param>
-        /// <typeparam name="T">The attribute type</typeparam>
+        /// <typeparam name="T">The attribute type.</typeparam>
         /// <returns>The attribute.</returns>
         [CanBeNull]
         public static T GetCustomAttribute<T>([NotNull] this Enum value) where T : Attribute

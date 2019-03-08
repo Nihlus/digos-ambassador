@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Transformations
         /// Initializes a new instance of the <see cref="SpeciesYamlConverter"/> class.
         /// </summary>
         /// <param name="database">The database.</param>
-        /// <param name="transformation">The transformation service</param>
+        /// <param name="transformation">The transformation service.</param>
         public SpeciesYamlConverter(GlobalInfoContext database, TransformationService transformation)
         {
             this.Database = database;

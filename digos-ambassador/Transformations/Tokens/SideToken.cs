@@ -27,7 +27,7 @@ using Humanizer;
 namespace DIGOS.Ambassador.Transformations
 {
     /// <summary>
-    /// A token that gets replaced with the transformation's chirality
+    /// A token that gets replaced with the transformation's chirality.
     /// </summary>
     [TokenIdentifier("side", "chirality")]
     public class SideToken : ReplacableTextToken<SideToken>

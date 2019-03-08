@@ -28,7 +28,7 @@ using DIGOS.Ambassador.Services;
 namespace DIGOS.Ambassador.Transformations
 {
     /// <summary>
-    /// A token that gets replaced with a possessive pronoun
+    /// A token that gets replaced with a possessive pronoun.
     /// </summary>
     [TokenIdentifier("pronoun", "pr")]
     public class PronounToken : ReplacableTextToken<PronounToken>

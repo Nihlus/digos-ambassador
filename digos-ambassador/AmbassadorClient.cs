@@ -153,6 +153,7 @@ namespace DIGOS.Ambassador
             this.Behaviours = new BehaviourService();
 
             this.Services = new ServiceCollection()
+                .AddSingleton(this)
                 .AddSingleton(this.Client)
                 .AddSingleton(this.DiscordIntegration)
                 .AddSingleton(this.Content)
@@ -245,7 +246,7 @@ namespace DIGOS.Ambassador
         /// <summary>
         /// Saves log events from Discord using the configured method in log4net.
         /// </summary>
-        /// <param name="arg">The log message from Discord</param>
+        /// <param name="arg">The log message from Discord.</param>
         /// <returns>A completed task.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the log severity is not recognized.</exception>
         [NotNull]

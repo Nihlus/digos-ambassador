@@ -1463,7 +1463,7 @@ namespace DIGOS.Ambassador.Modules
             /// Sets whether or not a character is NSFW.
             /// </summary>
             /// <param name="character">The character.</param>
-            /// <param name="isNSFW">Whether or not the character is NSFW</param>
+            /// <param name="isNSFW">Whether or not the character is NSFW.</param>
             [UsedImplicitly]
             [Command("nsfw", RunMode = Async)]
             [Summary("Sets whether or not a character is NSFW.")]

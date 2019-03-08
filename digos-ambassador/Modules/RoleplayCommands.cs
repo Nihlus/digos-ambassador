@@ -627,7 +627,7 @@ namespace DIGOS.Ambassador.Modules
         /// Replays the named roleplay owned by the given user to you.
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
-        /// <param name="from">The time from which you want to replay,</param>
+        /// <param name="from">The time from which you want to replay.</param>
         /// <param name="to">The time until you want to replay.</param>
         [UsedImplicitly]
         [Command("replay", RunMode = Async)]
@@ -785,7 +785,7 @@ namespace DIGOS.Ambassador.Modules
             /// Sets the summary of the named roleplay.
             /// </summary>
             /// <param name="newRoleplaySummary">The roleplay's new summary.</param>
-            /// <param name="roleplay">The roleplay</param>
+            /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
             [Command("summary", RunMode = Async)]
             [Summary("Sets the summary of the named roleplay.")]
