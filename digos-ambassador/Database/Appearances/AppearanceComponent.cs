@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Database.Appearances
         /// <summary>
         /// Gets or sets the base colour of the component.
         /// </summary>
-        [NotNull]
+        [NotNull, Required]
         public virtual Colour BaseColour { get; set; } = new Colour();
 
         /// <summary>
