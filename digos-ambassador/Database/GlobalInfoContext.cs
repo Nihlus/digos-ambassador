@@ -427,7 +427,11 @@ namespace DIGOS.Ambassador.Database
         /// <inheritdoc />
         protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>().HasMany(u => u.Characters).WithOne(u => u.Owner);
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.Characters)
+                .WithOne(u => u.Owner)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<User>()
                 .HasOne(u => u.DefaultCharacter)
                 .WithOne()
