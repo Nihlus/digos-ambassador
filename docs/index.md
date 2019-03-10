@@ -1,5 +1,10 @@
 ﻿Index
 =====
+
+### Getting Started
+[Guides](guides/index.md)
+
+
 ### Available Command Modules
 1. [Admin Commands](modules/admin.md)
 2. [Character Commands](modules/character.md)
