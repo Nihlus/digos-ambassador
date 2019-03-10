@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.ServerInfo;
 
@@ -36,6 +37,7 @@ namespace DIGOS.Ambassador.Database.Characters
         /// <summary>
         /// Gets or sets the server that the role is on.
         /// </summary>
+        [Required]
         public virtual Server Server { get; set; }
 
         /// <summary>
