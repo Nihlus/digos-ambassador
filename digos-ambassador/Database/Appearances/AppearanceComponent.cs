@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Transformations;
@@ -50,6 +51,7 @@ namespace DIGOS.Ambassador.Database.Appearances
         /// <summary>
         /// Gets or sets the component's current transformation.
         /// </summary>
+        [Required]
         public virtual Transformation Transformation { get; set; }
 
         /// <summary>
