@@ -59,6 +59,7 @@ namespace DIGOS.Ambassador.Database.Users
         /// <summary>
         /// Gets or sets the user's default character.
         /// </summary>
+        [CanBeNull]
         public virtual Character DefaultCharacter { get; set; }
 
         /// <summary>
