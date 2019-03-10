@@ -97,11 +97,13 @@ namespace DIGOS.Ambassador.Database.Characters
         /// <summary>
         /// Gets or sets the character's default appearance.
         /// </summary>
+        [CanBeNull]
         public virtual Appearance DefaultAppearance { get; set; }
 
         /// <summary>
         /// Gets or sets the character's transformed appearance.
         /// </summary>
+        [NotNull, Required]
         public virtual Appearance CurrentAppearance { get; set; }
 
         /// <summary>
