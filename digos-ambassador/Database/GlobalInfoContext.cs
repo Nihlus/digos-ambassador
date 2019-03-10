@@ -441,7 +441,7 @@ namespace DIGOS.Ambassador.Database
             modelBuilder.Entity<User>().HasMany(u => u.Kinks).WithOne().IsRequired();
 
             modelBuilder.Entity<Character>().HasOne(ch => ch.Owner).WithMany(u => u.Characters);
-            modelBuilder.Entity<Character>().HasMany(ch => ch.Images).WithOne().OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Character>().HasMany(ch => ch.Images).WithOne().IsRequired();
 
             modelBuilder.Entity<Roleplay>().HasOne(u => u.Owner).WithMany();
             modelBuilder.Entity<Roleplay>().HasMany(u => u.ParticipatingUsers).WithOne(p => p.Roleplay);
