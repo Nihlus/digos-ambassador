@@ -74,6 +74,30 @@ namespace DIGOS.Ambassador.TypeReaders
                 var userParseResult = await ReadUserAsync(context, input);
                 if (userParseResult.IsSuccess)
                 {
+                    // The entity might have the same name as the user; if so, it should take priority over naming a
+                    // user
+                    if (!MentionUtils.TryParseUser(input, out _))
+                    {
+                        var retrieveEntityByNameResult = await RetrieveEntityAsync(null, input, context, services);
+                        if (retrieveEntityByNameResult.IsSuccess)
+                        {
+                            if (retrieveEntityByNameResult.Entity.IsOwner(userParseResult.Entity))
+                            {
+                                return TypeReaderResult.FromSuccess(retrieveEntityByNameResult.Entity);
+                            }
+
+                            var message = "There's both an entity and a user with that name. Try specifying which" +
+                                          " user you want to look up entities from.";
+
+                            return TypeReaderResult.FromError
+                            (
+                                CommandError.MultipleMatches,
+                                message
+                            );
+                        }
+                    }
+
+                    // It's definitely a user and not an entity
                     entityName = null;
 
                     owner = userParseResult.Entity;
