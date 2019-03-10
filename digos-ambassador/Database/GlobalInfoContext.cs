@@ -443,7 +443,7 @@ namespace DIGOS.Ambassador.Database
             modelBuilder.Entity<Character>().HasOne(ch => ch.Owner).WithMany(u => u.Characters);
             modelBuilder.Entity<Character>().HasMany(ch => ch.Images).WithOne().IsRequired();
 
-            modelBuilder.Entity<Roleplay>().HasOne(u => u.Owner).WithMany();
+            modelBuilder.Entity<Roleplay>().HasOne(u => u.Owner).WithMany().IsRequired();
             modelBuilder.Entity<Roleplay>().HasMany(u => u.ParticipatingUsers).WithOne(p => p.Roleplay);
             modelBuilder.Entity<Roleplay>().HasMany(r => r.Messages).WithOne().IsRequired();
 

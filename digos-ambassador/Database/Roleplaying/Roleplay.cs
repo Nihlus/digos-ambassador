@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
@@ -64,6 +65,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
         public long ActiveChannelID { get; set; }
 
         /// <inheritdoc />
+        [Required]
         public virtual User Owner { get; set; }
 
         /// <summary>
