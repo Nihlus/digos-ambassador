@@ -430,7 +430,7 @@ namespace DIGOS.Ambassador.Database
             modelBuilder.Entity<User>()
                 .HasMany(u => u.Characters)
                 .WithOne(u => u.Owner)
-                .OnDelete(DeleteBehavior.Cascade);
+                .IsRequired();
 
             modelBuilder.Entity<User>()
                 .HasOne(u => u.DefaultCharacter)
