@@ -551,7 +551,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
 
-                this.Character = new Character { Owner = this.Owner };
+                this.Character = new Character
+                {
+                    Owner = this.Owner,
+                    CurrentAppearance = new Appearance(),
+                    DefaultAppearance = new Appearance()
+                };
+
                 this.Database.Characters.Add(this.Character);
                 this.Database.SaveChanges();
             }
@@ -577,20 +583,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 Assert.NotNull(this.Character.DefaultAppearance);
                 Assert.Equal(10, this.Character.DefaultAppearance.Height);
             }
-
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveAnAlteredAppearance()
-            {
-                var result = await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
-                (
-                    this.Database,
-                    this.Character
-                );
-
-                Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
-                Assert.Null(this.Character.DefaultAppearance);
-            }
         }
 
         public class ResetCharacterFormAsync : TransformationServiceTestBase
@@ -603,7 +595,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 this.Owner = (await this.Database.GetOrRegisterUserAsync(this.User)).Entity;
 
-                this.Character = new Character { Owner = this.Owner };
+                this.Character = new Character
+                {
+                    Owner = this.Owner,
+                    CurrentAppearance = new Appearance()
+                };
+
                 this.Database.Characters.Add(this.Character);
                 this.Database.SaveChanges();
             }
@@ -633,7 +630,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.ObjectNotFound, result.Error);
-                Assert.Null(this.Character.CurrentAppearance);
             }
         }
 
