@@ -361,6 +361,16 @@ namespace DIGOS.Ambassador.Modules
             this.Database.Attach(character);
 
             this.Database.Characters.Remove(character);
+
+            // Delete the character's associated appearances, too, since EF doesn't understand that the character
+            // owns these entities.
+            this.Database.Remove(character.CurrentAppearance);
+
+            if (!(character.DefaultAppearance is null))
+            {
+                this.Database.Remove(character.DefaultAppearance);
+            }
+
             await this.Database.SaveChangesAsync();
 
             await this.Feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
