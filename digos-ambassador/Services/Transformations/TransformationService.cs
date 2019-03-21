@@ -559,11 +559,6 @@ namespace DIGOS.Ambassador.Services
             [NotNull] Character character
         )
         {
-            if (character.CurrentAppearance is null)
-            {
-                return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "The character doesn't have an altered appearance.");
-            }
-
             if (!(character.DefaultAppearance is null))
             {
                 db.Remove(character.DefaultAppearance);
