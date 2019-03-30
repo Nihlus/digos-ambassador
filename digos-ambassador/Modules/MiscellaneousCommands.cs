@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -199,10 +200,28 @@ namespace DIGOS.Ambassador.Modules
                     emoteName = mappedEmote;
                 }
 
-                var codepoint = char.ConvertToUtf32(emoteName, 0);
-                var codepointHex = codepoint.ToString("X").ToLower();
+                var hexValues = new List<string>();
+                for (var i = 0; i < emoteName.Length; ++i)
+                {
+                    var codepoint = char.ConvertToUtf32(emoteName, i);
+                    var codepointHex = codepoint.ToString("x");
 
-                emoteUrl = $"https://raw.githubusercontent.com/twitter/twemoji/gh-pages/2/72x72/{codepointHex}.png";
+                    hexValues.Add(codepointHex);
+
+                    // ConvertToUtf32() might have parsed an extra character as some characters are combinations of two
+                    // 16-bit characters which start at 0x00d800 and end at 0x00dfff (Called surrogate low and surrogate
+                    // high)
+                    //
+                    // If the character is in this span, we have already essentially parsed the next index of the string
+                    // as well. Therefore we make sure to skip the next one.
+                    if (char.IsSurrogate(emoteName, i))
+                    {
+                        ++i;
+                    }
+                }
+
+                var emojiCode = string.Join('-', hexValues);
+                emoteUrl = $"https://raw.githubusercontent.com/twitter/twemoji/gh-pages/2/72x72/{emojiCode}.png";
             }
 
             using (var client = new HttpClient())
