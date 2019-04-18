@@ -41,6 +41,7 @@ using Discord.Net;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using MoreLinq.Extensions;
 using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
@@ -457,6 +458,52 @@ namespace DIGOS.Ambassador.Modules
             }
 
             await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+        }
+
+        /// <summary>
+        /// Switches the user's current character to a different one, picked at random.
+        /// </summary>
+        [UsedImplicitly]
+        [Alias("random")]
+        [Command("random", RunMode = Async)]
+        [Summary("Switches the user's current character to a different one, picked at random.")]
+        [RequireContext(Guild)]
+        public async Task AssumeRandomCharacterFormAsync()
+        {
+            var userCharacters = this.Characters.GetUserCharacters
+            (
+                this.Database,
+                this.Context.User,
+                this.Context.Guild
+            );
+
+            if (!await userCharacters.AnyAsync())
+            {
+                await this.Feedback.SendErrorAsync(this.Context, "You don't have any characters.");
+                return;
+            }
+
+            if (await userCharacters.CountAsync() == 1)
+            {
+                await this.Feedback.SendErrorAsync(this.Context, "You only have one character.");
+                return;
+            }
+
+            var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync
+            (
+                this.Database,
+                this.Context,
+                this.Context.User
+            );
+
+            // Filter out the current character, so becoming the same character isn't possible
+            if (getCurrentCharacterResult.IsSuccess)
+            {
+                userCharacters = userCharacters.Except(new[] { getCurrentCharacterResult.Entity });
+            }
+
+            var randomCharacter = userCharacters.AsEnumerable().RandomSubset(1).First();
+            await AssumeCharacterFormAsync(randomCharacter);
         }
 
         /// <summary>
