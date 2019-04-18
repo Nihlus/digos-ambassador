@@ -108,6 +108,8 @@ namespace DIGOS.Ambassador
 
         private readonly BehaviourService Behaviours;
 
+        private readonly Random Random;
+
         // ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 
         /// <summary>
@@ -152,6 +154,8 @@ namespace DIGOS.Ambassador
 
             this.Behaviours = new BehaviourService();
 
+            this.Random = new Random();
+
             this.Services = new ServiceCollection()
                 .AddSingleton(this)
                 .AddSingleton(this.Client)
@@ -171,6 +175,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton(this.Help)
                 .AddSingleton(this.Servers)
                 .AddSingleton(this.Behaviours)
+                .AddSingleton(this.Random)
                 .AddDbContextPool<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
                 .BuildServiceProvider();
 

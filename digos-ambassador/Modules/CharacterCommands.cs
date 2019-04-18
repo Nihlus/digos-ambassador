@@ -23,6 +23,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -81,6 +82,8 @@ namespace DIGOS.Ambassador.Modules
 
         private readonly InteractivityService Interactivity;
 
+        private readonly Random Random;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterCommands"/> class.
         /// </summary>
@@ -90,6 +93,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="feedbackService">The feedback service.</param>
         /// <param name="characterService">The character service.</param>
         /// <param name="interactivity">The interactivity service.</param>
+        /// /// <param name="random">A cached, application-level entropy source.</param>
         public CharacterCommands
         (
             GlobalInfoContext database,
@@ -97,7 +101,8 @@ namespace DIGOS.Ambassador.Modules
             DiscordService discordService,
             UserFeedbackService feedbackService,
             CharacterService characterService,
-            InteractivityService interactivity
+            InteractivityService interactivity,
+            Random random
         )
         {
             this.Database = database;
@@ -106,6 +111,7 @@ namespace DIGOS.Ambassador.Modules
             this.Feedback = feedbackService;
             this.Characters = characterService;
             this.Interactivity = interactivity;
+            this.Random = random;
         }
 
         /// <summary>
@@ -502,7 +508,10 @@ namespace DIGOS.Ambassador.Modules
                 userCharacters = userCharacters.Except(new[] { getCurrentCharacterResult.Entity });
             }
 
-            var randomCharacter = userCharacters.AsEnumerable().RandomSubset(1).First();
+            var characterCount = await userCharacters.CountAsync();
+            var randomIndex = this.Random.Next(0, characterCount);
+
+            var randomCharacter = userCharacters.ToList()[randomIndex];
             await AssumeCharacterFormAsync(randomCharacter);
         }
 
