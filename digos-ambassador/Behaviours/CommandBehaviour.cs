@@ -339,7 +339,9 @@ namespace DIGOS.Ambassador.Behaviours
                 );
                 eb.WithThumbnailUrl(this.Content.BrokenAmbyUri.ToString());
 
-                eb.WithUrl(this.Content.AutomaticBugReportCreationUri.ToString());
+                var reportEmbed = this.Feedback.CreateEmbedBase(Color.Red);
+                reportEmbed.WithTitle("Click here to create a new issue");
+                reportEmbed.WithUrl(this.Content.AutomaticBugReportCreationUri.ToString());
 
                 using (var ms = new MemoryStream())
                 {
@@ -367,7 +369,8 @@ namespace DIGOS.Ambassador.Behaviours
 
                     // Rewind the stream before passing it along
                     ms.Position = 0;
-                    await userDMChannel.SendFileAsync(ms, "bug-report.md", string.Empty, false, eb.Build());
+                    await userDMChannel.SendMessageAsync(string.Empty, false, eb.Build());
+                    await userDMChannel.SendFileAsync(ms, "bug-report.md", string.Empty, false, reportEmbed.Build());
                 }
             }
             catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
