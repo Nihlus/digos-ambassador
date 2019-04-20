@@ -21,7 +21,10 @@
 //
 
 using System;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Attributes;
@@ -37,6 +40,9 @@ using Discord.WebSocket;
 
 using Humanizer;
 using JetBrains.Annotations;
+using log4net;
+using log4net.Core;
+using log4net.Repository.Hierarchy;
 
 namespace DIGOS.Ambassador.Behaviours
 {
@@ -45,6 +51,8 @@ namespace DIGOS.Ambassador.Behaviours
     /// </summary>
     public class CommandBehaviour : BehaviourBase
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(CommandBehaviour));
+
         private readonly GlobalInfoContext Database;
 
         private readonly IServiceProvider Services;
@@ -98,6 +106,8 @@ namespace DIGOS.Ambassador.Behaviours
             this.Client.MessageReceived += OnMessageReceived;
             this.Client.MessageUpdated += OnMessageUpdated;
 
+            this.Commands.CommandExecuted += OnCommandExecuted;
+
             return Task.CompletedTask;
         }
 
@@ -106,6 +116,8 @@ namespace DIGOS.Ambassador.Behaviours
         {
             this.Client.MessageReceived -= OnMessageReceived;
             this.Client.MessageUpdated -= OnMessageUpdated;
+
+            this.Commands.CommandExecuted -= OnCommandExecuted;
 
             return Task.CompletedTask;
         }
@@ -201,8 +213,7 @@ namespace DIGOS.Ambassador.Behaviours
                 }
             }
 
-            var commandResult = await this.Commands.ExecuteAsync(context, argumentPos, this.Services);
-            await HandleCommandResultAsync(context, commandResult, argumentPos);
+            await this.Commands.ExecuteAsync(context, argumentPos, this.Services);
         }
 
         /// <summary>
@@ -236,22 +247,30 @@ namespace DIGOS.Ambassador.Behaviours
                 case CommandError.UnmetPrecondition:
                 case CommandError.ParseFailed:
                 case CommandError.BadArgCount:
-                case CommandError.Exception:
                 {
                     var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
 
-                    var errorEmbed = this.Feedback.CreateFeedbackEmbed(context.User, Color.Red, result.ErrorReason);
-                    var searchResult = this.Commands.Search(context, argumentPos);
-
                     try
                     {
-                        await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
-                        await userDMChannel.SendMessageAsync
+                        var errorEmbed = this.Feedback.CreateFeedbackEmbed
                         (
-                            string.Empty,
-                            false,
-                            this.Help.CreateCommandUsageEmbed(searchResult.Commands)
+                            context.User,
+                            Color.Red,
+                            result.ErrorReason
                         );
+
+                        await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
+
+                        var searchResult = this.Commands.Search(context, argumentPos);
+                        if (searchResult.Commands.Any())
+                        {
+                            await userDMChannel.SendMessageAsync
+                            (
+                                string.Empty,
+                                false,
+                                this.Help.CreateCommandUsageEmbed(searchResult.Commands)
+                            );
+                        }
                     }
                     catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
                     {
@@ -267,6 +286,98 @@ namespace DIGOS.Ambassador.Behaviours
                 {
                     throw new ArgumentOutOfRangeException();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Handles the result of an internal error, generating a short error report for the user and instructing them
+        /// on how to proceed.
+        /// </summary>
+        /// <param name="command">The command that failed.</param>
+        /// <param name="context">The context of the command.</param>
+        /// <param name="result">The result of the command.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        private async Task HandleInternalErrorAsync
+        (
+            [NotNull] CommandInfo command,
+            [NotNull] ICommandContext context,
+            IResult result
+        )
+        {
+            // Log the exception for later debugging purposes
+            var executeResult = (ExecuteResult)result;
+            Log.Error(executeResult.Exception);
+
+            // Alert the user, explain what happened, and ask them to make a bug report.
+            var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
+
+            try
+            {
+                var eb = this.Feedback.CreateEmbedBase(Color.Red);
+                eb.WithTitle("Internal Error");
+                eb.WithDescription
+                (
+                    "Oops! Looks like you've found a bug in the bot - fear not, though. If we work together, we'll " +
+                    "have it licked in no time at all.\n" +
+                    "\n" +
+                    "I've prepared a short report of the technical details of what happened, but it's not going" +
+                    "to be worth much without your help. In order to fix this problem, it would be extremely " +
+                    "helpful if you wrote down the exact steps you did to encounter this error, and post them along" +
+                    "with the generated report on the GitHub repository. You can go there by clicking the link " +
+                    "in this message.\n" +
+                    "\n" +
+                    "The report contains some information about you, so please check it and erase anything you don't" +
+                    " want to share before passing it on.\n" +
+                    "\n" +
+                    "Your assistance is essential, and very much appreciated!"
+                );
+
+                eb.WithAuthor(context.Client.CurrentUser);
+                eb.WithCurrentTimestamp();
+                eb.WithFooter
+                (
+                    "If you don't have an account on github, you can also send a DM to Jax#7487, who is the main" +
+                    " developer of the bot."
+                );
+                eb.WithThumbnailUrl(this.Content.BrokenAmbyUri.ToString());
+
+                eb.WithUrl(this.Content.AutomaticBugReportCreationUri.ToString());
+
+                using (var ms = new MemoryStream())
+                {
+                    using (var sw = new StreamWriter(ms, Encoding.Default, 1024, true))
+                    {
+                        await sw.WriteLineAsync("Automatic bug report");
+                        await sw.WriteLineAsync("====================");
+                        await sw.WriteLineAsync();
+                        await sw.WriteLineAsync($"Generated at: {DateTime.UtcNow}");
+                        await sw.WriteLineAsync($"Bot version: {Assembly.GetEntryAssembly().GetName().Version}");
+                        await sw.WriteLineAsync($"Command message link: {context.Message.GetJumpUrl()}");
+                        await sw.WriteLineAsync
+                        (
+                            $"Ran by: {context.User.Username}#{context.User.Discriminator} ({context.User.Id})"
+                        );
+                        await sw.WriteLineAsync
+                        (
+                            $"In: {(context.Guild is null ? "DM" : $"{context.Guild.Name} ({context.Guild.Id})")}"
+                        );
+                        await sw.WriteLineAsync($"Full command: {context.Message.Content}");
+                        await sw.WriteLineAsync();
+                        await sw.WriteLineAsync("### Stack Trace");
+                        await sw.WriteLineAsync(executeResult.Exception.ToString());
+                    }
+
+                    // Rewind the stream before passing it along
+                    ms.Position = 0;
+                    await userDMChannel.SendFileAsync(ms, "bug-report.md", string.Empty, false, eb.Build());
+                }
+            }
+            catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
+            {
+            }
+            finally
+            {
+                await userDMChannel.CloseAsync();
             }
         }
 
@@ -322,7 +433,14 @@ namespace DIGOS.Ambassador.Behaviours
                 return;
             }
 
-            await HandleCommandResultAsync(context, result, argumentPos);
+            if (result.Error == CommandError.Exception)
+            {
+                await HandleInternalErrorAsync(command.Value, context, result);
+            }
+            else
+            {
+                await HandleCommandResultAsync(context, result, argumentPos);
+            }
         }
     }
 }

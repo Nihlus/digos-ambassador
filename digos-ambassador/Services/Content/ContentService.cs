@@ -58,6 +58,8 @@ namespace DIGOS.Ambassador.Services
         private List<string> Sass;
         private List<string> SassNSFW;
 
+        private Uri BaseRemoteUri { get; }
+
         private Uri BaseRemoteContentUri { get; }
 
         /// <summary>
@@ -86,6 +88,16 @@ namespace DIGOS.Ambassador.Services
         public Uri AmbyPortraitUri { get; }
 
         /// <summary>
+        /// Gets the <see cref="Uri"/> pointing to a broken Ambybot portrait.
+        /// </summary>
+        public Uri BrokenAmbyUri { get; }
+
+        /// <summary>
+        /// Gets the <see cref="Uri"/> pointing to a templated issue creator on github.
+        /// </summary>
+        public Uri AutomaticBugReportCreationUri { get; }
+
+        /// <summary>
         /// Gets the <see cref="Uri"/> pointing to to the privacy policy.
         /// </summary>
         public Uri PrivacyPolicyUri { get; }
@@ -100,10 +112,17 @@ namespace DIGOS.Ambassador.Services
         /// </summary>
         public ContentService()
         {
-            this.BaseRemoteContentUri = new Uri("https://raw.githubusercontent.com/Nihlus/digos-ambassador/master/digos-ambassador/Content/");
+            this.BaseRemoteUri = new Uri("https://raw.githubusercontent.com/Nihlus/digos-ambassador/master");
+            this.BaseRemoteContentUri = new Uri(this.BaseRemoteUri, "digos-ambassador/Content");
             this.DefaultAvatarUri = new Uri(this.BaseRemoteContentUri, "Avatars/Default/Discord_DIGOS.png");
 
+            this.AutomaticBugReportCreationUri = new Uri
+            (
+                "https://github.com/Nihlus/digos-ambassador/issues/new?template=automated-bug-report.md"
+            );
+
             this.AmbyPortraitUri = new Uri(this.BaseRemoteContentUri, "Portraits/amby-irbynx-3.png");
+            this.BrokenAmbyUri = new Uri(this.BaseRemoteContentUri, "Portraits/maintenance.png");
             this.BwehUri = new Uri(this.BaseRemoteContentUri, "Portraits/bweh.png");
             this.PrivacyPolicyUri = new Uri(this.BaseRemoteContentUri, "PrivacyPolicy.pdf");
         }
