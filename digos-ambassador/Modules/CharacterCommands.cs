@@ -40,6 +40,7 @@ using Discord.Commands;
 using Discord.Net;
 using Humanizer;
 using JetBrains.Annotations;
+using log4net;
 using Microsoft.EntityFrameworkCore;
 using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
@@ -68,6 +69,8 @@ namespace DIGOS.Ambassador.Modules
     )]
     public class CharacterCommands : ModuleBase<SocketCommandContext>
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(CharacterCommands));
+
         private readonly DiscordService Discord;
 
         [ProvidesContext]
@@ -1040,6 +1043,15 @@ namespace DIGOS.Ambassador.Modules
             [RequireContext(Guild)]
             public async Task ListAvailableRolesAsync()
             {
+                var getServerRolesResult = await this.Characters.GetCharacterRolesAsync(this.Database, this.Context.Guild);
+                if (!getServerRolesResult.IsSuccess)
+                {
+                    await this.Feedback.SendErrorAsync(this.Context, getServerRolesResult.ErrorReason);
+                    return;
+                }
+
+                var serverRoles = getServerRolesResult.Entity;
+
                 var eb = this.Feedback.CreateEmbedBase();
 
                 eb.WithTitle("Available character roles");
@@ -1052,15 +1064,20 @@ namespace DIGOS.Ambassador.Modules
                     " instead of the actual mention. The ID is listed below along with the role name."
                 );
 
-                if (!await this.Database.CharacterRoles.AnyAsync())
+                if (!await serverRoles.AnyAsync())
                 {
                     eb.WithFooter("There aren't any character roles available in this server.");
                 }
                 else
                 {
-                    foreach (var characterRole in this.Database.CharacterRoles)
+                    foreach (var characterRole in serverRoles)
                     {
                         var discordRole = this.Context.Guild.GetRole((ulong)characterRole.DiscordID);
+                        if (discordRole is null)
+                        {
+                            Log.Warn($"No real Discord role found for stored role {characterRole.DiscordID}.");
+                            continue;
+                        }
 
                         var ef = new EmbedFieldBuilder();
                         ef.WithName($"{discordRole.Name} ({discordRole.Id})");

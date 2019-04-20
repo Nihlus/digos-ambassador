@@ -1106,6 +1106,25 @@ namespace DIGOS.Ambassador.Services
         }
 
         /// <summary>
+        /// Gets the roles available on the given server.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="guild">The Discord guild.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<IQueryable<CharacterRole>>> GetCharacterRolesAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] IGuild guild
+        )
+        {
+            var server = await db.GetOrRegisterServerAsync(guild);
+
+            var roles = db.CharacterRoles.Where(r => r.Server == server);
+
+            return RetrieveEntityResult<IQueryable<CharacterRole>>.FromSuccess(roles);
+        }
+
+        /// <summary>
         /// Sets the access conditions for the given character role.
         /// </summary>
         /// <param name="db">The database.</param>
