@@ -318,9 +318,9 @@ namespace DIGOS.Ambassador.Behaviours
                     "Oops! Looks like you've found a bug in the bot - fear not, though. If we work together, we'll " +
                     "have it licked in no time at all.\n" +
                     "\n" +
-                    "I've prepared a short report of the technical details of what happened, but it's not going" +
+                    "I've prepared a short report of the technical details of what happened, but it's not going " +
                     "to be worth much without your help. In order to fix this problem, it would be extremely " +
-                    "helpful if you wrote down the exact steps you did to encounter this error, and post them along" +
+                    "helpful if you wrote down the exact steps you did to encounter this error, and post them along " +
                     "with the generated report on the GitHub repository. You can go there by clicking the link " +
                     "in this message.\n" +
                     "\n" +
