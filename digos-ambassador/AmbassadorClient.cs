@@ -21,18 +21,14 @@
 //
 
 using System;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-
-using DIGOS.Ambassador.Attributes;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Behaviours;
@@ -46,8 +42,6 @@ using DIGOS.Ambassador.Utility;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
-using Humanizer;
 using JetBrains.Annotations;
 using log4net;
 using Microsoft.EntityFrameworkCore.Infrastructure;

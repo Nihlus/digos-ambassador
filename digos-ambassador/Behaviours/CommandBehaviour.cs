@@ -41,8 +41,6 @@ using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
 using log4net;
-using log4net.Core;
-using log4net.Repository.Hierarchy;
 
 namespace DIGOS.Ambassador.Behaviours
 {

@@ -23,7 +23,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -42,7 +41,6 @@ using Discord.Net;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using MoreLinq.Extensions;
 using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
