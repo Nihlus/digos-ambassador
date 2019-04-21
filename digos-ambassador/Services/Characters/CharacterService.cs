@@ -955,6 +955,15 @@ namespace DIGOS.Ambassador.Services
                 imageCaption = "No caption set.";
             }
 
+            if (!Uri.IsWellFormedUriString(imageUrl, UriKind.RelativeOrAbsolute))
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.Unsuccessful,
+                    $"That URL doesn't look valid. Please check \"{imageUrl}\" for errors."
+                );
+            }
+
             var image = new Image
             {
                 Name = imageName,
