@@ -47,10 +47,10 @@ namespace DIGOS.Ambassador.Pagination
         /// </summary>
         /// <param name="page">The page to add.</param>
         /// <returns>The pager with the page.</returns>
-        T2 WithPage(T1 page);
+        T2 AppendPage(T1 page);
 
         /// <summary>
-        /// Appends a set of pages to the pager.
+        /// Replaces the pages in the pager with a new collection.
         /// </summary>
         /// <param name="pages">The pages to add.</param>
         /// <returns>The pager with the pages.</returns>

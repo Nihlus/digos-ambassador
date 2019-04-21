@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Pagination
         /// <summary>
         /// Gets the default appearance options.
         /// </summary>
-        public static PaginatedAppearanceOptions Default { get; } = new PaginatedAppearanceOptions();
+        public static PaginatedAppearanceOptions Default => new PaginatedAppearanceOptions();
 
         /// <summary>
         /// Gets or sets the emote that takes the user back to the first page.
@@ -121,5 +121,26 @@ namespace DIGOS.Ambassador.Pagination
         /// </summary>
         [NotNull]
         public string Title { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Creates a new embed based on the appearance settings.
+        /// </summary>
+        /// <returns>The embed.</returns>
+        [NotNull]
+        public EmbedBuilder CreateEmbedBase()
+        {
+            var eb = new EmbedBuilder();
+
+            if (!(this.Author is null))
+            {
+                eb.WithAuthor(this.Author);
+            }
+
+            eb.WithColor(this.Color);
+            eb.WithFooter(this.FooterFormat);
+            eb.WithTitle(this.Title);
+
+            return eb;
+        }
     }
 }

@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity.Messages;
@@ -47,10 +48,10 @@ namespace DIGOS.Ambassador.Pagination
         private UserFeedbackService Feedback { get; }
 
         /// <inheritdoc />
-        public virtual IList<TContent> Pages { get; }
+        public virtual IList<TContent> Pages { get; protected set; }
 
         /// <inheritdoc />
-        public virtual PaginatedAppearanceOptions Appearance { get; set; } = PaginatedAppearanceOptions.Default;
+        public PaginatedAppearanceOptions Appearance { get; set; } = PaginatedAppearanceOptions.Default;
 
         private int CurrentPage = 1;
 
@@ -66,13 +67,11 @@ namespace DIGOS.Ambassador.Pagination
             this.Feedback = feedbackService;
             this.Pages = new List<TContent>();
 
-            this.Appearance.FooterFormat =
-                $"{PaginatedAppearanceOptions.Default.FooterFormat} - " +
-                $"press {this.Appearance.Stop} to remove this message.";
+            this.Appearance.Color = Color.DarkPurple;
         }
 
         /// <inheritdoc/>
-        public virtual TType WithPage(TContent page)
+        public virtual TType AppendPage(TContent page)
         {
             this.Pages.Add(page);
             return (TType)this;
@@ -81,10 +80,7 @@ namespace DIGOS.Ambassador.Pagination
         /// <inheritdoc/>
         public virtual TType WithPages(IEnumerable<TContent> pages)
         {
-            foreach (var page in pages)
-            {
-                WithPage(page);
-            }
+            this.Pages = pages.ToList();
 
             return (TType)this;
         }
@@ -95,6 +91,11 @@ namespace DIGOS.Ambassador.Pagination
         /// <inheritdoc/>
         protected override async Task<IUserMessage> DisplayAsync([NotNull] IMessageChannel channel)
         {
+            if (!this.Pages.Any())
+            {
+                throw new InvalidOperationException("The pager is empty.");
+            }
+
             var embed = BuildEmbed(this.CurrentPage - 1);
 
             var message = await channel.SendMessageAsync(string.Empty, embed: embed).ConfigureAwait(false);

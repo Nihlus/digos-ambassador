@@ -87,7 +87,7 @@ namespace DIGOS.Ambassador.Extensions
 
         /// <summary>
         /// Sends a paginated message to the context user's direct messaging channel, alerting them if they are
-        /// not already in it, and deletes it after a certain timeout.
+        /// not already in it, and deletes it after a certain timeout. Defaults to 5 minutes.
         /// </summary>
         /// <param name="this">The interactive service.</param>
         /// <param name="context">The command context.</param>

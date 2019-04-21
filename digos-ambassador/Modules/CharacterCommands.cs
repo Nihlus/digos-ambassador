@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -443,23 +444,28 @@ namespace DIGOS.Ambassador.Modules
         {
             discordUser = discordUser ?? this.Context.Message.Author;
 
-            var eb = this.Feedback.CreateEmbedBase();
-            eb.WithAuthor(discordUser);
-            eb.WithTitle("Your characters");
-
             var characters = this.Characters.GetUserCharacters(this.Database, discordUser, this.Context.Guild);
 
-            foreach (var character in characters)
-            {
-                eb.AddField(character.Name, character.Summary);
-            }
+            var appearance = PaginatedAppearanceOptions.Default;
+            appearance.Title = "Your characters";
+            appearance.Author = discordUser;
 
-            if (eb.Fields.Count <= 0)
-            {
-                eb.WithDescription("You don't have any characters.");
-            }
+            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                this.Feedback,
+                characters,
+                c => c.Name,
+                c => c.Summary ?? "No summary set.",
+                "You don't have any characters.",
+                appearance
+            );
 
-            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            (
+                this.Context,
+                this.Feedback,
+                paginatedEmbed
+            );
         }
 
         /// <summary>
@@ -811,13 +817,13 @@ namespace DIGOS.Ambassador.Modules
 
             gallery.Appearance = new PaginatedAppearanceOptions
             {
-                FooterFormat = $"Image {{0}}/{{1}} - press {gallery.Appearance.Stop} to remove this message.",
+                FooterFormat = "Image {0}/{1}",
                 HelpText = "Use the reactions to navigate the gallery.",
                 Color = Color.DarkPurple,
                 Title = character.Name
             };
 
-            await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, gallery);
+            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync(this.Context, this.Feedback, gallery);
         }
 
         /// <summary>
@@ -830,20 +836,25 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ListImagesAsync([NotNull] Character character)
         {
-            var eb = this.Feedback.CreateEmbedBase();
-            eb.WithTitle("Images in character gallery");
+            var appearance = PaginatedAppearanceOptions.Default;
+            appearance.Title = "Images in character gallery";
 
-            foreach (var image in character.Images)
-            {
-                eb.AddField(image.Name, image.Caption ?? "No caption set.");
-            }
+            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                this.Feedback,
+                character.Images,
+                i => i.Name,
+                i => i.Caption ?? "No caption set.",
+                "There are no images in the character's gallery.",
+                appearance
+            );
 
-            if (eb.Fields.Count <= 0)
-            {
-                eb.WithDescription("There are no images in the character's gallery.");
-            }
-
-            await this.Context.Channel.SendMessageAsync(string.Empty, false, eb.Build());
+            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            (
+                this.Context,
+                this.Feedback,
+                paginatedEmbed
+            );
         }
 
         /// <summary>

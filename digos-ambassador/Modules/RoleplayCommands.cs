@@ -28,10 +28,12 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Exporters;
+using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
@@ -71,6 +73,7 @@ namespace DIGOS.Ambassador.Modules
         private readonly RoleplayService Roleplays;
 
         private readonly UserFeedbackService Feedback;
+        private readonly InteractivityService Interactivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayCommands"/> class.
@@ -78,11 +81,19 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="database">A database context from the context pool.</param>
         /// <param name="roleplays">The roleplay service.</param>
         /// <param name="feedback">The user feedback service.</param>
-        public RoleplayCommands(GlobalInfoContext database, RoleplayService roleplays, UserFeedbackService feedback)
+        /// <param name="interactivity">The interactivity service.</param>
+        public RoleplayCommands
+        (
+            GlobalInfoContext database,
+            RoleplayService roleplays,
+            UserFeedbackService feedback,
+            InteractivityService interactivity
+        )
         {
             this.Database = database;
             this.Roleplays = roleplays;
             this.Feedback = feedback;
+            this.Interactivity = interactivity;
         }
 
         /// <summary>
@@ -161,23 +172,28 @@ namespace DIGOS.Ambassador.Modules
         {
             discordUser = discordUser ?? this.Context.Message.Author;
 
-            var eb = this.Feedback.CreateEmbedBase();
-            eb.WithAuthor(discordUser);
-            eb.WithTitle("Your roleplays");
-
             var roleplays = this.Roleplays.GetUserRoleplays(this.Database, discordUser, this.Context.Guild);
 
-            foreach (var roleplay in roleplays)
-            {
-                eb.AddField(roleplay.Name, roleplay.Summary);
-            }
+            var appearance = PaginatedAppearanceOptions.Default;
+            appearance.Title = "Your roleplays";
+            appearance.Author = discordUser;
 
-            if (eb.Fields.Count <= 0)
-            {
-                eb.WithDescription("You don't have any roleplays.");
-            }
+            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                this.Feedback,
+                roleplays,
+                r => r.Name,
+                r => r.Summary ?? "No summary set.",
+                "You don't have any roleplays.",
+                appearance
+            );
 
-            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            (
+                this.Context,
+                this.Feedback,
+                paginatedEmbed
+            );
         }
 
         /// <summary>

@@ -28,7 +28,7 @@ using JetBrains.Annotations;
 namespace DIGOS.Ambassador.Pagination
 {
     /// <summary>
-    /// Factory class for creating paginated embeds from various sources.
+    /// Factory class for creating page collections from various sources.
     /// </summary>
     public static class PageFactory
     {

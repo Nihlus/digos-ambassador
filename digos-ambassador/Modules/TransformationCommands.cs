@@ -21,12 +21,16 @@
 //
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;
 
@@ -57,6 +61,7 @@ namespace DIGOS.Ambassador.Modules
         private readonly CharacterService Characters;
 
         private readonly TransformationService Transformation;
+        private readonly InteractivityService Interactivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformationCommands"/> class.
@@ -65,18 +70,21 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="feedback">The feedback service.</param>
         /// <param name="characters">The character service.</param>
         /// <param name="transformation">The transformation service.</param>
+        /// <param name="interactivity">The interactivity service.</param>
         public TransformationCommands
         (
             GlobalInfoContext database,
             UserFeedbackService feedback,
             CharacterService characters,
-            TransformationService transformation
+            TransformationService transformation,
+            InteractivityService interactivity
         )
         {
             this.Database = database;
             this.Feedback = feedback;
             this.Characters = characters;
             this.Transformation = transformation;
+            this.Interactivity = interactivity;
         }
 
         /// <summary>
@@ -526,25 +534,36 @@ namespace DIGOS.Ambassador.Modules
         {
             var availableSpecies = await this.Transformation.GetAvailableSpeciesAsync(this.Database);
 
-            var eb = this.Feedback.CreateEmbedBase();
-            eb.WithTitle("Available species");
+            var appearance = PaginatedAppearanceOptions.Default;
+            appearance.Title = "Available species";
 
-            if (availableSpecies.Count <= 0)
+            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                this.Feedback,
+                availableSpecies,
+                s => $"{s.Name.Humanize(LetterCasing.Title)} ({s.Name})",
+                s => s.Description ?? "No description set.",
+                "There are no species available.",
+                appearance
+            );
+
+            if (availableSpecies.Any())
             {
-                eb.WithDescription("There are no available species.");
-            }
-            else
-            {
-                eb.WithDescription("Use the name inside the parens when transforming body parts.");
+                paginatedEmbed.WithPages
+                (
+                    paginatedEmbed.Pages.Select
+                    (
+                        p => p.WithDescription("Use the name inside the parens when transforming body parts.")
+                    )
+                );
             }
 
-            foreach (var species in availableSpecies)
-            {
-                var speciesName = $"{species.Name.Humanize(LetterCasing.Title)} ({species.Name})";
-                eb.AddField(speciesName, species.Description);
-            }
-
-            await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
+            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            (
+                this.Context,
+                this.Feedback,
+                paginatedEmbed
+            );
         }
 
         /// <summary>

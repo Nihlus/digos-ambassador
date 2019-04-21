@@ -26,8 +26,10 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Dossiers;
+using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;
-
+using DIGOS.Ambassador.Services.Interactivity;
 using Discord;
 using Discord.Commands;
 
@@ -50,6 +52,7 @@ namespace DIGOS.Ambassador.Modules
         private readonly UserFeedbackService Feedback;
         private readonly ContentService Content;
         private readonly DossierService Dossiers;
+        private readonly InteractivityService Interactivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DossierCommands"/> class.
@@ -58,12 +61,21 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="feedback">The feedback service.</param>
         /// <param name="content">The content service.</param>
         /// <param name="dossiers">The dossier service.</param>
-        public DossierCommands(GlobalInfoContext database, UserFeedbackService feedback, ContentService content, DossierService dossiers)
+        /// <param name="interactivity">The interactivity service.</param>
+        public DossierCommands
+        (
+            GlobalInfoContext database,
+            UserFeedbackService feedback,
+            ContentService content,
+            DossierService dossiers,
+            InteractivityService interactivity
+        )
         {
             this.Database = database;
             this.Feedback = feedback;
             this.Content = content;
             this.Dossiers = dossiers;
+            this.Interactivity = interactivity;
         }
 
         /// <summary>
@@ -74,27 +86,25 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Lists the available dossiers.")]
         public async Task ListDossiersAsync()
         {
-            var eb = BuildDossierListEmbed(this.Database.Dossiers);
-            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb);
-        }
+            var appearance = PaginatedAppearanceOptions.Default;
+            appearance.Title = "Dossier Database";
 
-        [NotNull]
-        private Embed BuildDossierListEmbed([NotNull][ItemNotNull]IEnumerable<Dossier> dossiers)
-        {
-            var eb = this.Feedback.CreateEmbedBase();
-            eb.WithTitle("Dossier Database");
+            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                this.Feedback,
+                this.Database.Dossiers,
+                d => d.Title,
+                d => d.Summary ?? "No summary set.",
+                "There are no dossiers available.",
+                appearance
+            );
 
-            foreach (var dossier in dossiers)
-            {
-                eb.AddField(dossier.Title, dossier.Summary);
-            }
-
-            if (!eb.Fields.Any())
-            {
-                eb.WithDescription("No dossiers found.");
-            }
-
-            return eb.Build();
+            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            (
+                this.Context,
+                this.Feedback,
+                paginatedEmbed
+            );
         }
 
         /// <summary>
