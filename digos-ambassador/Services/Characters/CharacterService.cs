@@ -945,6 +945,16 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.MultipleMatches, "The character already has an image with that name.");
             }
 
+            if (imageName.IsNullOrWhitespace())
+            {
+                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You need to specify a name.");
+            }
+
+            if (imageCaption.IsNullOrWhitespace())
+            {
+                imageCaption = "No caption set.";
+            }
+
             var image = new Image
             {
                 Name = imageName,
