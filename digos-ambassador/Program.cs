@@ -24,6 +24,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Services;
 using JetBrains.Annotations;
@@ -54,7 +55,7 @@ namespace DIGOS.Ambassador
             var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
             log4net.Config.XmlConfigurator.Configure(logRepository, new FileInfo("app.config"));
 
-            // Log.Debug($"Starting up. Running on {RuntimeInformation.OSDescription}");
+            Log.Debug($"Running on {RuntimeInformation.FrameworkDescription}");
 
             // Initialize
             var contentService = new ContentService();
