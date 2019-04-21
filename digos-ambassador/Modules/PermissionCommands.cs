@@ -96,21 +96,17 @@ namespace DIGOS.Ambassador.Modules
             var enumValues = (Permission[])Enum.GetValues(typeof(Permission));
 
             var fields = enumValues.Select(CreateHumanizedPermissionField);
-            var paginatedEmbed = PaginatedEmbedFactory.FromFields(fields);
-            paginatedEmbed.Options.HelpText =
-                "These are the available bot-specific permissions. Scroll through the pages by using the reactions.";
+            var paginatedEmbedPages = PageFactory.FromFields(fields);
+            var paginatedEmbed = new PaginatedEmbed(this.Feedback).WithPages(paginatedEmbedPages);
 
-            var paginatedMessage = new PaginatedMessage<EmbedBuilder, PaginatedEmbed>
-            (
-                this.Feedback,
-                paginatedEmbed
-            );
+            paginatedEmbed.Appearance.HelpText =
+                "These are the available bot-specific permissions. Scroll through the pages by using the reactions.";
 
             await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (
                 this.Context,
                 this.Feedback,
-                paginatedMessage,
+                paginatedEmbed,
                 TimeSpan.FromMinutes(5)
             );
         }
@@ -143,27 +139,19 @@ namespace DIGOS.Ambassador.Modules
             );
 
             var fields = localPermissions.AsEnumerable().Select(CreateHumanizedPermissionField);
-            var paginatedEmbed = PaginatedEmbedFactory.FromFields
-            (
-                fields
-            );
+            var paginatedEmbedPages = PageFactory.FromFields(fields);
+            var paginatedEmbed = new PaginatedEmbed(this.Feedback).WithPages(paginatedEmbedPages);
 
-            paginatedEmbed.Options.HelpText =
+            paginatedEmbed.Appearance.HelpText =
                 "These are the permissions granted to the given user. Scroll through the pages by using the reactions.";
 
-            paginatedEmbed.Options.Author = discordUser;
-
-            var paginatedMessage = new PaginatedMessage<EmbedBuilder, PaginatedEmbed>
-            (
-                this.Feedback,
-                paginatedEmbed
-            );
+            paginatedEmbed.Appearance.Author = discordUser;
 
             await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (
                 this.Context,
                 this.Feedback,
-                paginatedMessage,
+                paginatedEmbed,
                 TimeSpan.FromMinutes(5)
             );
         }

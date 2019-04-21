@@ -22,6 +22,7 @@
 
 // Originally licensed under the ISC license; modified from https://github.com/foxbot/Discord.Addons.Interactive
 using System.Collections.Generic;
+using DIGOS.Ambassador.Services;
 using Discord;
 using JetBrains.Annotations;
 using Image = DIGOS.Ambassador.Database.Data.Image;
@@ -31,55 +32,28 @@ namespace DIGOS.Ambassador.Pagination
     /// <summary>
     /// Represents a paginated gallery of images.
     /// </summary>
-    public class PaginatedGallery : IPager<Image, PaginatedGallery>
+    public class PaginatedGallery : PaginatedMessage<Image, PaginatedGallery>
     {
-        /// <inheritdoc />
-        public IList<Image> Pages { get; set; } = new List<Image>();
-
-        /// <inheritdoc />
-        public PaginatedAppearanceOptions Options { get; set; } = PaginatedAppearanceOptions.Default;
-
         /// <summary>
-        /// Gets or sets the colour of the gallery's embed.
+        /// Initializes a new instance of the <see cref="PaginatedGallery"/> class.
         /// </summary>
-        public Color Color { get; set; } = Color.Default;
-
-        /// <summary>
-        /// Gets or sets the title of the gallery.
-        /// </summary>
-        public string Title { get; set; } = string.Empty;
-
-        /// <inheritdoc />
-        [NotNull]
-        public PaginatedGallery WithPage(Image page)
+        /// <param name="feedbackService">The feedback service.</param>
+        public PaginatedGallery(UserFeedbackService feedbackService)
+            : base(feedbackService)
         {
-            this.Pages.Add(page);
-            return this;
         }
 
         /// <inheritdoc />
-        [NotNull]
-        public PaginatedGallery WithPages([NotNull] IEnumerable<Image> pages)
-        {
-            foreach (var page in pages)
-            {
-                WithPage(page);
-            }
-
-            return this;
-        }
-
-        /// <inheritdoc />
-        public Embed BuildEmbed(int page)
+        public override Embed BuildEmbed(int page)
         {
             var currentImage = this.Pages[page];
 
             return new EmbedBuilder()
-                .WithColor(this.Color)
-                .WithTitle($"{this.Title} | {currentImage.Name}")
+                .WithColor(this.Appearance.Color)
+                .WithTitle($"{this.Appearance.Title} | {currentImage.Name}")
                 .WithDescription(currentImage.Caption)
                 .WithImageUrl(currentImage.Url)
-                .WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page + 1, this.Pages.Count))
+                .WithFooter(f => f.Text = string.Format(this.Appearance.FooterFormat, page + 1, this.Pages.Count))
                 .Build();
         }
     }

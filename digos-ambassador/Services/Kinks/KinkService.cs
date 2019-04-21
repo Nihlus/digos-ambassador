@@ -143,7 +143,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="kinks">The kinks.</param>
         /// <returns>A paginated embed.</returns>
         [NotNull]
-        public PaginatedEmbed BuildKinkOverlapEmbed(IUser firstUser, IUser secondUser, IEnumerable<UserKink> kinks)
+        public IEnumerable<EmbedBuilder> BuildKinkOverlapEmbeds(IUser firstUser, IUser secondUser, IEnumerable<UserKink> kinks)
         {
             var pages =
             (
@@ -156,7 +156,7 @@ namespace DIGOS.Ambassador.Services
             )
             .ToList();
 
-            return new PaginatedEmbed().WithPages(pages);
+            return pages;
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="kinks">The kinks.</param>
         /// <returns>A paginated embed.</returns>
         [NotNull]
-        public PaginatedEmbed BuildPaginatedUserKinkEmbed(IEnumerable<UserKink> kinks)
+        public IEnumerable<EmbedBuilder> BuildPaginatedUserKinkEmbeds(IEnumerable<UserKink> kinks)
         {
             var pages =
             (
@@ -175,7 +175,7 @@ namespace DIGOS.Ambassador.Services
             )
             .ToList();
 
-            return new PaginatedEmbed().WithPages(pages);
+            return pages;
         }
 
         /// <summary>

@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Pagination
         /// <summary>
         /// Gets or sets the appearance options for the pager.
         /// </summary>
-        PaginatedAppearanceOptions Options { get; set; }
+        PaginatedAppearanceOptions Appearance { get; set; }
 
         /// <summary>
         /// Appends a page to the pager.

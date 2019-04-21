@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity.Messages;
@@ -37,18 +38,19 @@ namespace DIGOS.Ambassador.Pagination
     /// </summary>
     /// <typeparam name="TContent">The type of content in the pager.</typeparam>
     /// <typeparam name="TType">The type of the pager.</typeparam>
-    public sealed class PaginatedMessage<TContent, TType> : InteractiveMessage where TType : IPager<TContent, TType>
+    public abstract class PaginatedMessage<TContent, TType> : InteractiveMessage, IPager<TContent, TType>
+        where TType : PaginatedMessage<TContent, TType>
     {
         /// <summary>
         /// Gets the user interaction service.
         /// </summary>
         private UserFeedbackService Feedback { get; }
 
-        private readonly IPager<TContent, TType> Pager;
+        /// <inheritdoc />
+        public virtual IList<TContent> Pages { get; }
 
-        private PaginatedAppearanceOptions Options => this.Pager.Options;
-
-        private readonly int PageCount;
+        /// <inheritdoc />
+        public virtual PaginatedAppearanceOptions Appearance { get; set; } = PaginatedAppearanceOptions.Default;
 
         private int CurrentPage = 1;
 
@@ -56,50 +58,75 @@ namespace DIGOS.Ambassador.Pagination
         /// Initializes a new instance of the <see cref="PaginatedMessage{T1,T2}"/> class.
         /// </summary>
         /// <param name="feedbackService">The user feedback service.</param>
-        /// <param name="pager">The pages in the gallery.</param>
-        public PaginatedMessage
+        protected PaginatedMessage
         (
-            UserFeedbackService feedbackService,
-            IPager<TContent, TType> pager
+            UserFeedbackService feedbackService
         )
         {
             this.Feedback = feedbackService;
-            this.Pager = pager;
-            this.PageCount = this.Pager.Pages.Count;
+            this.Pages = new List<TContent>();
+
+            this.Appearance.FooterFormat =
+                $"{PaginatedAppearanceOptions.Default.FooterFormat} - " +
+                $"press {this.Appearance.Stop} to remove this message.";
         }
+
+        /// <inheritdoc/>
+        public virtual TType WithPage(TContent page)
+        {
+            this.Pages.Add(page);
+            return (TType)this;
+        }
+
+        /// <inheritdoc/>
+        public virtual TType WithPages(IEnumerable<TContent> pages)
+        {
+            foreach (var page in pages)
+            {
+                WithPage(page);
+            }
+
+            return (TType)this;
+        }
+
+        /// <inheritdoc/>
+        public abstract Embed BuildEmbed(int page);
 
         /// <inheritdoc/>
         protected override async Task<IUserMessage> DisplayAsync([NotNull] IMessageChannel channel)
         {
-            var embed = this.Pager.BuildEmbed(this.CurrentPage - 1);
+            var embed = BuildEmbed(this.CurrentPage - 1);
 
             var message = await channel.SendMessageAsync(string.Empty, embed: embed).ConfigureAwait(false);
 
             // Reactions take a while to add, don't wait for them
             _ = Task.Run(async () =>
             {
-                await message.AddReactionAsync(this.Options.First);
-                await message.AddReactionAsync(this.Options.Back);
-                await message.AddReactionAsync(this.Options.Next);
-                await message.AddReactionAsync(this.Options.Last);
-
-                var manageMessages = await CanManageMessages();
-
-                var canJump =
-                    this.Options.JumpDisplayCondition == JumpDisplayCondition.Always ||
-                    (this.Options.JumpDisplayCondition == JumpDisplayCondition.WithManageMessages && manageMessages);
-
-                if (canJump)
+                if (this.Pages.Count > 1)
                 {
-                    await message.AddReactionAsync(this.Options.Jump);
+                    await message.AddReactionAsync(this.Appearance.First);
+                    await message.AddReactionAsync(this.Appearance.Back);
+                    await message.AddReactionAsync(this.Appearance.Next);
+                    await message.AddReactionAsync(this.Appearance.Last);
+
+                    var manageMessages = await CanManageMessages();
+
+                    var canJump =
+                        this.Appearance.JumpDisplayCondition == JumpDisplayCondition.Always ||
+                        (this.Appearance.JumpDisplayCondition == JumpDisplayCondition.WithManageMessages && manageMessages);
+
+                    if (canJump)
+                    {
+                        await message.AddReactionAsync(this.Appearance.Jump);
+                    }
+
+                    if (this.Appearance.DisplayInformationIcon)
+                    {
+                        await message.AddReactionAsync(this.Appearance.Help);
+                    }
                 }
 
-                await message.AddReactionAsync(this.Options.Stop);
-
-                if (this.Options.DisplayInformationIcon)
-                {
-                    await message.AddReactionAsync(this.Options.Help);
-                }
+                await message.AddReactionAsync(this.Appearance.Stop);
             });
 
             return message;
@@ -117,20 +144,20 @@ namespace DIGOS.Ambassador.Pagination
         {
             var emote = reaction.Emote;
 
-            if (emote.Equals(this.Options.First))
+            if (emote.Equals(this.Appearance.First))
             {
                 this.CurrentPage = 1;
             }
-            else if (emote.Equals(this.Options.Next))
+            else if (emote.Equals(this.Appearance.Next))
             {
-                if (this.CurrentPage >= this.PageCount)
+                if (this.CurrentPage >= this.Pages.Count)
                 {
                     return;
                 }
 
                 ++this.CurrentPage;
             }
-            else if (emote.Equals(this.Options.Back))
+            else if (emote.Equals(this.Appearance.Back))
             {
                 if (this.CurrentPage <= 1)
                 {
@@ -139,16 +166,16 @@ namespace DIGOS.Ambassador.Pagination
 
                 --this.CurrentPage;
             }
-            else if (emote.Equals(this.Options.Last))
+            else if (emote.Equals(this.Appearance.Last))
             {
-                this.CurrentPage = this.PageCount;
+                this.CurrentPage = this.Pages.Count;
             }
-            else if (emote.Equals(this.Options.Stop))
+            else if (emote.Equals(this.Appearance.Stop))
             {
                 await this.Interactivity.DeleteInteractiveMessageAsync(this);
                 return;
             }
-            else if (emote.Equals(this.Options.Jump))
+            else if (emote.Equals(this.Appearance.Jump))
             {
                 _ = Task.Run
                 (
@@ -164,7 +191,7 @@ namespace DIGOS.Ambassador.Pagination
 
                         var response = responseResult.Entity;
 
-                        if (!int.TryParse(response.Content, out int request) || request < 1 || request > this.PageCount)
+                        if (!int.TryParse(response.Content, out int request) || request < 1 || request > this.Pages.Count)
                         {
                             _ = response.DeleteAsync().ConfigureAwait(false);
 
@@ -180,12 +207,12 @@ namespace DIGOS.Ambassador.Pagination
                     }
                 );
             }
-            else if (emote.Equals(this.Options.Help))
+            else if (emote.Equals(this.Appearance.Help))
             {
                 var user = this.Interactivity.Client.GetUser(reaction.UserId);
-                var eb = this.Feedback.CreateFeedbackEmbed(user, Color.DarkPurple, this.Options.HelpText);
+                var eb = this.Feedback.CreateFeedbackEmbed(user, Color.DarkPurple, this.Appearance.HelpText);
 
-                await this.Feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb, this.Options.InfoTimeout);
+                await this.Feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb, this.Appearance.InfoTimeout);
                 return;
             }
 
@@ -213,7 +240,7 @@ namespace DIGOS.Ambassador.Pagination
         /// <inheritdoc/>
         protected override async Task UpdateAsync()
         {
-            var embed = this.Pager.BuildEmbed(this.CurrentPage - 1);
+            var embed = BuildEmbed(this.CurrentPage - 1);
 
             await this.Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
         }

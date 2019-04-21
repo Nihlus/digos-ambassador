@@ -1,5 +1,5 @@
 //
-//  PaginatedEmbedFactory.cs
+//  PageFactory.cs
 //
 //  Author:
 //        Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -30,17 +30,17 @@ namespace DIGOS.Ambassador.Pagination
     /// <summary>
     /// Factory class for creating paginated embeds from various sources.
     /// </summary>
-    public static class PaginatedEmbedFactory
+    public static class PageFactory
     {
         /// <summary>
-        /// Creates a paginated embed from a collection of embed fields.
+        /// Creates a set of embed pages from a collection of embed fields.
         /// </summary>
         /// <param name="fields">The fields to paginate.</param>
         /// <param name="maxFieldsPerPage">The maximum number of embed fields per page.</param>
         /// <param name="description">The description to display on each page.</param>
         /// <returns>The paginated embed.</returns>
         [NotNull]
-        public static PaginatedEmbed FromFields
+        public static IEnumerable<EmbedBuilder> FromFields
         (
             [NotNull, ItemNotNull] IEnumerable<EmbedFieldBuilder> fields,
             uint maxFieldsPerPage = 5,
@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Pagination
                 }
             }
 
-            return new PaginatedEmbed().WithPages(pages);
+            return pages;
         }
     }
 }

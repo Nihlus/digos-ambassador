@@ -93,12 +93,7 @@ namespace DIGOS.Ambassador.Modules
             var guilds = this.Context.Client.Guilds;
             var pages = guilds.Select(CreateGuildInfoEmbed);
 
-            var paginatedEmbed = new PaginatedEmbed().WithPages(pages);
-            var paginatedMessage = new PaginatedMessage<EmbedBuilder, PaginatedEmbed>
-            (
-                this.Feedback,
-                paginatedEmbed
-            );
+            var paginatedMessage = new PaginatedEmbed(this.Feedback).WithPages(pages);
 
             await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (

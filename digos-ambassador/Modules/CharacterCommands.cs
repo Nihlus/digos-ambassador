@@ -148,30 +148,25 @@ namespace DIGOS.Ambassador.Modules
                               "each field is the pronoun family that you use when selecting the pronoun, and below it" +
                               "is a short example of how it might be used.";
 
-            var paginatedEmbed = PaginatedEmbedFactory.FromFields
+            var paginatedEmbedPages = PageFactory.FromFields
             (
                 fields,
                 description: description
             );
 
-            paginatedEmbed.Pages = paginatedEmbed.Pages
-            .Select
+            var paginatedEmbed = new PaginatedEmbed(this.Feedback).WithPages
             (
-                p => p.WithColor(Color.DarkPurple).WithTitle("Available pronouns")
-            )
-            .ToList();
-
-            var paginatedMessage = new PaginatedMessage<EmbedBuilder, PaginatedEmbed>
-            (
-                this.Feedback,
-                paginatedEmbed
+                paginatedEmbedPages.Select
+                (
+                    p => p.WithColor(Color.DarkPurple).WithTitle("Available pronouns")
+                )
             );
 
             await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (
                 this.Context,
                 this.Feedback,
-                paginatedMessage
+                paginatedEmbed
             );
         }
 
@@ -812,22 +807,17 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            var gallery = new PaginatedGallery
+            var gallery = new PaginatedGallery(this.Feedback).WithPages(character.Images);
+
+            gallery.Appearance = new PaginatedAppearanceOptions
             {
-                Pages = character.Images,
+                FooterFormat = $"Image {{0}}/{{1}} - press {gallery.Appearance.Stop} to remove this message.",
+                HelpText = "Use the reactions to navigate the gallery.",
                 Color = Color.DarkPurple,
-                Title = character.Name,
-                Options =
-                new PaginatedAppearanceOptions
-                {
-                    FooterFormat = "Image {0}/{1}",
-                    HelpText = "Use the reactions to navigate the gallery."
-                }
+                Title = character.Name
             };
 
-            var message = new PaginatedMessage<DIGOS.Ambassador.Database.Data.Image, PaginatedGallery>(this.Feedback, gallery);
-
-            await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, message);
+            await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, gallery);
         }
 
         /// <summary>

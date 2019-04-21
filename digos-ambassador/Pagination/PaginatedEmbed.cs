@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using DIGOS.Ambassador.Services;
 using Discord;
 using JetBrains.Annotations;
 
@@ -29,54 +30,29 @@ namespace DIGOS.Ambassador.Pagination
     /// <summary>
     /// Represents a paginated gallery of embeds.
     /// </summary>
-    public class PaginatedEmbed : IPager<EmbedBuilder, PaginatedEmbed>
+    public class PaginatedEmbed : PaginatedMessage<EmbedBuilder, PaginatedEmbed>
     {
-        /// <inheritdoc />
-        public IList<EmbedBuilder> Pages { get; set; }
-
-        /// <inheritdoc />
-        public PaginatedAppearanceOptions Options { get; set; } = PaginatedAppearanceOptions.Default;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PaginatedEmbed"/> class.
         /// </summary>
-        public PaginatedEmbed()
+        /// <param name="feedbackService">The feedback service.</param>
+        public PaginatedEmbed(UserFeedbackService feedbackService)
+            : base(feedbackService)
         {
-            this.Pages = new List<EmbedBuilder>();
         }
 
         /// <inheritdoc />
-        [NotNull]
-        public PaginatedEmbed WithPage(EmbedBuilder page)
-        {
-            this.Pages.Add(page);
-            return this;
-        }
-
-        /// <inheritdoc />
-        [NotNull]
-        public PaginatedEmbed WithPages([NotNull] IEnumerable<EmbedBuilder> pages)
-        {
-            foreach (var page in pages)
-            {
-                WithPage(page);
-            }
-
-            return this;
-        }
-
-        /// <inheritdoc />
-        public Embed BuildEmbed(int page)
+        public override Embed BuildEmbed(int page)
         {
             var currentPage = this.Pages[page];
 
-            if (!(this.Options.Author is null))
+            if (!(this.Appearance.Author is null))
             {
-                currentPage = currentPage.WithAuthor(this.Options.Author);
+                currentPage = currentPage.WithAuthor(this.Appearance.Author);
             }
 
             return currentPage
-            .WithFooter(f => f.Text = string.Format(this.Options.FooterFormat, page + 1, this.Pages.Count))
+            .WithFooter(f => f.Text = string.Format(this.Appearance.FooterFormat, page + 1, this.Pages.Count))
             .Build();
         }
     }
