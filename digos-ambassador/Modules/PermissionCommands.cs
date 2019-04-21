@@ -95,12 +95,20 @@ namespace DIGOS.Ambassador.Modules
         {
             var enumValues = (Permission[])Enum.GetValues(typeof(Permission));
 
-            var fields = enumValues.Select(CreateHumanizedPermissionField);
-            var paginatedEmbedPages = PageFactory.FromFields(fields);
-            var paginatedEmbed = new PaginatedEmbed(this.Feedback).WithPages(paginatedEmbedPages);
-
-            paginatedEmbed.Appearance.HelpText =
+            var appearance = PaginatedAppearanceOptions.Default;
+            appearance.HelpText =
                 "These are the available bot-specific permissions. Scroll through the pages by using the reactions.";
+
+            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                this.Feedback,
+                this.Context.User,
+                enumValues,
+                p => p.ToString().Humanize().Transform(To.TitleCase),
+                p => p.Humanize(),
+                "No permissions available. This is most likely an error.",
+                appearance
+            );
 
             await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (
@@ -138,14 +146,21 @@ namespace DIGOS.Ambassador.Modules
                 this.Context.Guild
             );
 
-            var fields = localPermissions.AsEnumerable().Select(CreateHumanizedPermissionField);
-            var paginatedEmbedPages = PageFactory.FromFields(fields);
-            var paginatedEmbed = new PaginatedEmbed(this.Feedback).WithPages(paginatedEmbedPages);
-
-            paginatedEmbed.Appearance.HelpText =
+            var appearance = PaginatedAppearanceOptions.Default;
+            appearance.Author = discordUser;
+            appearance.HelpText =
                 "These are the permissions granted to the given user. Scroll through the pages by using the reactions.";
 
-            paginatedEmbed.Appearance.Author = discordUser;
+            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                this.Feedback,
+                this.Context.User,
+                localPermissions,
+                p => p.Permission.Humanize(),
+                p => $"*Allowed targets: {p.Target}*",
+                "No permissions set.",
+                appearance
+            );
 
             await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (
@@ -154,26 +169,6 @@ namespace DIGOS.Ambassador.Modules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5)
             );
-        }
-
-        [NotNull]
-        private EmbedFieldBuilder CreateHumanizedPermissionField(Permission permission)
-        {
-            return new EmbedFieldBuilder()
-                .WithName(permission.ToString().Humanize().Transform(To.TitleCase))
-                .WithValue(permission.Humanize());
-        }
-
-        [NotNull]
-        private EmbedFieldBuilder CreateHumanizedPermissionField([NotNull] LocalPermission permission)
-        {
-            return new EmbedFieldBuilder()
-                .WithName(permission.Permission.ToString().Humanize().Transform(To.TitleCase))
-                .WithValue
-                (
-                    $"{permission.Permission.Humanize()}\n" +
-                    $"*Allowed targets: {permission.Target}*"
-                );
         }
 
         /// <summary>

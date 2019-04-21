@@ -155,7 +155,7 @@ namespace DIGOS.Ambassador.Modules
                 description: description
             );
 
-            var paginatedEmbed = new PaginatedEmbed(this.Feedback).WithPages
+            var paginatedEmbed = new PaginatedEmbed(this.Feedback, this.Context.User).WithPages
             (
                 paginatedEmbedPages.Select
                 (
@@ -163,11 +163,11 @@ namespace DIGOS.Ambassador.Modules
                 )
             );
 
-            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
             (
-                this.Context,
-                this.Feedback,
-                paginatedEmbed
+                this.Context.Channel,
+                paginatedEmbed,
+                TimeSpan.FromMinutes(5.0)
             );
         }
 
@@ -453,6 +453,7 @@ namespace DIGOS.Ambassador.Modules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 this.Feedback,
+                this.Context.User,
                 characters,
                 c => c.Name,
                 c => c.Summary ?? "No summary set.",
@@ -460,11 +461,11 @@ namespace DIGOS.Ambassador.Modules
                 appearance
             );
 
-            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
             (
-                this.Context,
-                this.Feedback,
-                paginatedEmbed
+                this.Context.Channel,
+                paginatedEmbed,
+                TimeSpan.FromMinutes(5.0)
             );
         }
 
@@ -813,7 +814,7 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            var gallery = new PaginatedGallery(this.Feedback).WithPages(character.Images);
+            var gallery = new PaginatedGallery(this.Feedback, this.Context.User).WithPages(character.Images);
 
             gallery.Appearance = new PaginatedAppearanceOptions
             {
@@ -823,7 +824,12 @@ namespace DIGOS.Ambassador.Modules
                 Title = character.Name
             };
 
-            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync(this.Context, this.Feedback, gallery);
+            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
+            (
+                this.Context.Channel,
+                gallery,
+                TimeSpan.FromMinutes(5.0)
+            );
         }
 
         /// <summary>
@@ -842,6 +848,7 @@ namespace DIGOS.Ambassador.Modules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 this.Feedback,
+                this.Context.User,
                 character.Images,
                 i => i.Name,
                 i => i.Caption ?? "No caption set.",
@@ -849,11 +856,11 @@ namespace DIGOS.Ambassador.Modules
                 appearance
             );
 
-            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
             (
-                this.Context,
-                this.Feedback,
-                paginatedEmbed
+                this.Context.Channel,
+                paginatedEmbed,
+                TimeSpan.FromMinutes(5.0)
             );
         }
 

@@ -175,7 +175,7 @@ namespace DIGOS.Ambassador.Modules
             }
 
             var kinkOverlapPages = this.Kinks.BuildKinkOverlapEmbeds(this.Context.User, otherUser, overlap);
-            var paginatedMessage = new PaginatedEmbed(this.Feedback).WithPages(kinkOverlapPages);
+            var paginatedMessage = new PaginatedEmbed(this.Feedback, this.Context.User).WithPages(kinkOverlapPages);
 
             await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, paginatedMessage);
         }
@@ -228,7 +228,7 @@ namespace DIGOS.Ambassador.Modules
             }
 
             var paginatedKinkPages = this.Kinks.BuildPaginatedUserKinkEmbeds(withPreference);
-            var paginatedMessage = new PaginatedEmbed(this.Feedback).WithPages(paginatedKinkPages);
+            var paginatedMessage = new PaginatedEmbed(this.Feedback, this.Context.User).WithPages(paginatedKinkPages);
 
             await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, paginatedMessage);
         }

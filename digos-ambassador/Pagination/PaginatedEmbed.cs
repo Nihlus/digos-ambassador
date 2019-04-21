@@ -36,8 +36,9 @@ namespace DIGOS.Ambassador.Pagination
         /// Initializes a new instance of the <see cref="PaginatedEmbed"/> class.
         /// </summary>
         /// <param name="feedbackService">The feedback service.</param>
-        public PaginatedEmbed(UserFeedbackService feedbackService)
-            : base(feedbackService)
+        /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
+        public PaginatedEmbed(UserFeedbackService feedbackService, IUser sourceUser)
+            : base(feedbackService, sourceUser)
         {
         }
 

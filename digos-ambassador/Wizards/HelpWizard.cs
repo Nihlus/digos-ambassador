@@ -108,12 +108,15 @@ namespace DIGOS.Ambassador.Wizards
         /// <param name="modules">The modules available in the bot.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="help">The help service.</param>
+        /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
         public HelpWizard
         (
             [NotNull, ItemNotNull] IReadOnlyList<ModuleInfo> modules,
             [NotNull] UserFeedbackService feedback,
-            [NotNull] HelpService help
+            [NotNull] HelpService help,
+            [NotNull] IUser sourceUser
         )
+            : base(sourceUser)
         {
             this.Modules = modules;
             this.Feedback = feedback;

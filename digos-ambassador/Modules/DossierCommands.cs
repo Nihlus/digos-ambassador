@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -92,6 +93,7 @@ namespace DIGOS.Ambassador.Modules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 this.Feedback,
+                this.Context.User,
                 this.Database.Dossiers,
                 d => d.Title,
                 d => d.Summary ?? "No summary set.",
@@ -99,11 +101,11 @@ namespace DIGOS.Ambassador.Modules
                 appearance
             );
 
-            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
             (
-                this.Context,
-                this.Feedback,
-                paginatedEmbed
+                this.Context.Channel,
+                paginatedEmbed,
+                TimeSpan.FromMinutes(5.0)
             );
         }
 

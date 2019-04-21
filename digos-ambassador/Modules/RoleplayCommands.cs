@@ -181,6 +181,7 @@ namespace DIGOS.Ambassador.Modules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 this.Feedback,
+                this.Context.User,
                 roleplays,
                 r => r.Name,
                 r => r.Summary ?? "No summary set.",
@@ -188,11 +189,11 @@ namespace DIGOS.Ambassador.Modules
                 appearance
             );
 
-            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
             (
-                this.Context,
-                this.Feedback,
-                paginatedEmbed
+                this.Context.Channel,
+                paginatedEmbed,
+                TimeSpan.FromMinutes(5.0)
             );
         }
 

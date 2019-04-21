@@ -114,7 +114,7 @@ namespace DIGOS.Ambassador.Pagination
         /// <summary>
         /// Gets or sets the colour of the paginated message's embed.
         /// </summary>
-        public Color Color { get; set; } = Color.Default;
+        public Color Color { get; set; } = Color.DarkPurple;
 
         /// <summary>
         /// Gets or sets the title of the paginated message.

@@ -38,6 +38,7 @@ namespace DIGOS.Ambassador.Pagination
         /// Creates a simple paginated list from a collection of items.
         /// </summary>
         /// <param name="feedbackService">The user feedback service.</param>
+        /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
         /// <param name="items">The items.</param>
         /// <param name="titleSelector">A function that selects the title for each field.</param>
         /// <param name="valueSelector">A function that selects the value for each field.</param>
@@ -48,6 +49,7 @@ namespace DIGOS.Ambassador.Pagination
         public static PaginatedEmbed SimpleFieldsFromCollection<TItem>
         (
             UserFeedbackService feedbackService,
+            IUser sourceUser,
             IEnumerable<TItem> items,
             Func<TItem, string> titleSelector,
             Func<TItem, string> valueSelector,
@@ -58,7 +60,7 @@ namespace DIGOS.Ambassador.Pagination
             appearance = appearance ?? PaginatedAppearanceOptions.Default;
 
             var enumeratedItems = items.ToList();
-            var paginatedEmbed = new PaginatedEmbed(feedbackService) { Appearance = appearance };
+            var paginatedEmbed = new PaginatedEmbed(feedbackService, sourceUser) { Appearance = appearance };
 
             IEnumerable<EmbedBuilder> pages;
             if (!enumeratedItems.Any())

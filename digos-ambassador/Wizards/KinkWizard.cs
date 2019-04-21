@@ -105,6 +105,7 @@ namespace DIGOS.Ambassador.Wizards
             KinkService kinkService,
             IUser targetUser
         )
+            : base(targetUser)
         {
             this.Database = database;
             this.Feedback = feedback;

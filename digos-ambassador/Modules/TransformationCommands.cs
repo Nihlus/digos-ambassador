@@ -540,6 +540,7 @@ namespace DIGOS.Ambassador.Modules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 this.Feedback,
+                this.Context.User,
                 availableSpecies,
                 s => $"{s.Name.Humanize(LetterCasing.Title)} ({s.Name})",
                 s => s.Description ?? "No description set.",
@@ -558,11 +559,11 @@ namespace DIGOS.Ambassador.Modules
                 );
             }
 
-            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
             (
-                this.Context,
-                this.Feedback,
-                paginatedEmbed
+                this.Context.Channel,
+                paginatedEmbed,
+                TimeSpan.FromMinutes(5.0)
             );
         }
 

@@ -59,10 +59,13 @@ namespace DIGOS.Ambassador.Pagination
         /// Initializes a new instance of the <see cref="PaginatedMessage{T1,T2}"/> class.
         /// </summary>
         /// <param name="feedbackService">The user feedback service.</param>
+        /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
         protected PaginatedMessage
         (
-            UserFeedbackService feedbackService
+            UserFeedbackService feedbackService,
+            IUser sourceUser
         )
+            : base(sourceUser)
         {
             this.Feedback = feedbackService;
             this.Pages = new List<TContent>();
@@ -143,6 +146,30 @@ namespace DIGOS.Ambassador.Pagination
         /// <inheritdoc/>
         public override async Task HandleAddedInteractionAsync(SocketReaction reaction)
         {
+            if (!reaction.User.IsSpecified)
+            {
+                // Ignore unspecified users
+                return;
+            }
+
+            var interactingUser = reaction.User.Value;
+            if (interactingUser.Id != this.SourceUser.Id)
+            {
+                if (interactingUser is IGuildUser guildUser)
+                {
+                    // If the user has permission to manage messages, they should be allowed to interact in all cases
+                    if (!guildUser.GetPermissions(this.MessageContext.Channel as IGuildChannel).ManageMessages)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    // We only allow interactions from the user who created the message
+                    return;
+                }
+            }
+
             var emote = reaction.Emote;
 
             if (emote.Equals(this.Appearance.First))

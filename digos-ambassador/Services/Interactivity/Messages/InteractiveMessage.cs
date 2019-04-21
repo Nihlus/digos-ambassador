@@ -37,6 +37,9 @@ namespace DIGOS.Ambassador.Services.Interactivity.Messages
         /// <inheritdoc/>
         public IUserMessage Message { get; private set; }
 
+        /// <inheritdoc />
+        public IUser SourceUser { get; }
+
         /// <summary>
         /// Gets the context of the message the interactive message wraps.
         /// </summary>
@@ -46,6 +49,15 @@ namespace DIGOS.Ambassador.Services.Interactivity.Messages
         /// Gets the interactivity service that manages this interactive message.
         /// </summary>
         protected InteractivityService Interactivity { get; private set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InteractiveMessage"/> class.
+        /// </summary>
+        /// <param name="sourceUser">The source user.</param>
+        protected InteractiveMessage(IUser sourceUser)
+        {
+            this.SourceUser = sourceUser;
+        }
 
         /// <inheritdoc/>
         public async Task SendAsync(InteractivityService service, IMessageChannel channel)

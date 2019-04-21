@@ -39,6 +39,11 @@ namespace DIGOS.Ambassador.Services.Interactivity.Messages
         IUserMessage Message { get; }
 
         /// <summary>
+        /// Gets the user that caused the interactive message to be created.
+        /// </summary>
+        IUser SourceUser { get; }
+
+        /// <summary>
         /// Sends the interactive message to the given channel.
         /// </summary>
         /// <param name="service">The interactivity service that manages this message.</param>
