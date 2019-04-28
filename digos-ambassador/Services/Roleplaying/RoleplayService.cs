@@ -27,10 +27,12 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
+using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 
 using Discord;
 using Discord.Commands;
+using Discord.Rest;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -65,7 +67,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A task that must be awaited.</returns>
         public async Task ConsumeMessageAsync([NotNull] GlobalInfoContext db, [NotNull] ICommandContext context)
         {
-            var result = await GetActiveRoleplayAsync(db, context);
+            var result = await GetActiveRoleplayAsync(db, context.Channel);
             if (!result.IsSuccess)
             {
                 return;
@@ -108,7 +110,7 @@ namespace DIGOS.Ambassador.Services
                 Owner = owner,
                 ServerID = (long)context.Guild.Id,
                 IsActive = false,
-                ActiveChannelID = (long)context.Channel.Id,
+                ActiveChannelID = null,
                 ParticipatingUsers = new List<RoleplayParticipant>(),
                 Messages = new List<UserMessage>()
             };
@@ -220,7 +222,7 @@ namespace DIGOS.Ambassador.Services
         {
             if (roleplayOwner is null && roleplayName is null)
             {
-                return await GetActiveRoleplayAsync(db, context);
+                return await GetActiveRoleplayAsync(db, context.Channel);
             }
 
             if (roleplayOwner is null)
@@ -230,7 +232,7 @@ namespace DIGOS.Ambassador.Services
 
             if (roleplayName.IsNullOrWhitespace())
             {
-                return await GetActiveRoleplayAsync(db, context);
+                return await GetActiveRoleplayAsync(db, context.Channel);
             }
 
             return await GetUserRoleplayByNameAsync(db, context, roleplayOwner, roleplayName);
@@ -275,26 +277,26 @@ namespace DIGOS.Ambassador.Services
         /// Gets the current active roleplay in the given channel.
         /// </summary>
         /// <param name="db">The database where the roleplays are stored.</param>
-        /// <param name="context">The context to get the roleplay from.</param>
+        /// <param name="channel">The channel to get the roleplay from.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
         public async Task<RetrieveEntityResult<Roleplay>> GetActiveRoleplayAsync
         (
             [NotNull] GlobalInfoContext db,
-            [NotNull] ICommandContext context
+            [NotNull] IMessageChannel channel
         )
         {
-            if (context.Guild is null)
-            {
-                return RetrieveEntityResult<Roleplay>.FromError(CommandError.ObjectNotFound, "You're not in a server.");
-            }
-
-            var roleplay = await GetRoleplays(db, context.Guild)
-                .FirstOrDefaultAsync(rp => rp.IsActive && rp.ActiveChannelID == (long)context.Channel.Id);
+            var roleplay = await db.Roleplays.FirstOrDefaultAsync
+            (
+                rp => rp.IsActive && rp.ActiveChannelID == (long)channel.Id
+            );
 
             if (roleplay is null)
             {
-                return RetrieveEntityResult<Roleplay>.FromError(CommandError.ObjectNotFound, "There is no roleplay that is currently active in this channel.");
+                return RetrieveEntityResult<Roleplay>.FromError
+                (
+                    CommandError.ObjectNotFound, "There is no roleplay that is currently active in this channel."
+                );
             }
 
             return RetrieveEntityResult<Roleplay>.FromSuccess(roleplay);
@@ -499,7 +501,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="roleplay">The roleplay to add the user to.</param>
         /// <param name="newUser">The user to add to the roleplay.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        public async Task<ExecuteResult> AddUserToRoleplayAsync
+        public async Task<CreateEntityResult<RoleplayParticipant>> AddUserToRoleplayAsync
         (
             [NotNull] GlobalInfoContext db,
             [NotNull] SocketCommandContext context,
@@ -514,7 +516,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You're already in that roleplay."
                     : "The user is aleady in that roleplay.";
 
-                return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
+                return CreateEntityResult<RoleplayParticipant>.FromError(CommandError.Unsuccessful, errorMessage);
             }
 
             if (roleplay.IsKicked(newUser))
@@ -523,7 +525,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You've been kicked from that roleplay, and can't rejoin unless invited."
                     : "The user has been kicked from that roleplay, and can't rejoin unless invited.";
 
-                return ExecuteResult.FromError(CommandError.UnmetPrecondition, errorMessage);
+                return CreateEntityResult<RoleplayParticipant>.FromError(CommandError.UnmetPrecondition, errorMessage);
             }
 
             // Check the invite list for nonpublic roleplays.
@@ -533,7 +535,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You haven't been invited to that roleplay."
                     : "The user hasn't been invited to that roleplay.";
 
-                return ExecuteResult.FromError(CommandError.UnmetPrecondition, errorMessage);
+                return CreateEntityResult<RoleplayParticipant>.FromError(CommandError.UnmetPrecondition, errorMessage);
             }
 
             var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)newUser.Id);
@@ -542,7 +544,7 @@ namespace DIGOS.Ambassador.Services
                 var getUserResult = await db.GetOrRegisterUserAsync(newUser);
                 if (!getUserResult.IsSuccess)
                 {
-                    return ExecuteResult.FromError(getUserResult);
+                    return CreateEntityResult<RoleplayParticipant>.FromError(getUserResult);
                 }
 
                 var user = getUserResult.Entity;
@@ -557,7 +559,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ExecuteResult.FromSuccess();
+            return CreateEntityResult<RoleplayParticipant>.FromSuccess(participantEntry);
         }
 
         /// <summary>
@@ -751,6 +753,229 @@ namespace DIGOS.Ambassador.Services
             roleplay.IsPublic = isPublic;
             await db.SaveChangesAsync();
 
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Creates a dedicated channel for the roleplay.
+        /// </summary>
+        /// <param name="db">The database containing the roleplays.</param>
+        /// <param name="context">The context in which the request was made.</param>
+        /// <param name="roleplay">The roleplay to create the channel for.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<CreateEntityResult<IGuildChannel>> CreateDedicatedRoleplayChannelAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] SocketCommandContext context,
+            [NotNull] Roleplay roleplay
+        )
+        {
+            if (!context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageChannels)
+            {
+                return CreateEntityResult<IGuildChannel>.FromError
+                (
+                    CommandError.UnmetPrecondition,
+                    "I don't have permission to manage channels, so I can't create dedicated RP channels."
+                );
+            }
+
+            var getExistingChannelResult = await GetDedicatedRoleplayChannelAsync(context, roleplay);
+            if (getExistingChannelResult.IsSuccess)
+            {
+                return CreateEntityResult<IGuildChannel>.FromError
+                (
+                    CommandError.Unsuccessful,
+                    "The roleplay already has a dedicated channel."
+                );
+            }
+
+            var server = await db.GetOrRegisterServerAsync(context.Guild);
+            var dedicatedChannel = await context.Guild.CreateTextChannelAsync
+            (
+                $"{roleplay.Name}-rp",
+                properties =>
+                {
+                    properties.CategoryId = new Optional<ulong?>((ulong?)server.DedicatedRoleplayChannelsCategory);
+                    properties.IsNsfw = roleplay.IsNSFW;
+                    properties.Topic = $"Dedicated roleplay channel for {roleplay.Name}.";
+                }
+            );
+
+            roleplay.DedicatedChannelID = (long)dedicatedChannel.Id;
+
+            // Set up permission overrides
+            foreach (var participant in roleplay.ParticipatingUsers)
+            {
+                var discordUser = context.Guild.GetUser((ulong)participant.User.DiscordID);
+                await GrantUserDedicatedChannelAccessAsync(context, dedicatedChannel, discordUser);
+            }
+
+            var botDiscordUser = context.Guild.GetUser(context.Client.CurrentUser.Id);
+            await GrantUserDedicatedChannelAccessAsync(context, dedicatedChannel, botDiscordUser);
+
+            // Configure visibility for everyone
+            var everyoneRole = context.Guild.EveryoneRole;
+            var everyonePermissions = OverwritePermissions.InheritAll.Modify
+            (
+                readMessageHistory: roleplay.IsPublic ? PermValue.Allow : PermValue.Deny,
+                viewChannel: roleplay.IsPublic ? PermValue.Allow : PermValue.Deny
+            );
+
+            await dedicatedChannel.AddPermissionOverwriteAsync(everyoneRole, everyonePermissions);
+
+            return CreateEntityResult<IGuildChannel>.FromSuccess(dedicatedChannel);
+        }
+
+        /// <summary>
+        /// Deletes the dedicated channel for the roleplay.
+        /// </summary>
+        /// <param name="db">The database containing the roleplays.</param>
+        /// <param name="context">The context in which the request was made.</param>
+        /// <param name="roleplay">The roleplay to delete the channel of.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> DeleteDedicatedRoleplayChannelAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] SocketCommandContext context,
+            [NotNull] Roleplay roleplay
+        )
+        {
+            if (!context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageChannels)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.UnmetPrecondition,
+                    "I don't have permission to manage channels, so I can't delete dedicated RP channels."
+                );
+            }
+
+            if (roleplay.DedicatedChannelID is null)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.ObjectNotFound, "The roleplay doesn't have a dedicated channel."
+                );
+            }
+
+            var getDedicatedChannelResult = await GetDedicatedRoleplayChannelAsync(context, roleplay);
+            if (getDedicatedChannelResult.IsSuccess)
+            {
+                await getDedicatedChannelResult.Entity.DeleteAsync();
+            }
+
+            roleplay.DedicatedChannelID = null;
+            await db.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Gets the channel dedicated to the given roleplay.
+        /// </summary>
+        /// <param name="context">The context in which the request was made.</param>
+        /// <param name="roleplay">The roleplay.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<IGuildChannel>> GetDedicatedRoleplayChannelAsync
+        (
+            [NotNull] SocketCommandContext context,
+            [NotNull] Roleplay roleplay
+        )
+        {
+            if (!(roleplay.DedicatedChannelID is null))
+            {
+                var guildChannel = context.Guild.GetChannel((ulong)roleplay.DedicatedChannelID.Value);
+                if (!(guildChannel is null))
+                {
+                    return RetrieveEntityResult<IGuildChannel>.FromSuccess(guildChannel);
+                }
+
+                return RetrieveEntityResult<IGuildChannel>.FromError
+                (
+                    CommandError.ObjectNotFound, "The roleplay had a channel set, but it appears to have been deleted."
+                );
+            }
+
+            return RetrieveEntityResult<IGuildChannel>.FromError
+            (
+                CommandError.ObjectNotFound, "The roleplay doesn't have a dedicated channel."
+            );
+        }
+
+        /// <summary>
+        /// Grants the given roleplay participant access to the given roleplay channel.
+        /// </summary>
+        /// <param name="context">The context in which the request was made.</param>
+        /// <param name="dedicatedChannel">The roleplay's dedicated channel.</param>
+        /// <param name="participant">The participant to grant access to.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> GrantUserDedicatedChannelAccessAsync
+        (
+            [NotNull] SocketCommandContext context,
+            [NotNull] IGuildChannel dedicatedChannel,
+            [NotNull] IUser participant
+        )
+        {
+            if (!context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageChannels)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.UnmetPrecondition,
+                    "I don't have permission to manage channels, so I can't change permissions on dedicated RP channels."
+                );
+            }
+
+            var user = context.Guild.GetUser(participant.Id);
+            if (user is null)
+            {
+                return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "User not found in guild.");
+            }
+
+            var permissionOverwrites = OverwritePermissions.InheritAll.Modify
+            (
+                readMessageHistory: PermValue.Allow,
+                sendMessages: PermValue.Allow,
+                addReactions: PermValue.Allow,
+                embedLinks: PermValue.Allow,
+                attachFiles: PermValue.Allow,
+                useExternalEmojis: PermValue.Allow,
+                viewChannel: PermValue.Allow
+            );
+
+            await dedicatedChannel.AddPermissionOverwriteAsync(user, permissionOverwrites);
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Revokes the given roleplay participant access to the given roleplay channel.
+        /// </summary>
+        /// <param name="context">The context in which the request was made.</param>
+        /// <param name="dedicatedChannel">The roleplay's dedicated channel.</param>
+        /// <param name="participant">The participant to grant access to.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> RevokeUserDedicatedChannelAccessAsync
+        (
+            [NotNull] SocketCommandContext context,
+            [NotNull] IGuildChannel dedicatedChannel,
+            [NotNull] IUser participant
+        )
+        {
+            if (!context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageChannels)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.UnmetPrecondition,
+                    "I don't have permission to manage channels, so I can't change permissions on dedicated RP channels."
+                );
+            }
+
+            var user = context.Guild.GetUser(participant.Id);
+            if (user is null)
+            {
+                return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "User not found in guild.");
+            }
+
+            await dedicatedChannel.RemovePermissionOverwriteAsync(user);
             return ModifyEntityResult.FromSuccess();
         }
     }

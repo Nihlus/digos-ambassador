@@ -62,7 +62,12 @@ namespace DIGOS.Ambassador.Database.Roleplaying
         /// <summary>
         /// Gets or sets the ID of the channel that the roleplay is active in.
         /// </summary>
-        public long ActiveChannelID { get; set; }
+        public long? ActiveChannelID { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the roleplay's dedicated channel.
+        /// </summary>
+        public long? DedicatedChannelID { get; set; }
 
         /// <inheritdoc />
         [Required]

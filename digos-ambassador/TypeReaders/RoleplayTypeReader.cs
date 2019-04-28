@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.TypeReaders
 
             if (!entityName.IsNullOrWhitespace() && string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
             {
-                return await roleplayService.GetActiveRoleplayAsync(db, context);
+                return await roleplayService.GetActiveRoleplayAsync(db, context.Channel);
             }
 
             return await roleplayService.GetBestMatchingRoleplayAsync(db, context, entityOwner, entityName);

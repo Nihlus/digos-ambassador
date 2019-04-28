@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Extensions;
-
+using Discord;
 using Discord.Commands;
 
 using JetBrains.Annotations;
@@ -216,6 +216,26 @@ namespace DIGOS.Ambassador.Services.Servers
             }
 
             server.SendJoinMessage = sendJoinMessage;
+            await db.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Sets the channel category to use for dedicated roleplay channels.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="server">The server.</param>
+        /// <param name="category">The category to use.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetDedicatedRoleplayChannelCategoryAsync
+        (
+            [NotNull] GlobalInfoContext db,
+            [NotNull] Server server,
+            [CanBeNull] ICategoryChannel category
+        )
+        {
+            server.DedicatedRoleplayChannelsCategory = (long?)category?.Id;
             await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();

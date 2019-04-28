@@ -972,6 +972,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     .AddSingleton<CharacterService>()
                     .AddSingleton(client)
                     .AddSingleton<BaseSocketClient>(client)
+                    .AddSingleton<Random>()
                     .BuildServiceProvider();
 
                 this.Commands.AddTypeReader<Character>(new CharacterTypeReader());
