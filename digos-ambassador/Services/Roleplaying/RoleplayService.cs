@@ -27,12 +27,10 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 
 using Discord;
 using Discord.Commands;
-using Discord.Rest;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -770,6 +768,7 @@ namespace DIGOS.Ambassador.Services
             [NotNull] Roleplay roleplay
         )
         {
+            var server = await db.GetOrRegisterServerAsync(context.Guild);
             if (!context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageChannels)
             {
                 return CreateEntityResult<IGuildChannel>.FromError
@@ -789,7 +788,6 @@ namespace DIGOS.Ambassador.Services
                 );
             }
 
-            var server = await db.GetOrRegisterServerAsync(context.Guild);
             var dedicatedChannel = await context.Guild.CreateTextChannelAsync
             (
                 $"{roleplay.Name}-rp",
@@ -818,7 +816,10 @@ namespace DIGOS.Ambassador.Services
             var everyonePermissions = OverwritePermissions.InheritAll.Modify
             (
                 readMessageHistory: roleplay.IsPublic ? PermValue.Allow : PermValue.Deny,
-                viewChannel: roleplay.IsPublic ? PermValue.Allow : PermValue.Deny
+                viewChannel: roleplay.IsPublic ? PermValue.Allow : PermValue.Deny,
+                sendMessages: PermValue.Deny,
+                addReactions: PermValue.Deny,
+                sendTTSMessages: PermValue.Deny
             );
 
             await dedicatedChannel.AddPermissionOverwriteAsync(everyoneRole, everyonePermissions);
