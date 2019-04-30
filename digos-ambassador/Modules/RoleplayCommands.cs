@@ -999,6 +999,92 @@ namespace DIGOS.Ambassador.Modules
         }
 
         /// <summary>
+        /// Views the given roleplay, allowing you to read the channel.
+        /// </summary>
+        /// <param name="roleplay">The roleplay.</param>
+        [UsedImplicitly]
+        [Command("view", RunMode = Async)]
+        [Summary("Views the given roleplay, allowing you to read the channel.")]
+        [RequireContext(Guild)]
+        public async Task ViewRoleplayAsync([NotNull] Roleplay roleplay)
+        {
+            var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
+            (
+                this.Context,
+                roleplay
+            );
+
+            if (!getDedicatedChannelResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync
+                (
+                    this.Context,
+                    "The given roleplay doesn't have a dedicated channel. Try using \"!rp export\" instead."
+                );
+
+                return;
+            }
+
+            var user = this.Context.User;
+            if (!roleplay.IsPublic && roleplay.ParticipatingUsers.All(p => p.User.DiscordID != (long)user.Id))
+            {
+                await this.Feedback.SendErrorAsync
+                (
+                    this.Context,
+                    "You don't have permission to view that roleplay."
+                );
+
+                return;
+            }
+
+            var dedicatedChannel = getDedicatedChannelResult.Entity;
+            await this.Roleplays.SetDedicatedChannelVisibilityForUserAsync(dedicatedChannel, user, true);
+
+            var channelMention = MentionUtils.MentionChannel(dedicatedChannel.Id);
+            await this.Feedback.SendConfirmationAsync
+            (
+                this.Context, $"The roleplay \"{roleplay.Name}\" is now visible in {channelMention}."
+            );
+        }
+
+        /// <summary>
+        /// Hides the given roleplay.
+        /// </summary>
+        /// <param name="roleplay">The roleplay.</param>
+        [UsedImplicitly]
+        [Command("hide", RunMode = Async)]
+        [Summary("Hides the given roleplay.")]
+        [RequireContext(Guild)]
+        public async Task HideRoleplayAsync([NotNull] Roleplay roleplay)
+        {
+            var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
+            (
+                this.Context,
+                roleplay
+            );
+
+            if (!getDedicatedChannelResult.IsSuccess)
+            {
+                await this.Feedback.SendErrorAsync
+                (
+                    this.Context,
+                    "The given roleplay doesn't have a dedicated channel."
+                );
+
+                return;
+            }
+
+            var user = this.Context.User;
+            var dedicatedChannel = getDedicatedChannelResult.Entity;
+            await this.Roleplays.SetDedicatedChannelVisibilityForUserAsync(dedicatedChannel, user, false);
+
+            await this.Feedback.SendConfirmationAsync
+            (
+                this.Context, "Roleplay hidden."
+            );
+        }
+
+        /// <summary>
         /// Setter commands for roleplay properties.
         /// </summary>
         [UsedImplicitly]

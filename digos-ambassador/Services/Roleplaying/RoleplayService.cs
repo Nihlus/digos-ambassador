@@ -964,25 +964,21 @@ namespace DIGOS.Ambassador.Services
             bool isVisible
         )
         {
-            if (dedicatedChannel.PermissionOverwrites.All(o => o.TargetId != participant.Id))
+            var permissions = OverwritePermissions.InheritAll;
+            if (dedicatedChannel.PermissionOverwrites.Any(o => o.TargetId == participant.Id))
             {
-                return ModifyEntityResult.FromError
-                (
-                    CommandError.ObjectNotFound, "The user doesn't have access to that channel."
-                );
+                permissions = dedicatedChannel.PermissionOverwrites.
+                    First(o => o.TargetId == participant.Id)
+                    .Permissions;
             }
 
-            var permissionOverwrite = dedicatedChannel.PermissionOverwrites.
-                First(o => o.TargetId == participant.Id)
-                .Permissions;
-
-            permissionOverwrite = permissionOverwrite.Modify
+            permissions = permissions.Modify
             (
                 readMessageHistory: isVisible ? PermValue.Allow : PermValue.Deny,
                 viewChannel: isVisible ? PermValue.Allow : PermValue.Deny
             );
 
-            await dedicatedChannel.AddPermissionOverwriteAsync(participant, permissionOverwrite);
+            await dedicatedChannel.AddPermissionOverwriteAsync(participant, permissions);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -1001,25 +997,21 @@ namespace DIGOS.Ambassador.Services
             bool isVisible
         )
         {
-            if (dedicatedChannel.PermissionOverwrites.All(o => o.TargetId != role.Id))
+            var permissions = OverwritePermissions.InheritAll;
+            if (dedicatedChannel.PermissionOverwrites.Any(o => o.TargetId == role.Id))
             {
-                return ModifyEntityResult.FromError
-                (
-                    CommandError.ObjectNotFound, "The user doesn't have access to that channel."
-                );
+                permissions = dedicatedChannel.PermissionOverwrites.
+                    First(o => o.TargetId == role.Id)
+                    .Permissions;
             }
 
-            var permissionOverwrite = dedicatedChannel.PermissionOverwrites.
-                First(o => o.TargetId == role.Id)
-                .Permissions;
-
-            permissionOverwrite = permissionOverwrite.Modify
+            permissions = permissions.Modify
             (
                 readMessageHistory: isVisible ? PermValue.Allow : PermValue.Deny,
                 viewChannel: isVisible ? PermValue.Allow : PermValue.Deny
             );
 
-            await dedicatedChannel.AddPermissionOverwriteAsync(role, permissionOverwrite);
+            await dedicatedChannel.AddPermissionOverwriteAsync(role, permissions);
 
             return ModifyEntityResult.FromSuccess();
         }
