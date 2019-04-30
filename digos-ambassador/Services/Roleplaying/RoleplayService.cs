@@ -1008,6 +1008,9 @@ namespace DIGOS.Ambassador.Services
 
             await dedicatedChannel.AddPermissionOverwriteAsync(role, permissions);
 
+            // Ugly hack - there seems to be some kind of race condition on Discord's end.
+            await Task.Delay(20);
+
             return ModifyEntityResult.FromSuccess();
         }
 
