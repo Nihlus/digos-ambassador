@@ -328,6 +328,16 @@ namespace DIGOS.Ambassador.Modules
                     this.Context.User
                 );
 
+                if (roleplay.IsActive)
+                {
+                    await this.Roleplays.SetDedicatedChannelVisibilityForUserAsync
+                    (
+                        dedicatedChannel,
+                        this.Context.User,
+                        true
+                    );
+                }
+
                 if (!grantPermissionResult.IsSuccess)
                 {
                     await this.Feedback.SendWarningAsync(this.Context, grantPermissionResult.ErrorReason);
@@ -638,6 +648,40 @@ namespace DIGOS.Ambassador.Modules
             }
 
             roleplay.IsActive = true;
+
+            // Make the channel visible for all participants
+            if (getDedicatedChannelResult.IsSuccess)
+            {
+                var dedicatedChannel = getDedicatedChannelResult.Entity;
+
+                foreach (var participant in roleplay.ParticipatingUsers)
+                {
+                    var user = this.Context.Guild.GetUser((ulong)participant.User.DiscordID);
+                    if (user is null)
+                    {
+                        continue;
+                    }
+
+                    await this.Roleplays.SetDedicatedChannelVisibilityForUserAsync
+                    (
+                        dedicatedChannel,
+                        user,
+                        true
+                    );
+                }
+
+                if (roleplay.IsPublic)
+                {
+                    var everyoneRole = this.Context.Guild.EveryoneRole;
+                    await this.Roleplays.SetDedicatedChannelVisibilityForRoleAsync
+                    (
+                        dedicatedChannel,
+                        everyoneRole,
+                        true
+                    );
+                }
+            }
+
             await this.Database.SaveChangesAsync();
 
             var joinedUsers = roleplay.JoinedUsers.Select(p => this.Context.Client.GetUser((ulong)p.User.DiscordID));
@@ -673,6 +717,45 @@ namespace DIGOS.Ambassador.Modules
 
             roleplay.IsActive = false;
             roleplay.ActiveChannelID = null;
+
+            var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
+            (
+                this.Context,
+                roleplay
+            );
+
+            // Hide the channel for all participants
+            if (getDedicatedChannelResult.IsSuccess)
+            {
+                var dedicatedChannel = getDedicatedChannelResult.Entity;
+
+                foreach (var participant in roleplay.ParticipatingUsers)
+                {
+                    var user = this.Context.Guild.GetUser((ulong)participant.User.DiscordID);
+                    if (user is null)
+                    {
+                        continue;
+                    }
+
+                    await this.Roleplays.SetDedicatedChannelVisibilityForUserAsync
+                    (
+                        dedicatedChannel,
+                        user,
+                        false
+                    );
+                }
+
+                if (roleplay.IsPublic)
+                {
+                    var everyoneRole = this.Context.Guild.EveryoneRole;
+                    await this.Roleplays.SetDedicatedChannelVisibilityForRoleAsync
+                    (
+                        dedicatedChannel,
+                        everyoneRole,
+                        false
+                    );
+                }
+            }
 
             await this.Database.SaveChangesAsync();
 
@@ -1085,14 +1168,12 @@ namespace DIGOS.Ambassador.Modules
                     var dedicatedChannel = getDedicatedChannelResult.Entity;
                     var everyoneRole = this.Context.Guild.EveryoneRole;
 
-                    var everyonePermissions = dedicatedChannel.GetPermissionOverwrite(everyoneRole).Value.Modify
+                    await this.Roleplays.SetDedicatedChannelVisibilityForRoleAsync
                     (
-                        readMessageHistory: isPublic ? PermValue.Allow : PermValue.Deny,
-                        viewChannel: roleplay.IsPublic ? PermValue.Allow : PermValue.Deny
+                        dedicatedChannel,
+                        everyoneRole,
+                        isPublic
                     );
-
-                    await dedicatedChannel.RemovePermissionOverwriteAsync(everyoneRole);
-                    await dedicatedChannel.AddPermissionOverwriteAsync(everyoneRole, everyonePermissions);
                 }
 
                 await this.Feedback.SendConfirmationAsync(this.Context, $"Roleplay set to {(isPublic ? "public" : "private")}");

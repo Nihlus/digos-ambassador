@@ -810,13 +810,15 @@ namespace DIGOS.Ambassador.Services
 
             var botDiscordUser = context.Guild.GetUser(context.Client.CurrentUser.Id);
             await GrantUserDedicatedChannelAccessAsync(context, dedicatedChannel, botDiscordUser);
+            await SetDedicatedChannelVisibilityForUserAsync(dedicatedChannel, botDiscordUser, true);
 
             // Configure visibility for everyone
+            // viewChannel starts off as deny, since starting or stopping the RP will set the correct permissions.
             var everyoneRole = context.Guild.EveryoneRole;
             var everyonePermissions = OverwritePermissions.InheritAll.Modify
             (
                 readMessageHistory: roleplay.IsPublic ? PermValue.Allow : PermValue.Deny,
-                viewChannel: roleplay.IsPublic ? PermValue.Allow : PermValue.Deny,
+                viewChannel: PermValue.Deny,
                 sendMessages: PermValue.Deny,
                 addReactions: PermValue.Deny,
                 sendTTSMessages: PermValue.Deny
@@ -931,6 +933,7 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "User not found in guild.");
             }
 
+            // viewChannel starts off as deny, since starting or stopping the RP will set the correct permissions.
             var permissionOverwrites = OverwritePermissions.InheritAll.Modify
             (
                 readMessageHistory: PermValue.Allow,
@@ -939,10 +942,84 @@ namespace DIGOS.Ambassador.Services
                 embedLinks: PermValue.Allow,
                 attachFiles: PermValue.Allow,
                 useExternalEmojis: PermValue.Allow,
-                viewChannel: PermValue.Allow
+                viewChannel: PermValue.Deny
             );
 
             await dedicatedChannel.AddPermissionOverwriteAsync(user, permissionOverwrites);
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Sets the visibility of the given dedicated channel for the given user.
+        /// </summary>
+        /// <param name="dedicatedChannel">The roleplay's dedicated channel.</param>
+        /// <param name="participant">The participant to grant access to.</param>
+        /// <param name="isVisible">Whether or not the channel should be visible.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetDedicatedChannelVisibilityForUserAsync
+        (
+            [NotNull] IGuildChannel dedicatedChannel,
+            [NotNull] IUser participant,
+            bool isVisible
+        )
+        {
+            if (dedicatedChannel.PermissionOverwrites.All(o => o.TargetId != participant.Id))
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.ObjectNotFound, "The user doesn't have access to that channel."
+                );
+            }
+
+            var permissionOverwrite = dedicatedChannel.PermissionOverwrites.
+                First(o => o.TargetId == participant.Id)
+                .Permissions;
+
+            permissionOverwrite = permissionOverwrite.Modify
+            (
+                readMessageHistory: isVisible ? PermValue.Allow : PermValue.Deny,
+                viewChannel: isVisible ? PermValue.Allow : PermValue.Deny
+            );
+
+            await dedicatedChannel.AddPermissionOverwriteAsync(participant, permissionOverwrite);
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Sets the visibility of the given dedicated channel for the given user.
+        /// </summary>
+        /// <param name="dedicatedChannel">The roleplay's dedicated channel.</param>
+        /// <param name="role">The role to grant access to.</param>
+        /// <param name="isVisible">Whether or not the channel should be visible.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetDedicatedChannelVisibilityForRoleAsync
+        (
+            [NotNull] IGuildChannel dedicatedChannel,
+            [NotNull] IRole role,
+            bool isVisible
+        )
+        {
+            if (dedicatedChannel.PermissionOverwrites.All(o => o.TargetId != role.Id))
+            {
+                return ModifyEntityResult.FromError
+                (
+                    CommandError.ObjectNotFound, "The user doesn't have access to that channel."
+                );
+            }
+
+            var permissionOverwrite = dedicatedChannel.PermissionOverwrites.
+                First(o => o.TargetId == role.Id)
+                .Permissions;
+
+            permissionOverwrite = permissionOverwrite.Modify
+            (
+                readMessageHistory: isVisible ? PermValue.Allow : PermValue.Deny,
+                viewChannel: isVisible ? PermValue.Allow : PermValue.Deny
+            );
+
+            await dedicatedChannel.AddPermissionOverwriteAsync(role, permissionOverwrite);
 
             return ModifyEntityResult.FromSuccess();
         }
