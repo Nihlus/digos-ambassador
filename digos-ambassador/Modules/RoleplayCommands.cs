@@ -660,7 +660,14 @@ namespace DIGOS.Ambassador.Modules
                     await this.Roleplays.SetDedicatedChannelWritabilityForUserAsync
                     (
                         dedicatedChannel,
-                        this.Context.User,
+                        user,
+                        true
+                    );
+
+                    await this.Roleplays.SetDedicatedChannelVisibilityForUserAsync
+                    (
+                        dedicatedChannel,
+                        user,
                         true
                     );
                 }
@@ -735,7 +742,14 @@ namespace DIGOS.Ambassador.Modules
                     await this.Roleplays.SetDedicatedChannelWritabilityForUserAsync
                     (
                         dedicatedChannel,
-                        this.Context.User,
+                        user,
+                        false
+                    );
+
+                    await this.Roleplays.SetDedicatedChannelVisibilityForUserAsync
+                    (
+                        dedicatedChannel,
+                        user,
                         false
                     );
                 }
