@@ -1226,6 +1226,24 @@ namespace DIGOS.Ambassador.Modules
             }
 
             /// <summary>
+            /// Sets a value indicating whether or not the named roleplay is private. This restricts replays to participants.
+            /// </summary>
+            /// <param name="isPrivate">true if the roleplay is private; otherwise, false.</param>
+            /// <param name="roleplay">The roleplay.</param>
+            [UsedImplicitly]
+            [Command("private", RunMode = Async)]
+            [Summary("Sets a value indicating whether or not the named roleplay is private. This restricts replays to participants.")]
+            [RequireContext(Guild)]
+            [RequirePermission(Permission.EditRoleplay)]
+            public Task SetRoleplayIsPrivate
+            (
+                bool isPrivate,
+                [NotNull] [RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
+                Roleplay roleplay
+            )
+            => SetRoleplayIsPublic(!isPrivate, roleplay);
+
+            /// <summary>
             /// Sets a value indicating whether or not the named roleplay is publíc. This restricts replays to participants.
             /// </summary>
             /// <param name="isPublic">true if the roleplay is public; otherwise, false.</param>
