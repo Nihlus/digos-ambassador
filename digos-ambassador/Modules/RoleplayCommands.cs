@@ -321,15 +321,15 @@ namespace DIGOS.Ambassador.Modules
             {
                 var dedicatedChannel = getDedicatedChannelResult.Entity;
 
-                await this.Roleplays.SetDedicatedChannelWritabilityForUserAsync
-                (
-                    dedicatedChannel,
-                    this.Context.User,
-                    true
-                );
-
                 if (roleplay.IsActive)
                 {
+                    await this.Roleplays.SetDedicatedChannelWritabilityForUserAsync
+                    (
+                        dedicatedChannel,
+                        this.Context.User,
+                        true
+                    );
+
                     await this.Roleplays.SetDedicatedChannelVisibilityForUserAsync
                     (
                         dedicatedChannel,
