@@ -152,7 +152,10 @@ namespace DIGOS.Ambassador.Services
         /// <param name="eb">The embed to send.</param>
         public async Task SendEmbedAsync([NotNull] IMessageChannel channel, [NotNull] Embed eb)
         {
-            await channel.SendMessageAsync(string.Empty, false, eb);
+            using (channel.EnterTypingState())
+            {
+                await channel.SendMessageAsync(string.Empty, false, eb);
+            }
         }
 
         /// <summary>
@@ -171,10 +174,13 @@ namespace DIGOS.Ambassador.Services
         {
             timeout = timeout ?? TimeSpan.FromSeconds(15.0);
 
-            var message = await channel.SendMessageAsync(string.Empty, embed: eb);
-            _ = Task.Delay(timeout.Value)
-                .ContinueWith(_ => message.DeleteAsync().ConfigureAwait(false))
-                .ConfigureAwait(false);
+            using (channel.EnterTypingState())
+            {
+                var message = await channel.SendMessageAsync(string.Empty, embed: eb);
+                _ = Task.Delay(timeout.Value)
+                    .ContinueWith(_ => message.DeleteAsync().ConfigureAwait(false))
+                    .ConfigureAwait(false);
+            }
         }
 
         private async Task SendEmbedAsync([NotNull] ICommandContext context, Color color, [NotNull] string contents)
