@@ -921,11 +921,10 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var permissions = OverwritePermissions.InheritAll;
-            if (dedicatedChannel.PermissionOverwrites.Any(o => o.TargetId == participant.Id))
+            var existingOverwrite = dedicatedChannel.GetPermissionOverwrite(participant);
+            if (!(existingOverwrite is null))
             {
-                permissions = dedicatedChannel.PermissionOverwrites.
-                    First(o => o.TargetId == participant.Id)
-                    .Permissions;
+                permissions = existingOverwrite.Value;
             }
 
             permissions = permissions.Modify
@@ -960,11 +959,10 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var permissions = OverwritePermissions.InheritAll;
-            if (dedicatedChannel.PermissionOverwrites.Any(o => o.TargetId == participant.Id))
+            var existingOverwrite = dedicatedChannel.GetPermissionOverwrite(participant);
+            if (!(existingOverwrite is null))
             {
-                permissions = dedicatedChannel.PermissionOverwrites.
-                    First(o => o.TargetId == participant.Id)
-                    .Permissions;
+                permissions = existingOverwrite.Value;
             }
 
             permissions = permissions.Modify
@@ -996,11 +994,10 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var permissions = OverwritePermissions.InheritAll;
-            if (dedicatedChannel.PermissionOverwrites.Any(o => o.TargetId == role.Id))
+            var existingOverwrite = dedicatedChannel.GetPermissionOverwrite(role);
+            if (!(existingOverwrite is null))
             {
-                permissions = dedicatedChannel.PermissionOverwrites.
-                    First(o => o.TargetId == role.Id)
-                    .Permissions;
+                permissions = existingOverwrite.Value;
             }
 
             permissions = permissions.Modify
