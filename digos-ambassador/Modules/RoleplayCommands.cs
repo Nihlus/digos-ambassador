@@ -321,11 +321,11 @@ namespace DIGOS.Ambassador.Modules
             {
                 var dedicatedChannel = getDedicatedChannelResult.Entity;
 
-                var grantPermissionResult = await this.Roleplays.GrantUserDedicatedChannelAccessAsync
+                await this.Roleplays.SetDedicatedChannelWritabilityForUserAsync
                 (
-                    this.Context,
                     dedicatedChannel,
-                    this.Context.User
+                    this.Context.User,
+                    true
                 );
 
                 if (roleplay.IsActive)
@@ -336,11 +336,6 @@ namespace DIGOS.Ambassador.Modules
                         this.Context.User,
                         true
                     );
-                }
-
-                if (!grantPermissionResult.IsSuccess)
-                {
-                    await this.Feedback.SendWarningAsync(this.Context, grantPermissionResult.ErrorReason);
                 }
             }
 
@@ -662,10 +657,10 @@ namespace DIGOS.Ambassador.Modules
                         continue;
                     }
 
-                    await this.Roleplays.SetDedicatedChannelVisibilityForUserAsync
+                    await this.Roleplays.SetDedicatedChannelWritabilityForUserAsync
                     (
                         dedicatedChannel,
-                        user,
+                        this.Context.User,
                         true
                     );
                 }
@@ -737,10 +732,10 @@ namespace DIGOS.Ambassador.Modules
                         continue;
                     }
 
-                    await this.Roleplays.SetDedicatedChannelVisibilityForUserAsync
+                    await this.Roleplays.SetDedicatedChannelWritabilityForUserAsync
                     (
                         dedicatedChannel,
-                        user,
+                        this.Context.User,
                         false
                     );
                 }
