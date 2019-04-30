@@ -574,7 +574,7 @@ namespace DIGOS.Ambassador.Services
             [NotNull] IUser invitedUser
         )
         {
-            if (roleplay.IsPublic)
+            if (roleplay.IsPublic && !roleplay.IsKicked(invitedUser))
             {
                 return ExecuteResult.FromError(CommandError.UnmetPrecondition, "The roleplay is not set to private.");
             }
