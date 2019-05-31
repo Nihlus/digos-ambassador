@@ -316,7 +316,7 @@ namespace DIGOS.Ambassador.Modules
             }
 
             // Ensure the user has the correct permissions for the dedicated channel
-            var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync(this.Context, roleplay);
+            var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync(this.Context.Guild, roleplay);
             if (getDedicatedChannelResult.IsSuccess)
             {
                 var dedicatedChannel = getDedicatedChannelResult.Entity;
@@ -408,7 +408,7 @@ namespace DIGOS.Ambassador.Modules
             }
 
             // Ensure the user has the correct permissions for the dedicated channel
-            var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync(this.Context, roleplay);
+            var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync(this.Context.Guild, roleplay);
             if (getDedicatedChannelResult.IsSuccess)
             {
                 var dedicatedChannel = getDedicatedChannelResult.Entity;
@@ -459,7 +459,7 @@ namespace DIGOS.Ambassador.Modules
             }
 
             // Ensure the user has the correct permissions for the dedicated channel
-            var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync(this.Context, roleplay);
+            var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync(this.Context.Guild, roleplay);
             if (getDedicatedChannelResult.IsSuccess)
             {
                 var dedicatedChannel = getDedicatedChannelResult.Entity;
@@ -516,7 +516,7 @@ namespace DIGOS.Ambassador.Modules
 
             var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
             (
-                this.Context,
+                this.Context.Guild,
                 roleplay
             );
 
@@ -580,7 +580,7 @@ namespace DIGOS.Ambassador.Modules
 
             var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
             (
-                this.Context,
+                this.Context.Guild,
                 roleplay
             );
 
@@ -684,6 +684,8 @@ namespace DIGOS.Ambassador.Modules
                 }
             }
 
+            roleplay.LastUpdated = DateTime.Now;
+
             await this.Database.SaveChangesAsync();
 
             var joinedUsers = roleplay.JoinedUsers.Select(p => this.Context.Client.GetUser((ulong)p.User.DiscordID));
@@ -722,7 +724,7 @@ namespace DIGOS.Ambassador.Modules
 
             var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
             (
-                this.Context,
+                this.Context.Guild,
                 roleplay
             );
 
@@ -1019,7 +1021,7 @@ namespace DIGOS.Ambassador.Modules
         {
             var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
             (
-                this.Context,
+                this.Context.Guild,
                 roleplay
             );
 
@@ -1068,7 +1070,7 @@ namespace DIGOS.Ambassador.Modules
         {
             var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
             (
-                this.Context,
+                this.Context.Guild,
                 roleplay
             );
 
@@ -1149,7 +1151,7 @@ namespace DIGOS.Ambassador.Modules
 
                 var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
                 (
-                    this.Context,
+                    this.Context.Guild,
                     roleplay
                 );
 
@@ -1272,7 +1274,7 @@ namespace DIGOS.Ambassador.Modules
 
                 var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
                 (
-                    this.Context,
+                    this.Context.Guild,
                     roleplay
                 );
 

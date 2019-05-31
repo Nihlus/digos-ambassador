@@ -34,7 +34,6 @@ using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
-
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -94,7 +93,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="feedbackService">The feedback service.</param>
         /// <param name="characterService">The character service.</param>
         /// <param name="interactivity">The interactivity service.</param>
-        /// /// <param name="random">A cached, application-level entropy source.</param>
+        /// <param name="random">A cached, application-level entropy source.</param>
         public CharacterCommands
         (
             GlobalInfoContext database,
@@ -342,7 +341,10 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, $"Character \"{createCharacterResult.Entity.Name}\" created.");
+            await this.Feedback.SendConfirmationAsync
+            (
+                this.Context, $"Character \"{createCharacterResult.Entity.Name}\" created."
+            );
         }
 
         /// <summary>

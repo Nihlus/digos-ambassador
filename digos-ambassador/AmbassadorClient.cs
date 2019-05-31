@@ -62,49 +62,15 @@ namespace DIGOS.Ambassador
         /// </summary>
         private static readonly ILog Log = LogManager.GetLogger(typeof(AmbassadorClient));
 
-        // Services should be persisted in the client
-        // ReSharper disable PrivateFieldCanBeConvertedToLocalVariable
         private readonly DiscordSocketClient Client;
-
-        private readonly DiscordService DiscordIntegration;
-
-        private readonly OwnedEntityService OwnedEntities;
 
         private readonly ContentService Content;
 
         private readonly CommandService Commands;
 
-        private readonly RoleplayService Roleplays;
-
-        private readonly CharacterService Characters;
-
-        private readonly UserFeedbackService Feedback;
-
-        private readonly DossierService Dossiers;
-
-        private readonly InteractivityService Interactivity;
-
-        private readonly TransformationService Transformation;
-
-        private readonly LuaService Lua;
-
-        private readonly KinkService Kinks;
-
-        private readonly PermissionService Permissions;
-
         private readonly IServiceProvider Services;
 
-        private readonly PrivacyService Privacy;
-
-        private readonly HelpService Help;
-
-        private readonly ServerService Servers;
-
         private readonly BehaviourService Behaviours;
-
-        private readonly Random Random;
-
-        // ReSharper restore PrivateFieldCanBeConvertedToLocalVariable
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorClient"/> class.
@@ -121,60 +87,38 @@ namespace DIGOS.Ambassador
             this.Commands = new CommandService();
             this.Commands.Log += OnDiscordLogEvent;
 
-            this.DiscordIntegration = new DiscordService();
             this.Content = content;
             this.Commands = new CommandService();
-            this.OwnedEntities = new OwnedEntityService();
-            this.Roleplays = new RoleplayService(this.Commands, this.OwnedEntities);
-            this.Transformation = new TransformationService(this.Content);
-
-            this.Characters = new CharacterService(this.Commands, this.OwnedEntities, this.Content, this.Transformation);
-            this.Characters.DiscoverPronounProviders();
-
-            this.Feedback = new UserFeedbackService();
-            this.Dossiers = new DossierService(this.Content);
-            this.Interactivity = new InteractivityService(this.Client);
-
-            this.Lua = new LuaService(this.Content);
-            this.Kinks = new KinkService(this.Feedback);
-
-            this.Permissions = new PermissionService();
-
-            this.Privacy = new PrivacyService();
-
-            this.Help = new HelpService(this.Feedback);
-
-            this.Servers = new ServerService();
 
             this.Behaviours = new BehaviourService();
-
-            this.Random = new Random();
 
             this.Services = new ServiceCollection()
                 .AddSingleton(this)
                 .AddSingleton(this.Client)
-                .AddSingleton(this.DiscordIntegration)
+                .AddSingleton<BaseSocketClient>(this.Client)
+                .AddSingleton(this.Behaviours)
                 .AddSingleton(this.Content)
                 .AddSingleton(this.Commands)
-                .AddSingleton(this.Roleplays)
-                .AddSingleton(this.Characters)
-                .AddSingleton(this.Feedback)
-                .AddSingleton(this.Dossiers)
-                .AddSingleton(this.Interactivity)
-                .AddSingleton(this.Transformation)
-                .AddSingleton(this.Lua)
-                .AddSingleton(this.Kinks)
-                .AddSingleton(this.Permissions)
-                .AddSingleton(this.Privacy)
-                .AddSingleton(this.Help)
-                .AddSingleton(this.Servers)
-                .AddSingleton(this.Behaviours)
-                .AddSingleton(this.Random)
+                .AddSingleton<RoleplayService>()
+                .AddSingleton<DiscordService>()
+                .AddSingleton<CharacterService>()
+                .AddSingleton<UserFeedbackService>()
+                .AddSingleton<DossierService>()
+                .AddSingleton<InteractivityService>()
+                .AddSingleton<TransformationService>()
+                .AddSingleton<LuaService>()
+                .AddSingleton<KinkService>()
+                .AddSingleton<PermissionService>()
+                .AddSingleton<PrivacyService>()
+                .AddSingleton<HelpService>()
+                .AddSingleton<ServerService>()
+                .AddSingleton<OwnedEntityService>()
+                .AddSingleton<Random>()
                 .AddDbContextPool<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
                 .BuildServiceProvider();
 
-            this.Transformation = this.Transformation
-            .WithDescriptionBuilder
+            var transformationService = this.Services.GetRequiredService<TransformationService>();
+            transformationService.WithDescriptionBuilder
             (
                 ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(this.Services)
             );
@@ -217,7 +161,6 @@ namespace DIGOS.Ambassador
             this.Behaviours.AddBehaviours(Assembly.GetEntryAssembly(), this.Services);
 
             await this.Client.StartAsync();
-
             await this.Behaviours.StartBehavioursAsync();
         }
 

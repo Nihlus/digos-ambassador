@@ -188,12 +188,18 @@ namespace DIGOS.Ambassador.Services
 
                 existingMessage.Contents = message.Content;
 
+                // Update roleplay timestamp
+                roleplay.LastUpdated = DateTime.Now;
+
                 await db.SaveChangesAsync();
                 return ModifyEntityResult.FromSuccess();
             }
 
             var roleplayMessage = UserMessage.FromDiscordMessage(message, userNick);
             roleplay.Messages.Add(roleplayMessage);
+
+            // Update roleplay timestamp
+            roleplay.LastUpdated = DateTime.Now;
 
             await db.SaveChangesAsync();
             return ModifyEntityResult.FromSuccess();
@@ -778,7 +784,7 @@ namespace DIGOS.Ambassador.Services
                 );
             }
 
-            var getExistingChannelResult = await GetDedicatedRoleplayChannelAsync(context, roleplay);
+            var getExistingChannelResult = await GetDedicatedRoleplayChannelAsync(context.Guild, roleplay);
             if (getExistingChannelResult.IsSuccess)
             {
                 return CreateEntityResult<IGuildChannel>.FromError
@@ -862,7 +868,7 @@ namespace DIGOS.Ambassador.Services
                 );
             }
 
-            var getDedicatedChannelResult = await GetDedicatedRoleplayChannelAsync(context, roleplay);
+            var getDedicatedChannelResult = await GetDedicatedRoleplayChannelAsync(context.Guild, roleplay);
             if (getDedicatedChannelResult.IsSuccess)
             {
                 await getDedicatedChannelResult.Entity.DeleteAsync();
@@ -877,18 +883,18 @@ namespace DIGOS.Ambassador.Services
         /// <summary>
         /// Gets the channel dedicated to the given roleplay.
         /// </summary>
-        /// <param name="context">The context in which the request was made.</param>
+        /// <param name="guild">The guild that contains the channel.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<IGuildChannel>> GetDedicatedRoleplayChannelAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] IGuild guild,
             [NotNull] Roleplay roleplay
         )
         {
             if (!(roleplay.DedicatedChannelID is null))
             {
-                var guildChannel = context.Guild.GetChannel((ulong)roleplay.DedicatedChannelID.Value);
+                var guildChannel = await guild.GetChannelAsync((ulong)roleplay.DedicatedChannelID.Value);
                 if (!(guildChannel is null))
                 {
                     return RetrieveEntityResult<IGuildChannel>.FromSuccess(guildChannel);

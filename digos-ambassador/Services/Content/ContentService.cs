@@ -108,6 +108,11 @@ namespace DIGOS.Ambassador.Services
         public Uri BwehUri { get; }
 
         /// <summary>
+        /// Gets the <see cref="Uri"/> pointing to the localization catalog.
+        /// </summary>
+        public string LocalizationCatalogPath { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ContentService"/> class.
         /// </summary>
         public ContentService()
@@ -125,6 +130,8 @@ namespace DIGOS.Ambassador.Services
             this.BrokenAmbyUri = new Uri(this.BaseRemoteContentUri, "Portraits/maintenance.png");
             this.BwehUri = new Uri(this.BaseRemoteContentUri, "Portraits/bweh.png");
             this.PrivacyPolicyUri = new Uri(this.BaseRemoteContentUri, "PrivacyPolicy.pdf");
+
+            this.LocalizationCatalogPath = Path.Combine(this.BaseContentPath, "Localization", "locale");
         }
 
         /// <summary>

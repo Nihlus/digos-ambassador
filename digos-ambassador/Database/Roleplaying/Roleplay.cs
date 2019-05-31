@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -117,6 +118,12 @@ namespace DIGOS.Ambassador.Database.Roleplaying
         /// </summary>
         [NotNull]
         public virtual List<UserMessage> Messages { get; set; } = new List<UserMessage>();
+
+        /// <summary>
+        /// Gets or sets the last time the roleplay was updated.
+        /// </summary>
+        [CanBeNull]
+        public DateTime? LastUpdated { get; set; }
 
         /// <inheritdoc />
         public bool IsOwner(User user)
