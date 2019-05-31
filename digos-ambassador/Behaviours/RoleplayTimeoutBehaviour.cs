@@ -120,7 +120,7 @@ namespace DIGOS.Ambassador.Behaviours
                     }
 
                     var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated.Value;
-                    if (timeSinceLastActivity > TimeSpan.FromHours(48))
+                    if (timeSinceLastActivity > TimeSpan.FromHours(72))
                     {
                         await StopRoleplayAsync(roleplay);
                         await NotifyOwner(roleplay);
