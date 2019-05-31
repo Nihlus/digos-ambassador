@@ -1363,6 +1363,7 @@ namespace DIGOS.Ambassador.Modules
             [Command("update-timestamps", RunMode = Async)]
             [Summary("Updates the timestamps of all roleplays in the bot.")]
             [RequireContext(DM)]
+            [RequireOwner]
             public async Task UpdateTimestamps()
             {
                 var roleplays = await this.Database.Roleplays.ToListAsync();
