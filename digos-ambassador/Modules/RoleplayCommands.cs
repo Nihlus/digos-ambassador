@@ -1377,7 +1377,11 @@ namespace DIGOS.Ambassador.Modules
 
                     if (!(roleplay.LastUpdated is null))
                     {
-                        continue;
+                        var value = roleplay.LastUpdated.Value;
+                        if (value != default)
+                        {
+                            continue;
+                        }
                     }
 
                     roleplay.LastUpdated = lastMessage.Timestamp.DateTime;
