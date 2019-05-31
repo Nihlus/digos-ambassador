@@ -42,6 +42,7 @@ using Discord.Net;
 using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using static Discord.Commands.ContextType;
 using static Discord.Commands.RunMode;
 using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
@@ -1326,6 +1327,63 @@ namespace DIGOS.Ambassador.Modules
                 }
 
                 await this.Feedback.SendConfirmationAsync(this.Context, $"Roleplay set to {(isPublic ? "public" : "private")}");
+            }
+        }
+
+        /// <summary>
+        /// Administrative commands for roleplays.
+        /// </summary>
+        [UsedImplicitly]
+        [Group("admin")]
+        public class AdminCommands : ModuleBase<SocketCommandContext>
+        {
+            [ProvidesContext]
+            private readonly GlobalInfoContext Database;
+            private readonly RoleplayService Roleplays;
+
+            private readonly UserFeedbackService Feedback;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="AdminCommands"/> class.
+            /// </summary>
+            /// <param name="database">A database context from the context pool.</param>
+            /// <param name="roleplays">The roleplay service.</param>
+            /// <param name="feedback">The user feedback service.</param>
+            public AdminCommands(GlobalInfoContext database, RoleplayService roleplays, UserFeedbackService feedback)
+            {
+                this.Database = database;
+                this.Roleplays = roleplays;
+                this.Feedback = feedback;
+            }
+
+            /// <summary>
+            /// Updates the timestamps of all roleplays in the bot.
+            /// </summary>
+            [UsedImplicitly]
+            [Command("update-timestamps", RunMode = Async)]
+            [Summary("Updates the timestamps of all roleplays in the bot.")]
+            [RequireContext(DM)]
+            public async Task UpdateTimestamps()
+            {
+                var roleplays = await this.Database.Roleplays.ToListAsync();
+                foreach (var roleplay in roleplays)
+                {
+                    var lastMessage = roleplay.Messages.OrderBy(m => m.Timestamp).LastOrDefault();
+                    if (lastMessage is null)
+                    {
+                        continue;
+                    }
+
+                    if (!(roleplay.LastUpdated is null))
+                    {
+                        continue;
+                    }
+
+                    roleplay.LastUpdated = lastMessage.Timestamp.DateTime;
+                }
+
+                await this.Database.SaveChangesAsync();
+                await this.Feedback.SendConfirmationAsync(this.Context, "Timestamps updated.");
             }
         }
     }
