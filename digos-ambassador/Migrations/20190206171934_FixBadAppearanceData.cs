@@ -15,6 +15,7 @@ namespace DIGOS.Ambassador.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            /*
             var options = GlobalInfoContext.ConfigureOptions(new DbContextOptionsBuilder()).Options;
             using (var db = new GlobalInfoContext(options))
             {
@@ -71,10 +72,12 @@ namespace DIGOS.Ambassador.Migrations
 
                 db.SaveChanges();
             }
+            */
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            /*
             var options = GlobalInfoContext.ConfigureOptions(new DbContextOptionsBuilder()).Options;
             using (var db = new GlobalInfoContext(options))
             {
@@ -119,6 +122,7 @@ namespace DIGOS.Ambassador.Migrations
 
                 db.SaveChanges();
             }
+            */
         }
     }
 }

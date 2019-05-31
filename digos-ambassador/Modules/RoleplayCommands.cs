@@ -1096,6 +1096,40 @@ namespace DIGOS.Ambassador.Modules
         }
 
         /// <summary>
+        /// Hides all roleplays in the server for the user.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("hide-all", RunMode = Async)]
+        [Summary("Hides all roleplays in the server for the user.")]
+        [RequireContext(Guild)]
+        public async Task HideAllRoleplaysAsync()
+        {
+            var roleplays = this.Roleplays.GetRoleplays(this.Database, this.Context.Guild);
+            foreach (var roleplay in roleplays)
+            {
+                var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
+                (
+                    this.Context.Guild,
+                    roleplay
+                );
+
+                if (!getDedicatedChannelResult.IsSuccess)
+                {
+                    continue;
+                }
+
+                var user = this.Context.User;
+                var dedicatedChannel = getDedicatedChannelResult.Entity;
+                await this.Roleplays.SetDedicatedChannelVisibilityForUserAsync(dedicatedChannel, user, false);
+            }
+
+            await this.Feedback.SendConfirmationAsync
+            (
+                this.Context, "Roleplays hidden."
+            );
+        }
+
+        /// <summary>
         /// Setter commands for roleplay properties.
         /// </summary>
         [UsedImplicitly]
