@@ -101,6 +101,8 @@ namespace DIGOS.Ambassador.Behaviours
             {
                 if (this.Client.ConnectionState != ConnectionState.Connected)
                 {
+                    // Give the client some time to start up
+                    await Task.Delay(TimeSpan.FromSeconds(5), ct);
                     continue;
                 }
 
