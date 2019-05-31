@@ -712,7 +712,7 @@ namespace DIGOS.Ambassador.Services
 
             if (newCharacterNickname.Length > 32)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The summary is too long. Nicknames can be at most 32 characters.");
+                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The nickname is too long. It can be at most 32 characters.");
             }
 
             character.Nickname = newCharacterNickname;
@@ -780,6 +780,10 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character already has that description.");
             }
 
+            if (newCharacterDescription.Length > 1000)
+            {
+                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The description is too long. It can be at most 1000 characters.");
+            }
             character.Description = newCharacterDescription;
             await db.SaveChangesAsync();
 
