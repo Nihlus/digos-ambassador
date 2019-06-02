@@ -29,7 +29,6 @@ using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 using Discord;
-using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 using JetBrains.Annotations;
@@ -40,7 +39,7 @@ namespace DIGOS.Ambassador.Behaviours
     /// <summary>
     /// Times out roleplays, stopping them if they've been inactive for more than a set time.
     /// </summary>
-    public class RoleplayTimeoutBehaviour : BehaviourBase
+    public class RoleplayTimeoutBehaviour : ContinuousBehaviour
     {
         /// <summary>
         /// Gets the database context.
@@ -58,18 +57,6 @@ namespace DIGOS.Ambassador.Behaviours
         /// Gets the feedback service.
         /// </summary>
         private UserFeedbackService Feedback { get; }
-
-        /// <summary>
-        /// Gets or sets the timeout task.
-        /// </summary>
-        [NotNull]
-        private Task TimeoutTask { get; set; }
-
-        /// <summary>
-        /// Gets the cancellation source.
-        /// </summary>
-        [NotNull]
-        private CancellationTokenSource CancellationSource { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayTimeoutBehaviour"/> class.
@@ -90,45 +77,40 @@ namespace DIGOS.Ambassador.Behaviours
             this.Database = database;
             this.Roleplays = roleplays;
             this.Feedback = feedback;
-            this.CancellationSource = new CancellationTokenSource();
-
-            this.TimeoutTask = Task.CompletedTask;
         }
 
-        private async Task ContinuousTimeout(CancellationToken ct)
+        /// <inheritdoc/>
+        protected override async Task OnTickAsync(CancellationToken ct)
         {
-            while (!ct.IsCancellationRequested)
+            if (this.Client.ConnectionState != ConnectionState.Connected)
             {
-                if (this.Client.ConnectionState != ConnectionState.Connected)
+                // Give the client some time to start up
+                await Task.Delay(TimeSpan.FromSeconds(5), ct);
+                return;
+            }
+
+            var roleplays = await this.Database.Roleplays.ToListAsync(ct);
+            foreach (var roleplay in roleplays)
+            {
+                if (!roleplay.IsActive)
                 {
-                    // Give the client some time to start up
-                    await Task.Delay(TimeSpan.FromSeconds(5), ct);
                     continue;
                 }
 
-                var roleplays = await this.Database.Roleplays.ToListAsync(ct);
-                foreach (var roleplay in roleplays)
+                if (roleplay.LastUpdated is null)
                 {
-                    if (!roleplay.IsActive)
-                    {
-                        continue;
-                    }
-
-                    if (roleplay.LastUpdated is null)
-                    {
-                        continue;
-                    }
-
-                    var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated.Value;
-                    if (timeSinceLastActivity > TimeSpan.FromHours(72))
-                    {
-                        await StopRoleplayAsync(roleplay);
-                        await NotifyOwner(roleplay);
-                    }
+                    continue;
                 }
 
-                await Task.Delay(TimeSpan.FromSeconds(5), ct);
+                var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated.Value;
+                if (timeSinceLastActivity > TimeSpan.FromHours(72))
+                {
+                    await StopRoleplayAsync(roleplay);
+                    await NotifyOwner(roleplay);
+                }
             }
+
+            await Task.Delay(TimeSpan.FromSeconds(5), ct);
         }
 
         /// <summary>
@@ -235,20 +217,6 @@ namespace DIGOS.Ambassador.Behaviours
                     }
                 }
             }
-        }
-
-        /// <inheritdoc/>
-        protected override Task OnStartingAsync()
-        {
-            this.TimeoutTask = ContinuousTimeout(this.CancellationSource.Token);
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc/>
-        protected override async Task OnStoppingAsync()
-        {
-            this.CancellationSource.Cancel();
-            await this.TimeoutTask;
         }
     }
 }
