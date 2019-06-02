@@ -91,7 +91,7 @@ namespace DIGOS.Ambassador.Behaviours
                 catch (Exception e)
                 {
                     // Nom nom nom
-                    this.Log.Error($"Error in behaviour tick ({GetType().Name})", e);
+                    this.Log.Error($"Error in behaviour tick.", e);
                 }
             }
         }
