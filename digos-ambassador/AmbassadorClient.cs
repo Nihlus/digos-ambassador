@@ -159,8 +159,10 @@ namespace DIGOS.Ambassador
             this.Commands.AddEnumReader<Permission>();
             this.Commands.AddEnumReader<Permissions.PermissionTarget>();
 
-            await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly(), this.Services);
-            await this.Behaviours.AddBehavioursAsync(Assembly.GetEntryAssembly(), this.Services);
+            // Load modules and behaviours from the assembly this type was declared in
+            var localAssembly = GetType().Assembly;
+            await this.Commands.AddModulesAsync(localAssembly, this.Services);
+            await this.Behaviours.AddBehavioursAsync(localAssembly, this.Services);
 
             await this.Client.StartAsync();
             await this.Behaviours.StartBehavioursAsync();
