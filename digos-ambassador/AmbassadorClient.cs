@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Behaviours;
@@ -150,12 +151,13 @@ namespace DIGOS.Ambassador
             this.Commands.AddTypeReader<Character>(new CharacterTypeReader());
             this.Commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
             this.Commands.AddTypeReader<Colour>(new ColourTypeReader());
-            this.Commands.AddTypeReader<UserClass>(new HumanizerEnumTypeReader<UserClass>());
-            this.Commands.AddTypeReader<KinkPreference>(new HumanizerEnumTypeReader<KinkPreference>());
-            this.Commands.AddTypeReader<Bodypart>(new HumanizerEnumTypeReader<Bodypart>());
-            this.Commands.AddTypeReader<Pattern>(new HumanizerEnumTypeReader<Pattern>());
-            this.Commands.AddTypeReader<Permission>(new HumanizerEnumTypeReader<Permission>());
-            this.Commands.AddTypeReader<Permissions.PermissionTarget>(new HumanizerEnumTypeReader<Permissions.PermissionTarget>());
+
+            this.Commands.AddEnumReader<UserClass>();
+            this.Commands.AddEnumReader<KinkPreference>();
+            this.Commands.AddEnumReader<Bodypart>();
+            this.Commands.AddEnumReader<Pattern>();
+            this.Commands.AddEnumReader<Permission>();
+            this.Commands.AddEnumReader<Permissions.PermissionTarget>();
 
             await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly(), this.Services);
             await this.Behaviours.AddBehavioursAsync(Assembly.GetEntryAssembly(), this.Services);
