@@ -21,13 +21,10 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Dossiers;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;

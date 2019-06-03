@@ -20,10 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
 using DIGOS.Ambassador.Services;
 using Discord;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Pagination
 {

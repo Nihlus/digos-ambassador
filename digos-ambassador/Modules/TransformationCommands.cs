@@ -27,7 +27,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;

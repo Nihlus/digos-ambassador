@@ -28,8 +28,6 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Pagination;
-
 using Discord;
 using Discord.Commands;
 using Humanizer;

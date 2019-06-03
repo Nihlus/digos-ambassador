@@ -21,10 +21,9 @@
 //
 
 // Originally licensed under the ISC license; modified from https://github.com/foxbot/Discord.Addons.Interactive
-using System.Collections.Generic;
+
 using DIGOS.Ambassador.Services;
 using Discord;
-using JetBrains.Annotations;
 using Image = DIGOS.Ambassador.Database.Data.Image;
 
 namespace DIGOS.Ambassador.Pagination
