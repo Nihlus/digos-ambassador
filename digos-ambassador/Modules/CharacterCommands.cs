@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
@@ -66,22 +67,15 @@ namespace DIGOS.Ambassador.Modules
         "\n" +
         "You can also substitute any character name for \"current\", and your active character will be used instead."
     )]
-    public class CharacterCommands : ModuleBase<SocketCommandContext>
+    public class CharacterCommands : DatabaseModuleBase
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(CharacterCommands));
 
         private readonly DiscordService Discord;
-
-        [ProvidesContext]
-        private readonly GlobalInfoContext Database;
         private readonly ContentService Content;
-
         private readonly UserFeedbackService Feedback;
-
         private readonly CharacterService Characters;
-
         private readonly InteractivityService Interactivity;
-
         private readonly Random Random;
 
         /// <summary>
@@ -104,8 +98,8 @@ namespace DIGOS.Ambassador.Modules
             InteractivityService interactivity,
             Random random
         )
+            : base(database)
         {
-            this.Database = database;
             this.Content = contentService;
             this.Discord = discordService;
             this.Feedback = feedbackService;
@@ -140,7 +134,12 @@ namespace DIGOS.Ambassador.Modules
                 return ef;
             }
 
-            var pronounProviders = this.Characters.GetAvailablePronounProviders();
+            var pronounProviders = this.Characters.GetAvailablePronounProviders().ToList();
+            if (!pronounProviders.Any())
+            {
+                await this.Feedback.SendErrorAsync(this.Context, "There doesn't seem to be any pronouns available.");
+                return;
+            }
 
             var fields = pronounProviders.Select(CreatePronounField);
             var description = "Each field below represents a pronoun that can be used with a character. The title of " +
@@ -1014,13 +1013,10 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Group("role")]
-        public class RoleCommands : ModuleBase<SocketCommandContext>
+        public class RoleCommands : DatabaseModuleBase
         {
-            private readonly GlobalInfoContext Database;
             private readonly DiscordService Discord;
-
             private readonly UserFeedbackService Feedback;
-
             private readonly CharacterService Characters;
 
             /// <summary>
@@ -1037,8 +1033,8 @@ namespace DIGOS.Ambassador.Modules
                 UserFeedbackService feedbackService,
                 CharacterService characterService
             )
+                : base(database)
             {
-                this.Database = database;
                 this.Discord = discordService;
                 this.Feedback = feedbackService;
                 this.Characters = characterService;
@@ -1285,13 +1281,10 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Group("set")]
-        public class SetCommands : ModuleBase<SocketCommandContext>
+        public class SetCommands : DatabaseModuleBase
         {
-            private readonly GlobalInfoContext Database;
             private readonly DiscordService Discord;
-
             private readonly UserFeedbackService Feedback;
-
             private readonly CharacterService Characters;
 
             /// <summary>
@@ -1308,8 +1301,8 @@ namespace DIGOS.Ambassador.Modules
                 UserFeedbackService feedbackService,
                 CharacterService characterService
             )
+                : base(database)
             {
-                this.Database = database;
                 this.Discord = discordService;
                 this.Feedback = feedbackService;
                 this.Characters = characterService;

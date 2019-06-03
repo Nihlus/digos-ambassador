@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Services;
 
 using Discord.Commands;
@@ -40,10 +41,8 @@ namespace DIGOS.Ambassador.Modules
     [UsedImplicitly]
     [Group("admin")]
     [Summary("Administrative commands that directly affect the bot on a global scale.")]
-    public class AdminCommands : ModuleBase<SocketCommandContext>
+    public class AdminCommands : DatabaseModuleBase
     {
-        [ProvidesContext]
-        private readonly GlobalInfoContext Database;
         private readonly UserFeedbackService Feedback;
 
         /// <summary>
@@ -52,8 +51,8 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="database">A database context from the context pool.</param>
         /// <param name="feedback">The user feedback service.</param>
         public AdminCommands(GlobalInfoContext database, UserFeedbackService feedback)
+            : base(database)
         {
-            this.Database = database;
             this.Feedback = feedback;
         }
 

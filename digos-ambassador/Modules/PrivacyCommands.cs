@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Attributes;
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Users;
 
@@ -43,11 +44,9 @@ namespace DIGOS.Ambassador.Modules
     [UsedImplicitly]
     [Group("privacy")]
     [Summary("Privacy-related commands (data storage, deleting requests, data protection, privacy contacts, etc).")]
-    public class PrivacyCommands : ModuleBase<SocketCommandContext>
+    public class PrivacyCommands : DatabaseModuleBase
     {
         private readonly DiscordSocketClient Client;
-
-        private readonly GlobalInfoContext Database;
 
         private readonly PrivacyService Privacy;
         private readonly ContentService Content;
@@ -70,10 +69,10 @@ namespace DIGOS.Ambassador.Modules
             PrivacyService privacy,
             ContentService content
         )
+            : base(database)
         {
             this.Feedback = feedback;
             this.Client = client;
-            this.Database = database;
             this.Privacy = privacy;
             this.Content = content;
         }

@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
@@ -50,9 +51,8 @@ namespace DIGOS.Ambassador.Modules
     [UsedImplicitly]
     [Group("user")]
     [Summary("User-related commands, such as viewing or editing info about a specific user.")]
-    public class UserCommands : ModuleBase<SocketCommandContext>
+    public class UserCommands : DatabaseModuleBase
     {
-        private readonly GlobalInfoContext Database;
         private readonly UserFeedbackService Feedback;
 
         /// <summary>
@@ -61,8 +61,8 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="database">A database context from the context pool.</param>
         /// <param name="feedback">The user feedback service.</param>
         public UserCommands(GlobalInfoContext database, UserFeedbackService feedback)
+            : base(database)
         {
-            this.Database = database;
             this.Feedback = feedback;
         }
 
@@ -201,10 +201,8 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Group("set")]
-        public class SetCommands : ModuleBase<SocketCommandContext>
+        public class SetCommands : DatabaseModuleBase
         {
-            [ProvidesContext]
-            private readonly GlobalInfoContext Database;
             private readonly UserFeedbackService Feedback;
 
             /// <summary>
@@ -213,8 +211,8 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="database">A database context from the context pool.</param>
             /// <param name="feedback">The user feedback service.</param>
             public SetCommands(GlobalInfoContext database, UserFeedbackService feedback)
+                : base(database)
             {
-                this.Database = database;
                 this.Feedback = feedback;
             }
 

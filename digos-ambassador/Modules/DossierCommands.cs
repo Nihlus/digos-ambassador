@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
@@ -46,10 +47,8 @@ namespace DIGOS.Ambassador.Modules
     /// </summary>
     [Group("dossier")]
     [Summary("Commands for viewing, adding, and editing dossier entries.")]
-    public class DossierCommands : ModuleBase<SocketCommandContext>
+    public class DossierCommands : DatabaseModuleBase
     {
-        [ProvidesContext]
-        private readonly GlobalInfoContext Database;
         private readonly UserFeedbackService Feedback;
         private readonly ContentService Content;
         private readonly DossierService Dossiers;
@@ -71,8 +70,8 @@ namespace DIGOS.Ambassador.Modules
             DossierService dossiers,
             InteractivityService interactivity
         )
+            : base(database)
         {
-            this.Database = database;
             this.Feedback = feedback;
             this.Content = content;
             this.Dossiers = dossiers;
@@ -224,10 +223,8 @@ namespace DIGOS.Ambassador.Modules
         /// Setters for dossier properties.
         /// </summary>
         [Group("set")]
-        public class SetCommands : ModuleBase<SocketCommandContext>
+        public class SetCommands : DatabaseModuleBase
         {
-            [ProvidesContext]
-            private readonly GlobalInfoContext Database;
             private readonly UserFeedbackService Feedback;
             private readonly DossierService Dossiers;
 
@@ -238,8 +235,8 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="feedback">The feedback service.</param>
             /// <param name="dossiers">The dossier service.</param>
             public SetCommands(GlobalInfoContext database, UserFeedbackService feedback, DossierService dossiers)
+                : base(database)
             {
-                this.Database = database;
                 this.Feedback = feedback;
                 this.Dossiers = dossiers;
             }

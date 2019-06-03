@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
@@ -53,11 +54,8 @@ namespace DIGOS.Ambassador.Modules
     [UsedImplicitly]
     [Group("permission")]
     [Summary("Permission-related commands for granting, revoking and checking user permissions.")]
-    public class PermissionCommands : ModuleBase<SocketCommandContext>
+    public class PermissionCommands : DatabaseModuleBase
     {
-        [ProvidesContext]
-        private readonly GlobalInfoContext Database;
-
         private readonly UserFeedbackService Feedback;
 
         private readonly InteractivityService Interactivity;
@@ -78,8 +76,8 @@ namespace DIGOS.Ambassador.Modules
             PermissionService permissions,
             InteractivityService interactivity
         )
+            : base(database)
         {
-            this.Database = database;
             this.Feedback = feedback;
             this.Permissions = permissions;
             this.Interactivity = interactivity;
@@ -176,12 +174,9 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Group("grant")]
-        public class GrantCommands : ModuleBase<SocketCommandContext>
+        public class GrantCommands : DatabaseModuleBase
         {
-            [ProvidesContext]
-            private readonly GlobalInfoContext Database;
             private readonly UserFeedbackService Feedback;
-
             private readonly PermissionService Permissions;
 
             /// <summary>
@@ -190,9 +185,14 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="database">A database context from the context pool.</param>
             /// <param name="feedback">The user feedback service.</param>
             /// <param name="permissions">The permission service.</param>
-            public GrantCommands(GlobalInfoContext database, UserFeedbackService feedback, PermissionService permissions)
+            public GrantCommands
+            (
+                GlobalInfoContext database,
+                UserFeedbackService feedback,
+                PermissionService permissions
+            )
+                : base(database)
             {
-                this.Database = database;
                 this.Feedback = feedback;
                 this.Permissions = permissions;
             }
@@ -234,10 +234,8 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Group("revoke")]
-        public class RevokeCommands : ModuleBase<SocketCommandContext>
+        public class RevokeCommands : DatabaseModuleBase
         {
-            [ProvidesContext]
-            private readonly GlobalInfoContext Database;
             private readonly UserFeedbackService Feedback;
             private readonly PermissionService Permissions;
 
@@ -247,9 +245,14 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="database">A database context from the context pool.</param>
             /// <param name="feedback">The user feedback service.</param>
             /// <param name="permissions">The permission service.</param>
-            public RevokeCommands(GlobalInfoContext database, UserFeedbackService feedback, PermissionService permissions)
+            public RevokeCommands
+            (
+                GlobalInfoContext database,
+                UserFeedbackService feedback,
+                PermissionService permissions
+            )
+                : base(database)
             {
-                this.Database = database;
                 this.Feedback = feedback;
                 this.Permissions = permissions;
             }

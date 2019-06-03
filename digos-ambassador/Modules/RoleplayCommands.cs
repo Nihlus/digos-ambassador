@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
@@ -68,10 +69,8 @@ namespace DIGOS.Ambassador.Modules
         "\n" +
         "You can also substitute any roleplay name for \"current\", and the active roleplay will be used instead."
     )]
-    public class RoleplayCommands : ModuleBase<SocketCommandContext>
+    public class RoleplayCommands : DatabaseModuleBase
     {
-        [ProvidesContext]
-        private readonly GlobalInfoContext Database;
         private readonly RoleplayService Roleplays;
 
         private readonly UserFeedbackService Feedback;
@@ -91,8 +90,8 @@ namespace DIGOS.Ambassador.Modules
             UserFeedbackService feedback,
             InteractivityService interactivity
         )
+            : base(database)
         {
-            this.Database = database;
             this.Roleplays = roleplays;
             this.Feedback = feedback;
             this.Interactivity = interactivity;
@@ -1135,10 +1134,8 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Group("set")]
-        public class SetCommands : ModuleBase<SocketCommandContext>
+        public class SetCommands : DatabaseModuleBase
         {
-            [ProvidesContext]
-            private readonly GlobalInfoContext Database;
             private readonly RoleplayService Roleplays;
 
             private readonly UserFeedbackService Feedback;
@@ -1150,8 +1147,8 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="roleplays">The roleplay service.</param>
             /// <param name="feedback">The user feedback service.</param>
             public SetCommands(GlobalInfoContext database, RoleplayService roleplays, UserFeedbackService feedback)
+                : base(database)
             {
-                this.Database = database;
                 this.Roleplays = roleplays;
                 this.Feedback = feedback;
             }
@@ -1335,12 +1332,8 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Group("admin")]
-        public class AdminCommands : ModuleBase<SocketCommandContext>
+        public class AdminCommands : DatabaseModuleBase
         {
-            [ProvidesContext]
-            private readonly GlobalInfoContext Database;
-            private readonly RoleplayService Roleplays;
-
             private readonly UserFeedbackService Feedback;
 
             /// <summary>
@@ -1350,9 +1343,8 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="roleplays">The roleplay service.</param>
             /// <param name="feedback">The user feedback service.</param>
             public AdminCommands(GlobalInfoContext database, RoleplayService roleplays, UserFeedbackService feedback)
+                : base(database)
             {
-                this.Database = database;
-                this.Roleplays = roleplays;
                 this.Feedback = feedback;
             }
 

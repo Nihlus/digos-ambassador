@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.FList.Kinks;
+using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
@@ -53,10 +54,8 @@ namespace DIGOS.Ambassador.Modules
     /// </summary>
     [Group("kink")]
     [Summary("Commands for viewing and configuring user kinks.")]
-    public class KinkCommands : ModuleBase<SocketCommandContext>
+    public class KinkCommands : DatabaseModuleBase
     {
-        [ProvidesContext]
-        private readonly GlobalInfoContext Database;
         private readonly KinkService Kinks;
         private readonly UserFeedbackService Feedback;
 
@@ -76,8 +75,8 @@ namespace DIGOS.Ambassador.Modules
             UserFeedbackService feedback,
             InteractivityService interactivity
         )
+            : base(database)
         {
-            this.Database = database;
             this.Kinks = kinks;
             this.Feedback = feedback;
             this.Interactivity = interactivity;

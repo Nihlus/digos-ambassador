@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
@@ -52,10 +53,8 @@ namespace DIGOS.Ambassador.Modules
     [Alias("transform", "shift", "tf")]
     [Group("transform")]
     [Summary("Transformation-related commands, such as transforming certain body parts or saving transforms as characters.")]
-    public class TransformationCommands : ModuleBase<SocketCommandContext>
+    public class TransformationCommands : DatabaseModuleBase
     {
-        [ProvidesContext]
-        private readonly GlobalInfoContext Database;
         private readonly UserFeedbackService Feedback;
 
         private readonly CharacterService Characters;
@@ -79,8 +78,8 @@ namespace DIGOS.Ambassador.Modules
             TransformationService transformation,
             InteractivityService interactivity
         )
+            : base(database)
         {
-            this.Database = database;
             this.Feedback = feedback;
             this.Characters = characters;
             this.Transformation = transformation;

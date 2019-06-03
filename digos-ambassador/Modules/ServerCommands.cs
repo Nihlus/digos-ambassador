@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Servers;
 
@@ -43,9 +44,8 @@ namespace DIGOS.Ambassador.Modules
     [Group("server")]
     [Alias("server", "guild")]
     [Summary("Server-related commands, such as viewing or editing info about a specific server.")]
-    public class ServerCommands : ModuleBase<SocketCommandContext>
+    public class ServerCommands : DatabaseModuleBase
     {
-        private readonly GlobalInfoContext Database;
         private readonly UserFeedbackService Feedback;
         private readonly ServerService Servers;
 
@@ -56,8 +56,8 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="servers">The servers service.</param>
         public ServerCommands(GlobalInfoContext database, UserFeedbackService feedback, ServerService servers)
+            : base(database)
         {
-            this.Database = database;
             this.Feedback = feedback;
             this.Servers = servers;
         }
@@ -169,10 +169,8 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Group("set")]
-        public class SetCommands : ModuleBase<SocketCommandContext>
+        public class SetCommands : DatabaseModuleBase
         {
-            [ProvidesContext]
-            private readonly GlobalInfoContext Database;
             private readonly UserFeedbackService Feedback;
             private readonly ServerService Servers;
 
@@ -183,8 +181,8 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="feedback">The user feedback service.</param>
             /// <param name="servers">The servers service.</param>
             public SetCommands(GlobalInfoContext database, UserFeedbackService feedback, ServerService servers)
+                : base(database)
             {
-                this.Database = database;
                 this.Feedback = feedback;
                 this.Servers = servers;
             }
