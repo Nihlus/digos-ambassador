@@ -158,7 +158,7 @@ namespace DIGOS.Ambassador
             this.Commands.AddTypeReader<Pattern>(new HumanizerEnumTypeReader<Permissions.PermissionTarget>());
 
             await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly(), this.Services);
-            this.Behaviours.AddBehaviours(Assembly.GetEntryAssembly(), this.Services);
+            await this.Behaviours.AddBehavioursAsync(Assembly.GetEntryAssembly(), this.Services);
 
             await this.Client.StartAsync();
             await this.Behaviours.StartBehavioursAsync();

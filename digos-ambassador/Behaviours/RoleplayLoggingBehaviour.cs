@@ -39,7 +39,9 @@ namespace DIGOS.Ambassador.Behaviours
     /// </summary>
     public class RoleplayLoggingBehaviour : BehaviourBase
     {
+        [ProvidesContext]
         private readonly GlobalInfoContext Database;
+
         private readonly RoleplayService Roleplays;
 
         /// <summary>
@@ -136,6 +138,13 @@ namespace DIGOS.Ambassador.Behaviours
             }
 
             await OnMessageReceived(updatedMessage);
+        }
+
+        /// <inheritdoc/>
+        public override void Dispose()
+        {
+            base.Dispose();
+            this.Database.Dispose();
         }
     }
 }

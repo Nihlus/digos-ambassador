@@ -43,7 +43,8 @@ namespace DIGOS.Ambassador.Services.Behaviours
         /// </summary>
         /// <param name="containingAssembly">The assembly where behaviours are defined.</param>
         /// <param name="services">The services available to the application.</param>
-        public void AddBehaviours([NotNull] Assembly containingAssembly, IServiceProvider services)
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task AddBehavioursAsync([NotNull] Assembly containingAssembly, IServiceProvider services)
         {
             var definedTypes = containingAssembly.DefinedTypes;
             var behaviourTypes = definedTypes.Where(t => t.ImplementedInterfaces.Contains(typeof(IBehaviour)));
@@ -56,6 +57,17 @@ namespace DIGOS.Ambassador.Services.Behaviours
                 }
 
                 var behaviour = (IBehaviour)ActivatorUtilities.CreateInstance(services, behaviourType);
+
+                // Behaviours are implicitly singletons; there's only ever one instance of a behaviour at any given
+                // time.
+                if (this.RegisteredBehaviours.Any(b => b.GetType() == behaviourType))
+                {
+                    var existingBehaviour = this.RegisteredBehaviours.First(b => b.GetType() == behaviourType);
+                    this.RegisteredBehaviours.Remove(existingBehaviour);
+
+                    await existingBehaviour.StopAsync();
+                    existingBehaviour.Dispose();
+                }
 
                 this.RegisteredBehaviours.Add(behaviour);
             }

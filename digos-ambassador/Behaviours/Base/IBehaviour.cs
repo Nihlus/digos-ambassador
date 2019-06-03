@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
@@ -29,7 +30,7 @@ namespace DIGOS.Ambassador.Behaviours
     /// Interface for a behaviour.
     /// </summary>
     [UsedImplicitly]
-    public interface IBehaviour
+    public interface IBehaviour : IDisposable
     {
         /// <summary>
         /// Gets a value indicating whether the behaviour is currently running.

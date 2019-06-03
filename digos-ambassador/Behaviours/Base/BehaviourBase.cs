@@ -95,5 +95,10 @@ namespace DIGOS.Ambassador.Behaviours
         {
             return Task.CompletedTask;
         }
+
+        /// <inheritdoc/>
+        public virtual void Dispose()
+        {
+        }
     }
 }

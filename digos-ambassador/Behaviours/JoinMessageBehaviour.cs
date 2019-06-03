@@ -40,7 +40,9 @@ namespace DIGOS.Ambassador.Behaviours
     /// </summary>
     public class JoinMessageBehaviour : BehaviourBase
     {
+        [ProvidesContext]
         private readonly GlobalInfoContext Database;
+
         private readonly UserFeedbackService Feedback;
         private readonly ServerService Servers;
 
@@ -138,6 +140,13 @@ namespace DIGOS.Ambassador.Behaviours
                     }
                 }
             }
+        }
+
+        /// <inheritdoc/>
+        public override void Dispose()
+        {
+            base.Dispose();
+            this.Database.Dispose();
         }
     }
 }

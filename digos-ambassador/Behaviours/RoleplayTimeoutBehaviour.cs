@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Behaviours
         /// <summary>
         /// Gets the database context.
         /// </summary>
-        [NotNull]
+        [NotNull, ProvidesContext]
         private GlobalInfoContext Database { get; }
 
         /// <summary>
@@ -56,6 +56,7 @@ namespace DIGOS.Ambassador.Behaviours
         /// <summary>
         /// Gets the feedback service.
         /// </summary>
+        [NotNull]
         private UserFeedbackService Feedback { get; }
 
         /// <summary>
@@ -217,6 +218,13 @@ namespace DIGOS.Ambassador.Behaviours
                     }
                 }
             }
+        }
+
+        /// <inheritdoc/>
+        public override void Dispose()
+        {
+            base.Dispose();
+            this.Database.Dispose();
         }
     }
 }
