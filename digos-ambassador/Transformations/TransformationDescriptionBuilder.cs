@@ -235,12 +235,12 @@ namespace DIGOS.Ambassador.Transformations
             {
                 case Bodypart.Hair:
                 {
-                    removalText = $"{{@target}}'s hair becomes dull and colourless. Strand by strand, tuft by tuft, it falls out, leaving an empty scalp.";
+                    removalText = "{@target}'s hair becomes dull and colourless. Strand by strand, tuft by tuft, it falls out, leaving an empty scalp.";
                     break;
                 }
                 case Bodypart.Face:
                 {
-                    removalText = $"{{@target}}'s face begins to warp strangely. Slowly, their features smooth and vanish, leaving a blank surface.";
+                    removalText = "{@target}'s face begins to warp strangely. Slowly, their features smooth and vanish, leaving a blank surface.";
                     break;
                 }
                 case Bodypart.Ear:
@@ -255,7 +255,7 @@ namespace DIGOS.Ambassador.Transformations
                 }
                 case Bodypart.Teeth:
                 {
-                    removalText = $"With a strange popping sound, {{@target}}'s teeth retract and disappear.";
+                    removalText = "With a strange popping sound, {@target}'s teeth retract and disappear.";
                     break;
                 }
                 case Bodypart.Leg:
@@ -266,7 +266,7 @@ namespace DIGOS.Ambassador.Transformations
                 }
                 case Bodypart.Tail:
                 {
-                    removalText = $"{{@target}}'s tail flicks and thrashes for a moment, before it thins out and disappears into nothing.";
+                    removalText = "{@target}'s tail flicks and thrashes for a moment, before it thins out and disappears into nothing.";
                     break;
                 }
                 case Bodypart.Wing:
@@ -276,17 +276,17 @@ namespace DIGOS.Ambassador.Transformations
                 }
                 case Bodypart.Penis:
                 {
-                    removalText = $"{{@target}}'s shaft twitches and shudders, as it begins to shrink and retract. In mere moments, it's gone, leaving nothing.";
+                    removalText = "{@target}'s shaft twitches and shudders, as it begins to shrink and retract. In mere moments, it's gone, leaving nothing.";
                     break;
                 }
                 case Bodypart.Vagina:
                 {
-                    removalText = $"{{@target}}'s slit contracts and twitches. A strange sensation rushes through {{@f|them}} as the opening zips up and fills out, leaving nothing.";
+                    removalText = "{@target}'s slit contracts and twitches. A strange sensation rushes through {@f|them} as the opening zips up and fills out, leaving nothing.";
                     break;
                 }
                 case Bodypart.Head:
                 {
-                    removalText = $"{{@target}}'s head warps strangely before it deflates like a balloon, disappearing.";
+                    removalText = "{@target}'s head warps strangely before it deflates like a balloon, disappearing.";
                     break;
                 }
                 case Bodypart.Legs:
@@ -297,7 +297,7 @@ namespace DIGOS.Ambassador.Transformations
                 }
                 case Bodypart.Body:
                 {
-                    removalText = $"{{@target}}'s torso crumples into itself as their main body collapses, shifting and vanishing.";
+                    removalText = "{@target}'s torso crumples into itself as their main body collapses, shifting and vanishing.";
                     break;
                 }
                 case Bodypart.Wings:
@@ -357,7 +357,7 @@ namespace DIGOS.Ambassador.Transformations
         {
             string shiftMessage =
                 $"The surface of {{@target}}'s {currentComponent.Bodypart.Humanize().Transform(To.LowerCase)} morphs, as" +
-                $" {{@colour|pattern}} {{@pattern}} patterns spread across it" +
+                " {@colour|pattern} {@pattern} patterns spread across it" +
                 $"{(originalPattern.HasValue ? $", replacing their {originalColour} {originalPattern.Humanize().Pluralize()}." : ".")}";
 
             return ReplaceTokensWithContent(shiftMessage, character, currentComponent);

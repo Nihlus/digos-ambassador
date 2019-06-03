@@ -119,7 +119,7 @@ namespace DIGOS.Ambassador.Behaviours
                 }
 
                 var content = $"Welcome, {user.Mention}! You have DMs disabled, so I couldn't send you the " +
-                              $"first-join message. To see it, type \"!server join-message\".";
+                              "first-join message. To see it, type \"!server join-message\".";
 
                 var welcomeMessage = this.Feedback.CreateFeedbackEmbed
                 (

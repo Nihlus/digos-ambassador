@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tools
             else
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"Input not found.");
+                Console.WriteLine("Input not found.");
                 return -2;
             }
 
@@ -91,7 +91,7 @@ namespace DIGOS.Ambassador.Tools
             }
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Target file(s) look fine.");
+            Console.WriteLine("Target file(s) look fine.");
             return 0;
         }
     }

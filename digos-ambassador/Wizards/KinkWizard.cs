@@ -404,10 +404,10 @@ namespace DIGOS.Ambassador.Wizards
                     eb.AddField
                     (
                         "Usage",
-                        $"Use the navigation buttons to scroll through the available categories. Select a category by " +
+                        "Use the navigation buttons to scroll through the available categories. Select a category by " +
                         $"pressing {EnterCategory} and typing in the name. The search algorithm is quite lenient, so " +
-                        $"you may find that things work fine even with typos.\n" +
-                        $"\n" +
+                        "you may find that things work fine even with typos.\n" +
+                        "\n" +
                         $"You can quit at any point by pressing {Exit}."
                     );
                     break;
@@ -418,13 +418,13 @@ namespace DIGOS.Ambassador.Wizards
                     eb.AddField
                     (
                         "Usage",
-                        $"Set your preference for this kink by pressing one of the following buttons:" +
+                        "Set your preference for this kink by pressing one of the following buttons:" +
                         $"\n{Fave} : Favourite" +
                         $"\n{Like} : Like" +
                         $"\n{Maybe} : Maybe" +
                         $"\n{Never} : Never" +
                         $"\n{NoPreference} : No preference\n" +
-                        $"\n" +
+                        "\n" +
                         $"\nPress {Back} to go back to the categories." +
                         $"\nYou can quit at any point by pressing {Exit}."
                     );
