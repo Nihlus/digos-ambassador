@@ -154,8 +154,8 @@ namespace DIGOS.Ambassador
             this.Commands.AddTypeReader<KinkPreference>(new HumanizerEnumTypeReader<KinkPreference>());
             this.Commands.AddTypeReader<Bodypart>(new HumanizerEnumTypeReader<Bodypart>());
             this.Commands.AddTypeReader<Pattern>(new HumanizerEnumTypeReader<Pattern>());
-            this.Commands.AddTypeReader<Pattern>(new HumanizerEnumTypeReader<Permission>());
-            this.Commands.AddTypeReader<Pattern>(new HumanizerEnumTypeReader<Permissions.PermissionTarget>());
+            this.Commands.AddTypeReader<Permission>(new HumanizerEnumTypeReader<Permission>());
+            this.Commands.AddTypeReader<Permissions.PermissionTarget>(new HumanizerEnumTypeReader<Permissions.PermissionTarget>());
 
             await this.Commands.AddModulesAsync(Assembly.GetEntryAssembly(), this.Services);
             await this.Behaviours.AddBehavioursAsync(Assembly.GetEntryAssembly(), this.Services);
