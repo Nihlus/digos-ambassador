@@ -75,7 +75,11 @@ namespace DIGOS.Ambassador.Behaviours
         )
             : base(client)
         {
-            this.Database = database;
+            // Dirty hack; fix this tomorrow
+            //this.Database = database;
+
+            var options = GlobalInfoContext.ConfigureOptions(new DbContextOptionsBuilder()).Options;
+            this.Database = new GlobalInfoContext(options);
             this.Roleplays = roleplays;
             this.Feedback = feedback;
         }
