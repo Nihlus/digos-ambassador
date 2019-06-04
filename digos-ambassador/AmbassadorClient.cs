@@ -114,7 +114,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton<ServerService>()
                 .AddSingleton<OwnedEntityService>()
                 .AddSingleton<Random>()
-                .AddDbContextPool<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
+                .AddDbContext<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
                 .BuildServiceProvider();
 
             var transformationService = this.Services.GetRequiredService<TransformationService>();

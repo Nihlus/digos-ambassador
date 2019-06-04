@@ -57,9 +57,8 @@ namespace DIGOS.Ambassador.Behaviours
                 return;
             }
 
-            await OnStartingAsync();
-
             this.IsRunning = true;
+            await OnStartingAsync();
         }
 
         /// <summary>
@@ -81,9 +80,8 @@ namespace DIGOS.Ambassador.Behaviours
                 return;
             }
 
-            await OnStoppingAsync();
-
             this.IsRunning = false;
+            await OnStoppingAsync();
         }
 
         /// <summary>
