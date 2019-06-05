@@ -21,12 +21,15 @@
 //
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-
+using System.Windows.Input;
 using DIGOS.Ambassador.Attributes;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Extensions;
@@ -48,10 +51,8 @@ namespace DIGOS.Ambassador.Behaviours
     /// <summary>
     /// Acts as a behaviour for invoking commands, and logging their results.
     /// </summary>
-    public class CommandBehaviour : BehaviourBase
+    public class CommandBehaviour : ContinuousBehaviour
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(CommandBehaviour));
-
         private readonly GlobalInfoContext Database;
 
         private readonly IServiceProvider Services;
@@ -62,6 +63,11 @@ namespace DIGOS.Ambassador.Behaviours
         private readonly CommandService Commands;
         private readonly PermissionService Permissions;
         private readonly HelpService Help;
+
+        /// <summary>
+        /// Gets the commands that are currently running.
+        /// </summary>
+        private ConcurrentQueue<Task<IResult>> RunningCommands { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandBehaviour"/> class.
@@ -97,11 +103,52 @@ namespace DIGOS.Ambassador.Behaviours
             this.Commands = commands;
             this.Permissions = permissions;
             this.Help = help;
+
+            this.RunningCommands = new ConcurrentQueue<Task<IResult>>();
+        }
+
+        /// <inheritdoc/>
+        protected override async Task OnTickAsync(CancellationToken ct)
+        {
+            if (this.RunningCommands.TryDequeue(out var command))
+            {
+                if (command.IsCompleted)
+                {
+                    try
+                    {
+                        await command;
+                    }
+                    catch (Exception e)
+                    {
+                        // Nom nom nom
+                        this.Log.Error("Error in command.", e);
+                    }
+                }
+                else
+                {
+                    // If it's not done yet, stick it back on the queue.
+                    this.RunningCommands.Enqueue(command);
+                }
+            }
+
+            // And we'll also run a short delay so we don't eat all the CPU time
+            await Task.Delay(TimeSpan.FromSeconds(1), ct);
+        }
+
+        private async Task<IResult> SaneExecuteCommandWrapperAsync(ICommandContext context, int argumentPos)
+        {
+            // Create a service scope for this command
+            using (var scope = this.Services.CreateScope())
+            {
+                return await this.Commands.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
+            }
         }
 
         /// <inheritdoc />
         protected override Task OnStartingAsync()
         {
+            base.OnStartingAsync();
+
             this.Client.MessageReceived += OnMessageReceived;
             this.Client.MessageUpdated += OnMessageUpdated;
 
@@ -111,14 +158,14 @@ namespace DIGOS.Ambassador.Behaviours
         }
 
         /// <inheritdoc />
-        protected override Task OnStoppingAsync()
+        protected override async Task OnStoppingAsync()
         {
+            await base.OnStoppingAsync();
+
             this.Client.MessageReceived -= OnMessageReceived;
             this.Client.MessageUpdated -= OnMessageUpdated;
 
             this.Commands.CommandExecuted -= OnCommandExecuted;
-
-            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -215,11 +262,8 @@ namespace DIGOS.Ambassador.Behaviours
                 }
             }
 
-            // Create a service scope for this command
-            using (this.Services.CreateScope())
-            {
-                await this.Commands.ExecuteAsync(context, argumentPos, this.Services);
-            }
+            // Run the command asynchronously, but we'll await it later
+            this.RunningCommands.Enqueue(SaneExecuteCommandWrapperAsync(context, argumentPos));
         }
 
         /// <summary>

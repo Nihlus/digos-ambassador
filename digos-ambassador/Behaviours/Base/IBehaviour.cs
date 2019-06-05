@@ -23,6 +23,7 @@
 using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Behaviours
 {
@@ -49,5 +50,11 @@ namespace DIGOS.Ambassador.Behaviours
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task StopAsync();
+
+        /// <summary>
+        /// Provides the service scope for the behaviour, allowing it to clean up after itself when it is disposed.
+        /// </summary>
+        /// <param name="serviceScope">The scope.</param>
+        void WithScope(IServiceScope serviceScope);
     }
 }

@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using Discord.WebSocket;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Behaviours
 {
@@ -38,6 +39,11 @@ namespace DIGOS.Ambassador.Behaviours
         /// Gets the client associated with the behaviour.
         /// </summary>
         protected DiscordSocketClient Client { get; }
+
+        /// <summary>
+        /// Gets or sets the scope in which this behaviour lives.
+        /// </summary>
+        private IServiceScope ServiceScope { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BehaviourBase"/> class.
@@ -59,6 +65,12 @@ namespace DIGOS.Ambassador.Behaviours
 
             this.IsRunning = true;
             await OnStartingAsync();
+        }
+
+        /// <inheritdoc/>
+        public void WithScope(IServiceScope serviceScope)
+        {
+            this.ServiceScope = serviceScope;
         }
 
         /// <summary>
@@ -97,6 +109,7 @@ namespace DIGOS.Ambassador.Behaviours
         /// <inheritdoc/>
         public virtual void Dispose()
         {
+            this.ServiceScope.Dispose();
         }
     }
 }

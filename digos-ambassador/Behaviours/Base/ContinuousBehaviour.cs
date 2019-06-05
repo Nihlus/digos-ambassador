@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using log4net;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Behaviours
 {
@@ -38,7 +39,7 @@ namespace DIGOS.Ambassador.Behaviours
         /// Gets the logging instance for this behaviour.
         /// </summary>
         [NotNull]
-        private ILog Log { get; }
+        protected ILog Log { get; }
 
         /// <summary>
         /// Gets or sets the cancellation source for the continuous action task.

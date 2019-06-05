@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using DIGOS.Ambassador.Database;
 using Discord.Commands;
 using JetBrains.Annotations;
@@ -30,7 +29,7 @@ namespace DIGOS.Ambassador.Modules.Base
     /// <summary>
     /// Represents a command module with a dependency on a database context.
     /// </summary>
-    public abstract class DatabaseModuleBase : ModuleBase<SocketCommandContext>, IDisposable
+    public abstract class DatabaseModuleBase : ModuleBase<SocketCommandContext>
     {
         /// <summary>
         /// Gets the database context.
@@ -45,12 +44,6 @@ namespace DIGOS.Ambassador.Modules.Base
         protected DatabaseModuleBase([NotNull] GlobalInfoContext database)
         {
             this.Database = database;
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            //this.Database.Dispose();
         }
     }
 }
