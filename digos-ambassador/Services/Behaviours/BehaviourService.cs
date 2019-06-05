@@ -56,7 +56,12 @@ namespace DIGOS.Ambassador.Services.Behaviours
                     continue;
                 }
 
-                var behaviour = (IBehaviour)ActivatorUtilities.CreateInstance(services, behaviourType);
+                // Since the behaviours run in their own threads, we'll do scoped contexts for them.
+                IBehaviour behaviour;
+                using (services.CreateScope())
+                {
+                    behaviour = (IBehaviour)ActivatorUtilities.CreateInstance(services, behaviourType);
+                }
 
                 // Behaviours are implicitly singletons; there's only ever one instance of a behaviour at any given
                 // time.
