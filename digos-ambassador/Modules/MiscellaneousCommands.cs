@@ -64,13 +64,6 @@ namespace DIGOS.Ambassador.Modules
         }
 
         /// <summary>
-        /// Throws an exception.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("exception")]
-        public Task ExceptionAsync() => throw new InvalidOperationException("Kaboom!");
-
-        /// <summary>
         /// Instructs Amby to contact you over DM.
         /// </summary>
         [UsedImplicitly]
