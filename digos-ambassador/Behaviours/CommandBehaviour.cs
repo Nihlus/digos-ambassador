@@ -41,6 +41,7 @@ using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
 using log4net;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Behaviours
 {
@@ -121,6 +122,32 @@ namespace DIGOS.Ambassador.Behaviours
         }
 
         /// <summary>
+        /// Determines whether the currently running command is exempt from user consent.
+        /// </summary>
+        /// <param name="context">The command context.</param>
+        /// <param name="argumentPos">The position in the message where the command begins.</param>
+        /// <returns>true if the command is exempt from consent; otherwise, false.</returns>
+        private bool IsPrivacyExemptCommand(ICommandContext context, int argumentPos)
+        {
+            // We need to gather consent from the user
+            var commandSearchResult = this.Commands.Search(context, argumentPos);
+            if (!commandSearchResult.IsSuccess)
+            {
+                return false;
+            }
+
+            // Some command we recognize as being exempt from the privacy regulations
+            // (mostly privacy commands) - if this is one of them, just run it
+            var potentialPrivacyCommand = commandSearchResult.Commands.FirstOrDefault().Command;
+            if (potentialPrivacyCommand.Attributes.Any(a => a is PrivacyExemptAttribute))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Handles incoming messages, passing them to the command context handler.
         /// </summary>
         /// <param name="arg">The message coming in from the socket client.</param>
@@ -145,52 +172,29 @@ namespace DIGOS.Ambassador.Behaviours
 
             var context = new SocketCommandContext(this.Client, message);
 
-            // Perform first-time user checks, making sure the user has their default permissions
-            var guild = (message.Channel as SocketGuildChannel)?.Guild;
-            if (guild != null)
+            // Perform first-time user checks, making sure the user has their default permissions, has consented, etc
+            if (!await this.Privacy.HasUserConsentedAsync(this.Database, context.User) && !IsPrivacyExemptCommand(context, argumentPos))
             {
-                if (!await this.Privacy.HasUserConsentedAsync(this.Database, context.User))
+                // Ask for consent
+                var userDMChannel = await arg.Author.GetOrCreateDMChannelAsync();
+                var result = await this.Privacy.RequestConsentAsync(userDMChannel, this.Content, this.Feedback);
+                if (result.IsSuccess)
                 {
-                    // We need to gather consent from the user
-                    var commandSearchResult = this.Commands.Search(context, argumentPos);
-                    if (!commandSearchResult.IsSuccess)
-                    {
-                        return;
-                    }
-
-                    // Some command we recognize as being exempt from the privacy regulations
-                    // (mostly privacy commands) - if this is one of them, just run it
-                    var potentialPrivacyCommand = commandSearchResult.Commands.FirstOrDefault().Command;
-                    if (potentialPrivacyCommand.Attributes.Any(a => a is PrivacyExemptAttribute))
-                    {
-                        var privacyExemptCommandResult = await this.Commands.ExecuteAsync
-                        (
-                            context,
-                            argumentPos,
-                            this.Services
-                        );
-
-                        await HandleCommandResultAsync(context, privacyExemptCommandResult, argumentPos);
-                        return;
-                    }
-
-                    // else, ask for consent
-                    var userDMChannel = await arg.Author.GetOrCreateDMChannelAsync();
-                    var result = await this.Privacy.RequestConsentAsync(userDMChannel, this.Content, this.Feedback);
-                    if (result.IsSuccess)
-                    {
-                        return;
-                    }
-
-                    const string response = "It seems like you're not accepting DMs from non-friends. Please enable " +
-                                            "this, so you can read the bot's privacy policy and consent to data " +
-                                            "handling and processing.";
-
-                    await this.Feedback.SendWarningAsync(context, response);
-
                     return;
                 }
 
+                const string response = "It seems like you're not accepting DMs from non-friends. Please enable " +
+                                        "this, so you can read the bot's privacy policy and consent to data " +
+                                        "handling and processing.";
+
+                await this.Feedback.SendWarningAsync(context, response);
+
+                return;
+            }
+
+            var guild = (message.Channel as SocketGuildChannel)?.Guild;
+            if (guild != null)
+            {
                 var registerUserResult = await this.Database.GetOrRegisterUserAsync(arg.Author);
                 if (!registerUserResult.IsSuccess)
                 {
@@ -211,7 +215,11 @@ namespace DIGOS.Ambassador.Behaviours
                 }
             }
 
-            await this.Commands.ExecuteAsync(context, argumentPos, this.Services);
+            // Create a service scope for this command
+            using (this.Services.CreateScope())
+            {
+                await this.Commands.ExecuteAsync(context, argumentPos, this.Services);
+            }
         }
 
         /// <summary>
