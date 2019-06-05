@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Appearances;
@@ -122,6 +123,9 @@ namespace DIGOS.Ambassador
             (
                 ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(this.Services)
             );
+
+            var characterService = this.Services.GetRequiredService<CharacterService>();
+            characterService.DiscoverPronounProviders();
         }
 
         /// <summary>
