@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Modules.Base
         /// <inheritdoc/>
         public void Dispose()
         {
-            this.Database.Dispose();
+            //this.Database.Dispose();
         }
     }
 }

@@ -115,7 +115,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton<ServerService>()
                 .AddSingleton<OwnedEntityService>()
                 .AddSingleton<Random>()
-                .AddDbContext<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder), ServiceLifetime.Transient)
+                .AddDbContext<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
                 .BuildServiceProvider();
 
             var transformationService = this.Services.GetRequiredService<TransformationService>();
@@ -165,7 +165,12 @@ namespace DIGOS.Ambassador
             // Load modules and behaviours from the assembly this type was declared in
             var localAssembly = GetType().Assembly;
             await this.Commands.AddModulesAsync(localAssembly, this.Services);
-            await this.Behaviours.AddBehavioursAsync(localAssembly, this.Services);
+
+            // Since the behaviours run in their own threads, we'll do scoped contexts for them.
+            using (this.Services.CreateScope())
+            {
+                await this.Behaviours.AddBehavioursAsync(localAssembly, this.Services);
+            }
 
             await this.Client.StartAsync();
             await this.Behaviours.StartBehavioursAsync();
