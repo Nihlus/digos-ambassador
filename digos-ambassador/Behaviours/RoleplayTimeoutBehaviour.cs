@@ -71,15 +71,11 @@ namespace DIGOS.Ambassador.Behaviours
             DiscordSocketClient client,
             GlobalInfoContext database,
             RoleplayService roleplays,
-            UserFeedbackService feedback
+            [NotNull] UserFeedbackService feedback
         )
             : base(client)
         {
-            // Dirty hack; fix this tomorrow
-            //this.Database = database;
-
-            var options = GlobalInfoContext.ConfigureOptions(new DbContextOptionsBuilder()).Options;
-            this.Database = new GlobalInfoContext(options);
+            this.Database = database;
             this.Roleplays = roleplays;
             this.Feedback = feedback;
         }
