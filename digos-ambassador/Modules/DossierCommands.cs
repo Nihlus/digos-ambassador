@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Modules
         /// Lists the available dossiers.
         /// </summary>
         [UsedImplicitly]
-        [Command("list", RunMode = Async)]
+        [Command("list")]
         [Summary("Lists the available dossiers.")]
         public async Task ListDossiersAsync()
         {
@@ -111,7 +111,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="title">The title of the dossier to view.</param>
         [UsedImplicitly]
         [Alias("view", "show")]
-        [Command("view", RunMode = Async)]
+        [Command("view")]
         [Summary("Views the named dossier.")]
         public async Task ViewDossierAsync([NotNull] string title)
         {
@@ -157,7 +157,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="summary">The summary.</param>
         [UsedImplicitly]
         [Alias("add", "create")]
-        [Command("add", RunMode = Async)]
+        [Command("add")]
         [Summary("Adds a new dossier with the given title and summary. A PDF with the full dossier can be attached.")]
         [RequireOwner]
         public async Task AddDossierAsync([NotNull] string title, [NotNull] string summary = "No summary set.")
@@ -193,7 +193,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="title">The title.</param>
         [UsedImplicitly]
         [Alias("remove", "delete")]
-        [Command("remove", RunMode = Async)]
+        [Command("remove")]
         [Summary("Removes the dossier with the given title.")]
         [RequireOwner]
         public async Task RemoveDossierAsync([NotNull] string title)
@@ -244,7 +244,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="title">The title of the dossier to edit.</param>
             /// <param name="newTitle">The new title of the dossier.</param>
             [UsedImplicitly]
-            [Command("title", RunMode = Async)]
+            [Command("title")]
             [Summary("Sets the title of the given dossier.")]
             [RequireOwner]
             public async Task SetTitleAsync([NotNull] string title, [NotNull] string newTitle)
@@ -274,7 +274,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="title">The title of the dossier to edit.</param>
             /// <param name="newSummary">The new summary of the dossier.</param>
             [UsedImplicitly]
-            [Command("summary", RunMode = Async)]
+            [Command("summary")]
             [Summary("Sets the summary of the given dossier.")]
             [RequireOwner]
             public async Task SetSummaryAsync([NotNull] string title, [NotNull] string newSummary)
@@ -303,7 +303,7 @@ namespace DIGOS.Ambassador.Modules
             /// </summary>
             /// <param name="title">The title of the dossier to edit.</param>
             [UsedImplicitly]
-            [Command("data", RunMode = Async)]
+            [Command("data")]
             [Summary("Sets the data of the given dossier. Attach a PDF to the command.")]
             [RequireOwner]
             public async Task SetFileAsync([NotNull] string title)

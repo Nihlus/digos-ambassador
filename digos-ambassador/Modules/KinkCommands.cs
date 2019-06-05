@@ -87,7 +87,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="name">The name of the kink.</param>
         [UsedImplicitly]
-        [Command("info", RunMode = Async)]
+        [Command("info")]
         [Summary("Shows information about the named kink.")]
         public async Task ShowKinkAsync([NotNull] string name)
         {
@@ -110,7 +110,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="name">The name of the kink.</param>
         [UsedImplicitly]
         [Alias("show", "preference")]
-        [Command("show", RunMode = Async)]
+        [Command("show")]
         [Summary("Shows your preference for the named kink.")]
         public async Task ShowKinkPreferenceAsync([NotNull] string name) => await ShowKinkPreferenceAsync(this.Context.User, name);
 
@@ -121,7 +121,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="name">The name of the kink.</param>
         [UsedImplicitly]
         [Alias("show", "preference")]
-        [Command("show", RunMode = Async)]
+        [Command("show")]
         [Summary("Shows the user's preference for the named kink.")]
         public async Task ShowKinkPreferenceAsync([NotNull] IUser user, [NotNull] string name)
         {
@@ -143,7 +143,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="otherUser">The other user.</param>
         [UsedImplicitly]
-        [Command("overlap", RunMode = Async)]
+        [Command("overlap")]
         [Summary("Shows the kinks which overlap between you and the given user.")]
         public async Task ShowKinkOverlap([NotNull] IUser otherUser)
         {
@@ -184,7 +184,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="preference">The preference.</param>
         [UsedImplicitly]
-        [Command("by-preference", RunMode = Async)]
+        [Command("by-preference")]
         [Summary("Shows your kinks with the given preference.")]
         public async Task ShowKinksByPreferenceAsync
         (
@@ -199,7 +199,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="otherUser">The user.</param>
         /// <param name="preference">The preference.</param>
         [UsedImplicitly]
-        [Command("by-preference", RunMode = Async)]
+        [Command("by-preference")]
         [Summary("Shows the given user's kinks with the given preference.")]
         public async Task ShowKinksByPreferenceAsync
         (
@@ -238,7 +238,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="name">The name of the kink.</param>
         /// <param name="preference">The preference for the kink.</param>
         [UsedImplicitly]
-        [Command("preference", RunMode = Async)]
+        [Command("preference")]
         [Summary("Sets your preference for the given kink.")]
         public async Task SetKinkPreferenceAsync
         (
@@ -270,7 +270,7 @@ namespace DIGOS.Ambassador.Modules
         /// Runs an interactive wizard for setting kink preferences.
         /// </summary>
         [UsedImplicitly]
-        [Command("wizard", RunMode = Async)]
+        [Command("wizard")]
         [Summary("Runs an interactive wizard for setting kink preferences.")]
         public async Task RunKinkWizardAsync()
         {
@@ -290,7 +290,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <returns>A task wrapping the update action.</returns>
         [UsedImplicitly]
-        [Command("update-db", RunMode = Async)]
+        [Command("update-db")]
         [Summary("Updates the kink database with data from F-list.")]
         [RequireContext(DM)]
         [RequireOwner]
@@ -351,7 +351,7 @@ namespace DIGOS.Ambassador.Modules
         /// Resets all your kink preferences.
         /// </summary>
         [UsedImplicitly]
-        [Command("reset", RunMode = Async)]
+        [Command("reset")]
         [Summary("Resets all your kink preferences.")]
         public async Task ResetKinksAsync()
         {

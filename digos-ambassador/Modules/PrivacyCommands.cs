@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Modules
         /// Requests a copy of the privacy policy.
         /// </summary>
         [UsedImplicitly]
-        [Command("policy", RunMode = RunMode.Async)]
+        [Command("policy")]
         [Summary("Requests a copy of the privacy policy.")]
         [RequireContext(DM)]
         [PrivacyExempt]
@@ -94,7 +94,7 @@ namespace DIGOS.Ambassador.Modules
         /// Grants consent to store user data.
         /// </summary>
         [UsedImplicitly]
-        [Command("grant-consent", RunMode = RunMode.Async)]
+        [Command("grant-consent")]
         [Summary("Grants consent to store user data.")]
         [RequireContext(DM)]
         [PrivacyExempt]
@@ -108,7 +108,7 @@ namespace DIGOS.Ambassador.Modules
         /// Revokes consent to store user data.
         /// </summary>
         [UsedImplicitly]
-        [Command("revoke-consent", RunMode = RunMode.Async)]
+        [Command("revoke-consent")]
         [Summary("Revokes consent to store user data.")]
         [RequireContext(DM)]
         [PrivacyExempt]
@@ -128,7 +128,7 @@ namespace DIGOS.Ambassador.Modules
         /// Displays contact information for the privacy contact person.
         /// </summary>
         [UsedImplicitly]
-        [Command("contact", RunMode = RunMode.Async)]
+        [Command("contact")]
         [Summary("Displays contact information for the privacy contact person.")]
         [RequireContext(DM)]
         [PrivacyExempt]

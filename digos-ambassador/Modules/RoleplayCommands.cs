@@ -102,7 +102,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Alias("show", "info")]
-        [Command("show", RunMode = Async)]
+        [Command("show")]
         [Summary("Shows information about the current roleplay.")]
         [RequireContext(Guild)]
         public async Task ShowRoleplayAsync()
@@ -129,7 +129,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
         [Alias("show", "info")]
-        [Command("show", RunMode = Async)]
+        [Command("show")]
         [Summary("Shows information about the specified roleplay.")]
         [RequireContext(Guild)]
         public async Task ShowRoleplayAsync([NotNull] Roleplay roleplay)
@@ -175,7 +175,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="discordUser">The user to show the roleplays of.</param>
         [UsedImplicitly]
         [Alias("list-owned", "list")]
-        [Command("list-owned", RunMode = Async)]
+        [Command("list-owned")]
         [Summary("Lists the roleplays that the given user owns.")]
         [RequireContext(Guild)]
         public async Task ListOwnedRoleplaysAsync([CanBeNull] IUser discordUser = null)
@@ -215,7 +215,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="isNSFW">Whether or not the roleplay is NSFW.</param>
         /// <param name="isPublic">Whether or not the roleplay is public.</param>
         [UsedImplicitly]
-        [Command("create", RunMode = Async)]
+        [Command("create")]
         [Summary("Creates a new roleplay with the specified name.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.CreateRoleplay)]
@@ -242,7 +242,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
-        [Command("delete", RunMode = Async)]
+        [Command("delete")]
         [Summary("Deletes the specified roleplay.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.DeleteRoleplay)]
@@ -300,7 +300,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
-        [Command("join", RunMode = Async)]
+        [Command("join")]
         [Summary("Joins the roleplay owned by the given person with the given name.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.JoinRoleplay)]
@@ -349,7 +349,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="playerToInvite">The player to invite.</param>
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
-        [Command("invite", RunMode = Async)]
+        [Command("invite")]
         [Summary("Invites the specified user to the given roleplay.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.EditRoleplay)]
@@ -393,7 +393,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
-        [Command("leave", RunMode = Async)]
+        [Command("leave")]
         [Summary("Leaves the roleplay owned by the given person with the given name.")]
         [RequireContext(Guild)]
         public async Task LeaveRoleplayAsync([NotNull] Roleplay roleplay)
@@ -436,7 +436,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="discordUser">The user to kick.</param>
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
-        [Command("kick", RunMode = Async)]
+        [Command("kick")]
         [Summary("Kicks the given user from the named roleplay.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.KickRoleplayMember)]
@@ -501,7 +501,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
-        [Command("channel", RunMode = Async)]
+        [Command("channel")]
         [Summary("Makes the roleplay with the given name current in the current channel.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.StartStopRoleplay)]
@@ -565,7 +565,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
-        [Command("start", RunMode = Async)]
+        [Command("start")]
         [Summary("Starts the roleplay with the given name.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.StartStopRoleplay)]
@@ -706,7 +706,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
-        [Command("stop", RunMode = Async)]
+        [Command("stop")]
         [Summary("Stops the given roleplay.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.StartStopRoleplay)]
@@ -780,7 +780,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="startMessage">The earliest message to start adding from.</param>
         /// <param name="finalMessage">The final message in the range.</param>
         [UsedImplicitly]
-        [Command("include-previous", RunMode = Async)]
+        [Command("include-previous")]
         [Summary("Includes previous messages into the roleplay, starting at the given message.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.EditRoleplay)]
@@ -839,7 +839,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="newOwner">The new owner.</param>
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
-        [Command("transfer-ownership", RunMode = Async)]
+        [Command("transfer-ownership")]
         [Summary("Transfers ownership of the named roleplay to the specified user.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.TransferRoleplay)]
@@ -869,7 +869,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="roleplay">The roleplay.</param>
         /// <param name="format">The export format.</param>
         [UsedImplicitly]
-        [Command("export", RunMode = Async)]
+        [Command("export")]
         [Summary(" Exports the named roleplay owned by the given user, sending you a file with the contents.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.ReplayRoleplay)]
@@ -915,7 +915,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="from">The time from which you want to replay.</param>
         /// <param name="to">The time until you want to replay.</param>
         [UsedImplicitly]
-        [Command("replay", RunMode = Async)]
+        [Command("replay")]
         [Summary("Replays the named roleplay owned by the given user to you.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.ReplayRoleplay)]
@@ -1014,7 +1014,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
-        [Command("view", RunMode = Async)]
+        [Command("view")]
         [Summary("Views the given roleplay, allowing you to read the channel.")]
         [RequireContext(Guild)]
         public async Task ViewRoleplayAsync([NotNull] Roleplay roleplay)
@@ -1063,7 +1063,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         [UsedImplicitly]
-        [Command("hide", RunMode = Async)]
+        [Command("hide")]
         [Summary("Hides the given roleplay.")]
         [RequireContext(Guild)]
         public async Task HideRoleplayAsync([NotNull] Roleplay roleplay)
@@ -1099,7 +1099,7 @@ namespace DIGOS.Ambassador.Modules
         /// Hides all roleplays in the server for the user.
         /// </summary>
         [UsedImplicitly]
-        [Command("hide-all", RunMode = Async)]
+        [Command("hide-all")]
         [Summary("Hides all roleplays in the server for the user.")]
         [RequireContext(Guild)]
         public async Task HideAllRoleplaysAsync()
@@ -1159,7 +1159,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="newRoleplayName">The roleplay's new name.</param>
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
-            [Command("name", RunMode = Async)]
+            [Command("name")]
             [Summary("Sets the new name of the named roleplay.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditRoleplay)]
@@ -1203,7 +1203,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="newRoleplaySummary">The roleplay's new summary.</param>
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
-            [Command("summary", RunMode = Async)]
+            [Command("summary")]
             [Summary("Sets the summary of the named roleplay.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditRoleplay)]
@@ -1235,7 +1235,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="isNSFW">true if the roleplay is NSFW; otherwise, false.</param>
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
-            [Command("nsfw", RunMode = Async)]
+            [Command("nsfw")]
             [Summary("Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditRoleplay)]
@@ -1265,7 +1265,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="isPrivate">true if the roleplay is private; otherwise, false.</param>
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
-            [Command("private", RunMode = Async)]
+            [Command("private")]
             [Summary("Sets a value indicating whether or not the named roleplay is private. This restricts replays to participants.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditRoleplay)]
@@ -1283,7 +1283,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="isPublic">true if the roleplay is public; otherwise, false.</param>
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
-            [Command("public", RunMode = Async)]
+            [Command("public")]
             [Summary("Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditRoleplay)]
@@ -1352,7 +1352,7 @@ namespace DIGOS.Ambassador.Modules
             /// Updates the timestamps of all roleplays in the bot.
             /// </summary>
             [UsedImplicitly]
-            [Command("update-timestamps", RunMode = Async)]
+            [Command("update-timestamps")]
             [Summary("Updates the timestamps of all roleplays in the bot.")]
             [RequireContext(DM)]
             [RequireOwner]

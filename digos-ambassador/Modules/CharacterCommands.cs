@@ -113,7 +113,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Alias("available-pronouns", "pronouns")]
-        [Command("available-pronouns", RunMode = Async)]
+        [Command("available-pronouns")]
         [Summary("Shows available pronoun families that can be used with characters.")]
         public async Task ShowAvailablePronounFamiliesAsync()
         {
@@ -173,7 +173,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Alias("show", "info")]
-        [Command("show", RunMode = Async)]
+        [Command("show")]
         [Summary("Shows quick information about your current character.")]
         [RequireContext(Guild)]
         public async Task ShowCharacterAsync()
@@ -205,7 +205,7 @@ namespace DIGOS.Ambassador.Modules
         [UsedImplicitly]
         [Alias("show", "info")]
         [Priority(1)]
-        [Command("show", RunMode = Async)]
+        [Command("show")]
         [Summary("Shows quick information about a character.")]
         [RequireContext(Guild)]
         public async Task ShowCharacterAsync([NotNull] Character character)
@@ -309,7 +309,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="characterDescription">The full description of the character. Optional.</param>
         /// <param name="characterAvatarUrl">A url pointing to the character's avatar. Optional.</param>
         [UsedImplicitly]
-        [Command("create", RunMode = Async)]
+        [Command("create")]
         [Summary("Creates a new character.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.CreateCharacter)]
@@ -351,7 +351,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="character">The character to delete.</param>
         [UsedImplicitly]
-        [Command("delete", RunMode = Async)]
+        [Command("delete")]
         [Summary("Deletes the named character.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.DeleteCharacter)]
@@ -437,7 +437,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="discordUser">The user whose characters should be listed. Optional.</param>
         [UsedImplicitly]
         [Alias("list-owned", "list", "owned")]
-        [Command("list-owned", RunMode = Async)]
+        [Command("list-owned")]
         [Summary("Lists the characters owned by a given user.")]
         [RequireContext(Guild)]
         public async Task ListOwnedCharactersAsync([CanBeNull] IUser discordUser = null)
@@ -474,7 +474,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Alias("random")]
-        [Command("random", RunMode = Async)]
+        [Command("random")]
         [Summary("Switches the user's current character to a different one, picked at random.")]
         [RequireContext(Guild)]
         public async Task AssumeRandomCharacterFormAsync()
@@ -524,7 +524,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="character">The character to become.</param>
         [UsedImplicitly]
         [Alias("assume", "become", "transform", "active")]
-        [Command("assume", RunMode = Async)]
+        [Command("assume")]
         [Summary("Sets the named character as the user's current character.")]
         [RequireContext(Guild)]
         public async Task AssumeCharacterFormAsync
@@ -623,7 +623,7 @@ namespace DIGOS.Ambassador.Modules
         /// Sets your default form to your current character.
         /// </summary>
         [UsedImplicitly]
-        [Command("set-default", RunMode = Async)]
+        [Command("set-default")]
         [Summary("Sets your default form to your current character.")]
         [RequireContext(Guild)]
         public async Task SetDefaultCharacterAsync()
@@ -643,7 +643,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="character">The character to set as the default character.</param>
         [UsedImplicitly]
-        [Command("set-default", RunMode = Async)]
+        [Command("set-default")]
         [Summary("Sets your default form to the given character.")]
         [RequireContext(Guild)]
         public async Task SetDefaultCharacterAsync
@@ -679,7 +679,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Alias("clear-default", "drop-default")]
-        [Command("clear-default", RunMode = Async)]
+        [Command("clear-default")]
         [Summary("Clears your default form.")]
         [RequireContext(Guild)]
         public async Task ClearDefaultCharacterAsync()
@@ -708,7 +708,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Alias("clear", "drop", "default")]
-        [Command("clear", RunMode = Async)]
+        [Command("clear")]
         [Summary("Clears any active characters from you, restoring your default form.")]
         [RequireContext(Guild)]
         public async Task ClearCharacterFormAsync()
@@ -803,7 +803,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="character">The character to view the gallery of.</param>
         [UsedImplicitly]
         [Alias("view-gallery", "gallery")]
-        [Command("view-gallery", RunMode = Async)]
+        [Command("view-gallery")]
         [Summary("View the images in a character's gallery.")]
         [RequireContext(Guild)]
         public async Task ViewCharacterGalleryAsync([NotNull] Character character)
@@ -837,7 +837,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="character">The character.</param>
         [UsedImplicitly]
-        [Command("list-images", RunMode = Async)]
+        [Command("list-images")]
         [Summary("Lists the images in a character's gallery.")]
         [RequireContext(Guild)]
         public async Task ListImagesAsync([NotNull] Character character)
@@ -872,7 +872,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="imageCaption">The caption of the image.</param>
         /// <param name="isNSFW">Whether or not the image is NSFW.</param>
         [UsedImplicitly]
-        [Command("add-image", RunMode = Async)]
+        [Command("add-image")]
         [Summary("Adds an attached image to a character's gallery.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.EditCharacter)]
@@ -919,7 +919,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="imageCaption">The caption of the image.</param>
         /// <param name="isNSFW">Whether or not the image is NSFW.</param>
         [UsedImplicitly]
-        [Command("add-image", RunMode = Async)]
+        [Command("add-image")]
         [Summary("Adds a linked image to a character's gallery.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.EditCharacter)]
@@ -953,7 +953,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="imageName">The name of the image to remove.</param>
         [UsedImplicitly]
         [Alias("remove-image", "delete-image")]
-        [Command("remove-image", RunMode = Async)]
+        [Command("remove-image")]
         [Summary("Removes an image from a character's gallery.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.EditCharacter)]
@@ -984,7 +984,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="character">The character to transfer.</param>
         [UsedImplicitly]
         [Alias("transfer-ownership", "transfer")]
-        [Command("transfer-ownership", RunMode = Async)]
+        [Command("transfer-ownership")]
         [Summary("Transfers ownership of the named character to another user.")]
         [RequireContext(Guild)]
         [RequirePermission(Permission.TransferCharacter)]
@@ -1044,7 +1044,7 @@ namespace DIGOS.Ambassador.Modules
             /// Lists the available character roles.
             /// </summary>
             [UsedImplicitly]
-            [Command("list", RunMode = Async)]
+            [Command("list")]
             [RequireContext(Guild)]
             public async Task ListAvailableRolesAsync()
             {
@@ -1106,7 +1106,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="discordRole">The discord role.</param>
             /// <param name="access">The access for the role.</param>
             [UsedImplicitly]
-            [Command("create", RunMode = Async)]
+            [Command("create")]
             [Summary("Creates a new character role linked to a Discord role.")]
             [RequireContext(Guild)]
             [RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "You must be allowed to manage roles.")]
@@ -1138,7 +1138,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="discordRole">The discord role.</param>
             [UsedImplicitly]
             [Alias("delete", "remove", "erase")]
-            [Command("delete", RunMode = Async)]
+            [Command("delete")]
             [Summary("Deletes the character role for a given discord role.")]
             [RequireContext(Guild)]
             [RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "You must be allowed to manage roles.")]
@@ -1188,7 +1188,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="discordRole">The discord role.</param>
             /// <param name="access">The new access conditions.</param>
             [UsedImplicitly]
-            [Command("access", RunMode = Async)]
+            [Command("access")]
             [Summary("Sets the access conditions for the given role.")]
             [RequireContext(Guild)]
             [RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "You must be allowed to manage roles.")]
@@ -1229,7 +1229,7 @@ namespace DIGOS.Ambassador.Modules
             /// </summary>
             /// <param name="character">The character.</param>
             [UsedImplicitly]
-            [Command("clear", RunMode = Async)]
+            [Command("clear")]
             [Summary("Clears the role from a character.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditCharacter)]
@@ -1314,7 +1314,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="character">The character.</param>
             /// <param name="newCharacterName">The new name of the character.</param>
             [UsedImplicitly]
-            [Command("name", RunMode = Async)]
+            [Command("name")]
             [Summary("Sets the name of a character.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditCharacter)]
@@ -1345,7 +1345,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="character">The character.</param>
             /// <param name="newCharacterAvatarUrl">The url of the new avatar. Optional.</param>
             [UsedImplicitly]
-            [Command("avatar", RunMode = Async)]
+            [Command("avatar")]
             [Summary("Sets the avatar of a character. You can attach an image instead of passing a url as a parameter.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditCharacter)]
@@ -1404,7 +1404,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="newCharacterNickname">The new nickname of the character. Max 32 characters.</param>
             [UsedImplicitly]
             [Alias("nickname", "nick")]
-            [Command("nickname", RunMode = Async)]
+            [Command("nickname")]
             [Summary("Sets the nickname that the user should have when the character is active.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditCharacter)]
@@ -1460,7 +1460,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="character">The character.</param>
             /// <param name="newCharacterSummary">The new summary. Max 240 characters.</param>
             [UsedImplicitly]
-            [Command("summary", RunMode = Async)]
+            [Command("summary")]
             [Summary("Sets the summary of a character.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditCharacter)]
@@ -1492,7 +1492,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="newCharacterDescription">The new description of the character. Optional.</param>
             [UsedImplicitly]
             [Alias("description", "desc")]
-            [Command("description", RunMode = Async)]
+            [Command("description")]
             [Summary("Sets the description of a character. You can attach a plaintext document instead of passing the contents as a parameter.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditCharacter)]
@@ -1548,7 +1548,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="character">The character.</param>
             /// <param name="isNSFW">Whether or not the character is NSFW.</param>
             [UsedImplicitly]
-            [Command("nsfw", RunMode = Async)]
+            [Command("nsfw")]
             [Summary("Sets whether or not a character is NSFW.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditCharacter)]
@@ -1573,7 +1573,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="character">The character.</param>
             /// <param name="pronounFamily">The pronoun family.</param>
             [UsedImplicitly]
-            [Command("pronoun", RunMode = Async)]
+            [Command("pronoun")]
             [Summary("Sets the preferred pronoun of a character.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditCharacter)]
@@ -1604,7 +1604,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="character">The character.</param>
             /// <param name="discordRole">The role.</param>
             [UsedImplicitly]
-            [Command("role", RunMode = Async)]
+            [Command("role")]
             [Summary("Sets the given character's display role.")]
             [RequireContext(Guild)]
             [RequirePermission(Permission.EditCharacter)]

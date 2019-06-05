@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Modules
         /// Shows known information about the invoking user.
         /// </summary>
         [UsedImplicitly]
-        [Command("info", RunMode = RunMode.Async)]
+        [Command("info")]
         [Summary("Shows known information about the invoking user.")]
         public async Task ShowInfoAsync()
         {
@@ -90,7 +90,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="discordUser">The Discord user to show the info of.</param>
         [UsedImplicitly]
-        [Command("info", RunMode = RunMode.Async)]
+        [Command("info")]
         [Summary("Shows known information about the target user.")]
         public async Task ShowInfoAsync([NotNull] IUser discordUser)
         {
@@ -221,7 +221,7 @@ namespace DIGOS.Ambassador.Modules
             /// </summary>
             /// <param name="userClass">The user's new class.</param>
             [UsedImplicitly]
-            [Command("class", RunMode = RunMode.Async)]
+            [Command("class")]
             [Summary("Sets the invoking user's class.")]
             [RequirePermission(Permission.SetClass)]
             public async Task SetUserClassAsync
@@ -253,7 +253,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="discordUser">The Discord user to change the class of.</param>
             /// <param name="userClass">The user's new class.</param>
             [UsedImplicitly]
-            [Command("class", RunMode = RunMode.Async)]
+            [Command("class")]
             [Summary("Sets the target user's class.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(Permission.SetClass, PermissionTarget.Other)]
@@ -287,7 +287,7 @@ namespace DIGOS.Ambassador.Modules
             /// </summary>
             /// <param name="bio">The user's new bio.</param>
             [UsedImplicitly]
-            [Command("bio", RunMode = RunMode.Async)]
+            [Command("bio")]
             [Summary("Sets the invoking user's bio.")]
             [RequirePermission(Permission.EditUser)]
             public async Task SetUserBioAsync([NotNull] string bio)
@@ -315,7 +315,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="discordUser">The Discord user to change the bio of.</param>
             /// <param name="bio">The user's new bio.</param>
             [UsedImplicitly]
-            [Command("bio", RunMode = RunMode.Async)]
+            [Command("bio")]
             [Summary("Sets the target user's bio.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(Permission.EditUser, PermissionTarget.Other)]
@@ -343,7 +343,7 @@ namespace DIGOS.Ambassador.Modules
             /// </summary>
             /// <param name="timezone">The user's new timezone hour offset.</param>
             [UsedImplicitly]
-            [Command("timezone", RunMode = RunMode.Async)]
+            [Command("timezone")]
             [Summary("Sets the invoking user's UTC timezone hour offset.")]
             [RequirePermission(Permission.EditUser)]
             public async Task SetUserTimezoneAsync(int timezone)
@@ -371,7 +371,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="discordUser">The Discord user to change the timezone of.</param>
             /// <param name="timezone">The user's new timezone hour offset.</param>
             [UsedImplicitly]
-            [Command("timezone", RunMode = RunMode.Async)]
+            [Command("timezone")]
             [Summary("Sets the target user's UTC timezone hour offset.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(Permission.EditUser, PermissionTarget.Other)]

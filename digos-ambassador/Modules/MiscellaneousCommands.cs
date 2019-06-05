@@ -64,10 +64,17 @@ namespace DIGOS.Ambassador.Modules
         }
 
         /// <summary>
+        /// Throws an exception.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("exception")]
+        public Task ExceptionAsync() => throw new InvalidOperationException("Kaboom!");
+
+        /// <summary>
         /// Instructs Amby to contact you over DM.
         /// </summary>
         [UsedImplicitly]
-        [Command("contact", RunMode = RunMode.Async)]
+        [Command("contact")]
         [Summary("Instructs Amby to contact you over DM.")]
         [RequireContext(Guild)]
         public async Task ContactSelfAsync() => await ContactUserAsync(this.Context.User);
@@ -77,7 +84,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="discordUser">The user to contact.</param>
         [UsedImplicitly]
-        [Command("contact", RunMode = RunMode.Async)]
+        [Command("contact")]
         [Summary("Instructs Amby to contact a user over DM.")]
         [RequireContext(Guild)]
         [RequireUserPermission(GuildPermission.MentionEveryone)]
@@ -123,7 +130,7 @@ namespace DIGOS.Ambassador.Modules
         /// Sasses the user in a DIGOS fashion.
         /// </summary>
         [UsedImplicitly]
-        [Command("sass", RunMode = RunMode.Async)]
+        [Command("sass")]
         [Summary("Sasses the user in a DIGOS fashion.")]
         public async Task SassAsync()
         {
@@ -137,7 +144,7 @@ namespace DIGOS.Ambassador.Modules
         /// Bweh! A silly command.
         /// </summary>
         [UsedImplicitly]
-        [Command("bweh", RunMode = RunMode.Async)]
+        [Command("bweh")]
         [Summary("Bweh!")]
         public async Task BwehAsync()
         {
@@ -151,7 +158,7 @@ namespace DIGOS.Ambassador.Modules
         /// Boops the invoking user.
         /// </summary>
         [UsedImplicitly]
-        [Command("boop", RunMode = RunMode.Async)]
+        [Command("boop")]
         [Summary("Boops you.")]
         public async Task BoopAsync()
         {
@@ -162,7 +169,7 @@ namespace DIGOS.Ambassador.Modules
         /// Baps the invoking user.
         /// </summary>
         [UsedImplicitly]
-        [Command("bap", RunMode = RunMode.Async)]
+        [Command("bap")]
         [Summary("Baps you.")]
         public async Task BapAsync()
         {
@@ -174,7 +181,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="emoteName">The emote.</param>
         [UsedImplicitly]
-        [Command("jumbo", RunMode = RunMode.Async)]
+        [Command("jumbo")]
         [Summary("Sends a jumbo version of the given emote to the chat, if available.")]
         public async Task JumboAsync(string emoteName)
         {
@@ -246,7 +253,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="target">The target.</param>
         [UsedImplicitly]
-        [Command("boop", RunMode = RunMode.Async)]
+        [Command("boop")]
         [Summary("Boops the user.")]
         public async Task BoopAsync([NotNull] IUser target)
         {
@@ -266,7 +273,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="target">The target.</param>
         [UsedImplicitly]
-        [Command("bap", RunMode = RunMode.Async)]
+        [Command("bap")]
         [Summary("Baps the user.")]
         public async Task BapAsync([NotNull] IUser target)
         {
@@ -286,7 +293,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Alias("info", "information", "about")]
-        [Command("info", RunMode = RunMode.Async)]
+        [Command("info")]
         [Summary("Shows some information about Amby's metaworkings.")]
         public async Task InfoAsync()
         {

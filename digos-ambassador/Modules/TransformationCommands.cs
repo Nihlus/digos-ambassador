@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="species">The species to transform it into.</param>
         [UsedImplicitly]
         [Priority(int.MinValue)]
-        [Command(RunMode = Async)]
+        [Command]
         [Summary("Transforms the given bodypart into the given species on yourself.")]
         public async Task ShiftAsync
         (
@@ -113,7 +113,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="species">The species to transform it into.</param>
         [UsedImplicitly]
         [Priority(int.MinValue)]
-        [Command(RunMode = Async)]
+        [Command]
         [Summary("Transforms the given bodypart into the given species on yourself.")]
         public async Task ShiftAsync
         (
@@ -132,7 +132,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="species">The species to transform it into.</param>
         [UsedImplicitly]
         [Priority(int.MinValue)]
-        [Command(RunMode = Async)]
+        [Command]
         [Summary("Transforms the given bodypart of the target user into the given species.")]
         [RequireContext(Guild)]
         public async Task ShiftAsync
@@ -155,7 +155,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="species">The species to transform it into.</param>
         [UsedImplicitly]
         [Priority(int.MinValue)]
-        [Command(RunMode = Async)]
+        [Command]
         [Summary("Transforms the given bodypart of the target user into the given species.")]
         [RequireContext(Guild)]
         public async Task ShiftAsync
@@ -204,7 +204,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="bodypart">The part to transform.</param>
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
-        [Command("colour", RunMode = Async)]
+        [Command("colour")]
         [Summary("Transforms the base colour of the given bodypart on yourself into the given colour.")]
         public async Task ShiftColourAsync
         (
@@ -223,7 +223,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="bodypart">The part to transform.</param>
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
-        [Command("colour", RunMode = Async)]
+        [Command("colour")]
         [Summary("Transforms the base colour of the given bodypart on yourself into the given colour.")]
         public async Task ShiftColourAsync
         (
@@ -242,7 +242,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
         [Summary("Transforms the base colour of the given bodypart on the target user into the given colour.")]
-        [Command("colour", RunMode = Async)]
+        [Command("colour")]
         [RequireContext(Guild)]
         public async Task ShiftColourAsync
         (
@@ -262,7 +262,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
         [Summary("Transforms the base colour of the given bodypart on the target user into the given colour.")]
-        [Command("colour", RunMode = Async)]
+        [Command("colour")]
         [RequireContext(Guild)]
         public async Task ShiftColourAsync
         (
@@ -309,7 +309,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="pattern">The pattern to transform it into.</param>
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
-        [Command("pattern", RunMode = Async)]
+        [Command("pattern")]
         [Summary("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
         public async Task ShiftPatternAsync
         (
@@ -330,7 +330,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="pattern">The pattern to transform it into.</param>
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
-        [Command("pattern", RunMode = Async)]
+        [Command("pattern")]
         [Summary("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
         public async Task ShiftPatternAsync
         (
@@ -353,7 +353,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="pattern">The pattern to transform it into.</param>
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
-        [Command("pattern", RunMode = Async)]
+        [Command("pattern")]
         [Summary("Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.")]
         [RequireContext(Guild)]
         public async Task ShiftPatternAsync
@@ -376,7 +376,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="pattern">The pattern to transform it into.</param>
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
-        [Command("pattern", RunMode = Async)]
+        [Command("pattern")]
         [Summary("Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.")]
         [RequireContext(Guild)]
         public async Task ShiftPatternAsync
@@ -429,7 +429,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="bodypart">The part to transform.</param>
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
-        [Command("pattern-colour", RunMode = Async)]
+        [Command("pattern-colour")]
         [Summary("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
         public async Task ShiftPatternColourAsync
         (
@@ -448,7 +448,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="bodypart">The part to transform.</param>
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
-        [Command("pattern-colour", RunMode = Async)]
+        [Command("pattern-colour")]
         [Summary("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
         public async Task ShiftPatternColourAsync
         (
@@ -466,7 +466,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="bodyPart">The part to transform.</param>
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
-        [Command("pattern-colour", RunMode = Async)]
+        [Command("pattern-colour")]
         [Summary("Transforms the colour of the pattern on the given bodypart on the target user to the given colour.")]
         [RequireContext(Guild)]
         public async Task ShiftPatternColourAsync
@@ -486,7 +486,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="bodyPart">The part to transform.</param>
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
-        [Command("pattern-colour", RunMode = Async)]
+        [Command("pattern-colour")]
         [Summary("Transforms the colour of the pattern on the given bodypart on the target user to the given colour.")]
         [RequireContext(Guild)]
         public async Task ShiftPatternColourAsync
@@ -526,7 +526,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Alias("list-available", "list-species", "species", "list")]
-        [Command("list-available", RunMode = Async)]
+        [Command("list-available")]
         [Summary("Lists the available transformation species.")]
         public async Task ListAvailableTransformationsAsync()
         {
@@ -571,7 +571,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="bodyPart">The part to list available transformations for. Optional.</param>
         [UsedImplicitly]
         [Alias("list-available", "list-species", "species", "list")]
-        [Command("list-available", RunMode = Async)]
+        [Command("list-available")]
         [Summary("Lists the available transformations for a given bodypart.")]
         public async Task ListAvailableTransformationsAsync
         (
@@ -606,7 +606,7 @@ namespace DIGOS.Ambassador.Modules
         /// Describes the current physical appearance of the current character.
         /// </summary>
         [UsedImplicitly]
-        [Command("describe", RunMode = Async)]
+        [Command("describe")]
         [Summary("Describes the current physical appearance of the current character.")]
         public async Task DescribeCharacterAsync()
         {
@@ -625,7 +625,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="character">The character to describe.</param>
         [UsedImplicitly]
-        [Command("describe", RunMode = Async)]
+        [Command("describe")]
         [Summary("Describes the current physical appearance of a character.")]
         public async Task DescribeCharacterAsync([NotNull] Character character)
         {
@@ -639,7 +639,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Alias("reset")]
-        [Command("reset", RunMode = Async)]
+        [Command("reset")]
         [Summary("Resets your form to your default one.")]
         public async Task ResetFormAsync()
         {
@@ -667,7 +667,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="newCharacterName">The name of the character to save the form as.</param>
         [UsedImplicitly]
         [Alias("save", "save-current")]
-        [Command("save", RunMode = Async)]
+        [Command("save")]
         [Summary("Saves your current form as a new character.")]
         public async Task SaveCurrentFormAsync([NotNull] string newCharacterName)
         {
@@ -696,7 +696,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         [UsedImplicitly]
         [Alias("set-default", "save-default")]
-        [Command("set-default", RunMode = Async)]
+        [Command("set-default")]
         [Summary("Sets your current appearance as your current character's default one.")]
         public async Task SetCurrentAppearanceAsDefaultAsync()
         {
@@ -724,7 +724,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="shouldOptIn">Whether or not to opt in by default.</param>
         [UsedImplicitly]
-        [Command("default-opt-in", RunMode = Async)]
+        [Command("default-opt-in")]
         [Summary("Sets your default setting for opting in or out of transformations on servers you join.")]
         [RequireContext(Guild)]
         public async Task SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
@@ -753,7 +753,7 @@ namespace DIGOS.Ambassador.Modules
         /// Opts into the transformation module on this server.
         /// </summary>
         [UsedImplicitly]
-        [Command("opt-in", RunMode = Async)]
+        [Command("opt-in")]
         [Summary("Opts into the transformation module on this server.")]
         [RequireContext(Guild)]
         public async Task OptInToTransformationsAsync()
@@ -777,7 +777,7 @@ namespace DIGOS.Ambassador.Modules
         /// Opts into the transformation module on this server.
         /// </summary>
         [UsedImplicitly]
-        [Command("opt-out", RunMode = Async)]
+        [Command("opt-out")]
         [Summary("Opts out of the transformation module on this server.")]
         [RequireContext(Guild)]
         public async Task OptOutOfTransformationsAsync()
@@ -802,7 +802,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="protectionType">The protection type to use.</param>
         [UsedImplicitly]
-        [Command("default-protection", RunMode = Async)]
+        [Command("default-protection")]
         [Summary("Sets your default protection type for transformations on servers you join. Available types are Whitelist and Blacklist.")]
         public async Task SetDefaultProtectionTypeAsync(ProtectionType protectionType)
         {
@@ -821,7 +821,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="protectionType">The protection type to use.</param>
         [UsedImplicitly]
-        [Command("protection", RunMode = Async)]
+        [Command("protection")]
         [Summary("Sets your protection type for transformations. Available types are Whitelist and Blacklist.")]
         [RequireContext(Guild)]
         public async Task SetProtectionTypeAsync(ProtectionType protectionType)
@@ -841,7 +841,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="user">The user to whitelist.</param>
         [UsedImplicitly]
-        [Command("whitelist", RunMode = Async)]
+        [Command("whitelist")]
         [Summary("Whitelists a user, allowing them to transform you.")]
         public async Task WhitelistUserAsync([NotNull] IUser user)
         {
@@ -860,7 +860,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="user">The user to blacklist.</param>
         [UsedImplicitly]
-        [Command("blacklist", RunMode = Async)]
+        [Command("blacklist")]
         [Summary("Blacklists a user, preventing them from transforming you.")]
         public async Task BlacklistUserAsync([NotNull] IUser user)
         {
@@ -878,7 +878,7 @@ namespace DIGOS.Ambassador.Modules
         /// Updates the transformation database with the bundled definitions.
         /// </summary>
         [UsedImplicitly]
-        [Command("update-db", RunMode = Async)]
+        [Command("update-db")]
         [Summary("Updates the transformation database with the bundled definitions.")]
         [RequireOwner]
         public async Task UpdateTransformationDatabaseAsync()

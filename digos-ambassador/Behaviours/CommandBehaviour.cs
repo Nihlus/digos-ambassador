@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Behaviours
         /// <summary>
         /// Gets the commands that are currently running.
         /// </summary>
-        private ConcurrentQueue<Task<IResult>> RunningCommands { get; }
+        private ConcurrentQueue<Task> RunningCommands { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandBehaviour"/> class.
@@ -104,7 +104,7 @@ namespace DIGOS.Ambassador.Behaviours
             this.Permissions = permissions;
             this.Help = help;
 
-            this.RunningCommands = new ConcurrentQueue<Task<IResult>>();
+            this.RunningCommands = new ConcurrentQueue<Task>();
         }
 
         /// <inheritdoc/>
@@ -135,12 +135,13 @@ namespace DIGOS.Ambassador.Behaviours
             await Task.Delay(TimeSpan.FromSeconds(1), ct);
         }
 
-        private async Task<IResult> SaneExecuteCommandWrapperAsync(ICommandContext context, int argumentPos)
+        private async Task SaneExecuteCommandWrapperAsync(ICommandContext context, int argumentPos)
         {
             // Create a service scope for this command
             using (var scope = this.Services.CreateScope())
             {
-                return await this.Commands.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
+                var result = await this.Commands.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
+                await HandleCommandResultAsync(context, result, argumentPos);
             }
         }
 
@@ -152,8 +153,6 @@ namespace DIGOS.Ambassador.Behaviours
             this.Client.MessageReceived += OnMessageReceived;
             this.Client.MessageUpdated += OnMessageUpdated;
 
-            this.Commands.CommandExecuted += OnCommandExecuted;
-
             return Task.CompletedTask;
         }
 
@@ -164,8 +163,6 @@ namespace DIGOS.Ambassador.Behaviours
 
             this.Client.MessageReceived -= OnMessageReceived;
             this.Client.MessageUpdated -= OnMessageUpdated;
-
-            this.Commands.CommandExecuted -= OnCommandExecuted;
         }
 
         /// <summary>
@@ -287,6 +284,11 @@ namespace DIGOS.Ambassador.Behaviours
 
             switch (result.Error)
             {
+                case CommandError.Exception:
+                {
+                    await HandleInternalErrorAsync(context, result);
+                    break;
+                }
                 case CommandError.UnknownCommand:
                 {
                     break;
@@ -343,20 +345,18 @@ namespace DIGOS.Ambassador.Behaviours
         /// Handles the result of an internal error, generating a short error report for the user and instructing them
         /// on how to proceed.
         /// </summary>
-        /// <param name="command">The command that failed.</param>
         /// <param name="context">The context of the command.</param>
         /// <param name="result">The result of the command.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task HandleInternalErrorAsync
         (
-            [NotNull] CommandInfo command,
             [NotNull] ICommandContext context,
             IResult result
         )
         {
             // Log the exception for later debugging purposes
             var executeResult = (ExecuteResult)result;
-            Log.Error(executeResult.Exception);
+            this.Log.Error(executeResult.Exception);
 
             // Alert the user, explain what happened, and ask them to make a bug report.
             var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
@@ -462,38 +462,6 @@ namespace DIGOS.Ambassador.Behaviours
             }
 
             await OnMessageReceived(updatedMessage);
-        }
-
-        /// <summary>
-        /// Handles the execution result of an asynchronous command, letting errors be handled properly.
-        /// </summary>
-        /// <param name="command">The command that was executed.</param>
-        /// <param name="context">The context of the executed command.</param>
-        /// <param name="result">The result of the execution.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task OnCommandExecuted(Optional<CommandInfo> command, ICommandContext context, IResult result)
-        {
-            if (!command.IsSpecified)
-            {
-                return;
-            }
-
-            var message = context.Message;
-
-            var argumentPos = 0;
-            if (!(message.HasCharPrefix('!', ref argumentPos) || message.HasMentionPrefix(this.Client.CurrentUser, ref argumentPos)))
-            {
-                return;
-            }
-
-            if (result.Error == CommandError.Exception)
-            {
-                await HandleInternalErrorAsync(command.Value, context, result);
-            }
-            else
-            {
-                await HandleCommandResultAsync(context, result, argumentPos);
-            }
         }
     }
 }

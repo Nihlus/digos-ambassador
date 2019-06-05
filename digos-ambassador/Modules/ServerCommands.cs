@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Modules
         /// Shows general information about the current server.
         /// </summary>
         [UsedImplicitly]
-        [Command("show", RunMode = RunMode.Async)]
+        [Command("show")]
         [Alias("show", "info")]
         [Summary("Shows general information about the current server.")]
         [RequireContext(Guild)]
@@ -120,7 +120,7 @@ namespace DIGOS.Ambassador.Modules
         /// Shows the server's join message.
         /// </summary>
         [UsedImplicitly]
-        [Command("join-message", RunMode = RunMode.Async)]
+        [Command("join-message")]
         [Summary("Shows the server's join message.")]
         [RequireContext(Guild)]
         public async Task ShowJoinMessageAsync()

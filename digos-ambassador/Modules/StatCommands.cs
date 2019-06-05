@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Modules
         /// Displays statistics about the current guild.
         /// </summary>
         [UsedImplicitly]
-        [Command("guild", RunMode = Async)]
+        [Command("guild")]
         [Alias("guild", "server")]
         [Summary("Displays statistics about the current guild.")]
         [RequireContext(Guild)]
@@ -83,7 +83,7 @@ namespace DIGOS.Ambassador.Modules
         /// Displays statistics about all guilds the bot has joined.
         /// </summary>
         [UsedImplicitly]
-        [Command("guilds", RunMode = Async)]
+        [Command("guilds")]
         [Alias("guilds", "servers")]
         [Summary("Displays statistics about all guilds the bot has joined.")]
         [RequireContext(DM)]

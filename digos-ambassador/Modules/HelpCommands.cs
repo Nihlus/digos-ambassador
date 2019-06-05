@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [UsedImplicitly]
-        [Command(RunMode = RunMode.Async)]
+        [Command]
         [Summary("Lists available command modules.")]
         public async Task HelpAsync()
         {
@@ -96,7 +96,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="searchText">The text to search the command handler for.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [UsedImplicitly]
-        [Command(RunMode = RunMode.Async)]
+        [Command]
         [Summary("Lists available commands that match the given search text.")]
         public async Task HelpAsync([CanBeNull, Remainder] string searchText)
         {
