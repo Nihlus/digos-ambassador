@@ -253,8 +253,6 @@ namespace DIGOS.Ambassador.Modules
             Roleplay roleplay
         )
         {
-            this.Database.Attach(roleplay);
-
             this.Database.Roleplays.Remove(roleplay);
 
             var canSendMessageInCurrentChannelAfterDeletion = true;
@@ -306,8 +304,6 @@ namespace DIGOS.Ambassador.Modules
         [RequirePermission(Permission.JoinRoleplay)]
         public async Task JoinRoleplayAsync([NotNull] Roleplay roleplay)
         {
-            this.Database.Attach(roleplay);
-
             var addUserResult = await this.Roleplays.AddUserToRoleplayAsync(this.Database, this.Context, roleplay, this.Context.Message.Author);
             if (!addUserResult.IsSuccess)
             {
@@ -362,8 +358,6 @@ namespace DIGOS.Ambassador.Modules
             Roleplay roleplay
         )
         {
-            this.Database.Attach(roleplay);
-
             var invitePlayerResult = await this.Roleplays.InviteUserAsync(this.Database, roleplay, playerToInvite);
             if (!invitePlayerResult.IsSuccess)
             {
@@ -398,8 +392,6 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task LeaveRoleplayAsync([NotNull] Roleplay roleplay)
         {
-            this.Database.Attach(roleplay);
-
             var removeUserResult = await this.Roleplays.RemoveUserFromRoleplayAsync(this.Database, this.Context, roleplay, this.Context.Message.Author);
             if (!removeUserResult.IsSuccess)
             {
@@ -449,8 +441,6 @@ namespace DIGOS.Ambassador.Modules
             Roleplay roleplay
         )
         {
-            this.Database.Attach(roleplay);
-
             var kickUserResult = await this.Roleplays.KickUserFromRoleplayAsync(this.Database, this.Context, roleplay, discordUser);
             if (!kickUserResult.IsSuccess)
             {
@@ -512,8 +502,6 @@ namespace DIGOS.Ambassador.Modules
             Roleplay roleplay
         )
         {
-            this.Database.Attach(roleplay);
-
             var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
             (
                 this.Context.Guild,
@@ -576,8 +564,6 @@ namespace DIGOS.Ambassador.Modules
             Roleplay roleplay
         )
         {
-            this.Database.Attach(roleplay);
-
             var getDedicatedChannelResult = await this.Roleplays.GetDedicatedRoleplayChannelAsync
             (
                 this.Context.Guild,
@@ -717,8 +703,6 @@ namespace DIGOS.Ambassador.Modules
             Roleplay roleplay
         )
         {
-            this.Database.Attach(roleplay);
-
             roleplay.IsActive = false;
             roleplay.ActiveChannelID = null;
 
@@ -804,8 +788,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            this.Database.Attach(roleplay);
-
             int addedOrUpdatedMessageCount = 0;
 
             var latestMessage = startMessage;
@@ -851,8 +833,6 @@ namespace DIGOS.Ambassador.Modules
             Roleplay roleplay
         )
         {
-            this.Database.Attach(roleplay);
-
             var transferResult = await this.Roleplays.TransferRoleplayOwnershipAsync(this.Database, newOwner, roleplay, this.Context.Guild);
             if (!transferResult.IsSuccess)
             {
@@ -1172,8 +1152,6 @@ namespace DIGOS.Ambassador.Modules
                 Roleplay roleplay
             )
             {
-                this.Database.Attach(roleplay);
-
                 var result = await this.Roleplays.SetRoleplayNameAsync(this.Database, this.Context, roleplay, newRoleplayName);
                 if (!result.IsSuccess)
                 {
@@ -1216,8 +1194,6 @@ namespace DIGOS.Ambassador.Modules
                 Roleplay roleplay
             )
             {
-                this.Database.Attach(roleplay);
-
                 var result = await this.Roleplays.SetRoleplaySummaryAsync(this.Database, roleplay, newRoleplaySummary);
                 if (!result.IsSuccess)
                 {
@@ -1247,8 +1223,6 @@ namespace DIGOS.Ambassador.Modules
                 Roleplay roleplay
             )
             {
-                this.Database.Attach(roleplay);
-
                 var result = await this.Roleplays.SetRoleplayIsNSFWAsync(this.Database, roleplay, isNSFW);
                 if (!result.IsSuccess)
                 {
@@ -1295,8 +1269,6 @@ namespace DIGOS.Ambassador.Modules
                 Roleplay roleplay
             )
             {
-                this.Database.Attach(roleplay);
-
                 var result = await this.Roleplays.SetRoleplayIsPublicAsync(this.Database, roleplay, isPublic);
                 if (!result.IsSuccess)
                 {

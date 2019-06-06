@@ -362,8 +362,6 @@ namespace DIGOS.Ambassador.Modules
             Character character
         )
         {
-            this.Database.Attach(character);
-
             this.Database.Characters.Remove(character);
 
             // Delete the character's associated appearances, too, since EF doesn't understand that the character
@@ -534,8 +532,6 @@ namespace DIGOS.Ambassador.Modules
             Character character
         )
         {
-            this.Database.Attach(character);
-
             var getPreviousCharacterResult = await this.Characters.GetCurrentCharacterAsync
             (
                 this.Database,
@@ -653,8 +649,6 @@ namespace DIGOS.Ambassador.Modules
             Character character
         )
         {
-            this.Database.Attach(character);
-
             var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
             if (!getUserResult.IsSuccess)
             {
@@ -934,8 +928,6 @@ namespace DIGOS.Ambassador.Modules
             bool isNSFW = false
         )
         {
-            this.Database.Attach(character);
-
             var addImageResult = await this.Characters.AddImageToCharacterAsync(this.Database, character, imageName, imageUrl, imageCaption, isNSFW);
             if (!addImageResult.IsSuccess)
             {
@@ -965,8 +957,6 @@ namespace DIGOS.Ambassador.Modules
             [NotNull] string imageName
         )
         {
-            this.Database.Attach(character);
-
             var removeImageResult = await this.Characters.RemoveImageFromCharacterAsync(this.Database, character, imageName);
             if (!removeImageResult.IsSuccess)
             {
@@ -996,8 +986,6 @@ namespace DIGOS.Ambassador.Modules
             Character character
         )
         {
-            this.Database.Attach(character);
-
             var transferResult = await this.Characters.TransferCharacterOwnershipAsync(this.Database, newOwner, character, this.Context.Guild);
             if (!transferResult.IsSuccess)
             {
@@ -1240,8 +1228,6 @@ namespace DIGOS.Ambassador.Modules
                 Character character
             )
             {
-                this.Database.Attach(character);
-
                 var previousRole = character.Role;
 
                 var result = await this.Characters.ClearCharacterRoleAsync(this.Database, character);
@@ -1327,8 +1313,6 @@ namespace DIGOS.Ambassador.Modules
                 string newCharacterName
             )
             {
-                this.Database.Attach(character);
-
                 var setNameResult = await this.Characters.SetCharacterNameAsync(this.Database, this.Context, character, newCharacterName);
                 if (!setNameResult.IsSuccess)
                 {
@@ -1357,8 +1341,6 @@ namespace DIGOS.Ambassador.Modules
                 [CanBeNull] string newCharacterAvatarUrl = null
             )
             {
-                this.Database.Attach(character);
-
                 if (newCharacterAvatarUrl is null)
                 {
                     if (!this.Context.Message.Attachments.Any())
@@ -1417,8 +1399,6 @@ namespace DIGOS.Ambassador.Modules
                 string newCharacterNickname
             )
             {
-                this.Database.Attach(character);
-
                 var setNickResult = await this.Characters.SetCharacterNicknameAsync(this.Database, character, newCharacterNickname);
                 if (!setNickResult.IsSuccess)
                 {
@@ -1473,8 +1453,6 @@ namespace DIGOS.Ambassador.Modules
                 string newCharacterSummary
             )
             {
-                this.Database.Attach(character);
-
                 var setSummaryResult = await this.Characters.SetCharacterSummaryAsync(this.Database, character, newCharacterSummary);
                 if (!setSummaryResult.IsSuccess)
                 {
@@ -1505,8 +1483,6 @@ namespace DIGOS.Ambassador.Modules
                 string newCharacterDescription = null
             )
             {
-                this.Database.Attach(character);
-
                 if (newCharacterDescription is null)
                 {
                     if (!this.Context.Message.Attachments.Any())
@@ -1560,8 +1536,6 @@ namespace DIGOS.Ambassador.Modules
                 bool isNSFW
             )
             {
-                this.Database.Attach(character);
-
                 await this.Characters.SetCharacterIsNSFWAsync(this.Database, character, isNSFW);
 
                 await this.Feedback.SendConfirmationAsync(this.Context, $"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
@@ -1586,8 +1560,6 @@ namespace DIGOS.Ambassador.Modules
                 string pronounFamily
             )
             {
-                this.Database.Attach(character);
-
                 var result = await this.Characters.SetCharacterPronounAsync(this.Database, character, pronounFamily);
                 if (!result.IsSuccess)
                 {
@@ -1617,8 +1589,6 @@ namespace DIGOS.Ambassador.Modules
                 IRole discordRole
             )
             {
-                this.Database.Attach(character);
-
                 var previousRole = character.Role;
 
                 var getRoleResult = await this.Characters.GetCharacterRoleAsync(this.Database, discordRole);
