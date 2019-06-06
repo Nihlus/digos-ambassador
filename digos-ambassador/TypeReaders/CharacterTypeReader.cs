@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.TypeReaders
     /// <summary>
     /// Reads owned characters as command arguments.
     /// </summary>
-    public sealed class CharacterTypeReader : OwnedEntityTypeReader<IUser, Character>
+    public sealed class CharacterTypeReader : OwnedEntityTypeReader<Character>
     {
         /// <inheritdoc />
         protected override async Task<RetrieveEntityResult<Character>> RetrieveEntityAsync(IUser entityOwner, string entityName, ICommandContext context, IServiceProvider services)

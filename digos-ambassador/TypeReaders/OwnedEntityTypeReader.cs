@@ -41,11 +41,8 @@ namespace DIGOS.Ambassador.TypeReaders
     /// <summary>
     /// Reads owned entities from command arguments.
     /// </summary>
-    /// <typeparam name="T1">User classes.</typeparam>
-    /// <typeparam name="T2">Owned entity classes.</typeparam>
-    public abstract class OwnedEntityTypeReader<T1, T2> : TypeReader
-        where T1 : class, IUser
-        where T2 : class, IOwnedNamedEntity
+    /// <typeparam name="TEntity">Owned entity classes.</typeparam>
+    public abstract class OwnedEntityTypeReader<TEntity> : TypeReader where TEntity : class, IOwnedNamedEntity
     {
         /// <inheritdoc />
         public sealed override async Task<TypeReaderResult> ReadAsync([NotNull] ICommandContext context, string input, IServiceProvider services)
@@ -136,7 +133,7 @@ namespace DIGOS.Ambassador.TypeReaders
         /// <param name="context">The context of the command.</param>
         /// <param name="services">The injected services.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        protected abstract Task<RetrieveEntityResult<T2>> RetrieveEntityAsync
+        protected abstract Task<RetrieveEntityResult<TEntity>> RetrieveEntityAsync
         (
             [CanBeNull] IUser entityOwner,
             [CanBeNull] string entityName,

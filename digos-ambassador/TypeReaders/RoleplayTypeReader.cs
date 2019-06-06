@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.TypeReaders
     /// Reads owned roleplays as command arguments. The name "current" is reserved, and will retrieve the current
     /// roleplay.
     /// </summary>
-    public sealed class RoleplayTypeReader : OwnedEntityTypeReader<IUser, Roleplay>
+    public sealed class RoleplayTypeReader : OwnedEntityTypeReader<Roleplay>
     {
         /// <inheritdoc />
         protected override async Task<RetrieveEntityResult<Roleplay>> RetrieveEntityAsync(IUser entityOwner, string entityName, ICommandContext context, IServiceProvider services)
