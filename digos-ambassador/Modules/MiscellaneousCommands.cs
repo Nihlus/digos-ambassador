@@ -59,8 +59,8 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="feedback">The user feedback service.</param>
         public MiscellaneousCommands(ContentService content, UserFeedbackService feedback)
         {
-            this._content = content;
-            this._feedback = feedback;
+            _content = content;
+            _feedback = feedback;
         }
 
         /// <summary>
@@ -85,17 +85,17 @@ namespace DIGOS.Ambassador.Modules
         {
             if (discordUser.Id == this.Context.Client.CurrentUser.Id)
             {
-                await this._feedback.SendErrorAsync(this.Context, "That's a splendid idea - at least then, I'd get an intelligent reply.");
+                await _feedback.SendErrorAsync(this.Context, "That's a splendid idea - at least then, I'd get an intelligent reply.");
                 return;
             }
 
             if (discordUser.IsBot)
             {
-                await this._feedback.SendErrorAsync(this.Context, "I could do that, but I doubt I'd get a reply.");
+                await _feedback.SendErrorAsync(this.Context, "I could do that, but I doubt I'd get a reply.");
                 return;
             }
 
-            var eb = this._feedback.CreateFeedbackEmbed
+            var eb = _feedback.CreateFeedbackEmbed
             (
                 discordUser,
                 Color.DarkPurple,
@@ -116,7 +116,7 @@ namespace DIGOS.Ambassador.Modules
                 await userDMChannel.CloseAsync();
             }
 
-            await this._feedback.SendConfirmationAsync(this.Context, "User contacted.");
+            await _feedback.SendConfirmationAsync(this.Context, "User contacted.");
         }
 
         /// <summary>
@@ -128,9 +128,9 @@ namespace DIGOS.Ambassador.Modules
         public async Task SassAsync()
         {
             var isNsfwChannel = this.Context.Channel is ITextChannel textChannel && textChannel.IsNsfw;
-            string sass = this._content.GetSass(isNsfwChannel);
+            string sass = _content.GetSass(isNsfwChannel);
 
-            await this._feedback.SendConfirmationAsync(this.Context, sass);
+            await _feedback.SendConfirmationAsync(this.Context, sass);
         }
 
         /// <summary>
@@ -141,10 +141,10 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Bweh!")]
         public async Task BwehAsync()
         {
-            var eb = this._feedback.CreateEmbedBase();
-            eb.WithImageUrl(this._content.BwehUri.ToString());
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithImageUrl(_content.BwehUri.ToString());
 
-            await this._feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Boops you.")]
         public async Task BoopAsync()
         {
-            await this._feedback.SendConfirmationAsync(this.Context, "*boop*");
+            await _feedback.SendConfirmationAsync(this.Context, "*boop*");
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Baps you.")]
         public async Task BapAsync()
         {
-            await this._feedback.SendConfirmationAsync(this.Context, "**baps**");
+            await _feedback.SendConfirmationAsync(this.Context, "**baps**");
         }
 
         /// <summary>
@@ -229,14 +229,14 @@ namespace DIGOS.Ambassador.Modules
                 var response = await client.GetAsync(emoteUrl, HttpCompletionOption.ResponseHeadersRead);
                 if (response.IsSuccessStatusCode)
                 {
-                    var eb = this._feedback.CreateEmbedBase();
+                    var eb = _feedback.CreateEmbedBase();
                     eb.WithImageUrl(emoteUrl);
 
-                    await this._feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+                    await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
                 }
                 else
                 {
-                    await this._feedback.SendWarningAsync(this.Context, "Sorry, I couldn't find that emote.");
+                    await _feedback.SendWarningAsync(this.Context, "Sorry, I couldn't find that emote.");
                 }
             }
         }
@@ -252,13 +252,13 @@ namespace DIGOS.Ambassador.Modules
         {
             if (target.IsMe(this.Context.Client))
             {
-                await this._feedback.SendConfirmationAsync(this.Context, "...seriously?");
-                await this._feedback.SendConfirmationAsync(this.Context, $"*boops {this.Context.User.Mention}*");
+                await _feedback.SendConfirmationAsync(this.Context, "...seriously?");
+                await _feedback.SendConfirmationAsync(this.Context, $"*boops {this.Context.User.Mention}*");
 
                 return;
             }
 
-            await this._feedback.SendConfirmationAsync(this.Context, $"*boops {target.Mention}*");
+            await _feedback.SendConfirmationAsync(this.Context, $"*boops {target.Mention}*");
         }
 
         /// <summary>
@@ -272,13 +272,13 @@ namespace DIGOS.Ambassador.Modules
         {
             if (target.IsMe(this.Context.Client))
             {
-                await this._feedback.SendConfirmationAsync(this.Context, "...seriously?");
-                await this._feedback.SendConfirmationAsync(this.Context, $"**baps {this.Context.User.Mention}**");
+                await _feedback.SendConfirmationAsync(this.Context, "...seriously?");
+                await _feedback.SendConfirmationAsync(this.Context, $"**baps {this.Context.User.Mention}**");
 
                 return;
             }
 
-            await this._feedback.SendConfirmationAsync(this.Context, $"**baps {target.Mention}**");
+            await _feedback.SendConfirmationAsync(this.Context, $"**baps {target.Mention}**");
         }
 
         /// <summary>
@@ -290,11 +290,11 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Shows some information about Amby's metaworkings.")]
         public async Task InfoAsync()
         {
-            var eb = this._feedback.CreateEmbedBase();
+            var eb = _feedback.CreateEmbedBase();
 
             eb.WithAuthor(this.Context.Client.CurrentUser);
             eb.WithTitle("The DIGOS Ambassador (\"Amby\")");
-            eb.WithImageUrl(this._content.AmbyPortraitUri.ToString());
+            eb.WithImageUrl(_content.AmbyPortraitUri.ToString());
 
             eb.WithDescription
             (
@@ -316,7 +316,7 @@ namespace DIGOS.Ambassador.Modules
                 "- Amby"
             );
 
-            await this._feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
+            await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
         }
     }
 }

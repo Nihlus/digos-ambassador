@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Modules
         public AdminCommands(GlobalInfoContext database, UserFeedbackService feedback)
             : base(database)
         {
-            this._feedback = feedback;
+            _feedback = feedback;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Modules
             await this.Database.Database.EnsureDeletedAsync();
             await this.Database.Database.MigrateAsync();
 
-            await this._feedback.SendConfirmationAsync(this.Context, "Database reset.");
+            await _feedback.SendConfirmationAsync(this.Context, "Database reset.");
         }
     }
 }

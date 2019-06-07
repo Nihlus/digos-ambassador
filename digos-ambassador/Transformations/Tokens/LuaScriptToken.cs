@@ -48,8 +48,8 @@ namespace DIGOS.Ambassador.Transformations
         /// <param name="content">The application's content service.</param>
         public LuaScriptToken(LuaService luaService, ContentService content)
         {
-            this._lua = luaService;
-            this._content = content;
+            _lua = luaService;
+            _content = content;
         }
 
         /// <inheritdoc />
@@ -66,8 +66,8 @@ namespace DIGOS.Ambassador.Transformations
                 return string.Empty;
             }
 
-            var scriptPath = this._content.GetLuaScriptPath(component.Transformation, this.ScriptName);
-            var result = await this._lua.ExecuteScriptAsync
+            var scriptPath = _content.GetLuaScriptPath(component.Transformation, this.ScriptName);
+            var result = await _lua.ExecuteScriptAsync
             (
                 scriptPath,
                 (nameof(character), character),

@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Doc
             var sb = new StringBuilder();
 
             sb.AppendLine(new MarkdownHeader(this.Title, 1, true).Compile());
-            foreach (var section in this._sections)
+            foreach (var section in _sections)
             {
                 sb.AppendLine(section.Compile());
                 sb.AppendLine();
@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Doc
         [NotNull]
         public MarkdownPage AppendSection(MarkdownSection section)
         {
-            this._sections.Add(section);
+            _sections.Add(section);
             return this;
         }
     }

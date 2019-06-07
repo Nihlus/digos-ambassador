@@ -41,9 +41,9 @@ namespace DIGOS.Ambassador.Services
         [NotNull]
         public MetaTableBuilder WithEntry(string entry)
         {
-            if (!this._entries.Contains(entry))
+            if (!_entries.Contains(entry))
             {
-                this._entries.Add(entry);
+                _entries.Add(entry);
             }
 
             return this;
@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Services
                 Name = "env"
             };
 
-            foreach (var entry in this._entries)
+            foreach (var entry in _entries)
             {
                 PopulateSubNodes(metatable, entry, entry);
             }

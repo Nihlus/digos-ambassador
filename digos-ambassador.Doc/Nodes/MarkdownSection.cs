@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
         {
             var sb = new StringBuilder();
             sb.AppendLine(this.Header.Compile());
-            foreach (var contentNode in this._content)
+            foreach (var contentNode in _content)
             {
                 sb.AppendLine(contentNode.Compile());
                 sb.AppendLine();
@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
         [NotNull]
         public MarkdownSection AppendContent([NotNull] IMarkdownNode content)
         {
-            this._content.Add(content);
+            _content.Add(content);
             return this;
         }
 

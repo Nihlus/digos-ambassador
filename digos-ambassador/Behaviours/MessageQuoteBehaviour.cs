@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Behaviours
         public MessageQuoteBehaviour(DiscordSocketClient client, UserFeedbackService feedback)
             : base(client)
         {
-            this._feedback = feedback;
+            _feedback = feedback;
         }
 
         /// <inheritdoc />
@@ -148,7 +148,7 @@ namespace DIGOS.Ambassador.Behaviours
                     }
                 }
 
-                var embed = this._feedback.CreateMessageQuote(quotedMessage, guildUser);
+                var embed = _feedback.CreateMessageQuote(quotedMessage, guildUser);
                 embed.WithTimestamp(quotedMessage.Timestamp);
 
                 try

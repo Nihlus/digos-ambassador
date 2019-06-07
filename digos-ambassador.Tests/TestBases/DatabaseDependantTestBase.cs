@@ -43,15 +43,15 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// </summary>
         protected DatabaseDependantTestBase()
         {
-            this._databaseMock = new MockedDatabase();
-            this.Database = this._databaseMock.GetDatabaseContext();
+            _databaseMock = new MockedDatabase();
+            this.Database = _databaseMock.GetDatabaseContext();
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
             this.Database?.Dispose();
-            this._databaseMock?.Dispose();
+            _databaseMock?.Dispose();
         }
     }
 }

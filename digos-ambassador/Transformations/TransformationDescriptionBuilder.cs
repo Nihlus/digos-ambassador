@@ -49,9 +49,9 @@ namespace DIGOS.Ambassador.Transformations
         /// <param name="services">The available services.</param>
         public TransformationDescriptionBuilder(IServiceProvider services)
         {
-            this._tokenizer = new TransformationTextTokenizer(services);
+            _tokenizer = new TransformationTextTokenizer(services);
 
-            this._tokenizer.DiscoverAvailableTokens();
+            _tokenizer.DiscoverAvailableTokens();
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Transformations
             [CanBeNull] AppearanceComponent component
         )
         {
-            var tokens = this._tokenizer.GetTokens(text);
+            var tokens = _tokenizer.GetTokens(text);
             var tokenContentMap = tokens.ToDictionary(token => token, token => token.GetText(character, component));
 
             int relativeOffset = 0;
@@ -167,7 +167,7 @@ namespace DIGOS.Ambassador.Transformations
             }
 
             var description = sb.ToString().Trim();
-            var withSentenceSpacing = this._sentenceSpacingRegex.Replace(description, ". ");
+            var withSentenceSpacing = _sentenceSpacingRegex.Replace(description, ". ");
 
             return withSentenceSpacing;
         }

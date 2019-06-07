@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Transformations
         /// <param name="services">The services to make available to tokens via dependency injection.</param>
         public TransformationTextTokenizer(IServiceProvider services)
         {
-            this._services = services;
+            _services = services;
         }
 
         /// <summary>
@@ -87,12 +87,12 @@ namespace DIGOS.Ambassador.Transformations
 
             foreach (var identifier in tokenIdentifier.Identifiers)
             {
-                if (this._availableTokens.ContainsKey(identifier))
+                if (_availableTokens.ContainsKey(identifier))
                 {
                     throw new ArgumentException($"A token with the identifier \"{identifier}\"has already been registered.");
                 }
 
-                this._availableTokens.Add(identifier, tokenType);
+                _availableTokens.Add(identifier, tokenType);
             }
         }
 
@@ -188,12 +188,12 @@ namespace DIGOS.Ambassador.Transformations
             }
 
             // Look up the token type
-            if (!this._availableTokens.ContainsKey(identifier))
+            if (!_availableTokens.ContainsKey(identifier))
             {
                 return null;
             }
 
-            var tokenType = this._availableTokens[identifier];
+            var tokenType = _availableTokens[identifier];
 
             // TargetToken is only used here for compile-time resolution of the CreateFrom method name.
             var creationMethod = tokenType.GetMethod
@@ -203,7 +203,7 @@ namespace DIGOS.Ambassador.Transformations
             );
 
             // The +3 here includes the surrounding braces and the @
-            var tokenObject = creationMethod?.Invoke(null, new object[] { start, tokenText.Length + 3, data, this._services } );
+            var tokenObject = creationMethod?.Invoke(null, new object[] { start, tokenText.Length + 3, data, _services } );
 
             return (IReplaceableTextToken)tokenObject;
         }

@@ -62,9 +62,9 @@ namespace DIGOS.Ambassador.Behaviours
         )
             : base(client)
         {
-            this._database = database;
-            this._feedback = feedback;
-            this._servers = servers;
+            _database = database;
+            _feedback = feedback;
+            _servers = servers;
         }
 
         /// <inheritdoc />
@@ -89,14 +89,14 @@ namespace DIGOS.Ambassador.Behaviours
         /// <param name="user">The user.</param>
         private async Task OnUserJoined([NotNull] SocketGuildUser user)
         {
-            var server = await this._database.GetOrRegisterServerAsync(user.Guild);
+            var server = await _database.GetOrRegisterServerAsync(user.Guild);
 
             if (!server.SendJoinMessage)
             {
                 return;
             }
 
-            var getJoinMessageResult = this._servers.GetJoinMessage(server);
+            var getJoinMessageResult = _servers.GetJoinMessage(server);
             if (!getJoinMessageResult.IsSuccess)
             {
                 return;
@@ -105,11 +105,11 @@ namespace DIGOS.Ambassador.Behaviours
             var userChannel = await user.GetOrCreateDMChannelAsync();
             try
             {
-                var eb = this._feedback.CreateEmbedBase();
+                var eb = _feedback.CreateEmbedBase();
                 eb.WithDescription($"Welcome, {user.Mention}!");
                 eb.WithDescription(getJoinMessageResult.Entity);
 
-                await this._feedback.SendEmbedAsync(userChannel, eb.Build());
+                await _feedback.SendEmbedAsync(userChannel, eb.Build());
             }
             catch (HttpException hex)
             {
@@ -121,7 +121,7 @@ namespace DIGOS.Ambassador.Behaviours
                 var content = $"Welcome, {user.Mention}! You have DMs disabled, so I couldn't send you the " +
                               "first-join message. To see it, type \"!server join-message\".";
 
-                var welcomeMessage = this._feedback.CreateFeedbackEmbed
+                var welcomeMessage = _feedback.CreateFeedbackEmbed
                 (
                     user,
                     Color.Orange,
@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Behaviours
 
                 try
                 {
-                    await this._feedback.SendEmbedAsync(user.Guild.DefaultChannel, welcomeMessage);
+                    await _feedback.SendEmbedAsync(user.Guild.DefaultChannel, welcomeMessage);
                 }
                 catch (HttpException pex)
                 {
@@ -146,7 +146,7 @@ namespace DIGOS.Ambassador.Behaviours
         public override void Dispose()
         {
             base.Dispose();
-            this._database.Dispose();
+            _database.Dispose();
         }
     }
 }

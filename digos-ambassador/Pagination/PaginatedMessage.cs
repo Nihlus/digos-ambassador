@@ -99,7 +99,7 @@ namespace DIGOS.Ambassador.Pagination
                 throw new InvalidOperationException("The pager is empty.");
             }
 
-            var embed = BuildEmbed(this._currentPage - 1);
+            var embed = BuildEmbed(_currentPage - 1);
 
             var message = await channel.SendMessageAsync(string.Empty, embed: embed).ConfigureAwait(false);
 
@@ -174,29 +174,29 @@ namespace DIGOS.Ambassador.Pagination
 
             if (emote.Equals(this.Appearance.First))
             {
-                this._currentPage = 1;
+                _currentPage = 1;
             }
             else if (emote.Equals(this.Appearance.Next))
             {
-                if (this._currentPage >= this.Pages.Count)
+                if (_currentPage >= this.Pages.Count)
                 {
                     return;
                 }
 
-                ++this._currentPage;
+                ++_currentPage;
             }
             else if (emote.Equals(this.Appearance.Back))
             {
-                if (this._currentPage <= 1)
+                if (_currentPage <= 1)
                 {
                     return;
                 }
 
-                --this._currentPage;
+                --_currentPage;
             }
             else if (emote.Equals(this.Appearance.Last))
             {
-                this._currentPage = this.Pages.Count;
+                _currentPage = this.Pages.Count;
             }
             else if (emote.Equals(this.Appearance.Stop))
             {
@@ -229,7 +229,7 @@ namespace DIGOS.Ambassador.Pagination
                             return;
                         }
 
-                        this._currentPage = request;
+                        _currentPage = request;
                         _ = response.DeleteAsync().ConfigureAwait(false);
                         await UpdateAsync().ConfigureAwait(false);
                     }
@@ -268,7 +268,7 @@ namespace DIGOS.Ambassador.Pagination
         /// <inheritdoc/>
         protected override async Task UpdateAsync()
         {
-            var embed = BuildEmbed(this._currentPage - 1);
+            var embed = BuildEmbed(_currentPage - 1);
 
             await this.Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
         }

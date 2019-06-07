@@ -51,15 +51,15 @@ namespace DIGOS.Ambassador.Tests.TestBases
         {
             this.Commands = new CommandService();
             var content = new ContentService();
-            this._transformations = new TransformationService(content);
+            _transformations = new TransformationService(content);
 
-            this.Characters = new CharacterService(this.Commands, new OwnedEntityService(), content, this._transformations);
+            this.Characters = new CharacterService(this.Commands, new OwnedEntityService(), content, _transformations);
         }
 
         /// <inheritdoc />
         public virtual async Task InitializeAsync()
         {
-            await this._transformations.UpdateTransformationDatabaseAsync(this.Database);
+            await _transformations.UpdateTransformationDatabaseAsync(this.Database);
         }
 
         /// <inheritdoc />

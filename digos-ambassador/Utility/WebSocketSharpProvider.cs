@@ -64,28 +64,28 @@ namespace DIGOS.Ambassador.Utility
         /// </summary>
         public WebSocketSharpProvider()
         {
-            this._headers = new Dictionary<string, string>();
-            this._lock = new SemaphoreSlim(1, 1);
-            this._cancelTokenSource = new CancellationTokenSource();
-            this._cancelToken = CancellationToken.None;
-            this._parentToken = CancellationToken.None;
-            this._waitUntilConnect = new ManualResetEventSlim();
+            _headers = new Dictionary<string, string>();
+            _lock = new SemaphoreSlim(1, 1);
+            _cancelTokenSource = new CancellationTokenSource();
+            _cancelToken = CancellationToken.None;
+            _parentToken = CancellationToken.None;
+            _waitUntilConnect = new ManualResetEventSlim();
         }
 
         /// <inheritdoc />
         public void SetHeader([NotNull] string key, string value)
         {
-            this._headers[key] = value;
+            _headers[key] = value;
         }
 
         /// <inheritdoc />
         public void SetCancelToken(CancellationToken cancelToken)
         {
-            this._parentToken = cancelToken;
-            this._cancelToken = CancellationTokenSource.CreateLinkedTokenSource
+            _parentToken = cancelToken;
+            _cancelToken = CancellationTokenSource.CreateLinkedTokenSource
             (
-                this._parentToken,
-                this._cancelTokenSource.Token
+                _parentToken,
+                _cancelTokenSource.Token
             )
             .Token;
         }
@@ -93,14 +93,14 @@ namespace DIGOS.Ambassador.Utility
         /// <inheritdoc />
         public async Task ConnectAsync(string host)
         {
-            await this._lock.WaitAsync().ConfigureAwait(false);
+            await _lock.WaitAsync().ConfigureAwait(false);
             try
             {
                 await ConnectInternalAsync(host).ConfigureAwait(false);
             }
             finally
             {
-                this._lock.Release();
+                _lock.Release();
             }
         }
 
@@ -108,62 +108,62 @@ namespace DIGOS.Ambassador.Utility
         {
             await DisconnectInternalAsync().ConfigureAwait(false);
 
-            this._cancelTokenSource = new CancellationTokenSource();
-            this._cancelToken = CancellationTokenSource.CreateLinkedTokenSource
+            _cancelTokenSource = new CancellationTokenSource();
+            _cancelToken = CancellationTokenSource.CreateLinkedTokenSource
                 (
-                    this._parentToken,
-                    this._cancelTokenSource.Token
+                    _parentToken,
+                    _cancelTokenSource.Token
                 )
                 .Token;
 
-            this._client = new WebSocket(host)
+            _client = new WebSocket(host)
             {
-                CustomHeaders = this._headers.ToList()
+                CustomHeaders = _headers.ToList()
             };
-            this._client.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
+            _client.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 
-            this._client.OnMessage += OnMessage;
-            this._client.OnOpen += OnConnected;
-            this._client.OnClose += OnClosed;
+            _client.OnMessage += OnMessage;
+            _client.OnOpen += OnConnected;
+            _client.OnClose += OnClosed;
 
-            this._client.Connect();
-            this._waitUntilConnect.Wait(this._cancelToken);
+            _client.Connect();
+            _waitUntilConnect.Wait(_cancelToken);
         }
 
         /// <inheritdoc />
         public async Task DisconnectAsync()
         {
-            await this._lock.WaitAsync().ConfigureAwait(false);
+            await _lock.WaitAsync().ConfigureAwait(false);
             try
             {
                 await DisconnectInternalAsync().ConfigureAwait(false);
             }
             finally
             {
-                this._lock.Release();
+                _lock.Release();
             }
         }
 
         [NotNull]
         private Task DisconnectInternalAsync()
         {
-            this._cancelTokenSource.Cancel();
-            if (this._client is null)
+            _cancelTokenSource.Cancel();
+            if (_client is null)
             {
                 return Task.CompletedTask;
             }
 
-            if (this._client.ReadyState == WebSocketState.Open)
+            if (_client.ReadyState == WebSocketState.Open)
             {
-                this._client.Close();
+                _client.Close();
             }
 
-            this._client.OnMessage -= OnMessage;
-            this._client.OnOpen -= OnConnected;
-            this._client.OnClose -= OnClosed;
+            _client.OnMessage -= OnMessage;
+            _client.OnOpen -= OnConnected;
+            _client.OnClose -= OnClosed;
 
-            this._client = null;
-            this._waitUntilConnect.Reset();
+            _client = null;
+            _waitUntilConnect.Reset();
 
             return Task.CompletedTask;
         }
@@ -183,21 +183,21 @@ namespace DIGOS.Ambassador.Utility
         /// <inheritdoc />
         public async Task SendAsync([NotNull] byte[] data, int index, int count, bool isText)
         {
-            await this._lock.WaitAsync(this._cancelToken).ConfigureAwait(false);
+            await _lock.WaitAsync(_cancelToken).ConfigureAwait(false);
             try
             {
                 if (isText)
                 {
-                    this._client.Send(Encoding.UTF8.GetString(data, index, count));
+                    _client.Send(Encoding.UTF8.GetString(data, index, count));
                 }
                 else
                 {
-                    this._client.Send(data.Skip(index).Take(count).ToArray());
+                    _client.Send(data.Skip(index).Take(count).ToArray());
                 }
             }
             finally
             {
-                this._lock.Release();
+                _lock.Release();
             }
         }
 
@@ -213,7 +213,7 @@ namespace DIGOS.Ambassador.Utility
 
         private void OnConnected(object sender, EventArgs e)
         {
-            this._waitUntilConnect.Set();
+            _waitUntilConnect.Set();
         }
 
         private void OnClosed(object sender, [NotNull] CloseEventArgs e)
@@ -231,17 +231,17 @@ namespace DIGOS.Ambassador.Utility
         /// <inheritdoc />
         public void Dispose()
         {
-            if (this._isDisposed)
+            if (_isDisposed)
             {
                 return;
             }
 
             DisconnectInternalAsync().GetAwaiter().GetResult();
 
-            ((IDisposable)this._client)?.Dispose();
-            this._client = null;
+            ((IDisposable)_client)?.Dispose();
+            _client = null;
 
-            this._isDisposed = true;
+            _isDisposed = true;
         }
     }
 }

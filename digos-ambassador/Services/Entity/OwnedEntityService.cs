@@ -142,16 +142,16 @@ namespace DIGOS.Ambassador.Services
                 return DetermineConditionResult.FromError(CommandError.ObjectNotFound, "Names cannot be empty.");
             }
 
-            if (entityName.Any(c => this._reservedNameCharacters.Contains(c)))
+            if (entityName.Any(c => _reservedNameCharacters.Contains(c)))
             {
                 return DetermineConditionResult.FromError
                 (
                     CommandError.UnmetPrecondition,
-                    $"Names may not contain any of the following characters: {this._reservedNameCharacters.Humanize()}"
+                    $"Names may not contain any of the following characters: {_reservedNameCharacters.Humanize()}"
                 );
             }
 
-            if (this._reservedNames.Any(n => string.Equals(n, entityName, StringComparison.OrdinalIgnoreCase)))
+            if (_reservedNames.Any(n => string.Equals(n, entityName, StringComparison.OrdinalIgnoreCase)))
             {
                 return DetermineConditionResult.FromError
                 (

@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
         /// <param name="target">The required target scope.</param>
         public RequirePermissionAttribute(Permission permission, PermissionTarget target = PermissionTarget.Self)
         {
-            this._requiredPermission = (permission, target);
+            _requiredPermission = (permission, target);
         }
 
         /// <inheritdoc />
@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
             var permissionService = services.GetRequiredService<PermissionService>();
             var db = services.GetRequiredService<GlobalInfoContext>();
 
-            if (await permissionService.HasPermissionAsync(db, context.Guild, context.User, this._requiredPermission))
+            if (await permissionService.HasPermissionAsync(db, context.Guild, context.User, _requiredPermission))
             {
                 return PreconditionResult.FromSuccess();
             }

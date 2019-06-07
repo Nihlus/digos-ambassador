@@ -45,12 +45,12 @@ namespace DIGOS.Ambassador.Tests.Database
         /// </summary>
         public MockedDatabase()
         {
-            this._connection = new SqliteConnection("DataSource=:memory:");
-            this._connection.Open();
+            _connection = new SqliteConnection("DataSource=:memory:");
+            _connection.Open();
 
-            this._databaseOptions = new DbContextOptionsBuilder<GlobalInfoContext>()
+            _databaseOptions = new DbContextOptionsBuilder<GlobalInfoContext>()
                 .UseLazyLoadingProxies()
-                .UseSqlite(this._connection).Options;
+                .UseSqlite(_connection).Options;
 
             using (var db = GetDatabaseContext())
             {
@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Database
         [NotNull]
         public GlobalInfoContext GetDatabaseContext()
         {
-            return new GlobalInfoContext(this._databaseOptions);
+            return new GlobalInfoContext(_databaseOptions);
         }
 
         /// <summary>
@@ -133,8 +133,8 @@ namespace DIGOS.Ambassador.Tests.Database
         /// <inheritdoc />
         public void Dispose()
         {
-            this._connection?.Close();
-            this._connection?.Dispose();
+            _connection?.Close();
+            _connection?.Dispose();
         }
     }
 }

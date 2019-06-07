@@ -58,8 +58,8 @@ namespace DIGOS.Ambassador.Behaviours
         )
             : base(client)
         {
-            this._roleplays = roleplays;
-            this._database = database;
+            _roleplays = roleplays;
+            _database = database;
         }
 
         /// <inheritdoc />
@@ -109,7 +109,7 @@ namespace DIGOS.Ambassador.Behaviours
                 return;
             }
 
-            await this._roleplays.ConsumeMessageAsync(this._database, new SocketCommandContext(this.Client, message));
+            await _roleplays.ConsumeMessageAsync(_database, new SocketCommandContext(this.Client, message));
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace DIGOS.Ambassador.Behaviours
         public override void Dispose()
         {
             base.Dispose();
-            this._database.Dispose();
+            _database.Dispose();
         }
     }
 }

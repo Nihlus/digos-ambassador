@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
         /// <param name="requireOwner">Whether or not it is required that the current roleplay is owned by the invoker.</param>
         public RequireActiveRoleplayAttribute(bool requireOwner = false)
         {
-            this._requireOwner = requireOwner;
+            _requireOwner = requireOwner;
         }
 
         /// <inheritdoc />
@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
                 return PreconditionResult.FromError(result);
             }
 
-            if (this._requireOwner)
+            if (_requireOwner)
             {
                 var roleplay = result.Entity;
                 if (roleplay.Owner.DiscordID != (long)context.User.Id)

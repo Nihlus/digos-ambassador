@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.Transformations
         /// <param name="luaService">The lua execution service.</param>
         public LuaSnippetToken(LuaService luaService)
         {
-            this._lua = luaService;
+            _lua = luaService;
         }
 
         /// <inheritdoc />
@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Transformations
         /// <inheritdoc />
         public override async Task<string> GetTextAsync(Character character, AppearanceComponent component)
         {
-            var result = await this._lua.ExecuteSnippetAsync
+            var result = await _lua.ExecuteSnippetAsync
             (
                 this.Snippet,
                 (nameof(character), character),

@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
         public LuaServiceTests()
         {
-            this._lua = new LuaService(new Mock<ContentService>().Object);
+            _lua = new LuaService(new Mock<ContentService>().Object);
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
         {
             const string code = "return \"test\"";
 
-            var result = await this._lua.ExecuteSnippetAsync(code);
+            var result = await _lua.ExecuteSnippetAsync(code);
             Assert.True(result.IsSuccess);
             Assert.Equal("test", result.Entity);
         }
@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
         {
             const string code = "while (true) do end";
 
-            var result = await this._lua.ExecuteSnippetAsync(code);
+            var result = await _lua.ExecuteSnippetAsync(code);
             Assert.False(result.IsSuccess);
         }
 
@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
         {
             const string code = "setfenv({})";
 
-            var result = await this._lua.ExecuteSnippetAsync(code);
+            var result = await _lua.ExecuteSnippetAsync(code);
             Assert.False(result.IsSuccess);
         }
 
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
         {
             const string code = "return string.lower(\"ABC\")";
 
-            var result = await this._lua.ExecuteSnippetAsync(code);
+            var result = await _lua.ExecuteSnippetAsync(code);
             Assert.True(result.IsSuccess);
             Assert.Equal("abc", result.Entity);
         }
@@ -83,7 +83,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             int variable = 10;
             const string code = "return variable";
 
-            var result = await this._lua.ExecuteSnippetAsync(code, (nameof(variable), variable));
+            var result = await _lua.ExecuteSnippetAsync(code, (nameof(variable), variable));
             Assert.True(result.IsSuccess);
             Assert.Equal("10.0", result.Entity);
         }

@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="contentService">The content service.</param>
         public DossierService([NotNull] ContentService contentService)
         {
-            this._content = contentService;
+            _content = contentService;
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace DIGOS.Ambassador.Services
             [NotNull] Dossier dossier
         )
         {
-            var deleteContentResult = await this._content.DeleteDossierDataAsync(dossier);
+            var deleteContentResult = await _content.DeleteDossierDataAsync(dossier);
             if (!deleteContentResult.IsSuccess)
             {
                 return deleteContentResult;
@@ -244,8 +244,8 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var originalDossierPath = dossier.Path;
-            var newDossierPath = Path.GetFullPath(Path.Combine(this._content.BaseDossierPath, $"{dossier.Title}.pdf"));
-            if (Directory.GetParent(newDossierPath).FullName != this._content.BaseDossierPath)
+            var newDossierPath = Path.GetFullPath(Path.Combine(_content.BaseDossierPath, $"{dossier.Title}.pdf"));
+            if (Directory.GetParent(newDossierPath).FullName != _content.BaseDossierPath)
             {
                 return ModifyEntityResult.FromError(CommandError.Exception, "Invalid data path.");
             }
@@ -284,9 +284,9 @@ namespace DIGOS.Ambassador.Services
             [NotNull] SocketCommandContext context
         )
         {
-            var dossierPath = Path.GetFullPath(Path.Combine(this._content.BaseContentPath, "Dossiers", $"{dossier.Title}.pdf"));
+            var dossierPath = Path.GetFullPath(Path.Combine(_content.BaseContentPath, "Dossiers", $"{dossier.Title}.pdf"));
 
-            if (Directory.GetParent(dossierPath).FullName != this._content.BaseDossierPath)
+            if (Directory.GetParent(dossierPath).FullName != _content.BaseDossierPath)
             {
                 return ModifyEntityResult.FromError(CommandError.Exception, "Invalid data path.");
             }

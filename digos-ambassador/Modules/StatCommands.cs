@@ -58,8 +58,8 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="interactivity">The interactivity service.</param>
         public StatCommands(UserFeedbackService feedback, InteractivityService interactivity)
         {
-            this._feedback = feedback;
-            this._interactivity = interactivity;
+            _feedback = feedback;
+            _interactivity = interactivity;
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.Modules
 
             var eb = CreateGuildInfoEmbed(guild);
 
-            await this._feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
         }
 
         /// <summary>
@@ -93,12 +93,12 @@ namespace DIGOS.Ambassador.Modules
             var guilds = this.Context.Client.Guilds;
             var pages = guilds.Select(CreateGuildInfoEmbed);
 
-            var paginatedMessage = new PaginatedEmbed(this._feedback, this.Context.User).WithPages(pages);
+            var paginatedMessage = new PaginatedEmbed(_feedback, this.Context.User).WithPages(pages);
 
-            await this._interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            await _interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (
                 this.Context,
-                this._feedback,
+                _feedback,
                 paginatedMessage
             );
         }
@@ -111,7 +111,7 @@ namespace DIGOS.Ambassador.Modules
         [NotNull]
         private EmbedBuilder CreateGuildInfoEmbed([NotNull] SocketGuild guild)
         {
-            var eb = this._feedback.CreateEmbedBase();
+            var eb = _feedback.CreateEmbedBase();
 
             if (!(guild.SplashUrl is null))
             {

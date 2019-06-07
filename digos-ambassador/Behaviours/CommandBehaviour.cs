@@ -95,14 +95,14 @@ namespace DIGOS.Ambassador.Behaviours
         )
             : base(client)
         {
-            this._database = database;
-            this._services = services;
-            this._feedback = feedback;
-            this._privacy = privacy;
-            this._content = content;
-            this._commands = commands;
-            this._permissions = permissions;
-            this._help = help;
+            _database = database;
+            _services = services;
+            _feedback = feedback;
+            _privacy = privacy;
+            _content = content;
+            _commands = commands;
+            _permissions = permissions;
+            _help = help;
 
             this.RunningCommands = new ConcurrentQueue<Task>();
         }
@@ -138,9 +138,9 @@ namespace DIGOS.Ambassador.Behaviours
         private async Task SaneExecuteCommandWrapperAsync(ICommandContext context, int argumentPos)
         {
             // Create a service scope for this command
-            using (var scope = this._services.CreateScope())
+            using (var scope = _services.CreateScope())
             {
-                var result = await this._commands.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
+                var result = await _commands.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
                 await HandleCommandResultAsync(context, result, argumentPos);
             }
         }
@@ -174,7 +174,7 @@ namespace DIGOS.Ambassador.Behaviours
         private bool IsPrivacyExemptCommand(ICommandContext context, int argumentPos)
         {
             // We need to gather consent from the user
-            var commandSearchResult = this._commands.Search(context, argumentPos);
+            var commandSearchResult = _commands.Search(context, argumentPos);
             if (!commandSearchResult.IsSuccess)
             {
                 return false;
@@ -217,11 +217,11 @@ namespace DIGOS.Ambassador.Behaviours
             var context = new SocketCommandContext(this.Client, message);
 
             // Perform first-time user checks, making sure the user has their default permissions, has consented, etc
-            if (!await this._privacy.HasUserConsentedAsync(this._database, context.User) && !IsPrivacyExemptCommand(context, argumentPos))
+            if (!await _privacy.HasUserConsentedAsync(_database, context.User) && !IsPrivacyExemptCommand(context, argumentPos))
             {
                 // Ask for consent
                 var userDMChannel = await arg.Author.GetOrCreateDMChannelAsync();
-                var result = await this._privacy.RequestConsentAsync(userDMChannel, this._content, this._feedback);
+                var result = await _privacy.RequestConsentAsync(userDMChannel, _content, _feedback);
                 if (result.IsSuccess)
                 {
                     return;
@@ -231,7 +231,7 @@ namespace DIGOS.Ambassador.Behaviours
                                         "this, so you can read the bot's privacy policy and consent to data " +
                                         "handling and processing.";
 
-                await this._feedback.SendWarningAsync(context, response);
+                await _feedback.SendWarningAsync(context, response);
 
                 return;
             }
@@ -239,7 +239,7 @@ namespace DIGOS.Ambassador.Behaviours
             var guild = (message.Channel as SocketGuildChannel)?.Guild;
             if (guild != null)
             {
-                var registerUserResult = await this._database.GetOrRegisterUserAsync(arg.Author);
+                var registerUserResult = await _database.GetOrRegisterUserAsync(arg.Author);
                 if (!registerUserResult.IsSuccess)
                 {
                     return;
@@ -247,15 +247,15 @@ namespace DIGOS.Ambassador.Behaviours
 
                 var user = registerUserResult.Entity;
 
-                var server = await this._database.GetOrRegisterServerAsync(guild);
+                var server = await _database.GetOrRegisterServerAsync(guild);
 
                 // Grant permissions to new users
                 if (!server.IsUserKnown(arg.Author))
                 {
-                    await this._permissions.GrantDefaultPermissionsAsync(this._database, guild, arg.Author);
+                    await _permissions.GrantDefaultPermissionsAsync(_database, guild, arg.Author);
                     server.KnownUsers.Add(user);
 
-                    await this._database.SaveChangesAsync();
+                    await _database.SaveChangesAsync();
                 }
             }
 
@@ -304,7 +304,7 @@ namespace DIGOS.Ambassador.Behaviours
 
                     try
                     {
-                        var errorEmbed = this._feedback.CreateFeedbackEmbed
+                        var errorEmbed = _feedback.CreateFeedbackEmbed
                         (
                             context.User,
                             Color.Red,
@@ -313,14 +313,14 @@ namespace DIGOS.Ambassador.Behaviours
 
                         await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
 
-                        var searchResult = this._commands.Search(context, argumentPos);
+                        var searchResult = _commands.Search(context, argumentPos);
                         if (searchResult.Commands.Any())
                         {
                             await userDMChannel.SendMessageAsync
                             (
                                 string.Empty,
                                 false,
-                                this._help.CreateCommandUsageEmbed(searchResult.Commands)
+                                _help.CreateCommandUsageEmbed(searchResult.Commands)
                             );
                         }
                     }
@@ -363,7 +363,7 @@ namespace DIGOS.Ambassador.Behaviours
 
             try
             {
-                var eb = this._feedback.CreateEmbedBase(Color.Red);
+                var eb = _feedback.CreateEmbedBase(Color.Red);
                 eb.WithTitle("Internal Error");
                 eb.WithDescription
                 (
@@ -389,11 +389,11 @@ namespace DIGOS.Ambassador.Behaviours
                     "If you don't have an account on github, you can also send a DM to Jax#7487, who is the main" +
                     " developer of the bot."
                 );
-                eb.WithThumbnailUrl(this._content.BrokenAmbyUri.ToString());
+                eb.WithThumbnailUrl(_content.BrokenAmbyUri.ToString());
 
-                var reportEmbed = this._feedback.CreateEmbedBase(Color.Red);
+                var reportEmbed = _feedback.CreateEmbedBase(Color.Red);
                 reportEmbed.WithTitle("Click here to create a new issue");
-                reportEmbed.WithUrl(this._content.AutomaticBugReportCreationUri.ToString());
+                reportEmbed.WithUrl(_content.AutomaticBugReportCreationUri.ToString());
 
                 using (var ms = new MemoryStream())
                 {

@@ -53,8 +53,8 @@ namespace DIGOS.Ambassador.Services
         /// <param name="entityService">The application's owned entity service.</param>
         public RoleplayService(CommandService commands, OwnedEntityService entityService)
         {
-            this._commands = commands;
-            this._ownedEntities = entityService;
+            _commands = commands;
+            _ownedEntities = entityService;
         }
 
         /// <summary>
@@ -336,7 +336,7 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var userRoleplays = GetUserRoleplays(db, discordUser, guild);
-            return await this._ownedEntities.IsEntityNameUniqueForUserAsync(userRoleplays, roleplayName);
+            return await _ownedEntities.IsEntityNameUniqueForUserAsync(userRoleplays, roleplayName);
         }
 
         /// <summary>
@@ -632,7 +632,7 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var newOwnerRoleplays = GetUserRoleplays(db, newOwner, guild);
-            return await this._ownedEntities.TransferEntityOwnershipAsync
+            return await _ownedEntities.TransferEntityOwnershipAsync
             (
                 db,
                 newOwner,
@@ -677,8 +677,8 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.MultipleMatches, errorMessage);
             }
 
-            var commandModule = this._commands.Modules.First(m => m.Name == "roleplay");
-            var validNameResult = this._ownedEntities.IsEntityNameValid(commandModule, newRoleplayName);
+            var commandModule = _commands.Modules.First(m => m.Name == "roleplay");
+            var validNameResult = _ownedEntities.IsEntityNameValid(commandModule, newRoleplayName);
             if (!validNameResult.IsSuccess)
             {
                 return ModifyEntityResult.FromError(validNameResult);

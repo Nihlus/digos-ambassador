@@ -163,7 +163,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 await base.InitializeAsync();
-                this._templateSpecies = this.Database.Species.First(s => s.Name == "template");
+                _templateSpecies = this.Database.Species.First(s => s.Name == "template");
             }
 
             [Fact]
@@ -173,7 +173,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 (
                     this.Database,
                     Bodypart.Wings,
-                    this._templateSpecies
+                    _templateSpecies
                 );
 
                 Assert.True(result);
@@ -186,7 +186,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 (
                     this.Database,
                     Bodypart.Face,
-                    this._templateSpecies
+                    _templateSpecies
                 );
 
                 Assert.False(result);
@@ -200,7 +200,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 await base.InitializeAsync();
-                this._templateSpecies = this.Database.Species.First(s => s.Name == "template");
+                _templateSpecies = this.Database.Species.First(s => s.Name == "template");
             }
 
             [Fact]
@@ -210,7 +210,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 (
                     this.Database,
                     Bodypart.Face,
-                    this._templateSpecies
+                    _templateSpecies
                 );
 
                 Assert.True(result.IsSuccess);
@@ -219,7 +219,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var transformation = result.Entity.First();
 
                 Assert.Equal(Bodypart.Face, transformation.Part);
-                Assert.Same(this._templateSpecies, transformation.Species);
+                Assert.Same(_templateSpecies, transformation.Species);
             }
 
             [Fact]
@@ -244,7 +244,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 (
                     this.Database,
                     Bodypart.Wings,
-                    this._templateSpecies
+                    _templateSpecies
                 );
 
                 Assert.False(result.IsSuccess);
@@ -265,8 +265,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._user,
-                    this._guild
+                    _user,
+                    _guild
                 );
 
                 Assert.NotEmpty(this.Database.ServerUserProtections);
@@ -279,11 +279,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._user,
-                    this._guild
+                    _user,
+                    _guild
                 );
 
-                Assert.Equal((long)this._guild.Id, result.Entity.Server.DiscordID);
+                Assert.Equal((long)_guild.Id, result.Entity.Server.DiscordID);
             }
 
             [Fact]
@@ -292,11 +292,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._user,
-                    this._guild
+                    _user,
+                    _guild
                 );
 
-                Assert.Equal((long)this._user.Id, result.Entity.User.DiscordID);
+                Assert.Equal((long)_user.Id, result.Entity.User.DiscordID);
             }
 
             [Fact]
@@ -306,16 +306,16 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var created = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._user,
-                    this._guild
+                    _user,
+                    _guild
                 );
 
                 // Get it from the database
                 var retrieved = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._user,
-                    this._guild
+                    _user,
+                    _guild
                 );
 
                 Assert.Same(created.Entity, retrieved.Entity);
@@ -324,7 +324,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task CreatedObjectRespectsGlobalDefaults()
             {
-                var user = (await this.Database.GetOrRegisterUserAsync(this._user)).Entity;
+                var user = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
 
                 var globalSetting = new GlobalUserProtection
                 {
@@ -339,8 +339,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var localSetting = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._user,
-                    this._guild
+                    _user,
+                    _guild
                 );
 
                 Assert.Equal(globalSetting.DefaultOptIn, localSetting.Entity.HasOptedIn);
@@ -358,7 +358,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 Assert.Empty(this.Database.ServerUserProtections);
 
-                var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, this._user);
+                var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, _user);
 
                 Assert.NotEmpty(this.Database.GlobalUserProtections);
                 Assert.Same(result.Entity, this.Database.GlobalUserProtections.First());
@@ -367,19 +367,19 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task CreatedObjectIsBoundToTheCorrectUser()
             {
-                var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, this._user);
+                var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, _user);
 
-                Assert.Equal((long)this._user.Id, result.Entity.User.DiscordID);
+                Assert.Equal((long)_user.Id, result.Entity.User.DiscordID);
             }
 
             [Fact]
             public async Task RetrievesCorrectObjectIfOneExists()
             {
                 // Create an object
-                var created = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, this._user);
+                var created = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, _user);
 
                 // Get it from the database
-                var retrieved = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, this._user);
+                var retrieved = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(this.Database, _user);
 
                 Assert.Same(created.Entity, retrieved.Entity);
             }
@@ -393,24 +393,24 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task CanBlacklistUser()
             {
-                var result = await this.Transformations.BlacklistUserAsync(this.Database, this._user, this._blacklistedUser);
+                var result = await this.Transformations.BlacklistUserAsync(this.Database, _user, _blacklistedUser);
 
                 Assert.True(result.IsSuccess);
                 Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
 
                 Assert.NotEmpty(this.Database.GlobalUserProtections.First().Blacklist);
 
-                Assert.Equal((long)this._blacklistedUser.Id, this.Database.GlobalUserProtections.First().Blacklist.First().DiscordID);
+                Assert.Equal((long)_blacklistedUser.Id, this.Database.GlobalUserProtections.First().Blacklist.First().DiscordID);
             }
 
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfUserIsAlreadyBlacklisted()
             {
                 // Blacklist the user
-                await this.Transformations.BlacklistUserAsync(this.Database, this._user, this._blacklistedUser);
+                await this.Transformations.BlacklistUserAsync(this.Database, _user, _blacklistedUser);
 
                 // Then blacklist them again
-                var result = await this.Transformations.BlacklistUserAsync(this.Database, this._user, this._blacklistedUser);
+                var result = await this.Transformations.BlacklistUserAsync(this.Database, _user, _blacklistedUser);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.Unsuccessful, result.Error);
@@ -419,7 +419,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfTargetUserIsInvokingUser()
             {
-                var result = await this.Transformations.BlacklistUserAsync(this.Database, this._user, this._user);
+                var result = await this.Transformations.BlacklistUserAsync(this.Database, _user, _user);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.Unsuccessful, result.Error);
@@ -434,23 +434,23 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task CanWhitelistUser()
             {
-                var result = await this.Transformations.WhitelistUserAsync(this.Database, this._user, this._whitelistedUser);
+                var result = await this.Transformations.WhitelistUserAsync(this.Database, _user, _whitelistedUser);
 
                 Assert.True(result.IsSuccess);
                 Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
 
                 Assert.NotEmpty(this.Database.GlobalUserProtections.First().Whitelist);
-                Assert.Equal((long)this._whitelistedUser.Id, this.Database.GlobalUserProtections.First().Whitelist.First().DiscordID);
+                Assert.Equal((long)_whitelistedUser.Id, this.Database.GlobalUserProtections.First().Whitelist.First().DiscordID);
             }
 
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfUserIsAlreadyWhitelisted()
             {
                 // Whitelist the user
-                await this.Transformations.WhitelistUserAsync(this.Database, this._user, this._whitelistedUser);
+                await this.Transformations.WhitelistUserAsync(this.Database, _user, _whitelistedUser);
 
                 // Then Whitelist them again
-                var result = await this.Transformations.WhitelistUserAsync(this.Database, this._user, this._whitelistedUser);
+                var result = await this.Transformations.WhitelistUserAsync(this.Database, _user, _whitelistedUser);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.Unsuccessful, result.Error);
@@ -459,7 +459,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfTargetUserIsInvokingUser()
             {
-                var result = await this.Transformations.WhitelistUserAsync(this.Database, this._user, this._user);
+                var result = await this.Transformations.WhitelistUserAsync(this.Database, _user, _user);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.Unsuccessful, result.Error);
@@ -478,8 +478,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.SetServerProtectionTypeAsync
                 (
                     this.Database,
-                    this._user,
-                    this._guild,
+                    _user,
+                    _guild,
                     expected
                 );
 
@@ -495,8 +495,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.SetServerProtectionTypeAsync
                 (
                     this.Database,
-                    this._user,
-                    this._guild,
+                    _user,
+                    _guild,
                     existingType
                 );
 
@@ -516,7 +516,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.SetDefaultProtectionTypeAsync
                 (
                     this.Database,
-                    this._user,
+                    _user,
                     expected
                 );
 
@@ -532,7 +532,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.SetDefaultProtectionTypeAsync
                 (
                     this.Database,
-                    this._user,
+                    _user,
                     currentType
                 );
 
@@ -549,16 +549,16 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this._owner = (await this.Database.GetOrRegisterUserAsync(this._user)).Entity;
+                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
 
-                this._character = new Character
+                _character = new Character
                 {
-                    Owner = this._owner,
+                    Owner = _owner,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
                 };
 
-                this.Database.Characters.Add(this._character);
+                this.Database.Characters.Add(_character);
                 this.Database.SaveChanges();
             }
 
@@ -570,18 +570,18 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     Height = 10
                 };
 
-                this._character.CurrentAppearance = alteredAppearance;
+                _character.CurrentAppearance = alteredAppearance;
 
                 var result = await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
                 (
                     this.Database,
-                    this._character
+                    _character
                 );
 
                 Assert.True(result.IsSuccess);
                 Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
-                Assert.NotNull(this._character.DefaultAppearance);
-                Assert.Equal(10, this._character.DefaultAppearance.Height);
+                Assert.NotNull(_character.DefaultAppearance);
+                Assert.Equal(10, _character.DefaultAppearance.Height);
             }
         }
 
@@ -593,15 +593,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this._owner = (await this.Database.GetOrRegisterUserAsync(this._user)).Entity;
+                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
 
-                this._character = new Character
+                _character = new Character
                 {
-                    Owner = this._owner,
+                    Owner = _owner,
                     CurrentAppearance = new Appearance()
                 };
 
-                this.Database.Characters.Add(this._character);
+                this.Database.Characters.Add(_character);
                 this.Database.SaveChanges();
             }
 
@@ -613,20 +613,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     Height = 256
                 };
 
-                this._character.DefaultAppearance = defaultAppearance;
+                _character.DefaultAppearance = defaultAppearance;
 
-                var result = await this.Transformations.ResetCharacterFormAsync(this.Database, this._character);
+                var result = await this.Transformations.ResetCharacterFormAsync(this.Database, _character);
 
                 Assert.True(result.IsSuccess);
                 Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
-                Assert.NotNull(this._character.CurrentAppearance);
-                Assert.Equal(this._character.DefaultAppearance.Height, this._character.CurrentAppearance.Height);
+                Assert.NotNull(_character.CurrentAppearance);
+                Assert.Equal(_character.DefaultAppearance.Height, _character.CurrentAppearance.Height);
             }
 
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveADefaultAppearance()
             {
-                var result = await this.Transformations.ResetCharacterFormAsync(this.Database, this._character);
+                var result = await this.Transformations.ResetCharacterFormAsync(this.Database, _character);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -690,9 +690,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.CanUserTransformUserAsync
                 (
                     this.Database,
-                    this._guild,
-                    this._user,
-                    this._targetUser
+                    _guild,
+                    _user,
+                    _targetUser
                 );
 
                 Assert.False(result.IsSuccess);
@@ -702,15 +702,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfUserIsOnTargetUsersBlacklist()
             {
-                await EnsureOptedInAsync(this._targetUser);
-                await this.Transformations.BlacklistUserAsync(this.Database, this._targetUser, this._user);
+                await EnsureOptedInAsync(_targetUser);
+                await this.Transformations.BlacklistUserAsync(this.Database, _targetUser, _user);
 
                 var result = await this.Transformations.CanUserTransformUserAsync
                 (
                     this.Database,
-                    this._guild,
-                    this._user,
-                    this._targetUser
+                    _guild,
+                    _user,
+                    _targetUser
                 );
 
                 Assert.False(result.IsSuccess);
@@ -720,21 +720,21 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfTargetUserUsesWhitelistingAndUserIsNotOnWhitelist()
             {
-                await EnsureOptedInAsync(this._targetUser);
+                await EnsureOptedInAsync(_targetUser);
                 await this.Transformations.SetServerProtectionTypeAsync
                 (
                     this.Database,
-                    this._targetUser,
-                    this._guild,
+                    _targetUser,
+                    _guild,
                     ProtectionType.Whitelist
                 );
 
                 var result = await this.Transformations.CanUserTransformUserAsync
                 (
                     this.Database,
-                    this._guild,
-                    this._user,
-                    this._targetUser
+                    _guild,
+                    _user,
+                    _targetUser
                 );
 
                 Assert.False(result.IsSuccess);
@@ -744,23 +744,23 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsSuccessfulResultIfTargetUserUsesWhitelistingAndUserIsOnWhitelist()
             {
-                await EnsureOptedInAsync(this._targetUser);
+                await EnsureOptedInAsync(_targetUser);
                 await this.Transformations.SetServerProtectionTypeAsync
                 (
                     this.Database,
-                    this._targetUser,
-                    this._guild,
+                    _targetUser,
+                    _guild,
                     ProtectionType.Whitelist
                 );
 
-                await this.Transformations.WhitelistUserAsync(this.Database, this._targetUser, this._user);
+                await this.Transformations.WhitelistUserAsync(this.Database, _targetUser, _user);
 
                 var result = await this.Transformations.CanUserTransformUserAsync
                 (
                     this.Database,
-                    this._guild,
-                    this._user,
-                    this._targetUser
+                    _guild,
+                    _user,
+                    _targetUser
                 );
 
                 Assert.True(result.IsSuccess);
@@ -769,14 +769,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsSuccessfulResultIfUserIsNotOnTargetUsersBlacklist()
             {
-                await EnsureOptedInAsync(this._targetUser);
+                await EnsureOptedInAsync(_targetUser);
 
                 var result = await this.Transformations.CanUserTransformUserAsync
                 (
                     this.Database,
-                    this._guild,
-                    this._user,
-                    this._targetUser
+                    _guild,
+                    _user,
+                    _targetUser
                 );
 
                 Assert.True(result.IsSuccess);
@@ -788,7 +788,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 (
                     this.Database,
                     user,
-                    this._guild
+                    _guild
                 );
                 protection.Entity.HasOptedIn = true;
 
@@ -815,20 +815,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     c =>
                         c.GetUserAsync
                         (
-                            It.Is<ulong>(id => id == this._owner.Id),
+                            It.Is<ulong>(id => id == _owner.Id),
                             CacheMode.AllowDownload,
                             null
                         )
                 )
-                .Returns(Task.FromResult((IGuildUser)this._owner));
+                .Returns(Task.FromResult((IGuildUser)_owner));
 
-                this._guild = mockedGuild.Object;
+                _guild = mockedGuild.Object;
 
                 var mockedContext = new Mock<ICommandContext>();
-                mockedContext.Setup(c => c.Guild).Returns(this._guild);
-                mockedContext.Setup(c => c.User).Returns(this._invoker);
+                mockedContext.Setup(c => c.Guild).Returns(_guild);
+                mockedContext.Setup(c => c.User).Returns(_invoker);
 
-                this._context = mockedContext.Object;
+                _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
                     .AddSingleton(this.Transformations)
@@ -846,21 +846,21 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._owner,
-                    this._guild
+                    _owner,
+                    _guild
                 );
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(this._owner)).Entity;
-                this._character = new Character
+                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                _character = new Character
                 {
                     Name = "Test",
                     CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
                     Owner = owner
                 };
 
-                this.Database.Characters.Add(this._character);
+                this.Database.Characters.Add(_character);
 
                 await this.Database.SaveChangesAsync();
             }
@@ -868,19 +868,19 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
             {
-                await this.Transformations.BlacklistUserAsync(this.Database, this._owner, this._invoker);
+                await this.Transformations.BlacklistUserAsync(this.Database, _owner, _invoker);
 
                 var result = await this.Transformations.RemoveBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face
                 );
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.UnmetPrecondition, result.Error);
-                Assert.True(this._character.HasComponent(Bodypart.Face, Chirality.Center));
+                Assert.True(_character.HasComponent(Bodypart.Face, Chirality.Center));
             }
 
             [Fact]
@@ -889,8 +889,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.RemoveBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Wing,
                     Chirality.Left
                 );
@@ -905,8 +905,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.RemoveBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face
                 );
 
@@ -916,17 +916,17 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task RemovesCorrectBodypart()
             {
-                Assert.Contains(this._character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
+                Assert.Contains(_character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
 
                 await this.Transformations.RemoveBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face
                 );
 
-                Assert.DoesNotContain(this._character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
+                Assert.DoesNotContain(_character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
             }
 
             [Fact]
@@ -935,8 +935,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.RemoveBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face
                 );
 
@@ -963,20 +963,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     c =>
                         c.GetUserAsync
                         (
-                            It.Is<ulong>(id => id == this._owner.Id),
+                            It.Is<ulong>(id => id == _owner.Id),
                             CacheMode.AllowDownload,
                             null
                         )
                 )
-                .Returns(Task.FromResult((IGuildUser)this._owner));
+                .Returns(Task.FromResult((IGuildUser)_owner));
 
-                this._guild = mockedGuild.Object;
+                _guild = mockedGuild.Object;
 
                 var mockedContext = new Mock<ICommandContext>();
-                mockedContext.Setup(c => c.Guild).Returns(this._guild);
-                mockedContext.Setup(c => c.User).Returns(this._invoker);
+                mockedContext.Setup(c => c.Guild).Returns(_guild);
+                mockedContext.Setup(c => c.User).Returns(_invoker);
 
-                this._context = mockedContext.Object;
+                _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
                     .AddSingleton(this.Transformations)
@@ -994,22 +994,22 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._owner,
-                    this._guild
+                    _owner,
+                    _guild
                 );
 
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(this._owner)).Entity;
-                this._character = new Character
+                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                _character = new Character
                 {
                     Name = "Test",
                     CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
                     Owner = owner
                 };
 
-                this.Database.Characters.Add(this._character);
+                this.Database.Characters.Add(_character);
 
                 await this.Database.SaveChangesAsync();
             }
@@ -1017,20 +1017,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
             {
-                await this.Transformations.BlacklistUserAsync(this.Database, this._owner, this._invoker);
+                await this.Transformations.BlacklistUserAsync(this.Database, _owner, _invoker);
 
                 var result = await this.Transformations.AddBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "template"
                 );
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.UnmetPrecondition, result.Error);
-                Assert.Contains(this._character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
+                Assert.Contains(_character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
             }
 
             [Fact]
@@ -1039,8 +1039,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.AddBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "template"
                 );
@@ -1055,8 +1055,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.AddBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "aaaa"
                 );
@@ -1071,8 +1071,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.AddBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Wing,
                     "template",
                     Chirality.Left
@@ -1089,8 +1089,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.RemoveBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face
                 );
 
@@ -1098,8 +1098,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.AddBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "template"
                 );
@@ -1114,24 +1114,24 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.RemoveBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face
                 );
 
-                Assert.False(this._character.HasComponent(Bodypart.Face, Chirality.Center));
+                Assert.False(_character.HasComponent(Bodypart.Face, Chirality.Center));
 
                 // Then add it again
                 await this.Transformations.AddBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "template"
                 );
 
-                Assert.True(this._character.HasComponent(Bodypart.Face, Chirality.Center));
+                Assert.True(_character.HasComponent(Bodypart.Face, Chirality.Center));
             }
 
             [Fact]
@@ -1141,8 +1141,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.RemoveBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face
                 );
 
@@ -1150,8 +1150,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.AddBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "template"
                 );
@@ -1179,20 +1179,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     c =>
                         c.GetUserAsync
                         (
-                            It.Is<ulong>(id => id == this._owner.Id),
+                            It.Is<ulong>(id => id == _owner.Id),
                             CacheMode.AllowDownload,
                             null
                         )
                 )
-                .Returns(Task.FromResult((IGuildUser)this._owner));
+                .Returns(Task.FromResult((IGuildUser)_owner));
 
-                this._guild = mockedGuild.Object;
+                _guild = mockedGuild.Object;
 
                 var mockedContext = new Mock<ICommandContext>();
-                mockedContext.Setup(c => c.Guild).Returns(this._guild);
-                mockedContext.Setup(c => c.User).Returns(this._invoker);
+                mockedContext.Setup(c => c.Guild).Returns(_guild);
+                mockedContext.Setup(c => c.User).Returns(_invoker);
 
-                this._context = mockedContext.Object;
+                _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
                     .AddSingleton(this.Transformations)
@@ -1216,15 +1216,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._owner,
-                    this._guild
+                    _owner,
+                    _guild
                 );
 
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(this._owner)).Entity;
-                this._character = new Character
+                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                _character = new Character
                 {
                     Name = "Test",
                     DefaultAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
@@ -1233,7 +1233,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     PronounProviderFamily = "Feminine"
                 };
 
-                this.Database.Characters.Add(this._character);
+                this.Database.Characters.Add(_character);
 
                 await this.Database.SaveChangesAsync();
             }
@@ -1241,13 +1241,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
             {
-                await this.Transformations.BlacklistUserAsync(this.Database, this._owner, this._invoker);
+                await this.Transformations.BlacklistUserAsync(this.Database, _owner, _invoker);
 
                 var result = await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "shark"
                 );
@@ -1262,8 +1262,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "adadadsasd"
                 );
@@ -1278,8 +1278,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Wing,
                     "shark",
                     Chirality.Left
@@ -1295,8 +1295,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "template"
                 );
@@ -1308,19 +1308,19 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task AddsBodypartIfItDoesNotAlreadyExist()
             {
-                Assert.False(this._character.HasComponent(Bodypart.Tail, Chirality.Center));
+                Assert.False(_character.HasComponent(Bodypart.Tail, Chirality.Center));
 
                 var result = await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Tail,
                     "shark"
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.True(this._character.HasComponent(Bodypart.Tail, Chirality.Center));
+                Assert.True(_character.HasComponent(Bodypart.Tail, Chirality.Center));
             }
 
             [Fact]
@@ -1329,14 +1329,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "shark"
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal("shark", this._character.GetAppearanceComponent(Bodypart.Face, Chirality.Center).Transformation.Species.Name);
+                Assert.Equal("shark", _character.GetAppearanceComponent(Bodypart.Face, Chirality.Center).Transformation.Species.Name);
             }
 
             [Fact]
@@ -1345,8 +1345,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "shark"
                 );
@@ -1361,8 +1361,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "shark"
                 );
@@ -1370,7 +1370,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 Assert.NotEqual
                 (
                     "shark",
-                    this._character.DefaultAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+                    _character.DefaultAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
                 );
             }
 
@@ -1380,8 +1380,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "shark"
                 );
@@ -1389,13 +1389,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ResetCharacterFormAsync
                 (
                     this.Database,
-                    this._character
+                    _character
                 );
 
                 Assert.NotEqual
                 (
                     "shark",
-                    this._character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+                    _character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
                 );
             }
 
@@ -1405,8 +1405,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "shark"
                 );
@@ -1414,13 +1414,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
                 (
                     this.Database,
-                    this._character
+                    _character
                 );
 
                 Assert.Equal
                 (
                     "shark",
-                    this._character.DefaultAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+                    _character.DefaultAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
                 );
             }
 
@@ -1430,8 +1430,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "shark"
                 );
@@ -1439,14 +1439,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
                 (
                     this.Database,
-                    this._character
+                    _character
                 );
 
                 await this.Transformations.ShiftBodypartAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     "shark-dronie"
                 );
@@ -1454,13 +1454,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ResetCharacterFormAsync
                 (
                     this.Database,
-                    this._character
+                    _character
                 );
 
                 Assert.Equal
                 (
                     "shark",
-                    this._character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+                    _character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
                 );
             }
         }
@@ -1488,20 +1488,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     c =>
                         c.GetUserAsync
                         (
-                            It.Is<ulong>(id => id == this._owner.Id),
+                            It.Is<ulong>(id => id == _owner.Id),
                             CacheMode.AllowDownload,
                             null
                         )
                 )
-                .Returns(Task.FromResult((IGuildUser)this._owner));
+                .Returns(Task.FromResult((IGuildUser)_owner));
 
-                this._guild = mockedGuild.Object;
+                _guild = mockedGuild.Object;
 
                 var mockedContext = new Mock<ICommandContext>();
-                mockedContext.Setup(c => c.Guild).Returns(this._guild);
-                mockedContext.Setup(c => c.User).Returns(this._invoker);
+                mockedContext.Setup(c => c.Guild).Returns(_guild);
+                mockedContext.Setup(c => c.User).Returns(_invoker);
 
-                this._context = mockedContext.Object;
+                _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
                     .AddSingleton<ContentService>()
@@ -1520,7 +1520,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
 
-                Colour.TryParse("bright purple", out this._newColour);
+                Colour.TryParse("bright purple", out _newColour);
             }
 
             public override async Task InitializeAsync()
@@ -1531,15 +1531,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._owner,
-                    this._guild
+                    _owner,
+                    _guild
                 );
 
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(this._owner)).Entity;
-                this._character = new Character
+                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                _character = new Character
                 {
                     Name = "Test",
                     CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
@@ -1547,9 +1547,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     PronounProviderFamily = "They"
                 };
 
-                this._originalColour = this._character.GetAppearanceComponent(Bodypart.Face, Chirality.Center).BaseColour;
+                _originalColour = _character.GetAppearanceComponent(Bodypart.Face, Chirality.Center).BaseColour;
 
-                this.Database.Characters.Add(this._character);
+                this.Database.Characters.Add(_character);
 
                 await this.Database.SaveChangesAsync();
             }
@@ -1557,15 +1557,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
             {
-                await this.Transformations.BlacklistUserAsync(this.Database, this._owner, this._invoker);
+                await this.Transformations.BlacklistUserAsync(this.Database, _owner, _invoker);
 
                 var result = await this.Transformations.ShiftBodypartColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newColour
+                    _newColour
                 );
 
                 Assert.False(result.IsSuccess);
@@ -1578,10 +1578,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Wing,
-                    this._newColour,
+                    _newColour,
                     Chirality.Left
                 );
 
@@ -1595,10 +1595,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._originalColour
+                    _originalColour
                 );
 
                 Assert.False(result.IsSuccess);
@@ -1611,10 +1611,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newColour
+                    _newColour
                 );
 
                 Assert.True(result.IsSuccess);
@@ -1626,14 +1626,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ShiftBodypartColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newColour
+                    _newColour
                 );
 
-                var face = this._character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face);
-                Assert.Same(this._newColour, face.BaseColour);
+                var face = _character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face);
+                Assert.Same(_newColour, face.BaseColour);
             }
 
             [Fact]
@@ -1642,10 +1642,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newColour
+                    _newColour
                 );
 
                 Assert.NotNull(result.ShiftMessage);
@@ -1675,20 +1675,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     c =>
                         c.GetUserAsync
                         (
-                            It.Is<ulong>(id => id == this._owner.Id),
+                            It.Is<ulong>(id => id == _owner.Id),
                             CacheMode.AllowDownload,
                             null
                         )
                 )
-                .Returns(Task.FromResult((IGuildUser)this._owner));
+                .Returns(Task.FromResult((IGuildUser)_owner));
 
-                this._guild = mockedGuild.Object;
+                _guild = mockedGuild.Object;
 
                 var mockedContext = new Mock<ICommandContext>();
-                mockedContext.Setup(c => c.Guild).Returns(this._guild);
-                mockedContext.Setup(c => c.User).Returns(this._invoker);
+                mockedContext.Setup(c => c.Guild).Returns(_guild);
+                mockedContext.Setup(c => c.User).Returns(_invoker);
 
-                this._context = mockedContext.Object;
+                _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
                     .AddSingleton<ContentService>()
@@ -1707,8 +1707,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
 
-                this._newPattern = Pattern.Swirly;
-                Colour.TryParse("bright purple", out this._newPatternColour);
+                _newPattern = Pattern.Swirly;
+                Colour.TryParse("bright purple", out _newPatternColour);
             }
 
             public override async Task InitializeAsync()
@@ -1719,15 +1719,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._owner,
-                    this._guild
+                    _owner,
+                    _guild
                 );
 
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(this._owner)).Entity;
-                this._character = new Character
+                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                _character = new Character
                 {
                     Name = "Test",
                     CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
@@ -1735,7 +1735,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     PronounProviderFamily = "They"
                 };
 
-                this.Database.Characters.Add(this._character);
+                this.Database.Characters.Add(_character);
 
                 await this.Database.SaveChangesAsync();
             }
@@ -1743,16 +1743,16 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
             {
-                await this.Transformations.BlacklistUserAsync(this.Database, this._owner, this._invoker);
+                await this.Transformations.BlacklistUserAsync(this.Database, _owner, _invoker);
 
                 var result = await this.Transformations.ShiftBodypartPatternAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPattern,
-                    this._newPatternColour
+                    _newPattern,
+                    _newPatternColour
                 );
 
                 Assert.False(result.IsSuccess);
@@ -1765,11 +1765,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartPatternAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Wing,
-                    this._newPattern,
-                    this._newPatternColour,
+                    _newPattern,
+                    _newPatternColour,
                     Chirality.Left
                 );
 
@@ -1783,21 +1783,21 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ShiftBodypartPatternAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPattern,
-                    this._newPatternColour
+                    _newPattern,
+                    _newPatternColour
                 );
 
                 var result = await this.Transformations.ShiftBodypartPatternAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPattern,
-                    this._newPatternColour
+                    _newPattern,
+                    _newPatternColour
                 );
 
                 Assert.False(result.IsSuccess);
@@ -1810,11 +1810,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartPatternAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPattern,
-                    this._newPatternColour
+                    _newPattern,
+                    _newPatternColour
                 );
 
                 Assert.True(result.IsSuccess);
@@ -1826,15 +1826,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ShiftBodypartPatternAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPattern,
-                    this._newPatternColour
+                    _newPattern,
+                    _newPatternColour
                 );
 
-                var face = this._character.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
-                Assert.Equal(this._newPattern, face.Pattern);
+                var face = _character.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
+                Assert.Equal(_newPattern, face.Pattern);
             }
 
             [Fact]
@@ -1843,15 +1843,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ShiftBodypartPatternAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPattern,
-                    this._newPatternColour
+                    _newPattern,
+                    _newPatternColour
                 );
 
-                var face = this._character.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
-                Assert.Equal(this._newPatternColour, face.PatternColour);
+                var face = _character.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
+                Assert.Equal(_newPatternColour, face.PatternColour);
             }
 
             [Fact]
@@ -1860,11 +1860,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftBodypartPatternAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPattern,
-                    this._newPatternColour
+                    _newPattern,
+                    _newPatternColour
                 );
 
                 Assert.NotNull(result.ShiftMessage);
@@ -1895,20 +1895,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     c =>
                         c.GetUserAsync
                         (
-                            It.Is<ulong>(id => id == this._owner.Id),
+                            It.Is<ulong>(id => id == _owner.Id),
                             CacheMode.AllowDownload,
                             null
                         )
                 )
-                .Returns(Task.FromResult((IGuildUser)this._owner));
+                .Returns(Task.FromResult((IGuildUser)_owner));
 
-                this._guild = mockedGuild.Object;
+                _guild = mockedGuild.Object;
 
                 var mockedContext = new Mock<ICommandContext>();
-                mockedContext.Setup(c => c.Guild).Returns(this._guild);
-                mockedContext.Setup(c => c.User).Returns(this._invoker);
+                mockedContext.Setup(c => c.Guild).Returns(_guild);
+                mockedContext.Setup(c => c.User).Returns(_invoker);
 
-                this._context = mockedContext.Object;
+                _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
                     .AddSingleton<ContentService>()
@@ -1927,7 +1927,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
 
-                Colour.TryParse("bright purple", out this._newPatternColour);
+                Colour.TryParse("bright purple", out _newPatternColour);
             }
 
             public override async Task InitializeAsync()
@@ -1938,15 +1938,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
                     this.Database,
-                    this._owner,
-                    this._guild
+                    _owner,
+                    _guild
                 );
 
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(this._owner)).Entity;
-                this._character = new Character
+                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                _character = new Character
                 {
                     Name = "Test",
                     CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
@@ -1954,20 +1954,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     PronounProviderFamily = "They"
                 };
 
-                Colour.TryParse("dull white", out this._originalPatternColour);
-                Assert.NotNull(this._originalPatternColour);
+                Colour.TryParse("dull white", out _originalPatternColour);
+                Assert.NotNull(_originalPatternColour);
 
                 await this.Transformations.ShiftBodypartPatternAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
                     Pattern.Swirly,
-                    this._originalPatternColour
+                    _originalPatternColour
                 );
 
-                this.Database.Characters.Add(this._character);
+                this.Database.Characters.Add(_character);
 
                 await this.Database.SaveChangesAsync();
             }
@@ -1975,15 +1975,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfUserIsNotAllowedToTransformTarget()
             {
-                await this.Transformations.BlacklistUserAsync(this.Database, this._owner, this._invoker);
+                await this.Transformations.BlacklistUserAsync(this.Database, _owner, _invoker);
 
                 var result = await this.Transformations.ShiftPatternColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPatternColour
+                    _newPatternColour
                 );
 
                 Assert.False(result.IsSuccess);
@@ -1996,10 +1996,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftPatternColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Wing,
-                    this._newPatternColour,
+                    _newPatternColour,
                     Chirality.Left
                 );
 
@@ -2013,10 +2013,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftPatternColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Arm,
-                    this._newPatternColour,
+                    _newPatternColour,
                     Chirality.Left
                 );
 
@@ -2030,19 +2030,19 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ShiftPatternColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPatternColour
+                    _newPatternColour
                 );
 
                 var result = await this.Transformations.ShiftPatternColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPatternColour
+                    _newPatternColour
                 );
 
                 Assert.False(result.IsSuccess);
@@ -2055,10 +2055,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftPatternColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPatternColour
+                    _newPatternColour
                 );
 
                 Assert.True(result.IsSuccess);
@@ -2070,14 +2070,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Transformations.ShiftPatternColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPatternColour
+                    _newPatternColour
                 );
 
-                var face = this._character.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
-                Assert.Equal(this._newPatternColour, face.PatternColour);
+                var face = _character.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
+                Assert.Equal(_newPatternColour, face.PatternColour);
             }
 
             [Fact]
@@ -2086,10 +2086,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.ShiftPatternColourAsync
                 (
                     this.Database,
-                    this._context,
-                    this._character,
+                    _context,
+                    _character,
                     Bodypart.Face,
-                    this._newPatternColour
+                    _newPatternColour
                 );
 
                 Assert.NotNull(result.ShiftMessage);

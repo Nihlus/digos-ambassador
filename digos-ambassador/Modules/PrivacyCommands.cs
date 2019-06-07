@@ -71,10 +71,10 @@ namespace DIGOS.Ambassador.Modules
         )
             : base(database)
         {
-            this._feedback = feedback;
-            this._client = client;
-            this._privacy = privacy;
-            this._content = content;
+            _feedback = feedback;
+            _client = client;
+            _privacy = privacy;
+            _content = content;
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace DIGOS.Ambassador.Modules
         [PrivacyExempt]
         public async Task RequestPolicyAsync()
         {
-            await this._privacy.SendPrivacyPolicyAsync(this.Context.Channel, this._content, this._feedback);
+            await _privacy.SendPrivacyPolicyAsync(this.Context.Channel, _content, _feedback);
         }
 
         /// <summary>
@@ -100,8 +100,8 @@ namespace DIGOS.Ambassador.Modules
         [PrivacyExempt]
         public async Task GrantConsentAsync()
         {
-            await this._privacy.GrantUserConsentAsync(this.Database, this.Context.User);
-            await this._feedback.SendConfirmationAsync(this.Context, "Thank you! Enjoy using the bot :smiley:");
+            await _privacy.GrantUserConsentAsync(this.Database, this.Context.User);
+            await _feedback.SendConfirmationAsync(this.Context, "Thank you! Enjoy using the bot :smiley:");
         }
 
         /// <summary>
@@ -114,8 +114,8 @@ namespace DIGOS.Ambassador.Modules
         [PrivacyExempt]
         public async Task RevokeConsentAsync()
         {
-            await this._privacy.RevokeUserConsentAsync(this.Database, this.Context.User);
-            await this._feedback.SendConfirmationAsync
+            await _privacy.RevokeUserConsentAsync(this.Database, this.Context.User);
+            await _feedback.SendConfirmationAsync
             (
                 this.Context,
                 "Consent revoked - no more information will be stored about you from now on. If you would like to " +
@@ -135,9 +135,9 @@ namespace DIGOS.Ambassador.Modules
         public async Task DisplayContactAsync()
         {
             const string avatarURL = "https://i.imgur.com/2E334jS.jpg";
-            var discordUser = this._client.GetUser("Jax", "7487");
+            var discordUser = _client.GetUser("Jax", "7487");
 
-            var eb = this._feedback.CreateEmbedBase();
+            var eb = _feedback.CreateEmbedBase();
             eb.WithTitle("Privacy Contact");
             eb.WithAuthor("Jarl Gullberg", avatarURL, "https://github.com/Nihlus/");
             eb.WithThumbnailUrl(avatarURL);

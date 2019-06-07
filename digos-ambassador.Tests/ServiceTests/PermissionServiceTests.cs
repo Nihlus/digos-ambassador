@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 guildMock.Setup(g => g.Id).Returns(1);
                 guildMock.Setup(g => g.OwnerId).Returns(long.MaxValue);
 
-                this._guild = guildMock.Object;
+                _guild = guildMock.Object;
             }
 
             [Fact]
@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 // Set up mocked permissions
                 var requiredPermission = (Permission.SetClass, PermissionTarget.Other);
 
-                var result = await this.Permissions.HasPermissionAsync(this.Database, this._guild, this._user, requiredPermission);
+                var result = await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission);
 
                 Assert.False(result);
             }
@@ -72,14 +72,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Permission = Permission.SetClass,
                     Target = PermissionTarget.Other,
-                    ServerDiscordID = (long)this._guild.Id,
-                    UserDiscordID = (long)this._user.Id
+                    ServerDiscordID = (long)_guild.Id,
+                    UserDiscordID = (long)_user.Id
                 };
 
                 await this.Database.LocalPermissions.AddAsync(grantedPermission);
                 await this.Database.SaveChangesAsync();
 
-                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, this._guild, this._user, requiredPermission));
+                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -91,15 +91,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Permission = Permission.SetClass,
                     Target = PermissionTarget.Other,
-                    ServerDiscordID = (long)this._guild.Id,
-                    UserDiscordID = (long)this._user.Id
+                    ServerDiscordID = (long)_guild.Id,
+                    UserDiscordID = (long)_user.Id
                 };
 
                 await this.Database.LocalPermissions.AddAsync(grantedPermission);
 
                 await this.Database.SaveChangesAsync();
 
-                Assert.False(await this.Permissions.HasPermissionAsync(this.Database, this._guild, this._user, requiredPermission));
+                Assert.False(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -111,15 +111,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Permission = Permission.SetClass,
                     Target = PermissionTarget.Self,
-                    ServerDiscordID = (long)this._guild.Id,
-                    UserDiscordID = (long)this._user.Id
+                    ServerDiscordID = (long)_guild.Id,
+                    UserDiscordID = (long)_user.Id
                 };
 
                 await this.Database.LocalPermissions.AddAsync(grantedPermission);
 
                 await this.Database.SaveChangesAsync();
 
-                Assert.False(await this.Permissions.HasPermissionAsync(this.Database, this._guild, this._user, requiredPermission));
+                Assert.False(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -139,7 +139,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 await this.Database.SaveChangesAsync();
 
-                Assert.False(await this.Permissions.HasPermissionAsync(this.Database, this._guild, this._user, requiredPermission));
+                Assert.False(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -151,15 +151,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Permission = Permission.SetClass,
                     Target = PermissionTarget.Self,
-                    ServerDiscordID = (long)this._guild.Id,
-                    UserDiscordID = (long)this._user.Id
+                    ServerDiscordID = (long)_guild.Id,
+                    UserDiscordID = (long)_user.Id
                 };
 
                 var grantedGlobalPermission = new GlobalPermission
                 {
                     Permission = Permission.SetClass,
                     Target = PermissionTarget.Self,
-                    UserDiscordID = (long)this._user.Id
+                    UserDiscordID = (long)_user.Id
                 };
 
                 await this.Database.GlobalPermissions.AddAsync(grantedGlobalPermission);
@@ -167,7 +167,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 await this.Database.SaveChangesAsync();
 
-                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, this._guild, this._user, requiredPermission));
+                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -179,13 +179,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Permission = Permission.SetClass,
                     Target = PermissionTarget.Self,
-                    UserDiscordID = (long)this._user.Id
+                    UserDiscordID = (long)_user.Id
                 };
 
                 await this.Database.GlobalPermissions.AddAsync(grantedGlobalPermission);
                 await this.Database.SaveChangesAsync();
 
-                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, this._guild, this._user, requiredPermission));
+                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -197,15 +197,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Permission = Permission.SetClass,
                     Target = PermissionTarget.Self,
-                    ServerDiscordID = (long)this._guild.Id,
-                    UserDiscordID = (long)this._user.Id
+                    ServerDiscordID = (long)_guild.Id,
+                    UserDiscordID = (long)_user.Id
                 };
 
                 var grantedGlobalPermission = new GlobalPermission
                 {
                     Permission = Permission.SetClass,
                     Target = PermissionTarget.Other,
-                    UserDiscordID = (long)this._user.Id
+                    UserDiscordID = (long)_user.Id
                 };
 
                 await this.Database.GlobalPermissions.AddAsync(grantedGlobalPermission);
@@ -213,7 +213,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 await this.Database.SaveChangesAsync();
 
-                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, this._guild, this._user, requiredPermission));
+                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
             }
         }
     }

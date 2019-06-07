@@ -159,16 +159,16 @@ namespace DIGOS.Ambassador.Services
 
             if (!File.Exists(sassPath))
             {
-                this._sass = new List<string>();
+                _sass = new List<string>();
             }
 
             if (!File.Exists(sassNSFWPath))
             {
-                this._sassNSFW = new List<string>();
+                _sassNSFW = new List<string>();
             }
 
-            this._sass = (await FileAsync.ReadAllLinesAsync(sassPath)).ToList();
-            this._sassNSFW = (await FileAsync.ReadAllLinesAsync(sassNSFWPath)).ToList();
+            _sass = (await FileAsync.ReadAllLinesAsync(sassPath)).ToList();
+            _sassNSFW = (await FileAsync.ReadAllLinesAsync(sassNSFWPath)).ToList();
         }
 
         /// <summary>
@@ -416,10 +416,10 @@ namespace DIGOS.Ambassador.Services
         {
             if (includeNSFW)
             {
-                return this._sass.Union(this._sassNSFW).ToList().PickRandom();
+                return _sass.Union(_sassNSFW).ToList().PickRandom();
             }
 
-            return this._sass.PickRandom();
+            return _sass.PickRandom();
         }
 
         /// <summary>

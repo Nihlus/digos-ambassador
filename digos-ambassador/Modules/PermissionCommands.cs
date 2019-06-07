@@ -77,9 +77,9 @@ namespace DIGOS.Ambassador.Modules
         )
             : base(database)
         {
-            this._feedback = feedback;
-            this._permissions = permissions;
-            this._interactivity = interactivity;
+            _feedback = feedback;
+            _permissions = permissions;
+            _interactivity = interactivity;
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace DIGOS.Ambassador.Modules
 
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                this._feedback,
+                _feedback,
                 this.Context.User,
                 enumValues,
                 p => p.ToString().Humanize().Transform(To.TitleCase),
@@ -107,10 +107,10 @@ namespace DIGOS.Ambassador.Modules
                 appearance
             );
 
-            await this._interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            await _interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (
                 this.Context,
-                this._feedback,
+                _feedback,
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5)
             );
@@ -136,7 +136,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ListGrantedPermissionsAsync([NotNull] IUser discordUser)
         {
-            var localPermissions = this._permissions.GetLocalUserPermissions
+            var localPermissions = _permissions.GetLocalUserPermissions
             (
                 this.Database,
                 discordUser,
@@ -150,7 +150,7 @@ namespace DIGOS.Ambassador.Modules
 
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                this._feedback,
+                _feedback,
                 this.Context.User,
                 localPermissions,
                 p => p.Permission.Humanize(),
@@ -159,10 +159,10 @@ namespace DIGOS.Ambassador.Modules
                 appearance
             );
 
-            await this._interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            await _interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (
                 this.Context,
-                this._feedback,
+                _feedback,
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5)
             );
@@ -192,8 +192,8 @@ namespace DIGOS.Ambassador.Modules
             )
                 : base(database)
             {
-                this._feedback = feedback;
-                this._permissions = permissions;
+                _feedback = feedback;
+                _permissions = permissions;
             }
 
             /// <summary>
@@ -222,9 +222,9 @@ namespace DIGOS.Ambassador.Modules
                     ServerDiscordID = (long)this.Context.Guild.Id
                 };
 
-                await this._permissions.GrantLocalPermissionAsync(this.Database, this.Context.Guild, discordUser, newPermission);
+                await _permissions.GrantLocalPermissionAsync(this.Database, this.Context.Guild, discordUser, newPermission);
 
-                await this._feedback.SendConfirmationAsync(this.Context, $"{grantedPermission.ToString().Humanize().Transform(To.TitleCase)} granted to {discordUser.Mention}.");
+                await _feedback.SendConfirmationAsync(this.Context, $"{grantedPermission.ToString().Humanize().Transform(To.TitleCase)} granted to {discordUser.Mention}.");
             }
         }
 
@@ -252,8 +252,8 @@ namespace DIGOS.Ambassador.Modules
             )
                 : base(database)
             {
-                this._feedback = feedback;
-                this._permissions = permissions;
+                _feedback = feedback;
+                _permissions = permissions;
             }
 
             /// <summary>
@@ -272,9 +272,9 @@ namespace DIGOS.Ambassador.Modules
                 Permission revokedPermission
             )
             {
-                await this._permissions.RevokeLocalPermissionAsync(this.Database, this.Context.Guild, discordUser, revokedPermission);
+                await _permissions.RevokeLocalPermissionAsync(this.Database, this.Context.Guild, discordUser, revokedPermission);
 
-                await this._feedback.SendConfirmationAsync(this.Context, $"${revokedPermission.ToString().Humanize().Transform(To.TitleCase)} revoked from {discordUser.Mention}.");
+                await _feedback.SendConfirmationAsync(this.Context, $"${revokedPermission.ToString().Humanize().Transform(To.TitleCase)} revoked from {discordUser.Mention}.");
             }
 
             /// <summary>
@@ -296,9 +296,9 @@ namespace DIGOS.Ambassador.Modules
                 PermissionTarget revokedTarget
             )
             {
-                await this._permissions.RevokeLocalPermissionTargetAsync(this.Database, this.Context.Guild, discordUser, permission, revokedTarget);
+                await _permissions.RevokeLocalPermissionTargetAsync(this.Database, this.Context.Guild, discordUser, permission, revokedTarget);
 
-                await this._feedback.SendConfirmationAsync
+                await _feedback.SendConfirmationAsync
                 (
                     this.Context,
                     $"{permission.ToString().Humanize().Transform(To.TitleCase)} ({revokedTarget.ToString().Humanize().Transform(To.TitleCase)}) revoked from {discordUser.Mention}."

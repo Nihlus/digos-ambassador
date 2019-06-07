@@ -69,16 +69,16 @@ namespace DIGOS.Ambassador.Services.Behaviours
 
                 // Behaviours are implicitly singletons; there's only ever one instance of a behaviour at any given
                 // time.
-                if (this._registeredBehaviours.Any(b => b.GetType() == behaviourType))
+                if (_registeredBehaviours.Any(b => b.GetType() == behaviourType))
                 {
-                    var existingBehaviour = this._registeredBehaviours.First(b => b.GetType() == behaviourType);
-                    this._registeredBehaviours.Remove(existingBehaviour);
+                    var existingBehaviour = _registeredBehaviours.First(b => b.GetType() == behaviourType);
+                    _registeredBehaviours.Remove(existingBehaviour);
 
                     await existingBehaviour.StopAsync();
                     existingBehaviour.Dispose();
                 }
 
-                this._registeredBehaviours.Add(behaviour);
+                _registeredBehaviours.Add(behaviour);
             }
         }
 
@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Services.Behaviours
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task StartBehavioursAsync()
         {
-            foreach (var behaviour in this._registeredBehaviours)
+            foreach (var behaviour in _registeredBehaviours)
             {
                 await behaviour.StartAsync();
             }
@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Services.Behaviours
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task StopBehavioursAsync()
         {
-            foreach (var behaviour in this._registeredBehaviours)
+            foreach (var behaviour in _registeredBehaviours)
             {
                 await behaviour.StopAsync();
             }

@@ -79,27 +79,27 @@ namespace DIGOS.Ambassador
         /// <param name="content">The content service.</param>
         public AmbassadorClient([NotNull] ContentService content)
         {
-            this._client = Type.GetType("Mono.Runtime") is null
+            _client = Type.GetType("Mono.Runtime") is null
                 ? new DiscordSocketClient()
                 : new DiscordSocketClient(new DiscordSocketConfig { WebSocketProvider = () => new WebSocketSharpProvider() });
 
-            this._client.Log += OnDiscordLogEvent;
+            _client.Log += OnDiscordLogEvent;
 
-            this._commands = new CommandService();
-            this._commands.Log += OnDiscordLogEvent;
+            _commands = new CommandService();
+            _commands.Log += OnDiscordLogEvent;
 
-            this._content = content;
-            this._commands = new CommandService();
+            _content = content;
+            _commands = new CommandService();
 
-            this._behaviours = new BehaviourService();
+            _behaviours = new BehaviourService();
 
-            this._services = new ServiceCollection()
+            _services = new ServiceCollection()
                 .AddSingleton(this)
-                .AddSingleton(this._client)
-                .AddSingleton<BaseSocketClient>(this._client)
-                .AddSingleton(this._behaviours)
-                .AddSingleton(this._content)
-                .AddSingleton(this._commands)
+                .AddSingleton(_client)
+                .AddSingleton<BaseSocketClient>(_client)
+                .AddSingleton(_behaviours)
+                .AddSingleton(_content)
+                .AddSingleton(_commands)
                 .AddSingleton<RoleplayService>()
                 .AddSingleton<DiscordService>()
                 .AddSingleton<CharacterService>()
@@ -118,13 +118,13 @@ namespace DIGOS.Ambassador
                 .AddDbContext<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
                 .BuildServiceProvider();
 
-            var transformationService = this._services.GetRequiredService<TransformationService>();
+            var transformationService = _services.GetRequiredService<TransformationService>();
             transformationService.WithDescriptionBuilder
             (
-                ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(this._services)
+                ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(_services)
             );
 
-            var characterService = this._services.GetRequiredService<CharacterService>();
+            var characterService = _services.GetRequiredService<CharacterService>();
             characterService.DiscoverPronounProviders();
         }
 
@@ -134,7 +134,7 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the login action.</returns>
         public async Task LoginAsync()
         {
-            await this._client.LoginAsync(TokenType.Bot, this._content.BotToken.Trim());
+            await _client.LoginAsync(TokenType.Bot, _content.BotToken.Trim());
         }
 
         /// <summary>
@@ -143,32 +143,32 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the start action.</returns>
         public async Task StartAsync()
         {
-            var db = this._services.GetRequiredService<GlobalInfoContext>();
+            var db = _services.GetRequiredService<GlobalInfoContext>();
             if (!((RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>()).Exists())
             {
                 Log.Error("The database doesn't exist.");
                 return;
             }
 
-            this._commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
-            this._commands.AddTypeReader<Character>(new CharacterTypeReader());
-            this._commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
-            this._commands.AddTypeReader<Colour>(new ColourTypeReader());
+            _commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
+            _commands.AddTypeReader<Character>(new CharacterTypeReader());
+            _commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
+            _commands.AddTypeReader<Colour>(new ColourTypeReader());
 
-            this._commands.AddEnumReader<UserClass>();
-            this._commands.AddEnumReader<KinkPreference>();
-            this._commands.AddEnumReader<Bodypart>();
-            this._commands.AddEnumReader<Pattern>();
-            this._commands.AddEnumReader<Permission>();
-            this._commands.AddEnumReader<Permissions.PermissionTarget>();
+            _commands.AddEnumReader<UserClass>();
+            _commands.AddEnumReader<KinkPreference>();
+            _commands.AddEnumReader<Bodypart>();
+            _commands.AddEnumReader<Pattern>();
+            _commands.AddEnumReader<Permission>();
+            _commands.AddEnumReader<Permissions.PermissionTarget>();
 
             // Load modules and behaviours from the assembly this type was declared in
             var localAssembly = GetType().Assembly;
-            await this._commands.AddModulesAsync(localAssembly, this._services);
-            await this._behaviours.AddBehavioursAsync(localAssembly, this._services);
+            await _commands.AddModulesAsync(localAssembly, _services);
+            await _behaviours.AddBehavioursAsync(localAssembly, _services);
 
-            await this._client.StartAsync();
-            await this._behaviours.StartBehavioursAsync();
+            await _client.StartAsync();
+            await _behaviours.StartBehavioursAsync();
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the login action.</returns>
         public async Task LogoutAsync()
         {
-            await this._client.LogoutAsync();
+            await _client.LogoutAsync();
         }
 
         /// <summary>
@@ -186,10 +186,10 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the stop action.</returns>
         public async Task StopAsync()
         {
-            await this._behaviours.StopBehavioursAsync();
+            await _behaviours.StopBehavioursAsync();
 
             await LogoutAsync();
-            await this._client.StopAsync();
+            await _client.StopAsync();
         }
 
         /// <summary>

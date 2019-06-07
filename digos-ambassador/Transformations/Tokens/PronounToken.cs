@@ -46,13 +46,13 @@ namespace DIGOS.Ambassador.Transformations
         /// <param name="characters">The character service.</param>
         public PronounToken(CharacterService characters)
         {
-            this._characters = characters;
+            _characters = characters;
         }
 
         /// <inheritdoc />
         public override string GetText(Character character, AppearanceComponent component)
         {
-            var pronounProvider = this._characters.GetPronounProvider(character);
+            var pronounProvider = _characters.GetPronounProvider(character);
 
             return pronounProvider.GetForm(this.Form);
         }

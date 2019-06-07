@@ -115,7 +115,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="contentService">The application's content service.</param>
         public LuaService([NotNull] ContentService contentService)
         {
-            this._contentService = contentService;
+            _contentService = contentService;
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace DIGOS.Ambassador.Services
                 envBuilder.WithEntry(variable.name);
             }
 
-            foreach (var function in this._functionWhitelist)
+            foreach (var function in _functionWhitelist)
             {
                 envBuilder = envBuilder.WithEntry(function);
             }
@@ -234,8 +234,8 @@ namespace DIGOS.Ambassador.Services
                             );
                         }
 
-                        string erroringFunction = this._getErroringFunctionRegex.Match(result ?? string.Empty).Value;
-                        if (!this._functionWhitelist.Contains(erroringFunction))
+                        string erroringFunction = _getErroringFunctionRegex.Match(result ?? string.Empty).Value;
+                        if (!_functionWhitelist.Contains(erroringFunction))
                         {
                             return RetrieveEntityResult<string>.FromError
                             (
@@ -267,7 +267,7 @@ namespace DIGOS.Ambassador.Services
             [NotNull] params (string name, object value)[] variables
         )
         {
-            var getScriptResult = this._contentService.OpenLocalStream(scriptPath);
+            var getScriptResult = _contentService.OpenLocalStream(scriptPath);
             if (!getScriptResult.IsSuccess)
             {
                 return RetrieveEntityResult<string>.FromError(getScriptResult);

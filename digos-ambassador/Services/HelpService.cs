@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="feedback">The feedback service.</param>
         public HelpService(UserFeedbackService feedback)
         {
-            this._feedback = feedback;
+            _feedback = feedback;
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Services
         [NotNull]
         public EmbedBuilder CreateDetailedCommandInfoEmbed([NotNull] IGrouping<string, CommandInfo> commandGroup)
         {
-            var eb = this._feedback.CreateEmbedBase();
+            var eb = _feedback.CreateEmbedBase();
 
             var relevantAliases = commandGroup.SelectMany(c => c.Aliases).Distinct()
                 .Skip(1)
@@ -145,7 +145,7 @@ namespace DIGOS.Ambassador.Services
         [NotNull]
         public Embed CreateCommandUsageEmbed([NotNull] IEnumerable<CommandMatch> matchingCommands)
         {
-            var eb = this._feedback.CreateEmbedBase();
+            var eb = _feedback.CreateEmbedBase();
             eb.WithTitle("Perhaps you meant one of the following?");
 
             foreach (var matchingCommand in matchingCommands)

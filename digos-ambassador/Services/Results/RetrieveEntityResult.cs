@@ -46,12 +46,12 @@ namespace DIGOS.Ambassador.Services
         {
             get
             {
-                if (!this.IsSuccess || this._internalEntity is null)
+                if (!this.IsSuccess || _internalEntity is null)
                 {
                     throw new InvalidOperationException("The result does not contain a valid value.");
                 }
 
-                return this._internalEntity;
+                return _internalEntity;
             }
         }
 
@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="exception">The exception that caused the error (if any).</param>
         private RetrieveEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
         {
-            this._internalEntity = entity;
+            _internalEntity = entity;
 
             this.Error = error;
             this.ErrorReason = errorReason;

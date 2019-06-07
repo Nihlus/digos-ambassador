@@ -40,13 +40,13 @@ namespace DIGOS.Ambassador.Transformations
         /// <param name="nodeDeserializer">The node deserializer.</param>
         public ValidatingNodeDeserializer(INodeDeserializer nodeDeserializer)
         {
-            this._nodeDeserializer = nodeDeserializer;
+            _nodeDeserializer = nodeDeserializer;
         }
 
         /// <inheritdoc />
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
-            if (this._nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
+            if (_nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
             {
                 var context = new ValidationContext(value, null, null);
                 Validator.ValidateObject(value, context, true);

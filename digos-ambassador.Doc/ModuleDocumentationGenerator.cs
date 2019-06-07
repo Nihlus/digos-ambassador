@@ -62,10 +62,10 @@ namespace DIGOS.Ambassador.Doc
         /// <param name="outputPath">The output path where documentation files should be written.</param>
         public ModuleDocumentationGenerator(Assembly commandAssembly, string outputPath)
         {
-            this._commandAssembly = commandAssembly;
-            this._outputPath = outputPath;
+            _commandAssembly = commandAssembly;
+            _outputPath = outputPath;
 
-            this._commands = new CommandService(new CommandServiceConfig { ThrowOnError = false });
+            _commands = new CommandService(new CommandServiceConfig { ThrowOnError = false });
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Doc
         [NotNull]
         public ModuleDocumentationGenerator WithTypeReader<T>(TypeReader typeReader)
         {
-            this._commands.AddTypeReader<T>(typeReader);
+            _commands.AddTypeReader<T>(typeReader);
             return this;
         }
 
@@ -92,7 +92,7 @@ namespace DIGOS.Ambassador.Doc
         {
             await AddModulesAsync();
 
-            var modules = GetTopLevelModules(this._commands.Modules);
+            var modules = GetTopLevelModules(_commands.Modules);
             var modulePages = GenerateDocumentationPages(modules);
 
             foreach (var modulePage in modulePages.Values)
@@ -114,19 +114,19 @@ namespace DIGOS.Ambassador.Doc
             {
                 try
                 {
-                    await this._commands.AddModulesAsync(this._commandAssembly, this._services);
+                    await _commands.AddModulesAsync(_commandAssembly, _services);
                     break;
                 }
                 catch (InvalidOperationException iox)
                 {
-                    var typeName = this._typeReaderTypeFinder.Match(iox.Message).Value;
-                    var typeInfo = this._commandAssembly.DefinedTypes.FirstOrDefault(t => t.Name == typeName);
+                    var typeName = _typeReaderTypeFinder.Match(iox.Message).Value;
+                    var typeInfo = _commandAssembly.DefinedTypes.FirstOrDefault(t => t.Name == typeName);
                     if (typeInfo is null)
                     {
                         throw;
                     }
 
-                    this._commands.AddTypeReader(typeInfo.AsType(), new DummyTypeReader());
+                    _commands.AddTypeReader(typeInfo.AsType(), new DummyTypeReader());
                 }
             }
         }
@@ -231,7 +231,7 @@ namespace DIGOS.Ambassador.Doc
         {
             subdirectory = subdirectory ?? string.Empty;
 
-            var outputDirectory = Path.Combine(this._outputPath, subdirectory);
+            var outputDirectory = Path.Combine(_outputPath, subdirectory);
             Directory.CreateDirectory(outputDirectory);
 
             var outputPath = Path.Combine(outputDirectory, $"{page.Name}.md");
