@@ -33,9 +33,27 @@ namespace DIGOS.Ambassador.Services
     public struct RetrieveEntityResult<T> : IResult where T : class
     {
         /// <summary>
+        /// Holds the actual entity value.
+        /// </summary>
+        [CanBeNull]
+        private readonly T InternalEntity;
+
+        /// <summary>
         /// Gets the entity that was retrieved.
         /// </summary>
-        public T Entity { get; }
+        [NotNull]
+        public T Entity
+        {
+            get
+            {
+                if (!this.IsSuccess || this.InternalEntity is null)
+                {
+                    throw new InvalidOperationException("The result does not contain a valid value.");
+                }
+
+                return this.InternalEntity;
+            }
+        }
 
         /// <inheritdoc />
         public CommandError? Error { get; }
@@ -61,7 +79,8 @@ namespace DIGOS.Ambassador.Services
         /// <param name="exception">The exception that caused the error (if any).</param>
         private RetrieveEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
         {
-            this.Entity = entity;
+            this.InternalEntity = entity;
+
             this.Error = error;
             this.ErrorReason = errorReason;
             this.Exception = exception;
