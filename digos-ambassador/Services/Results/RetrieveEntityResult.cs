@@ -36,7 +36,13 @@ namespace DIGOS.Ambassador.Services
         /// Holds the actual entity value.
         /// </summary>
         [CanBeNull]
-        private readonly T _internalEntity;
+        private readonly T _entity;
+
+        /// <summary>
+        /// Holds the actual error reason.
+        /// </summary>
+        [CanBeNull]
+        private readonly string _errorReason;
 
         /// <summary>
         /// Gets the entity that was retrieved.
@@ -46,12 +52,12 @@ namespace DIGOS.Ambassador.Services
         {
             get
             {
-                if (!this.IsSuccess || _internalEntity is null)
+                if (!this.IsSuccess || _entity is null)
                 {
                     throw new InvalidOperationException("The result does not contain a valid value.");
                 }
 
-                return _internalEntity;
+                return _entity;
             }
         }
 
@@ -59,7 +65,19 @@ namespace DIGOS.Ambassador.Services
         public CommandError? Error { get; }
 
         /// <inheritdoc />
-        public string ErrorReason { get; }
+        [NotNull]
+        public string ErrorReason
+        {
+            get
+            {
+                if (this.IsSuccess || _errorReason is null)
+                {
+                    throw new InvalidOperationException("The result does not contain a valid error.");
+                }
+
+                return _errorReason;
+            }
+        }
 
         /// <inheritdoc />
         public bool IsSuccess => !this.Error.HasValue;
@@ -79,10 +97,10 @@ namespace DIGOS.Ambassador.Services
         /// <param name="exception">The exception that caused the error (if any).</param>
         private RetrieveEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
         {
-            _internalEntity = entity;
+            _entity = entity;
+            _errorReason = errorReason;
 
             this.Error = error;
-            this.ErrorReason = errorReason;
             this.Exception = exception;
         }
 
