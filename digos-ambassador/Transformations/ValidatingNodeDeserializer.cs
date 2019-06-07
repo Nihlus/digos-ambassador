@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Transformations
     /// </summary>
     public class ValidatingNodeDeserializer : INodeDeserializer
     {
-        private readonly INodeDeserializer NodeDeserializer;
+        private readonly INodeDeserializer _nodeDeserializer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatingNodeDeserializer"/> class.
@@ -40,13 +40,13 @@ namespace DIGOS.Ambassador.Transformations
         /// <param name="nodeDeserializer">The node deserializer.</param>
         public ValidatingNodeDeserializer(INodeDeserializer nodeDeserializer)
         {
-            this.NodeDeserializer = nodeDeserializer;
+            this._nodeDeserializer = nodeDeserializer;
         }
 
         /// <inheritdoc />
         public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
         {
-            if (this.NodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
+            if (this._nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
             {
                 var context = new ValidationContext(value, null, null);
                 Validator.ValidateObject(value, context, true);

@@ -54,12 +54,12 @@ namespace DIGOS.Ambassador.Modules
     [Summary("Transformation-related commands, such as transforming certain body parts or saving transforms as characters.")]
     public class TransformationCommands : DatabaseModuleBase
     {
-        private readonly UserFeedbackService Feedback;
+        private readonly UserFeedbackService _feedback;
 
-        private readonly CharacterService Characters;
+        private readonly CharacterService _characters;
 
-        private readonly TransformationService Transformation;
-        private readonly InteractivityService Interactivity;
+        private readonly TransformationService _transformation;
+        private readonly InteractivityService _interactivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformationCommands"/> class.
@@ -79,10 +79,10 @@ namespace DIGOS.Ambassador.Modules
         )
             : base(database)
         {
-            this.Feedback = feedback;
-            this.Characters = characters;
-            this.Transformation = transformation;
-            this.Interactivity = interactivity;
+            this._feedback = feedback;
+            this._characters = characters;
+            this._transformation = transformation;
+            this._interactivity = interactivity;
         }
 
         /// <summary>
@@ -169,10 +169,10 @@ namespace DIGOS.Ambassador.Modules
             [NotNull] string species
         )
         {
-            var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
+            var getCurrentCharacterResult = await this._characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
                 return;
             }
 
@@ -181,20 +181,20 @@ namespace DIGOS.Ambassador.Modules
             ShiftBodypartResult result;
             if (species.Equals("remove", StringComparison.OrdinalIgnoreCase))
             {
-                result = await this.Transformation.RemoveBodypartAsync(this.Database, this.Context, character, bodyPart, chirality);
+                result = await this._transformation.RemoveBodypartAsync(this.Database, this.Context, character, bodyPart, chirality);
             }
             else
             {
-                result = await this.Transformation.ShiftBodypartAsync(this.Database, this.Context, character, bodyPart, species, chirality);
+                result = await this._transformation.ShiftBodypartAsync(this.Database, this.Context, character, bodyPart, species, chirality);
             }
 
             if (!result.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, result.ShiftMessage);
+            await this._feedback.SendConfirmationAsync(this.Context, result.ShiftMessage);
         }
 
         /// <summary>
@@ -274,16 +274,16 @@ namespace DIGOS.Ambassador.Modules
             [NotNull] Colour colour
         )
         {
-            var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
+            var getCurrentCharacterResult = await this._characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
                 return;
             }
 
             var character = getCurrentCharacterResult.Entity;
 
-            var shiftPartResult = await this.Transformation.ShiftBodypartColourAsync
+            var shiftPartResult = await this._transformation.ShiftBodypartColourAsync
             (
                 this.Database,
                 this.Context,
@@ -295,11 +295,11 @@ namespace DIGOS.Ambassador.Modules
 
             if (!shiftPartResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
+            await this._feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
         }
 
         /// <summary>
@@ -393,16 +393,16 @@ namespace DIGOS.Ambassador.Modules
             Colour colour
         )
         {
-            var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
+            var getCurrentCharacterResult = await this._characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
                 return;
             }
 
             var character = getCurrentCharacterResult.Entity;
 
-            var shiftPartResult = await this.Transformation.ShiftBodypartPatternAsync
+            var shiftPartResult = await this._transformation.ShiftBodypartPatternAsync
             (
                 this.Database,
                 this.Context,
@@ -415,11 +415,11 @@ namespace DIGOS.Ambassador.Modules
 
             if (!shiftPartResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
+            await this._feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
         }
 
         /// <summary>
@@ -501,24 +501,24 @@ namespace DIGOS.Ambassador.Modules
             Colour colour
         )
         {
-            var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
+            var getCurrentCharacterResult = await this._characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
                 return;
             }
 
             var character = getCurrentCharacterResult.Entity;
 
-            var shiftPartResult = await this.Transformation.ShiftPatternColourAsync(this.Database, this.Context, character, bodyPart, colour, chirality);
+            var shiftPartResult = await this._transformation.ShiftPatternColourAsync(this.Database, this.Context, character, bodyPart, colour, chirality);
 
             if (!shiftPartResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
+            await this._feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
         }
 
         /// <summary>
@@ -530,14 +530,14 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Lists the available transformation species.")]
         public async Task ListAvailableTransformationsAsync()
         {
-            var availableSpecies = await this.Transformation.GetAvailableSpeciesAsync(this.Database);
+            var availableSpecies = await this._transformation.GetAvailableSpeciesAsync(this.Database);
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Available species";
 
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                this.Feedback,
+                this._feedback,
                 this.Context.User,
                 availableSpecies,
                 s => $"{s.Name.Humanize(LetterCasing.Title)} ({s.Name})",
@@ -557,7 +557,7 @@ namespace DIGOS.Ambassador.Modules
                 );
             }
 
-            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
+            await this._interactivity.SendInteractiveMessageAndDeleteAsync
             (
                 this.Context.Channel,
                 paginatedEmbed,
@@ -579,9 +579,9 @@ namespace DIGOS.Ambassador.Modules
             Bodypart bodyPart
         )
         {
-            var transformations = await this.Transformation.GetAvailableTransformationsAsync(this.Database, bodyPart);
+            var transformations = await this._transformation.GetAvailableTransformationsAsync(this.Database, bodyPart);
 
-            var eb = this.Feedback.CreateEmbedBase();
+            var eb = this._feedback.CreateEmbedBase();
             eb.WithTitle("Available transformations");
 
             if (transformations.Count <= 0)
@@ -599,7 +599,7 @@ namespace DIGOS.Ambassador.Modules
                 eb.AddField(speciesName, transformation.Description);
             }
 
-            await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
+            await this._feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
         }
 
         /// <summary>
@@ -610,10 +610,10 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Describes the current physical appearance of the current character.")]
         public async Task DescribeCharacterAsync()
         {
-            var result = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var result = await this._characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
             if (!result.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                 return;
             }
 
@@ -629,9 +629,9 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Describes the current physical appearance of a character.")]
         public async Task DescribeCharacterAsync([NotNull] Character character)
         {
-            var eb = await this.Transformation.GenerateCharacterDescriptionAsync(this.Context, character);
+            var eb = await this._transformation.GenerateCharacterDescriptionAsync(this.Context, character);
 
-            await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
+            await this._feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
         }
 
         /// <summary>
@@ -643,22 +643,22 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Resets your form to your default one.")]
         public async Task ResetFormAsync()
         {
-            var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var getCurrentCharacterResult = await this._characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
                 return;
             }
 
             var character = getCurrentCharacterResult.Entity;
-            var resetFormResult = await this.Transformation.ResetCharacterFormAsync(this.Database, character);
+            var resetFormResult = await this._transformation.ResetCharacterFormAsync(this.Database, character);
             if (!resetFormResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, resetFormResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, resetFormResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Character form reset.");
+            await this._feedback.SendConfirmationAsync(this.Context, "Character form reset.");
         }
 
         /// <summary>
@@ -671,24 +671,24 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Saves your current form as a new character.")]
         public async Task SaveCurrentFormAsync([NotNull] string newCharacterName)
         {
-            var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var getCurrentCharacterResult = await this._characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
                 return;
             }
 
             var character = getCurrentCharacterResult.Entity;
             var currentAppearance = character.CurrentAppearance;
 
-            var cloneCharacterResult = await this.Characters.CreateCharacterFromAppearanceAsync(this.Database, this.Context, newCharacterName, currentAppearance);
+            var cloneCharacterResult = await this._characters.CreateCharacterFromAppearanceAsync(this.Database, this.Context, newCharacterName, currentAppearance);
             if (!cloneCharacterResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, cloneCharacterResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, cloneCharacterResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, $"Current appearance saved as new character \"{newCharacterName}\"");
+            await this._feedback.SendConfirmationAsync(this.Context, $"Current appearance saved as new character \"{newCharacterName}\"");
         }
 
         /// <summary>
@@ -700,23 +700,23 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Sets your current appearance as your current character's default one.")]
         public async Task SetCurrentAppearanceAsDefaultAsync()
         {
-            var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var getCurrentCharacterResult = await this._characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
                 return;
             }
 
             var character = getCurrentCharacterResult.Entity;
 
-            var setDefaultAppearanceResult = await this.Transformation.SetCurrentAppearanceAsDefaultForCharacterAsync(this.Database, character);
+            var setDefaultAppearanceResult = await this._transformation.SetCurrentAppearanceAsDefaultForCharacterAsync(this.Database, character);
             if (!setDefaultAppearanceResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, setDefaultAppearanceResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, setDefaultAppearanceResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Current appearance saved as the default one of this character.");
+            await this._feedback.SendConfirmationAsync(this.Context, "Current appearance saved as the default one of this character.");
         }
 
         /// <summary>
@@ -729,10 +729,10 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
         {
-            var getProtectionResult = await this.Transformation.GetOrCreateGlobalUserProtectionAsync(this.Database, this.Context.User);
+            var getProtectionResult = await this._transformation.GetOrCreateGlobalUserProtectionAsync(this.Database, this.Context.User);
             if (!getProtectionResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
                 return;
             }
 
@@ -742,7 +742,7 @@ namespace DIGOS.Ambassador.Modules
 
             await this.Database.SaveChangesAsync();
 
-            await this.Feedback.SendConfirmationAsync
+            await this._feedback.SendConfirmationAsync
             (
                 this.Context,
                 $"You're now opted {(shouldOptIn ? "in" : "out")} by default on new servers."
@@ -758,10 +758,10 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task OptInToTransformationsAsync()
         {
-            var getProtectionResult = await this.Transformation.GetOrCreateServerUserProtectionAsync(this.Database, this.Context.User, this.Context.Guild);
+            var getProtectionResult = await this._transformation.GetOrCreateServerUserProtectionAsync(this.Database, this.Context.User, this.Context.Guild);
             if (!getProtectionResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
                 return;
             }
 
@@ -770,7 +770,7 @@ namespace DIGOS.Ambassador.Modules
 
             await this.Database.SaveChangesAsync();
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Opted into transformations. Have fun!");
+            await this._feedback.SendConfirmationAsync(this.Context, "Opted into transformations. Have fun!");
         }
 
         /// <summary>
@@ -782,10 +782,10 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task OptOutOfTransformationsAsync()
         {
-            var getProtectionResult = await this.Transformation.GetOrCreateServerUserProtectionAsync(this.Database, this.Context.User, this.Context.Guild);
+            var getProtectionResult = await this._transformation.GetOrCreateServerUserProtectionAsync(this.Database, this.Context.User, this.Context.Guild);
             if (!getProtectionResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
                 return;
             }
 
@@ -794,7 +794,7 @@ namespace DIGOS.Ambassador.Modules
 
             await this.Database.SaveChangesAsync();
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Opted out of transformations.");
+            await this._feedback.SendConfirmationAsync(this.Context, "Opted out of transformations.");
         }
 
         /// <summary>
@@ -806,14 +806,14 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Sets your default protection type for transformations on servers you join. Available types are Whitelist and Blacklist.")]
         public async Task SetDefaultProtectionTypeAsync(ProtectionType protectionType)
         {
-            var setProtectionTypeResult = await this.Transformation.SetDefaultProtectionTypeAsync(this.Database, this.Context.User, protectionType);
+            var setProtectionTypeResult = await this._transformation.SetDefaultProtectionTypeAsync(this.Database, this.Context.User, protectionType);
             if (!setProtectionTypeResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, setProtectionTypeResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, setProtectionTypeResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, $"Default protection type set to \"{protectionType.Humanize()}\"");
+            await this._feedback.SendConfirmationAsync(this.Context, $"Default protection type set to \"{protectionType.Humanize()}\"");
         }
 
         /// <summary>
@@ -826,14 +826,14 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task SetProtectionTypeAsync(ProtectionType protectionType)
         {
-            var setProtectionTypeResult = await this.Transformation.SetServerProtectionTypeAsync(this.Database, this.Context.User, this.Context.Guild, protectionType);
+            var setProtectionTypeResult = await this._transformation.SetServerProtectionTypeAsync(this.Database, this.Context.User, this.Context.Guild, protectionType);
             if (!setProtectionTypeResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, setProtectionTypeResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, setProtectionTypeResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, $"Protection type set to \"{protectionType.Humanize()}\"");
+            await this._feedback.SendConfirmationAsync(this.Context, $"Protection type set to \"{protectionType.Humanize()}\"");
         }
 
         /// <summary>
@@ -845,14 +845,14 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Whitelists a user, allowing them to transform you.")]
         public async Task WhitelistUserAsync([NotNull] IUser user)
         {
-            var whitelistUserResult = await this.Transformation.WhitelistUserAsync(this.Database, this.Context.User, user);
+            var whitelistUserResult = await this._transformation.WhitelistUserAsync(this.Database, this.Context.User, user);
             if (!whitelistUserResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, whitelistUserResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, whitelistUserResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "User whitelisted.");
+            await this._feedback.SendConfirmationAsync(this.Context, "User whitelisted.");
         }
 
         /// <summary>
@@ -864,14 +864,14 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Blacklists a user, preventing them from transforming you.")]
         public async Task BlacklistUserAsync([NotNull] IUser user)
         {
-            var blacklistUserResult = await this.Transformation.BlacklistUserAsync(this.Database, this.Context.User, user);
+            var blacklistUserResult = await this._transformation.BlacklistUserAsync(this.Database, this.Context.User, user);
             if (!blacklistUserResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, blacklistUserResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, blacklistUserResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "User whitelisted.");
+            await this._feedback.SendConfirmationAsync(this.Context, "User whitelisted.");
         }
 
         /// <summary>
@@ -883,10 +883,10 @@ namespace DIGOS.Ambassador.Modules
         [RequireOwner]
         public async Task UpdateTransformationDatabaseAsync()
         {
-            var updateTransformationsResult = await this.Transformation.UpdateTransformationDatabaseAsync(this.Database);
+            var updateTransformationsResult = await this._transformation.UpdateTransformationDatabaseAsync(this.Database);
             if (!updateTransformationsResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, updateTransformationsResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, updateTransformationsResult.ErrorReason);
                 return;
             }
 
@@ -896,7 +896,7 @@ namespace DIGOS.Ambassador.Modules
                 $"{updateTransformationsResult.SpeciesUpdated} species updated, " +
                 $"and {updateTransformationsResult.TransformationsUpdated} transformations updated.";
 
-            await this.Feedback.SendConfirmationAsync(this.Context, confirmationText);
+            await this._feedback.SendConfirmationAsync(this.Context, confirmationText);
         }
     }
 }

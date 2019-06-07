@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class LuaService
     {
-        private readonly IReadOnlyList<string> FunctionWhitelist = new[]
+        private readonly IReadOnlyList<string> _functionWhitelist = new[]
         {
             "assert",
             "error",
@@ -104,9 +104,9 @@ namespace DIGOS.Ambassador.Services
         };
 
         [NotNull]
-        private readonly ContentService ContentService;
+        private readonly ContentService _contentService;
 
-        private readonly Regex GetErroringFunctionRegex =
+        private readonly Regex _getErroringFunctionRegex =
             new Regex("(?<=\\((?>global)|(?>field )(?> \')).+(?=\'\\))", RegexOptions.Compiled);
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="contentService">The application's content service.</param>
         public LuaService([NotNull] ContentService contentService)
         {
-            this.ContentService = contentService;
+            this._contentService = contentService;
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace DIGOS.Ambassador.Services
                 envBuilder.WithEntry(variable.name);
             }
 
-            foreach (var function in this.FunctionWhitelist)
+            foreach (var function in this._functionWhitelist)
             {
                 envBuilder = envBuilder.WithEntry(function);
             }
@@ -234,8 +234,8 @@ namespace DIGOS.Ambassador.Services
                             );
                         }
 
-                        string erroringFunction = this.GetErroringFunctionRegex.Match(result ?? string.Empty).Value;
-                        if (!this.FunctionWhitelist.Contains(erroringFunction))
+                        string erroringFunction = this._getErroringFunctionRegex.Match(result ?? string.Empty).Value;
+                        if (!this._functionWhitelist.Contains(erroringFunction))
                         {
                             return RetrieveEntityResult<string>.FromError
                             (
@@ -267,7 +267,7 @@ namespace DIGOS.Ambassador.Services
             [NotNull] params (string name, object value)[] variables
         )
         {
-            var getScriptResult = this.ContentService.OpenLocalStream(scriptPath);
+            var getScriptResult = this._contentService.OpenLocalStream(scriptPath);
             if (!getScriptResult.IsSuccess)
             {
                 return RetrieveEntityResult<string>.FromError(getScriptResult);

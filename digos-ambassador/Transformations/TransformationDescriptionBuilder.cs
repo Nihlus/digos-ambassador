@@ -39,9 +39,9 @@ namespace DIGOS.Ambassador.Transformations
     /// </summary>
     public class TransformationDescriptionBuilder
     {
-        private readonly TransformationTextTokenizer Tokenizer;
+        private readonly TransformationTextTokenizer _tokenizer;
 
-        private readonly Regex SentenceSpacingRegex = new Regex("(?<=\\w)\\.(?=\\w)", RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase);
+        private readonly Regex _sentenceSpacingRegex = new Regex("(?<=\\w)\\.(?=\\w)", RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformationDescriptionBuilder"/> class.
@@ -49,9 +49,9 @@ namespace DIGOS.Ambassador.Transformations
         /// <param name="services">The available services.</param>
         public TransformationDescriptionBuilder(IServiceProvider services)
         {
-            this.Tokenizer = new TransformationTextTokenizer(services);
+            this._tokenizer = new TransformationTextTokenizer(services);
 
-            this.Tokenizer.DiscoverAvailableTokens();
+            this._tokenizer.DiscoverAvailableTokens();
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Transformations
             [CanBeNull] AppearanceComponent component
         )
         {
-            var tokens = this.Tokenizer.GetTokens(text);
+            var tokens = this._tokenizer.GetTokens(text);
             var tokenContentMap = tokens.ToDictionary(token => token, token => token.GetText(character, component));
 
             int relativeOffset = 0;
@@ -167,7 +167,7 @@ namespace DIGOS.Ambassador.Transformations
             }
 
             var description = sb.ToString().Trim();
-            var withSentenceSpacing = this.SentenceSpacingRegex.Replace(description, ". ");
+            var withSentenceSpacing = this._sentenceSpacingRegex.Replace(description, ". ");
 
             return withSentenceSpacing;
         }

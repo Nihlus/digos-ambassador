@@ -53,16 +53,16 @@ namespace DIGOS.Ambassador.Behaviours
     /// </summary>
     public class CommandBehaviour : ContinuousBehaviour
     {
-        private readonly GlobalInfoContext Database;
+        private readonly GlobalInfoContext _database;
 
-        private readonly IServiceProvider Services;
+        private readonly IServiceProvider _services;
 
-        private readonly UserFeedbackService Feedback;
-        private readonly PrivacyService Privacy;
-        private readonly ContentService Content;
-        private readonly CommandService Commands;
-        private readonly PermissionService Permissions;
-        private readonly HelpService Help;
+        private readonly UserFeedbackService _feedback;
+        private readonly PrivacyService _privacy;
+        private readonly ContentService _content;
+        private readonly CommandService _commands;
+        private readonly PermissionService _permissions;
+        private readonly HelpService _help;
 
         /// <summary>
         /// Gets the commands that are currently running.
@@ -95,14 +95,14 @@ namespace DIGOS.Ambassador.Behaviours
         )
             : base(client)
         {
-            this.Database = database;
-            this.Services = services;
-            this.Feedback = feedback;
-            this.Privacy = privacy;
-            this.Content = content;
-            this.Commands = commands;
-            this.Permissions = permissions;
-            this.Help = help;
+            this._database = database;
+            this._services = services;
+            this._feedback = feedback;
+            this._privacy = privacy;
+            this._content = content;
+            this._commands = commands;
+            this._permissions = permissions;
+            this._help = help;
 
             this.RunningCommands = new ConcurrentQueue<Task>();
         }
@@ -138,9 +138,9 @@ namespace DIGOS.Ambassador.Behaviours
         private async Task SaneExecuteCommandWrapperAsync(ICommandContext context, int argumentPos)
         {
             // Create a service scope for this command
-            using (var scope = this.Services.CreateScope())
+            using (var scope = this._services.CreateScope())
             {
-                var result = await this.Commands.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
+                var result = await this._commands.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
                 await HandleCommandResultAsync(context, result, argumentPos);
             }
         }
@@ -174,7 +174,7 @@ namespace DIGOS.Ambassador.Behaviours
         private bool IsPrivacyExemptCommand(ICommandContext context, int argumentPos)
         {
             // We need to gather consent from the user
-            var commandSearchResult = this.Commands.Search(context, argumentPos);
+            var commandSearchResult = this._commands.Search(context, argumentPos);
             if (!commandSearchResult.IsSuccess)
             {
                 return false;
@@ -217,11 +217,11 @@ namespace DIGOS.Ambassador.Behaviours
             var context = new SocketCommandContext(this.Client, message);
 
             // Perform first-time user checks, making sure the user has their default permissions, has consented, etc
-            if (!await this.Privacy.HasUserConsentedAsync(this.Database, context.User) && !IsPrivacyExemptCommand(context, argumentPos))
+            if (!await this._privacy.HasUserConsentedAsync(this._database, context.User) && !IsPrivacyExemptCommand(context, argumentPos))
             {
                 // Ask for consent
                 var userDMChannel = await arg.Author.GetOrCreateDMChannelAsync();
-                var result = await this.Privacy.RequestConsentAsync(userDMChannel, this.Content, this.Feedback);
+                var result = await this._privacy.RequestConsentAsync(userDMChannel, this._content, this._feedback);
                 if (result.IsSuccess)
                 {
                     return;
@@ -231,7 +231,7 @@ namespace DIGOS.Ambassador.Behaviours
                                         "this, so you can read the bot's privacy policy and consent to data " +
                                         "handling and processing.";
 
-                await this.Feedback.SendWarningAsync(context, response);
+                await this._feedback.SendWarningAsync(context, response);
 
                 return;
             }
@@ -239,7 +239,7 @@ namespace DIGOS.Ambassador.Behaviours
             var guild = (message.Channel as SocketGuildChannel)?.Guild;
             if (guild != null)
             {
-                var registerUserResult = await this.Database.GetOrRegisterUserAsync(arg.Author);
+                var registerUserResult = await this._database.GetOrRegisterUserAsync(arg.Author);
                 if (!registerUserResult.IsSuccess)
                 {
                     return;
@@ -247,15 +247,15 @@ namespace DIGOS.Ambassador.Behaviours
 
                 var user = registerUserResult.Entity;
 
-                var server = await this.Database.GetOrRegisterServerAsync(guild);
+                var server = await this._database.GetOrRegisterServerAsync(guild);
 
                 // Grant permissions to new users
                 if (!server.IsUserKnown(arg.Author))
                 {
-                    await this.Permissions.GrantDefaultPermissionsAsync(this.Database, guild, arg.Author);
+                    await this._permissions.GrantDefaultPermissionsAsync(this._database, guild, arg.Author);
                     server.KnownUsers.Add(user);
 
-                    await this.Database.SaveChangesAsync();
+                    await this._database.SaveChangesAsync();
                 }
             }
 
@@ -304,7 +304,7 @@ namespace DIGOS.Ambassador.Behaviours
 
                     try
                     {
-                        var errorEmbed = this.Feedback.CreateFeedbackEmbed
+                        var errorEmbed = this._feedback.CreateFeedbackEmbed
                         (
                             context.User,
                             Color.Red,
@@ -313,14 +313,14 @@ namespace DIGOS.Ambassador.Behaviours
 
                         await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
 
-                        var searchResult = this.Commands.Search(context, argumentPos);
+                        var searchResult = this._commands.Search(context, argumentPos);
                         if (searchResult.Commands.Any())
                         {
                             await userDMChannel.SendMessageAsync
                             (
                                 string.Empty,
                                 false,
-                                this.Help.CreateCommandUsageEmbed(searchResult.Commands)
+                                this._help.CreateCommandUsageEmbed(searchResult.Commands)
                             );
                         }
                     }
@@ -363,7 +363,7 @@ namespace DIGOS.Ambassador.Behaviours
 
             try
             {
-                var eb = this.Feedback.CreateEmbedBase(Color.Red);
+                var eb = this._feedback.CreateEmbedBase(Color.Red);
                 eb.WithTitle("Internal Error");
                 eb.WithDescription
                 (
@@ -389,11 +389,11 @@ namespace DIGOS.Ambassador.Behaviours
                     "If you don't have an account on github, you can also send a DM to Jax#7487, who is the main" +
                     " developer of the bot."
                 );
-                eb.WithThumbnailUrl(this.Content.BrokenAmbyUri.ToString());
+                eb.WithThumbnailUrl(this._content.BrokenAmbyUri.ToString());
 
-                var reportEmbed = this.Feedback.CreateEmbedBase(Color.Red);
+                var reportEmbed = this._feedback.CreateEmbedBase(Color.Red);
                 reportEmbed.WithTitle("Click here to create a new issue");
-                reportEmbed.WithUrl(this.Content.AutomaticBugReportCreationUri.ToString());
+                reportEmbed.WithUrl(this._content.AutomaticBugReportCreationUri.ToString());
 
                 using (var ms = new MemoryStream())
                 {

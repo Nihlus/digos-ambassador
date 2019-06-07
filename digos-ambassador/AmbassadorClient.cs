@@ -63,15 +63,15 @@ namespace DIGOS.Ambassador
         /// </summary>
         private static readonly ILog Log = LogManager.GetLogger(typeof(AmbassadorClient));
 
-        private readonly DiscordSocketClient Client;
+        private readonly DiscordSocketClient _client;
 
-        private readonly ContentService Content;
+        private readonly ContentService _content;
 
-        private readonly CommandService Commands;
+        private readonly CommandService _commands;
 
-        private readonly IServiceProvider Services;
+        private readonly IServiceProvider _services;
 
-        private readonly BehaviourService Behaviours;
+        private readonly BehaviourService _behaviours;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorClient"/> class.
@@ -79,27 +79,27 @@ namespace DIGOS.Ambassador
         /// <param name="content">The content service.</param>
         public AmbassadorClient([NotNull] ContentService content)
         {
-            this.Client = Type.GetType("Mono.Runtime") is null
+            this._client = Type.GetType("Mono.Runtime") is null
                 ? new DiscordSocketClient()
                 : new DiscordSocketClient(new DiscordSocketConfig { WebSocketProvider = () => new WebSocketSharpProvider() });
 
-            this.Client.Log += OnDiscordLogEvent;
+            this._client.Log += OnDiscordLogEvent;
 
-            this.Commands = new CommandService();
-            this.Commands.Log += OnDiscordLogEvent;
+            this._commands = new CommandService();
+            this._commands.Log += OnDiscordLogEvent;
 
-            this.Content = content;
-            this.Commands = new CommandService();
+            this._content = content;
+            this._commands = new CommandService();
 
-            this.Behaviours = new BehaviourService();
+            this._behaviours = new BehaviourService();
 
-            this.Services = new ServiceCollection()
+            this._services = new ServiceCollection()
                 .AddSingleton(this)
-                .AddSingleton(this.Client)
-                .AddSingleton<BaseSocketClient>(this.Client)
-                .AddSingleton(this.Behaviours)
-                .AddSingleton(this.Content)
-                .AddSingleton(this.Commands)
+                .AddSingleton(this._client)
+                .AddSingleton<BaseSocketClient>(this._client)
+                .AddSingleton(this._behaviours)
+                .AddSingleton(this._content)
+                .AddSingleton(this._commands)
                 .AddSingleton<RoleplayService>()
                 .AddSingleton<DiscordService>()
                 .AddSingleton<CharacterService>()
@@ -118,13 +118,13 @@ namespace DIGOS.Ambassador
                 .AddDbContext<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
                 .BuildServiceProvider();
 
-            var transformationService = this.Services.GetRequiredService<TransformationService>();
+            var transformationService = this._services.GetRequiredService<TransformationService>();
             transformationService.WithDescriptionBuilder
             (
-                ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(this.Services)
+                ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(this._services)
             );
 
-            var characterService = this.Services.GetRequiredService<CharacterService>();
+            var characterService = this._services.GetRequiredService<CharacterService>();
             characterService.DiscoverPronounProviders();
         }
 
@@ -134,7 +134,7 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the login action.</returns>
         public async Task LoginAsync()
         {
-            await this.Client.LoginAsync(TokenType.Bot, this.Content.BotToken.Trim());
+            await this._client.LoginAsync(TokenType.Bot, this._content.BotToken.Trim());
         }
 
         /// <summary>
@@ -143,32 +143,32 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the start action.</returns>
         public async Task StartAsync()
         {
-            var db = this.Services.GetRequiredService<GlobalInfoContext>();
+            var db = this._services.GetRequiredService<GlobalInfoContext>();
             if (!((RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>()).Exists())
             {
                 Log.Error("The database doesn't exist.");
                 return;
             }
 
-            this.Commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
-            this.Commands.AddTypeReader<Character>(new CharacterTypeReader());
-            this.Commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
-            this.Commands.AddTypeReader<Colour>(new ColourTypeReader());
+            this._commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
+            this._commands.AddTypeReader<Character>(new CharacterTypeReader());
+            this._commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
+            this._commands.AddTypeReader<Colour>(new ColourTypeReader());
 
-            this.Commands.AddEnumReader<UserClass>();
-            this.Commands.AddEnumReader<KinkPreference>();
-            this.Commands.AddEnumReader<Bodypart>();
-            this.Commands.AddEnumReader<Pattern>();
-            this.Commands.AddEnumReader<Permission>();
-            this.Commands.AddEnumReader<Permissions.PermissionTarget>();
+            this._commands.AddEnumReader<UserClass>();
+            this._commands.AddEnumReader<KinkPreference>();
+            this._commands.AddEnumReader<Bodypart>();
+            this._commands.AddEnumReader<Pattern>();
+            this._commands.AddEnumReader<Permission>();
+            this._commands.AddEnumReader<Permissions.PermissionTarget>();
 
             // Load modules and behaviours from the assembly this type was declared in
             var localAssembly = GetType().Assembly;
-            await this.Commands.AddModulesAsync(localAssembly, this.Services);
-            await this.Behaviours.AddBehavioursAsync(localAssembly, this.Services);
+            await this._commands.AddModulesAsync(localAssembly, this._services);
+            await this._behaviours.AddBehavioursAsync(localAssembly, this._services);
 
-            await this.Client.StartAsync();
-            await this.Behaviours.StartBehavioursAsync();
+            await this._client.StartAsync();
+            await this._behaviours.StartBehavioursAsync();
         }
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the login action.</returns>
         public async Task LogoutAsync()
         {
-            await this.Client.LogoutAsync();
+            await this._client.LogoutAsync();
         }
 
         /// <summary>
@@ -186,10 +186,10 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the stop action.</returns>
         public async Task StopAsync()
         {
-            await this.Behaviours.StopBehavioursAsync();
+            await this._behaviours.StopBehavioursAsync();
 
             await LogoutAsync();
-            await this.Client.StopAsync();
+            await this._client.StopAsync();
         }
 
         /// <summary>

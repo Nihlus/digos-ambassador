@@ -56,10 +56,10 @@ namespace DIGOS.Ambassador.Modules
     [Summary("Commands for viewing and configuring user kinks.")]
     public class KinkCommands : DatabaseModuleBase
     {
-        private readonly KinkService Kinks;
-        private readonly UserFeedbackService Feedback;
+        private readonly KinkService _kinks;
+        private readonly UserFeedbackService _feedback;
 
-        private readonly InteractivityService Interactivity;
+        private readonly InteractivityService _interactivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KinkCommands"/> class.
@@ -77,9 +77,9 @@ namespace DIGOS.Ambassador.Modules
         )
             : base(database)
         {
-            this.Kinks = kinks;
-            this.Feedback = feedback;
-            this.Interactivity = interactivity;
+            this._kinks = kinks;
+            this._feedback = feedback;
+            this._interactivity = interactivity;
         }
 
         /// <summary>
@@ -91,17 +91,17 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Shows information about the named kink.")]
         public async Task ShowKinkAsync([NotNull] string name)
         {
-            var getKinkInfoResult = await this.Kinks.GetKinkByNameAsync(this.Database, name);
+            var getKinkInfoResult = await this._kinks.GetKinkByNameAsync(this.Database, name);
             if (!getKinkInfoResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getKinkInfoResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getKinkInfoResult.ErrorReason);
                 return;
             }
 
             var kink = getKinkInfoResult.Entity;
-            var display = this.Kinks.BuildKinkInfoEmbed(kink);
+            var display = this._kinks.BuildKinkInfoEmbed(kink);
 
-            await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display);
+            await this._feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display);
         }
 
         /// <summary>
@@ -125,17 +125,17 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Shows the user's preference for the named kink.")]
         public async Task ShowKinkPreferenceAsync([NotNull] IUser user, [NotNull] string name)
         {
-            var getUserKinkResult = await this.Kinks.GetUserKinkByNameAsync(this.Database, user, name);
+            var getUserKinkResult = await this._kinks.GetUserKinkByNameAsync(this.Database, user, name);
             if (!getUserKinkResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getUserKinkResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getUserKinkResult.ErrorReason);
                 return;
             }
 
             var userKink = getUserKinkResult.Entity;
-            var display = this.Kinks.BuildUserKinkInfoEmbedBase(userKink);
+            var display = this._kinks.BuildUserKinkInfoEmbedBase(userKink);
 
-            await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display.Build());
+            await this._feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display.Build());
         }
 
         /// <summary>
@@ -147,19 +147,19 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Shows the kinks which overlap between you and the given user.")]
         public async Task ShowKinkOverlap([NotNull] IUser otherUser)
         {
-            var getUserKinksResult = await this.Kinks.GetUserKinksAsync(this.Database, this.Context.User);
+            var getUserKinksResult = await this._kinks.GetUserKinksAsync(this.Database, this.Context.User);
             if (!getUserKinksResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getUserKinksResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getUserKinksResult.ErrorReason);
                 return;
             }
 
             var userKinks = getUserKinksResult.Entity;
 
-            var getOtherUserKinksResult = await this.Kinks.GetUserKinksAsync(this.Database, otherUser);
+            var getOtherUserKinksResult = await this._kinks.GetUserKinksAsync(this.Database, otherUser);
             if (!getOtherUserKinksResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getOtherUserKinksResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getOtherUserKinksResult.ErrorReason);
                 return;
             }
 
@@ -169,14 +169,14 @@ namespace DIGOS.Ambassador.Modules
 
             if (!overlap.Any())
             {
-                await this.Feedback.SendErrorAsync(this.Context, "You don't overlap anywhere.");
+                await this._feedback.SendErrorAsync(this.Context, "You don't overlap anywhere.");
                 return;
             }
 
-            var kinkOverlapPages = this.Kinks.BuildKinkOverlapEmbeds(this.Context.User, otherUser, overlap);
-            var paginatedMessage = new PaginatedEmbed(this.Feedback, this.Context.User).WithPages(kinkOverlapPages);
+            var kinkOverlapPages = this._kinks.BuildKinkOverlapEmbeds(this.Context.User, otherUser, overlap);
+            var paginatedMessage = new PaginatedEmbed(this._feedback, this.Context.User).WithPages(kinkOverlapPages);
 
-            await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, paginatedMessage);
+            await this._interactivity.SendPrivateInteractiveMessageAsync(this.Context, this._feedback, paginatedMessage);
         }
 
         /// <summary>
@@ -209,10 +209,10 @@ namespace DIGOS.Ambassador.Modules
             KinkPreference preference
         )
         {
-            var getUserKinksResult = await this.Kinks.GetUserKinksAsync(this.Database, otherUser);
+            var getUserKinksResult = await this._kinks.GetUserKinksAsync(this.Database, otherUser);
             if (!getUserKinksResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getUserKinksResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getUserKinksResult.ErrorReason);
                 return;
             }
 
@@ -222,14 +222,14 @@ namespace DIGOS.Ambassador.Modules
 
             if (!withPreference.Any())
             {
-                await this.Feedback.SendErrorAsync(this.Context, "The user doesn't have any kinks with that preference.");
+                await this._feedback.SendErrorAsync(this.Context, "The user doesn't have any kinks with that preference.");
                 return;
             }
 
-            var paginatedKinkPages = this.Kinks.BuildPaginatedUserKinkEmbeds(withPreference);
-            var paginatedMessage = new PaginatedEmbed(this.Feedback, this.Context.User).WithPages(paginatedKinkPages);
+            var paginatedKinkPages = this._kinks.BuildPaginatedUserKinkEmbeds(withPreference);
+            var paginatedMessage = new PaginatedEmbed(this._feedback, this.Context.User).WithPages(paginatedKinkPages);
 
-            await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, paginatedMessage);
+            await this._interactivity.SendPrivateInteractiveMessageAsync(this.Context, this._feedback, paginatedMessage);
         }
 
         /// <summary>
@@ -248,22 +248,22 @@ namespace DIGOS.Ambassador.Modules
             KinkPreference preference
         )
         {
-            var getUserKinkResult = await this.Kinks.GetUserKinkByNameAsync(this.Database, this.Context.User, name);
+            var getUserKinkResult = await this._kinks.GetUserKinkByNameAsync(this.Database, this.Context.User, name);
             if (!getUserKinkResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getUserKinkResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getUserKinkResult.ErrorReason);
                 return;
             }
 
             var userKink = getUserKinkResult.Entity;
-            var setKinkPreferenceResult = await this.Kinks.SetKinkPreferenceAsync(this.Database, userKink, preference);
+            var setKinkPreferenceResult = await this._kinks.SetKinkPreferenceAsync(this.Database, userKink, preference);
             if (!setKinkPreferenceResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, setKinkPreferenceResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, setKinkPreferenceResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Preference set.");
+            await this._feedback.SendConfirmationAsync(this.Context, "Preference set.");
         }
 
         /// <summary>
@@ -277,12 +277,12 @@ namespace DIGOS.Ambassador.Modules
             var wizard = new KinkWizard
             (
                 this.Database,
-                this.Feedback,
-                this.Kinks,
+                this._feedback,
+                this._kinks,
                 this.Context.User
             );
 
-            await this.Interactivity.SendPrivateInteractiveMessageAsync(this.Context, this.Feedback, wizard);
+            await this._interactivity.SendPrivateInteractiveMessageAsync(this.Context, this._feedback, wizard);
         }
 
         /// <summary>
@@ -296,7 +296,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireOwner]
         public async Task UpdateKinkDatabaseAsync()
         {
-            await this.Feedback.SendConfirmationAsync(this.Context, "Updating kinks...");
+            await this._feedback.SendConfirmationAsync(this.Context, "Updating kinks...");
 
             int updatedKinkCount = 0;
 
@@ -318,7 +318,7 @@ namespace DIGOS.Ambassador.Modules
                 }
                 catch (OperationCanceledException)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, "Could not connect to F-list: Operation timed out.");
+                    await this._feedback.SendErrorAsync(this.Context, "Could not connect to F-list: Operation timed out.");
                     return;
                 }
             }
@@ -328,7 +328,7 @@ namespace DIGOS.Ambassador.Modules
             {
                 if (!Enum.TryParse<KinkCategory>(kinkSection.Key, out var kinkCategory))
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, "Failed to parse kink category.");
+                    await this._feedback.SendErrorAsync(this.Context, "Failed to parse kink category.");
                     return;
                 }
 
@@ -344,7 +344,7 @@ namespace DIGOS.Ambassador.Modules
                 ));
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, $"Done. {updatedKinkCount} kinks updated.");
+            await this._feedback.SendConfirmationAsync(this.Context, $"Done. {updatedKinkCount} kinks updated.");
         }
 
         /// <summary>
@@ -355,8 +355,8 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Resets all your kink preferences.")]
         public async Task ResetKinksAsync()
         {
-            await this.Kinks.ResetUserKinksAsync(this.Database, this.Context.User);
-            await this.Feedback.SendConfirmationAsync(this.Context, "Preferences reset.");
+            await this._kinks.ResetUserKinksAsync(this.Database, this.Context.User);
+            await this._feedback.SendConfirmationAsync(this.Context, "Preferences reset.");
         }
     }
 }

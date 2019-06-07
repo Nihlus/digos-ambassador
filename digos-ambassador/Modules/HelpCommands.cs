@@ -43,10 +43,10 @@ namespace DIGOS.Ambassador.Modules
     [Summary("Help-related commands that explain other commands or modules.")]
     public class HelpCommands : ModuleBase<SocketCommandContext>
     {
-        private readonly CommandService Commands;
-        private readonly UserFeedbackService Feedback;
-        private readonly InteractivityService Interactive;
-        private readonly HelpService Help;
+        private readonly CommandService _commands;
+        private readonly UserFeedbackService _feedback;
+        private readonly InteractivityService _interactive;
+        private readonly HelpService _help;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HelpCommands"/> class.
@@ -63,10 +63,10 @@ namespace DIGOS.Ambassador.Modules
             [NotNull] HelpService help
         )
         {
-            this.Commands = commands;
-            this.Feedback = feedback;
-            this.Interactive = interactive;
-            this.Help = help;
+            this._commands = commands;
+            this._feedback = feedback;
+            this._interactive = interactive;
+            this._help = help;
         }
 
         /// <summary>
@@ -78,13 +78,13 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Lists available command modules.")]
         public async Task HelpAsync()
         {
-            var modules = this.Commands.Modules.Where(m => !m.IsSubmodule).ToList();
-            var helpWizard = new HelpWizard(modules, this.Feedback, this.Help, this.Context.User);
+            var modules = this._commands.Modules.Where(m => !m.IsSubmodule).ToList();
+            var helpWizard = new HelpWizard(modules, this._feedback, this._help, this.Context.User);
 
-            await this.Interactive.SendPrivateInteractiveMessageAndDeleteAsync
+            await this._interactive.SendPrivateInteractiveMessageAndDeleteAsync
             (
                 this.Context,
-                this.Feedback,
+                this._feedback,
                 helpWizard,
                 TimeSpan.FromMinutes(30)
             );
@@ -102,9 +102,9 @@ namespace DIGOS.Ambassador.Modules
         {
             searchText = searchText.Unquote();
 
-            var topLevelModules = this.Commands.Modules.Where(m => !m.IsSubmodule).ToList();
+            var topLevelModules = this._commands.Modules.Where(m => !m.IsSubmodule).ToList();
 
-            var moduleSearchTerms = this.Commands.Modules.Select
+            var moduleSearchTerms = this._commands.Modules.Select
             (
                 m => new List<string>(m.Aliases) { m.Name }
             )
@@ -113,18 +113,18 @@ namespace DIGOS.Ambassador.Modules
             var getModuleAliasResult = moduleSearchTerms.BestLevenshteinMatch(searchText, 0.5);
             if (getModuleAliasResult.IsSuccess)
             {
-                var module = this.Commands.Modules.First(m => m.Aliases.Contains(getModuleAliasResult.Entity));
+                var module = this._commands.Modules.First(m => m.Aliases.Contains(getModuleAliasResult.Entity));
                 if (module.IsSubmodule)
                 {
                     module = module.GetTopLevelModule();
                 }
 
-                var helpWizard = new HelpWizard(topLevelModules, this.Feedback, this.Help, this.Context.User);
+                var helpWizard = new HelpWizard(topLevelModules, this._feedback, this._help, this.Context.User);
                 await helpWizard.OpenModule(module.Name);
-                await this.Interactive.SendPrivateInteractiveMessageAndDeleteAsync
+                await this._interactive.SendPrivateInteractiveMessageAndDeleteAsync
                 (
                     this.Context,
-                    this.Feedback,
+                    this._feedback,
                     helpWizard,
                     TimeSpan.FromMinutes(30)
                 );
@@ -145,9 +145,9 @@ namespace DIGOS.Ambassador.Modules
                     .GroupBy(c => c.Aliases.OrderByDescending(a => a).First())
                     .First();
 
-                var eb = this.Help.CreateDetailedCommandInfoEmbed(commandGroup);
+                var eb = this._help.CreateDetailedCommandInfoEmbed(commandGroup);
 
-                await this.Feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
+                await this._feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
             }
         }
     }

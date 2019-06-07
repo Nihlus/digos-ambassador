@@ -42,9 +42,9 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class RoleplayService
     {
-        private readonly CommandService Commands;
+        private readonly CommandService _commands;
 
-        private readonly OwnedEntityService OwnedEntities;
+        private readonly OwnedEntityService _ownedEntities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayService"/> class.
@@ -53,8 +53,8 @@ namespace DIGOS.Ambassador.Services
         /// <param name="entityService">The application's owned entity service.</param>
         public RoleplayService(CommandService commands, OwnedEntityService entityService)
         {
-            this.Commands = commands;
-            this.OwnedEntities = entityService;
+            this._commands = commands;
+            this._ownedEntities = entityService;
         }
 
         /// <summary>
@@ -336,7 +336,7 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var userRoleplays = GetUserRoleplays(db, discordUser, guild);
-            return await this.OwnedEntities.IsEntityNameUniqueForUserAsync(userRoleplays, roleplayName);
+            return await this._ownedEntities.IsEntityNameUniqueForUserAsync(userRoleplays, roleplayName);
         }
 
         /// <summary>
@@ -632,7 +632,7 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var newOwnerRoleplays = GetUserRoleplays(db, newOwner, guild);
-            return await this.OwnedEntities.TransferEntityOwnershipAsync
+            return await this._ownedEntities.TransferEntityOwnershipAsync
             (
                 db,
                 newOwner,
@@ -677,8 +677,8 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.MultipleMatches, errorMessage);
             }
 
-            var commandModule = this.Commands.Modules.First(m => m.Name == "roleplay");
-            var validNameResult = this.OwnedEntities.IsEntityNameValid(commandModule, newRoleplayName);
+            var commandModule = this._commands.Modules.First(m => m.Name == "roleplay");
+            var validNameResult = this._ownedEntities.IsEntityNameValid(commandModule, newRoleplayName);
             if (!validNameResult.IsSuccess)
             {
                 return ModifyEntityResult.FromError(validNameResult);

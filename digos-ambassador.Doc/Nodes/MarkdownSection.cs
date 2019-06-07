@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
         /// </summary>
         public MarkdownHeader Header { get; set; }
 
-        private readonly List<IMarkdownNode> Content = new List<IMarkdownNode>();
+        private readonly List<IMarkdownNode> _content = new List<IMarkdownNode>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MarkdownSection"/> class.
@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
         {
             var sb = new StringBuilder();
             sb.AppendLine(this.Header.Compile());
-            foreach (var contentNode in this.Content)
+            foreach (var contentNode in this._content)
             {
                 sb.AppendLine(contentNode.Compile());
                 sb.AppendLine();
@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
         [NotNull]
         public MarkdownSection AppendContent([NotNull] IMarkdownNode content)
         {
-            this.Content.Add(content);
+            this._content.Add(content);
             return this;
         }
 

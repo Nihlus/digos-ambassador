@@ -39,19 +39,19 @@ namespace DIGOS.Ambassador.Tests
 
         private const string SampleText = "lorem ipsum {@target} dolor {@colour} sit amet {@colour|base}";
 
-        private readonly IServiceProvider Services;
+        private readonly IServiceProvider _services;
 
         public TokenizerTests()
         {
             var serviceMock = new Mock<IServiceProvider>();
 
-            this.Services = serviceMock.Object;
+            this._services = serviceMock.Object;
         }
 
         [Fact]
         public void CanParseTokenWithoutData()
         {
-            var tokenizer = new TransformationTextTokenizer(this.Services);
+            var tokenizer = new TransformationTextTokenizer(this._services);
             tokenizer.WithTokenType<TargetToken>();
 
             Assert.NotNull(tokenizer.ParseToken(0, TokenWithoutData));
@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Tests
         [Fact]
         public void CanParseTokenWithoutOptionalData()
         {
-            var tokenizer = new TransformationTextTokenizer(this.Services);
+            var tokenizer = new TransformationTextTokenizer(this._services);
             tokenizer.WithTokenType<ColourToken>();
 
             var token = tokenizer.ParseToken(0, TokenWithoutOptionalData) as ColourToken;
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Tests
         [Fact]
         public void CanParseTokenWithOptionalData()
         {
-            var tokenizer = new TransformationTextTokenizer(this.Services);
+            var tokenizer = new TransformationTextTokenizer(this._services);
             tokenizer.WithTokenType<ColourToken>();
 
             var token = tokenizer.ParseToken(0, TokenWithOptionalData) as ColourToken;
@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Tests
         [Fact]
         public void CanTokenizeText()
         {
-            var tokenizer = new TransformationTextTokenizer(this.Services)
+            var tokenizer = new TransformationTextTokenizer(this._services)
                 .WithTokenType<TargetToken>()
                 .WithTokenType<ColourToken>();
 
@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Tests
         [Fact]
         public void ParsesTokenStartIndexCorrectly()
         {
-            var tokenizer = new TransformationTextTokenizer(this.Services)
+            var tokenizer = new TransformationTextTokenizer(this._services)
                 .WithTokenType<TargetToken>()
                 .WithTokenType<ColourToken>();
 
@@ -116,7 +116,7 @@ namespace DIGOS.Ambassador.Tests
         [Fact]
         public void ParsesTokenLengthCorrectly()
         {
-            var tokenizer = new TransformationTextTokenizer(this.Services)
+            var tokenizer = new TransformationTextTokenizer(this._services)
                 .WithTokenType<TargetToken>()
                 .WithTokenType<ColourToken>();
 

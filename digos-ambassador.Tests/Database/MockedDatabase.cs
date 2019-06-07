@@ -37,20 +37,20 @@ namespace DIGOS.Ambassador.Tests.Database
     /// </summary>
     public class MockedDatabase : IDisposable
     {
-        private readonly SqliteConnection Connection;
-        private readonly DbContextOptions<GlobalInfoContext> DatabaseOptions;
+        private readonly SqliteConnection _connection;
+        private readonly DbContextOptions<GlobalInfoContext> _databaseOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockedDatabase"/> class.
         /// </summary>
         public MockedDatabase()
         {
-            this.Connection = new SqliteConnection("DataSource=:memory:");
-            this.Connection.Open();
+            this._connection = new SqliteConnection("DataSource=:memory:");
+            this._connection.Open();
 
-            this.DatabaseOptions = new DbContextOptionsBuilder<GlobalInfoContext>()
+            this._databaseOptions = new DbContextOptionsBuilder<GlobalInfoContext>()
                 .UseLazyLoadingProxies()
-                .UseSqlite(this.Connection).Options;
+                .UseSqlite(this._connection).Options;
 
             using (var db = GetDatabaseContext())
             {
@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Database
         [NotNull]
         public GlobalInfoContext GetDatabaseContext()
         {
-            return new GlobalInfoContext(this.DatabaseOptions);
+            return new GlobalInfoContext(this._databaseOptions);
         }
 
         /// <summary>
@@ -133,8 +133,8 @@ namespace DIGOS.Ambassador.Tests.Database
         /// <inheritdoc />
         public void Dispose()
         {
-            this.Connection?.Close();
-            this.Connection?.Dispose();
+            this._connection?.Close();
+            this._connection?.Dispose();
         }
     }
 }

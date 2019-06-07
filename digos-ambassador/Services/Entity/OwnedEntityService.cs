@@ -45,12 +45,12 @@ namespace DIGOS.Ambassador.Services
         /// <summary>
         /// Holds reserved characters which may not appear in names.
         /// </summary>
-        private readonly char[] ReservedNameCharacters = { ':' };
+        private readonly char[] _reservedNameCharacters = { ':' };
 
         /// <summary>
         /// Holds reserved names which entities may not have.
         /// </summary>
-        private readonly string[] ReservedNames = { "current" };
+        private readonly string[] _reservedNames = { "current" };
 
         /// <summary>
         /// Determines whether or not the given entity name is unique for a given set of user entities.
@@ -142,16 +142,16 @@ namespace DIGOS.Ambassador.Services
                 return DetermineConditionResult.FromError(CommandError.ObjectNotFound, "Names cannot be empty.");
             }
 
-            if (entityName.Any(c => this.ReservedNameCharacters.Contains(c)))
+            if (entityName.Any(c => this._reservedNameCharacters.Contains(c)))
             {
                 return DetermineConditionResult.FromError
                 (
                     CommandError.UnmetPrecondition,
-                    $"Names may not contain any of the following characters: {this.ReservedNameCharacters.Humanize()}"
+                    $"Names may not contain any of the following characters: {this._reservedNameCharacters.Humanize()}"
                 );
             }
 
-            if (this.ReservedNames.Any(n => string.Equals(n, entityName, StringComparison.OrdinalIgnoreCase)))
+            if (this._reservedNames.Any(n => string.Equals(n, entityName, StringComparison.OrdinalIgnoreCase)))
             {
                 return DetermineConditionResult.FromError
                 (

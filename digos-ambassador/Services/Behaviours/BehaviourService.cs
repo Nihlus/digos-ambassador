@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Services.Behaviours
     /// </summary>
     public class BehaviourService
     {
-        private readonly ICollection<IBehaviour> RegisteredBehaviours = new List<IBehaviour>();
+        private readonly ICollection<IBehaviour> _registeredBehaviours = new List<IBehaviour>();
 
         /// <summary>
         /// Discovers and adds behaviours defined in the given assembly.
@@ -69,16 +69,16 @@ namespace DIGOS.Ambassador.Services.Behaviours
 
                 // Behaviours are implicitly singletons; there's only ever one instance of a behaviour at any given
                 // time.
-                if (this.RegisteredBehaviours.Any(b => b.GetType() == behaviourType))
+                if (this._registeredBehaviours.Any(b => b.GetType() == behaviourType))
                 {
-                    var existingBehaviour = this.RegisteredBehaviours.First(b => b.GetType() == behaviourType);
-                    this.RegisteredBehaviours.Remove(existingBehaviour);
+                    var existingBehaviour = this._registeredBehaviours.First(b => b.GetType() == behaviourType);
+                    this._registeredBehaviours.Remove(existingBehaviour);
 
                     await existingBehaviour.StopAsync();
                     existingBehaviour.Dispose();
                 }
 
-                this.RegisteredBehaviours.Add(behaviour);
+                this._registeredBehaviours.Add(behaviour);
             }
         }
 
@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Services.Behaviours
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task StartBehavioursAsync()
         {
-            foreach (var behaviour in this.RegisteredBehaviours)
+            foreach (var behaviour in this._registeredBehaviours)
             {
                 await behaviour.StartAsync();
             }
@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Services.Behaviours
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task StopBehavioursAsync()
         {
-            foreach (var behaviour in this.RegisteredBehaviours)
+            foreach (var behaviour in this._registeredBehaviours)
             {
                 await behaviour.StopAsync();
             }

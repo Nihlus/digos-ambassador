@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// </summary>
         protected CommandService Commands { get; }
 
-        private readonly TransformationService Transformations;
+        private readonly TransformationService _transformations;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterServiceTestBase"/> class.
@@ -51,15 +51,15 @@ namespace DIGOS.Ambassador.Tests.TestBases
         {
             this.Commands = new CommandService();
             var content = new ContentService();
-            this.Transformations = new TransformationService(content);
+            this._transformations = new TransformationService(content);
 
-            this.Characters = new CharacterService(this.Commands, new OwnedEntityService(), content, this.Transformations);
+            this.Characters = new CharacterService(this.Commands, new OwnedEntityService(), content, this._transformations);
         }
 
         /// <inheritdoc />
         public virtual async Task InitializeAsync()
         {
-            await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
+            await this._transformations.UpdateTransformationDatabaseAsync(this.Database);
         }
 
         /// <inheritdoc />

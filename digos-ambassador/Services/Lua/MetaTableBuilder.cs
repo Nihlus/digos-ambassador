@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class MetaTableBuilder
     {
-        private readonly List<string> Entries = new List<string>();
+        private readonly List<string> _entries = new List<string>();
 
         /// <summary>
         /// Adds a unique entry to the builder.
@@ -41,9 +41,9 @@ namespace DIGOS.Ambassador.Services
         [NotNull]
         public MetaTableBuilder WithEntry(string entry)
         {
-            if (!this.Entries.Contains(entry))
+            if (!this._entries.Contains(entry))
             {
-                this.Entries.Add(entry);
+                this._entries.Add(entry);
             }
 
             return this;
@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Services
                 Name = "env"
             };
 
-            foreach (var entry in this.Entries)
+            foreach (var entry in this._entries)
             {
                 PopulateSubNodes(metatable, entry, entry);
             }

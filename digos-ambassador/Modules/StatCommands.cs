@@ -48,8 +48,8 @@ namespace DIGOS.Ambassador.Modules
     [Summary("Various statistics-related commands.")]
     public class StatCommands : ModuleBase<SocketCommandContext>
     {
-        private readonly UserFeedbackService Feedback;
-        private readonly InteractivityService Interactivity;
+        private readonly UserFeedbackService _feedback;
+        private readonly InteractivityService _interactivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StatCommands"/> class.
@@ -58,8 +58,8 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="interactivity">The interactivity service.</param>
         public StatCommands(UserFeedbackService feedback, InteractivityService interactivity)
         {
-            this.Feedback = feedback;
-            this.Interactivity = interactivity;
+            this._feedback = feedback;
+            this._interactivity = interactivity;
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.Modules
 
             var eb = CreateGuildInfoEmbed(guild);
 
-            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            await this._feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
         }
 
         /// <summary>
@@ -93,12 +93,12 @@ namespace DIGOS.Ambassador.Modules
             var guilds = this.Context.Client.Guilds;
             var pages = guilds.Select(CreateGuildInfoEmbed);
 
-            var paginatedMessage = new PaginatedEmbed(this.Feedback, this.Context.User).WithPages(pages);
+            var paginatedMessage = new PaginatedEmbed(this._feedback, this.Context.User).WithPages(pages);
 
-            await this.Interactivity.SendPrivateInteractiveMessageAndDeleteAsync
+            await this._interactivity.SendPrivateInteractiveMessageAndDeleteAsync
             (
                 this.Context,
-                this.Feedback,
+                this._feedback,
                 paginatedMessage
             );
         }
@@ -111,7 +111,7 @@ namespace DIGOS.Ambassador.Modules
         [NotNull]
         private EmbedBuilder CreateGuildInfoEmbed([NotNull] SocketGuild guild)
         {
-            var eb = this.Feedback.CreateEmbedBase();
+            var eb = this._feedback.CreateEmbedBase();
 
             if (!(guild.SplashUrl is null))
             {

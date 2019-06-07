@@ -41,10 +41,10 @@ namespace DIGOS.Ambassador.Behaviours
     public class JoinMessageBehaviour : BehaviourBase
     {
         [ProvidesContext]
-        private readonly GlobalInfoContext Database;
+        private readonly GlobalInfoContext _database;
 
-        private readonly UserFeedbackService Feedback;
-        private readonly ServerService Servers;
+        private readonly UserFeedbackService _feedback;
+        private readonly ServerService _servers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JoinMessageBehaviour"/> class.
@@ -62,9 +62,9 @@ namespace DIGOS.Ambassador.Behaviours
         )
             : base(client)
         {
-            this.Database = database;
-            this.Feedback = feedback;
-            this.Servers = servers;
+            this._database = database;
+            this._feedback = feedback;
+            this._servers = servers;
         }
 
         /// <inheritdoc />
@@ -89,14 +89,14 @@ namespace DIGOS.Ambassador.Behaviours
         /// <param name="user">The user.</param>
         private async Task OnUserJoined([NotNull] SocketGuildUser user)
         {
-            var server = await this.Database.GetOrRegisterServerAsync(user.Guild);
+            var server = await this._database.GetOrRegisterServerAsync(user.Guild);
 
             if (!server.SendJoinMessage)
             {
                 return;
             }
 
-            var getJoinMessageResult = this.Servers.GetJoinMessage(server);
+            var getJoinMessageResult = this._servers.GetJoinMessage(server);
             if (!getJoinMessageResult.IsSuccess)
             {
                 return;
@@ -105,11 +105,11 @@ namespace DIGOS.Ambassador.Behaviours
             var userChannel = await user.GetOrCreateDMChannelAsync();
             try
             {
-                var eb = this.Feedback.CreateEmbedBase();
+                var eb = this._feedback.CreateEmbedBase();
                 eb.WithDescription($"Welcome, {user.Mention}!");
                 eb.WithDescription(getJoinMessageResult.Entity);
 
-                await this.Feedback.SendEmbedAsync(userChannel, eb.Build());
+                await this._feedback.SendEmbedAsync(userChannel, eb.Build());
             }
             catch (HttpException hex)
             {
@@ -121,7 +121,7 @@ namespace DIGOS.Ambassador.Behaviours
                 var content = $"Welcome, {user.Mention}! You have DMs disabled, so I couldn't send you the " +
                               "first-join message. To see it, type \"!server join-message\".";
 
-                var welcomeMessage = this.Feedback.CreateFeedbackEmbed
+                var welcomeMessage = this._feedback.CreateFeedbackEmbed
                 (
                     user,
                     Color.Orange,
@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Behaviours
 
                 try
                 {
-                    await this.Feedback.SendEmbedAsync(user.Guild.DefaultChannel, welcomeMessage);
+                    await this._feedback.SendEmbedAsync(user.Guild.DefaultChannel, welcomeMessage);
                 }
                 catch (HttpException pex)
                 {
@@ -146,7 +146,7 @@ namespace DIGOS.Ambassador.Behaviours
         public override void Dispose()
         {
             base.Dispose();
-            this.Database.Dispose();
+            this._database.Dispose();
         }
     }
 }

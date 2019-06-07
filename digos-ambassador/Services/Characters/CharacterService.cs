@@ -47,15 +47,15 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class CharacterService
     {
-        private readonly TransformationService Transformations;
+        private readonly TransformationService _transformations;
 
-        private readonly CommandService Commands;
+        private readonly CommandService _commands;
 
-        private readonly OwnedEntityService OwnedEntities;
+        private readonly OwnedEntityService _ownedEntities;
 
-        private readonly ContentService Content;
+        private readonly ContentService _content;
 
-        private readonly Dictionary<string, IPronounProvider> PronounProviders;
+        private readonly Dictionary<string, IPronounProvider> _pronounProviders;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterService"/> class.
@@ -66,12 +66,12 @@ namespace DIGOS.Ambassador.Services
         /// <param name="transformations">The transformation service.</param>
         public CharacterService(CommandService commands, OwnedEntityService entityService, ContentService content, TransformationService transformations)
         {
-            this.Commands = commands;
-            this.OwnedEntities = entityService;
-            this.Content = content;
-            this.Transformations = transformations;
+            this._commands = commands;
+            this._ownedEntities = entityService;
+            this._content = content;
+            this._transformations = transformations;
 
-            this.PronounProviders = new Dictionary<string, IPronounProvider>(new CaseInsensitiveStringEqualityComparer());
+            this._pronounProviders = new Dictionary<string, IPronounProvider>(new CaseInsensitiveStringEqualityComparer());
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Services
         /// </summary>
         public void DiscoverPronounProviders()
         {
-            this.PronounProviders.Clear();
+            this._pronounProviders.Clear();
 
             var assembly = Assembly.GetExecutingAssembly();
             var pronounProviderTypes = assembly.DefinedTypes.Where
@@ -109,7 +109,7 @@ namespace DIGOS.Ambassador.Services
         [NotNull]
         public CharacterService WithPronounProvider([NotNull] IPronounProvider pronounProvider)
         {
-            this.PronounProviders.Add(pronounProvider.Family, pronounProvider);
+            this._pronounProviders.Add(pronounProvider.Family, pronounProvider);
             return this;
         }
 
@@ -122,9 +122,9 @@ namespace DIGOS.Ambassador.Services
         [NotNull]
         public virtual IPronounProvider GetPronounProvider([NotNull] Character character)
         {
-            if (this.PronounProviders.ContainsKey(character.PronounProviderFamily))
+            if (this._pronounProviders.ContainsKey(character.PronounProviderFamily))
             {
-                return this.PronounProviders[character.PronounProviderFamily];
+                return this._pronounProviders[character.PronounProviderFamily];
             }
 
             throw new KeyNotFoundException("No pronoun provider for that family found.");
@@ -138,7 +138,7 @@ namespace DIGOS.Ambassador.Services
         [ItemNotNull]
         public IEnumerable<IPronounProvider> GetAvailablePronounProviders()
         {
-            return this.PronounProviders.Values;
+            return this._pronounProviders.Values;
         }
 
         /// <summary>
@@ -417,7 +417,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A creation result which may or may not have been successful.</returns>
         public async Task<CreateEntityResult<Character>> CreateCharacterAsync([NotNull] GlobalInfoContext db, [NotNull] ICommandContext context, [NotNull] string characterName)
         {
-            return await CreateCharacterAsync(db, context, characterName, this.Content.DefaultAvatarUri.ToString(), null, null, null);
+            return await CreateCharacterAsync(db, context, characterName, this._content.DefaultAvatarUri.ToString(), null, null, null);
         }
 
         /// <summary>
@@ -491,14 +491,14 @@ namespace DIGOS.Ambassador.Services
                 return CreateEntityResult<Character>.FromError(modifyEntityResult);
             }
 
-            var defaultPronounFamilyName = this.PronounProviders.FirstOrDefault(p => p.Value is TheyPronounProvider).Value?.Family ?? new TheyPronounProvider().Family;
+            var defaultPronounFamilyName = this._pronounProviders.FirstOrDefault(p => p.Value is TheyPronounProvider).Value?.Family ?? new TheyPronounProvider().Family;
             modifyEntityResult = await SetCharacterPronounAsync(db, character, defaultPronounFamilyName);
             if (!modifyEntityResult.IsSuccess)
             {
                 return CreateEntityResult<Character>.FromError(modifyEntityResult);
             }
 
-            var getDefaultAppearanceResult = await Appearance.CreateDefaultAsync(db, this.Transformations);
+            var getDefaultAppearanceResult = await Appearance.CreateDefaultAsync(db, this._transformations);
             if (!getDefaultAppearanceResult.IsSuccess)
             {
                 return CreateEntityResult<Character>.FromError(getDefaultAppearanceResult);
@@ -509,7 +509,7 @@ namespace DIGOS.Ambassador.Services
 
             // The default and current appearances must be different objects, or the end up pointing to the same
             // database record, which is not desired.
-            var getCurrentAppearanceResult = await Appearance.CreateDefaultAsync(db, this.Transformations);
+            var getCurrentAppearanceResult = await Appearance.CreateDefaultAsync(db, this._transformations);
             if (!getCurrentAppearanceResult.IsSuccess)
             {
                 return CreateEntityResult<Character>.FromError(getCurrentAppearanceResult);
@@ -635,10 +635,10 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.MultipleMatches, errorMessage);
             }
 
-            var commandModule = this.Commands.Modules.FirstOrDefault(m => m.Name == "character");
+            var commandModule = this._commands.Modules.FirstOrDefault(m => m.Name == "character");
             if (!(commandModule is null))
             {
-                var validNameResult = this.OwnedEntities.IsEntityNameValid(commandModule, newCharacterName);
+                var validNameResult = this._ownedEntities.IsEntityNameValid(commandModule, newCharacterName);
                 if (!validNameResult.IsSuccess)
                 {
                     return ModifyEntityResult.FromError(validNameResult);
@@ -809,7 +809,7 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a pronoun family.");
             }
 
-            if (!this.PronounProviders.ContainsKey(pronounFamily))
+            if (!this._pronounProviders.ContainsKey(pronounFamily))
             {
                 return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "Could not find a pronoun provider for that family.");
             }
@@ -819,7 +819,7 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character is already using that pronoun set.");
             }
 
-            var pronounProvider = this.PronounProviders[pronounFamily];
+            var pronounProvider = this._pronounProviders[pronounFamily];
             character.PronounProviderFamily = pronounProvider.Family;
 
             await db.SaveChangesAsync();
@@ -872,7 +872,7 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var newOwnerCharacters = GetUserCharacters(db, newOwner, guild);
-            return await this.OwnedEntities.TransferEntityOwnershipAsync
+            return await this._ownedEntities.TransferEntityOwnershipAsync
             (
                 db,
                 newOwner,
@@ -920,7 +920,7 @@ namespace DIGOS.Ambassador.Services
         )
         {
             var userCharacters = GetUserCharacters(db, discordUser, guild);
-            return await this.OwnedEntities.IsEntityNameUniqueForUserAsync(userCharacters, characterName);
+            return await this._ownedEntities.IsEntityNameUniqueForUserAsync(userCharacters, characterName);
         }
 
         /// <summary>

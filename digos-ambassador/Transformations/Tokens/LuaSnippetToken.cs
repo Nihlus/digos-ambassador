@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Transformations
     [TokenIdentifier("snippet", "lua", "sn")]
     public class LuaSnippetToken : ReplacableTextToken<LuaSnippetToken>
     {
-        private readonly LuaService Lua;
+        private readonly LuaService _lua;
 
         /// <summary>
         /// Gets the snippet of lua code to execute.
@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.Transformations
         /// <param name="luaService">The lua execution service.</param>
         public LuaSnippetToken(LuaService luaService)
         {
-            this.Lua = luaService;
+            this._lua = luaService;
         }
 
         /// <inheritdoc />
@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Transformations
         /// <inheritdoc />
         public override async Task<string> GetTextAsync(Character character, AppearanceComponent component)
         {
-            var result = await this.Lua.ExecuteSnippetAsync
+            var result = await this._lua.ExecuteSnippetAsync
             (
                 this.Snippet,
                 (nameof(character), character),

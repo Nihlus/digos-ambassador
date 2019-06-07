@@ -108,11 +108,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
         public class TransferEntityOwnershipAsync : OwnedEntityServiceTestBase, IAsyncLifetime
         {
-            private readonly IUser OriginalUser;
-            private readonly IUser NewUser;
+            private readonly IUser _originalUser;
+            private readonly IUser _newUser;
 
-            private User OriginalDBUser;
-            private User NewDBUser;
+            private User _originalDBUser;
+            private User _newDBUser;
 
             public TransferEntityOwnershipAsync()
             {
@@ -123,15 +123,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var newUserMock = new Mock<IUser>();
                 newUserMock.Setup(u => u.Id).Returns(1);
 
-                this.OriginalUser = originalUserMock.Object;
-                this.NewUser = newUserMock.Object;
+                this._originalUser = originalUserMock.Object;
+                this._newUser = newUserMock.Object;
             }
 
             public async Task InitializeAsync()
             {
                 // Set up mocked datbase users
-                this.OriginalDBUser = await this.Database.AddUserAsync(this.OriginalUser);
-                this.NewDBUser = await this.Database.AddUserAsync(this.NewUser);
+                this._originalDBUser = await this.Database.AddUserAsync(this._originalUser);
+                this._newDBUser = await this.Database.AddUserAsync(this._newUser);
 
                 await this.Database.SaveChangesAsync();
             }
@@ -142,7 +142,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 // Set up entity owned by the original user
                 var entityMock = new Mock<IOwnedNamedEntity>();
                 entityMock.Setup(e => e.Name).Returns("Test");
-                entityMock.Setup(e => e.Owner).Returns(this.OriginalDBUser);
+                entityMock.Setup(e => e.Owner).Returns(this._originalDBUser);
                 entityMock.Setup
                 (
                     e =>
@@ -158,7 +158,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var collection = new List<IOwnedNamedEntity> { entityMock.Object };
                 var ownerEntities = collection.AsQueryable().BuildMock().Object;
 
-                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, this.OriginalUser, ownerEntities, entityMock.Object);
+                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, this._originalUser, ownerEntities, entityMock.Object);
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
@@ -169,17 +169,17 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 // Set up the entities owned by the users
                 var entityOwnedByOriginal = new Mock<IOwnedNamedEntity>();
                 entityOwnedByOriginal.Setup(e => e.Name).Returns("Test");
-                entityOwnedByOriginal.Setup(e => e.Owner).Returns(this.OriginalDBUser);
+                entityOwnedByOriginal.Setup(e => e.Owner).Returns(this._originalDBUser);
 
                 var entityOwnedByNew = new Mock<IOwnedNamedEntity>();
                 entityOwnedByNew.Setup(e => e.Name).Returns("Test");
-                entityOwnedByNew.Setup(e => e.Owner).Returns(this.NewDBUser);
+                entityOwnedByNew.Setup(e => e.Owner).Returns(this._newDBUser);
 
                 // Set up the list of entities owned by the new owner
                 var collection = new List<IOwnedNamedEntity> { entityOwnedByNew.Object };
                 var ownerEntities = collection.AsQueryable().BuildMock().Object;
 
-                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, this.NewUser, ownerEntities, entityOwnedByOriginal.Object);
+                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, this._newUser, ownerEntities, entityOwnedByOriginal.Object);
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.MultipleMatches, result.Error);
             }
@@ -190,12 +190,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 // Set up the entities owned by the users
                 var entityOwnedByOriginalMock = new Mock<IOwnedNamedEntity>();
                 entityOwnedByOriginalMock.Setup(e => e.Name).Returns("Test");
-                entityOwnedByOriginalMock.Setup(e => e.Owner).Returns(this.OriginalDBUser);
+                entityOwnedByOriginalMock.Setup(e => e.Owner).Returns(this._originalDBUser);
                 entityOwnedByOriginalMock.SetupProperty(e => e.Owner);
 
                 var entityOwnedByNewMock = new Mock<IOwnedNamedEntity>();
                 entityOwnedByNewMock.Setup(e => e.Name).Returns("Test2");
-                entityOwnedByNewMock.Setup(e => e.Owner).Returns(this.NewDBUser);
+                entityOwnedByNewMock.Setup(e => e.Owner).Returns(this._newDBUser);
 
                 var entityOwnedByOriginal = entityOwnedByOriginalMock.Object;
                 var entityOwnedByNew = entityOwnedByNewMock.Object;
@@ -204,9 +204,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var collection = new List<IOwnedNamedEntity> { entityOwnedByNew };
                 var ownerEntities = collection.AsQueryable().BuildMock().Object;
 
-                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, this.NewUser, ownerEntities, entityOwnedByOriginal);
+                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, this._newUser, ownerEntities, entityOwnedByOriginal);
                 Assert.True(result.IsSuccess);
-                Assert.Same(this.NewDBUser, entityOwnedByOriginal.Owner);
+                Assert.Same(this._newDBUser, entityOwnedByOriginal.Owner);
                 Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
             }
 
@@ -218,8 +218,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
         public class IsEntityNameValid : OwnedEntityServiceTestBase, IAsyncLifetime
         {
-            private ModuleInfo CommandModule;
-            private IServiceProvider Services;
+            private ModuleInfo _commandModule;
+            private IServiceProvider _services;
 
             public async Task InitializeAsync()
             {
@@ -227,7 +227,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 var client = new DiscordSocketClient();
 
-                this.Services = new ServiceCollection()
+                this._services = new ServiceCollection()
                     .AddSingleton(this.Database)
                     .AddSingleton<ContentService>()
                     .AddSingleton<CommandService>()
@@ -243,14 +243,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     .BuildServiceProvider();
 
                 commands.AddTypeReader<Character>(new CharacterTypeReader());
-                this.CommandModule = await commands.AddModuleAsync<CharacterCommands>(this.Services);
+                this._commandModule = await commands.AddModuleAsync<CharacterCommands>(this._services);
             }
 
             [Fact]
             public void ReturnsFailureForNullNames()
             {
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                var result = this.Entities.IsEntityNameValid(this.CommandModule, null);
+                var result = this.Entities.IsEntityNameValid(this._commandModule, null);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -260,7 +260,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [InlineData(':')]
             public void ReturnsFailureIfNameContainsInvalidCharacters(char invalidCharacter)
             {
-                var result = this.Entities.IsEntityNameValid(this.CommandModule, $"Test{invalidCharacter}");
+                var result = this.Entities.IsEntityNameValid(this._commandModule, $"Test{invalidCharacter}");
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.UnmetPrecondition, result.Error);
@@ -270,7 +270,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [InlineData("current")]
             public void ReturnsFailureIfNameIsAReservedName(string reservedName)
             {
-                var result = this.Entities.IsEntityNameValid(this.CommandModule, reservedName);
+                var result = this.Entities.IsEntityNameValid(this._commandModule, reservedName);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.UnmetPrecondition, result.Error);
@@ -284,7 +284,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [InlineData("set name Amby")]
             public void ReturnsFailureIfNameContainsACommandName(string commandName)
             {
-                var result = this.Entities.IsEntityNameValid(this.CommandModule, commandName);
+                var result = this.Entities.IsEntityNameValid(this._commandModule, commandName);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.UnmetPrecondition, result.Error);
@@ -296,7 +296,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [InlineData("August Strindberg")]
             public void ReturnsSuccessForNormalNames(string name)
             {
-                var result = this.Entities.IsEntityNameValid(this.CommandModule, name);
+                var result = this.Entities.IsEntityNameValid(this._commandModule, name);
 
                 Assert.True(result.IsSuccess);
             }

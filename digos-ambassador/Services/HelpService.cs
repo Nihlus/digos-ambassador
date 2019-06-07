@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class HelpService
     {
-        private readonly UserFeedbackService Feedback;
+        private readonly UserFeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HelpService"/> class.
@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="feedback">The feedback service.</param>
         public HelpService(UserFeedbackService feedback)
         {
-            this.Feedback = feedback;
+            this._feedback = feedback;
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Services
         [NotNull]
         public EmbedBuilder CreateDetailedCommandInfoEmbed([NotNull] IGrouping<string, CommandInfo> commandGroup)
         {
-            var eb = this.Feedback.CreateEmbedBase();
+            var eb = this._feedback.CreateEmbedBase();
 
             var relevantAliases = commandGroup.SelectMany(c => c.Aliases).Distinct()
                 .Skip(1)
@@ -145,7 +145,7 @@ namespace DIGOS.Ambassador.Services
         [NotNull]
         public Embed CreateCommandUsageEmbed([NotNull] IEnumerable<CommandMatch> matchingCommands)
         {
-            var eb = this.Feedback.CreateEmbedBase();
+            var eb = this._feedback.CreateEmbedBase();
             eb.WithTitle("Perhaps you meant one of the following?");
 
             foreach (var matchingCommand in matchingCommands)

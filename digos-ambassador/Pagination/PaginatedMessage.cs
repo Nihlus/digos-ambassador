@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Pagination
         /// <inheritdoc />
         public PaginatedAppearanceOptions Appearance { get; set; } = PaginatedAppearanceOptions.Default;
 
-        private int CurrentPage = 1;
+        private int _currentPage = 1;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PaginatedMessage{T1,T2}"/> class.
@@ -99,7 +99,7 @@ namespace DIGOS.Ambassador.Pagination
                 throw new InvalidOperationException("The pager is empty.");
             }
 
-            var embed = BuildEmbed(this.CurrentPage - 1);
+            var embed = BuildEmbed(this._currentPage - 1);
 
             var message = await channel.SendMessageAsync(string.Empty, embed: embed).ConfigureAwait(false);
 
@@ -174,29 +174,29 @@ namespace DIGOS.Ambassador.Pagination
 
             if (emote.Equals(this.Appearance.First))
             {
-                this.CurrentPage = 1;
+                this._currentPage = 1;
             }
             else if (emote.Equals(this.Appearance.Next))
             {
-                if (this.CurrentPage >= this.Pages.Count)
+                if (this._currentPage >= this.Pages.Count)
                 {
                     return;
                 }
 
-                ++this.CurrentPage;
+                ++this._currentPage;
             }
             else if (emote.Equals(this.Appearance.Back))
             {
-                if (this.CurrentPage <= 1)
+                if (this._currentPage <= 1)
                 {
                     return;
                 }
 
-                --this.CurrentPage;
+                --this._currentPage;
             }
             else if (emote.Equals(this.Appearance.Last))
             {
-                this.CurrentPage = this.Pages.Count;
+                this._currentPage = this.Pages.Count;
             }
             else if (emote.Equals(this.Appearance.Stop))
             {
@@ -229,7 +229,7 @@ namespace DIGOS.Ambassador.Pagination
                             return;
                         }
 
-                        this.CurrentPage = request;
+                        this._currentPage = request;
                         _ = response.DeleteAsync().ConfigureAwait(false);
                         await UpdateAsync().ConfigureAwait(false);
                     }
@@ -268,7 +268,7 @@ namespace DIGOS.Ambassador.Pagination
         /// <inheritdoc/>
         protected override async Task UpdateAsync()
         {
-            var embed = BuildEmbed(this.CurrentPage - 1);
+            var embed = BuildEmbed(this._currentPage - 1);
 
             await this.Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
         }

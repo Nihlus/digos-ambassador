@@ -46,12 +46,12 @@ namespace DIGOS.Ambassador.Modules
     [Summary("Privacy-related commands (data storage, deleting requests, data protection, privacy contacts, etc).")]
     public class PrivacyCommands : DatabaseModuleBase
     {
-        private readonly DiscordSocketClient Client;
+        private readonly DiscordSocketClient _client;
 
-        private readonly PrivacyService Privacy;
-        private readonly ContentService Content;
+        private readonly PrivacyService _privacy;
+        private readonly ContentService _content;
 
-        private readonly UserFeedbackService Feedback;
+        private readonly UserFeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PrivacyCommands"/> class.
@@ -71,10 +71,10 @@ namespace DIGOS.Ambassador.Modules
         )
             : base(database)
         {
-            this.Feedback = feedback;
-            this.Client = client;
-            this.Privacy = privacy;
-            this.Content = content;
+            this._feedback = feedback;
+            this._client = client;
+            this._privacy = privacy;
+            this._content = content;
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace DIGOS.Ambassador.Modules
         [PrivacyExempt]
         public async Task RequestPolicyAsync()
         {
-            await this.Privacy.SendPrivacyPolicyAsync(this.Context.Channel, this.Content, this.Feedback);
+            await this._privacy.SendPrivacyPolicyAsync(this.Context.Channel, this._content, this._feedback);
         }
 
         /// <summary>
@@ -100,8 +100,8 @@ namespace DIGOS.Ambassador.Modules
         [PrivacyExempt]
         public async Task GrantConsentAsync()
         {
-            await this.Privacy.GrantUserConsentAsync(this.Database, this.Context.User);
-            await this.Feedback.SendConfirmationAsync(this.Context, "Thank you! Enjoy using the bot :smiley:");
+            await this._privacy.GrantUserConsentAsync(this.Database, this.Context.User);
+            await this._feedback.SendConfirmationAsync(this.Context, "Thank you! Enjoy using the bot :smiley:");
         }
 
         /// <summary>
@@ -114,8 +114,8 @@ namespace DIGOS.Ambassador.Modules
         [PrivacyExempt]
         public async Task RevokeConsentAsync()
         {
-            await this.Privacy.RevokeUserConsentAsync(this.Database, this.Context.User);
-            await this.Feedback.SendConfirmationAsync
+            await this._privacy.RevokeUserConsentAsync(this.Database, this.Context.User);
+            await this._feedback.SendConfirmationAsync
             (
                 this.Context,
                 "Consent revoked - no more information will be stored about you from now on. If you would like to " +
@@ -135,9 +135,9 @@ namespace DIGOS.Ambassador.Modules
         public async Task DisplayContactAsync()
         {
             const string avatarURL = "https://i.imgur.com/2E334jS.jpg";
-            var discordUser = this.Client.GetUser("Jax", "7487");
+            var discordUser = this._client.GetUser("Jax", "7487");
 
-            var eb = this.Feedback.CreateEmbedBase();
+            var eb = this._feedback.CreateEmbedBase();
             eb.WithTitle("Privacy Contact");
             eb.WithAuthor("Jarl Gullberg", avatarURL, "https://github.com/Nihlus/");
             eb.WithThumbnailUrl(avatarURL);

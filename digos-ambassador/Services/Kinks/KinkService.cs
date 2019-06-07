@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class KinkService
     {
-        private readonly UserFeedbackService Feedback;
+        private readonly UserFeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KinkService"/> class.
@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="feedback">The feedback service.</param>
         public KinkService(UserFeedbackService feedback)
         {
-            this.Feedback = feedback;
+            this._feedback = feedback;
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An embed.</returns>
         public Embed BuildKinkInfoEmbed([NotNull] Kink kink)
         {
-            var eb = this.Feedback.CreateEmbedBase();
+            var eb = this._feedback.CreateEmbedBase();
 
             eb.WithTitle(kink.Name.Transform(To.TitleCase));
             eb.WithDescription(kink.Description);
@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Services
         [NotNull]
         public EmbedBuilder BuildUserKinkInfoEmbedBase([NotNull] UserKink userKink)
         {
-            var eb = this.Feedback.CreateEmbedBase();
+            var eb = this._feedback.CreateEmbedBase();
 
             eb.AddField(userKink.Kink.Name.Transform(To.TitleCase), userKink.Kink.Description);
             eb.AddField("Current preference", userKink.Preference.Humanize());

@@ -48,44 +48,44 @@ namespace DIGOS.Ambassador.Utility
         /// <inheritdoc />
         public event Func<Exception, Task> Closed;
 
-        private readonly SemaphoreSlim Lock;
-        private readonly Dictionary<string, string> Headers;
-        private readonly ManualResetEventSlim WaitUntilConnect;
+        private readonly SemaphoreSlim _lock;
+        private readonly Dictionary<string, string> _headers;
+        private readonly ManualResetEventSlim _waitUntilConnect;
 
-        private WebSocket Client;
-        private CancellationTokenSource CancelTokenSource;
-        private CancellationToken CancelToken;
-        private CancellationToken ParentToken;
+        private WebSocket _client;
+        private CancellationTokenSource _cancelTokenSource;
+        private CancellationToken _cancelToken;
+        private CancellationToken _parentToken;
 
-        private bool IsDisposed;
+        private bool _isDisposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WebSocketSharpProvider"/> class.
         /// </summary>
         public WebSocketSharpProvider()
         {
-            this.Headers = new Dictionary<string, string>();
-            this.Lock = new SemaphoreSlim(1, 1);
-            this.CancelTokenSource = new CancellationTokenSource();
-            this.CancelToken = CancellationToken.None;
-            this.ParentToken = CancellationToken.None;
-            this.WaitUntilConnect = new ManualResetEventSlim();
+            this._headers = new Dictionary<string, string>();
+            this._lock = new SemaphoreSlim(1, 1);
+            this._cancelTokenSource = new CancellationTokenSource();
+            this._cancelToken = CancellationToken.None;
+            this._parentToken = CancellationToken.None;
+            this._waitUntilConnect = new ManualResetEventSlim();
         }
 
         /// <inheritdoc />
         public void SetHeader([NotNull] string key, string value)
         {
-            this.Headers[key] = value;
+            this._headers[key] = value;
         }
 
         /// <inheritdoc />
         public void SetCancelToken(CancellationToken cancelToken)
         {
-            this.ParentToken = cancelToken;
-            this.CancelToken = CancellationTokenSource.CreateLinkedTokenSource
+            this._parentToken = cancelToken;
+            this._cancelToken = CancellationTokenSource.CreateLinkedTokenSource
             (
-                this.ParentToken,
-                this.CancelTokenSource.Token
+                this._parentToken,
+                this._cancelTokenSource.Token
             )
             .Token;
         }
@@ -93,14 +93,14 @@ namespace DIGOS.Ambassador.Utility
         /// <inheritdoc />
         public async Task ConnectAsync(string host)
         {
-            await this.Lock.WaitAsync().ConfigureAwait(false);
+            await this._lock.WaitAsync().ConfigureAwait(false);
             try
             {
                 await ConnectInternalAsync(host).ConfigureAwait(false);
             }
             finally
             {
-                this.Lock.Release();
+                this._lock.Release();
             }
         }
 
@@ -108,62 +108,62 @@ namespace DIGOS.Ambassador.Utility
         {
             await DisconnectInternalAsync().ConfigureAwait(false);
 
-            this.CancelTokenSource = new CancellationTokenSource();
-            this.CancelToken = CancellationTokenSource.CreateLinkedTokenSource
+            this._cancelTokenSource = new CancellationTokenSource();
+            this._cancelToken = CancellationTokenSource.CreateLinkedTokenSource
                 (
-                    this.ParentToken,
-                    this.CancelTokenSource.Token
+                    this._parentToken,
+                    this._cancelTokenSource.Token
                 )
                 .Token;
 
-            this.Client = new WebSocket(host)
+            this._client = new WebSocket(host)
             {
-                CustomHeaders = this.Headers.ToList()
+                CustomHeaders = this._headers.ToList()
             };
-            this.Client.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
+            this._client.SslConfiguration.EnabledSslProtocols = SslProtocols.Tls12;
 
-            this.Client.OnMessage += OnMessage;
-            this.Client.OnOpen += OnConnected;
-            this.Client.OnClose += OnClosed;
+            this._client.OnMessage += OnMessage;
+            this._client.OnOpen += OnConnected;
+            this._client.OnClose += OnClosed;
 
-            this.Client.Connect();
-            this.WaitUntilConnect.Wait(this.CancelToken);
+            this._client.Connect();
+            this._waitUntilConnect.Wait(this._cancelToken);
         }
 
         /// <inheritdoc />
         public async Task DisconnectAsync()
         {
-            await this.Lock.WaitAsync().ConfigureAwait(false);
+            await this._lock.WaitAsync().ConfigureAwait(false);
             try
             {
                 await DisconnectInternalAsync().ConfigureAwait(false);
             }
             finally
             {
-                this.Lock.Release();
+                this._lock.Release();
             }
         }
 
         [NotNull]
         private Task DisconnectInternalAsync()
         {
-            this.CancelTokenSource.Cancel();
-            if (this.Client is null)
+            this._cancelTokenSource.Cancel();
+            if (this._client is null)
             {
                 return Task.CompletedTask;
             }
 
-            if (this.Client.ReadyState == WebSocketState.Open)
+            if (this._client.ReadyState == WebSocketState.Open)
             {
-                this.Client.Close();
+                this._client.Close();
             }
 
-            this.Client.OnMessage -= OnMessage;
-            this.Client.OnOpen -= OnConnected;
-            this.Client.OnClose -= OnClosed;
+            this._client.OnMessage -= OnMessage;
+            this._client.OnOpen -= OnConnected;
+            this._client.OnClose -= OnClosed;
 
-            this.Client = null;
-            this.WaitUntilConnect.Reset();
+            this._client = null;
+            this._waitUntilConnect.Reset();
 
             return Task.CompletedTask;
         }
@@ -183,21 +183,21 @@ namespace DIGOS.Ambassador.Utility
         /// <inheritdoc />
         public async Task SendAsync([NotNull] byte[] data, int index, int count, bool isText)
         {
-            await this.Lock.WaitAsync(this.CancelToken).ConfigureAwait(false);
+            await this._lock.WaitAsync(this._cancelToken).ConfigureAwait(false);
             try
             {
                 if (isText)
                 {
-                    this.Client.Send(Encoding.UTF8.GetString(data, index, count));
+                    this._client.Send(Encoding.UTF8.GetString(data, index, count));
                 }
                 else
                 {
-                    this.Client.Send(data.Skip(index).Take(count).ToArray());
+                    this._client.Send(data.Skip(index).Take(count).ToArray());
                 }
             }
             finally
             {
-                this.Lock.Release();
+                this._lock.Release();
             }
         }
 
@@ -213,7 +213,7 @@ namespace DIGOS.Ambassador.Utility
 
         private void OnConnected(object sender, EventArgs e)
         {
-            this.WaitUntilConnect.Set();
+            this._waitUntilConnect.Set();
         }
 
         private void OnClosed(object sender, [NotNull] CloseEventArgs e)
@@ -231,17 +231,17 @@ namespace DIGOS.Ambassador.Utility
         /// <inheritdoc />
         public void Dispose()
         {
-            if (this.IsDisposed)
+            if (this._isDisposed)
             {
                 return;
             }
 
             DisconnectInternalAsync().GetAwaiter().GetResult();
 
-            ((IDisposable)this.Client)?.Dispose();
-            this.Client = null;
+            ((IDisposable)this._client)?.Dispose();
+            this._client = null;
 
-            this.IsDisposed = true;
+            this._isDisposed = true;
         }
     }
 }

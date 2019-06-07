@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Modules
     [Summary("Administrative commands that directly affect the bot on a global scale.")]
     public class AdminCommands : DatabaseModuleBase
     {
-        private readonly UserFeedbackService Feedback;
+        private readonly UserFeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdminCommands"/> class.
@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Modules
         public AdminCommands(GlobalInfoContext database, UserFeedbackService feedback)
             : base(database)
         {
-            this.Feedback = feedback;
+            this._feedback = feedback;
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Modules
             await this.Database.Database.EnsureDeletedAsync();
             await this.Database.Database.MigrateAsync();
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Database reset.");
+            await this._feedback.SendConfirmationAsync(this.Context, "Database reset.");
         }
     }
 }

@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
     /// </summary>
     public class RequirePermissionAttribute : PrioritizedPreconditionAttribute
     {
-        private readonly (Permission Permission, PermissionTarget Target) RequiredPermission;
+        private readonly (Permission Permission, PermissionTarget Target) _requiredPermission;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequirePermissionAttribute"/> class.
@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
         /// <param name="target">The required target scope.</param>
         public RequirePermissionAttribute(Permission permission, PermissionTarget target = PermissionTarget.Self)
         {
-            this.RequiredPermission = (permission, target);
+            this._requiredPermission = (permission, target);
         }
 
         /// <inheritdoc />
@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
             var permissionService = services.GetRequiredService<PermissionService>();
             var db = services.GetRequiredService<GlobalInfoContext>();
 
-            if (await permissionService.HasPermissionAsync(db, context.Guild, context.User, this.RequiredPermission))
+            if (await permissionService.HasPermissionAsync(db, context.Guild, context.User, this._requiredPermission))
             {
                 return PreconditionResult.FromSuccess();
             }

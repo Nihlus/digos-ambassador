@@ -55,8 +55,8 @@ namespace DIGOS.Ambassador.Services
         /// </summary>o
         public string BotToken { get; private set; }
 
-        private List<string> Sass;
-        private List<string> SassNSFW;
+        private List<string> _sass;
+        private List<string> _sassNSFW;
 
         private Uri BaseRemoteUri { get; }
 
@@ -159,16 +159,16 @@ namespace DIGOS.Ambassador.Services
 
             if (!File.Exists(sassPath))
             {
-                this.Sass = new List<string>();
+                this._sass = new List<string>();
             }
 
             if (!File.Exists(sassNSFWPath))
             {
-                this.SassNSFW = new List<string>();
+                this._sassNSFW = new List<string>();
             }
 
-            this.Sass = (await FileAsync.ReadAllLinesAsync(sassPath)).ToList();
-            this.SassNSFW = (await FileAsync.ReadAllLinesAsync(sassNSFWPath)).ToList();
+            this._sass = (await FileAsync.ReadAllLinesAsync(sassPath)).ToList();
+            this._sassNSFW = (await FileAsync.ReadAllLinesAsync(sassNSFWPath)).ToList();
         }
 
         /// <summary>
@@ -416,10 +416,10 @@ namespace DIGOS.Ambassador.Services
         {
             if (includeNSFW)
             {
-                return this.Sass.Union(this.SassNSFW).ToList().PickRandom();
+                return this._sass.Union(this._sassNSFW).ToList().PickRandom();
             }
 
-            return this.Sass.PickRandom();
+            return this._sass.PickRandom();
         }
 
         /// <summary>

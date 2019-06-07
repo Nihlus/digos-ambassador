@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Doc
         [CanBeNull]
         public string Footer { get; set; }
 
-        private readonly List<MarkdownSection> Sections = new List<MarkdownSection>();
+        private readonly List<MarkdownSection> _sections = new List<MarkdownSection>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MarkdownPage"/> class.
@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Doc
             var sb = new StringBuilder();
 
             sb.AppendLine(new MarkdownHeader(this.Title, 1, true).Compile());
-            foreach (var section in this.Sections)
+            foreach (var section in this._sections)
             {
                 sb.AppendLine(section.Compile());
                 sb.AppendLine();
@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Doc
         [NotNull]
         public MarkdownPage AppendSection(MarkdownSection section)
         {
-            this.Sections.Add(section);
+            this._sections.Add(section);
             return this;
         }
     }

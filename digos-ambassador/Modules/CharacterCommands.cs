@@ -71,12 +71,12 @@ namespace DIGOS.Ambassador.Modules
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(CharacterCommands));
 
-        private readonly DiscordService Discord;
-        private readonly ContentService Content;
-        private readonly UserFeedbackService Feedback;
-        private readonly CharacterService Characters;
-        private readonly InteractivityService Interactivity;
-        private readonly Random Random;
+        private readonly DiscordService _discord;
+        private readonly ContentService _content;
+        private readonly UserFeedbackService _feedback;
+        private readonly CharacterService _characters;
+        private readonly InteractivityService _interactivity;
+        private readonly Random _random;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterCommands"/> class.
@@ -100,12 +100,12 @@ namespace DIGOS.Ambassador.Modules
         )
             : base(database)
         {
-            this.Content = contentService;
-            this.Discord = discordService;
-            this.Feedback = feedbackService;
-            this.Characters = characterService;
-            this.Interactivity = interactivity;
-            this.Random = random;
+            this._content = contentService;
+            this._discord = discordService;
+            this._feedback = feedbackService;
+            this._characters = characterService;
+            this._interactivity = interactivity;
+            this._random = random;
         }
 
         /// <summary>
@@ -134,10 +134,10 @@ namespace DIGOS.Ambassador.Modules
                 return ef;
             }
 
-            var pronounProviders = this.Characters.GetAvailablePronounProviders().ToList();
+            var pronounProviders = this._characters.GetAvailablePronounProviders().ToList();
             if (!pronounProviders.Any())
             {
-                await this.Feedback.SendErrorAsync(this.Context, "There doesn't seem to be any pronouns available.");
+                await this._feedback.SendErrorAsync(this.Context, "There doesn't seem to be any pronouns available.");
                 return;
             }
 
@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Modules
                 description: description
             );
 
-            var paginatedEmbed = new PaginatedEmbed(this.Feedback, this.Context.User).WithPages
+            var paginatedEmbed = new PaginatedEmbed(this._feedback, this.Context.User).WithPages
             (
                 paginatedEmbedPages.Select
                 (
@@ -160,7 +160,7 @@ namespace DIGOS.Ambassador.Modules
                 )
             );
 
-            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
+            await this._interactivity.SendInteractiveMessageAndDeleteAsync
             (
                 this.Context.Channel,
                 paginatedEmbed,
@@ -178,10 +178,10 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ShowCharacterAsync()
         {
-            var retrieveCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var retrieveCurrentCharacterResult = await this._characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
             if (!retrieveCurrentCharacterResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, retrieveCurrentCharacterResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, retrieveCurrentCharacterResult.ErrorReason);
                 return;
             }
 
@@ -238,12 +238,12 @@ namespace DIGOS.Ambassador.Modules
 
                     if (!this.Context.IsPrivate)
                     {
-                        await this.Feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
+                        await this._feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
                     }
                 }
                 catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
                 {
-                    await this.Feedback.SendWarningAsync
+                    await this._feedback.SendWarningAsync
                     (
                         this.Context,
                         "Your description is really long, and you don't accept DMs from non-friends on this server, so I'm unable to do that."
@@ -257,14 +257,14 @@ namespace DIGOS.Ambassador.Modules
             else
             {
                 eb.AddField("Description", character.Description);
-                await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+                await this._feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
             }
         }
 
         [NotNull]
         private EmbedBuilder CreateCharacterInfoEmbed([NotNull] Character character)
         {
-            var eb = this.Feedback.CreateEmbedBase();
+            var eb = this._feedback.CreateEmbedBase();
 
             eb.WithAuthor(this.Context.Client.GetUser((ulong)character.Owner.DiscordID));
 
@@ -279,7 +279,7 @@ namespace DIGOS.Ambassador.Modules
             (
                 !character.AvatarUrl.IsNullOrWhitespace()
                     ? character.AvatarUrl
-                    : this.Content.DefaultAvatarUri.ToString()
+                    : this._content.DefaultAvatarUri.ToString()
             );
 
             eb.AddField("Preferred pronouns", character.PronounProviderFamily);
@@ -322,9 +322,9 @@ namespace DIGOS.Ambassador.Modules
             [CanBeNull] string characterAvatarUrl = null
         )
         {
-            characterAvatarUrl = characterAvatarUrl ?? this.Content.DefaultAvatarUri.ToString();
+            characterAvatarUrl = characterAvatarUrl ?? this._content.DefaultAvatarUri.ToString();
 
-            var createCharacterResult = await this.Characters.CreateCharacterAsync
+            var createCharacterResult = await this._characters.CreateCharacterAsync
             (
                 this.Database,
                 this.Context,
@@ -336,11 +336,11 @@ namespace DIGOS.Ambassador.Modules
             );
             if (!createCharacterResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, createCharacterResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, createCharacterResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync
+            await this._feedback.SendConfirmationAsync
             (
                 this.Context, $"Character \"{createCharacterResult.Entity.Name}\" created."
             );
@@ -375,7 +375,7 @@ namespace DIGOS.Ambassador.Modules
 
             await this.Database.SaveChangesAsync();
 
-            await this.Feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
+            await this._feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
 
             if (character.IsCurrent)
             {
@@ -385,7 +385,7 @@ namespace DIGOS.Ambassador.Modules
                 if (!(character.Role is null))
                 {
                     var newDiscordRole = this.Context.Guild.GetRole((ulong)character.Role.DiscordID);
-                    var removeRoleResult = await this.Discord.RemoveUserRoleAsync
+                    var removeRoleResult = await this._discord.RemoveUserRoleAsync
                     (
                         this.Context,
                         owner,
@@ -396,18 +396,18 @@ namespace DIGOS.Ambassador.Modules
                     {
                         if (removeRoleResult.Error != CommandError.UnmetPrecondition)
                         {
-                            await this.Feedback.SendErrorAsync(this.Context, removeRoleResult.ErrorReason);
+                            await this._feedback.SendErrorAsync(this.Context, removeRoleResult.ErrorReason);
                         }
                         else if (!currentServer.SuppressPermissonWarnings)
                         {
-                            await this.Feedback.SendWarningAsync(this.Context, removeRoleResult.ErrorReason);
+                            await this._feedback.SendWarningAsync(this.Context, removeRoleResult.ErrorReason);
                         }
                     }
                 }
 
                 if (!(character.Nickname is null))
                 {
-                    var resetNickResult = await this.Discord.SetUserNicknameAsync
+                    var resetNickResult = await this._discord.SetUserNicknameAsync
                     (
                         this.Context,
                         owner,
@@ -418,11 +418,11 @@ namespace DIGOS.Ambassador.Modules
                     {
                         if (resetNickResult.Error != CommandError.UnmetPrecondition)
                         {
-                            await this.Feedback.SendErrorAsync(this.Context, resetNickResult.ErrorReason);
+                            await this._feedback.SendErrorAsync(this.Context, resetNickResult.ErrorReason);
                         }
                         else if (!currentServer.SuppressPermissonWarnings)
                         {
-                            await this.Feedback.SendWarningAsync(this.Context, resetNickResult.ErrorReason);
+                            await this._feedback.SendWarningAsync(this.Context, resetNickResult.ErrorReason);
                         }
                     }
                 }
@@ -442,7 +442,7 @@ namespace DIGOS.Ambassador.Modules
         {
             discordUser = discordUser ?? this.Context.Message.Author;
 
-            var characters = this.Characters.GetUserCharacters(this.Database, discordUser, this.Context.Guild);
+            var characters = this._characters.GetUserCharacters(this.Database, discordUser, this.Context.Guild);
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Your characters";
@@ -450,7 +450,7 @@ namespace DIGOS.Ambassador.Modules
 
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                this.Feedback,
+                this._feedback,
                 this.Context.User,
                 characters,
                 c => c.Name,
@@ -459,7 +459,7 @@ namespace DIGOS.Ambassador.Modules
                 appearance
             );
 
-            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
+            await this._interactivity.SendInteractiveMessageAndDeleteAsync
             (
                 this.Context.Channel,
                 paginatedEmbed,
@@ -477,7 +477,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task AssumeRandomCharacterFormAsync()
         {
-            var userCharacters = this.Characters.GetUserCharacters
+            var userCharacters = this._characters.GetUserCharacters
             (
                 this.Database,
                 this.Context.User,
@@ -486,17 +486,17 @@ namespace DIGOS.Ambassador.Modules
 
             if (!await userCharacters.AnyAsync())
             {
-                await this.Feedback.SendErrorAsync(this.Context, "You don't have any characters.");
+                await this._feedback.SendErrorAsync(this.Context, "You don't have any characters.");
                 return;
             }
 
             if (await userCharacters.CountAsync() == 1)
             {
-                await this.Feedback.SendErrorAsync(this.Context, "You only have one character.");
+                await this._feedback.SendErrorAsync(this.Context, "You only have one character.");
                 return;
             }
 
-            var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync
+            var getCurrentCharacterResult = await this._characters.GetCurrentCharacterAsync
             (
                 this.Database,
                 this.Context,
@@ -510,7 +510,7 @@ namespace DIGOS.Ambassador.Modules
             }
 
             var characterCount = await userCharacters.CountAsync();
-            var randomIndex = this.Random.Next(0, characterCount);
+            var randomIndex = this._random.Next(0, characterCount);
 
             var randomCharacter = userCharacters.ToList()[randomIndex];
             await AssumeCharacterFormAsync(randomCharacter);
@@ -532,7 +532,7 @@ namespace DIGOS.Ambassador.Modules
             Character character
         )
         {
-            var getPreviousCharacterResult = await this.Characters.GetCurrentCharacterAsync
+            var getPreviousCharacterResult = await this._characters.GetCurrentCharacterAsync
             (
                 this.Database,
                 this.Context,
@@ -545,17 +545,17 @@ namespace DIGOS.Ambassador.Modules
                 previousRole = getPreviousCharacterResult.Entity.Role;
             }
 
-            await this.Characters.MakeCharacterCurrentOnServerAsync(this.Database, this.Context, this.Context.Guild, character);
+            await this._characters.MakeCharacterCurrentOnServerAsync(this.Database, this.Context, this.Context.Guild, character);
 
             var guildUser = (IGuildUser)this.Context.User;
             var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
 
             if (!character.Nickname.IsNullOrWhitespace())
             {
-                var modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, character.Nickname);
+                var modifyNickResult = await this._discord.SetUserNicknameAsync(this.Context, guildUser, character.Nickname);
                 if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
                 {
-                    await this.Feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
+                    await this._feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
                 }
             }
 
@@ -564,7 +564,7 @@ namespace DIGOS.Ambassador.Modules
                 if (!(previousRole is null))
                 {
                     var previousDiscordRole = this.Context.Guild.GetRole((ulong)previousRole.DiscordID);
-                    var removePreviousRoleResult = await this.Discord.RemoveUserRoleAsync
+                    var removePreviousRoleResult = await this._discord.RemoveUserRoleAsync
                     (
                         this.Context,
                         guildUser,
@@ -575,11 +575,11 @@ namespace DIGOS.Ambassador.Modules
                     {
                         if (removePreviousRoleResult.Error != CommandError.UnmetPrecondition)
                         {
-                            await this.Feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
+                            await this._feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
                         }
                         else if (!currentServer.SuppressPermissonWarnings)
                         {
-                            await this.Feedback.SendWarningAsync(this.Context, removePreviousRoleResult.ErrorReason);
+                            await this._feedback.SendWarningAsync(this.Context, removePreviousRoleResult.ErrorReason);
                         }
                     }
                 }
@@ -587,7 +587,7 @@ namespace DIGOS.Ambassador.Modules
                 if (!(character.Role is null))
                 {
                     var newDiscordRole = this.Context.Guild.GetRole((ulong)character.Role.DiscordID);
-                    var addNewRoleResult = await this.Discord.AddUserRoleAsync
+                    var addNewRoleResult = await this._discord.AddUserRoleAsync
                     (
                         this.Context,
                         guildUser,
@@ -598,17 +598,17 @@ namespace DIGOS.Ambassador.Modules
                     {
                         if (addNewRoleResult.Error != CommandError.UnmetPrecondition)
                         {
-                            await this.Feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
+                            await this._feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
                         }
                         else if (!currentServer.SuppressPermissonWarnings)
                         {
-                            await this.Feedback.SendWarningAsync(this.Context, addNewRoleResult.ErrorReason);
+                            await this._feedback.SendWarningAsync(this.Context, addNewRoleResult.ErrorReason);
                         }
                     }
                 }
             }
 
-            await this.Feedback.SendConfirmationAsync
+            await this._feedback.SendConfirmationAsync
             (
                 this.Context,
                 $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}."
@@ -624,10 +624,10 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task SetDefaultCharacterAsync()
         {
-            var result = await this.Characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var result = await this._characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
             if (!result.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                 return;
             }
 
@@ -652,20 +652,20 @@ namespace DIGOS.Ambassador.Modules
             var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
             if (!getUserResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
                 return;
             }
 
             var user = getUserResult.Entity;
 
-            var result = await this.Characters.SetDefaultCharacterForUserAsync(this.Database, this.Context, character, user);
+            var result = await this._characters.SetDefaultCharacterForUserAsync(this.Database, this.Context, character, user);
             if (!result.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Default character set.");
+            await this._feedback.SendConfirmationAsync(this.Context, "Default character set.");
         }
 
         /// <summary>
@@ -681,20 +681,20 @@ namespace DIGOS.Ambassador.Modules
             var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
             if (!getUserResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
                 return;
             }
 
             var user = getUserResult.Entity;
 
-            var result = await this.Characters.ClearDefaultCharacterForUserAsync(this.Database, this.Context, user);
+            var result = await this._characters.ClearDefaultCharacterForUserAsync(this.Database, this.Context, user);
             if (!result.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Default character cleared.");
+            await this._feedback.SendConfirmationAsync(this.Context, "Default character cleared.");
         }
 
         /// <summary>
@@ -710,13 +710,13 @@ namespace DIGOS.Ambassador.Modules
             var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
             if (!getUserResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
                 return;
             }
 
             var user = getUserResult.Entity;
 
-            var getCurrentCharacterResult = await this.Characters.GetCurrentCharacterAsync
+            var getCurrentCharacterResult = await this._characters.GetCurrentCharacterAsync
             (
                 this.Database,
                 this.Context,
@@ -727,15 +727,15 @@ namespace DIGOS.Ambassador.Modules
             {
                 if (user.DefaultCharacter == getCurrentCharacterResult.Entity)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, "You're already your default form.");
+                    await this._feedback.SendErrorAsync(this.Context, "You're already your default form.");
                     return;
                 }
             }
 
-            var result = await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Context.Message.Author, this.Context.Guild);
+            var result = await this._characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Context.Message.Author, this.Context.Guild);
             if (!result.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                 return;
             }
 
@@ -746,16 +746,16 @@ namespace DIGOS.Ambassador.Modules
                 ModifyEntityResult modifyNickResult;
                 if (!(user.DefaultCharacter is null) && !user.DefaultCharacter.Nickname.IsNullOrWhitespace())
                 {
-                    modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, user.DefaultCharacter.Nickname);
+                    modifyNickResult = await this._discord.SetUserNicknameAsync(this.Context, guildUser, user.DefaultCharacter.Nickname);
                 }
                 else
                 {
-                    modifyNickResult = await this.Discord.SetUserNicknameAsync(this.Context, guildUser, guildUser.Username);
+                    modifyNickResult = await this._discord.SetUserNicknameAsync(this.Context, guildUser, guildUser.Username);
                 }
 
                 if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
                 {
-                    await this.Feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
+                    await this._feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
                 }
 
                 if (getCurrentCharacterResult.IsSuccess)
@@ -764,7 +764,7 @@ namespace DIGOS.Ambassador.Modules
                     if (!(previousRole is null))
                     {
                         var previousDiscordRole = this.Context.Guild.GetRole((ulong)previousRole.DiscordID);
-                        var modifyRolesResult = await this.Discord.RemoveUserRoleAsync
+                        var modifyRolesResult = await this._discord.RemoveUserRoleAsync
                         (
                             this.Context, guildUser, previousDiscordRole
                         );
@@ -774,7 +774,7 @@ namespace DIGOS.Ambassador.Modules
                             if (modifyRolesResult.Error == CommandError.UnmetPrecondition &&
                                 !currentServer.SuppressPermissonWarnings)
                             {
-                                await this.Feedback.SendWarningAsync(this.Context, modifyRolesResult.ErrorReason);
+                                await this._feedback.SendWarningAsync(this.Context, modifyRolesResult.ErrorReason);
                             }
                         }
                     }
@@ -783,7 +783,7 @@ namespace DIGOS.Ambassador.Modules
 
             if (user.DefaultCharacter is null)
             {
-                await this.Feedback.SendConfirmationAsync(this.Context, "Character cleared.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Character cleared.");
             }
             else
             {
@@ -804,11 +804,11 @@ namespace DIGOS.Ambassador.Modules
         {
             if (character.Images.Count <= 0)
             {
-                await this.Feedback.SendErrorAsync(this.Context, "There are no images in that character's gallery.");
+                await this._feedback.SendErrorAsync(this.Context, "There are no images in that character's gallery.");
                 return;
             }
 
-            var gallery = new PaginatedGallery(this.Feedback, this.Context.User).WithPages(character.Images);
+            var gallery = new PaginatedGallery(this._feedback, this.Context.User).WithPages(character.Images);
 
             gallery.Appearance = new PaginatedAppearanceOptions
             {
@@ -818,7 +818,7 @@ namespace DIGOS.Ambassador.Modules
                 Title = character.Name
             };
 
-            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
+            await this._interactivity.SendInteractiveMessageAndDeleteAsync
             (
                 this.Context.Channel,
                 gallery,
@@ -841,7 +841,7 @@ namespace DIGOS.Ambassador.Modules
 
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                this.Feedback,
+                this._feedback,
                 this.Context.User,
                 character.Images,
                 i => i.Name,
@@ -850,7 +850,7 @@ namespace DIGOS.Ambassador.Modules
                 appearance
             );
 
-            await this.Interactivity.SendInteractiveMessageAndDeleteAsync
+            await this._interactivity.SendInteractiveMessageAndDeleteAsync
             (
                 this.Context.Channel,
                 paginatedEmbed,
@@ -883,7 +883,7 @@ namespace DIGOS.Ambassador.Modules
             bool hasAtLeastOneAttachment = this.Context.Message.Attachments.Any();
             if (!hasAtLeastOneAttachment)
             {
-                await this.Feedback.SendErrorAsync(this.Context, "You need to attach an image.");
+                await this._feedback.SendErrorAsync(this.Context, "You need to attach an image.");
                 return;
             }
 
@@ -893,7 +893,7 @@ namespace DIGOS.Ambassador.Modules
 
             if (!firstAttachmentIsImage)
             {
-                await this.Feedback.SendErrorAsync(this.Context, "You need to attach an image.");
+                await this._feedback.SendErrorAsync(this.Context, "You need to attach an image.");
                 return;
             }
             string imageUrl = firstAttachment.Url;
@@ -928,14 +928,14 @@ namespace DIGOS.Ambassador.Modules
             bool isNSFW = false
         )
         {
-            var addImageResult = await this.Characters.AddImageToCharacterAsync(this.Database, character, imageName, imageUrl, imageCaption, isNSFW);
+            var addImageResult = await this._characters.AddImageToCharacterAsync(this.Database, character, imageName, imageUrl, imageCaption, isNSFW);
             if (!addImageResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, addImageResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, addImageResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, $"Added \"{imageName}\" to {character.Name}'s gallery.");
+            await this._feedback.SendConfirmationAsync(this.Context, $"Added \"{imageName}\" to {character.Name}'s gallery.");
         }
 
         /// <summary>
@@ -957,14 +957,14 @@ namespace DIGOS.Ambassador.Modules
             [NotNull] string imageName
         )
         {
-            var removeImageResult = await this.Characters.RemoveImageFromCharacterAsync(this.Database, character, imageName);
+            var removeImageResult = await this._characters.RemoveImageFromCharacterAsync(this.Database, character, imageName);
             if (!removeImageResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, removeImageResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, removeImageResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Image removed.");
+            await this._feedback.SendConfirmationAsync(this.Context, "Image removed.");
         }
 
         /// <summary>
@@ -986,14 +986,14 @@ namespace DIGOS.Ambassador.Modules
             Character character
         )
         {
-            var transferResult = await this.Characters.TransferCharacterOwnershipAsync(this.Database, newOwner, character, this.Context.Guild);
+            var transferResult = await this._characters.TransferCharacterOwnershipAsync(this.Database, newOwner, character, this.Context.Guild);
             if (!transferResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Character ownership transferred.");
+            await this._feedback.SendConfirmationAsync(this.Context, "Character ownership transferred.");
         }
 
         /// <summary>
@@ -1003,9 +1003,9 @@ namespace DIGOS.Ambassador.Modules
         [Group("role")]
         public class RoleCommands : DatabaseModuleBase
         {
-            private readonly DiscordService Discord;
-            private readonly UserFeedbackService Feedback;
-            private readonly CharacterService Characters;
+            private readonly DiscordService _discord;
+            private readonly UserFeedbackService _feedback;
+            private readonly CharacterService _characters;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="RoleCommands"/> class.
@@ -1023,9 +1023,9 @@ namespace DIGOS.Ambassador.Modules
             )
                 : base(database)
             {
-                this.Discord = discordService;
-                this.Feedback = feedbackService;
-                this.Characters = characterService;
+                this._discord = discordService;
+                this._feedback = feedbackService;
+                this._characters = characterService;
             }
 
             /// <summary>
@@ -1036,16 +1036,16 @@ namespace DIGOS.Ambassador.Modules
             [RequireContext(Guild)]
             public async Task ListAvailableRolesAsync()
             {
-                var getServerRolesResult = await this.Characters.GetCharacterRolesAsync(this.Database, this.Context.Guild);
+                var getServerRolesResult = await this._characters.GetCharacterRolesAsync(this.Database, this.Context.Guild);
                 if (!getServerRolesResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, getServerRolesResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, getServerRolesResult.ErrorReason);
                     return;
                 }
 
                 var serverRoles = getServerRolesResult.Entity;
 
-                var eb = this.Feedback.CreateEmbedBase();
+                var eb = this._feedback.CreateEmbedBase();
 
                 eb.WithTitle("Available character roles");
                 eb.WithDescription
@@ -1085,7 +1085,7 @@ namespace DIGOS.Ambassador.Modules
                     }
                 }
 
-                await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+                await this._feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
             }
 
             /// <summary>
@@ -1104,7 +1104,7 @@ namespace DIGOS.Ambassador.Modules
                 RoleAccess access = RoleAccess.Open
             )
             {
-                var createRoleResult = await this.Characters.CreateCharacterRoleAsync
+                var createRoleResult = await this._characters.CreateCharacterRoleAsync
                 (
                     this.Database,
                     discordRole,
@@ -1113,11 +1113,11 @@ namespace DIGOS.Ambassador.Modules
 
                 if (!createRoleResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, createRoleResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, createRoleResult.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Character role created.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Character role created.");
             }
 
             /// <summary>
@@ -1135,19 +1135,19 @@ namespace DIGOS.Ambassador.Modules
                 [NotNull] IRole discordRole
             )
             {
-                var getExistingRoleResult = await this.Characters.GetCharacterRoleAsync(this.Database, discordRole);
+                var getExistingRoleResult = await this._characters.GetCharacterRoleAsync(this.Database, discordRole);
                 if (!getExistingRoleResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, getExistingRoleResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, getExistingRoleResult.ErrorReason);
                     return;
                 }
 
-                var currentCharactersWithRole = await this.Characters.GetCharacters(this.Database, this.Context.Guild)
+                var currentCharactersWithRole = await this._characters.GetCharacters(this.Database, this.Context.Guild)
                     .Where(c => c.Role.ID == getExistingRoleResult.Entity.ID)
                     .Where(c => c.IsCurrent)
                     .ToListAsync();
 
-                var deleteRoleResult = await this.Characters.DeleteCharacterRoleAsync
+                var deleteRoleResult = await this._characters.DeleteCharacterRoleAsync
                 (
                     this.Database,
                     getExistingRoleResult.Entity
@@ -1155,7 +1155,7 @@ namespace DIGOS.Ambassador.Modules
 
                 if (!deleteRoleResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, deleteRoleResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, deleteRoleResult.ErrorReason);
                     return;
                 }
 
@@ -1164,10 +1164,10 @@ namespace DIGOS.Ambassador.Modules
                     var owner = this.Context.Guild.GetUser((ulong)character.Owner.DiscordID);
                     var role = this.Context.Guild.GetRole((ulong)getExistingRoleResult.Entity.DiscordID);
 
-                    await this.Discord.RemoveUserRoleAsync(this.Context, owner, role);
+                    await this._discord.RemoveUserRoleAsync(this.Context, owner, role);
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Character role deleted.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Character role deleted.");
             }
 
             /// <summary>
@@ -1186,14 +1186,14 @@ namespace DIGOS.Ambassador.Modules
                 RoleAccess access
             )
             {
-                var getExistingRoleResult = await this.Characters.GetCharacterRoleAsync(this.Database, discordRole);
+                var getExistingRoleResult = await this._characters.GetCharacterRoleAsync(this.Database, discordRole);
                 if (!getExistingRoleResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, getExistingRoleResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, getExistingRoleResult.ErrorReason);
                     return;
                 }
 
-                var setRoleAccessResult = await this.Characters.SetCharacterRoleAccessAsync
+                var setRoleAccessResult = await this._characters.SetCharacterRoleAccessAsync
                 (
                     this.Database,
                     getExistingRoleResult.Entity,
@@ -1202,11 +1202,11 @@ namespace DIGOS.Ambassador.Modules
 
                 if (!setRoleAccessResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, setRoleAccessResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, setRoleAccessResult.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync
+                await this._feedback.SendConfirmationAsync
                 (
                     this.Context, "Character role access conditions set."
                 );
@@ -1230,10 +1230,10 @@ namespace DIGOS.Ambassador.Modules
             {
                 var previousRole = character.Role;
 
-                var result = await this.Characters.ClearCharacterRoleAsync(this.Database, character);
+                var result = await this._characters.ClearCharacterRoleAsync(this.Database, character);
                 if (!result.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                     return;
                 }
 
@@ -1243,7 +1243,7 @@ namespace DIGOS.Ambassador.Modules
                 if (!(previousRole is null))
                 {
                     var previousDiscordRole = this.Context.Guild.GetRole((ulong)previousRole.DiscordID);
-                    var modifyRolesResult = await this.Discord.RemoveUserRoleAsync
+                    var modifyRolesResult = await this._discord.RemoveUserRoleAsync
                     (
                         this.Context, guildUser, previousDiscordRole
                     );
@@ -1253,12 +1253,12 @@ namespace DIGOS.Ambassador.Modules
                         if (modifyRolesResult.Error == CommandError.UnmetPrecondition &&
                             !currentServer.SuppressPermissonWarnings)
                         {
-                            await this.Feedback.SendWarningAsync(this.Context, modifyRolesResult.ErrorReason);
+                            await this._feedback.SendWarningAsync(this.Context, modifyRolesResult.ErrorReason);
                         }
                     }
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Character role cleared.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Character role cleared.");
             }
         }
 
@@ -1269,9 +1269,9 @@ namespace DIGOS.Ambassador.Modules
         [Group("set")]
         public class SetCommands : DatabaseModuleBase
         {
-            private readonly DiscordService Discord;
-            private readonly UserFeedbackService Feedback;
-            private readonly CharacterService Characters;
+            private readonly DiscordService _discord;
+            private readonly UserFeedbackService _feedback;
+            private readonly CharacterService _characters;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
@@ -1289,9 +1289,9 @@ namespace DIGOS.Ambassador.Modules
             )
                 : base(database)
             {
-                this.Discord = discordService;
-                this.Feedback = feedbackService;
-                this.Characters = characterService;
+                this._discord = discordService;
+                this._feedback = feedbackService;
+                this._characters = characterService;
             }
 
             /// <summary>
@@ -1313,14 +1313,14 @@ namespace DIGOS.Ambassador.Modules
                 string newCharacterName
             )
             {
-                var setNameResult = await this.Characters.SetCharacterNameAsync(this.Database, this.Context, character, newCharacterName);
+                var setNameResult = await this._characters.SetCharacterNameAsync(this.Database, this.Context, character, newCharacterName);
                 if (!setNameResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, setNameResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, setNameResult.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Character name set.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Character name set.");
             }
 
             /// <summary>
@@ -1345,7 +1345,7 @@ namespace DIGOS.Ambassador.Modules
                 {
                     if (!this.Context.Message.Attachments.Any())
                     {
-                        await this.Feedback.SendErrorAsync(this.Context, "You need to attach an image or provide a url.");
+                        await this._feedback.SendErrorAsync(this.Context, "You need to attach an image or provide a url.");
                         return;
                     }
 
@@ -1363,7 +1363,7 @@ namespace DIGOS.Ambassador.Modules
                     newCharacterAvatarUrl = galleryImage.Url;
                 }
 
-                var result = await this.Characters.SetCharacterAvatarAsync
+                var result = await this._characters.SetCharacterAvatarAsync
                 (
                     this.Database,
                     character,
@@ -1372,11 +1372,11 @@ namespace DIGOS.Ambassador.Modules
 
                 if (!result.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Character avatar set.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Character avatar set.");
             }
 
             /// <summary>
@@ -1399,14 +1399,14 @@ namespace DIGOS.Ambassador.Modules
                 string newCharacterNickname
             )
             {
-                var setNickResult = await this.Characters.SetCharacterNicknameAsync(this.Database, character, newCharacterNickname);
+                var setNickResult = await this._characters.SetCharacterNicknameAsync(this.Database, character, newCharacterNickname);
                 if (!setNickResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, setNickResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, setNickResult.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Character nickname set.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Character nickname set.");
 
                 // Update the user's active nickname if they are currently this character, and don't have the same nick
                 if (this.Context.User is IGuildUser guildUser && guildUser.Nickname != newCharacterNickname)
@@ -1416,7 +1416,7 @@ namespace DIGOS.Ambassador.Modules
                         return;
                     }
 
-                    var updateUserNickResult = await this.Discord.SetUserNicknameAsync
+                    var updateUserNickResult = await this._discord.SetUserNicknameAsync
                     (
                         this.Context,
                         guildUser,
@@ -1425,7 +1425,7 @@ namespace DIGOS.Ambassador.Modules
 
                     if (!updateUserNickResult.IsSuccess)
                     {
-                        await this.Feedback.SendWarningAsync
+                        await this._feedback.SendWarningAsync
                         (
                             this.Context,
                             "Your character nickname has been updated, but I couldn't update your current real nickname due to permission issues (or something else). You'll have to do it yourself :("
@@ -1453,14 +1453,14 @@ namespace DIGOS.Ambassador.Modules
                 string newCharacterSummary
             )
             {
-                var setSummaryResult = await this.Characters.SetCharacterSummaryAsync(this.Database, character, newCharacterSummary);
+                var setSummaryResult = await this._characters.SetCharacterSummaryAsync(this.Database, character, newCharacterSummary);
                 if (!setSummaryResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, setSummaryResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, setSummaryResult.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Character summary set.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Character summary set.");
             }
 
             /// <summary>
@@ -1487,15 +1487,15 @@ namespace DIGOS.Ambassador.Modules
                 {
                     if (!this.Context.Message.Attachments.Any())
                     {
-                        await this.Feedback.SendErrorAsync(this.Context, "You need to attach a plaintext document or provide an in-message description.");
+                        await this._feedback.SendErrorAsync(this.Context, "You need to attach a plaintext document or provide an in-message description.");
                         return;
                     }
 
                     var newDescription = this.Context.Message.Attachments.First();
-                    var getAttachmentStreamResult = await this.Discord.GetAttachmentStreamAsync(newDescription);
+                    var getAttachmentStreamResult = await this._discord.GetAttachmentStreamAsync(newDescription);
                     if (!getAttachmentStreamResult.IsSuccess)
                     {
-                        await this.Feedback.SendErrorAsync(this.Context, getAttachmentStreamResult.ErrorReason);
+                        await this._feedback.SendErrorAsync(this.Context, getAttachmentStreamResult.ErrorReason);
                         return;
                     }
 
@@ -1508,14 +1508,14 @@ namespace DIGOS.Ambassador.Modules
                     }
                 }
 
-                var setDescriptionResult = await this.Characters.SetCharacterDescriptionAsync(this.Database, character, newCharacterDescription);
+                var setDescriptionResult = await this._characters.SetCharacterDescriptionAsync(this.Database, character, newCharacterDescription);
                 if (!setDescriptionResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, setDescriptionResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, setDescriptionResult.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Character description set.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Character description set.");
             }
 
             /// <summary>
@@ -1536,9 +1536,9 @@ namespace DIGOS.Ambassador.Modules
                 bool isNSFW
             )
             {
-                await this.Characters.SetCharacterIsNSFWAsync(this.Database, character, isNSFW);
+                await this._characters.SetCharacterIsNSFWAsync(this.Database, character, isNSFW);
 
-                await this.Feedback.SendConfirmationAsync(this.Context, $"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
+                await this._feedback.SendConfirmationAsync(this.Context, $"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
             }
 
             /// <summary>
@@ -1560,14 +1560,14 @@ namespace DIGOS.Ambassador.Modules
                 string pronounFamily
             )
             {
-                var result = await this.Characters.SetCharacterPronounAsync(this.Database, character, pronounFamily);
+                var result = await this._characters.SetCharacterPronounAsync(this.Database, character, pronounFamily);
                 if (!result.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Preferred pronoun set.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Preferred pronoun set.");
             }
 
             /// <summary>
@@ -1591,10 +1591,10 @@ namespace DIGOS.Ambassador.Modules
             {
                 var previousRole = character.Role;
 
-                var getRoleResult = await this.Characters.GetCharacterRoleAsync(this.Database, discordRole);
+                var getRoleResult = await this._characters.GetCharacterRoleAsync(this.Database, discordRole);
                 if (!getRoleResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, getRoleResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, getRoleResult.ErrorReason);
                     return;
                 }
 
@@ -1607,7 +1607,7 @@ namespace DIGOS.Ambassador.Modules
                 {
                     if (!commandInvoker.GuildPermissions.ManageRoles)
                     {
-                        await this.Feedback.SendErrorAsync
+                        await this._feedback.SendErrorAsync
                         (
                             this.Context,
                             "That role is restricted, and you must be able to manage roles to use it."
@@ -1617,10 +1617,10 @@ namespace DIGOS.Ambassador.Modules
                     }
                 }
 
-                var setRoleResult = await this.Characters.SetCharacterRoleAsync(this.Database, character, role);
+                var setRoleResult = await this._characters.SetCharacterRoleAsync(this.Database, character, role);
                 if (!setRoleResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, setRoleResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, setRoleResult.ErrorReason);
                     return;
                 }
 
@@ -1629,7 +1629,7 @@ namespace DIGOS.Ambassador.Modules
                     if (!(previousRole is null))
                     {
                         var previousDiscordRole = this.Context.Guild.GetRole((ulong)previousRole.DiscordID);
-                        var removePreviousRoleResult = await this.Discord.RemoveUserRoleAsync
+                        var removePreviousRoleResult = await this._discord.RemoveUserRoleAsync
                         (
                             this.Context,
                             characterOwner,
@@ -1640,11 +1640,11 @@ namespace DIGOS.Ambassador.Modules
                         {
                             if (removePreviousRoleResult.Error != CommandError.UnmetPrecondition)
                             {
-                                await this.Feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
+                                await this._feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
                             }
                             else if (!currentServer.SuppressPermissonWarnings)
                             {
-                                await this.Feedback.SendWarningAsync(this.Context, removePreviousRoleResult.ErrorReason);
+                                await this._feedback.SendWarningAsync(this.Context, removePreviousRoleResult.ErrorReason);
                             }
                         }
                     }
@@ -1652,7 +1652,7 @@ namespace DIGOS.Ambassador.Modules
                     if (!(character.Role is null))
                     {
                         var newDiscordRole = this.Context.Guild.GetRole((ulong)character.Role.DiscordID);
-                        var addNewRoleResult = await this.Discord.AddUserRoleAsync
+                        var addNewRoleResult = await this._discord.AddUserRoleAsync
                         (
                             this.Context,
                             characterOwner,
@@ -1663,17 +1663,17 @@ namespace DIGOS.Ambassador.Modules
                         {
                             if (addNewRoleResult.Error != CommandError.UnmetPrecondition)
                             {
-                                await this.Feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
+                                await this._feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
                             }
                             else if (!currentServer.SuppressPermissonWarnings)
                             {
-                                await this.Feedback.SendWarningAsync(this.Context, addNewRoleResult.ErrorReason);
+                                await this._feedback.SendWarningAsync(this.Context, addNewRoleResult.ErrorReason);
                             }
                         }
                     }
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Character role set.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Character role set.");
             }
         }
     }

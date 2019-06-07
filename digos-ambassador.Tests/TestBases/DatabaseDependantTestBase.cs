@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
     /// </summary>
     public abstract class DatabaseDependantTestBase : IDisposable
     {
-        private readonly MockedDatabase DatabaseMock;
+        private readonly MockedDatabase _databaseMock;
 
         /// <summary>
         /// Gets the mocked database connection for this test.
@@ -43,15 +43,15 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// </summary>
         protected DatabaseDependantTestBase()
         {
-            this.DatabaseMock = new MockedDatabase();
-            this.Database = this.DatabaseMock.GetDatabaseContext();
+            this._databaseMock = new MockedDatabase();
+            this.Database = this._databaseMock.GetDatabaseContext();
         }
 
         /// <inheritdoc />
         public void Dispose()
         {
             this.Database?.Dispose();
-            this.DatabaseMock?.Dispose();
+            this._databaseMock?.Dispose();
         }
     }
 }

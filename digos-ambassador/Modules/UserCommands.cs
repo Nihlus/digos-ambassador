@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Modules
     [Summary("User-related commands, such as viewing or editing info about a specific user.")]
     public class UserCommands : DatabaseModuleBase
     {
-        private readonly UserFeedbackService Feedback;
+        private readonly UserFeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserCommands"/> class.
@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Modules
         public UserCommands(GlobalInfoContext database, UserFeedbackService feedback)
             : base(database)
         {
-            this.Feedback = feedback;
+            this._feedback = feedback;
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Modules
             var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
             if (!getUserResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
                 return;
             }
 
@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Modules
             var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
                 return;
             }
 
@@ -193,7 +193,7 @@ namespace DIGOS.Ambassador.Modules
 
             eb.AddField("Technical Info", technicalInfo.ToString());
 
-            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            await this._feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace DIGOS.Ambassador.Modules
         [Group("set")]
         public class SetCommands : DatabaseModuleBase
         {
-            private readonly UserFeedbackService Feedback;
+            private readonly UserFeedbackService _feedback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
@@ -213,7 +213,7 @@ namespace DIGOS.Ambassador.Modules
             public SetCommands(GlobalInfoContext database, UserFeedbackService feedback)
                 : base(database)
             {
-                this.Feedback = feedback;
+                this._feedback = feedback;
             }
 
             /// <summary>
@@ -234,7 +234,7 @@ namespace DIGOS.Ambassador.Modules
                 var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
                 if (!getUserResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
                     return;
                 }
 
@@ -244,7 +244,7 @@ namespace DIGOS.Ambassador.Modules
 
                 await this.Database.SaveChangesAsync();
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Class updated.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Class updated.");
             }
 
             /// <summary>
@@ -269,7 +269,7 @@ namespace DIGOS.Ambassador.Modules
                 var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
                 if (!getUserResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
                     return;
                 }
 
@@ -279,7 +279,7 @@ namespace DIGOS.Ambassador.Modules
 
                 await this.Database.SaveChangesAsync();
 
-                await this.Feedback.SendConfirmationAsync(this.Context, $"Class of {discordUser.Mention} updated.");
+                await this._feedback.SendConfirmationAsync(this.Context, $"Class of {discordUser.Mention} updated.");
             }
 
             /// <summary>
@@ -296,7 +296,7 @@ namespace DIGOS.Ambassador.Modules
                 var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
                 if (!getUserResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
                     return;
                 }
 
@@ -306,7 +306,7 @@ namespace DIGOS.Ambassador.Modules
 
                 await this.Database.SaveChangesAsync();
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Bio updated.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Bio updated.");
             }
 
             /// <summary>
@@ -325,7 +325,7 @@ namespace DIGOS.Ambassador.Modules
                 var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
                 if (!getUserResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
                     return;
                 }
 
@@ -335,7 +335,7 @@ namespace DIGOS.Ambassador.Modules
 
                 await this.Database.SaveChangesAsync();
 
-                await this.Feedback.SendConfirmationAsync(this.Context, $"Bio of {discordUser.Mention} updated.");
+                await this._feedback.SendConfirmationAsync(this.Context, $"Bio of {discordUser.Mention} updated.");
             }
 
             /// <summary>
@@ -352,7 +352,7 @@ namespace DIGOS.Ambassador.Modules
                 var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
                 if (!getUserResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
                     return;
                 }
 
@@ -362,7 +362,7 @@ namespace DIGOS.Ambassador.Modules
 
                 await this.Database.SaveChangesAsync();
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Timezone updated.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Timezone updated.");
             }
 
             /// <summary>
@@ -381,7 +381,7 @@ namespace DIGOS.Ambassador.Modules
                 var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
                 if (!getUserResult.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
                     return;
                 }
 
@@ -391,7 +391,7 @@ namespace DIGOS.Ambassador.Modules
 
                 await this.Database.SaveChangesAsync();
 
-                await this.Feedback.SendConfirmationAsync(this.Context, $"Timezone of {discordUser.Mention} updated.");
+                await this._feedback.SendConfirmationAsync(this.Context, $"Timezone of {discordUser.Mention} updated.");
             }
         }
     }

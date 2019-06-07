@@ -34,9 +34,9 @@ namespace DIGOS.Ambassador.Transformations
     /// </summary>
     public sealed class TransformationTextTokenizer
     {
-        private readonly Dictionary<string, Type> AvailableTokens = new Dictionary<string, Type>();
+        private readonly Dictionary<string, Type> _availableTokens = new Dictionary<string, Type>();
 
-        private readonly IServiceProvider Services;
+        private readonly IServiceProvider _services;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformationTextTokenizer"/> class.
@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Transformations
         /// <param name="services">The services to make available to tokens via dependency injection.</param>
         public TransformationTextTokenizer(IServiceProvider services)
         {
-            this.Services = services;
+            this._services = services;
         }
 
         /// <summary>
@@ -87,12 +87,12 @@ namespace DIGOS.Ambassador.Transformations
 
             foreach (var identifier in tokenIdentifier.Identifiers)
             {
-                if (this.AvailableTokens.ContainsKey(identifier))
+                if (this._availableTokens.ContainsKey(identifier))
                 {
                     throw new ArgumentException($"A token with the identifier \"{identifier}\"has already been registered.");
                 }
 
-                this.AvailableTokens.Add(identifier, tokenType);
+                this._availableTokens.Add(identifier, tokenType);
             }
         }
 
@@ -188,12 +188,12 @@ namespace DIGOS.Ambassador.Transformations
             }
 
             // Look up the token type
-            if (!this.AvailableTokens.ContainsKey(identifier))
+            if (!this._availableTokens.ContainsKey(identifier))
             {
                 return null;
             }
 
-            var tokenType = this.AvailableTokens[identifier];
+            var tokenType = this._availableTokens[identifier];
 
             // TargetToken is only used here for compile-time resolution of the CreateFrom method name.
             var creationMethod = tokenType.GetMethod
@@ -203,7 +203,7 @@ namespace DIGOS.Ambassador.Transformations
             );
 
             // The +3 here includes the surrounding braces and the @
-            var tokenObject = creationMethod?.Invoke(null, new object[] { start, tokenText.Length + 3, data, this.Services } );
+            var tokenObject = creationMethod?.Invoke(null, new object[] { start, tokenText.Length + 3, data, this._services } );
 
             return (IReplaceableTextToken)tokenObject;
         }

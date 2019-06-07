@@ -33,8 +33,8 @@ namespace DIGOS.Ambassador.Transformations
     [TokenIdentifier("script", "sc")]
     public class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
     {
-        private readonly ContentService Content;
-        private readonly LuaService Lua;
+        private readonly ContentService _content;
+        private readonly LuaService _lua;
 
         /// <summary>
         /// Gets the name of the script to execute.
@@ -48,8 +48,8 @@ namespace DIGOS.Ambassador.Transformations
         /// <param name="content">The application's content service.</param>
         public LuaScriptToken(LuaService luaService, ContentService content)
         {
-            this.Lua = luaService;
-            this.Content = content;
+            this._lua = luaService;
+            this._content = content;
         }
 
         /// <inheritdoc />
@@ -66,8 +66,8 @@ namespace DIGOS.Ambassador.Transformations
                 return string.Empty;
             }
 
-            var scriptPath = this.Content.GetLuaScriptPath(component.Transformation, this.ScriptName);
-            var result = await this.Lua.ExecuteScriptAsync
+            var scriptPath = this._content.GetLuaScriptPath(component.Transformation, this.ScriptName);
+            var result = await this._lua.ExecuteScriptAsync
             (
                 scriptPath,
                 (nameof(character), character),

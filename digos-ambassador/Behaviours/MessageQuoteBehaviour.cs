@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Behaviours
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
         );
 
-        private readonly UserFeedbackService Feedback;
+        private readonly UserFeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageQuoteBehaviour"/> class.
@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Behaviours
         public MessageQuoteBehaviour(DiscordSocketClient client, UserFeedbackService feedback)
             : base(client)
         {
-            this.Feedback = feedback;
+            this._feedback = feedback;
         }
 
         /// <inheritdoc />
@@ -148,7 +148,7 @@ namespace DIGOS.Ambassador.Behaviours
                     }
                 }
 
-                var embed = this.Feedback.CreateMessageQuote(quotedMessage, guildUser);
+                var embed = this._feedback.CreateMessageQuote(quotedMessage, guildUser);
                 embed.WithTimestamp(quotedMessage.Timestamp);
 
                 try

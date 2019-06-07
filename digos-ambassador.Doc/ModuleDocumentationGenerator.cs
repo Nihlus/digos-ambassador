@@ -46,14 +46,14 @@ namespace DIGOS.Ambassador.Doc
     /// </summary>
     public class ModuleDocumentationGenerator : IDocumentationGenerator
     {
-        private readonly Assembly CommandAssembly;
-        private readonly string OutputPath;
+        private readonly Assembly _commandAssembly;
+        private readonly string _outputPath;
 
-        private readonly CommandService Commands;
+        private readonly CommandService _commands;
 
-        private readonly Regex TypeReaderTypeFinder = new Regex("(?<=No type reader found for type ).+?.(?=, one must be specified)", RegexOptions.Compiled);
+        private readonly Regex _typeReaderTypeFinder = new Regex("(?<=No type reader found for type ).+?.(?=, one must be specified)", RegexOptions.Compiled);
 
-        private IServiceProvider Services = new ServiceCollection().BuildServiceProvider();
+        private IServiceProvider _services = new ServiceCollection().BuildServiceProvider();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModuleDocumentationGenerator"/> class.
@@ -62,10 +62,10 @@ namespace DIGOS.Ambassador.Doc
         /// <param name="outputPath">The output path where documentation files should be written.</param>
         public ModuleDocumentationGenerator(Assembly commandAssembly, string outputPath)
         {
-            this.CommandAssembly = commandAssembly;
-            this.OutputPath = outputPath;
+            this._commandAssembly = commandAssembly;
+            this._outputPath = outputPath;
 
-            this.Commands = new CommandService(new CommandServiceConfig { ThrowOnError = false });
+            this._commands = new CommandService(new CommandServiceConfig { ThrowOnError = false });
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Doc
         [NotNull]
         public ModuleDocumentationGenerator WithTypeReader<T>(TypeReader typeReader)
         {
-            this.Commands.AddTypeReader<T>(typeReader);
+            this._commands.AddTypeReader<T>(typeReader);
             return this;
         }
 
@@ -92,7 +92,7 @@ namespace DIGOS.Ambassador.Doc
         {
             await AddModulesAsync();
 
-            var modules = GetTopLevelModules(this.Commands.Modules);
+            var modules = GetTopLevelModules(this._commands.Modules);
             var modulePages = GenerateDocumentationPages(modules);
 
             foreach (var modulePage in modulePages.Values)
@@ -114,19 +114,19 @@ namespace DIGOS.Ambassador.Doc
             {
                 try
                 {
-                    await this.Commands.AddModulesAsync(this.CommandAssembly, this.Services);
+                    await this._commands.AddModulesAsync(this._commandAssembly, this._services);
                     break;
                 }
                 catch (InvalidOperationException iox)
                 {
-                    var typeName = this.TypeReaderTypeFinder.Match(iox.Message).Value;
-                    var typeInfo = this.CommandAssembly.DefinedTypes.FirstOrDefault(t => t.Name == typeName);
+                    var typeName = this._typeReaderTypeFinder.Match(iox.Message).Value;
+                    var typeInfo = this._commandAssembly.DefinedTypes.FirstOrDefault(t => t.Name == typeName);
                     if (typeInfo is null)
                     {
                         throw;
                     }
 
-                    this.Commands.AddTypeReader(typeInfo.AsType(), new DummyTypeReader());
+                    this._commands.AddTypeReader(typeInfo.AsType(), new DummyTypeReader());
                 }
             }
         }
@@ -222,7 +222,7 @@ namespace DIGOS.Ambassador.Doc
         }
 
         /// <summary>
-        /// Saves the given page to disk in the folder specified by <see cref="OutputPath"/>.
+        /// Saves the given page to disk in the folder specified by <see cref="_outputPath"/>.
         /// </summary>
         /// <param name="page">The page to save.</param>
         /// <param name="subdirectory">The subdirectory to save it in, if any.</param>
@@ -231,7 +231,7 @@ namespace DIGOS.Ambassador.Doc
         {
             subdirectory = subdirectory ?? string.Empty;
 
-            var outputDirectory = Path.Combine(this.OutputPath, subdirectory);
+            var outputDirectory = Path.Combine(this._outputPath, subdirectory);
             Directory.CreateDirectory(outputDirectory);
 
             var outputPath = Path.Combine(outputDirectory, $"{page.Name}.md");

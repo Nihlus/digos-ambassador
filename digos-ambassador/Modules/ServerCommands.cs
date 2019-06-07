@@ -46,8 +46,8 @@ namespace DIGOS.Ambassador.Modules
     [Summary("Server-related commands, such as viewing or editing info about a specific server.")]
     public class ServerCommands : DatabaseModuleBase
     {
-        private readonly UserFeedbackService Feedback;
-        private readonly ServerService Servers;
+        private readonly UserFeedbackService _feedback;
+        private readonly ServerService _servers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerCommands"/> class.
@@ -58,8 +58,8 @@ namespace DIGOS.Ambassador.Modules
         public ServerCommands(GlobalInfoContext database, UserFeedbackService feedback, ServerService servers)
             : base(database)
         {
-            this.Feedback = feedback;
-            this.Servers = servers;
+            this._feedback = feedback;
+            this._servers = servers;
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ShowServerAsync()
         {
-            var eb = this.Feedback.CreateEmbedBase();
+            var eb = this._feedback.CreateEmbedBase();
 
             var guild = this.Context.Guild;
             var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Modules
                 eb.WithThumbnailUrl(guild.IconUrl);
             }
 
-            var getDescriptionResult = this.Servers.GetDescription(server);
+            var getDescriptionResult = this._servers.GetDescription(server);
             if (getDescriptionResult.IsSuccess)
             {
                 eb.WithDescription(getDescriptionResult.Entity);
@@ -113,7 +113,7 @@ namespace DIGOS.Ambassador.Modules
 
             eb.AddField("First-join Message", content);
 
-            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            await this._feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
         }
 
         /// <summary>
@@ -127,19 +127,19 @@ namespace DIGOS.Ambassador.Modules
         {
             var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
 
-            var getJoinMessageResult = this.Servers.GetJoinMessage(server);
+            var getJoinMessageResult = this._servers.GetJoinMessage(server);
             if (!getJoinMessageResult.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, getJoinMessageResult.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, getJoinMessageResult.ErrorReason);
                 return;
             }
 
-            var eb = this.Feedback.CreateEmbedBase();
+            var eb = this._feedback.CreateEmbedBase();
 
             eb.WithTitle("Welcome!");
             eb.WithDescription(getJoinMessageResult.Entity);
 
-            await this.Feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            await this._feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
         }
 
         /// <summary>
@@ -153,15 +153,15 @@ namespace DIGOS.Ambassador.Modules
         public async Task ClearDedicatedRoleplayChannelCategory()
         {
             var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
-            var result = await this.Servers.SetDedicatedRoleplayChannelCategoryAsync(this.Database, server, null);
+            var result = await this._servers.SetDedicatedRoleplayChannelCategoryAsync(this.Database, server, null);
 
             if (!result.IsSuccess)
             {
-                await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                 return;
             }
 
-            await this.Feedback.SendConfirmationAsync(this.Context, "Dedicated channel category cleared.");
+            await this._feedback.SendConfirmationAsync(this.Context, "Dedicated channel category cleared.");
         }
 
         /// <summary>
@@ -171,8 +171,8 @@ namespace DIGOS.Ambassador.Modules
         [Group("set")]
         public class SetCommands : DatabaseModuleBase
         {
-            private readonly UserFeedbackService Feedback;
-            private readonly ServerService Servers;
+            private readonly UserFeedbackService _feedback;
+            private readonly ServerService _servers;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
@@ -183,8 +183,8 @@ namespace DIGOS.Ambassador.Modules
             public SetCommands(GlobalInfoContext database, UserFeedbackService feedback, ServerService servers)
                 : base(database)
             {
-                this.Feedback = feedback;
-                this.Servers = servers;
+                this._feedback = feedback;
+                this._servers = servers;
             }
 
             /// <summary>
@@ -199,14 +199,14 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetDescriptionAsync([NotNull] string newDescription)
             {
                 var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
-                var result = await this.Servers.SetDescriptionAsync(this.Database, server, newDescription);
+                var result = await this._servers.SetDescriptionAsync(this.Database, server, newDescription);
                 if (!result.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Server description set.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Server description set.");
             }
 
             /// <summary>
@@ -221,14 +221,14 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetJoinMessageAsync([NotNull] string newJoinMessage)
             {
                 var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
-                var result = await this.Servers.SetJoinMessageAsync(this.Database, server, newJoinMessage);
+                var result = await this._servers.SetJoinMessageAsync(this.Database, server, newJoinMessage);
                 if (!result.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Server first-join message set.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Server first-join message set.");
             }
 
             /// <summary>
@@ -243,14 +243,14 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetIsNSFWAsync(bool isNsfw)
             {
                 var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
-                var result = await this.Servers.SetIsNSFWAsync(this.Database, server, isNsfw);
+                var result = await this._servers.SetIsNSFWAsync(this.Database, server, isNsfw);
                 if (!result.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync
+                await this._feedback.SendConfirmationAsync
                 (
                     this.Context,
                     $"The server is {(isNsfw ? "now set as NSFW" : "no longer NSFW")}."
@@ -269,10 +269,10 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetSendJoinMessagesAsync(bool sendJoinMessage)
             {
                 var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
-                var result = await this.Servers.SetSendJoinMessageAsync(this.Database, server, sendJoinMessage);
+                var result = await this._servers.SetSendJoinMessageAsync(this.Database, server, sendJoinMessage);
                 if (!result.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                     return;
                 }
 
@@ -280,7 +280,7 @@ namespace DIGOS.Ambassador.Modules
                     ? "will now send first-join messages to new users"
                     : "no longer sends first-join messages";
 
-                await this.Feedback.SendConfirmationAsync
+                await this._feedback.SendConfirmationAsync
                 (
                     this.Context,
                     $"The server {willDo}."
@@ -299,7 +299,7 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetDedicatedRoleplayChannelCategory(ICategoryChannel category)
             {
                 var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
-                var result = await this.Servers.SetDedicatedRoleplayChannelCategoryAsync
+                var result = await this._servers.SetDedicatedRoleplayChannelCategoryAsync
                 (
                     this.Database,
                     server,
@@ -308,11 +308,11 @@ namespace DIGOS.Ambassador.Modules
 
                 if (!result.IsSuccess)
                 {
-                    await this.Feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    await this._feedback.SendErrorAsync(this.Context, result.ErrorReason);
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAsync(this.Context, "Dedicated channel category set.");
+                await this._feedback.SendConfirmationAsync(this.Context, "Dedicated channel category set.");
             }
         }
     }

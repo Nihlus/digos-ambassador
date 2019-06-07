@@ -44,10 +44,10 @@ namespace DIGOS.Ambassador.Wizards
     public class HelpWizard : InteractiveMessage, IWizard
     {
         [NotNull]
-        private readonly UserFeedbackService Feedback;
+        private readonly UserFeedbackService _feedback;
 
         [NotNull]
-        private readonly HelpService Help;
+        private readonly HelpService _help;
 
         private static readonly Emoji First = new Emoji("\x23EE");
         private static readonly Emoji Next = new Emoji("\x25B6");
@@ -72,35 +72,35 @@ namespace DIGOS.Ambassador.Wizards
         private IReadOnlyCollection<IEmote> CurrrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
 
         [NotNull, ItemNotNull]
-        private readonly IReadOnlyList<ModuleInfo> Modules;
+        private readonly IReadOnlyList<ModuleInfo> _modules;
 
-        private readonly IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>> ModuleListPages;
+        private readonly IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>> _moduleListPages;
 
-        private readonly IDictionary<ModuleInfo, IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>>> CommandListPages;
+        private readonly IDictionary<ModuleInfo, IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>>> _commandListPages;
 
         [NotNull]
-        private readonly Embed LoadingEmbed;
+        private readonly Embed _loadingEmbed;
 
         /*
          * State fields
          */
 
-        private HelpWizardState State;
+        private HelpWizardState _state;
 
         /*
          * Module list state
          */
 
-        private int ModuleListOffset;
+        private int _moduleListOffset;
 
         /*
          * Command list state
          */
 
         [CanBeNull]
-        private ModuleInfo CurrentModule;
+        private ModuleInfo _currentModule;
 
-        private int CommandListOffset;
+        private int _commandListOffset;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HelpWizard"/> class.
@@ -118,18 +118,18 @@ namespace DIGOS.Ambassador.Wizards
         )
             : base(sourceUser)
         {
-            this.Modules = modules;
-            this.Feedback = feedback;
-            this.Help = help;
+            this._modules = modules;
+            this._feedback = feedback;
+            this._help = help;
 
             var eb = new EmbedBuilder();
             eb.WithTitle("Help & Information");
             eb.WithDescription("Loading...");
 
-            this.LoadingEmbed = eb.Build();
+            this._loadingEmbed = eb.Build();
 
-            this.ModuleListPages = BuildModuleListPages();
-            this.CommandListPages = new Dictionary<ModuleInfo, IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>>>();
+            this._moduleListPages = BuildModuleListPages();
+            this._commandListPages = new Dictionary<ModuleInfo, IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>>>();
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace DIGOS.Ambassador.Wizards
 
             var currentPage = new List<EmbedFieldBuilder>();
             var currentContentLength = 0;
-            foreach (var module in this.Modules)
+            foreach (var module in this._modules)
             {
                 var moduleContentLength = module.Name.Length + module.Summary.Length;
                 if (currentPage.Count >= 3 || currentContentLength + moduleContentLength > 1300)
@@ -159,7 +159,7 @@ namespace DIGOS.Ambassador.Wizards
 
                 currentContentLength += moduleContentLength;
 
-                if (module == this.Modules.Last() && !pages.Contains(currentPage))
+                if (module == this._modules.Last() && !pages.Contains(currentPage))
                 {
                     pages.Add(currentPage);
                 }
@@ -187,7 +187,7 @@ namespace DIGOS.Ambassador.Wizards
 
             foreach (var commandGroup in commandGroups)
             {
-                var helpField = this.Help.CreateCommandInfoEmbedField(commandGroup.First());
+                var helpField = this._help.CreateCommandInfoEmbedField(commandGroup.First());
 
                 var commandContentLength = helpField.Name.Length + ((string)helpField.Value).Length;
 
@@ -223,7 +223,7 @@ namespace DIGOS.Ambassador.Wizards
         /// <inheritdoc/>
         protected override async Task<IUserMessage> DisplayAsync([NotNull] IMessageChannel channel)
         {
-            return await channel.SendMessageAsync(string.Empty, embed: this.LoadingEmbed)
+            return await channel.SendMessageAsync(string.Empty, embed: this._loadingEmbed)
                 .ConfigureAwait(false);
         }
 
@@ -235,7 +235,7 @@ namespace DIGOS.Ambassador.Wizards
                 return;
             }
 
-            await this.Message.ModifyAsync(m => m.Embed = this.LoadingEmbed);
+            await this.Message.ModifyAsync(m => m.Embed = this._loadingEmbed);
 
             foreach (var emote in this.CurrrentlyRejectedEmotes)
             {
@@ -264,43 +264,43 @@ namespace DIGOS.Ambassador.Wizards
         /// <inheritdoc/>
         public Task<Embed> GetCurrentPageAsync()
         {
-            switch (this.State)
+            switch (this._state)
             {
                 case HelpWizardState.ModuleListing:
                 {
-                    var eb = this.Feedback.CreateEmbedBase();
+                    var eb = this._feedback.CreateEmbedBase();
                     eb.WithTitle("Available command modules");
                     eb.WithDescription($"Click {EnterModule} and type in a module's name to see available commands.");
 
-                    var page = this.ModuleListPages[this.ModuleListOffset];
+                    var page = this._moduleListPages[this._moduleListOffset];
                     eb.WithFields(page);
 
                     eb.WithFooter
                     (
-                       $"Page {this.ModuleListOffset + 1} of {this.ModuleListPages.Count} " +
-                       $"({this.Modules.Count} modules)"
+                       $"Page {this._moduleListOffset + 1} of {this._moduleListPages.Count} " +
+                       $"({this._modules.Count} modules)"
                     );
 
                     return Task.FromResult(eb.Build());
                 }
                 case HelpWizardState.CommandListing:
                 {
-                    var eb = this.Feedback.CreateEmbedBase();
-                    eb.WithTitle($"Available commands in {this.CurrentModule.Name}");
+                    var eb = this._feedback.CreateEmbedBase();
+                    eb.WithTitle($"Available commands in {this._currentModule.Name}");
 
                     var description = $"Click {EnterModule} and type in a command to see detailed information." +
                                       "\n\n" +
-                                      $"{this.CurrentModule.Remarks}";
+                                      $"{this._currentModule.Remarks}";
 
                     eb.WithDescription(description);
 
-                    var pages = this.CommandListPages[this.CurrentModule];
-                    var page = pages[this.CommandListOffset];
+                    var pages = this._commandListPages[this._currentModule];
+                    var page = pages[this._commandListOffset];
                     eb.WithFields(page);
 
                     eb.WithFooter
                     (
-                        $"Page {this.CommandListOffset + 1} of {pages.Count} " +
+                        $"Page {this._commandListOffset + 1} of {pages.Count} " +
                         $"({pages.Sum(p => p.Count)} commands)"
                     );
 
@@ -326,7 +326,7 @@ namespace DIGOS.Ambassador.Wizards
                 return DisplayHelpTextAsync();
             }
 
-            switch (this.State)
+            switch (this._state)
             {
                 case HelpWizardState.ModuleListing:
                 {
@@ -354,7 +354,7 @@ namespace DIGOS.Ambassador.Wizards
 
             if (emote.Equals(Back))
             {
-                this.State = HelpWizardState.ModuleListing;
+                this._state = HelpWizardState.ModuleListing;
                 await UpdateAsync();
 
                 return;
@@ -362,37 +362,37 @@ namespace DIGOS.Ambassador.Wizards
 
             if (emote.Equals(Next))
             {
-                if (this.CommandListOffset + 1 > this.CommandListPages[this.CurrentModule].Count - 1)
+                if (this._commandListOffset + 1 > this._commandListPages[this._currentModule].Count - 1)
                 {
                     return;
                 }
 
-                this.CommandListOffset++;
+                this._commandListOffset++;
             }
             else if (emote.Equals(Previous))
             {
-                if (this.CommandListOffset - 1 < 0)
+                if (this._commandListOffset - 1 < 0)
                 {
                     return;
                 }
 
-                this.CommandListOffset--;
+                this._commandListOffset--;
             }
             else if (emote.Equals(First))
             {
-                this.CommandListOffset = 0;
+                this._commandListOffset = 0;
             }
             else if (emote.Equals(Last))
             {
-                this.CommandListOffset = this.CommandListPages[this.CurrentModule].Count - 1;
+                this._commandListOffset = this._commandListPages[this._currentModule].Count - 1;
             }
             else if (emote.Equals(EnterModule))
             {
                 bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
 
-                if (!this.CurrentModule.Commands.Any())
+                if (!this._currentModule.Commands.Any())
                 {
-                    await this.Feedback.SendWarningAndDeleteAsync
+                    await this._feedback.SendWarningAndDeleteAsync
                     (
                         this.MessageContext,
                         "There aren't any commands available in the module.",
@@ -402,7 +402,7 @@ namespace DIGOS.Ambassador.Wizards
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAndDeleteAsync
+                await this._feedback.SendConfirmationAndDeleteAsync
                 (
                     this.MessageContext,
                     "Please enter a command name.",
@@ -419,7 +419,7 @@ namespace DIGOS.Ambassador.Wizards
                 if (messageResult.IsSuccess)
                 {
                     var searchText = messageResult.Entity.Content;
-                    var commandSearchTerms = this.CurrentModule
+                    var commandSearchTerms = this._currentModule
                         .GetAllCommands()
                         .Select(c => c.GetFullCommand());
 
@@ -428,14 +428,14 @@ namespace DIGOS.Ambassador.Wizards
                     {
                         var foundName = findCommandResult.Entity;
 
-                        var commandGroup = this.CurrentModule.Commands
+                        var commandGroup = this._currentModule.Commands
                             .Where(c => c.GetFullCommand() == foundName)
                             .GroupBy(c => c.Aliases.OrderByDescending(a => a).First())
                             .First();
 
-                        var eb = this.Help.CreateDetailedCommandInfoEmbed(commandGroup);
+                        var eb = this._help.CreateDetailedCommandInfoEmbed(commandGroup);
 
-                        await this.Feedback.SendEmbedAndDeleteAsync
+                        await this._feedback.SendEmbedAndDeleteAsync
                         (
                             this.MessageContext.Channel,
                             eb.Build(),
@@ -444,10 +444,10 @@ namespace DIGOS.Ambassador.Wizards
                     }
                     else
                     {
-                        var eb = this.Feedback.CreateEmbedBase(Color.Orange);
+                        var eb = this._feedback.CreateEmbedBase(Color.Orange);
                         eb.WithDescription("I couldn't find a sufficiently close command to that.");
 
-                        await this.Feedback.SendEmbedAndDeleteAsync
+                        await this._feedback.SendEmbedAndDeleteAsync
                         (
                             this.MessageContext.Channel,
                             eb.Build()
@@ -470,37 +470,37 @@ namespace DIGOS.Ambassador.Wizards
 
             if (emote.Equals(Next))
             {
-                if (this.ModuleListOffset + 1 > this.ModuleListPages.Count - 1)
+                if (this._moduleListOffset + 1 > this._moduleListPages.Count - 1)
                 {
                     return;
                 }
 
-                this.ModuleListOffset++;
+                this._moduleListOffset++;
             }
             else if (emote.Equals(Previous))
             {
-                if (this.ModuleListOffset - 1 < 0)
+                if (this._moduleListOffset - 1 < 0)
                 {
                     return;
                 }
 
-                this.ModuleListOffset--;
+                this._moduleListOffset--;
             }
             else if (emote.Equals(First))
             {
-                this.ModuleListOffset = 0;
+                this._moduleListOffset = 0;
             }
             else if (emote.Equals(Last))
             {
-                this.ModuleListOffset = this.ModuleListPages.Count - 1;
+                this._moduleListOffset = this._moduleListPages.Count - 1;
             }
             else if (emote.Equals(EnterModule))
             {
                 bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
 
-                if (!this.Modules.Any())
+                if (!this._modules.Any())
                 {
-                    await this.Feedback.SendWarningAndDeleteAsync
+                    await this._feedback.SendWarningAndDeleteAsync
                     (
                         this.MessageContext,
                         "There aren't any modules available in the bot.",
@@ -510,7 +510,7 @@ namespace DIGOS.Ambassador.Wizards
                     return;
                 }
 
-                await this.Feedback.SendConfirmationAndDeleteAsync
+                await this._feedback.SendConfirmationAndDeleteAsync
                 (
                     this.MessageContext,
                     "Please enter a module name.",
@@ -529,7 +529,7 @@ namespace DIGOS.Ambassador.Wizards
                     var tryStartCategoryResult = await OpenModule(messageResult.Entity.Content);
                     if (!tryStartCategoryResult.IsSuccess)
                     {
-                        await this.Feedback.SendWarningAndDeleteAsync
+                        await this._feedback.SendWarningAndDeleteAsync
                         (
                             this.MessageContext,
                             tryStartCategoryResult.ErrorReason,
@@ -551,7 +551,7 @@ namespace DIGOS.Ambassador.Wizards
         /// <returns>A execution result which may or may not have succeeded.</returns>
         public Task<ExecuteResult> OpenModule(string moduleName)
         {
-            var moduleSearchTerms = this.Modules.Select
+            var moduleSearchTerms = this._modules.Select
             (
                 m => new List<string>(m.Aliases) { m.Name }
             )
@@ -565,17 +565,17 @@ namespace DIGOS.Ambassador.Wizards
 
             var bestMatch = getModuleResult.Entity;
 
-            var module = this.Modules.First(m => m.Name == bestMatch || m.Aliases.Contains(bestMatch));
-            if (!this.CommandListPages.ContainsKey(module))
+            var module = this._modules.First(m => m.Name == bestMatch || m.Aliases.Contains(bestMatch));
+            if (!this._commandListPages.ContainsKey(module))
             {
                 var commandPages = BuildCommandListPages(module);
-                this.CommandListPages.Add(module, commandPages);
+                this._commandListPages.Add(module, commandPages);
             }
 
-            this.CommandListOffset = 0;
-            this.CurrentModule = module;
+            this._commandListOffset = 0;
+            this._currentModule = module;
 
-            this.State = HelpWizardState.CommandListing;
+            this._state = HelpWizardState.CommandListing;
 
             return Task.FromResult(ExecuteResult.FromSuccess());
         }
@@ -586,7 +586,7 @@ namespace DIGOS.Ambassador.Wizards
             var eb = new EmbedBuilder();
             eb.WithColor(Color.DarkPurple);
 
-            switch (this.State)
+            switch (this._state)
             {
                 case HelpWizardState.ModuleListing:
                 {
@@ -622,7 +622,7 @@ namespace DIGOS.Ambassador.Wizards
                 }
             }
 
-            await this.Feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb.Build(), TimeSpan.FromSeconds(30));
+            await this._feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb.Build(), TimeSpan.FromSeconds(30));
         }
 
         /// <remarks>
@@ -636,7 +636,7 @@ namespace DIGOS.Ambassador.Wizards
         /// <inheritdoc/>
         public IEnumerable<IEmote> GetCurrentPageEmotes()
         {
-            switch (this.State)
+            switch (this._state)
             {
                 case HelpWizardState.ModuleListing:
                 {
@@ -656,7 +656,7 @@ namespace DIGOS.Ambassador.Wizards
         [NotNull]
         private IEnumerable<IEmote> GetCurrentPageRejectedEmotes()
         {
-            switch (this.State)
+            switch (this._state)
             {
                 case HelpWizardState.ModuleListing:
                 {

@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Services.Interactivity
     /// </summary>
     public class InteractivityService : IDisposable
     {
-        private readonly IList<IInteractiveMessage> TrackedMessages;
+        private readonly IList<IInteractiveMessage> _trackedMessages;
 
         /// <summary>
         /// Gets the client that the service is attached to.
@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Services.Interactivity
         {
             this.Client = client;
 
-            this.TrackedMessages = new List<IInteractiveMessage>();
+            this._trackedMessages = new List<IInteractiveMessage>();
 
             this.Client.ReactionAdded += OnReactionAdded;
             this.Client.ReactionRemoved += OnReactionRemoved;
@@ -135,7 +135,7 @@ namespace DIGOS.Ambassador.Services.Interactivity
             [NotNull] IInteractiveMessage message
         )
         {
-            this.TrackedMessages.Add(message);
+            this._trackedMessages.Add(message);
             return message.SendAsync(this, channel);
         }
 
@@ -155,7 +155,7 @@ namespace DIGOS.Ambassador.Services.Interactivity
         {
             timeout = timeout ?? TimeSpan.FromSeconds(15.0);
 
-            this.TrackedMessages.Add(message);
+            this._trackedMessages.Add(message);
             await message.SendAsync(this, channel);
 
             _ = Task.Delay(timeout.Value)
@@ -171,7 +171,7 @@ namespace DIGOS.Ambassador.Services.Interactivity
         [NotNull]
         public Task DeleteInteractiveMessageAsync([NotNull] IInteractiveMessage message)
         {
-            this.TrackedMessages.Remove(message);
+            this._trackedMessages.Remove(message);
             return message.DeleteAsync();
         }
 
@@ -190,10 +190,10 @@ namespace DIGOS.Ambassador.Services.Interactivity
                 return;
             }
 
-            var deletedMessages = this.TrackedMessages.Where(m => m.Message?.Id == userMessage.Id);
+            var deletedMessages = this._trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
             foreach (var deletedMessage in deletedMessages)
             {
-                this.TrackedMessages.Remove(deletedMessage);
+                this._trackedMessages.Remove(deletedMessage);
             }
         }
 
@@ -227,7 +227,7 @@ namespace DIGOS.Ambassador.Services.Interactivity
                         return;
                     }
 
-                    var relevantMessages = this.TrackedMessages.Where(m => m.Message?.Id == userMessage.Id);
+                    var relevantMessages = this._trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
                     var handlerTasks = relevantMessages
                         .Select(relevantMessage => relevantMessage.HandleRemovedInteractionAsync(reaction));
 
@@ -268,7 +268,7 @@ namespace DIGOS.Ambassador.Services.Interactivity
                         return;
                     }
 
-                    var relevantMessages = this.TrackedMessages.Where(m => m.Message?.Id == userMessage.Id);
+                    var relevantMessages = this._trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
                     var handlerTasks = relevantMessages
                         .Select(relevantMessage => relevantMessage.HandleAddedInteractionAsync(reaction)).ToList();
 

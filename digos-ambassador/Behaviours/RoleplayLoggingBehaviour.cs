@@ -40,9 +40,9 @@ namespace DIGOS.Ambassador.Behaviours
     public class RoleplayLoggingBehaviour : BehaviourBase
     {
         [ProvidesContext]
-        private readonly GlobalInfoContext Database;
+        private readonly GlobalInfoContext _database;
 
-        private readonly RoleplayService Roleplays;
+        private readonly RoleplayService _roleplays;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayLoggingBehaviour"/> class.
@@ -58,8 +58,8 @@ namespace DIGOS.Ambassador.Behaviours
         )
             : base(client)
         {
-            this.Roleplays = roleplays;
-            this.Database = database;
+            this._roleplays = roleplays;
+            this._database = database;
         }
 
         /// <inheritdoc />
@@ -109,7 +109,7 @@ namespace DIGOS.Ambassador.Behaviours
                 return;
             }
 
-            await this.Roleplays.ConsumeMessageAsync(this.Database, new SocketCommandContext(this.Client, message));
+            await this._roleplays.ConsumeMessageAsync(this._database, new SocketCommandContext(this.Client, message));
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace DIGOS.Ambassador.Behaviours
         public override void Dispose()
         {
             base.Dispose();
-            this.Database.Dispose();
+            this._database.Dispose();
         }
     }
 }
