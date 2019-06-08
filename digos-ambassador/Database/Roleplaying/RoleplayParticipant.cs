@@ -55,10 +55,23 @@ namespace DIGOS.Ambassador.Database.Roleplaying
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayParticipant"/> class.
         /// </summary>
+        [UsedImplicitly]
+        public RoleplayParticipant()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleplayParticipant"/> class.
+        /// </summary>
         /// <param name="roleplay">The roleplay that the user is participating in.</param>
         /// <param name="user">The user that is participating in the roleplay.</param>
         /// <param name="status">The status of the user.</param>
-        public RoleplayParticipant([NotNull] Roleplay roleplay, [NotNull] User user, ParticipantStatus status)
+        public RoleplayParticipant
+        (
+            [NotNull] Roleplay roleplay,
+            [NotNull] User user,
+            ParticipantStatus status = ParticipantStatus.None
+        )
         {
             this.Roleplay = roleplay;
             this.User = user;
