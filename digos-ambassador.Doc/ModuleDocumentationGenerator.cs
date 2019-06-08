@@ -127,7 +127,7 @@ namespace DIGOS.Ambassador.Doc
 
             foreach (var modulePage in modulePages.Values)
             {
-                await SavePageAsync(modulePage, "modules");
+                await SavePageAsync(modulePage, Path.Combine("docs", "modules"));
             }
 
             var indexPage = GenerateDocumentationIndex
@@ -135,7 +135,7 @@ namespace DIGOS.Ambassador.Doc
                 modulePages.Where(p => !p.Key.IsSubmodule).Select(kvp => kvp.Value)
             );
 
-            await SavePageAsync(indexPage);
+            await SavePageAsync(indexPage, "docs");
         }
 
         private async Task AddModulesAsync()

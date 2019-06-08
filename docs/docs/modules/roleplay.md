@@ -5,13 +5,6 @@ These commands are prefixed with `roleplay`. You can also use `rp` instead of `r
 
 Commands for interacting with and managing channel roleplays.
 
-Parameters which take a roleplay can be specified in two ways - by just the name, which will search your roleplays, and by mention and name, which will search the given user's roleplays. For example,
-
-Your roleplay: ipsum
-Another user's roleplay: @DIGOS Ambassador:ipsum
-
-You can also substitute any roleplay name for "current", and the active roleplay will be used instead.
-
 ## Submodules
 * [Set](roleplay_set.md)
 * [Admin](roleplay_admin.md)

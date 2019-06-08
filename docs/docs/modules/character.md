@@ -5,13 +5,6 @@ These commands are prefixed with `character`. You can also use `char` or `ch` in
 
 Commands for creating, editing, and interacting with user characters.
 
-Parameters which take a character can be specified in two ways - by just the name, which will search your characters, and by mention and name, which will search the given user's characters. For example,
-
-Your character: Amby  
-Another user's character: @DIGOS Ambassador:Amby
-
-You can also substitute any character name for "current", and your active character will be used instead.
-
 ## Submodules
 * [Role](character_role.md)
 * [Set](character_set.md)
