@@ -32,20 +32,20 @@
     <PackageReference Include="Discord.Net.Commands" Version="2.0.1" />
     <PackageReference Include="Humanizer" Version="2.6.2" />
     <PackageReference Include="iTextSharp" Version="5.5.13" />
-    <PackageReference Include="JetBrains.Annotations" Version="2018.2.1" PrivateAssets="all" />
+    <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" PrivateAssets="all" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.2.4" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
-    <PackageReference Include="morelinq" Version="3.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="NLua" Version="1.4.9" />
+    <PackageReference Include="morelinq" Version="3.1.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="NLua" Version="1.4.18" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
     <PackageReference Include="WebSocketSharp.CustomHeaders.Standard" Version="1.0.2" />
-    <PackageReference Include="YamlDotNet" Version="5.3.0" />
+    <PackageReference Include="YamlDotNet" Version="6.1.1" />
   </ItemGroup>
   <ItemGroup Condition="$(NETCoreSdkVersion) &lt; 2.1">
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.2" />

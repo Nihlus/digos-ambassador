@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             var result = await _lua.ExecuteSnippetAsync(code, (nameof(variable), variable));
             Assert.True(result.IsSuccess);
-            Assert.Equal("10.0", result.Entity);
+            Assert.Equal("10", result.Entity);
         }
     }
 }
