@@ -2,11 +2,11 @@
 =====
 
 ### Getting Started
-[Guides](guides/index.md)
+* [Guides](guides/index.md)
 
 
 ### Command Documentation
-[Index](docs/index.md)
+* [Index](docs/index.md)
 
 ### Tips & Tricks 
 Characters and roleplays can be specified in two ways - by just the name, which will search the ones you own, and 
