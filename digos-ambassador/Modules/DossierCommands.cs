@@ -33,7 +33,6 @@ using Discord;
 using Discord.Commands;
 
 using JetBrains.Annotations;
-using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 

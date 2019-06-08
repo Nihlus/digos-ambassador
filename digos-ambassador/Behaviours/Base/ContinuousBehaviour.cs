@@ -26,7 +26,6 @@ using System.Threading.Tasks;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using log4net;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Behaviours
 {

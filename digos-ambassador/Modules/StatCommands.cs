@@ -34,7 +34,6 @@ using Discord.WebSocket;
 
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
-using static Discord.Commands.RunMode;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 

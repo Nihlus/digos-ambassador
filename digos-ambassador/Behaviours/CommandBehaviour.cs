@@ -22,14 +22,12 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using DIGOS.Ambassador.Attributes;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Extensions;
@@ -43,7 +41,6 @@ using Discord.WebSocket;
 
 using Humanizer;
 using JetBrains.Annotations;
-using log4net;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Behaviours
