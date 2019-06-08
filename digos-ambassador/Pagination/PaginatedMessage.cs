@@ -244,11 +244,6 @@ namespace DIGOS.Ambassador.Pagination
                 return;
             }
 
-            if (await CanManageMessages())
-            {
-                _ = this.Message.RemoveReactionAsync(reaction.Emote, reaction.User.Value);
-            }
-
             await UpdateAsync().ConfigureAwait(false);
         }
 
