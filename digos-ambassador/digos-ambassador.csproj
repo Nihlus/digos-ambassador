@@ -31,7 +31,7 @@
     <PackageReference Include="Discord.Net" Version="2.0.1" />
     <PackageReference Include="Discord.Net.Commands" Version="2.0.1" />
     <PackageReference Include="Humanizer" Version="2.6.2" />
-    <PackageReference Include="iTextSharp" Version="5.5.13" />
+    <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.5.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" PrivateAssets="all" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.4" />

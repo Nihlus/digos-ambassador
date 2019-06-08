@@ -45,9 +45,9 @@ namespace DIGOS.Ambassador.Services.Exporters
     public class PDFRoleplayExporter : RoleplayExporterBase
     {
         private const float DefaultParagraphSpacing = 8.0f;
-        private static readonly Font StandardFont = new Font(Font.FontFamily.HELVETICA, 11.0f);
-        private static readonly Font ItalicFont = new Font(Font.FontFamily.HELVETICA, 11.0f, Font.ITALIC);
-        private static readonly Font TitleFont = new Font(Font.FontFamily.HELVETICA, 48.0f, Font.BOLD);
+        private static readonly Font StandardFont = new Font(Font.HELVETICA, 11.0f);
+        private static readonly Font ItalicFont = new Font(Font.HELVETICA, 11.0f, Font.ITALIC);
+        private static readonly Font TitleFont = new Font(Font.HELVETICA, 48.0f, Font.BOLD);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PDFRoleplayExporter"/> class.
@@ -67,32 +67,33 @@ namespace DIGOS.Ambassador.Services.Exporters
             var filePath = Path.GetTempFileName();
             using (var of = File.Create(filePath))
             {
-                using (PdfWriter.GetInstance(pdfDoc, of))
+                var writer = PdfWriter.GetInstance(pdfDoc, of);
+                writer.Open();
+                pdfDoc.Open();
+
+                var owner = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
+
+                pdfDoc.AddAuthor(owner.Nickname);
+                pdfDoc.AddCreationDate();
+                pdfDoc.AddCreator("DIGOS Ambassador");
+                pdfDoc.AddTitle(roleplay.Name);
+
+                var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
+
+                pdfDoc.Add(CreateTitle(roleplay.Name));
+                pdfDoc.Add(CreateParticipantList(joinedUsers));
+
+                pdfDoc.NewPage();
+
+                var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
+                foreach (var message in messages)
                 {
-                    pdfDoc.Open();
-
-                    var owner = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
-
-                    pdfDoc.AddAuthor(owner.Nickname);
-                    pdfDoc.AddCreationDate();
-                    pdfDoc.AddCreator("DIGOS Ambassador");
-                    pdfDoc.AddTitle(roleplay.Name);
-
-                    var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
-
-                    pdfDoc.Add(CreateTitle(roleplay.Name));
-                    pdfDoc.Add(CreateParticipantList(joinedUsers));
-
-                    pdfDoc.NewPage();
-
-                    var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
-                    foreach (var message in messages)
-                    {
-                        pdfDoc.Add(CreateMessage(message.AuthorNickname, message.Contents));
-                    }
-
-                    pdfDoc.Close();
+                    pdfDoc.Add(CreateMessage(message.AuthorNickname, message.Contents));
                 }
+
+                pdfDoc.Close();
+                writer.Flush();
+                writer.Close();
             }
 
             var resultFile = File.OpenRead(filePath);
@@ -177,7 +178,7 @@ namespace DIGOS.Ambassador.Services.Exporters
                     var spacingChunk = new Chunk("\n", StandardFont);
 
                     var chunk = new Chunk($"{splits[i]}", ItalicFont);
-                    chunk.SetBackground(BaseColor.LIGHT_GRAY, 4, 4, 4, 4);
+                    chunk.SetBackground(BaseColor.LightGray, 4, 4, 4, 4);
 
                     subPara.Add(spacingChunk);
                     subPara.Add(chunk);
