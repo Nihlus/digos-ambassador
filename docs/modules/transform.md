@@ -188,11 +188,11 @@ Transforms the colour of the pattern on the given bodypart on the target user to
 
 ### *list-available*
 #### Overloads
-**`transform list-available` (as well as `transform list-species` or `transform species`)**
+**`transform list-available` (as well as `transform list-species`, `transform species`, or `transform list`)**
 
 Lists the available transformation species.
 
-**`transform list-available`**
+**`transform list-available` (as well as `transform list-species`, `transform species`, or `transform list`)**
 
 Lists the available transformations for a given bodypart.
 

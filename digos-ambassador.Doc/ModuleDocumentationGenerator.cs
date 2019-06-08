@@ -28,12 +28,16 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Doc.Extensions;
 using DIGOS.Ambassador.Doc.Nodes;
 using DIGOS.Ambassador.Extensions;
-
+using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Interactivity;
+using DIGOS.Ambassador.Services.Servers;
+using DIGOS.Ambassador.Services.Users;
 using Discord.Commands;
+using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -53,7 +57,7 @@ namespace DIGOS.Ambassador.Doc
 
         private readonly Regex _typeReaderTypeFinder = new Regex("(?<=No type reader found for type ).+?.(?=, one must be specified)", RegexOptions.Compiled);
 
-        private IServiceProvider _services = new ServiceCollection().BuildServiceProvider();
+        private IServiceProvider _services;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModuleDocumentationGenerator"/> class.
@@ -66,6 +70,32 @@ namespace DIGOS.Ambassador.Doc
             _outputPath = outputPath;
 
             _commands = new CommandService(new CommandServiceConfig { ThrowOnError = false });
+
+            var dummyClient = new DiscordSocketClient();
+
+            // Dummy services
+            _services = new ServiceCollection()
+                .AddSingleton<BaseSocketClient>(new DiscordSocketClient())
+                .AddSingleton(dummyClient)
+                .AddSingleton<ContentService>()
+                .AddSingleton(_commands)
+                .AddSingleton<RoleplayService>()
+                .AddSingleton<DiscordService>()
+                .AddSingleton<CharacterService>()
+                .AddSingleton<UserFeedbackService>()
+                .AddSingleton<DossierService>()
+                .AddSingleton<InteractivityService>()
+                .AddSingleton<TransformationService>()
+                .AddSingleton<LuaService>()
+                .AddSingleton<KinkService>()
+                .AddSingleton<PermissionService>()
+                .AddSingleton<PrivacyService>()
+                .AddSingleton<HelpService>()
+                .AddSingleton<ServerService>()
+                .AddSingleton<OwnedEntityService>()
+                .AddSingleton<Random>()
+                .AddDbContext<GlobalInfoContext>()
+                .BuildServiceProvider();
         }
 
         /// <summary>

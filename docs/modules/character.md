@@ -13,6 +13,7 @@ Another user's character: @DIGOS Ambassador:Amby
 You can also substitute any character name for "current", and your active character will be used instead.
 
 ## Submodules
+* [Role](character_role.md)
 * [Set](character_set.md)
 
 ## Commands
@@ -80,6 +81,14 @@ Lists the characters owned by a given user.
 
 ---
 
+### *random*
+#### Overloads
+**`character random`**
+
+Switches the user's current character to a different one, picked at random.
+
+---
+
 ### *assume*
 #### Overloads
 **`character assume` (as well as `character become`, `character transform`, or `character active`)**
@@ -105,6 +114,14 @@ Sets your default form to the given character.
 | Name | Type | Optional |
 | --- | --- | --- |
 | character | Character | `no` |
+
+---
+
+### *clear-default*
+#### Overloads
+**`character clear-default` (or `character drop-default`)**
+
+Clears your default form.
 
 ---
 

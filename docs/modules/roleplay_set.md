@@ -43,6 +43,19 @@ Sets a value indicating whether or not the named roleplay is NSFW. This restrict
 
 ---
 
+### *private*
+#### Overloads
+**`roleplay set private`**
+
+Sets a value indicating whether or not the named roleplay is private. This restricts replays to participants.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| isPrivate | bool | `no` |
+| roleplay | Roleplay | `no` |
+
+---
+
 ### *public*
 #### Overloads
 **`roleplay set public`**
