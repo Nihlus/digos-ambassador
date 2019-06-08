@@ -21,7 +21,6 @@
 //
 
 // Originally licensed under the ISC license; modified from https://github.com/foxbot/Discord.Addons.Interactive
-
 using DIGOS.Ambassador.Services;
 using Discord;
 using Image = DIGOS.Ambassador.Database.Data.Image;
