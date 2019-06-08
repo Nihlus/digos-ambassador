@@ -55,7 +55,8 @@ namespace DIGOS.Ambassador.Tests.ContentTests
         {
             var result = this.Verifier.VerifyFile<Species>(speciesFile);
 
-            Assert.True(result.IsSuccess, result.ErrorReason);
+            // Guarding ErrorReason here, since it throws if the result was successful.
+            Assert.True(result.IsSuccess, result.IsSuccess ? string.Empty : result.ErrorReason);
         }
     }
 }
