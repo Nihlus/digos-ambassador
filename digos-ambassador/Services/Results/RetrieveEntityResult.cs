@@ -30,20 +30,20 @@ namespace DIGOS.Ambassador.Services
     /// <summary>
     /// Represents an attempt to retrieve a roleplay from the database.
     /// </summary>
-    /// <typeparam name="T">The entity type to encapsulate.</typeparam>
-    public class RetrieveEntityResult<T> : ResultBase<RetrieveEntityResult<T>> where T : class
+    /// <typeparam name="TEntity">The entity type to encapsulate.</typeparam>
+    public class RetrieveEntityResult<TEntity> : ResultBase<RetrieveEntityResult<TEntity>> where TEntity : class
     {
         /// <summary>
         /// Holds the actual entity value.
         /// </summary>
         [CanBeNull]
-        private readonly T _entity;
+        private readonly TEntity _entity;
 
         /// <summary>
         /// Gets the entity that was retrieved.
         /// </summary>
         [NotNull]
-        public T Entity
+        public TEntity Entity
         {
             get
             {
@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Services
         /// Initializes a new instance of the <see cref="RetrieveEntityResult{T}"/> class.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        private RetrieveEntityResult([CanBeNull] T entity)
+        private RetrieveEntityResult([CanBeNull] TEntity entity)
         {
             _entity = entity;
         }
@@ -78,9 +78,9 @@ namespace DIGOS.Ambassador.Services
         /// <param name="entity">The roleplay that was retrieved.</param>
         /// <returns>A successful result.</returns>
         [Pure]
-        public static RetrieveEntityResult<T> FromSuccess([NotNull] T entity)
+        public static RetrieveEntityResult<TEntity> FromSuccess([NotNull] TEntity entity)
         {
-            return new RetrieveEntityResult<T>(entity);
+            return new RetrieveEntityResult<TEntity>(entity);
         }
     }
 }

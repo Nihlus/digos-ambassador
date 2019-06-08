@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using DIGOS.Ambassador.Services.Base;
 using Discord.Commands;
 using JetBrains.Annotations;
 
@@ -28,17 +30,8 @@ namespace DIGOS.Ambassador.Services
     /// <summary>
     /// Represents an attempt to shift a part of a character's body.
     /// </summary>
-    public struct UpdateTransformationsResult : IResult
+    public class UpdateTransformationsResult : ResultBase<UpdateTransformationsResult>
     {
-        /// <inheritdoc />
-        public CommandError? Error { get; }
-
-        /// <inheritdoc />
-        public string ErrorReason { get; }
-
-        /// <inheritdoc />
-        public bool IsSuccess => !this.Error.HasValue;
-
         /// <summary>
         /// Gets the number of added species.
         /// </summary>
@@ -60,30 +53,31 @@ namespace DIGOS.Ambassador.Services
         public uint TransformationsUpdated { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UpdateTransformationsResult"/> struct.
+        /// Initializes a new instance of the <see cref="UpdateTransformationsResult"/> class.
         /// </summary>
         /// <param name="speciesAdded">The number of new species added.</param>
         /// <param name="transformationsAdded">The number of new transformations added.</param>
         /// <param name="speciesUpdated">The number of existing species that were updated with new information.</param>
-        /// <param name="transformationsUpdated">The number of existing transformations that were updated with new information.</param>
-        /// <param name="error">The error (if any).</param>
-        /// <param name="errorReason">A more detailed error description.</param>
+        /// <param name="transformationsUpdated">The number of existing transformations that were updated with new information.</param>>
         private UpdateTransformationsResult
         (
             uint speciesAdded,
             uint transformationsAdded,
             uint speciesUpdated,
-            uint transformationsUpdated,
-            [CanBeNull] CommandError? error,
-            [CanBeNull] string errorReason
+            uint transformationsUpdated
         )
         {
-            this.Error = error;
-            this.ErrorReason = errorReason;
             this.SpeciesAdded = speciesAdded;
             this.TransformationsAdded = transformationsAdded;
             this.SpeciesUpdated = speciesUpdated;
             this.TransformationsUpdated = transformationsUpdated;
+        }
+
+        /// <inheritdoc cref="ResultBase{TResultType}"/>
+        [UsedImplicitly]
+        private UpdateTransformationsResult([CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+            : base(error, errorReason, exception)
+        {
         }
 
         /// <summary>
@@ -102,30 +96,7 @@ namespace DIGOS.Ambassador.Services
             uint transformationsUpdated
         )
         {
-            return new UpdateTransformationsResult(speciesAdded, transformationsAdded, speciesUpdated, transformationsUpdated, null, null);
-        }
-
-        /// <summary>
-        /// Creates a failed result.
-        /// </summary>
-        /// <param name="error">The error that caused the failure.</param>
-        /// <param name="reason">A more detailed error reason.</param>
-        /// <returns>A failed result.</returns>
-        [Pure]
-        public static UpdateTransformationsResult FromError(CommandError error, [NotNull] string reason)
-        {
-            return new UpdateTransformationsResult(0, 0, 0, 0, error, reason);
-        }
-
-        /// <summary>
-        /// Creates a failed result based on another result.
-        /// </summary>
-        /// <param name="result">The result to base this result off of.</param>
-        /// <returns>A failed result.</returns>
-        [Pure]
-        public static UpdateTransformationsResult FromError([NotNull] IResult result)
-        {
-            return new UpdateTransformationsResult(0, 0, 0, 0, result.Error, result.ErrorReason);
+            return new UpdateTransformationsResult(speciesAdded, transformationsAdded, speciesUpdated, transformationsUpdated);
         }
     }
 }

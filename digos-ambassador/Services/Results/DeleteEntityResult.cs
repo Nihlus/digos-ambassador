@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using DIGOS.Ambassador.Services.Base;
 using Discord.Commands;
 using JetBrains.Annotations;
 
@@ -28,26 +30,20 @@ namespace DIGOS.Ambassador.Services
     /// <summary>
     /// Encapsulates the result of an attempt to delete an entity.
     /// </summary>
-    public struct DeleteEntityResult : IResult
+    public class DeleteEntityResult : ResultBase<DeleteEntityResult>
     {
-        /// <inheritdoc />
-        public CommandError? Error { get; }
-
-        /// <inheritdoc />
-        public string ErrorReason { get; }
-
-        /// <inheritdoc />
-        public bool IsSuccess => !this.Error.HasValue;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="DeleteEntityResult"/> struct.
+        /// Initializes a new instance of the <see cref="DeleteEntityResult"/> class.
         /// </summary>
-        /// <param name="error">The error (if any).</param>
-        /// <param name="errorReason">A more detailed error description.</param>
-        private DeleteEntityResult([CanBeNull] CommandError? error, [CanBeNull] string errorReason)
+        private DeleteEntityResult()
         {
-            this.Error = error;
-            this.ErrorReason = errorReason;
+        }
+
+        /// <inheritdoc cref="ResultBase{TResultType}(CommandError?,string,Exception)"/>
+        [UsedImplicitly]
+        private DeleteEntityResult([CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+            : base(error, errorReason, exception)
+        {
         }
 
         /// <summary>
@@ -57,30 +53,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public static DeleteEntityResult FromSuccess()
         {
-            return new DeleteEntityResult(null, null);
-        }
-
-        /// <summary>
-        /// Creates a failed result.
-        /// </summary>
-        /// <param name="error">The error that caused the failure.</param>
-        /// <param name="reason">A more detailed error reason.</param>
-        /// <returns>A failed result.</returns>
-        [Pure]
-        public static DeleteEntityResult FromError(CommandError error, [NotNull] string reason)
-        {
-            return new DeleteEntityResult(error, reason);
-        }
-
-        /// <summary>
-        /// Creates a failed result based on another result.
-        /// </summary>
-        /// <param name="result">The result to base this result off of.</param>
-        /// <returns>A failed result.</returns>
-        [Pure]
-        public static DeleteEntityResult FromError([NotNull] IResult result)
-        {
-            return new DeleteEntityResult(result.Error, result.ErrorReason);
+            return new DeleteEntityResult();
         }
     }
 }

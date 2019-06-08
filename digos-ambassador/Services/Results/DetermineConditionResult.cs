@@ -21,6 +21,7 @@
 //
 
 using System;
+using DIGOS.Ambassador.Services.Base;
 using Discord.Commands;
 using JetBrains.Annotations;
 
@@ -29,36 +30,20 @@ namespace DIGOS.Ambassador.Services
     /// <summary>
     /// Represents an attempt to retrieve a roleplay from the database.
     /// </summary>
-    public struct DetermineConditionResult : IResult
+    public class DetermineConditionResult : ResultBase<DetermineConditionResult>
     {
-        /// <inheritdoc />
-        public CommandError? Error { get; }
-
-        /// <inheritdoc />
-        public string ErrorReason { get; }
-
-        /// <inheritdoc />
-        public bool IsSuccess { get; }
-
         /// <summary>
-        /// Gets the exception that caused the error, if any.
+        /// Initializes a new instance of the <see cref="DetermineConditionResult"/> class.
         /// </summary>
-        [CanBeNull]
-        public Exception Exception { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DetermineConditionResult"/> struct.
-        /// </summary>
-        /// <param name="wasSuccessful">Whether or not the condition passed or not.</param>
-        /// <param name="error">The error (if any).</param>
-        /// <param name="errorReason">A more detailed error description.</param>
-        /// <param name="exception">The exception that caused the error (if any).</param>
-        private DetermineConditionResult(bool wasSuccessful, [CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+        private DetermineConditionResult()
         {
-            this.IsSuccess = wasSuccessful;
-            this.Error = error;
-            this.ErrorReason = errorReason;
-            this.Exception = exception;
+        }
+
+        /// <inheritdoc cref="ResultBase{TResultType}(CommandError?,string,Exception)"/>
+        [UsedImplicitly]
+        private DetermineConditionResult([CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+            : base(error, errorReason, exception)
+        {
         }
 
         /// <summary>
@@ -68,7 +53,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public static DetermineConditionResult FromSuccess()
         {
-            return new DetermineConditionResult(true, null, null);
+            return new DetermineConditionResult();
         }
 
         /// <summary>
@@ -79,50 +64,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public static DetermineConditionResult FromError([NotNull] string reason)
         {
-            return new DetermineConditionResult(false, CommandError.UnmetPrecondition, reason);
-        }
-
-        /// <summary>
-        /// Creates a failed result.
-        /// </summary>
-        /// <param name="error">The error that caused the failure.</param>
-        /// <param name="reason">A more detailed error reason.</param>
-        /// <returns>A failed result.</returns>
-        [Pure]
-        public static DetermineConditionResult FromError(CommandError error, [NotNull] string reason)
-        {
-            return new DetermineConditionResult(false, error, reason);
-        }
-
-        /// <summary>
-        /// Creates a failed result based on another result.
-        /// </summary>
-        /// <param name="result">The result to base this result off of.</param>
-        /// <returns>A failed result.</returns>
-        [Pure]
-        public static DetermineConditionResult FromError([NotNull] IResult result)
-        {
-            return new DetermineConditionResult(false, result.Error, result.ErrorReason);
-        }
-
-        /// <summary>
-        /// Creates a failed result based on an exception.
-        /// </summary>
-        /// <param name="exception">The exception to base this result off of.</param>
-        /// <param name="reason">The reason for the exception. Optional, defaults to the exception message.</param>
-        /// <returns>A failed result.</returns>
-        [Pure]
-        public static DetermineConditionResult FromError([NotNull] Exception exception, string reason = null)
-        {
-            reason = reason ?? exception.Message;
-
-            return new DetermineConditionResult(false, CommandError.Exception, reason, exception);
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            return this.IsSuccess ? "Success" : $"{this.Error}: {this.ErrorReason}";
+            return FromError(CommandError.UnmetPrecondition, reason);
         }
     }
 }

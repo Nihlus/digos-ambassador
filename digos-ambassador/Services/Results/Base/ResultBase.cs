@@ -117,6 +117,18 @@ namespace DIGOS.Ambassador.Services.Base
         }
 
         /// <summary>
+        /// Creates a failed result based on an exception.
+        /// </summary>
+        /// <param name="exception">The exception to base this result off of.</param>
+        /// <param name="reason">The reason for the exception.</param>
+        /// <returns>A failed result.</returns>
+        [Pure]
+        public static TResultType FromError([NotNull] Exception exception, string reason)
+        {
+            return FromError(CommandError.Exception, reason, exception);
+        }
+
+        /// <summary>
         /// Creates a failed result.
         /// </summary>
         /// <param name="error">The error that caused the failure.</param>

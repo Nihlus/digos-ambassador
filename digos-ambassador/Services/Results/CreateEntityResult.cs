@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using DIGOS.Ambassador.Services.Base;
 using Discord.Commands;
 using JetBrains.Annotations;
 
@@ -28,34 +30,46 @@ namespace DIGOS.Ambassador.Services
     /// <summary>
     /// Represents an attempt to create an entity and save it in the database.
     /// </summary>
-    /// <typeparam name="T">The entity type to encapsulate.</typeparam>
-    public struct CreateEntityResult<T> : IResult where T : class
+    /// <typeparam name="TEntity">The entity type to encapsulate.</typeparam>
+    public class CreateEntityResult<TEntity> : ResultBase<CreateEntityResult<TEntity>> where TEntity : class
     {
+        /// <summary>
+        /// Holds the actual entity value.
+        /// </summary>
+        [CanBeNull]
+        private readonly TEntity _entity;
+
         /// <summary>
         /// Gets the entity that was retrieved.
         /// </summary>
-        public T Entity { get; }
+        [NotNull]
+        public TEntity Entity
+        {
+            get
+            {
+                if (!this.IsSuccess || _entity is null)
+                {
+                    throw new InvalidOperationException("The result does not contain a valid value.");
+                }
 
-        /// <inheritdoc />
-        public CommandError? Error { get; }
-
-        /// <inheritdoc />
-        public string ErrorReason { get; }
-
-        /// <inheritdoc />
-        public bool IsSuccess => !this.Error.HasValue;
+                return _entity;
+            }
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CreateEntityResult{T}"/> struct.
+        /// Initializes a new instance of the <see cref="CreateEntityResult{T}"/> class.
         /// </summary>
         /// <param name="entity">The entity.</param>
-        /// <param name="error">The error (if any).</param>
-        /// <param name="errorReason">A more detailed error description.</param>
-        private CreateEntityResult([CanBeNull] T entity, [CanBeNull] CommandError? error, [CanBeNull] string errorReason)
+        private CreateEntityResult([CanBeNull] TEntity entity)
         {
-            this.Entity = entity;
-            this.Error = error;
-            this.ErrorReason = errorReason;
+            _entity = entity;
+        }
+
+        /// <inheritdoc cref="ResultBase{TResultType}(CommandError?,string,Exception)"/>
+        [UsedImplicitly]
+        private CreateEntityResult([CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+            : base(error, errorReason, exception)
+        {
         }
 
         /// <summary>
@@ -64,38 +78,9 @@ namespace DIGOS.Ambassador.Services
         /// <param name="entity">The roleplay that was retrieved.</param>
         /// <returns>A successful result.</returns>
         [Pure]
-        public static CreateEntityResult<T> FromSuccess([NotNull] T entity)
+        public static CreateEntityResult<TEntity> FromSuccess([NotNull] TEntity entity)
         {
-            return new CreateEntityResult<T>(entity, null, null);
-        }
-
-        /// <summary>
-        /// Creates a failed result.
-        /// </summary>
-        /// <param name="error">The error that caused the failure.</param>
-        /// <param name="reason">A more detailed error reason.</param>
-        /// <returns>A failed result.</returns>
-        [Pure]
-        public static CreateEntityResult<T> FromError(CommandError error, [NotNull] string reason)
-        {
-            return new CreateEntityResult<T>(null, error, reason);
-        }
-
-        /// <summary>
-        /// Creates a failed result based on another result.
-        /// </summary>
-        /// <param name="result">The result to base this result off of.</param>
-        /// <returns>A failed result.</returns>
-        [Pure]
-        public static CreateEntityResult<T> FromError([NotNull] IResult result)
-        {
-            return new CreateEntityResult<T>(null, result.Error, result.ErrorReason);
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-        {
-            return this.IsSuccess ? "Success" : $"{this.Error}: {this.ErrorReason}";
+            return new CreateEntityResult<TEntity>(entity);
         }
     }
 }
