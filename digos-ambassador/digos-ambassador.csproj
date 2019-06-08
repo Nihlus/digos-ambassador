@@ -42,7 +42,7 @@
     <PackageReference Include="morelinq" Version="3.1.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
     <PackageReference Include="NLua" Version="1.4.18" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.2.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
     <PackageReference Include="WebSocketSharp.CustomHeaders.Standard" Version="1.0.2" />
     <PackageReference Include="YamlDotNet" Version="6.1.1" />

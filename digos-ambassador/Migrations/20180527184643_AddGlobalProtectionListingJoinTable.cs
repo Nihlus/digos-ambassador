@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace DIGOS.Ambassador.Migrations
 {
