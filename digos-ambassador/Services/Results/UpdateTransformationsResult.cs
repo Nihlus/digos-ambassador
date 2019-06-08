@@ -58,7 +58,9 @@ namespace DIGOS.Ambassador.Services
         /// <param name="speciesAdded">The number of new species added.</param>
         /// <param name="transformationsAdded">The number of new transformations added.</param>
         /// <param name="speciesUpdated">The number of existing species that were updated with new information.</param>
-        /// <param name="transformationsUpdated">The number of existing transformations that were updated with new information.</param>>
+        /// <param name="transformationsUpdated">
+        /// The number of existing transformations that were updated with new information.
+        /// </param>
         private UpdateTransformationsResult
         (
             uint speciesAdded,
@@ -75,7 +77,12 @@ namespace DIGOS.Ambassador.Services
 
         /// <inheritdoc cref="ResultBase{TResultType}"/>
         [UsedImplicitly]
-        private UpdateTransformationsResult([CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+        private UpdateTransformationsResult
+        (
+            [CanBeNull] CommandError? error,
+            [CanBeNull] string errorReason,
+            [CanBeNull] Exception exception = null
+        )
             : base(error, errorReason, exception)
         {
         }
@@ -87,7 +94,9 @@ namespace DIGOS.Ambassador.Services
         /// <param name="speciesAdded">The number of new species added.</param>
         /// <param name="transformationsAdded">The number of new transformations added.</param>
         /// <param name="speciesUpdated">The number of existing species that were updated with new information.</param>
-        /// <param name="transformationsUpdated">The number of existing transformations that were updated with new information.</param>
+        /// <param name="transformationsUpdated">
+        /// The number of existing transformations that were updated with new information.
+        /// </param>
         public static UpdateTransformationsResult FromSuccess
         (
             uint speciesAdded,
@@ -96,7 +105,13 @@ namespace DIGOS.Ambassador.Services
             uint transformationsUpdated
         )
         {
-            return new UpdateTransformationsResult(speciesAdded, transformationsAdded, speciesUpdated, transformationsUpdated);
+            return new UpdateTransformationsResult
+            (
+                speciesAdded,
+                transformationsAdded,
+                speciesUpdated,
+                transformationsUpdated
+            );
         }
     }
 }

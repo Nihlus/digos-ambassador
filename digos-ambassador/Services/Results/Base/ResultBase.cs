@@ -41,6 +41,7 @@ namespace DIGOS.Ambassador.Services.Base
         private readonly string _errorReason;
 
         /// <inheritdoc />
+        [CanBeNull]
         public CommandError? Error { get; }
 
         /// <inheritdoc />
@@ -80,7 +81,12 @@ namespace DIGOS.Ambassador.Services.Base
         /// <param name="error">The error (if any).</param>
         /// <param name="errorReason">A more detailed error description.</param>
         /// <param name="exception">The exception that caused the error (if any).</param>
-        protected ResultBase([CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+        protected ResultBase
+        (
+            [CanBeNull] CommandError? error,
+            [CanBeNull] string errorReason,
+            [CanBeNull] Exception exception = null
+        )
         {
             _errorReason = errorReason;
 
@@ -123,7 +129,7 @@ namespace DIGOS.Ambassador.Services.Base
         /// <param name="reason">The reason for the exception.</param>
         /// <returns>A failed result.</returns>
         [Pure]
-        public static TResultType FromError([NotNull] Exception exception, string reason)
+        public static TResultType FromError([NotNull] Exception exception, [NotNull] string reason)
         {
             return FromError(CommandError.Exception, reason, exception);
         }
@@ -136,7 +142,12 @@ namespace DIGOS.Ambassador.Services.Base
         /// <param name="exception">The exception that caused the failure, if any.</param>
         /// <returns>A failed result.</returns>
         [Pure]
-        public static TResultType FromError(CommandError error, [NotNull] string reason, Exception exception = null)
+        public static TResultType FromError
+        (
+            CommandError error,
+            [NotNull] string reason,
+            [CanBeNull] Exception exception = null
+        )
         {
             return (TResultType)Activator.CreateInstance
             (

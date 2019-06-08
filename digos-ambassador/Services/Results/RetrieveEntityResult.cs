@@ -67,7 +67,12 @@ namespace DIGOS.Ambassador.Services
 
         /// <inheritdoc cref="ResultBase{TResultType}(CommandError?,string,Exception)"/>
         [UsedImplicitly]
-        private RetrieveEntityResult([CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+        private RetrieveEntityResult
+        (
+            [CanBeNull] CommandError? error,
+            [CanBeNull] string errorReason,
+            [CanBeNull] Exception exception = null
+        )
             : base(error, errorReason, exception)
         {
         }

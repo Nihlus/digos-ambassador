@@ -41,7 +41,12 @@ namespace DIGOS.Ambassador.Services
 
         /// <inheritdoc cref="ResultBase{TResultType}(CommandError?,string,Exception)"/>
         [UsedImplicitly]
-        private DeleteEntityResult([CanBeNull] CommandError? error, [CanBeNull] string errorReason, [CanBeNull] Exception exception = null)
+        private DeleteEntityResult
+        (
+            [CanBeNull] CommandError? error,
+            [CanBeNull] string errorReason,
+            [CanBeNull] Exception exception = null
+        )
             : base(error, errorReason, exception)
         {
         }
