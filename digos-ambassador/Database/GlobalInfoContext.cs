@@ -225,24 +225,6 @@ namespace DIGOS.Ambassador.Database
         }
 
         /// <summary>
-        /// Updates the kink database, adding in new entries. Duplicates are not added.
-        /// </summary>
-        /// <param name="newKinks">The new kinks.</param>
-        /// <returns>The number of updated kinks.</returns>
-        public async Task<int> UpdateKinksAsync([NotNull] [ItemNotNull] IEnumerable<Kink> newKinks)
-        {
-            foreach (var kink in newKinks)
-            {
-                if (!await this.Kinks.AnyAsync(k => k.FListID == kink.FListID))
-                {
-                    await this.Kinks.AddAsync(kink);
-                }
-            }
-
-            return await SaveChangesAsync();
-        }
-
-        /// <summary>
         /// Configures the given options builder to match the settings required for the <see cref="GlobalInfoContext"/>.
         /// </summary>
         /// <param name="optionsBuilder">The builder to configure.</param>

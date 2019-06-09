@@ -460,5 +460,24 @@ namespace DIGOS.Ambassador.Services
 
             return RetrieveEntityResult<Kink>.FromSuccess(nextKink);
         }
+
+        /// <summary>
+        /// Updates the kink database, adding in new entries. Duplicates are not added.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="newKinks">The new kinks.</param>
+        /// <returns>The number of updated kinks.</returns>
+        public async Task<int> UpdateKinksAsync(GlobalInfoContext db, [NotNull, ItemNotNull] IEnumerable<Kink> newKinks)
+        {
+            foreach (var kink in newKinks)
+            {
+                if (!await db.Kinks.AnyAsync(k => k.FListID == kink.FListID))
+                {
+                    await db.Kinks.AddAsync(kink);
+                }
+            }
+
+            return await db.SaveChangesAsync();
+        }
     }
 }

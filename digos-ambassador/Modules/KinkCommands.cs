@@ -331,7 +331,7 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                updatedKinkCount += await this.Database.UpdateKinksAsync(kinkSection.Value.Kinks.Select
+                updatedKinkCount += await _kinks.UpdateKinksAsync(this.Database, kinkSection.Value.Kinks.Select
                 (
                     k => new Kink
                     {
