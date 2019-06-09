@@ -75,6 +75,7 @@ namespace DIGOS.Ambassador.Doc
 
             // Dummy services
             _services = new ServiceCollection()
+                .AddSingleton<UserService>()
                 .AddSingleton<BaseSocketClient>(new DiscordSocketClient())
                 .AddSingleton(dummyClient)
                 .AddSingleton<ContentService>()
