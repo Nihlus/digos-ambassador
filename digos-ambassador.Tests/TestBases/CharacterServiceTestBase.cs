@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using Discord.Commands;
 using Xunit;
@@ -57,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         {
             this.Commands = new CommandService();
             var content = new ContentService();
-            _transformations = new TransformationService(content, this.Users);
+            _transformations = new TransformationService(content, this.Users, new ServerService());
 
             this.Users = new UserService();
             this.Characters = new CharacterService
@@ -66,7 +67,8 @@ namespace DIGOS.Ambassador.Tests.TestBases
                 new OwnedEntityService(),
                 content,
                 _transformations,
-                this.Users
+                this.Users,
+                new ServerService()
             );
         }
 

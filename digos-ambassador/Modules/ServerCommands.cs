@@ -75,7 +75,7 @@ namespace DIGOS.Ambassador.Modules
             var eb = _feedback.CreateEmbedBase();
 
             var guild = this.Context.Guild;
-            var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+            var server = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
 
             eb.WithTitle(guild.Name);
 
@@ -125,7 +125,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ShowJoinMessageAsync()
         {
-            var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+            var server = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
 
             var getJoinMessageResult = _servers.GetJoinMessage(server);
             if (!getJoinMessageResult.IsSuccess)
@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireUserPermission(GuildPermission.ManageGuild)]
         public async Task ClearDedicatedRoleplayChannelCategory()
         {
-            var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+            var server = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
             var result = await _servers.SetDedicatedRoleplayChannelCategoryAsync(this.Database, server, null);
 
             if (!result.IsSuccess)
@@ -198,7 +198,7 @@ namespace DIGOS.Ambassador.Modules
             [RequireUserPermission(GuildPermission.ManageGuild)]
             public async Task SetDescriptionAsync([NotNull] string newDescription)
             {
-                var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+                var server = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
                 var result = await _servers.SetDescriptionAsync(this.Database, server, newDescription);
                 if (!result.IsSuccess)
                 {
@@ -220,7 +220,7 @@ namespace DIGOS.Ambassador.Modules
             [RequireUserPermission(GuildPermission.ManageGuild)]
             public async Task SetJoinMessageAsync([NotNull] string newJoinMessage)
             {
-                var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+                var server = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
                 var result = await _servers.SetJoinMessageAsync(this.Database, server, newJoinMessage);
                 if (!result.IsSuccess)
                 {
@@ -242,7 +242,7 @@ namespace DIGOS.Ambassador.Modules
             [RequireUserPermission(GuildPermission.ManageGuild)]
             public async Task SetIsNSFWAsync(bool isNsfw)
             {
-                var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+                var server = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
                 var result = await _servers.SetIsNSFWAsync(this.Database, server, isNsfw);
                 if (!result.IsSuccess)
                 {
@@ -268,7 +268,7 @@ namespace DIGOS.Ambassador.Modules
             [RequireUserPermission(GuildPermission.ManageGuild)]
             public async Task SetSendJoinMessagesAsync(bool sendJoinMessage)
             {
-                var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+                var server = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
                 var result = await _servers.SetSendJoinMessageAsync(this.Database, server, sendJoinMessage);
                 if (!result.IsSuccess)
                 {
@@ -298,7 +298,7 @@ namespace DIGOS.Ambassador.Modules
             [RequireUserPermission(GuildPermission.ManageGuild)]
             public async Task SetDedicatedRoleplayChannelCategory(ICategoryChannel category)
             {
-                var server = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+                var server = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
                 var result = await _servers.SetDedicatedRoleplayChannelCategoryAsync
                 (
                     this.Database,

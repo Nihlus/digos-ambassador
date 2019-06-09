@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using Discord.Commands;
 
@@ -47,7 +48,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected RoleplayServiceTestBase()
         {
             this.Commands = new CommandService();
-            this.Roleplays = new RoleplayService(this.Commands, new OwnedEntityService(), new UserService());
+            this.Roleplays = new RoleplayService(this.Commands, new OwnedEntityService(), new UserService(), new ServerService());
         }
     }
 }

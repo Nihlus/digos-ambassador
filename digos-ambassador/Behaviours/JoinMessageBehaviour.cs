@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Servers;
@@ -89,7 +90,7 @@ namespace DIGOS.Ambassador.Behaviours
         /// <param name="user">The user.</param>
         private async Task OnUserJoined([NotNull] SocketGuildUser user)
         {
-            var server = await _database.GetOrRegisterServerAsync(user.Guild);
+            var server = await _servers.GetOrRegisterServerAsync(_database, user.Guild);
 
             if (!server.SendJoinMessage)
             {

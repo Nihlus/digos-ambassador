@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
@@ -35,6 +36,7 @@ using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
+using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using Discord;
 using Discord.Commands;
@@ -71,6 +73,7 @@ namespace DIGOS.Ambassador.Modules
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(CharacterCommands));
 
+        private readonly ServerService _servers;
         private readonly UserService _users;
         private readonly DiscordService _discord;
         private readonly ContentService _content;
@@ -90,6 +93,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="interactivity">The interactivity service.</param>
         /// <param name="random">A cached, application-level entropy source.</param>
         /// <param name="users">The user service.</param>
+        /// <param name="servers">The server service.</param>
         public CharacterCommands
         (
             GlobalInfoContext database,
@@ -99,7 +103,8 @@ namespace DIGOS.Ambassador.Modules
             CharacterService characterService,
             InteractivityService interactivity,
             Random random,
-            UserService users
+            UserService users,
+            ServerService servers
         )
             : base(database)
         {
@@ -110,6 +115,7 @@ namespace DIGOS.Ambassador.Modules
             _interactivity = interactivity;
             _random = random;
             _users = users;
+            _servers = servers;
         }
 
         /// <summary>
@@ -393,7 +399,7 @@ namespace DIGOS.Ambassador.Modules
             if (character.IsCurrent)
             {
                 var owner = this.Context.Guild.GetUser((ulong)character.Owner.DiscordID);
-                var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+                var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
 
                 if (!(character.Role is null))
                 {
@@ -588,7 +594,7 @@ namespace DIGOS.Ambassador.Modules
             await _characters.MakeCharacterCurrentOnServerAsync(this.Database, this.Context, this.Context.Guild, character);
 
             var guildUser = (IGuildUser)this.Context.User;
-            var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+            var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
 
             if (!character.Nickname.IsNullOrWhitespace())
             {
@@ -790,7 +796,7 @@ namespace DIGOS.Ambassador.Modules
 
             if (this.Context.Message.Author is IGuildUser guildUser)
             {
-                var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+                var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
 
                 ModifyEntityResult modifyNickResult;
                 if (!(invoker.DefaultCharacter is null) && !invoker.DefaultCharacter.Nickname.IsNullOrWhitespace())
@@ -1061,6 +1067,7 @@ namespace DIGOS.Ambassador.Modules
         [Group("role")]
         public class RoleCommands : DatabaseModuleBase
         {
+            private readonly ServerService _servers;
             private readonly DiscordService _discord;
             private readonly UserFeedbackService _feedback;
             private readonly CharacterService _characters;
@@ -1072,18 +1079,21 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="discordService">The Discord integration service.</param>
             /// <param name="feedbackService">The feedback service.</param>
             /// <param name="characterService">The character service.</param>
+            /// <param name="servers">The server service.</param>
             public RoleCommands
             (
                 GlobalInfoContext database,
                 DiscordService discordService,
                 UserFeedbackService feedbackService,
-                CharacterService characterService
+                CharacterService characterService,
+                ServerService servers
             )
                 : base(database)
             {
                 _discord = discordService;
                 _feedback = feedbackService;
                 _characters = characterService;
+                _servers = servers;
             }
 
             /// <summary>
@@ -1296,7 +1306,7 @@ namespace DIGOS.Ambassador.Modules
                 }
 
                 var guildUser = (IGuildUser)this.Context.User;
-                var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+                var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
 
                 if (!(previousRole is null))
                 {
@@ -1327,6 +1337,7 @@ namespace DIGOS.Ambassador.Modules
         [Group("set")]
         public class SetCommands : DatabaseModuleBase
         {
+            private readonly ServerService _servers;
             private readonly DiscordService _discord;
             private readonly UserFeedbackService _feedback;
             private readonly CharacterService _characters;
@@ -1338,18 +1349,21 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="discordService">The Discord integration service.</param>
             /// <param name="feedbackService">The feedback service.</param>
             /// <param name="characterService">The character service.</param>
+            /// <param name="servers">The server service.</param>
             public SetCommands
             (
                 GlobalInfoContext database,
                 DiscordService discordService,
                 UserFeedbackService feedbackService,
-                CharacterService characterService
+                CharacterService characterService,
+                ServerService servers
             )
                 : base(database)
             {
                 _discord = discordService;
                 _feedback = feedbackService;
                 _characters = characterService;
+                _servers = servers;
             }
 
             /// <summary>
@@ -1658,7 +1672,7 @@ namespace DIGOS.Ambassador.Modules
 
                 var commandInvoker = (IGuildUser)this.Context.User;
                 var characterOwner = (IGuildUser)this.Context.Guild.GetUser((ulong)character.Owner.DiscordID);
-                var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
+                var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
 
                 var role = getRoleResult.Entity;
                 if (role.Access == RoleAccess.Restricted)

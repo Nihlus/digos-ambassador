@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Modules;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
+using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.TypeReaders;
@@ -230,6 +231,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 _services = new ServiceCollection()
                     .AddSingleton(this.Database)
+                    .AddSingleton<ServerService>()
                     .AddSingleton<UserService>()
                     .AddSingleton<ContentService>()
                     .AddSingleton<CommandService>()

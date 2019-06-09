@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Attributes;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 
 using Discord;
@@ -54,6 +55,7 @@ namespace DIGOS.Ambassador.Behaviours
 
         private readonly IServiceProvider _services;
 
+        private readonly ServerService _servers;
         private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
         private readonly PrivacyService _privacy;
@@ -80,6 +82,7 @@ namespace DIGOS.Ambassador.Behaviours
         /// <param name="permissions">The permission service.</param>
         /// <param name="help">The help service.</param>
         /// <param name="users">The user service.</param>
+        /// <param name="servers">The server service.</param>
         public CommandBehaviour
         (
             DiscordSocketClient client,
@@ -91,7 +94,8 @@ namespace DIGOS.Ambassador.Behaviours
             CommandService commands,
             PermissionService permissions,
             HelpService help,
-            UserService users
+            UserService users,
+            ServerService servers
         )
             : base(client)
         {
@@ -104,6 +108,7 @@ namespace DIGOS.Ambassador.Behaviours
             _permissions = permissions;
             _help = help;
             _users = users;
+            _servers = servers;
 
             this.RunningCommands = new ConcurrentQueue<Task>();
         }
@@ -248,7 +253,7 @@ namespace DIGOS.Ambassador.Behaviours
 
                 var user = registerUserResult.Entity;
 
-                var server = await _database.GetOrRegisterServerAsync(guild);
+                var server = await _servers.GetOrRegisterServerAsync(_database, guild);
 
                 // Grant permissions to new users
                 if (!server.IsUserKnown(arg.Author))

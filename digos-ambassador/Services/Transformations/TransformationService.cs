@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Transformations;
 
@@ -48,6 +49,7 @@ namespace DIGOS.Ambassador.Services
     public class TransformationService
     {
         private readonly UserService _users;
+        private readonly ServerService _servers;
         private readonly ContentService _content;
 
         private TransformationDescriptionBuilder _descriptionBuilder;
@@ -57,10 +59,12 @@ namespace DIGOS.Ambassador.Services
         /// </summary>
         /// <param name="content">The content service.</param>
         /// <param name="users">The user service.</param>
-        public TransformationService(ContentService content, UserService users)
+        /// <param name="servers">The server service.</param>
+        public TransformationService(ContentService content, UserService users, ServerService servers)
         {
             _content = content;
             _users = users;
+            _servers = servers;
         }
 
         /// <summary>
@@ -828,7 +832,7 @@ namespace DIGOS.Ambassador.Services
                 return RetrieveEntityResult<ServerUserProtection>.FromSuccess(protection);
             }
 
-            var server = await db.GetOrRegisterServerAsync(guild);
+            var server = await _servers.GetOrRegisterServerAsync(db, guild);
             var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
             if (!getGlobalProtectionResult.IsSuccess)
             {

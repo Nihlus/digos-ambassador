@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Utility;
 
@@ -48,6 +49,7 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class CharacterService
     {
+        private readonly ServerService _servers;
         private readonly TransformationService _transformations;
         private readonly CommandService _commands;
         private readonly OwnedEntityService _ownedEntities;
@@ -64,13 +66,15 @@ namespace DIGOS.Ambassador.Services
         /// <param name="content">The content service.</param>
         /// <param name="transformations">The transformation service.</param>
         /// <param name="users">The user service.</param>
+        /// <param name="servers">The server service.</param>
         public CharacterService
         (
             CommandService commands,
             OwnedEntityService entityService,
             ContentService content,
             TransformationService transformations,
-            UserService users
+            UserService users,
+            ServerService servers
         )
         {
             _commands = commands;
@@ -78,6 +82,7 @@ namespace DIGOS.Ambassador.Services
             _content = content;
             _transformations = transformations;
             _users = users;
+            _servers = servers;
 
             _pronounProviders = new Dictionary<string, IPronounProvider>(new CaseInsensitiveStringEqualityComparer());
         }
@@ -1076,7 +1081,7 @@ namespace DIGOS.Ambassador.Services
                 );
             }
 
-            var server = await db.GetOrRegisterServerAsync(role.Guild);
+            var server = await _servers.GetOrRegisterServerAsync(db, role.Guild);
 
             var characterRole = new CharacterRole
             {
@@ -1148,7 +1153,7 @@ namespace DIGOS.Ambassador.Services
             [NotNull] IGuild guild
         )
         {
-            var server = await db.GetOrRegisterServerAsync(guild);
+            var server = await _servers.GetOrRegisterServerAsync(db, guild);
 
             var roles = db.CharacterRoles.Where(r => r.Server == server);
 

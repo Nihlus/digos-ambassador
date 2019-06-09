@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using Discord;
 using Discord.Commands;
@@ -43,6 +44,7 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class RoleplayService
     {
+        private readonly ServerService _servers;
         private readonly UserService _users;
         private readonly CommandService _commands;
         private readonly OwnedEntityService _ownedEntities;
@@ -53,11 +55,13 @@ namespace DIGOS.Ambassador.Services
         /// <param name="commands">The application's command service.</param>
         /// <param name="entityService">The application's owned entity service.</param>
         /// <param name="users">The user service.</param>
-        public RoleplayService(CommandService commands, OwnedEntityService entityService, UserService users)
+        /// <param name="servers">The server service.</param>
+        public RoleplayService(CommandService commands, OwnedEntityService entityService, UserService users, ServerService servers)
         {
             _commands = commands;
             _ownedEntities = entityService;
             _users = users;
+            _servers = servers;
         }
 
         /// <summary>
@@ -777,7 +781,7 @@ namespace DIGOS.Ambassador.Services
             [NotNull] Roleplay roleplay
         )
         {
-            var server = await db.GetOrRegisterServerAsync(context.Guild);
+            var server = await _servers.GetOrRegisterServerAsync(db, context.Guild);
             if (!context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageChannels)
             {
                 return CreateEntityResult<IGuildChannel>.FromError

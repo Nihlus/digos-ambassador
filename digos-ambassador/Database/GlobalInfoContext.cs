@@ -243,68 +243,6 @@ namespace DIGOS.Ambassador.Database
         }
 
         /// <summary>
-        /// Determines whether or not a Discord server is stored in the database.
-        /// </summary>
-        /// <param name="discordServer">The Discord server.</param>
-        /// <returns><value>true</value> if the server is stored; otherwise, <value>false</value>.</returns>
-        [Pure]
-        public async Task<bool> IsServerKnownAsync([NotNull] IGuild discordServer)
-        {
-            return await this.Servers.AnyAsync(u => u.DiscordID == (long)discordServer.Id);
-        }
-
-        /// <summary>
-        /// Gets an existing set of information about a Discord server, or registers it with the database if one is not found.
-        /// </summary>
-        /// <param name="discordServer">The Discord server.</param>
-        /// <returns>Stored information about the server.</returns>
-        [ItemNotNull]
-        public async Task<Server> GetOrRegisterServerAsync([NotNull] IGuild discordServer)
-        {
-            if (!await IsServerKnownAsync(discordServer))
-            {
-                return await AddServerAsync(discordServer);
-            }
-
-            return await GetServerAsync(discordServer);
-        }
-
-        /// <summary>
-        /// Gets a stored server from the database that matches the given Discord server.
-        /// </summary>
-        /// <param name="discordServer">The Discord server.</param>
-        /// <returns>Stored information about the server.</returns>
-        [Pure]
-        [ItemNotNull]
-        public async Task<Server> GetServerAsync([NotNull] IGuild discordServer)
-        {
-            return await this.Servers.FirstAsync(u => u.DiscordID == (long)discordServer.Id);
-        }
-
-        /// <summary>
-        /// Adds a Discord server to the database.
-        /// </summary>
-        /// <param name="discordServer">The Discord server.</param>
-        /// <returns>The freshly created information about the server.</returns>
-        /// <exception cref="ArgumentException">Thrown if the server already exists in the database.</exception>
-        [ItemNotNull]
-        public async Task<Server> AddServerAsync([NotNull] IGuild discordServer)
-        {
-            if (await IsServerKnownAsync(discordServer))
-            {
-                throw new ArgumentException($"A server with the ID {discordServer.Id} has already been added to the database.", nameof(discordServer));
-            }
-
-            var server = Server.CreateDefault(discordServer);
-
-            await this.Servers.AddAsync(server);
-
-            await SaveChangesAsync();
-
-            return await GetServerAsync(discordServer);
-        }
-
-        /// <summary>
         /// Configures the given options builder to match the settings required for the <see cref="GlobalInfoContext"/>.
         /// </summary>
         /// <param name="optionsBuilder">The builder to configure.</param>

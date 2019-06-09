@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using Xunit;
 
@@ -47,7 +48,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// </summary>
         protected TransformationServiceTestBase()
         {
-            this.Transformations = new TransformationService(new ContentService(), new UserService());
+            this.Transformations = new TransformationService(new ContentService(), new UserService(), new ServerService());
             this.Users = new UserService();
         }
 

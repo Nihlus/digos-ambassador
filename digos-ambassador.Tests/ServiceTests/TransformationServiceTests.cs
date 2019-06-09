@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
@@ -1196,6 +1197,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
+                    .AddSingleton<ServerService>()
                     .AddSingleton<UserService>()
                     .AddSingleton(this.Transformations)
                     .AddSingleton<ContentService>()
@@ -1506,6 +1508,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
+                    .AddSingleton<ServerService>()
                     .AddSingleton<UserService>()
                     .AddSingleton<ContentService>()
                     .AddSingleton<CommandService>()
@@ -1914,6 +1917,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
+                    .AddSingleton<ServerService>()
                     .AddSingleton<UserService>()
                     .AddSingleton<ContentService>()
                     .AddSingleton<CommandService>()

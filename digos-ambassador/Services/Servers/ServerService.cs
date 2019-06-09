@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
@@ -29,6 +30,7 @@ using Discord;
 using Discord.Commands;
 
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace DIGOS.Ambassador.Services.Servers
 {
@@ -37,6 +39,71 @@ namespace DIGOS.Ambassador.Services.Servers
     /// </summary>
     public class ServerService
     {
+        /// <summary>
+        /// Determines whether or not a Discord server is stored in the database.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="discordServer">The Discord server.</param>
+        /// <returns><value>true</value> if the server is stored; otherwise, <value>false</value>.</returns>
+        [Pure]
+        public async Task<bool> IsServerKnownAsync([NotNull] GlobalInfoContext db, [NotNull] IGuild discordServer)
+        {
+            return await db.Servers.AnyAsync(u => u.DiscordID == (long)discordServer.Id);
+        }
+
+        /// <summary>
+        /// Gets an existing set of information about a Discord server, or registers it with the database if one is not found.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="discordServer">The Discord server.</param>
+        /// <returns>Stored information about the server.</returns>
+        [ItemNotNull]
+        public async Task<Server> GetOrRegisterServerAsync([NotNull] GlobalInfoContext db, [NotNull] IGuild discordServer)
+        {
+            if (!await IsServerKnownAsync(db, discordServer))
+            {
+                return await AddServerAsync(db, discordServer);
+            }
+
+            return await GetServerAsync(db, discordServer);
+        }
+
+        /// <summary>
+        /// Gets a stored server from the database that matches the given Discord server.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="discordServer">The Discord server.</param>
+        /// <returns>Stored information about the server.</returns>
+        [Pure]
+        [ItemNotNull]
+        public async Task<Server> GetServerAsync([NotNull] GlobalInfoContext db, [NotNull] IGuild discordServer)
+        {
+            return await db.Servers.FirstAsync(u => u.DiscordID == (long)discordServer.Id);
+        }
+
+        /// <summary>
+        /// Adds a Discord server to the database.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="discordServer">The Discord server.</param>
+        /// <returns>The freshly created information about the server.</returns>
+        /// <exception cref="ArgumentException">Thrown if the server already exists in the database.</exception>
+        [ItemNotNull]
+        public async Task<Server> AddServerAsync([NotNull] GlobalInfoContext db, [NotNull] IGuild discordServer)
+        {
+            if (await IsServerKnownAsync(db, discordServer))
+            {
+                throw new ArgumentException($"A server with the ID {discordServer.Id} has already been added to the database.", nameof(discordServer));
+            }
+
+            var server = Server.CreateDefault(discordServer);
+
+            await db.Servers.AddAsync(server);
+            await db.SaveChangesAsync();
+
+            return server;
+        }
+
         /// <summary>
         /// Gets the description of the server.
         /// </summary>

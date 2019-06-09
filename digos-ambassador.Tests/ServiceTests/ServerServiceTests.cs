@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Database.GetOrRegisterServerAsync(serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
             }
 
             [Fact]
@@ -98,7 +98,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Database.GetOrRegisterServerAsync(serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
             }
 
             [Fact]
@@ -168,7 +168,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Database.GetOrRegisterServerAsync(serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
             }
 
             [Fact]
@@ -222,7 +222,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Database.GetOrRegisterServerAsync(serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
             }
 
             [Fact]
@@ -292,7 +292,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Database.GetOrRegisterServerAsync(serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
             }
 
             [Fact]
@@ -320,7 +320,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Database.GetOrRegisterServerAsync(serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
             }
 
             [Fact]
