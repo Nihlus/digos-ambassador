@@ -841,6 +841,7 @@ namespace DIGOS.Ambassador.Services
 
             await dedicatedChannel.AddPermissionOverwriteAsync(everyoneRole, everyonePermissions);
 
+            await db.SaveChangesAsync();
             return CreateEntityResult<IGuildChannel>.FromSuccess(dedicatedChannel);
         }
 
