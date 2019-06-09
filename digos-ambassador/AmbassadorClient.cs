@@ -99,6 +99,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton(_behaviours)
                 .AddSingleton(_content)
                 .AddSingleton(_commands)
+                .AddSingleton<UserService>()
                 .AddSingleton<RoleplayService>()
                 .AddSingleton<DiscordService>()
                 .AddSingleton<CharacterService>()

@@ -35,6 +35,7 @@ using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
+using DIGOS.Ambassador.Services.Users;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -70,6 +71,7 @@ namespace DIGOS.Ambassador.Modules
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(CharacterCommands));
 
+        private readonly UserService _users;
         private readonly DiscordService _discord;
         private readonly ContentService _content;
         private readonly UserFeedbackService _feedback;
@@ -87,6 +89,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="characterService">The character service.</param>
         /// <param name="interactivity">The interactivity service.</param>
         /// <param name="random">A cached, application-level entropy source.</param>
+        /// <param name="users">The user service.</param>
         public CharacterCommands
         (
             GlobalInfoContext database,
@@ -95,7 +98,8 @@ namespace DIGOS.Ambassador.Modules
             UserFeedbackService feedbackService,
             CharacterService characterService,
             InteractivityService interactivity,
-            Random random
+            Random random,
+            UserService users
         )
             : base(database)
         {
@@ -105,6 +109,7 @@ namespace DIGOS.Ambassador.Modules
             _characters = characterService;
             _interactivity = interactivity;
             _random = random;
+            _users = users;
         }
 
         /// <summary>
@@ -177,7 +182,16 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ShowCharacterAsync()
         {
-            var retrieveCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            if (!getInvokerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
+                return;
+            }
+
+            var invoker = getInvokerResult.Entity;
+
+            var retrieveCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
             if (!retrieveCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, retrieveCurrentCharacterResult.ErrorReason);
@@ -441,7 +455,16 @@ namespace DIGOS.Ambassador.Modules
         {
             discordUser = discordUser ?? this.Context.Message.Author;
 
-            var characters = _characters.GetUserCharacters(this.Database, discordUser, this.Context.Guild);
+            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, discordUser);
+            if (!getUserResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                return;
+            }
+
+            var user = getUserResult.Entity;
+
+            var characters = _characters.GetUserCharacters(this.Database, user, this.Context.Guild);
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Your characters";
@@ -476,10 +499,19 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task AssumeRandomCharacterFormAsync()
         {
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            if (!getInvokerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
+                return;
+            }
+
+            var invoker = getInvokerResult.Entity;
+
             var userCharacters = _characters.GetUserCharacters
             (
                 this.Database,
-                this.Context.User,
+                invoker,
                 this.Context.Guild
             );
 
@@ -499,7 +531,7 @@ namespace DIGOS.Ambassador.Modules
             (
                 this.Database,
                 this.Context,
-                this.Context.User
+                invoker
             );
 
             // Filter out the current character, so becoming the same character isn't possible
@@ -531,11 +563,20 @@ namespace DIGOS.Ambassador.Modules
             Character character
         )
         {
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            if (!getInvokerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
+                return;
+            }
+
+            var invoker = getInvokerResult.Entity;
+
             var getPreviousCharacterResult = await _characters.GetCurrentCharacterAsync
             (
                 this.Database,
                 this.Context,
-                this.Context.User
+                invoker
             );
 
             CharacterRole previousRole = null;
@@ -623,7 +664,16 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task SetDefaultCharacterAsync()
         {
-            var result = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            if (!getInvokerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
+                return;
+            }
+
+            var invoker = getInvokerResult.Entity;
+
+            var result = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
             if (!result.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -648,7 +698,7 @@ namespace DIGOS.Ambassador.Modules
             Character character
         )
         {
-            var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
             if (!getUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -677,7 +727,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ClearDefaultCharacterAsync()
         {
-            var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
             if (!getUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -706,32 +756,32 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ClearCharacterFormAsync()
         {
-            var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
-            if (!getUserResult.IsSuccess)
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            if (!getInvokerResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
                 return;
             }
 
-            var user = getUserResult.Entity;
+            var invoker = getInvokerResult.Entity;
 
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
             (
                 this.Database,
                 this.Context,
-                this.Context.User
+                invoker
             );
 
             if (getCurrentCharacterResult.IsSuccess)
             {
-                if (user.DefaultCharacter == getCurrentCharacterResult.Entity)
+                if (invoker.DefaultCharacter == getCurrentCharacterResult.Entity)
                 {
                     await _feedback.SendErrorAsync(this.Context, "You're already your default form.");
                     return;
                 }
             }
 
-            var result = await _characters.ClearCurrentCharacterOnServerAsync(this.Database, this.Context.Message.Author, this.Context.Guild);
+            var result = await _characters.ClearCurrentCharacterOnServerAsync(this.Database, invoker, this.Context.Guild);
             if (!result.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -743,9 +793,9 @@ namespace DIGOS.Ambassador.Modules
                 var currentServer = await this.Database.GetOrRegisterServerAsync(this.Context.Guild);
 
                 ModifyEntityResult modifyNickResult;
-                if (!(user.DefaultCharacter is null) && !user.DefaultCharacter.Nickname.IsNullOrWhitespace())
+                if (!(invoker.DefaultCharacter is null) && !invoker.DefaultCharacter.Nickname.IsNullOrWhitespace())
                 {
-                    modifyNickResult = await _discord.SetUserNicknameAsync(this.Context, guildUser, user.DefaultCharacter.Nickname);
+                    modifyNickResult = await _discord.SetUserNicknameAsync(this.Context, guildUser, invoker.DefaultCharacter.Nickname);
                 }
                 else
                 {
@@ -780,13 +830,13 @@ namespace DIGOS.Ambassador.Modules
                 }
             }
 
-            if (user.DefaultCharacter is null)
+            if (invoker.DefaultCharacter is null)
             {
                 await _feedback.SendConfirmationAsync(this.Context, "Character cleared.");
             }
             else
             {
-                await AssumeCharacterFormAsync(user.DefaultCharacter);
+                await AssumeCharacterFormAsync(invoker.DefaultCharacter);
             }
         }
 
@@ -985,7 +1035,16 @@ namespace DIGOS.Ambassador.Modules
             Character character
         )
         {
-            var transferResult = await _characters.TransferCharacterOwnershipAsync(this.Database, newOwner, character, this.Context.Guild);
+            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, newOwner);
+            if (!getUserResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                return;
+            }
+
+            var user = getUserResult.Entity;
+
+            var transferResult = await _characters.TransferCharacterOwnershipAsync(this.Database, user, character, this.Context.Guild);
             if (!transferResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);

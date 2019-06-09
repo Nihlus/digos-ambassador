@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Services.Users;
 using Discord;
 using Discord.Commands;
 using Humanizer;
@@ -42,15 +43,18 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class KinkService
     {
+        private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KinkService"/> class.
         /// </summary>
         /// <param name="feedback">The feedback service.</param>
-        public KinkService(UserFeedbackService feedback)
+        /// <param name="users">The user service.</param>
+        public KinkService(UserFeedbackService feedback, UserService users)
         {
             _feedback = feedback;
+            _users = users;
         }
 
         /// <summary>
@@ -88,7 +92,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByNameAsync([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser, string name)
         {
-            var getUserResult = await db.GetOrRegisterUserAsync(discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
             if (!getUserResult.IsSuccess)
             {
                 return RetrieveEntityResult<UserKink>.FromError(getUserResult);
@@ -123,7 +127,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>The user's kinks.</returns>
         public async Task<RetrieveEntityResult<IEnumerable<UserKink>>> GetUserKinksAsync([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser)
         {
-            var getUserResult = await db.GetOrRegisterUserAsync(discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
             if (!getUserResult.IsSuccess)
             {
                 return RetrieveEntityResult<IEnumerable<UserKink>>.FromError(getUserResult);
@@ -206,7 +210,7 @@ namespace DIGOS.Ambassador.Services
                 return RetrieveEntityResult<UserKink>.FromError(getKinkResult);
             }
 
-            var getUserResult = await db.GetOrRegisterUserAsync(discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
             if (!getUserResult.IsSuccess)
             {
                 return RetrieveEntityResult<UserKink>.FromError(getUserResult);
@@ -240,7 +244,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<UserKink>> AddUserKinkAsync([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser, Kink kink)
         {
-            var getUserResult = await db.GetOrRegisterUserAsync(discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
             if (!getUserResult.IsSuccess)
             {
                 return CreateEntityResult<UserKink>.FromError(getUserResult);
@@ -344,7 +348,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A task that must be awaited.</returns>
         public async Task<ModifyEntityResult> ResetUserKinksAsync([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser)
         {
-            var getUserResult = await db.GetOrRegisterUserAsync(discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
             if (!getUserResult.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getUserResult);

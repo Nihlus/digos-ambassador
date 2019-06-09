@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Modules;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
+using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.TypeReaders;
 
@@ -129,9 +130,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public async Task InitializeAsync()
             {
-                // Set up mocked datbase users
-                _originalDBUser = await this.Database.AddUserAsync(_originalUser);
-                _newDBUser = await this.Database.AddUserAsync(_newUser);
+                // Set up mocked database users
+                _originalDBUser = await this.Users.AddUserAsync(this.Database, _originalUser);
+                _newDBUser = await this.Users.AddUserAsync(this.Database, _newUser);
 
                 await this.Database.SaveChangesAsync();
             }
@@ -146,19 +147,19 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 entityMock.Setup
                 (
                     e =>
-                        e.IsOwner(It.IsAny<IUser>())
+                        e.IsOwner(It.IsAny<User>())
                 )
-                .Returns<IUser>
+                .Returns<User>
                 (
                     u =>
-                        u.Id == (ulong)entityMock.Object.Owner.DiscordID
+                        u == entityMock.Object.Owner
                 );
 
                 // Set up the list of entities owned by the new owner
                 var collection = new List<IOwnedNamedEntity> { entityMock.Object };
                 var ownerEntities = collection.AsQueryable().BuildMock().Object;
 
-                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _originalUser, ownerEntities, entityMock.Object);
+                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _originalDBUser, ownerEntities, entityMock.Object);
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
@@ -179,7 +180,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var collection = new List<IOwnedNamedEntity> { entityOwnedByNew.Object };
                 var ownerEntities = collection.AsQueryable().BuildMock().Object;
 
-                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _newUser, ownerEntities, entityOwnedByOriginal.Object);
+                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _newDBUser, ownerEntities, entityOwnedByOriginal.Object);
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.MultipleMatches, result.Error);
             }
@@ -204,7 +205,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var collection = new List<IOwnedNamedEntity> { entityOwnedByNew };
                 var ownerEntities = collection.AsQueryable().BuildMock().Object;
 
-                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _newUser, ownerEntities, entityOwnedByOriginal);
+                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _newDBUser, ownerEntities, entityOwnedByOriginal);
                 Assert.True(result.IsSuccess);
                 Assert.Same(_newDBUser, entityOwnedByOriginal.Owner);
                 Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
@@ -229,6 +230,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 _services = new ServiceCollection()
                     .AddSingleton(this.Database)
+                    .AddSingleton<UserService>()
                     .AddSingleton<ContentService>()
                     .AddSingleton<CommandService>()
                     .AddSingleton<DiscordService>()

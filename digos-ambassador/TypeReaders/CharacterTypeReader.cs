@@ -27,7 +27,7 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
-
+using DIGOS.Ambassador.Services.Users;
 using Discord;
 using Discord.Commands;
 
@@ -41,17 +41,43 @@ namespace DIGOS.Ambassador.TypeReaders
     public sealed class CharacterTypeReader : OwnedEntityTypeReader<Character>
     {
         /// <inheritdoc />
-        protected override async Task<RetrieveEntityResult<Character>> RetrieveEntityAsync(IUser entityOwner, string entityName, ICommandContext context, IServiceProvider services)
+        protected override async Task<RetrieveEntityResult<Character>> RetrieveEntityAsync
+        (
+            IUser entityOwner,
+            string entityName,
+            ICommandContext context,
+            IServiceProvider services
+        )
         {
             var characterService = services.GetRequiredService<CharacterService>();
+            var userService = services.GetRequiredService<UserService>();
             var db = services.GetRequiredService<GlobalInfoContext>();
 
-            if (!entityName.IsNullOrWhitespace() && string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
+            var getInvokerResult = await userService.GetOrRegisterUserAsync(db, context.User);
+            if (!getInvokerResult.IsSuccess)
             {
-                return await characterService.GetCurrentCharacterAsync(db, context, context.User);
+                return RetrieveEntityResult<Character>.FromError(getInvokerResult);
             }
 
-            return await characterService.GetBestMatchingCharacterAsync(db, context, entityOwner, entityName);
+            var invoker = getInvokerResult.Entity;
+            if (!entityName.IsNullOrWhitespace() && string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
+            {
+                return await characterService.GetCurrentCharacterAsync(db, context, invoker);
+            }
+
+            if (entityOwner is null)
+            {
+                return await characterService.GetBestMatchingCharacterAsync(db, context, null, entityName);
+            }
+
+            var getOwnerResult = await userService.GetOrRegisterUserAsync(db, entityOwner);
+            if (!getOwnerResult.IsSuccess)
+            {
+                return RetrieveEntityResult<Character>.FromError(getOwnerResult);
+            }
+
+            var owner = getOwnerResult.Entity;
+            return await characterService.GetBestMatchingCharacterAsync(db, context, owner, entityName);
         }
     }
 }

@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
 using DIGOS.Ambassador.Transformations;
@@ -324,7 +325,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task CreatedObjectRespectsGlobalDefaults()
             {
-                var user = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
+                var user = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
 
                 var globalSetting = new GlobalUserProtection
                 {
@@ -549,7 +550,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
 
                 _character = new Character
                 {
@@ -593,7 +594,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
 
                 _character = new Character
                 {
@@ -852,7 +853,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
                 _character = new Character
                 {
                     Name = "Test",
@@ -1001,7 +1002,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
                 _character = new Character
                 {
                     Name = "Test",
@@ -1195,6 +1196,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
+                    .AddSingleton<UserService>()
                     .AddSingleton(this.Transformations)
                     .AddSingleton<ContentService>()
                     .AddSingleton<OwnedEntityService>()
@@ -1223,7 +1225,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
                 _character = new Character
                 {
                     Name = "Test",
@@ -1504,6 +1506,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
+                    .AddSingleton<UserService>()
                     .AddSingleton<ContentService>()
                     .AddSingleton<CommandService>()
                     .AddSingleton<OwnedEntityService>()
@@ -1538,7 +1541,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
                 _character = new Character
                 {
                     Name = "Test",
@@ -1726,7 +1729,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
                 _character = new Character
                 {
                     Name = "Test",
@@ -1911,6 +1914,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _context = mockedContext.Object;
 
                 var services = new ServiceCollection()
+                    .AddSingleton<UserService>()
                     .AddSingleton<ContentService>()
                     .AddSingleton<CommandService>()
                     .AddSingleton<OwnedEntityService>()
@@ -1945,7 +1949,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
                 _character = new Character
                 {
                     Name = "Test",

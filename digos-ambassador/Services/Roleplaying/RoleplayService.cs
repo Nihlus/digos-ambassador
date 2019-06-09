@@ -27,8 +27,9 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
+using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
-
+using DIGOS.Ambassador.Services.Users;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -42,8 +43,8 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class RoleplayService
     {
+        private readonly UserService _users;
         private readonly CommandService _commands;
-
         private readonly OwnedEntityService _ownedEntities;
 
         /// <summary>
@@ -51,10 +52,12 @@ namespace DIGOS.Ambassador.Services
         /// </summary>
         /// <param name="commands">The application's command service.</param>
         /// <param name="entityService">The application's owned entity service.</param>
-        public RoleplayService(CommandService commands, OwnedEntityService entityService)
+        /// <param name="users">The user service.</param>
+        public RoleplayService(CommandService commands, OwnedEntityService entityService, UserService users)
         {
             _commands = commands;
             _ownedEntities = entityService;
+            _users = users;
         }
 
         /// <summary>
@@ -93,9 +96,10 @@ namespace DIGOS.Ambassador.Services
             [NotNull] string roleplayName,
             [NotNull] string roleplaySummary,
             bool isNSFW,
-            bool isPublic)
+            bool isPublic
+        )
         {
-            var getOwnerResult = await db.GetOrRegisterUserAsync(context.User);
+            var getOwnerResult = await _users.GetOrRegisterUserAsync(db, context.User);
             if (!getOwnerResult.IsSuccess)
             {
                 return CreateEntityResult<Roleplay>.FromError(getOwnerResult);
@@ -322,7 +326,7 @@ namespace DIGOS.Ambassador.Services
         /// Determines whether or not the given roleplay name is unique for a given user.
         /// </summary>
         /// <param name="db">The database where the roleplays are stored.</param>
-        /// <param name="discordUser">The user to check.</param>
+        /// <param name="user">The user to check.</param>
         /// <param name="roleplayName">The roleplay name to check.</param>
         /// <param name="guild">The guild to scope the roleplays to.</param>
         /// <returns>true if the name is unique; otherwise, false.</returns>
@@ -330,12 +334,12 @@ namespace DIGOS.Ambassador.Services
         public async Task<bool> IsRoleplayNameUniqueForUserAsync
         (
             [NotNull] GlobalInfoContext db,
-            [NotNull] IUser discordUser,
+            [NotNull] User user,
             [NotNull] string roleplayName,
             [NotNull] IGuild guild
         )
         {
-            var userRoleplays = GetUserRoleplays(db, discordUser, guild);
+            var userRoleplays = GetUserRoleplays(db, user, guild);
             return await _ownedEntities.IsEntityNameUniqueForUserAsync(userRoleplays, roleplayName);
         }
 
@@ -362,20 +366,19 @@ namespace DIGOS.Ambassador.Services
         /// Get the roleplays owned by the given user.
         /// </summary>
         /// <param name="db">The database where the roleplays are stored.</param>
-        /// <param name="discordUser">The user to get the roleplays of.</param>
+        /// <param name="user">The user to get the roleplays of.</param>
         /// <param name="guild">The guild that the search is scoped to.</param>
         /// <returns>A queryable list of roleplays belonging to the user.</returns>
         [Pure]
         [NotNull]
         [ItemNotNull]
-        public IQueryable<Roleplay> GetUserRoleplays([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser, [NotNull] IGuild guild)
+        public IQueryable<Roleplay> GetUserRoleplays([NotNull] GlobalInfoContext db, [NotNull] User user, [NotNull] IGuild guild)
         {
-            return GetRoleplays(db, guild)
-                .Where
-                (
-                    rp =>
-                        rp.Owner.DiscordID == (long)discordUser.Id
-                );
+            return GetRoleplays(db, guild).Where
+            (
+                rp =>
+                    rp.Owner == user
+            );
         }
 
         /// <summary>
@@ -545,7 +548,7 @@ namespace DIGOS.Ambassador.Services
             var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)newUser.Id);
             if (participantEntry is null)
             {
-                var getUserResult = await db.GetOrRegisterUserAsync(newUser);
+                var getUserResult = await _users.GetOrRegisterUserAsync(db, newUser);
                 if (!getUserResult.IsSuccess)
                 {
                     return CreateEntityResult<RoleplayParticipant>.FromError(getUserResult);
@@ -594,7 +597,7 @@ namespace DIGOS.Ambassador.Services
             var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)invitedUser.Id);
             if (participantEntry is null)
             {
-                var getUserResult = await db.GetOrRegisterUserAsync(invitedUser);
+                var getUserResult = await _users.GetOrRegisterUserAsync(db, invitedUser);
                 if (!getUserResult.IsSuccess)
                 {
                     return ExecuteResult.FromError(getUserResult);
@@ -626,7 +629,7 @@ namespace DIGOS.Ambassador.Services
         public async Task<ModifyEntityResult> TransferRoleplayOwnershipAsync
         (
             [NotNull] GlobalInfoContext db,
-            [NotNull] IUser newOwner,
+            [NotNull] User newOwner,
             [NotNull] Roleplay roleplay,
             [NotNull] IGuild guild
         )
@@ -657,7 +660,6 @@ namespace DIGOS.Ambassador.Services
             [NotNull] string newRoleplayName
         )
         {
-            var isCurrentUser = context.Message.Author.Id == (ulong)roleplay.Owner.DiscordID;
             if (string.IsNullOrWhiteSpace(newRoleplayName))
             {
                 return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
@@ -668,7 +670,8 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The name may not contain double quotes.");
             }
 
-            if (!await IsRoleplayNameUniqueForUserAsync(db, context.Message.Author, newRoleplayName, context.Guild))
+            var isCurrentUser = context.Message.Author.Id == (ulong)roleplay.Owner.DiscordID;
+            if (!await IsRoleplayNameUniqueForUserAsync(db, roleplay.Owner, newRoleplayName, context.Guild))
             {
                 var errorMessage = isCurrentUser
                     ? "You already have a roleplay with that name."

@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Tests
                 PronounProviderFamily = "Feminine"
             };
 
-            var characterService = new CharacterService(null, null, null, null)
+            var characterService = new CharacterService(null, null, null, null, null)
                 .WithPronounProvider(new FemininePronounProvider());
 
             var serviceProvider = new ServiceCollection()

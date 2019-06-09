@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Users;
 using Discord.Commands;
 using Xunit;
 
@@ -38,6 +39,11 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected CharacterService Characters { get; }
 
         /// <summary>
+        /// Gets the user service.
+        /// </summary>
+        protected UserService Users { get; }
+
+        /// <summary>
         /// Gets the command service dependency.
         /// </summary>
         protected CommandService Commands { get; }
@@ -51,9 +57,17 @@ namespace DIGOS.Ambassador.Tests.TestBases
         {
             this.Commands = new CommandService();
             var content = new ContentService();
-            _transformations = new TransformationService(content);
+            _transformations = new TransformationService(content, this.Users);
 
-            this.Characters = new CharacterService(this.Commands, new OwnedEntityService(), content, _transformations);
+            this.Users = new UserService();
+            this.Characters = new CharacterService
+            (
+                this.Commands,
+                new OwnedEntityService(),
+                content,
+                _transformations,
+                this.Users
+            );
         }
 
         /// <inheritdoc />

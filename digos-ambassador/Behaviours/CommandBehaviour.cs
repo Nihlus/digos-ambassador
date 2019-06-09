@@ -54,6 +54,7 @@ namespace DIGOS.Ambassador.Behaviours
 
         private readonly IServiceProvider _services;
 
+        private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
         private readonly PrivacyService _privacy;
         private readonly ContentService _content;
@@ -78,6 +79,7 @@ namespace DIGOS.Ambassador.Behaviours
         /// <param name="commands">The command service.</param>
         /// <param name="permissions">The permission service.</param>
         /// <param name="help">The help service.</param>
+        /// <param name="users">The user service.</param>
         public CommandBehaviour
         (
             DiscordSocketClient client,
@@ -88,7 +90,8 @@ namespace DIGOS.Ambassador.Behaviours
             ContentService content,
             CommandService commands,
             PermissionService permissions,
-            HelpService help
+            HelpService help,
+            UserService users
         )
             : base(client)
         {
@@ -100,6 +103,7 @@ namespace DIGOS.Ambassador.Behaviours
             _commands = commands;
             _permissions = permissions;
             _help = help;
+            _users = users;
 
             this.RunningCommands = new ConcurrentQueue<Task>();
         }
@@ -236,7 +240,7 @@ namespace DIGOS.Ambassador.Behaviours
             var guild = (message.Channel as SocketGuildChannel)?.Guild;
             if (guild != null)
             {
-                var registerUserResult = await _database.GetOrRegisterUserAsync(arg.Author);
+                var registerUserResult = await _users.GetOrRegisterUserAsync(_database, arg.Author);
                 if (!registerUserResult.IsSuccess)
                 {
                     return;

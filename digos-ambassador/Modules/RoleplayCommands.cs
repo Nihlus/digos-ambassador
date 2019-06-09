@@ -35,6 +35,7 @@ using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Exporters;
 using DIGOS.Ambassador.Services.Interactivity;
+using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
@@ -72,6 +73,7 @@ namespace DIGOS.Ambassador.Modules
     {
         private readonly RoleplayService _roleplays;
 
+        private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
         private readonly InteractivityService _interactivity;
 
@@ -82,18 +84,21 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="roleplays">The roleplay service.</param>
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="interactivity">The interactivity service.</param>
+        /// <param name="users">The user service.</param>
         public RoleplayCommands
         (
             GlobalInfoContext database,
             RoleplayService roleplays,
             UserFeedbackService feedback,
-            InteractivityService interactivity
+            InteractivityService interactivity,
+            UserService users
         )
             : base(database)
         {
             _roleplays = roleplays;
             _feedback = feedback;
             _interactivity = interactivity;
+            _users = users;
         }
 
         /// <summary>
@@ -181,7 +186,16 @@ namespace DIGOS.Ambassador.Modules
         {
             discordUser = discordUser ?? this.Context.Message.Author;
 
-            var roleplays = _roleplays.GetUserRoleplays(this.Database, discordUser, this.Context.Guild);
+            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, discordUser);
+            if (!getUserResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                return;
+            }
+
+            var user = getUserResult.Entity;
+
+            var roleplays = _roleplays.GetUserRoleplays(this.Database, user, this.Context.Guild);
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Your roleplays";
@@ -832,7 +846,16 @@ namespace DIGOS.Ambassador.Modules
             Roleplay roleplay
         )
         {
-            var transferResult = await _roleplays.TransferRoleplayOwnershipAsync(this.Database, newOwner, roleplay, this.Context.Guild);
+            var getNewOwnerResult = await _users.GetOrRegisterUserAsync(this.Database, newOwner);
+            if (!getNewOwnerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getNewOwnerResult.ErrorReason);
+                return;
+            }
+
+            var newOwnerUser = getNewOwnerResult.Entity;
+
+            var transferResult = await _roleplays.TransferRoleplayOwnershipAsync(this.Database, newOwnerUser, roleplay, this.Context.Guild);
             if (!transferResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);

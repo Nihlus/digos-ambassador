@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Users;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
@@ -35,11 +36,17 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected OwnedEntityService Entities { get; }
 
         /// <summary>
+        /// Gets the user service.
+        /// </summary>
+        protected UserService Users { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="OwnedEntityServiceTestBase"/> class.
         /// </summary>
         protected OwnedEntityServiceTestBase()
         {
             this.Entities = new OwnedEntityService();
+            this.Users = new UserService();
         }
     }
 }

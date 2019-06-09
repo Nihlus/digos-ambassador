@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
+using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;
 
@@ -53,6 +54,7 @@ namespace DIGOS.Ambassador.Modules
     [Summary("Transformation-related commands, such as transforming certain body parts or saving transforms as characters.")]
     public class TransformationCommands : DatabaseModuleBase
     {
+        private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
 
         private readonly CharacterService _characters;
@@ -68,13 +70,15 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="characters">The character service.</param>
         /// <param name="transformation">The transformation service.</param>
         /// <param name="interactivity">The interactivity service.</param>
+        /// <param name="users">The user service.</param>
         public TransformationCommands
         (
             GlobalInfoContext database,
             UserFeedbackService feedback,
             CharacterService characters,
             TransformationService transformation,
-            InteractivityService interactivity
+            InteractivityService interactivity,
+            UserService users
         )
             : base(database)
         {
@@ -82,6 +86,7 @@ namespace DIGOS.Ambassador.Modules
             _characters = characters;
             _transformation = transformation;
             _interactivity = interactivity;
+            _users = users;
         }
 
         /// <summary>
@@ -168,7 +173,16 @@ namespace DIGOS.Ambassador.Modules
             [NotNull] string species
         )
         {
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
+            var getTargetUserResult = await _users.GetOrRegisterUserAsync(this.Database, target);
+            if (!getTargetUserResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getTargetUserResult.ErrorReason);
+                return;
+            }
+
+            var targetUser = getTargetUserResult.Entity;
+
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, targetUser);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -273,7 +287,16 @@ namespace DIGOS.Ambassador.Modules
             [NotNull] Colour colour
         )
         {
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
+            var getTargetUserResult = await _users.GetOrRegisterUserAsync(this.Database, target);
+            if (!getTargetUserResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getTargetUserResult.ErrorReason);
+                return;
+            }
+
+            var targetUser = getTargetUserResult.Entity;
+
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, targetUser);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -392,7 +415,16 @@ namespace DIGOS.Ambassador.Modules
             Colour colour
         )
         {
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
+            var getTargetUserResult = await _users.GetOrRegisterUserAsync(this.Database, target);
+            if (!getTargetUserResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getTargetUserResult.ErrorReason);
+                return;
+            }
+
+            var targetUser = getTargetUserResult.Entity;
+
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, targetUser);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -500,7 +532,16 @@ namespace DIGOS.Ambassador.Modules
             Colour colour
         )
         {
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, target);
+            var getTargetUserResult = await _users.GetOrRegisterUserAsync(this.Database, target);
+            if (!getTargetUserResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getTargetUserResult.ErrorReason);
+                return;
+            }
+
+            var targetUser = getTargetUserResult.Entity;
+
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, targetUser);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -609,7 +650,16 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Describes the current physical appearance of the current character.")]
         public async Task DescribeCharacterAsync()
         {
-            var result = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            if (!getInvokerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
+                return;
+            }
+
+            var invoker = getInvokerResult.Entity;
+
+            var result = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
             if (!result.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -642,7 +692,16 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Resets your form to your default one.")]
         public async Task ResetFormAsync()
         {
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            if (!getInvokerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
+                return;
+            }
+
+            var invoker = getInvokerResult.Entity;
+
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -670,7 +729,16 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Saves your current form as a new character.")]
         public async Task SaveCurrentFormAsync([NotNull] string newCharacterName)
         {
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            if (!getInvokerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
+                return;
+            }
+
+            var invoker = getInvokerResult.Entity;
+
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -699,7 +767,16 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Sets your current appearance as your current character's default one.")]
         public async Task SetCurrentAppearanceAsDefaultAsync()
         {
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, this.Context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            if (!getInvokerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
+                return;
+            }
+
+            var invoker = getInvokerResult.Entity;
+
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);

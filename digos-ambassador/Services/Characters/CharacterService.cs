@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Utility;
 
 using Discord;
@@ -48,12 +49,10 @@ namespace DIGOS.Ambassador.Services
     public class CharacterService
     {
         private readonly TransformationService _transformations;
-
         private readonly CommandService _commands;
-
         private readonly OwnedEntityService _ownedEntities;
-
         private readonly ContentService _content;
+        private readonly UserService _users;
 
         private readonly Dictionary<string, IPronounProvider> _pronounProviders;
 
@@ -64,12 +63,21 @@ namespace DIGOS.Ambassador.Services
         /// <param name="entityService">The application's owned entity service.</param>
         /// <param name="content">The content service.</param>
         /// <param name="transformations">The transformation service.</param>
-        public CharacterService(CommandService commands, OwnedEntityService entityService, ContentService content, TransformationService transformations)
+        /// <param name="users">The user service.</param>
+        public CharacterService
+        (
+            CommandService commands,
+            OwnedEntityService entityService,
+            ContentService content,
+            TransformationService transformations,
+            UserService users
+        )
         {
             _commands = commands;
             _ownedEntities = entityService;
             _content = content;
             _transformations = transformations;
+            _users = users;
 
             _pronounProviders = new Dictionary<string, IPronounProvider>(new CaseInsensitiveStringEqualityComparer());
         }
@@ -155,19 +163,26 @@ namespace DIGOS.Ambassador.Services
         (
             [NotNull] GlobalInfoContext db,
             [NotNull] ICommandContext context,
-            [CanBeNull] IUser characterOwner,
+            [CanBeNull] User characterOwner,
             [CanBeNull] string characterName
         )
         {
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(db, context.User);
+            if (!getInvokerResult.IsSuccess)
+            {
+                return RetrieveEntityResult<Character>.FromError(getInvokerResult);
+            }
+
+            var invoker = getInvokerResult.Entity;
+
             if (characterOwner is null && characterName is null)
             {
-                return await GetCurrentCharacterAsync(db, context, context.Message.Author);
+                return await GetCurrentCharacterAsync(db, context, invoker);
             }
 
             if (characterOwner is null)
             {
                 // Search the invoker's characters first
-                var invoker = context.User;
                 var invokerCharacterResult = await GetUserCharacterByNameAsync
                 (
                     db,
@@ -204,12 +219,12 @@ namespace DIGOS.Ambassador.Services
         (
             [NotNull] GlobalInfoContext db,
             [NotNull] ICommandContext context,
-            [NotNull] IUser discordUser
+            [NotNull] User discordUser
         )
         {
             if (!await HasActiveCharacterOnServerAsync(db, discordUser, context.Guild))
             {
-                var isCurrentUser = context.Message.Author.Id == discordUser.Id;
+                var isCurrentUser = context.Message.Author.Id == (ulong)discordUser.DiscordID;
                 var errorMessage = isCurrentUser
                     ? "You haven't assumed a character."
                     : "The user hasn't assumed a character.";
@@ -292,7 +307,7 @@ namespace DIGOS.Ambassador.Services
         (
             [NotNull] GlobalInfoContext db,
             [NotNull] ICommandContext context,
-            [NotNull] IUser characterOwner,
+            [NotNull] User characterOwner,
             [NotNull] string characterName
         )
         {
@@ -304,7 +319,7 @@ namespace DIGOS.Ambassador.Services
 
             if (character is null)
             {
-                var isCurrentUser = context.Message.Author.Id == characterOwner.Id;
+                var isCurrentUser = context.Message.Author.Id == (ulong)characterOwner.DiscordID;
                 var errorMessage = isCurrentUser
                     ? "You don't own a character with that name."
                     : "The user doesn't own a character with that name.";
@@ -331,7 +346,13 @@ namespace DIGOS.Ambassador.Services
             [NotNull] Character character
         )
         {
-            var user = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(db, context.User);
+            if (!getInvokerResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getInvokerResult);
+            }
+
+            var user = getInvokerResult.Entity;
 
             if (character.IsCurrent)
             {
@@ -357,7 +378,7 @@ namespace DIGOS.Ambassador.Services
         public async Task<ModifyEntityResult> ClearCurrentCharacterOnServerAsync
         (
             [NotNull] GlobalInfoContext db,
-            [NotNull] IUser discordUser,
+            [NotNull] User discordUser,
             [NotNull] IGuild discordServer
         )
         {
@@ -389,7 +410,7 @@ namespace DIGOS.Ambassador.Services
         public async Task<bool> HasActiveCharacterOnServerAsync
         (
             [NotNull] GlobalInfoContext db,
-            [NotNull] IUser discordUser,
+            [NotNull] User discordUser,
             [CanBeNull] IGuild discordServer
         )
         {
@@ -427,7 +448,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="context">The context of the command.</param>
         /// <param name="characterName">The name of the character.</param>
         /// <param name="characterAvatarUrl">The character's avatar url.</param>
-        /// <param name="characterNickname">The nicknme that should be applied to the user when the character is active.</param>
+        /// <param name="characterNickname">The nickname that should be applied to the user when the character is active.</param>
         /// <param name="characterSummary">The summary of the character.</param>
         /// <param name="characterDescription">The full description of the character.</param>
         /// <returns>A creation result which may or may not have been successful.</returns>
@@ -442,7 +463,7 @@ namespace DIGOS.Ambassador.Services
             [CanBeNull] string characterDescription
         )
         {
-            var getOwnerResult = await db.GetOrRegisterUserAsync(context.Message.Author);
+            var getOwnerResult = await _users.GetOrRegisterUserAsync(db, context.Message.Author);
             if (!getOwnerResult.IsSuccess)
             {
                 return CreateEntityResult<Character>.FromError(getOwnerResult);
@@ -522,13 +543,7 @@ namespace DIGOS.Ambassador.Services
             await db.Characters.AddAsync(character);
             await db.SaveChangesAsync();
 
-            var getCharacterResult = await GetUserCharacterByNameAsync(db, context, context.Message.Author, characterName);
-            if (!getCharacterResult.IsSuccess)
-            {
-                return CreateEntityResult<Character>.FromError(getCharacterResult);
-            }
-
-            return CreateEntityResult<Character>.FromSuccess(getCharacterResult.Entity);
+            return CreateEntityResult<Character>.FromSuccess(character);
         }
 
         /// <summary>
@@ -610,7 +625,6 @@ namespace DIGOS.Ambassador.Services
             [NotNull] string newCharacterName
         )
         {
-            var isCurrentUser = context.Message.Author.Id == (ulong)character.Owner.DiscordID;
             if (string.IsNullOrWhiteSpace(newCharacterName))
             {
                 return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
@@ -626,7 +640,8 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The name may not contain double quotes.");
             }
 
-            if (!await IsCharacterNameUniqueForUserAsync(db, context.Message.Author, newCharacterName, context.Guild))
+            var isCurrentUser = context.Message.Author.Id == (ulong)character.Owner.DiscordID;
+            if (!await IsCharacterNameUniqueForUserAsync(db, character.Owner, newCharacterName, context.Guild))
             {
                 var errorMessage = isCurrentUser
                     ? "You already have a character with that name."
@@ -866,7 +881,7 @@ namespace DIGOS.Ambassador.Services
         public async Task<ModifyEntityResult> TransferCharacterOwnershipAsync
         (
             [NotNull] GlobalInfoContext db,
-            [NotNull] IUser newOwner,
+            [NotNull] User newOwner,
             [NotNull] Character character,
             [NotNull] IGuild guild
         )
@@ -894,11 +909,11 @@ namespace DIGOS.Ambassador.Services
         public IQueryable<Character> GetUserCharacters
         (
             [NotNull] GlobalInfoContext db,
-            [NotNull] IUser discordUser,
+            [NotNull] User discordUser,
             [NotNull] IGuild guild
         )
         {
-            var characters = GetCharacters(db, guild).Where(ch => ch.Owner.DiscordID == (long)discordUser.Id);
+            var characters = GetCharacters(db, guild).Where(ch => ch.Owner.DiscordID == discordUser.DiscordID);
             return characters;
         }
 
@@ -914,7 +929,7 @@ namespace DIGOS.Ambassador.Services
         public async Task<bool> IsCharacterNameUniqueForUserAsync
         (
             [NotNull] GlobalInfoContext db,
-            [NotNull] IUser discordUser,
+            [NotNull] User discordUser,
             [NotNull] string characterName,
             [NotNull] IGuild guild
         )
@@ -1034,14 +1049,7 @@ namespace DIGOS.Ambassador.Services
             newCharacter.DefaultAppearance = appearance;
 
             await db.SaveChangesAsync();
-
-            var getCharacterResult = await GetUserCharacterByNameAsync(db, context, context.Message.Author, characterName);
-            if (!getCharacterResult.IsSuccess)
-            {
-                return CreateEntityResult<Character>.FromError(getCharacterResult);
-            }
-
-            return CreateEntityResult<Character>.FromSuccess(getCharacterResult.Entity);
+            return CreateEntityResult<Character>.FromSuccess(newCharacter);
         }
 
         /// <summary>

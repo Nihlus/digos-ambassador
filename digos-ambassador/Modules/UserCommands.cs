@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
@@ -53,6 +54,7 @@ namespace DIGOS.Ambassador.Modules
     [Summary("User-related commands, such as viewing or editing info about a specific user.")]
     public class UserCommands : DatabaseModuleBase
     {
+        private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
 
         /// <summary>
@@ -60,10 +62,12 @@ namespace DIGOS.Ambassador.Modules
         /// </summary>
         /// <param name="database">A database context from the context pool.</param>
         /// <param name="feedback">The user feedback service.</param>
-        public UserCommands(GlobalInfoContext database, UserFeedbackService feedback)
+        /// <param name="users">The user service.</param>
+        public UserCommands(GlobalInfoContext database, UserFeedbackService feedback, UserService users)
             : base(database)
         {
             _feedback = feedback;
+            _users = users;
         }
 
         /// <summary>
@@ -74,7 +78,7 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Shows known information about the invoking user.")]
         public async Task ShowInfoAsync()
         {
-            var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.Message.Author);
             if (!getUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -94,7 +98,7 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Shows known information about the target user.")]
         public async Task ShowInfoAsync([NotNull] IUser discordUser)
         {
-            var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, discordUser);
             if (!getUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -203,6 +207,7 @@ namespace DIGOS.Ambassador.Modules
         [Group("set")]
         public class SetCommands : DatabaseModuleBase
         {
+            private readonly UserService _users;
             private readonly UserFeedbackService _feedback;
 
             /// <summary>
@@ -210,10 +215,12 @@ namespace DIGOS.Ambassador.Modules
             /// </summary>
             /// <param name="database">A database context from the context pool.</param>
             /// <param name="feedback">The user feedback service.</param>
-            public SetCommands(GlobalInfoContext database, UserFeedbackService feedback)
+            /// <param name="users">The user service.</param>
+            public SetCommands(GlobalInfoContext database, UserFeedbackService feedback, UserService users)
                 : base(database)
             {
                 _feedback = feedback;
+                _users = users;
             }
 
             /// <summary>
@@ -231,7 +238,7 @@ namespace DIGOS.Ambassador.Modules
             )
             {
                 // Add the user to the user database if they're not already in it
-                var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.Message.Author);
+                var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.Message.Author);
                 if (!getUserResult.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -266,7 +273,7 @@ namespace DIGOS.Ambassador.Modules
             )
             {
                 // Add the user to the user database if they're not already in it
-                var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
+                var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, discordUser);
                 if (!getUserResult.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -293,7 +300,7 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetUserBioAsync([NotNull] string bio)
             {
                 // Add the user to the user database if they're not already in it
-                var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+                var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
                 if (!getUserResult.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -322,7 +329,7 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetUserBioAsync([NotNull] IUser discordUser, [NotNull] string bio)
             {
                 // Add the user to the user database if they're not already in it
-                var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
+                var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, discordUser);
                 if (!getUserResult.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -349,7 +356,7 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetUserTimezoneAsync(int timezone)
             {
                 // Add the user to the user database if they're not already in it
-                var getUserResult = await this.Database.GetOrRegisterUserAsync(this.Context.User);
+                var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
                 if (!getUserResult.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -378,7 +385,7 @@ namespace DIGOS.Ambassador.Modules
             public async Task SetUserTimezoneAsync([NotNull] IUser discordUser, int timezone)
             {
                 // Add the user to the user database if they're not already in it
-                var getUserResult = await this.Database.GetOrRegisterUserAsync(discordUser);
+                var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, discordUser);
                 if (!getUserResult.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);

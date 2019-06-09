@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Modules;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Interactivity;
+using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
 using DIGOS.Ambassador.TypeReaders;
@@ -117,9 +118,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private readonly IGuild _guild;
 
             private readonly Character _character;
+            private readonly User _dbOwner;
 
             public GetBestMatchingCharacterAsync()
             {
+                _dbOwner = new User { DiscordID = (long)_owner.Id };
+
                 var mockedGuild = new Mock<IGuild>();
                 mockedGuild.Setup(g => g.Id).Returns(1);
                 mockedGuild.Setup
@@ -151,7 +155,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     ServerID = (long)_guild.Id,
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
                 };
@@ -206,7 +210,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNameIsNullAndOwnerDoesNotHaveACurrentCharacter()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _owner, null);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, null);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -215,7 +219,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNameIsEmptyAndOwnerDoesNotHaveACurrentCharacter()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _owner, string.Empty);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, string.Empty);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -224,7 +228,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfOwnerIsNotNullAndNameIsNotNullAndUserDoesNotHaveACharacterWithThatName()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _owner, "NonExistant");
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, "NonExistant");
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -257,7 +261,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 await this.Characters.MakeCharacterCurrentOnServerAsync(this.Database, _context, _guild, _character);
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _owner, null);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, null);
 
                 Assert.True(result.IsSuccess);
             }
@@ -267,7 +271,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 await this.Characters.MakeCharacterCurrentOnServerAsync(this.Database, _context, _guild, _character);
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _owner, string.Empty);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, string.Empty);
 
                 Assert.True(result.IsSuccess);
             }
@@ -275,7 +279,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsSuccessfulResultIfOwnerIsNotNullAndNameIsNotNullAndOwnerHasACharacterWithThatName()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _owner, CharacterName);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, CharacterName);
 
                 Assert.True(result.IsSuccess);
             }
@@ -307,7 +311,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 await this.Characters.MakeCharacterCurrentOnServerAsync(this.Database, _context, _guild, _character);
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _owner, null);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, null);
 
                 Assert.Same(_character, result.Entity);
             }
@@ -317,7 +321,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 await this.Characters.MakeCharacterCurrentOnServerAsync(this.Database, _context, _guild, _character);
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _owner, string.Empty);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, string.Empty);
 
                 Assert.Same(_character, result.Entity);
             }
@@ -325,7 +329,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsCorrectCharacterIfOwnerIsNotNullAndNameIsNotNullAndOwnerHasACharacterWithThatName()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _owner, CharacterName);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, CharacterName);
 
                 Assert.Same(_character, result.Entity);
             }
@@ -339,8 +343,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             private readonly Character _character;
 
+            private readonly User _dbOwner;
+
             public GetCurrentCharacterAsync()
             {
+                _dbOwner = new User { DiscordID = (long)_owner.Id };
+
                 var mockedGuild = new Mock<IGuild>();
                 mockedGuild.Setup(g => g.Id).Returns(1);
                 mockedGuild.Setup
@@ -371,7 +379,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     ServerID = (long)_guild.Id,
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
                 };
@@ -383,7 +391,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfUserDoesNotHaveAnActiveCharacter()
             {
-                var result = await this.Characters.GetCurrentCharacterAsync(this.Database, _context, _owner);
+                var result = await this.Characters.GetCurrentCharacterAsync(this.Database, _context, _dbOwner);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -394,7 +402,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 await this.Characters.MakeCharacterCurrentOnServerAsync(this.Database, _context, _guild, _character);
 
-                var result = await this.Characters.GetCurrentCharacterAsync(this.Database, _context, _owner);
+                var result = await this.Characters.GetCurrentCharacterAsync(this.Database, _context, _dbOwner);
 
                 Assert.True(result.IsSuccess);
             }
@@ -404,7 +412,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 await this.Characters.MakeCharacterCurrentOnServerAsync(this.Database, _context, _guild, _character);
 
-                var result = await this.Characters.GetCurrentCharacterAsync(this.Database, _context, _owner);
+                var result = await this.Characters.GetCurrentCharacterAsync(this.Database, _context, _dbOwner);
 
                 Assert.Same(_character, result.Entity);
             }
@@ -417,12 +425,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private readonly IUser _user = MockHelper.CreateDiscordUser(0);
 
             private User _owner;
-
             private Character _character;
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
 
                 _character = new Character
                 {
@@ -493,7 +500,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
             }
 
             [Fact]
@@ -601,8 +608,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             private readonly Character _character;
 
+            private readonly User _dbOwner;
+
             public GetUserCharacterByNameAsync()
             {
+                _dbOwner = new User { DiscordID = (long)_owner.Id };
+
                 var mockedGuild = new Mock<IGuild>();
                 mockedGuild.Setup(g => g.Id).Returns(1);
                 mockedGuild.Setup
@@ -634,7 +645,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     ServerID = (long)guild.Id,
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
                 };
@@ -646,7 +657,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfOwnerDoesNotHaveACharacterWithThatName()
             {
-                var result = await this.Characters.GetUserCharacterByNameAsync(this.Database, _context, _owner, "NonExistant");
+                var result = await this.Characters.GetUserCharacterByNameAsync(this.Database, _context, _dbOwner, "NonExistant");
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -655,7 +666,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsSuccessfulResultIfOwnerHasACharacterWithThatName()
             {
-                var result = await this.Characters.GetUserCharacterByNameAsync(this.Database, _context, _owner, CharacterName);
+                var result = await this.Characters.GetUserCharacterByNameAsync(this.Database, _context, _dbOwner, CharacterName);
 
                 Assert.True(result.IsSuccess);
             }
@@ -663,7 +674,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsCorrectCharacter()
             {
-                var result = await this.Characters.GetUserCharacterByNameAsync(this.Database, _context, _owner, CharacterName);
+                var result = await this.Characters.GetUserCharacterByNameAsync(this.Database, _context, _dbOwner, CharacterName);
 
                 Assert.Same(_character, result.Entity);
             }
@@ -697,6 +708,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 var mockedContext = new Mock<ICommandContext>();
                 mockedContext.Setup(c => c.Guild).Returns(_guild);
+                mockedContext.Setup(c => c.User).Returns(_owner);
 
                 var mockedMessage = new Mock<IUserMessage>();
                 mockedMessage.Setup(m => m.Author).Returns(_owner);
@@ -749,12 +761,16 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
             private readonly Character _character;
 
+            private readonly User _dbOwner;
+
             public ClearCurrentCharacterOnServerAsync()
             {
+                _dbOwner = new User { DiscordID = (long)_owner.Id };
+
                 _character = new Character
                 {
                     ServerID = (long)_guild.Id,
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
                 };
@@ -766,7 +782,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfCharacterIsNotCurrentOnServer()
             {
-                var result = await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, _owner, _guild);
+                var result = await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, _dbOwner, _guild);
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.ObjectNotFound, result.Error);
@@ -778,7 +794,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character.IsCurrent = true;
                 await this.Database.SaveChangesAsync();
 
-                var result = await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, _owner, _guild);
+                var result = await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, _dbOwner, _guild);
 
                 Assert.True(result.IsSuccess);
             }
@@ -789,7 +805,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character.IsCurrent = true;
                 await this.Database.SaveChangesAsync();
 
-                await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, _owner, _guild);
+                await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, _dbOwner, _guild);
 
                 Assert.False(_character.IsCurrent);
             }
@@ -800,11 +816,18 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private readonly IUser _owner = MockHelper.CreateDiscordUser(0);
             private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
 
+            private readonly User _dbOwner;
+
+            public HasActiveCharacterOnServerAsync()
+            {
+                _dbOwner = new User { DiscordID = (long)_owner.Id };
+            }
+
             [Fact]
             public async Task ReturnsFalseIfServerIsNull()
             {
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                var result = await this.Characters.HasActiveCharacterOnServerAsync(this.Database, _owner, null);
+                var result = await this.Characters.HasActiveCharacterOnServerAsync(this.Database, _dbOwner, null);
 
                 Assert.False(result);
             }
@@ -812,7 +835,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsFalseIfUserHasNoCharacters()
             {
-                var result = await this.Characters.HasActiveCharacterOnServerAsync(this.Database, _owner, _guild);
+                var result = await this.Characters.HasActiveCharacterOnServerAsync(this.Database, _dbOwner, _guild);
 
                 Assert.False(result);
             }
@@ -822,7 +845,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var character = new Character
                 {
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
@@ -831,7 +854,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 this.Database.Characters.Add(character);
                 this.Database.SaveChanges();
 
-                var result = await this.Characters.HasActiveCharacterOnServerAsync(this.Database, _owner, _guild);
+                var result = await this.Characters.HasActiveCharacterOnServerAsync(this.Database, _dbOwner, _guild);
 
                 Assert.False(result);
             }
@@ -841,7 +864,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var character = new Character
                 {
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id,
                     IsCurrent = true,
                     CurrentAppearance = new Appearance(),
@@ -851,7 +874,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 this.Database.Characters.Add(character);
                 this.Database.SaveChanges();
 
-                var result = await this.Characters.HasActiveCharacterOnServerAsync(this.Database, _owner, _guild);
+                var result = await this.Characters.HasActiveCharacterOnServerAsync(this.Database, _dbOwner, _guild);
 
                 Assert.True(result);
             }
@@ -962,6 +985,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 _services = new ServiceCollection()
                     .AddSingleton(this.Database)
+                    .AddSingleton<UserService>()
                     .AddSingleton<ContentService>()
                     .AddSingleton<CommandService>()
                     .AddSingleton<DiscordService>()
@@ -1058,7 +1082,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
                 _character = new Character
                 {
                     AvatarUrl = AvatarURL,
@@ -1129,7 +1153,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
                 _character = new Character
                 {
                     Nickname = Nickname,
@@ -1208,7 +1232,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
                 _character = new Character
                 {
                     Summary = Summary,
@@ -1287,7 +1311,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
                 _character = new Character
                 {
                     Description = Description,
@@ -1360,7 +1384,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 this.Characters.WithPronounProvider(new TheyPronounProvider());
                 this.Characters.WithPronounProvider(new ZeHirPronounProvider());
 
-                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
                 _character = new Character
                 {
                     PronounProviderFamily = PronounFamily,
@@ -1440,7 +1464,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Database.GetOrRegisterUserAsync(_user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
                 _character = new Character
                 {
                     IsNSFW = IsNSFW,
@@ -1489,12 +1513,18 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private readonly IUser _newOwner = MockHelper.CreateDiscordUser(1);
             private readonly IGuild _guild = MockHelper.CreateDiscordGuild(2);
 
+            private readonly User _dbOldOwner;
+            private readonly User _dbNewOwner;
+
             public TransferCharacterOwnershipAsync()
             {
+                _dbOldOwner = new User { DiscordID = (long)_originalOwner.Id };
+                _dbNewOwner = new User { DiscordID = (long)_newOwner.Id };
+
                 _character = new Character
                 {
                     ServerID = (long)_guild.Id,
-                    Owner = new User { DiscordID = (long)_originalOwner.Id },
+                    Owner = _dbOldOwner,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
                 };
@@ -1506,7 +1536,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsSuccessfulResultIfCharacterIsTransferred()
             {
-                var result = await this.Characters.TransferCharacterOwnershipAsync(this.Database, _newOwner, _character, _guild);
+                var result = await this.Characters.TransferCharacterOwnershipAsync(this.Database, _dbNewOwner, _character, _guild);
 
                 Assert.True(result.IsSuccess);
             }
@@ -1514,7 +1544,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task TransfersCharacter()
             {
-                await this.Characters.TransferCharacterOwnershipAsync(this.Database, _newOwner, _character, _guild);
+                await this.Characters.TransferCharacterOwnershipAsync(this.Database, _dbNewOwner, _character, _guild);
 
                 var character = this.Database.Characters.First();
                 Assert.Equal((long)_newOwner.Id, character.Owner.DiscordID);
@@ -1526,10 +1556,17 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private readonly IUser _owner = MockHelper.CreateDiscordUser(0);
             private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
 
+            private readonly User _dbOwner;
+
+            public GetUserCharacters()
+            {
+                _dbOwner = new User { DiscordID = (long)_owner.Id };
+            }
+
             [Fact]
             public void ReturnsEmptySetFromEmptyDatabase()
             {
-                Assert.Empty(this.Characters.GetUserCharacters(this.Database, _owner, _guild));
+                Assert.Empty(this.Characters.GetUserCharacters(this.Database, _dbOwner, _guild));
             }
 
             [Fact]
@@ -1546,7 +1583,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 this.Database.Characters.Add(character);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(this.Database, _owner, _guild);
+                var result = this.Characters.GetUserCharacters(this.Database, _dbOwner, _guild);
                 Assert.Empty(result);
             }
 
@@ -1555,7 +1592,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var character = new Character
                 {
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
                 };
@@ -1563,7 +1600,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 this.Database.Characters.Add(character);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(this.Database, _owner, _guild);
+                var result = this.Characters.GetUserCharacters(this.Database, _dbOwner, _guild);
                 Assert.Empty(result);
             }
 
@@ -1572,7 +1609,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var character = new Character
                 {
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
@@ -1581,7 +1618,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 this.Database.Characters.Add(character);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(this.Database, _owner, _guild);
+                var result = this.Characters.GetUserCharacters(this.Database, _dbOwner, _guild);
                 Assert.NotEmpty(result);
             }
 
@@ -1590,7 +1627,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var character = new Character
                 {
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
@@ -1599,7 +1636,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 this.Database.Characters.Add(character);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(this.Database, _owner, _guild);
+                var result = this.Characters.GetUserCharacters(this.Database, _dbOwner, _guild);
                 Assert.Collection(result, c => Assert.Same(character, c));
             }
 
@@ -1608,7 +1645,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var character1 = new Character
                 {
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
@@ -1616,7 +1653,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 var character2 = new Character
                 {
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
@@ -1626,7 +1663,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 this.Database.Characters.Add(character2);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(this.Database, _owner, _guild);
+                var result = this.Characters.GetUserCharacters(this.Database, _dbOwner, _guild);
                 Assert.Collection
                 (
                     result,
@@ -1643,12 +1680,16 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private readonly IUser _owner = MockHelper.CreateDiscordUser(0);
             private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
 
+            private readonly User _dbOwner;
+
             public IsCharacterNameUniqueForUserAsync()
             {
+                _dbOwner = new User { DiscordID = (long)_owner.Id };
+
                 var character = new Character
                 {
                     Name = CharacterName,
-                    Owner = new User { DiscordID = (long)_owner.Id },
+                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id,
                     CurrentAppearance = new Appearance(),
                     DefaultAppearance = new Appearance()
@@ -1661,7 +1702,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsFalseIfUserHasACharacterWithThatName()
             {
-                var result = await this.Characters.IsCharacterNameUniqueForUserAsync(this.Database, _owner, CharacterName, _guild);
+                var result = await this.Characters.IsCharacterNameUniqueForUserAsync(this.Database, _dbOwner, CharacterName, _guild);
 
                 Assert.False(result);
             }
@@ -1669,7 +1710,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsTrueIfUserDoesNotHaveACharacterWithThatName()
             {
-                var result = await this.Characters.IsCharacterNameUniqueForUserAsync(this.Database, _owner, "AnotherName", _guild);
+                var result = await this.Characters.IsCharacterNameUniqueForUserAsync(this.Database, _dbOwner, "AnotherName", _guild);
 
                 Assert.True(result);
             }
@@ -1687,7 +1728,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                _user = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                _user = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
 
                 _character = new Character
                 {
@@ -1764,7 +1805,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                _user = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                _user = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
 
                 _character = new Character
                 {
@@ -2039,7 +2080,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                var user = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                var user = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
 
                 _character = new Character
                 {
@@ -2112,7 +2153,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                var user = (await this.Database.GetOrRegisterUserAsync(_owner)).Entity;
+                var user = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
 
                 _character = new Character
                 {
