@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
             }
 
             var permissionService = services.GetRequiredService<PermissionService>();
-            var db = services.GetRequiredService<GlobalInfoContext>();
+            var db = services.GetRequiredService<AmbyDatabaseContext>();
 
             if (entity.IsOwner(context.User))
             {

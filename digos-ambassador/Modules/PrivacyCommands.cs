@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Modules
         (
             UserFeedbackService feedback,
             DiscordSocketClient client,
-            GlobalInfoContext database,
+            AmbyDatabaseContext database,
             PrivacyService privacy,
             ContentService content
         )

@@ -359,7 +359,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] TransformationService transformation,
             [NotNull] Species species
         )

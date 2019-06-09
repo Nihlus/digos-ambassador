@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Migrations
 {
-    [DbContext(typeof(GlobalInfoContext))]
+    [DbContext(typeof(AmbyDatabaseContext))]
     [Migration("20190215210619_AddCharacterRole")]
     partial class AddCharacterRole
     {

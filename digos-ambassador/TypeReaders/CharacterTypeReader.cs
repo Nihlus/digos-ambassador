@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.TypeReaders
         {
             var characterService = services.GetRequiredService<CharacterService>();
             var userService = services.GetRequiredService<UserService>();
-            var db = services.GetRequiredService<GlobalInfoContext>();
+            var db = services.GetRequiredService<AmbyDatabaseContext>();
 
             var getInvokerResult = await userService.GetOrRegisterUserAsync(db, context.User);
             if (!getInvokerResult.IsSuccess)

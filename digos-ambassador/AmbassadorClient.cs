@@ -115,7 +115,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton<ServerService>()
                 .AddSingleton<OwnedEntityService>()
                 .AddSingleton<Random>()
-                .AddDbContext<GlobalInfoContext>(builder => GlobalInfoContext.ConfigureOptions(builder))
+                .AddDbContext<AmbyDatabaseContext>(builder => AmbyDatabaseContext.ConfigureOptions(builder))
                 .BuildServiceProvider();
 
             var transformationService = _services.GetRequiredService<TransformationService>();
@@ -143,7 +143,7 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the start action.</returns>
         public async Task StartAsync()
         {
-            var db = _services.GetRequiredService<GlobalInfoContext>();
+            var db = _services.GetRequiredService<AmbyDatabaseContext>();
             if (!((RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>()).Exists())
             {
                 Log.Error("The database doesn't exist.");

@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Migrations
 {
-    [DbContext(typeof(GlobalInfoContext))]
+    [DbContext(typeof(AmbyDatabaseContext))]
     [Migration("20190310192252_RequireCharacterRolesToHaveServers")]
     partial class RequireCharacterRolesToHaveServers
     {

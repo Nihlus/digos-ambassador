@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <param name="name">The name of the kink.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Kink>> GetKinkByNameAsync([NotNull] GlobalInfoContext db, string name)
+        public async Task<RetrieveEntityResult<Kink>> GetKinkByNameAsync([NotNull] AmbyDatabaseContext db, string name)
         {
             return await db.Kinks.SelectFromBestLevenshteinMatchAsync(x => x, k => k.Name, name);
         }
@@ -90,7 +90,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="discordUser">The user.</param>
         /// <param name="name">The kink name.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByNameAsync([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser, string name)
+        public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByNameAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser, string name)
         {
             var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
             if (!getUserResult.IsSuccess)
@@ -125,7 +125,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <param name="discordUser">The user.</param>
         /// <returns>The user's kinks.</returns>
-        public async Task<RetrieveEntityResult<IEnumerable<UserKink>>> GetUserKinksAsync([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser)
+        public async Task<RetrieveEntityResult<IEnumerable<UserKink>>> GetUserKinksAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser)
         {
             var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
             if (!getUserResult.IsSuccess)
@@ -187,7 +187,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="userKink">The user's kink.</param>
         /// <param name="preference">The new preference.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetKinkPreferenceAsync([NotNull] GlobalInfoContext db, [NotNull] UserKink userKink, KinkPreference preference)
+        public async Task<ModifyEntityResult> SetKinkPreferenceAsync([NotNull] AmbyDatabaseContext db, [NotNull] UserKink userKink, KinkPreference preference)
         {
             userKink.Preference = preference;
             await db.SaveChangesAsync();
@@ -202,7 +202,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="discordUser">The discord user.</param>
         /// <param name="onlineKinkID">The F-List kink ID.</param>
         /// <returns>The user's kink preference.</returns>
-        public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByFListIDAsync([NotNull] GlobalInfoContext db, IUser discordUser, int onlineKinkID)
+        public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByFListIDAsync([NotNull] AmbyDatabaseContext db, IUser discordUser, int onlineKinkID)
         {
             var getKinkResult = await GetKinkByFListIDAsync(db, onlineKinkID);
             if (!getKinkResult.IsSuccess)
@@ -242,7 +242,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="discordUser">The user.</param>
         /// <param name="kink">The kink.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<UserKink>> AddUserKinkAsync([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser, Kink kink)
+        public async Task<CreateEntityResult<UserKink>> AddUserKinkAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser, Kink kink)
         {
             var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
             if (!getUserResult.IsSuccess)
@@ -270,7 +270,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <returns>A list of kink categories.</returns>
         [NotNull]
-        public Task<IQueryable<KinkCategory>> GetKinkCategoriesAsync([NotNull] GlobalInfoContext db)
+        public Task<IQueryable<KinkCategory>> GetKinkCategoriesAsync([NotNull] AmbyDatabaseContext db)
         {
             return Task.FromResult(db.Kinks.Select(k => k.Category).Distinct());
         }
@@ -281,7 +281,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <param name="onlineKinkID">The F-List kink ID.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Kink>> GetKinkByFListIDAsync([NotNull] GlobalInfoContext db, int onlineKinkID)
+        public async Task<RetrieveEntityResult<Kink>> GetKinkByFListIDAsync([NotNull] AmbyDatabaseContext db, int onlineKinkID)
         {
             var kink = await db.Kinks.FirstOrDefaultAsync(k => k.FListID == onlineKinkID);
             if (kink is null)
@@ -298,7 +298,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <param name="category">The category.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IEnumerable<Kink>>> GetKinksByCategoryAsync([NotNull] GlobalInfoContext db, KinkCategory category)
+        public async Task<RetrieveEntityResult<IEnumerable<Kink>>> GetKinksByCategoryAsync([NotNull] AmbyDatabaseContext db, KinkCategory category)
         {
             var group = await db.Kinks.GroupBy(k => k.Category).FirstOrDefaultAsync(g => g.Key == category);
             if (group is null)
@@ -320,7 +320,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="user">The user.</param>
         /// <param name="category">The category.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IEnumerable<UserKink>>> GetUserKinksByCategoryAsync([NotNull] GlobalInfoContext db, [NotNull] IUser user, KinkCategory category)
+        public async Task<RetrieveEntityResult<IEnumerable<UserKink>>> GetUserKinksByCategoryAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser user, KinkCategory category)
         {
             var getUserKinksResult = await GetUserKinksAsync(db, user);
             if (!getUserKinksResult.IsSuccess)
@@ -346,7 +346,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <param name="discordUser">The user.</param>
         /// <returns>A task that must be awaited.</returns>
-        public async Task<ModifyEntityResult> ResetUserKinksAsync([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser)
+        public async Task<ModifyEntityResult> ResetUserKinksAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser)
         {
             var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
             if (!getUserResult.IsSuccess)
@@ -369,7 +369,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="user">The user.</param>
         /// <param name="category">The category.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Kink>> GetFirstKinkWithoutPreferenceInCategoryAsync([NotNull] GlobalInfoContext db, IUser user, KinkCategory category)
+        public async Task<RetrieveEntityResult<Kink>> GetFirstKinkWithoutPreferenceInCategoryAsync([NotNull] AmbyDatabaseContext db, IUser user, KinkCategory category)
         {
             var getKinksResult = await GetKinksByCategoryAsync(db, category);
             if (!getKinksResult.IsSuccess)
@@ -418,7 +418,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <param name="category">The category.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Kink>> GetFirstKinkInCategoryAsync([NotNull] GlobalInfoContext db, KinkCategory category)
+        public async Task<RetrieveEntityResult<Kink>> GetFirstKinkInCategoryAsync([NotNull] AmbyDatabaseContext db, KinkCategory category)
         {
             var getKinksResult = await GetKinksByCategoryAsync(db, category);
             if (!getKinksResult.IsSuccess)
@@ -435,7 +435,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <param name="precedingFListID">The F-List ID of the preceding kink.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Kink>> GetNextKinkByCurrentFListIDAsync([NotNull] GlobalInfoContext db, int precedingFListID)
+        public async Task<RetrieveEntityResult<Kink>> GetNextKinkByCurrentFListIDAsync([NotNull] AmbyDatabaseContext db, int precedingFListID)
         {
             var getKinkResult = await GetKinkByFListIDAsync(db, precedingFListID);
             if (!getKinkResult.IsSuccess)
@@ -467,7 +467,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <param name="newKinks">The new kinks.</param>
         /// <returns>The number of updated kinks.</returns>
-        public async Task<int> UpdateKinksAsync(GlobalInfoContext db, [NotNull, ItemNotNull] IEnumerable<Kink> newKinks)
+        public async Task<int> UpdateKinksAsync(AmbyDatabaseContext db, [NotNull, ItemNotNull] IEnumerable<Kink> newKinks)
         {
             foreach (var kink in newKinks)
             {

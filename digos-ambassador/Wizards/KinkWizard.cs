@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.Wizards
     public class KinkWizard : InteractiveMessage, IWizard
     {
         [ProvidesContext]
-        private readonly GlobalInfoContext _database;
+        private readonly AmbyDatabaseContext _database;
         private readonly UserFeedbackService _feedback;
         private readonly KinkService _kinks;
 
@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Wizards
         /// <param name="targetUser">The target user.</param>
         public KinkWizard
         (
-            GlobalInfoContext database,
+            AmbyDatabaseContext database,
             UserFeedbackService feedback,
             KinkService kinkService,
             IUser targetUser

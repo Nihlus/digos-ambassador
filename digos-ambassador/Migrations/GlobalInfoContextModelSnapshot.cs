@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Migrations
 {
-    [DbContext(typeof(GlobalInfoContext))]
+    [DbContext(typeof(AmbyDatabaseContext))]
     partial class GlobalInfoContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

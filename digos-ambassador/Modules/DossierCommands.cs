@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="interactivity">The interactivity service.</param>
         public DossierCommands
         (
-            GlobalInfoContext database,
+            AmbyDatabaseContext database,
             UserFeedbackService feedback,
             ContentService content,
             DossierService dossiers,
@@ -230,7 +230,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="database">A database context from the context pool.</param>
             /// <param name="feedback">The feedback service.</param>
             /// <param name="dossiers">The dossier service.</param>
-            public SetCommands(GlobalInfoContext database, UserFeedbackService feedback, DossierService dossiers)
+            public SetCommands(AmbyDatabaseContext database, UserFeedbackService feedback, DossierService dossiers)
                 : base(database)
             {
                 _feedback = feedback;

@@ -35,13 +35,13 @@ namespace DIGOS.Ambassador.Modules.Base
         /// Gets the database context.
         /// </summary>
         [NotNull, ProvidesContext]
-        protected GlobalInfoContext Database { get; }
+        protected AmbyDatabaseContext Database { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseModuleBase"/> class.
         /// </summary>
         /// <param name="database">The database context.</param>
-        protected DatabaseModuleBase([NotNull] GlobalInfoContext database)
+        protected DatabaseModuleBase([NotNull] AmbyDatabaseContext database)
         {
             this.Database = database;
         }

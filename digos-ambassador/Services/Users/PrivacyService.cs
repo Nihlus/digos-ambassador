@@ -131,7 +131,7 @@ namespace DIGOS.Ambassador.Services.Users
         /// <returns>true if the user has granted consent; Otherwise, false.</returns>
         public async Task<bool> HasUserConsentedAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IUser discordUser
         )
         {
@@ -148,7 +148,7 @@ namespace DIGOS.Ambassador.Services.Users
         /// <returns>A task that must be awaited.</returns>
         public async Task GrantUserConsentAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IUser discordUser
         )
         {
@@ -180,7 +180,7 @@ namespace DIGOS.Ambassador.Services.Users
         /// <returns>A task that must be awaited.</returns>
         public async Task RevokeUserConsentAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IUser discordUser
         )
         {

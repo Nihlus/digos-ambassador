@@ -90,7 +90,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A shifting result which may or may not have succeeded.</returns>
         public async Task<ShiftBodypartResult> RemoveBodypartAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] Character character,
             Bodypart bodyPart,
@@ -128,7 +128,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A shifting result which may or may not have succeeded.</returns>
         public async Task<ShiftBodypartResult> AddBodypartAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] Character character,
             Bodypart bodyPart,
@@ -192,7 +192,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A shifting result which may or may not have succeeded.</returns>
         public async Task<ShiftBodypartResult> ShiftBodypartAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] Character character,
             Bodypart bodyPart,
@@ -268,7 +268,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A shifting result which may or may not have succeeded.</returns>
         public async Task<ShiftBodypartResult> ShiftBodypartColourAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] Character character,
             Bodypart bodyPart,
@@ -315,7 +315,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A shifting result which may or may not have succeeded.</returns>
         public async Task<ShiftBodypartResult> ShiftBodypartPatternAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] Character character,
             Bodypart bodyPart,
@@ -365,7 +365,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A shifting result which may or may not have succeeded.</returns>
         public async Task<ShiftBodypartResult> ShiftPatternColourAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] Character character,
             Bodypart bodyPart,
@@ -416,7 +416,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<DetermineConditionResult> CanUserTransformUserAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IGuild discordServer,
             [NotNull] IUser invokingUser,
             [NotNull] IUser targetUser
@@ -504,7 +504,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database containing the transformations.</param>
         /// <returns>A list of the available species.</returns>
         [Pure]
-        public async Task<IReadOnlyList<Species>> GetAvailableSpeciesAsync([NotNull] GlobalInfoContext db)
+        public async Task<IReadOnlyList<Species>> GetAvailableSpeciesAsync([NotNull] AmbyDatabaseContext db)
         {
             return await db.Species
                 .ToListAsync();
@@ -519,7 +519,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<IReadOnlyList<Transformation>> GetAvailableTransformationsAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             Bodypart bodyPart
         )
         {
@@ -535,7 +535,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> ResetCharacterFormAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character
         )
         {
@@ -563,7 +563,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetCurrentAppearanceAsDefaultForCharacterAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character
         )
         {
@@ -588,7 +588,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetDefaultProtectionTypeAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IUser discordUser,
             ProtectionType protectionType
         )
@@ -622,7 +622,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetServerProtectionTypeAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IUser discordUser,
             [NotNull] IGuild discordServer,
             ProtectionType protectionType
@@ -656,7 +656,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> WhitelistUserAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IUser discordUser,
             [NotNull] IUser whitelistedUser
         )
@@ -718,7 +718,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> BlacklistUserAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IUser discordUser,
             [NotNull] IUser blacklistedUser
         )
@@ -779,7 +779,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>Global protection data for the given user.</returns>
         public async Task<RetrieveEntityResult<GlobalUserProtection>> GetOrCreateGlobalUserProtectionAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IUser discordUser
         )
         {
@@ -816,7 +816,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>Server-specific protection data for the given user.</returns>
         public async Task<RetrieveEntityResult<ServerUserProtection>> GetOrCreateServerUserProtectionAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IUser discordUser,
             [NotNull] IGuild guild
         )
@@ -856,7 +856,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An update result which may or may not have succeeded.</returns>
         public async Task<UpdateTransformationsResult> UpdateTransformationDatabaseAsync
         (
-            [NotNull] GlobalInfoContext db
+            [NotNull] AmbyDatabaseContext db
         )
         {
             uint addedSpecies = 0;
@@ -958,7 +958,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> GetTransformationsByPartAndSpeciesAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             Bodypart bodypart,
             [NotNull] Species species
         )
@@ -995,7 +995,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<bool> IsPartAndSpeciesCombinationUniqueAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             Bodypart bodypart,
             [NotNull] Species species
         )
@@ -1012,7 +1012,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public RetrieveEntityResult<Species> GetSpeciesByName
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] string speciesName
         )
         {
@@ -1028,7 +1028,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<Species>> GetSpeciesByNameAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] string speciesName
         )
         {
@@ -1050,7 +1050,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<bool> IsSpeciesNameUniqueAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] string speciesName
         )
         {

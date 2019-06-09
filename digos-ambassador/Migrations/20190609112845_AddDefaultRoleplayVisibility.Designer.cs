@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Migrations
 {
-    [DbContext(typeof(GlobalInfoContext))]
+    [DbContext(typeof(AmbyDatabaseContext))]
     [Migration("20190609112845_AddDefaultRoleplayVisibility")]
     partial class AddDefaultRoleplayVisibility
     {

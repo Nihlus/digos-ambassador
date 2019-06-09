@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A task wrapping the granting of the permission.</returns>
         public async Task GrantLocalPermissionAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IGuild discordServer,
             [NotNull] IUser discordUser,
             [NotNull] LocalPermission grantedPermission
@@ -87,7 +87,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A task wrapping the revoking of the permission.</returns>
         public async Task RevokeLocalPermissionAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IGuild discordServer,
             [NotNull] IUser discordUser,
             Permission revokedPermission
@@ -119,7 +119,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A task wrapping the revoking of the permission.</returns>
         public async Task RevokeLocalPermissionTargetAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IGuild discordServer,
             [NotNull] IUser discordUser,
             Permission permission,
@@ -147,7 +147,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="server">The server to grant the permissions on.</param>
         /// <param name="user">The user to grant the permissions to.</param>
         /// <returns>A task wrapping the granting of default permissions.</returns>
-        public async Task GrantDefaultPermissionsAsync([NotNull] GlobalInfoContext db, [NotNull] IGuild server, [NotNull] IUser user)
+        public async Task GrantDefaultPermissionsAsync([NotNull] AmbyDatabaseContext db, [NotNull] IGuild server, [NotNull] IUser user)
         {
             foreach (var permission in DefaultPermissions.DefaultPermissionSet)
             {
@@ -176,7 +176,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<bool> HasPermissionAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [CanBeNull] IGuild discordServer,
             [NotNull] IUser discordUser,
             (Permission Permission, PermissionTarget Target) requiredPermission
@@ -228,7 +228,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="guild">The server.</param>
         /// <returns>The permissions.</returns>
         [NotNull]
-        public IQueryable<LocalPermission> GetLocalUserPermissions([NotNull] GlobalInfoContext db, IUser contextUser, IGuild guild)
+        public IQueryable<LocalPermission> GetLocalUserPermissions([NotNull] AmbyDatabaseContext db, IUser contextUser, IGuild guild)
         {
             return db.LocalPermissions
                 .Where
@@ -246,7 +246,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="contextUser">The user.</param>
         /// <returns>The permissions.</returns>
         [NotNull]
-        public IQueryable<GlobalPermission> GetGlobalUserPermissions([NotNull] GlobalInfoContext db, IUser contextUser)
+        public IQueryable<GlobalPermission> GetGlobalUserPermissions([NotNull] AmbyDatabaseContext db, IUser contextUser)
         {
             return db.GlobalPermissions
                 .Where

@@ -96,7 +96,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="servers">The server service.</param>
         public CharacterCommands
         (
-            GlobalInfoContext database,
+            AmbyDatabaseContext database,
             ContentService contentService,
             DiscordService discordService,
             UserFeedbackService feedbackService,
@@ -1082,7 +1082,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="servers">The server service.</param>
             public RoleCommands
             (
-                GlobalInfoContext database,
+                AmbyDatabaseContext database,
                 DiscordService discordService,
                 UserFeedbackService feedbackService,
                 CharacterService characterService,
@@ -1352,7 +1352,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="servers">The server service.</param>
             public SetCommands
             (
-                GlobalInfoContext database,
+                AmbyDatabaseContext database,
                 DiscordService discordService,
                 UserFeedbackService feedbackService,
                 CharacterService characterService,

@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An entity modification result, which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> TransferEntityOwnershipAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] User newOwner,
             [NotNull] IQueryable<IOwnedNamedEntity> newOwnerEntities,
             [NotNull] IOwnedNamedEntity entity

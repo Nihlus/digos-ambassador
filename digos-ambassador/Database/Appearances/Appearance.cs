@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Database.Appearances
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public static async Task<CreateEntityResult<Appearance>> CreateDefaultAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] TransformationService transformations
         )
         {

@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.Tests.Database
     public class MockedDatabase : IDisposable
     {
         private readonly SqliteConnection _connection;
-        private readonly DbContextOptions<GlobalInfoContext> _databaseOptions;
+        private readonly DbContextOptions<AmbyDatabaseContext> _databaseOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockedDatabase"/> class.
@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Tests.Database
             _connection = new SqliteConnection("DataSource=:memory:");
             _connection.Open();
 
-            _databaseOptions = new DbContextOptionsBuilder<GlobalInfoContext>()
+            _databaseOptions = new DbContextOptionsBuilder<AmbyDatabaseContext>()
                 .UseLazyLoadingProxies()
                 .UseSqlite(_connection).Options;
 
@@ -63,9 +63,9 @@ namespace DIGOS.Ambassador.Tests.Database
         /// </summary>
         /// <returns>The database context.</returns>
         [NotNull]
-        public GlobalInfoContext GetDatabaseContext()
+        public AmbyDatabaseContext GetDatabaseContext()
         {
-            return new GlobalInfoContext(_databaseOptions);
+            return new AmbyDatabaseContext(_databaseOptions);
         }
 
         /// <summary>

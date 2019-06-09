@@ -94,7 +94,7 @@ namespace DIGOS.Ambassador.Doc
                 .AddSingleton<ServerService>()
                 .AddSingleton<OwnedEntityService>()
                 .AddSingleton<Random>()
-                .AddDbContext<GlobalInfoContext>()
+                .AddDbContext<AmbyDatabaseContext>()
                 .BuildServiceProvider();
         }
 

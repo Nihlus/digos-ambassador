@@ -87,7 +87,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="users">The user service.</param>
         public RoleplayCommands
         (
-            GlobalInfoContext database,
+            AmbyDatabaseContext database,
             RoleplayService roleplays,
             UserFeedbackService feedback,
             InteractivityService interactivity,
@@ -1148,7 +1148,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="database">A database context from the context pool.</param>
             /// <param name="roleplays">The roleplay service.</param>
             /// <param name="feedback">The user feedback service.</param>
-            public SetCommands(GlobalInfoContext database, RoleplayService roleplays, UserFeedbackService feedback)
+            public SetCommands(AmbyDatabaseContext database, RoleplayService roleplays, UserFeedbackService feedback)
                 : base(database)
             {
                 _roleplays = roleplays;
@@ -1336,7 +1336,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="database">A database context from the context pool.</param>
             /// <param name="roleplays">The roleplay service.</param>
             /// <param name="feedback">The user feedback service.</param>
-            public AdminCommands(GlobalInfoContext database, RoleplayService roleplays, UserFeedbackService feedback)
+            public AdminCommands(AmbyDatabaseContext database, RoleplayService roleplays, UserFeedbackService feedback)
                 : base(database)
             {
                 _feedback = feedback;

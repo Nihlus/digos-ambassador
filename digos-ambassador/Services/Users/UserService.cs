@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Services.Users
         /// <param name="discordUser">The Discord user.</param>
         /// <returns><value>true</value> if the user is stored; otherwise, <value>false</value>.</returns>
         [Pure, NotNull]
-        public async Task<bool> IsUserKnownAsync([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser)
+        public async Task<bool> IsUserKnownAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser)
         {
             return await db.Users.AnyAsync(u => u.DiscordID == (long)discordUser.Id);
         }
@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Services.Users
         [NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<User>> GetOrRegisterUserAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IUser discordUser
         )
         {
@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Services.Users
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>Stored information about the user.</returns>
         [Pure, ItemNotNull]
-        public async Task<User> GetUser([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser)
+        public async Task<User> GetUser([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser)
         {
             return await db.Users.FirstAsync
             (
@@ -102,7 +102,7 @@ namespace DIGOS.Ambassador.Services.Users
         /// <returns>The freshly created information about the user.</returns>
         /// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
         [NotNull, ItemNotNull]
-        public async Task<User> AddUserAsync([NotNull] GlobalInfoContext db, [NotNull] IUser discordUser)
+        public async Task<User> AddUserAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser)
         {
             if (await IsUserKnownAsync(db, discordUser))
             {

@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="users">The user service.</param>
         public TransformationCommands
         (
-            GlobalInfoContext database,
+            AmbyDatabaseContext database,
             UserFeedbackService feedback,
             CharacterService characters,
             TransformationService transformation,

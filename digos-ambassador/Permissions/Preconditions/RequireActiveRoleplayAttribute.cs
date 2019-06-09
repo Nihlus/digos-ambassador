@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
         public override async Task<PreconditionResult> CheckPermissionsAsync([NotNull] ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var roleplayService = services.GetRequiredService<RoleplayService>();
-            var db = services.GetRequiredService<GlobalInfoContext>();
+            var db = services.GetRequiredService<AmbyDatabaseContext>();
 
             var result = await roleplayService.GetActiveRoleplayAsync(db, context.Channel);
             if (!result.IsSuccess)

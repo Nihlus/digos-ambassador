@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
         protected override async Task<PreconditionResult> CheckPrioritizedPermissions([NotNull] ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var permissionService = services.GetRequiredService<PermissionService>();
-            var db = services.GetRequiredService<GlobalInfoContext>();
+            var db = services.GetRequiredService<AmbyDatabaseContext>();
 
             if (await permissionService.HasPermissionAsync(db, context.Guild, context.User, _requiredPermission))
             {

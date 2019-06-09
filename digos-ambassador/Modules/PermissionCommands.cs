@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="interactivity">The interactivity service.</param>
         public PermissionCommands
         (
-            GlobalInfoContext database,
+            AmbyDatabaseContext database,
             UserFeedbackService feedback,
             PermissionService permissions,
             InteractivityService interactivity
@@ -185,7 +185,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="permissions">The permission service.</param>
             public GrantCommands
             (
-                GlobalInfoContext database,
+                AmbyDatabaseContext database,
                 UserFeedbackService feedback,
                 PermissionService permissions
             )
@@ -245,7 +245,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="permissions">The permission service.</param>
             public RevokeCommands
             (
-                GlobalInfoContext database,
+                AmbyDatabaseContext database,
                 UserFeedbackService feedback,
                 PermissionService permissions
             )

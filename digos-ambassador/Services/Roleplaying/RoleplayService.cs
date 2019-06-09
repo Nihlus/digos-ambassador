@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <param name="context">The message to consume.</param>
         /// <returns>A task that must be awaited.</returns>
-        public async Task ConsumeMessageAsync([NotNull] GlobalInfoContext db, [NotNull] ICommandContext context)
+        public async Task ConsumeMessageAsync([NotNull] AmbyDatabaseContext db, [NotNull] ICommandContext context)
         {
             var result = await GetActiveRoleplayAsync(db, context.Channel);
             if (!result.IsSuccess)
@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A creation result which may or may not have been successful.</returns>
         public async Task<CreateEntityResult<Roleplay>> CreateRoleplayAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] SocketCommandContext context,
             [NotNull] string roleplayName,
             [NotNull] string roleplaySummary,
@@ -168,7 +168,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A task wrapping the update action.</returns>
         public async Task<ModifyEntityResult> AddToOrUpdateMessageInRoleplayAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Roleplay roleplay,
             [NotNull] IMessage message
         )
@@ -226,7 +226,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [CanBeNull] IUser roleplayOwner,
             [CanBeNull] string roleplayName
@@ -260,7 +260,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] string roleplayName,
             [NotNull] IGuild guild
         )
@@ -294,7 +294,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<Roleplay>> GetActiveRoleplayAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IMessageChannel channel
         )
         {
@@ -321,7 +321,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="channel">The channel to check.</param>
         /// <returns>true if there is an active roleplay; otherwise, false.</returns>
         [Pure]
-        public async Task<bool> HasActiveRoleplayAsync([NotNull] GlobalInfoContext db, [NotNull] IChannel channel)
+        public async Task<bool> HasActiveRoleplayAsync([NotNull] AmbyDatabaseContext db, [NotNull] IChannel channel)
         {
             return await db.Roleplays.AnyAsync(rp => rp.IsActive && rp.ActiveChannelID == (long)channel.Id);
         }
@@ -337,7 +337,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<bool> IsRoleplayNameUniqueForUserAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] User user,
             [NotNull] string roleplayName,
             [NotNull] IGuild guild
@@ -356,7 +356,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         [NotNull]
         [ItemNotNull]
-        public IQueryable<Roleplay> GetRoleplays([NotNull] GlobalInfoContext db, [NotNull] IGuild guild)
+        public IQueryable<Roleplay> GetRoleplays([NotNull] AmbyDatabaseContext db, [NotNull] IGuild guild)
         {
             return db.Roleplays
                 .Where
@@ -376,7 +376,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         [NotNull]
         [ItemNotNull]
-        public IQueryable<Roleplay> GetUserRoleplays([NotNull] GlobalInfoContext db, [NotNull] User user, [NotNull] IGuild guild)
+        public IQueryable<Roleplay> GetUserRoleplays([NotNull] AmbyDatabaseContext db, [NotNull] User user, [NotNull] IGuild guild)
         {
             return GetRoleplays(db, guild).Where
             (
@@ -396,7 +396,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] IUser roleplayOwner,
             [NotNull] string roleplayName
@@ -433,7 +433,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ExecuteResult> KickUserFromRoleplayAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] SocketCommandContext context,
             [NotNull] Roleplay roleplay,
             [NotNull] IUser kickedUser
@@ -471,7 +471,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ExecuteResult> RemoveUserFromRoleplayAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] SocketCommandContext context,
             [NotNull] Roleplay roleplay,
             [NotNull] IUser removedUser
@@ -514,7 +514,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<RoleplayParticipant>> AddUserToRoleplayAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] SocketCommandContext context,
             [NotNull] Roleplay roleplay,
             [NotNull] IUser newUser
@@ -582,7 +582,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ExecuteResult> InviteUserAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Roleplay roleplay,
             [NotNull] IUser invitedUser
         )
@@ -632,7 +632,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> TransferRoleplayOwnershipAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] User newOwner,
             [NotNull] Roleplay roleplay,
             [NotNull] IGuild guild
@@ -658,7 +658,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetRoleplayNameAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] SocketCommandContext context,
             [NotNull] Roleplay roleplay,
             [NotNull] string newRoleplayName
@@ -706,7 +706,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetRoleplaySummaryAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Roleplay roleplay,
             [NotNull] string newRoleplaySummary
         )
@@ -731,7 +731,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetRoleplayIsNSFWAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Roleplay roleplay,
             bool isNSFW
         )
@@ -756,7 +756,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetRoleplayIsPublicAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Roleplay roleplay,
             bool isPublic
         )
@@ -776,7 +776,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<IGuildChannel>> CreateDedicatedRoleplayChannelAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] SocketCommandContext context,
             [NotNull] Roleplay roleplay
         )
@@ -853,7 +853,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> DeleteDedicatedRoleplayChannelAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] SocketCommandContext context,
             [NotNull] Roleplay roleplay
         )

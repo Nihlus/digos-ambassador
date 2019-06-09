@@ -1,5 +1,5 @@
 ﻿//
-//  GlobalInfoContext.cs
+//  AmbyDatabaseContext.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Database
     /// <summary>
     /// Database context for global information.
     /// </summary>
-    public class GlobalInfoContext : DbContext
+    public class AmbyDatabaseContext : DbContext
     {
         /// <summary>
         /// Gets or sets the table where the user information is stored.
@@ -216,16 +216,16 @@ namespace DIGOS.Ambassador.Database
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="GlobalInfoContext"/> class.
+        /// Initializes a new instance of the <see cref="AmbyDatabaseContext"/> class.
         /// </summary>
         /// <param name="options">The context options.</param>
-        public GlobalInfoContext([NotNull] DbContextOptions options)
+        public AmbyDatabaseContext([NotNull] DbContextOptions options)
             : base(options)
         {
         }
 
         /// <summary>
-        /// Configures the given options builder to match the settings required for the <see cref="GlobalInfoContext"/>.
+        /// Configures the given options builder to match the settings required for the <see cref="AmbyDatabaseContext"/>.
         /// </summary>
         /// <param name="optionsBuilder">The builder to configure.</param>
         /// <returns>The builder, configured.</returns>

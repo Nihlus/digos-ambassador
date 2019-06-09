@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Behaviours
     public class RoleplayLoggingBehaviour : BehaviourBase
     {
         [ProvidesContext]
-        private readonly GlobalInfoContext _database;
+        private readonly AmbyDatabaseContext _database;
 
         private readonly RoleplayService _roleplays;
 
@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Behaviours
         (
             DiscordSocketClient client,
             RoleplayService roleplays,
-            GlobalInfoContext database
+            AmbyDatabaseContext database
         )
             : base(client)
         {

@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="interactivity">The interactivity service.</param>
         public KinkCommands
         (
-            GlobalInfoContext database,
+            AmbyDatabaseContext database,
             KinkService kinks,
             UserFeedbackService feedback,
             InteractivityService interactivity

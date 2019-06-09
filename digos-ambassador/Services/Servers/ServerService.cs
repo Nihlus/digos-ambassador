@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Services.Servers
         /// <param name="discordServer">The Discord server.</param>
         /// <returns><value>true</value> if the server is stored; otherwise, <value>false</value>.</returns>
         [Pure]
-        public async Task<bool> IsServerKnownAsync([NotNull] GlobalInfoContext db, [NotNull] IGuild discordServer)
+        public async Task<bool> IsServerKnownAsync([NotNull] AmbyDatabaseContext db, [NotNull] IGuild discordServer)
         {
             return await db.Servers.AnyAsync(u => u.DiscordID == (long)discordServer.Id);
         }
@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Services.Servers
         /// <param name="discordServer">The Discord server.</param>
         /// <returns>Stored information about the server.</returns>
         [ItemNotNull]
-        public async Task<Server> GetOrRegisterServerAsync([NotNull] GlobalInfoContext db, [NotNull] IGuild discordServer)
+        public async Task<Server> GetOrRegisterServerAsync([NotNull] AmbyDatabaseContext db, [NotNull] IGuild discordServer)
         {
             if (!await IsServerKnownAsync(db, discordServer))
             {
@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.Services.Servers
         /// <returns>Stored information about the server.</returns>
         [Pure]
         [ItemNotNull]
-        public async Task<Server> GetServerAsync([NotNull] GlobalInfoContext db, [NotNull] IGuild discordServer)
+        public async Task<Server> GetServerAsync([NotNull] AmbyDatabaseContext db, [NotNull] IGuild discordServer)
         {
             return await db.Servers.FirstAsync(u => u.DiscordID == (long)discordServer.Id);
         }
@@ -89,7 +89,7 @@ namespace DIGOS.Ambassador.Services.Servers
         /// <returns>The freshly created information about the server.</returns>
         /// <exception cref="ArgumentException">Thrown if the server already exists in the database.</exception>
         [ItemNotNull]
-        public async Task<Server> AddServerAsync([NotNull] GlobalInfoContext db, [NotNull] IGuild discordServer)
+        public async Task<Server> AddServerAsync([NotNull] AmbyDatabaseContext db, [NotNull] IGuild discordServer)
         {
             if (await IsServerKnownAsync(db, discordServer))
             {
@@ -128,7 +128,7 @@ namespace DIGOS.Ambassador.Services.Servers
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetDescriptionAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Server server,
             [NotNull] string description
         )
@@ -191,7 +191,7 @@ namespace DIGOS.Ambassador.Services.Servers
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetJoinMessageAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Server server,
             [NotNull] string joinMessage
         )
@@ -239,7 +239,7 @@ namespace DIGOS.Ambassador.Services.Servers
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetIsNSFWAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Server server,
             bool isNsfw
         )
@@ -268,7 +268,7 @@ namespace DIGOS.Ambassador.Services.Servers
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetSendJoinMessageAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Server server,
             bool sendJoinMessage
         )
@@ -297,7 +297,7 @@ namespace DIGOS.Ambassador.Services.Servers
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetDedicatedRoleplayChannelCategoryAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Server server,
             [CanBeNull] ICategoryChannel category
         )

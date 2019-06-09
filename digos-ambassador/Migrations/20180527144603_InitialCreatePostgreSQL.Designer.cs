@@ -19,7 +19,7 @@ using System;
 
 namespace DIGOS.Ambassador.Migrations
 {
-    [DbContext(typeof(GlobalInfoContext))]
+    [DbContext(typeof(AmbyDatabaseContext))]
     [Migration("20180527144603_InitialCreatePostgreSQL")]
     partial class InitialCreatePostgreSQL
     {

@@ -21,7 +21,7 @@ using System;
 
 namespace DIGOS.Ambassador.Migrations
 {
-    [DbContext(typeof(GlobalInfoContext))]
+    [DbContext(typeof(AmbyDatabaseContext))]
     [Migration("20180604105146_ConfigureGlobalUserProtectionRelationshipRequirements")]
     partial class ConfigureGlobalUserProtectionRelationshipRequirements
     {

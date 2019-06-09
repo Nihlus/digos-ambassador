@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="database">A database context from the context pool.</param>
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="users">The user service.</param>
-        public UserCommands(GlobalInfoContext database, UserFeedbackService feedback, UserService users)
+        public UserCommands(AmbyDatabaseContext database, UserFeedbackService feedback, UserService users)
             : base(database)
         {
             _feedback = feedback;
@@ -216,7 +216,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="database">A database context from the context pool.</param>
             /// <param name="feedback">The user feedback service.</param>
             /// <param name="users">The user service.</param>
-            public SetCommands(GlobalInfoContext database, UserFeedbackService feedback, UserService users)
+            public SetCommands(AmbyDatabaseContext database, UserFeedbackService feedback, UserService users)
                 : base(database)
             {
                 _feedback = feedback;

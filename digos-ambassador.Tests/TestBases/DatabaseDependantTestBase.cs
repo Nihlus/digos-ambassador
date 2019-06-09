@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <summary>
         /// Gets the mocked database connection for this test.
         /// </summary>
-        protected GlobalInfoContext Database { get; }
+        protected AmbyDatabaseContext Database { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseDependantTestBase"/> class.

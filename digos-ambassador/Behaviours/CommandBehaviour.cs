@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Behaviours
     /// </summary>
     public class CommandBehaviour : ContinuousBehaviour
     {
-        private readonly GlobalInfoContext _database;
+        private readonly AmbyDatabaseContext _database;
 
         private readonly IServiceProvider _services;
 
@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Behaviours
         public CommandBehaviour
         (
             DiscordSocketClient client,
-            GlobalInfoContext database,
+            AmbyDatabaseContext database,
             IServiceProvider services,
             UserFeedbackService feedback,
             PrivacyService privacy,

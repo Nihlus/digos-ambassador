@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Transformations
     /// </summary>
     public class SpeciesYamlConverter : IYamlTypeConverter
     {
-        private GlobalInfoContext Database { get; }
+        private AmbyDatabaseContext Database { get; }
 
         private TransformationService Transformation { get; }
 
@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Transformations
         /// </summary>
         /// <param name="database">The database.</param>
         /// <param name="transformation">The transformation service.</param>
-        public SpeciesYamlConverter(GlobalInfoContext database, TransformationService transformation)
+        public SpeciesYamlConverter(AmbyDatabaseContext database, TransformationService transformation)
         {
             this.Database = database;
             this.Transformation = transformation;

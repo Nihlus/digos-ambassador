@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Behaviours
         /// Gets the database context.
         /// </summary>
         [NotNull, ProvidesContext]
-        private GlobalInfoContext Database { get; }
+        private AmbyDatabaseContext Database { get; }
 
         /// <summary>
         /// Gets the roleplay service.
@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Behaviours
         public RoleplayTimeoutBehaviour
         (
             DiscordSocketClient client,
-            GlobalInfoContext database,
+            AmbyDatabaseContext database,
             RoleplayService roleplays,
             [NotNull] UserFeedbackService feedback
         )

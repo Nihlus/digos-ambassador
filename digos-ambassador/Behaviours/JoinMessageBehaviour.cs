@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Behaviours
     public class JoinMessageBehaviour : BehaviourBase
     {
         [ProvidesContext]
-        private readonly GlobalInfoContext _database;
+        private readonly AmbyDatabaseContext _database;
 
         private readonly UserFeedbackService _feedback;
         private readonly ServerService _servers;
@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Behaviours
         public JoinMessageBehaviour
         (
             DiscordSocketClient client,
-            GlobalInfoContext database,
+            AmbyDatabaseContext database,
             UserFeedbackService feedback,
             ServerService servers
         )

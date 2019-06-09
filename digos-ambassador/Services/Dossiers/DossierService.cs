@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A creation task which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<Dossier>> CreateDossierAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] string title,
             [NotNull] string summary
         )
@@ -94,7 +94,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A deletion result which may or may not have succeeded.</returns>
         public async Task<DeleteEntityResult> DeleteDossierAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Dossier dossier
         )
         {
@@ -119,7 +119,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<bool> IsDossierTitleUniqueAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] string dossierTitle
         )
         {
@@ -139,7 +139,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<Dossier>> GetDossierByTitleAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] string title
         )
         {
@@ -161,7 +161,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetDossierTitleAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Dossier dossier,
             [NotNull] string newTitle
         )
@@ -215,7 +215,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetDossierSummaryAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Dossier dossier,
             [NotNull] string newSummary
         )
@@ -239,7 +239,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> UpdateDossierDataLocationAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Dossier dossier
         )
         {
@@ -279,7 +279,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetDossierDataAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Dossier dossier,
             [NotNull] SocketCommandContext context
         )

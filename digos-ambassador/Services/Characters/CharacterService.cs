@@ -166,7 +166,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [CanBeNull] User characterOwner,
             [CanBeNull] string characterName
@@ -222,7 +222,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] User discordUser
         )
@@ -261,7 +261,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<Character>> GetNamedCharacterAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] string characterName,
             [NotNull] IGuild guild
         )
@@ -293,7 +293,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="guild">The guild where the characters are.</param>
         /// <returns>A queryable set of characters.</returns>
         [NotNull]
-        public IQueryable<Character> GetCharacters([NotNull] GlobalInfoContext db, IGuild guild)
+        public IQueryable<Character> GetCharacters([NotNull] AmbyDatabaseContext db, IGuild guild)
         {
             return db.Characters
                 .Where(c => c.ServerID == (long)guild.Id);
@@ -310,7 +310,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<RetrieveEntityResult<Character>> GetUserCharacterByNameAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] User characterOwner,
             [NotNull] string characterName
@@ -345,7 +345,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A task that must be awaited.</returns>
         public async Task<ModifyEntityResult> MakeCharacterCurrentOnServerAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] IGuild discordServer,
             [NotNull] Character character
@@ -382,7 +382,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A task that must be awaited.</returns>
         public async Task<ModifyEntityResult> ClearCurrentCharacterOnServerAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] User discordUser,
             [NotNull] IGuild discordServer
         )
@@ -414,7 +414,7 @@ namespace DIGOS.Ambassador.Services
         [Pure, ContractAnnotation("discordServer:null => false")]
         public async Task<bool> HasActiveCharacterOnServerAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] User discordUser,
             [CanBeNull] IGuild discordServer
         )
@@ -441,7 +441,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="context">The context of the command.</param>
         /// <param name="characterName">The name of the character.</param>
         /// <returns>A creation result which may or may not have been successful.</returns>
-        public async Task<CreateEntityResult<Character>> CreateCharacterAsync([NotNull] GlobalInfoContext db, [NotNull] ICommandContext context, [NotNull] string characterName)
+        public async Task<CreateEntityResult<Character>> CreateCharacterAsync([NotNull] AmbyDatabaseContext db, [NotNull] ICommandContext context, [NotNull] string characterName)
         {
             return await CreateCharacterAsync(db, context, characterName, _content.DefaultAvatarUri.ToString(), null, null, null);
         }
@@ -459,7 +459,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A creation result which may or may not have been successful.</returns>
         public async Task<CreateEntityResult<Character>> CreateCharacterAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] string characterName,
             [NotNull] string characterAvatarUrl,
@@ -561,7 +561,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetDefaultCharacterForUserAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] Character newDefaultCharacter,
             [NotNull] User targetUser
@@ -593,7 +593,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> ClearDefaultCharacterForUserAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] User targetUser
         )
@@ -624,7 +624,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetCharacterNameAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] Character character,
             [NotNull] string newCharacterName
@@ -680,7 +680,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetCharacterAvatarAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character,
             [NotNull] string newCharacterAvatarUrl
         )
@@ -715,7 +715,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetCharacterNicknameAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character,
             [NotNull] string newCharacterNickname
         )
@@ -750,7 +750,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetCharacterSummaryAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character,
             [NotNull] string newCharacterSummary
         )
@@ -785,7 +785,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetCharacterDescriptionAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character,
             [NotNull] string newCharacterDescription
         )
@@ -819,7 +819,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetCharacterPronounAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character,
             [NotNull] string pronounFamily
         )
@@ -855,7 +855,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A task that must be awaited.</returns>
         public async Task<ModifyEntityResult> SetCharacterIsNSFWAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character,
             bool isNSFW
         )
@@ -885,7 +885,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> TransferCharacterOwnershipAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] User newOwner,
             [NotNull] Character character,
             [NotNull] IGuild guild
@@ -913,7 +913,7 @@ namespace DIGOS.Ambassador.Services
         [ItemNotNull]
         public IQueryable<Character> GetUserCharacters
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] User discordUser,
             [NotNull] IGuild guild
         )
@@ -933,7 +933,7 @@ namespace DIGOS.Ambassador.Services
         [Pure]
         public async Task<bool> IsCharacterNameUniqueForUserAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] User discordUser,
             [NotNull] string characterName,
             [NotNull] IGuild guild
@@ -955,7 +955,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> AddImageToCharacterAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character,
             [NotNull] string imageName,
             [NotNull] string imageUrl,
@@ -1011,7 +1011,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> RemoveImageFromCharacterAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character,
             [NotNull] string imageName
         )
@@ -1038,7 +1038,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<Character>> CreateCharacterFromAppearanceAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] ICommandContext context,
             [NotNull] string characterName,
             [NotNull] Appearance appearance
@@ -1066,7 +1066,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<CharacterRole>> CreateCharacterRoleAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IRole role,
             RoleAccess access
         )
@@ -1104,7 +1104,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A deletion result which may or may not have succeeded.</returns>
         public async Task<DeleteEntityResult> DeleteCharacterRoleAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] CharacterRole role
         )
         {
@@ -1122,7 +1122,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<CharacterRole>> GetCharacterRoleAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IRole role
         )
         {
@@ -1149,7 +1149,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<IQueryable<CharacterRole>>> GetCharacterRolesAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] IGuild guild
         )
         {
@@ -1169,7 +1169,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetCharacterRoleAccessAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] CharacterRole role,
             RoleAccess access
         )
@@ -1198,7 +1198,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetCharacterRoleAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character,
             [NotNull] CharacterRole characterRole
         )
@@ -1227,7 +1227,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> ClearCharacterRoleAsync
         (
-            [NotNull] GlobalInfoContext db,
+            [NotNull] AmbyDatabaseContext db,
             [NotNull] Character character
         )
         {
