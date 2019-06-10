@@ -247,6 +247,7 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
+            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, $"Roleplay \"{result.Entity.Name}\" created.");
         }
 
@@ -291,6 +292,7 @@ namespace DIGOS.Ambassador.Modules
                 }
             }
 
+            await this.Database.SaveChangesAsync();
             if (canSendMessageInCurrentChannelAfterDeletion)
             {
                 await _feedback.SendConfirmationAsync(this.Context, $"Roleplay \"{roleplay.Name}\" deleted.");
@@ -302,8 +304,6 @@ namespace DIGOS.Ambassador.Modules
 
                 await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build(), false);
             }
-
-            await this.Database.SaveChangesAsync();
         }
 
         /// <summary>
@@ -348,6 +348,8 @@ namespace DIGOS.Ambassador.Modules
                 }
             }
 
+            await this.Database.SaveChangesAsync();
+
             var roleplayOwnerUser = this.Context.Guild.GetUser((ulong)roleplay.Owner.DiscordID);
             await _feedback.SendConfirmationAsync(this.Context, $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
         }
@@ -378,6 +380,7 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
+            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, $"Invited {playerToInvite.Mention} to {roleplay.Name}.");
 
             var userDMChannel = await playerToInvite.GetOrCreateDMChannelAsync();
@@ -431,6 +434,8 @@ namespace DIGOS.Ambassador.Modules
                 }
             }
 
+            await this.Database.SaveChangesAsync();
+
             var roleplayOwnerUser = this.Context.Guild.GetUser((ulong)roleplay.Owner.DiscordID);
             await _feedback.SendConfirmationAsync(this.Context, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
         }
@@ -479,6 +484,8 @@ namespace DIGOS.Ambassador.Modules
                     await _feedback.SendWarningAsync(this.Context, grantPermissionResult.ErrorReason);
                 }
             }
+
+            await this.Database.SaveChangesAsync();
 
             var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
             try
@@ -546,6 +553,8 @@ namespace DIGOS.Ambassador.Modules
                 await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
                 return;
             }
+
+            await this.Database.SaveChangesAsync();
 
             var dedicatedChannel = result.Entity;
             await _feedback.SendConfirmationAsync
@@ -766,7 +775,6 @@ namespace DIGOS.Ambassador.Modules
             }
 
             await this.Database.SaveChangesAsync();
-
             await _feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplay.Name}\" has been stopped.");
         }
 
@@ -825,6 +833,7 @@ namespace DIGOS.Ambassador.Modules
                 }
             }
 
+            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, $"{addedOrUpdatedMessageCount} messages added to \"{roleplay.Name}\".");
         }
 
@@ -862,6 +871,7 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
+            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Roleplay ownership transferred.");
         }
 
@@ -1194,6 +1204,7 @@ namespace DIGOS.Ambassador.Modules
                     await dedicatedChannel.ModifyAsync(p => p.Name = $"{roleplay.Name}-rp");
                 }
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Roleplay name set.");
             }
 
@@ -1223,6 +1234,7 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Roleplay summary set.");
             }
 
@@ -1252,6 +1264,7 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, $"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}");
             }
 
@@ -1317,6 +1330,7 @@ namespace DIGOS.Ambassador.Modules
                     );
                 }
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, $"Roleplay set to {(isPublic ? "public" : "private")}");
             }
         }

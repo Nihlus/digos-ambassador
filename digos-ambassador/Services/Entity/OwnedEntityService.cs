@@ -110,8 +110,6 @@ namespace DIGOS.Ambassador.Services
 
             entity.Owner = newOwner;
 
-            await db.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 

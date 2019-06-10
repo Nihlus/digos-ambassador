@@ -168,8 +168,6 @@ namespace DIGOS.Ambassador.Services.Users
             {
                 userConsent.HasConsented = true;
             }
-
-            await db.SaveChangesAsync();
         }
 
         /// <summary>
@@ -190,8 +188,6 @@ namespace DIGOS.Ambassador.Services.Users
             {
                 userConsent.HasConsented = false;
             }
-
-            await db.SaveChangesAsync();
         }
     }
 }

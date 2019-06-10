@@ -368,8 +368,6 @@ namespace DIGOS.Ambassador.Services
 
             character.IsCurrent = true;
 
-            await db.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -398,8 +396,6 @@ namespace DIGOS.Ambassador.Services
             (
                 ch => ch.IsCurrent = false
             );
-
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -546,7 +542,6 @@ namespace DIGOS.Ambassador.Services
 
             owner.Characters.Add(character);
             await db.Characters.AddAsync(character);
-            await db.SaveChangesAsync();
 
             return CreateEntityResult<Character>.FromSuccess(character);
         }
@@ -579,7 +574,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             targetUser.DefaultCharacter = newDefaultCharacter;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -609,7 +603,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             targetUser.DefaultCharacter = null;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -666,7 +659,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             character.Name = newCharacterName;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -701,7 +693,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             character.AvatarUrl = newCharacterAvatarUrl;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -736,7 +727,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             character.Nickname = newCharacterNickname;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -771,7 +761,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             character.Summary = newCharacterSummary;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -805,7 +794,6 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The description is too long. It can be at most 1000 characters.");
             }
             character.Description = newCharacterDescription;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -842,7 +830,6 @@ namespace DIGOS.Ambassador.Services
             var pronounProvider = _pronounProviders[pronounFamily];
             character.PronounProviderFamily = pronounProvider.Family;
 
-            await db.SaveChangesAsync();
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -870,7 +857,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             character.IsNSFW = isNSFW;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -997,7 +983,6 @@ namespace DIGOS.Ambassador.Services
             };
 
             character.Images.Add(image);
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -1023,7 +1008,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             character.Images.RemoveAll(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -1053,7 +1037,6 @@ namespace DIGOS.Ambassador.Services
             var newCharacter = createCharacterResult.Entity;
             newCharacter.DefaultAppearance = appearance;
 
-            await db.SaveChangesAsync();
             return CreateEntityResult<Character>.FromSuccess(newCharacter);
         }
 
@@ -1091,7 +1074,6 @@ namespace DIGOS.Ambassador.Services
             };
 
             await db.CharacterRoles.AddAsync(characterRole);
-            await db.SaveChangesAsync();
 
             return CreateEntityResult<CharacterRole>.FromSuccess(characterRole);
         }
@@ -1109,7 +1091,6 @@ namespace DIGOS.Ambassador.Services
         )
         {
             db.CharacterRoles.Remove(role);
-            await db.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -1184,7 +1165,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             role.Access = access;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -1214,8 +1194,6 @@ namespace DIGOS.Ambassador.Services
 
             character.Role = characterRole;
 
-            await db.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -1241,8 +1219,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             character.Role = null;
-
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }

@@ -70,6 +70,7 @@ namespace DIGOS.Ambassador.Modules
             await this.Database.Database.EnsureDeletedAsync();
             await this.Database.Database.MigrateAsync();
 
+            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Database reset.");
         }
     }

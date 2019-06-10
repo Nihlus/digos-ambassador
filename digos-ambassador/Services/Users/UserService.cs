@@ -123,8 +123,6 @@ namespace DIGOS.Ambassador.Services.Users
 
             await db.Users.AddAsync(newUser);
 
-            await db.SaveChangesAsync();
-
             return await GetUser(db, discordUser);
         }
     }

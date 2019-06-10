@@ -223,6 +223,7 @@ namespace DIGOS.Ambassador.Modules
 
                 await _permissions.GrantLocalPermissionAsync(this.Database, this.Context.Guild, discordUser, newPermission);
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, $"{grantedPermission.ToString().Humanize().Transform(To.TitleCase)} granted to {discordUser.Mention}.");
             }
         }
@@ -273,6 +274,7 @@ namespace DIGOS.Ambassador.Modules
             {
                 await _permissions.RevokeLocalPermissionAsync(this.Database, this.Context.Guild, discordUser, revokedPermission);
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, $"${revokedPermission.ToString().Humanize().Transform(To.TitleCase)} revoked from {discordUser.Mention}.");
             }
 
@@ -297,6 +299,7 @@ namespace DIGOS.Ambassador.Modules
             {
                 await _permissions.RevokeLocalPermissionTargetAsync(this.Database, this.Context.Guild, discordUser, permission, revokedTarget);
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync
                 (
                     this.Context,

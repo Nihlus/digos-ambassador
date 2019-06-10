@@ -101,6 +101,8 @@ namespace DIGOS.Ambassador.Modules
         public async Task GrantConsentAsync()
         {
             await _privacy.GrantUserConsentAsync(this.Database, this.Context.User);
+
+            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Thank you! Enjoy using the bot :smiley:");
         }
 
@@ -115,6 +117,8 @@ namespace DIGOS.Ambassador.Modules
         public async Task RevokeConsentAsync()
         {
             await _privacy.RevokeUserConsentAsync(this.Database, this.Context.User);
+
+            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync
             (
                 this.Context,

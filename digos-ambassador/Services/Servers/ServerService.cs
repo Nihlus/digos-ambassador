@@ -99,7 +99,6 @@ namespace DIGOS.Ambassador.Services.Servers
             var server = Server.CreateDefault(discordServer);
 
             await db.Servers.AddAsync(server);
-            await db.SaveChangesAsync();
 
             return server;
         }
@@ -162,8 +161,6 @@ namespace DIGOS.Ambassador.Services.Servers
 
             server.Description = description;
 
-            await db.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -225,8 +222,6 @@ namespace DIGOS.Ambassador.Services.Servers
 
             server.JoinMessage = joinMessage;
 
-            await db.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -254,7 +249,6 @@ namespace DIGOS.Ambassador.Services.Servers
             }
 
             server.IsNSFW = isNsfw;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -283,7 +277,6 @@ namespace DIGOS.Ambassador.Services.Servers
             }
 
             server.SendJoinMessage = sendJoinMessage;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -303,7 +296,6 @@ namespace DIGOS.Ambassador.Services.Servers
         )
         {
             server.DedicatedRoleplayChannelsCategory = (long?)category?.Id;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }

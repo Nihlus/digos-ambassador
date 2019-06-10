@@ -161,6 +161,7 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
+            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Dedicated channel category cleared.");
         }
 
@@ -206,6 +207,7 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Server description set.");
             }
 
@@ -228,6 +230,7 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Server first-join message set.");
             }
 
@@ -250,6 +253,7 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync
                 (
                     this.Context,
@@ -280,6 +284,7 @@ namespace DIGOS.Ambassador.Modules
                     ? "will now send first-join messages to new users"
                     : "no longer sends first-join messages";
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync
                 (
                     this.Context,
@@ -312,6 +317,7 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
+                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Dedicated channel category set.");
             }
         }

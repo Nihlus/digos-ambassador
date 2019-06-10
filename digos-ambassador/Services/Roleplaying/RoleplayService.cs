@@ -148,7 +148,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             await db.Roleplays.AddAsync(roleplay);
-            await db.SaveChangesAsync();
 
             var roleplayResult = await GetUserRoleplayByNameAsync(db, context, context.Message.Author, roleplayName);
             if (!roleplayResult.IsSuccess)
@@ -199,7 +198,6 @@ namespace DIGOS.Ambassador.Services
                 // Update roleplay timestamp
                 roleplay.LastUpdated = DateTime.Now;
 
-                await db.SaveChangesAsync();
                 return ModifyEntityResult.FromSuccess();
             }
 
@@ -209,7 +207,6 @@ namespace DIGOS.Ambassador.Services
             // Update roleplay timestamp
             roleplay.LastUpdated = DateTime.Now;
 
-            await db.SaveChangesAsync();
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -456,8 +453,6 @@ namespace DIGOS.Ambassador.Services
             var participantEntry = roleplay.JoinedUsers.First(p => p.User.DiscordID == (long)kickedUser.Id);
             participantEntry.Status = ParticipantStatus.Kicked;
 
-            await db.SaveChangesAsync();
-
             return ExecuteResult.FromSuccess();
         }
 
@@ -498,8 +493,6 @@ namespace DIGOS.Ambassador.Services
 
             var participantEntry = roleplay.JoinedUsers.First(p => p.User.DiscordID == (long)removedUser.Id);
             participantEntry.Status = ParticipantStatus.None;
-
-            await db.SaveChangesAsync();
 
             return ExecuteResult.FromSuccess();
         }
@@ -568,8 +561,6 @@ namespace DIGOS.Ambassador.Services
                 participantEntry.Status = ParticipantStatus.Joined;
             }
 
-            await db.SaveChangesAsync();
-
             return CreateEntityResult<RoleplayParticipant>.FromSuccess(participantEntry);
         }
 
@@ -616,8 +607,6 @@ namespace DIGOS.Ambassador.Services
             {
                 participantEntry.Status = ParticipantStatus.Invited;
             }
-
-            await db.SaveChangesAsync();
 
             return ExecuteResult.FromSuccess();
         }
@@ -692,7 +681,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             roleplay.Name = newRoleplayName;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -717,7 +705,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             roleplay.Summary = newRoleplaySummary;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -742,7 +729,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             roleplay.IsNSFW = isNSFW;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -762,7 +748,6 @@ namespace DIGOS.Ambassador.Services
         )
         {
             roleplay.IsPublic = isPublic;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -841,7 +826,6 @@ namespace DIGOS.Ambassador.Services
 
             await dedicatedChannel.AddPermissionOverwriteAsync(everyoneRole, everyonePermissions);
 
-            await db.SaveChangesAsync();
             return CreateEntityResult<IGuildChannel>.FromSuccess(dedicatedChannel);
         }
 
@@ -883,7 +867,6 @@ namespace DIGOS.Ambassador.Services
             }
 
             roleplay.DedicatedChannelID = null;
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
