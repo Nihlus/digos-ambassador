@@ -183,7 +183,6 @@ namespace DIGOS.Ambassador.Modules
                 await _feedback.SendWarningAsync(this.Context, modifyResult.ErrorReason);
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" added.");
         }
 
@@ -213,7 +212,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" deleted.");
         }
 
@@ -266,7 +264,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "New dossier title set.");
             }
 
@@ -297,7 +294,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "New dossier summary set.");
             }
 
@@ -327,7 +323,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Dossier data set.");
             }
         }

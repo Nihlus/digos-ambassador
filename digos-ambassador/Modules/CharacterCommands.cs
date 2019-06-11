@@ -352,14 +352,12 @@ namespace DIGOS.Ambassador.Modules
                 characterSummary,
                 characterDescription
             );
-
             if (!createCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, createCharacterResult.ErrorReason);
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync
             (
                 this.Context, $"Character \"{createCharacterResult.Entity.Name}\" created."
@@ -394,6 +392,7 @@ namespace DIGOS.Ambassador.Modules
             }
 
             await this.Database.SaveChangesAsync();
+
             await _feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
 
             if (character.IsCurrent)
@@ -593,13 +592,6 @@ namespace DIGOS.Ambassador.Modules
 
             await _characters.MakeCharacterCurrentOnServerAsync(this.Database, this.Context, this.Context.Guild, character);
 
-            await this.Database.SaveChangesAsync();
-            await _feedback.SendConfirmationAsync
-            (
-                this.Context,
-                $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}."
-            );
-
             var guildUser = (IGuildUser)this.Context.User;
             var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
 
@@ -660,6 +652,12 @@ namespace DIGOS.Ambassador.Modules
                     }
                 }
             }
+
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}."
+            );
         }
 
         /// <summary>
@@ -721,7 +719,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Default character set.");
         }
 
@@ -751,7 +748,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Default character cleared.");
         }
 
@@ -797,16 +793,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            if (invoker.DefaultCharacter is null)
-            {
-                await this.Database.SaveChangesAsync();
-                await _feedback.SendConfirmationAsync(this.Context, "Character cleared.");
-            }
-            else
-            {
-                await AssumeCharacterFormAsync(invoker.DefaultCharacter);
-            }
-
             if (this.Context.Message.Author is IGuildUser guildUser)
             {
                 var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
@@ -847,6 +833,15 @@ namespace DIGOS.Ambassador.Modules
                         }
                     }
                 }
+            }
+
+            if (invoker.DefaultCharacter is null)
+            {
+                await _feedback.SendConfirmationAsync(this.Context, "Character cleared.");
+            }
+            else
+            {
+                await AssumeCharacterFormAsync(invoker.DefaultCharacter);
             }
         }
 
@@ -994,7 +989,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, $"Added \"{imageName}\" to {character.Name}'s gallery.");
         }
 
@@ -1024,7 +1018,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Image removed.");
         }
 
@@ -1063,7 +1056,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Character ownership transferred.");
         }
 
@@ -1192,7 +1184,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Character role created.");
             }
 
@@ -1243,7 +1234,6 @@ namespace DIGOS.Ambassador.Modules
                     await _discord.RemoveUserRoleAsync(this.Context, owner, role);
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Character role deleted.");
             }
 
@@ -1283,7 +1273,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync
                 (
                     this.Context, "Character role access conditions set."
@@ -1336,7 +1325,6 @@ namespace DIGOS.Ambassador.Modules
                     }
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Character role cleared.");
             }
         }
@@ -1403,7 +1391,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Character name set.");
             }
 
@@ -1460,7 +1447,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Character avatar set.");
             }
 
@@ -1491,7 +1477,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Character nickname set.");
 
                 // Update the user's active nickname if they are currently this character, and don't have the same nick
@@ -1546,7 +1531,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Character summary set.");
             }
 
@@ -1602,7 +1586,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Character description set.");
             }
 
@@ -1626,7 +1609,6 @@ namespace DIGOS.Ambassador.Modules
             {
                 await _characters.SetCharacterIsNSFWAsync(this.Database, character, isNSFW);
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, $"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
             }
 
@@ -1656,7 +1638,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
                 await _feedback.SendConfirmationAsync(this.Context, "Preferred pronoun set.");
             }
 
@@ -1714,9 +1695,6 @@ namespace DIGOS.Ambassador.Modules
                     return;
                 }
 
-                await this.Database.SaveChangesAsync();
-                await _feedback.SendConfirmationAsync(this.Context, "Character role set.");
-
                 if (character.IsCurrent)
                 {
                     if (!(previousRole is null))
@@ -1765,6 +1743,8 @@ namespace DIGOS.Ambassador.Modules
                         }
                     }
                 }
+
+                await _feedback.SendConfirmationAsync(this.Context, "Character role set.");
             }
         }
     }

@@ -82,7 +82,7 @@ namespace DIGOS.Ambassador.Services
             }
 
             await db.Dossiers.AddAsync(dossier);
-
+            await db.SaveChangesAsync();
             return CreateEntityResult<Dossier>.FromSuccess((await GetDossierByTitleAsync(db, title)).Entity);
         }
 
@@ -105,6 +105,7 @@ namespace DIGOS.Ambassador.Services
             }
 
             db.Dossiers.Remove(dossier);
+            await db.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -200,6 +201,8 @@ namespace DIGOS.Ambassador.Services
                 return updateDataResult;
             }
 
+            await db.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -223,6 +226,7 @@ namespace DIGOS.Ambassador.Services
             }
 
             dossier.Summary = newSummary;
+            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -261,6 +265,7 @@ namespace DIGOS.Ambassador.Services
             }
 
             dossier.Path = newDossierPath;
+            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -339,6 +344,8 @@ namespace DIGOS.Ambassador.Services
                         }
 
                         dossier.Path = dossierPath;
+
+                        await db.SaveChangesAsync();
                     }
                 }
                 catch (TaskCanceledException)

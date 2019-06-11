@@ -207,7 +207,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, result.ShiftMessage);
         }
 
@@ -322,7 +321,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
         }
 
@@ -452,7 +450,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
         }
 
@@ -561,7 +558,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
         }
 
@@ -720,7 +716,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Character form reset.");
         }
 
@@ -760,7 +755,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, $"Current appearance saved as new character \"{newCharacterName}\"");
         }
 
@@ -798,7 +792,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Current appearance saved as the default one of this character.");
         }
 
@@ -824,6 +817,7 @@ namespace DIGOS.Ambassador.Modules
             protection.DefaultOptIn = shouldOptIn;
 
             await this.Database.SaveChangesAsync();
+
             await _feedback.SendConfirmationAsync
             (
                 this.Context,
@@ -851,6 +845,7 @@ namespace DIGOS.Ambassador.Modules
             protection.HasOptedIn = true;
 
             await this.Database.SaveChangesAsync();
+
             await _feedback.SendConfirmationAsync(this.Context, "Opted into transformations. Have fun!");
         }
 
@@ -874,6 +869,7 @@ namespace DIGOS.Ambassador.Modules
             protection.HasOptedIn = false;
 
             await this.Database.SaveChangesAsync();
+
             await _feedback.SendConfirmationAsync(this.Context, "Opted out of transformations.");
         }
 
@@ -893,7 +889,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, $"Default protection type set to \"{protectionType.Humanize()}\"");
         }
 
@@ -914,7 +909,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, $"Protection type set to \"{protectionType.Humanize()}\"");
         }
 
@@ -934,7 +928,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "User whitelisted.");
         }
 
@@ -954,7 +947,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "User whitelisted.");
         }
 
@@ -980,7 +972,6 @@ namespace DIGOS.Ambassador.Modules
                 $"{updateTransformationsResult.SpeciesUpdated} species updated, " +
                 $"and {updateTransformationsResult.TransformationsUpdated} transformations updated.";
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, confirmationText);
         }
     }

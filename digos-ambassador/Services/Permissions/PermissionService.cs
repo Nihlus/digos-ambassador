@@ -72,6 +72,8 @@ namespace DIGOS.Ambassador.Services
                 // Include the new target permissions
                 existingPermission.Target |= grantedPermission.Target;
             }
+
+            await db.SaveChangesAsync();
         }
 
         /// <summary>
@@ -101,6 +103,7 @@ namespace DIGOS.Ambassador.Services
             if (existingPermission != null)
             {
                 db.LocalPermissions.Remove(existingPermission);
+                await db.SaveChangesAsync();
             }
         }
 
@@ -133,6 +136,7 @@ namespace DIGOS.Ambassador.Services
             if (existingPermission != null)
             {
                 existingPermission.Target &= ~revokedTarget;
+                await db.SaveChangesAsync();
             }
         }
 
@@ -157,6 +161,8 @@ namespace DIGOS.Ambassador.Services
 
                 await db.LocalPermissions.AddAsync(scopedPermission);
             }
+
+            await db.SaveChangesAsync();
         }
 
         /// <summary>

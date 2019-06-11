@@ -250,6 +250,7 @@ namespace DIGOS.Ambassador.Modules
                 user.Class = userClass;
 
                 await this.Database.SaveChangesAsync();
+
                 await _feedback.SendConfirmationAsync(this.Context, "Class updated.");
             }
 
@@ -284,6 +285,7 @@ namespace DIGOS.Ambassador.Modules
                 user.Class = userClass;
 
                 await this.Database.SaveChangesAsync();
+
                 await _feedback.SendConfirmationAsync(this.Context, $"Class of {discordUser.Mention} updated.");
             }
 
@@ -310,6 +312,7 @@ namespace DIGOS.Ambassador.Modules
                 user.Bio = bio;
 
                 await this.Database.SaveChangesAsync();
+
                 await _feedback.SendConfirmationAsync(this.Context, "Bio updated.");
             }
 
@@ -338,6 +341,7 @@ namespace DIGOS.Ambassador.Modules
                 user.Bio = bio;
 
                 await this.Database.SaveChangesAsync();
+
                 await _feedback.SendConfirmationAsync(this.Context, $"Bio of {discordUser.Mention} updated.");
             }
 
@@ -364,6 +368,7 @@ namespace DIGOS.Ambassador.Modules
                 user.Timezone = timezone;
 
                 await this.Database.SaveChangesAsync();
+
                 await _feedback.SendConfirmationAsync(this.Context, "Timezone updated.");
             }
 
@@ -392,6 +397,7 @@ namespace DIGOS.Ambassador.Modules
                 user.Timezone = timezone;
 
                 await this.Database.SaveChangesAsync();
+
                 await _feedback.SendConfirmationAsync(this.Context, $"Timezone of {discordUser.Mention} updated.");
             }
         }

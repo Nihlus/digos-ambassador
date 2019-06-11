@@ -262,7 +262,6 @@ namespace DIGOS.Ambassador.Modules
                 return;
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Preference set.");
         }
 
@@ -344,7 +343,6 @@ namespace DIGOS.Ambassador.Modules
                 ));
             }
 
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, $"Done. {updatedKinkCount} kinks updated.");
         }
 
@@ -357,8 +355,6 @@ namespace DIGOS.Ambassador.Modules
         public async Task ResetKinksAsync()
         {
             await _kinks.ResetUserKinksAsync(this.Database, this.Context.User);
-
-            await this.Database.SaveChangesAsync();
             await _feedback.SendConfirmationAsync(this.Context, "Preferences reset.");
         }
     }

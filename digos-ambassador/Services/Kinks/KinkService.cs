@@ -190,6 +190,7 @@ namespace DIGOS.Ambassador.Services
         public async Task<ModifyEntityResult> SetKinkPreferenceAsync([NotNull] AmbyDatabaseContext db, [NotNull] UserKink userKink, KinkPreference preference)
         {
             userKink.Preference = preference;
+            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -259,6 +260,7 @@ namespace DIGOS.Ambassador.Services
             var userKink = UserKink.CreateFrom(kink);
             user.Kinks.Add(userKink);
 
+            await db.SaveChangesAsync();
             return CreateEntityResult<UserKink>.FromSuccess(userKink);
         }
 
@@ -354,6 +356,8 @@ namespace DIGOS.Ambassador.Services
 
             var user = getUserResult.Entity;
             user.Kinks.Clear();
+
+            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -465,18 +469,15 @@ namespace DIGOS.Ambassador.Services
         /// <returns>The number of updated kinks.</returns>
         public async Task<int> UpdateKinksAsync(AmbyDatabaseContext db, [NotNull, ItemNotNull] IEnumerable<Kink> newKinks)
         {
-            var updatedKinks = 0;
             foreach (var kink in newKinks)
             {
                 if (!await db.Kinks.AnyAsync(k => k.FListID == kink.FListID))
                 {
                     await db.Kinks.AddAsync(kink);
-
-                    ++updatedKinks;
                 }
             }
 
-            return updatedKinks;
+            return await db.SaveChangesAsync();
         }
     }
 }

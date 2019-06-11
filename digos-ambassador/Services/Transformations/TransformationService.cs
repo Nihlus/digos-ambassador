@@ -110,6 +110,7 @@ namespace DIGOS.Ambassador.Services
             }
 
             character.CurrentAppearance.Components.Remove(component);
+            await db.SaveChangesAsync();
 
             string removeMessage = _descriptionBuilder.BuildRemoveMessage(character, component);
             return ShiftBodypartResult.FromSuccess(removeMessage);
@@ -172,6 +173,8 @@ namespace DIGOS.Ambassador.Services
             var transformation = getTFsResult.Entity.First();
             var component = AppearanceComponent.CreateFrom(transformation, chirality);
             character.CurrentAppearance.Components.Add(component);
+
+            await db.SaveChangesAsync();
 
             var growMessage = _descriptionBuilder.BuildGrowMessage(character, component);
             return ShiftBodypartResult.FromSuccess(growMessage);
@@ -248,6 +251,8 @@ namespace DIGOS.Ambassador.Services
                 shiftMessage = _descriptionBuilder.BuildShiftMessage(character, currentComponent);
             }
 
+            await db.SaveChangesAsync();
+
             return ShiftBodypartResult.FromSuccess(shiftMessage);
         }
 
@@ -290,6 +295,8 @@ namespace DIGOS.Ambassador.Services
 
             var originalColour = currentComponent.BaseColour;
             currentComponent.BaseColour = colour;
+
+            await db.SaveChangesAsync();
 
             string shiftMessage = _descriptionBuilder.BuildColourShiftMessage(character, originalColour, currentComponent);
             return ShiftBodypartResult.FromSuccess(shiftMessage);
@@ -340,6 +347,8 @@ namespace DIGOS.Ambassador.Services
             currentComponent.Pattern = pattern;
             currentComponent.PatternColour = patternColour;
 
+            await db.SaveChangesAsync();
+
             string shiftMessage = _descriptionBuilder.BuildPatternShiftMessage(character, originalPattern, originalColour, currentComponent);
             return ShiftBodypartResult.FromSuccess(shiftMessage);
         }
@@ -388,6 +397,8 @@ namespace DIGOS.Ambassador.Services
 
             var originalColour = currentComponent.PatternColour;
             currentComponent.PatternColour = patternColour;
+
+            await db.SaveChangesAsync();
 
             // ReSharper disable once AssignNullToNotNullAttribute - Having a pattern implies having a pattern colour
             string shiftMessage = _descriptionBuilder.BuildPatternColourShiftMessage(character, originalColour, currentComponent);
@@ -539,6 +550,7 @@ namespace DIGOS.Ambassador.Services
             }
 
             character.CurrentAppearance = Appearance.CopyFrom(character.DefaultAppearance);
+            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -561,6 +573,8 @@ namespace DIGOS.Ambassador.Services
             }
 
             character.DefaultAppearance = Appearance.CopyFrom(character.CurrentAppearance);
+
+            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -593,6 +607,7 @@ namespace DIGOS.Ambassador.Services
             }
 
             protection.DefaultType = protectionType;
+            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -627,6 +642,7 @@ namespace DIGOS.Ambassador.Services
             }
 
             protection.Type = protectionType;
+            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -688,6 +704,8 @@ namespace DIGOS.Ambassador.Services
                 protectionEntry.Type = ListingType.Whitelist;
             }
 
+            await db.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -748,6 +766,8 @@ namespace DIGOS.Ambassador.Services
                 protectionEntry.Type = ListingType.Blacklist;
             }
 
+            await db.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -782,6 +802,7 @@ namespace DIGOS.Ambassador.Services
             protection = GlobalUserProtection.CreateDefault(user);
 
             await db.GlobalUserProtections.AddAsync(protection);
+            await db.SaveChangesAsync();
 
             return RetrieveEntityResult<GlobalUserProtection>.FromSuccess(protection);
         }
@@ -823,6 +844,7 @@ namespace DIGOS.Ambassador.Services
             protection = ServerUserProtection.CreateDefault(globalProtection, server);
 
             await db.ServerUserProtections.AddAsync(protection);
+            await db.SaveChangesAsync();
 
             return RetrieveEntityResult<ServerUserProtection>.FromSuccess(protection);
         }
@@ -869,6 +891,8 @@ namespace DIGOS.Ambassador.Services
                         ++updatedSpecies;
                     }
                 }
+
+                await db.SaveChangesAsync();
             }
 
             uint addedTransformations = 0;
@@ -915,6 +939,8 @@ namespace DIGOS.Ambassador.Services
                             ++updatedTransformations;
                         }
                     }
+
+                    await db.SaveChangesAsync();
                 }
             }
 
