@@ -468,6 +468,9 @@ namespace DIGOS.Ambassador.Services
             [CanBeNull] string characterDescription
         )
         {
+            // Default the nickname to the character name
+            characterNickname = characterNickname ?? characterName;
+
             var getOwnerResult = await _users.GetOrRegisterUserAsync(db, context.Message.Author);
             if (!getOwnerResult.IsSuccess)
             {
