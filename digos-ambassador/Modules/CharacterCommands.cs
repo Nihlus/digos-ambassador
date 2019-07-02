@@ -1560,6 +1560,7 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="character">The character.</param>
             /// <param name="pronounFamily">The pronoun family.</param>
             [UsedImplicitly]
+            [Alias("pronoun", "pronouns")]
             [Command("pronoun")]
             [Summary("Sets the preferred pronoun of a character.")]
             [RequireContext(Guild)]
