@@ -180,7 +180,7 @@ namespace DIGOS.Ambassador.Modules
         {
             string emoteUrl;
 
-            var guildEmote = this.Context.Guild.Emotes.FirstOrDefault
+            var guildEmote = this.Context.Guild?.Emotes.FirstOrDefault
             (
                 e => e.Name.Equals(emoteName, StringComparison.OrdinalIgnoreCase)
             );
