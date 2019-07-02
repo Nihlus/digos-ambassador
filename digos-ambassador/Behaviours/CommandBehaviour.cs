@@ -403,12 +403,14 @@ namespace DIGOS.Ambassador.Behaviours
 
                 using (var ms = new MemoryStream())
                 {
+                    var now = DateTime.UtcNow;
+
                     using (var sw = new StreamWriter(ms, Encoding.Default, 1024, true))
                     {
                         await sw.WriteLineAsync("Automatic bug report");
                         await sw.WriteLineAsync("====================");
                         await sw.WriteLineAsync();
-                        await sw.WriteLineAsync($"Generated at: {DateTime.UtcNow}");
+                        await sw.WriteLineAsync($"Generated at: {now}");
                         await sw.WriteLineAsync($"Bot version: {Assembly.GetEntryAssembly().GetName().Version}");
                         await sw.WriteLineAsync($"Command message link: {context.Message.GetJumpUrl()}");
                         await sw.WriteLineAsync
@@ -428,7 +430,10 @@ namespace DIGOS.Ambassador.Behaviours
                     // Rewind the stream before passing it along
                     ms.Position = 0;
                     await userDMChannel.SendMessageAsync(string.Empty, false, eb.Build());
-                    await userDMChannel.SendFileAsync(ms, "bug-report.md", string.Empty, false, reportEmbed.Build());
+
+                    var date = now.ToShortDateString();
+                    var time = now.ToShortTimeString();
+                    await userDMChannel.SendFileAsync(ms, $"bug-report-{date}-{time}.md", string.Empty, false, reportEmbed.Build());
                 }
             }
             catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
