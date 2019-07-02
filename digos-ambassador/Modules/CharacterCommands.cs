@@ -661,68 +661,6 @@ namespace DIGOS.Ambassador.Modules
         }
 
         /// <summary>
-        /// Sets your default form to your current character.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("set-default")]
-        [Summary("Sets your default form to your current character.")]
-        [RequireContext(Guild)]
-        public async Task SetDefaultCharacterAsync()
-        {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
-            if (!getInvokerResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
-                return;
-            }
-
-            var invoker = getInvokerResult.Entity;
-
-            var result = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
-            if (!result.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                return;
-            }
-
-            await SetDefaultCharacterAsync(result.Entity);
-        }
-
-        /// <summary>
-        /// Sets your default form to the given character.
-        /// </summary>
-        /// <param name="character">The character to set as the default character.</param>
-        [UsedImplicitly]
-        [Command("set-default")]
-        [Summary("Sets your default form to the given character.")]
-        [RequireContext(Guild)]
-        public async Task SetDefaultCharacterAsync
-        (
-            [NotNull]
-            [RequireEntityOwner]
-            Character character
-        )
-        {
-            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
-            if (!getUserResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
-                return;
-            }
-
-            var user = getUserResult.Entity;
-
-            var result = await _characters.SetDefaultCharacterForUserAsync(this.Database, this.Context, character, user);
-            if (!result.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                return;
-            }
-
-            await _feedback.SendConfirmationAsync(this.Context, "Default character set.");
-        }
-
-        /// <summary>
         /// Clears your default form.
         /// </summary>
         [UsedImplicitly]
@@ -1340,6 +1278,7 @@ namespace DIGOS.Ambassador.Modules
             private readonly DiscordService _discord;
             private readonly UserFeedbackService _feedback;
             private readonly CharacterService _characters;
+            private readonly UserService _users;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
@@ -1349,13 +1288,15 @@ namespace DIGOS.Ambassador.Modules
             /// <param name="feedbackService">The feedback service.</param>
             /// <param name="characterService">The character service.</param>
             /// <param name="servers">The server service.</param>
+            /// <param name="users">The user service.</param>
             public SetCommands
             (
                 AmbyDatabaseContext database,
                 DiscordService discordService,
                 UserFeedbackService feedbackService,
                 CharacterService characterService,
-                ServerService servers
+                ServerService servers,
+                UserService users
             )
                 : base(database)
             {
@@ -1363,6 +1304,7 @@ namespace DIGOS.Ambassador.Modules
                 _feedback = feedbackService;
                 _characters = characterService;
                 _servers = servers;
+                _users = users;
             }
 
             /// <summary>
@@ -1745,6 +1687,68 @@ namespace DIGOS.Ambassador.Modules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Character role set.");
+            }
+
+            /// <summary>
+            /// Sets your default form to your current character.
+            /// </summary>
+            [UsedImplicitly]
+            [Command("default")]
+            [Summary("Sets your default form to your current character.")]
+            [RequireContext(Guild)]
+            public async Task SetDefaultCharacterAsync()
+            {
+                var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+                if (!getInvokerResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
+                    return;
+                }
+
+                var invoker = getInvokerResult.Entity;
+
+                var result = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
+                if (!result.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    return;
+                }
+
+                await SetDefaultCharacterAsync(result.Entity);
+            }
+
+            /// <summary>
+            /// Sets your default form to the given character.
+            /// </summary>
+            /// <param name="character">The character to set as the default character.</param>
+            [UsedImplicitly]
+            [Command("default")]
+            [Summary("Sets your default form to the given character.")]
+            [RequireContext(Guild)]
+            public async Task SetDefaultCharacterAsync
+            (
+                [NotNull]
+                [RequireEntityOwner]
+                Character character
+            )
+            {
+                var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+                if (!getUserResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                    return;
+                }
+
+                var user = getUserResult.Entity;
+
+                var result = await _characters.SetDefaultCharacterForUserAsync(this.Database, this.Context, character, user);
+                if (!result.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    return;
+                }
+
+                await _feedback.SendConfirmationAsync(this.Context, "Default character set.");
             }
         }
     }
