@@ -78,7 +78,32 @@ namespace DIGOS.Ambassador.Services.Exporters
                 pdfDoc.AddCreator("DIGOS Ambassador");
                 pdfDoc.AddTitle(roleplay.Name);
 
-                var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
+                var joinedUsers = await Task.WhenAll
+                (
+                    roleplay.JoinedUsers.Select
+                    (
+                        async p =>
+                        {
+                            var guildUser = await this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID);
+                            if (guildUser is null)
+                            {
+                                var messageByUser = roleplay.Messages.FirstOrDefault
+                                (
+                                    m => m.AuthorDiscordID == p.User.DiscordID
+                                );
+
+                                if (messageByUser is null)
+                                {
+                                    return $"Unknown user ({p.User.DiscordID})";
+                                }
+
+                                return messageByUser.AuthorNickname;
+                            }
+
+                            return guildUser.Username;
+                        }
+                    )
+                );
 
                 pdfDoc.Add(CreateTitle(roleplay.Name));
                 pdfDoc.Add(CreateParticipantList(joinedUsers));
@@ -120,7 +145,7 @@ namespace DIGOS.Ambassador.Services.Exporters
         }
 
         [NotNull]
-        private Paragraph CreateParticipantList([NotNull] IEnumerable<IGuildUser> participants)
+        private Paragraph CreateParticipantList([NotNull] IEnumerable<string> participantNames)
         {
             var paragraph = new Paragraph
             {
@@ -130,9 +155,9 @@ namespace DIGOS.Ambassador.Services.Exporters
             var participantsTitleChunk = new Chunk("Participants: \n", StandardFont);
             paragraph.Add(participantsTitleChunk);
 
-            foreach (var participant in participants)
+            foreach (var participantName in participantNames)
             {
-                var content = $"{participant.Username}\n";
+                var content = $"{participantName}\n";
                 var participantChunk = new Chunk(content, ItalicFont);
 
                 paragraph.Add(participantChunk);

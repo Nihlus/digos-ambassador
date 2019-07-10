@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
         public virtual List<RoleplayParticipant> ParticipatingUsers { get; set; } = new List<RoleplayParticipant>();
 
         /// <summary>
-        /// Gets the users that have been kicked from the roleplay.
+        /// Gets the users that have joined the roleplay.
         /// </summary>
         [NotNull, NotMapped]
         public IEnumerable<RoleplayParticipant> JoinedUsers =>

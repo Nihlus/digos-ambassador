@@ -235,11 +235,16 @@ namespace DIGOS.Ambassador.Database
                 throw new InvalidDataException("The credential file was of an invalid format.");
             }
 
-            var password = passfileContents[4];
-
             optionsBuilder
                 .UseLazyLoadingProxies()
-                .UseNpgsql($"Server=localhost;Database=amby;Username=amby;Password={password}");
+                .UseNpgsql
+                (
+                    $"Server={passfileContents[0]};" +
+                    $"Port={ushort.Parse(passfileContents[1])};" +
+                    $"Database={passfileContents[2]};" +
+                    $"Username={passfileContents[3]};" +
+                    $"Password={passfileContents[4]}"
+                );
 
             return optionsBuilder;
         }

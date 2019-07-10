@@ -242,3 +242,5 @@ fabric.properties
 # Sensitive credentials
 /digos-ambassador/Content/bot.token
 /digos-ambassador/Content/database.credentials
+/digos-ambassador/Content/database-dev.credentials
+/digos-ambassador/Content/bot-dev.token
