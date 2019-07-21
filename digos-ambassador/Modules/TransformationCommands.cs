@@ -678,9 +678,17 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Describes the current physical appearance of a character.")]
         public async Task DescribeCharacterAsync([NotNull] Character character)
         {
-            var eb = await _transformation.GenerateCharacterDescriptionAsync(this.Context, character);
+            var (eb, description) = await _transformation.GenerateCharacterDescriptionAsync(this.Context, character);
 
             await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
+            await _feedback.SendPrivateEmbedAsync
+            (
+                this.Context,
+                this.Context.User,
+                Color.DarkPurple,
+                description,
+                false
+            );
         }
 
         /// <summary>

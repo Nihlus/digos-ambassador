@@ -607,7 +607,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="character">The character to generate the description for.</param>
         /// <returns>An embed with a formatted description.</returns>
         [Pure]
-        public async Task<Embed> GenerateCharacterDescriptionAsync
+        public async Task<(Embed, string)> GenerateCharacterDescriptionAsync
         (
             [NotNull] ICommandContext context,
             [NotNull] Character character
@@ -630,9 +630,7 @@ namespace DIGOS.Ambassador.Services
             eb.AddField("Description", character.Description);
 
             string visualDescription = _descriptionBuilder.BuildVisualDescription(character);
-            eb.WithDescription(visualDescription);
-
-            return eb.Build();
+            return (eb.Build(), visualDescription);
         }
 
         /// <summary>

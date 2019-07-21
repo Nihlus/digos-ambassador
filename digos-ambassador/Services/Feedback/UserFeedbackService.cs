@@ -237,6 +237,61 @@ namespace DIGOS.Ambassador.Services
         }
 
         /// <summary>
+        /// Sends a private embed to a given user, alerting them in their current context if they're not already in a
+        /// DM.
+        /// </summary>
+        /// <param name="context">The context of the command.</param>
+        /// <param name="user">The user to send the embed to.</param>
+        /// <param name="color">The color of the embed.</param>
+        /// <param name="contents">The contents of the embed to send.</param>
+        /// <param name="notify">Whether or not to notify the user that they've been sent a message.</param>
+        public async Task SendPrivateEmbedAsync
+        (
+            [NotNull] ICommandContext context,
+            IUser user,
+            Color color,
+            [NotNull] string contents,
+            bool notify = true
+        )
+        {
+            // Sometimes the content is > 2048 in length. We'll chunk it into embeds of 1024 here.
+            if (contents.Length < 1024)
+            {
+                var eb = CreateEmbedBase(color);
+                eb.WithDescription(contents);
+
+                await user.SendMessageAsync(null, embed: eb.Build());
+                return;
+            }
+
+            var words = contents.Split(" ");
+            var messageBuilder = new StringBuilder();
+            foreach (var word in words)
+            {
+                if (messageBuilder.Length >= 1024)
+                {
+                    var eb = CreateEmbedBase(color);
+                    eb.WithDescription(messageBuilder.ToString());
+
+                    await user.SendMessageAsync(null, embed: eb.Build());
+
+                    messageBuilder.Clear();
+                }
+
+                messageBuilder.Append(word);
+                messageBuilder.Append(" ");
+            }
+
+            if (messageBuilder.Length > 0)
+            {
+                var eb = CreateEmbedBase(color);
+                eb.WithDescription(messageBuilder.ToString());
+
+                await user.SendMessageAsync(null, embed: eb.Build());
+            }
+        }
+
+        /// <summary>
         /// Creates a feedback embed.
         /// </summary>
         /// <param name="invoker">The invoking mentionable.</param>
