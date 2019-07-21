@@ -38,12 +38,19 @@ namespace DIGOS.Ambassador.Services
         public string ShiftMessage { get; }
 
         /// <summary>
+        /// Gets the action that was performed on the bodypart.
+        /// </summary>
+        public ShiftBodypartAction Action { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ShiftBodypartResult"/> class.
         /// </summary>
         /// <param name="shiftMessage">The message to display to the user when shifting.</param>
-        private ShiftBodypartResult([CanBeNull] string shiftMessage)
+        /// <param name="action">The action that was performed on the bodypart.</param>
+        private ShiftBodypartResult([CanBeNull] string shiftMessage, ShiftBodypartAction action)
         {
             this.ShiftMessage = shiftMessage;
+            this.Action = action;
         }
 
         /// <inheritdoc cref="ResultBase{TResultType}(CommandError?,string,Exception)"/>
@@ -56,6 +63,8 @@ namespace DIGOS.Ambassador.Services
         )
             : base(error, errorReason, exception)
         {
+            // Assume that the programmer isn't dumb and leaves dirty changes on failure
+            this.Action = ShiftBodypartAction.Nothing;
         }
 
         /// <summary>
@@ -63,10 +72,11 @@ namespace DIGOS.Ambassador.Services
         /// </summary>
         /// <returns>A successful result.</returns>
         /// <param name="shiftMessage">The message to display to the user when shifting.</param>
+        /// <param name="action">The action that was performed on the bodypart.</param>
         [Pure]
-        public static ShiftBodypartResult FromSuccess([NotNull] string shiftMessage)
+        public static ShiftBodypartResult FromSuccess([NotNull] string shiftMessage, ShiftBodypartAction action)
         {
-            return new ShiftBodypartResult(shiftMessage);
+            return new ShiftBodypartResult(shiftMessage, action);
         }
     }
 }

@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Attributes;
+using iTextSharp.text.exceptions;
 
 namespace DIGOS.Ambassador.Transformations
 {
@@ -102,6 +103,12 @@ namespace DIGOS.Ambassador.Transformations
         Vagina,
 
         /// <summary>
+        /// The ears.
+        /// </summary>
+        [Composite(Ear)]
+        Ears,
+
+        /// <summary>
         /// The eyes.
         /// </summary>
         [Composite(Eye)]
@@ -110,7 +117,7 @@ namespace DIGOS.Ambassador.Transformations
         /// <summary>
         /// The head, composed of the face, the ears, the teeth, and the eyes.
         /// </summary>
-        [Composite(Face, Ear, Teeth, Eye)]
+        [Composite(Face, Ears, Teeth, Eyes, Hair)]
         Head,
 
         /// <summary>
@@ -130,5 +137,11 @@ namespace DIGOS.Ambassador.Transformations
         /// </summary>
         [Composite(Wing)]
         Wings,
+
+        /// <summary>
+        /// All of the available body parts.
+        /// </summary>
+        [Composite(Head, Body, Arms, Legs, Tail, Wings, Vagina, Penis)]
+        Full
     }
 }

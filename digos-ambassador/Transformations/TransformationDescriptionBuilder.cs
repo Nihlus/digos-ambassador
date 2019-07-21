@@ -204,6 +204,27 @@ namespace DIGOS.Ambassador.Transformations
         }
 
         /// <summary>
+        /// Builds a shift message for the given character if the given transformation were to be applied to both chiral
+        /// components at the same time.
+        /// </summary>
+        /// <param name="character">The character to use as a base.</param>
+        /// <param name="component">The component to build the message from.</param>
+        /// <returns>The uniform shift message.</returns>
+        [NotNull]
+        [Pure]
+        public string BuildUniformShiftMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
+        {
+            var transformation = component.Transformation;
+
+            if (transformation.UniformShiftMessage is null)
+            {
+                throw new InvalidOperationException("Missing uniform shift description.");
+            }
+
+            return ReplaceTokensWithContent(transformation.UniformShiftMessage, character, component);
+        }
+
+        /// <summary>
         /// Builds a grow message for the given character if the given transformation were to be applied.
         /// </summary>
         /// <param name="character">The character to use as a base.</param>
@@ -216,6 +237,27 @@ namespace DIGOS.Ambassador.Transformations
             var transformation = component.Transformation;
 
             return ReplaceTokensWithContent(transformation.GrowMessage, character, component);
+        }
+
+        /// <summary>
+        /// Builds a grow message for the given character if the given transformation were to be applied to both chiral
+        /// components at the same time.
+        /// </summary>
+        /// <param name="character">The character to use as a base.</param>
+        /// <param name="component">The component to build the message from.</param>
+        /// <returns>The uniform grow message.</returns>
+        [NotNull]
+        [Pure]
+        public string BuildUniformGrowMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
+        {
+            var transformation = component.Transformation;
+
+            if (transformation.UniformGrowMessage is null)
+            {
+                throw new InvalidOperationException("Missing uniform grow description.");
+            }
+
+            return ReplaceTokensWithContent(transformation.UniformGrowMessage, character, component);
         }
 
         /// <summary>

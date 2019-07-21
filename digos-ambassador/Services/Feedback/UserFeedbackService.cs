@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
@@ -185,8 +186,36 @@ namespace DIGOS.Ambassador.Services
 
         private async Task SendEmbedAsync([NotNull] ICommandContext context, Color color, [NotNull] string contents)
         {
-            var eb = CreateFeedbackEmbed(context.Message.Author, color, contents);
-            await SendEmbedAsync(context.Channel, eb);
+            // Sometimes the content is > 2048 in length. We'll chunk it into embeds of 1024 here.
+            if (contents.Length < 1024)
+            {
+                var eb = CreateFeedbackEmbed(context.Message.Author, color, contents);
+                await SendEmbedAsync(context.Channel, eb);
+
+                return;
+            }
+
+            var words = contents.Split(" ");
+            var messageBuilder = new StringBuilder();
+            foreach (var word in words)
+            {
+                if (messageBuilder.Length >= 1024)
+                {
+                    var eb = CreateFeedbackEmbed(context.Message.Author, color, messageBuilder.ToString());
+                    await SendEmbedAsync(context.Channel, eb);
+
+                    messageBuilder.Clear();
+                }
+
+                messageBuilder.Append(word);
+                messageBuilder.Append(" ");
+            }
+
+            if (messageBuilder.Length > 0)
+            {
+                var eb = CreateFeedbackEmbed(context.Message.Author, color, messageBuilder.ToString());
+                await SendEmbedAsync(context.Channel, eb);
+            }
         }
 
         /// <summary>
