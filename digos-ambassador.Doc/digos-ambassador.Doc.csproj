@@ -12,15 +12,11 @@
   <ItemGroup>
     <AdditionalFiles Include="$(ProjectDir)\..\stylecop.json">
       <Link>stylecop.json</Link>
+      <InProject>false</InProject>
     </AdditionalFiles>
     <AdditionalFiles Include="$(ProjectDir)\..\stylecop.ruleset">
       <Link>stylecop.ruleset</Link>
-    </AdditionalFiles>
-    <AdditionalFiles Include="$(SolutionDir)\README.md">
-      <Link>README.md</Link>
-    </AdditionalFiles>
-    <AdditionalFiles Include="$(SolutionDir)\.travis.yml">
-      <Link>.travis.yml</Link>
+      <InProject>false</InProject>
     </AdditionalFiles>
   </ItemGroup>
   <ItemGroup>
