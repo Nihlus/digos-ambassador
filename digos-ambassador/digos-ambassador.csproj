@@ -18,6 +18,7 @@
       <Link>stylecop.ruleset</Link>
       <InProject>false</InProject>
     </AdditionalFiles>
+    <EmbeddedResource Include="log4net.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\**\**">
