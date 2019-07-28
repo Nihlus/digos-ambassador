@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Kinks;
@@ -31,6 +32,7 @@ namespace DIGOS.Ambassador.Database.Users
     /// <summary>
     /// Represents globally accessible information about a user.
     /// </summary>
+    [Table("Users", Schema = "Core")]
     public class User : IEFEntity
     {
         /// <inheritdoc />

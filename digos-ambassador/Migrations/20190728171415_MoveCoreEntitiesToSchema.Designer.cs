@@ -8,14 +8,16 @@ using DIGOS.Ambassador.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(AmbyDatabaseContext))]
-    partial class GlobalInfoContextModelSnapshot : ModelSnapshot
+    [Migration("20190728171415_MoveCoreEntitiesToSchema")]
+    partial class MoveCoreEntitiesToSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -291,7 +293,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Servers","Core");
+                    b.ToTable("ServersIntermediateTableName","Core");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.Appearances.Appearance", b =>
@@ -510,7 +512,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("ServerID");
 
-                    b.ToTable("Users","Core");
+                    b.ToTable("UsersIntermediateTableName","Core");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Users.UserConsent", b =>
@@ -524,7 +526,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("UserConsents","Core");
+                    b.ToTable("UserConsentsIntermediateTableName","Core");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.Character", b =>

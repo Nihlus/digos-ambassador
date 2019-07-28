@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
 
 namespace DIGOS.Ambassador.Database.Users
@@ -27,6 +28,7 @@ namespace DIGOS.Ambassador.Database.Users
     /// <summary>
     /// Holds information about whether or not a user has granted consent to store user data.
     /// </summary>
+    [Table("UserConsents", Schema = "Core")]
     public class UserConsent : IEFEntity
     {
         /// <inheritdoc />

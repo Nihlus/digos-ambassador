@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
@@ -34,6 +35,7 @@ namespace DIGOS.Ambassador.Database.ServerInfo
     /// <summary>
     /// Represents stored settings for a Discord server.
     /// </summary>
+    [Table("Servers", Schema = "Core")]
     public class Server : IEFEntity
     {
         /// <inheritdoc />
