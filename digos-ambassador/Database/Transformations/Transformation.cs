@@ -22,8 +22,8 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Transformations;
 using iTextSharp.text;
 using JetBrains.Annotations;

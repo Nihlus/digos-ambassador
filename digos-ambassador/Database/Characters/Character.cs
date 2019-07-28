@@ -24,15 +24,15 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Transformations;
 
 using Discord;
 using JetBrains.Annotations;
-using Image = DIGOS.Ambassador.Database.Data.Image;
+using Image = DIGOS.Ambassador.Database.Characters.Data.Image;
 
 namespace DIGOS.Ambassador.Database.Characters
 {

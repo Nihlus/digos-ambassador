@@ -23,7 +23,7 @@
 using JetBrains.Annotations;
 
 #pragma warning disable 1591, SA1602
-namespace DIGOS.Ambassador.Database.Appearances
+namespace DIGOS.Ambassador.Database.Transformations.Appearances
 {
     /// <summary>
     /// Modifiying adjectives for shades.

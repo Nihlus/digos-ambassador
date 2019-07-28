@@ -27,8 +27,8 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services.Servers;
@@ -40,7 +40,7 @@ using Discord.Commands;
 
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Image = DIGOS.Ambassador.Database.Data.Image;
+using Image = DIGOS.Ambassador.Database.Characters.Data.Image;
 
 namespace DIGOS.Ambassador.Services
 {

@@ -1,8 +1,8 @@
 ﻿//
-//  IColour.cs
+//  Image.cs
 //
 //  Author:
-//       Jarl Gullberg <jarl.gullberg@gmail.com>
+//        Jarl Gullberg <jarl.gullberg@gmail.com>
 //
 //  Copyright (c) 2017 Jarl Gullberg
 //
@@ -20,21 +20,38 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Database.Appearances
+using DIGOS.Ambassador.Database.Interfaces;
+using JetBrains.Annotations;
+
+namespace DIGOS.Ambassador.Database.Characters.Data
 {
     /// <summary>
-    /// Represents a transformation colour.
+    /// Represents an image.
     /// </summary>
-    public interface IColour
+    public class Image : IEFEntity
     {
-        /// <summary>
-        /// Gets the shade of the colour.
-        /// </summary>
-        Shade Shade { get; }
+        /// <inheritdoc />
+        public long ID { get; set; }
 
         /// <summary>
-        /// Gets the colour modifier.
+        /// Gets or sets the name of the image.
         /// </summary>
-        ShadeModifier? Modifier { get; }
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Gets or sets the caption of the image.
+        /// </summary>
+        public string Caption { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether or not the image is NSFW.
+        /// </summary>
+        public bool IsNSFW { get; set; }
+
+        /// <summary>
+        /// Gets or sets the online URL of the image.
+        /// </summary>
+        [CanBeNull]
+        public string Url { get; set; }
     }
 }

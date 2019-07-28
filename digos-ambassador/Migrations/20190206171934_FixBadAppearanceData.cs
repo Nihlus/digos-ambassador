@@ -5,7 +5,6 @@
 // ReSharper disable RedundantUsingDirective
 using System.Linq;
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.Appearances;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 

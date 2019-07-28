@@ -22,10 +22,9 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-
-using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Servers;

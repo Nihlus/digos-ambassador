@@ -21,7 +21,6 @@
 //
 
 using System.IO;
-using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Dossiers;
 using DIGOS.Ambassador.Database.Kinks;
@@ -29,10 +28,11 @@ using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Database.Users;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Image = DIGOS.Ambassador.Database.Data.Image;
+using Image = DIGOS.Ambassador.Database.Characters.Data.Image;
 
 namespace DIGOS.Ambassador.Database
 {

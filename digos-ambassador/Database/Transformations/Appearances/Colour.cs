@@ -29,7 +29,7 @@ using Humanizer;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 
-namespace DIGOS.Ambassador.Database.Appearances
+namespace DIGOS.Ambassador.Database.Transformations.Appearances
 {
     /// <summary>
     /// Represents a colour shade with an optional modifier.

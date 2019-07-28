@@ -4,7 +4,6 @@
 // ReSharper disable PartialTypeWithSinglePart
 // ReSharper disable RedundantUsingDirective
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Transformations;

@@ -21,7 +21,7 @@
 //
 
 using System;
-using DIGOS.Ambassador.Database.Appearances;
+using DIGOS.Ambassador.Database.Transformations.Appearances;
 using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;

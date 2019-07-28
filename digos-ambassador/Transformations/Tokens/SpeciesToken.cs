@@ -22,8 +22,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Database.Transformations.Appearances;
 
 namespace DIGOS.Ambassador.Transformations
 {

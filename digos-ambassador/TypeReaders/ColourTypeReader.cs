@@ -22,7 +22,7 @@
 
 using System;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Database.Appearances;
+using DIGOS.Ambassador.Database.Transformations.Appearances;
 using Discord.Commands;
 using JetBrains.Annotations;
 

@@ -25,14 +25,13 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
-using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Transformations;
 using Humanizer;
 using JetBrains.Annotations;
 using static DIGOS.Ambassador.Transformations.Chirality;
 
-namespace DIGOS.Ambassador.Database.Appearances
+namespace DIGOS.Ambassador.Database.Transformations.Appearances
 {
     /// <summary>
     /// Represents a distinct part of a character's appearance.

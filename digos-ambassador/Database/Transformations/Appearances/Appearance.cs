@@ -24,18 +24,15 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
-
 using DIGOS.Ambassador.Database.Interfaces;
-using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Transformations;
-
 using Discord.Commands;
 using JetBrains.Annotations;
 using static DIGOS.Ambassador.Transformations.Bodypart;
 
-namespace DIGOS.Ambassador.Database.Appearances
+namespace DIGOS.Ambassador.Database.Transformations.Appearances
 {
     /// <summary>
     /// Represents the physical appearance of a character.
