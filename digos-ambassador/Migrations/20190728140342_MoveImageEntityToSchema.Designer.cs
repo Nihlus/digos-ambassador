@@ -8,14 +8,16 @@ using DIGOS.Ambassador.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(AmbyDatabaseContext))]
-    partial class GlobalInfoContextModelSnapshot : ModelSnapshot
+    [Migration("20190728140342_MoveImageEntityToSchema")]
+    partial class MoveImageEntityToSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,7 +65,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("RoleID");
 
-                    b.ToTable("Characters","CharacterModule");
+                    b.ToTable("CharactersIntermediateTableName","CharacterModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.CharacterRole", b =>
@@ -81,7 +83,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("ServerID");
 
-                    b.ToTable("CharacterRoles","CharacterModule");
+                    b.ToTable("CharacterRolesIntermediateTableName","CharacterModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.Data.Image", b =>
@@ -103,7 +105,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("CharacterID");
 
-                    b.ToTable("Images","CharacterModule");
+                    b.ToTable("ImagesIntermediateTableName","CharacterModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Dossiers.Dossier", b =>

@@ -21,6 +21,7 @@
 //
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.ServerInfo;
 
@@ -29,6 +30,7 @@ namespace DIGOS.Ambassador.Database.Characters
     /// <summary>
     /// Represents a role associated with a character, similar to a nickname.
     /// </summary>
+    [Table("CharacterRoles", Schema = "CharacterModule")]
     public class CharacterRole : IEFEntity
     {
         /// <inheritdoc />

@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
@@ -39,6 +40,7 @@ namespace DIGOS.Ambassador.Database.Characters
     /// <summary>
     /// Represents a user's character.
     /// </summary>
+    [Table("Characters", Schema = "CharacterModule")]
     public class Character : IOwnedNamedEntity, IServerEntity
     {
         /// <inheritdoc />
