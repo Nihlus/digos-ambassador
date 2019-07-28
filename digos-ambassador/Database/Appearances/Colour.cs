@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Database.Appearances
     /// <summary>
     /// Represents a colour shade with an optional modifier.
     /// </summary>
-    [Table("Colours", Schema = "KinkModule")]
+    [Table("Colours", Schema = "TransformationModule")]
     public class Colour : IEFEntity, IColour
     {
         /// <inheritdoc />

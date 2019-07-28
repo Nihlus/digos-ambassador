@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -39,6 +40,7 @@ namespace DIGOS.Ambassador.Database.Appearances
     /// <summary>
     /// Represents the physical appearance of a character.
     /// </summary>
+    [Table("Appearances", Schema = "TransformationModule")]
     public class Appearance : IEFEntity
     {
         /// <inheritdoc />
