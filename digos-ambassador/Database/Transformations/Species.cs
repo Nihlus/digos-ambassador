@@ -22,6 +22,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
@@ -31,6 +32,7 @@ namespace DIGOS.Ambassador.Database.Transformations
     /// <summary>
     /// Represents a single species (i.e, associated transformations).
     /// </summary>
+    [Table("Species", Schema = "TransformationModule")]
     public class Species : IEFEntity
     {
         /// <inheritdoc />

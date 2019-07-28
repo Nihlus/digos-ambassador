@@ -8,14 +8,16 @@ using DIGOS.Ambassador.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(AmbyDatabaseContext))]
-    partial class GlobalInfoContextModelSnapshot : ModelSnapshot
+    [Migration("20190728131225_MoveTransformationEntitiesToSchema")]
+    partial class MoveTransformationEntitiesToSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -353,7 +355,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("GlobalUserProtections","TransformationModule");
+                    b.ToTable("GlobalUserProtectionsIntermediateTableName","TransformationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.ServerUserProtection", b =>
@@ -375,7 +377,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("ServerUserProtections","TransformationModule");
+                    b.ToTable("ServerUserProtectionsIntermediateTableName","TransformationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.Species", b =>
@@ -395,7 +397,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("ParentID");
 
-                    b.ToTable("Species","TransformationModule");
+                    b.ToTable("SpeciesIntermediateTableName","TransformationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.Transformation", b =>
@@ -441,7 +443,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("SpeciesID");
 
-                    b.ToTable("Transformations","TransformationModule");
+                    b.ToTable("TransformationsIntermediateTableName","TransformationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.UserProtectionEntry", b =>
@@ -461,7 +463,7 @@ namespace DIGOS.Ambassador.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("UserProtectionEntries","TransformationModule");
+                    b.ToTable("UserProtectionEntriesIntermediateTableName","TransformationModule");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Users.User", b =>

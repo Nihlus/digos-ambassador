@@ -21,9 +21,11 @@
 //
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Appearances;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Transformations;
+using iTextSharp.text;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 
@@ -32,6 +34,7 @@ namespace DIGOS.Ambassador.Database.Transformations
     /// <summary>
     /// Represents an individual partial transformation.
     /// </summary>
+    [Table("Transformations", Schema = "TransformationModule")]
     public class Transformation : IEFEntity
     {
         /// <inheritdoc />

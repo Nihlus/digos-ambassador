@@ -21,6 +21,7 @@
 //
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
 
@@ -30,6 +31,7 @@ namespace DIGOS.Ambassador.Database.Transformations
     /// Represents a protection entry, that is, a user that has been whitelisted or blacklisted by another user in the
     /// TF module.
     /// </summary>
+    [Table("UserProtectionEntries", Schema = "TransformationModule")]
     public class UserProtectionEntry : IEFEntity
     {
         /// <inheritdoc />

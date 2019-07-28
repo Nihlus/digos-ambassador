@@ -21,6 +21,7 @@
 //
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Users;
@@ -32,6 +33,7 @@ namespace DIGOS.Ambassador.Database.Transformations
     /// <summary>
     /// Holds protection data for a specific user on a specific server.
     /// </summary>
+    [Table("ServerUserProtections", Schema = "TransformationModule")]
     public class ServerUserProtection : IEFEntity
     {
         /// <inheritdoc />
