@@ -837,7 +837,7 @@ namespace DIGOS.Ambassador.Modules
                 this.Context.User,
                 character.Images,
                 i => i.Name,
-                i => i.Caption.IsNullOrWhitespace() ? i.Caption : "No caption set.",
+                i => i.Caption.IsNullOrWhitespace() ? "No caption set." : i.Caption,
                 "There are no images in the character's gallery.",
                 appearance
             );
