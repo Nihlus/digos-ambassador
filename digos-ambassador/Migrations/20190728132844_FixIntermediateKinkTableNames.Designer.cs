@@ -8,14 +8,16 @@ using DIGOS.Ambassador.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(AmbyDatabaseContext))]
-    partial class GlobalInfoContextModelSnapshot : ModelSnapshot
+    [Migration("20190728132844_FixIntermediateKinkTableNames")]
+    partial class FixIntermediateKinkTableNames
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

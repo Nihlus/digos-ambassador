@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Database.Interfaces;
 using JetBrains.Annotations;
@@ -30,6 +31,7 @@ namespace DIGOS.Ambassador.Database.Kinks
     /// <summary>
     /// Represents a sexual kink or fetish.
     /// </summary>
+    [Table("Kinks", Schema = "KinkModule")]
     public class Kink : IEquatable<Kink>, IEFEntity
     {
         /// <inheritdoc />

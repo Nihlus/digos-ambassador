@@ -37,6 +37,8 @@ namespace DIGOS.Ambassador.Database.Appearances
     /// <summary>
     /// Represents a distinct part of a character's appearance.
     /// </summary>
+    [Table("AppearanceComponents", Schema = "KinkModule")]
+
     public class AppearanceComponent : IEFEntity
     {
         /// <inheritdoc />

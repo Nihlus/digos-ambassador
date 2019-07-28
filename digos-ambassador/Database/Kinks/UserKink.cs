@@ -21,15 +21,16 @@
 //
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
-using DIGOS.Ambassador.Database.Kinks;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Database.Users
+namespace DIGOS.Ambassador.Database.Kinks
 {
     /// <summary>
     /// Represents a user's kink, along with their preference for it.
     /// </summary>
+    [Table("UserKinks", Schema = "KinkModule")]
     public class UserKink : IEFEntity
     {
         /// <inheritdoc />

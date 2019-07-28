@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Extensions;
@@ -33,6 +34,7 @@ namespace DIGOS.Ambassador.Database.Appearances
     /// <summary>
     /// Represents a colour shade with an optional modifier.
     /// </summary>
+    [Table("Colours", Schema = "KinkModule")]
     public class Colour : IEFEntity, IColour
     {
         /// <inheritdoc />
