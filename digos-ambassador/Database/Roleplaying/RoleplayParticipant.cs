@@ -21,6 +21,7 @@
 //
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
 using JetBrains.Annotations;
@@ -30,6 +31,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
     /// <summary>
     /// Represents a join entry for a user that has participated in a roleplay in any way.
     /// </summary>
+    [Table("RoleplayParticipants", Schema = "RoleplayModule")]
     public class RoleplayParticipant : IEFEntity
     {
         /// <inheritdoc />

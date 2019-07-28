@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Interfaces;
 using Discord;
 
@@ -31,6 +32,7 @@ namespace DIGOS.Ambassador.Database.Roleplaying
     /// <summary>
     /// Represents a saved user message.
     /// </summary>
+    [Table("UserMessages", Schema = "RoleplayModule")]
     public class UserMessage : IEFEntity
     {
         /// <inheritdoc />
