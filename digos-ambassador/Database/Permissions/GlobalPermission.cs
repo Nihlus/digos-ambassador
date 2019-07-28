@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Permissions;
@@ -30,6 +31,7 @@ namespace DIGOS.Ambassador.Database.Permissions
     /// <summary>
     /// Represents a globally granted permission.
     /// </summary>
+    [Table("GlobalPermissions", Schema = "PermissionModule")]
     public class GlobalPermission : IPermission<GlobalPermission>, IEFEntity
     {
         /// <inheritdoc />
