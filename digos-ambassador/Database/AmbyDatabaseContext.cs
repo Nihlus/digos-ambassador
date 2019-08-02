@@ -207,6 +207,17 @@ namespace DIGOS.Ambassador.Database
         }
 
         /// <summary>
+        /// Gets or sets the table where appearance configurations are stored.
+        /// </summary>
+        public DbSet<AppearanceConfiguration> AppearanceConfigurations
+        {
+            get;
+
+            [UsedImplicitly]
+            set;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AmbyDatabaseContext"/> class.
         /// </summary>
         /// <param name="options">The context options.</param>

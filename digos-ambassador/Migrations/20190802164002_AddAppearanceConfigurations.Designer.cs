@@ -8,14 +8,16 @@ using DIGOS.Ambassador.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Migrations
 {
     [DbContext(typeof(AmbyDatabaseContext))]
-    partial class GlobalInfoContextModelSnapshot : ModelSnapshot
+    [Migration("20190802164002_AddAppearanceConfigurations")]
+    partial class AddAppearanceConfigurations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,6 +30,10 @@ namespace DIGOS.Ambassador.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("AvatarUrl");
+
+                    b.Property<long>("CurrentAppearanceID");
+
+                    b.Property<long?>("DefaultAppearanceID");
 
                     b.Property<string>("Description");
 
@@ -50,6 +56,10 @@ namespace DIGOS.Ambassador.Migrations
                     b.Property<string>("Summary");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("CurrentAppearanceID");
+
+                    b.HasIndex("DefaultAppearanceID");
 
                     b.HasIndex("OwnerID");
 
@@ -543,6 +553,15 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.Character", b =>
                 {
+                    b.HasOne("DIGOS.Ambassador.Database.Transformations.Appearances.Appearance", "CurrentAppearance")
+                        .WithMany()
+                        .HasForeignKey("CurrentAppearanceID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("DIGOS.Ambassador.Database.Transformations.Appearances.Appearance", "DefaultAppearance")
+                        .WithMany()
+                        .HasForeignKey("DefaultAppearanceID");
+
                     b.HasOne("DIGOS.Ambassador.Database.Users.User", "Owner")
                         .WithMany("Characters")
                         .HasForeignKey("OwnerID")
