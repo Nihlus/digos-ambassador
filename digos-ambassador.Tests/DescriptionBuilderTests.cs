@@ -65,8 +65,13 @@ namespace DIGOS.Ambassador.Tests
             var character = new Character
             {
                 Name = "Amby",
-                CurrentAppearance = appearance,
                 PronounProviderFamily = "Feminine"
+            };
+
+            var appearanceConfiguration = new AppearanceConfiguration
+            {
+                Character = character,
+                CurrentAppearance = appearance
             };
 
             var characterService = new CharacterService(null, null, null, null, null, null)
@@ -78,7 +83,7 @@ namespace DIGOS.Ambassador.Tests
 
             var descriptionBuilder = new TransformationDescriptionBuilder(serviceProvider);
 
-            var result = descriptionBuilder.ReplaceTokensWithContent(SampleFluentText, character, hairComponent);
+            var result = descriptionBuilder.ReplaceTokensWithContent(SampleFluentText, appearanceConfiguration, hairComponent);
 
             Assert.Equal(ExpectedText, result);
         }

@@ -20,10 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Transformations;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Transformations.Appearances
@@ -54,5 +58,80 @@ namespace DIGOS.Ambassador.Database.Transformations.Appearances
         /// </summary>
         [Required, NotNull]
         public virtual Appearance CurrentAppearance { get; set; }
+
+        /// <summary>
+        /// Determines whether or not the character has a given bodypart in their current appearance.
+        /// </summary>
+        /// <param name="bodypart">The bodypart to check for.</param>
+        /// <param name="chirality">The chirality of the bodypart.</param>
+        /// <returns>true if the character has the bodypart; otherwise, false.</returns>
+        [Pure]
+        public bool HasComponent(Bodypart bodypart, Chirality chirality)
+        {
+            if (bodypart.IsChiral() && chirality == Chirality.Center)
+            {
+                throw new ArgumentException("A chiral bodypart must have its chirality specified.", nameof(bodypart));
+            }
+
+            if (!bodypart.IsChiral() && chirality != Chirality.Center)
+            {
+                throw new ArgumentException("A nonchiral transformation cannot have chirality.", nameof(bodypart));
+            }
+
+            if (bodypart.IsComposite())
+            {
+                throw new ArgumentException("The bodypart must not be a composite part.");
+            }
+
+            return this.CurrentAppearance.Components.Any(c => c.Bodypart == bodypart && c.Chirality == chirality);
+        }
+
+        /// <summary>
+        /// Gets the component on the character's current appearance that matches the given bodypart.
+        /// </summary>
+        /// <param name="bodypart">The bodypart to get.</param>
+        /// <param name="chirality">The chirality of the bodypart.</param>
+        /// <returns>The appearance component of the bodypart.</returns>
+        [NotNull]
+        public AppearanceComponent GetAppearanceComponent(Bodypart bodypart, Chirality chirality)
+        {
+            if (bodypart.IsChiral() && chirality == Chirality.Center)
+            {
+                throw new ArgumentException("A chiral bodypart must have its chirality specified.", nameof(bodypart));
+            }
+
+            if (!bodypart.IsChiral() && chirality != Chirality.Center)
+            {
+                throw new ArgumentException("A nonchiral transformation cannot have chirality.", nameof(bodypart));
+            }
+
+            if (bodypart.IsComposite())
+            {
+                throw new ArgumentException("The bodypart must not be a composite part.");
+            }
+
+            return this.CurrentAppearance.Components.First(c => c.Bodypart == bodypart && c.Chirality == chirality);
+        }
+
+        /// <summary>
+        /// Tries to retrieve the component on the character's current appearance that matches the given bodypart.
+        /// </summary>
+        /// <param name="bodypart">The bodypart to get.</param>
+        /// <param name="chirality">The chirality of the bodypart.</param>
+        /// <param name="component">The component, or null.</param>
+        /// <returns>True if a component could be retrieved, otherwise, false.</returns>
+        [ContractAnnotation("=> true, component:notnull; => false, component:null")]
+        public bool TryGetAppearanceComponent(Bodypart bodypart, Chirality chirality, [CanBeNull] out AppearanceComponent component)
+        {
+            component = null;
+
+            if (!HasComponent(bodypart, chirality))
+            {
+                return false;
+            }
+
+            component = GetAppearanceComponent(bodypart, chirality);
+            return true;
+        }
     }
 }

@@ -527,26 +527,6 @@ namespace DIGOS.Ambassador.Services
                 return CreateEntityResult<Character>.FromError(modifyEntityResult);
             }
 
-            var getDefaultAppearanceResult = await Appearance.CreateDefaultAsync(db, _transformations);
-            if (!getDefaultAppearanceResult.IsSuccess)
-            {
-                return CreateEntityResult<Character>.FromError(getDefaultAppearanceResult);
-            }
-
-            var defaultAppearance = getDefaultAppearanceResult.Entity;
-            character.DefaultAppearance = defaultAppearance;
-
-            // The default and current appearances must be different objects, or the end up pointing to the same
-            // database record, which is not desired.
-            var getCurrentAppearanceResult = await Appearance.CreateDefaultAsync(db, _transformations);
-            if (!getCurrentAppearanceResult.IsSuccess)
-            {
-                return CreateEntityResult<Character>.FromError(getCurrentAppearanceResult);
-            }
-
-            var currentAppearance = getCurrentAppearanceResult.Entity;
-            character.CurrentAppearance = currentAppearance;
-
             owner.Characters.Add(character);
             await db.Characters.AddAsync(character);
             await db.SaveChangesAsync();
@@ -1029,35 +1009,6 @@ namespace DIGOS.Ambassador.Services
             await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <summary>
-        /// Creates a new template character with a given appearance.
-        /// </summary>
-        /// <param name="db">The database.</param>
-        /// <param name="context">The context of the command.</param>
-        /// <param name="characterName">The name of the new character.</param>
-        /// <param name="appearance">The appearance that the new character should have.</param>
-        /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<Character>> CreateCharacterFromAppearanceAsync
-        (
-            [NotNull] AmbyDatabaseContext db,
-            [NotNull] ICommandContext context,
-            [NotNull] string characterName,
-            [NotNull] Appearance appearance
-        )
-        {
-            var createCharacterResult = await CreateCharacterAsync(db, context, characterName);
-            if (!createCharacterResult.IsSuccess)
-            {
-                return createCharacterResult;
-            }
-
-            var newCharacter = createCharacterResult.Entity;
-            newCharacter.DefaultAppearance = appearance;
-
-            await db.SaveChangesAsync();
-            return CreateEntityResult<Character>.FromSuccess(newCharacter);
         }
 
         /// <summary>

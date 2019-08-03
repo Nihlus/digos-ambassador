@@ -50,18 +50,19 @@ namespace DIGOS.Ambassador.Transformations
         }
 
         /// <inheritdoc />
-        public override string GetText(Character character, AppearanceComponent component)
+        public override string GetText(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
         {
-            return GetTextAsync(character, component).GetAwaiter().GetResult();
+            return GetTextAsync(appearanceConfiguration, component).GetAwaiter().GetResult();
         }
 
         /// <inheritdoc />
-        public override async Task<string> GetTextAsync(Character character, AppearanceComponent component)
+        public override async Task<string> GetTextAsync(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
         {
             var result = await _lua.ExecuteSnippetAsync
             (
                 this.Snippet,
-                (nameof(character), character),
+                (nameof(appearanceConfiguration), appearanceConfiguration),
+                ("character", appearanceConfiguration.Character),
                 (nameof(component), component)
             );
 

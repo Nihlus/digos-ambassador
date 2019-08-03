@@ -156,9 +156,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     ServerID = (long)_guild.Id,
-                    Owner = _dbOwner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _dbOwner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -194,9 +192,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     ServerID = (long)_guild.Id,
-                    Owner = new User { DiscordID = 2 },
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = new User { DiscordID = 2 }
                 };
 
                 await this.Database.Characters.AddAsync(anotherCharacter);
@@ -380,9 +376,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     ServerID = (long)_guild.Id,
-                    Owner = _dbOwner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _dbOwner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -436,9 +430,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     ServerID = (long)_guild.Id,
-                    Owner = _owner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _owner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -461,9 +453,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     ServerID = (long)_guild.Id,
-                    Owner = _owner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _owner
                 };
 
                 await this.Database.Characters.AddAsync(anotherCharacter);
@@ -520,9 +510,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     new Character
                     {
                         ServerID = (long)_guild.Id,
-                        Owner = _owner,
-                        CurrentAppearance = new Appearance(),
-                        DefaultAppearance = new Appearance()
+                        Owner = _owner
                     }
                 );
 
@@ -542,9 +530,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     new Character
                     {
                         ServerID = 1,
-                        Owner = _owner,
-                        CurrentAppearance = new Appearance(),
-                        DefaultAppearance = new Appearance()
+                        Owner = _owner
                     }
                 );
 
@@ -563,9 +549,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     new Character
                     {
                         ServerID = 1,
-                        Owner = _owner,
-                        CurrentAppearance = new Appearance(),
-                        DefaultAppearance = new Appearance()
+                        Owner = _owner
                     }
                 );
 
@@ -574,9 +558,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     new Character
                     {
                         ServerID = (long)_guild.Id,
-                        Owner = _owner,
-                        CurrentAppearance = new Appearance(),
-                        DefaultAppearance = new Appearance()
+                        Owner = _owner
                     }
                 );
 
@@ -585,9 +567,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     new Character
                     {
                         ServerID = (long)_guild.Id,
-                        Owner = _owner,
-                        CurrentAppearance = new Appearance(),
-                        DefaultAppearance = new Appearance()
+                        Owner = _owner
                     }
                 );
 
@@ -646,9 +626,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     ServerID = (long)guild.Id,
-                    Owner = _dbOwner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _dbOwner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -720,9 +698,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 _character = new Character
                 {
-                    Owner = new User { DiscordID = (long)_owner.Id },
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = new User { DiscordID = (long)_owner.Id }
                 };
 
                 this.Database.Characters.Add(_character);
@@ -771,9 +747,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     ServerID = (long)_guild.Id,
-                    Owner = _dbOwner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _dbOwner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -847,9 +821,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var character = new Character
                 {
                     Owner = _dbOwner,
-                    ServerID = (long)_guild.Id,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Add(character);
@@ -867,9 +839,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Owner = _dbOwner,
                     ServerID = (long)_guild.Id,
-                    IsCurrent = true,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    IsCurrent = true
                 };
 
                 this.Database.Characters.Add(character);
@@ -961,18 +931,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     ServerID = (long)mockedGuildObject.Id,
-                    Owner = new User { DiscordID = (long)mockedUserObject.Id },
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = new User { DiscordID = (long)mockedUserObject.Id }
                 };
 
                 var anotherCharacter = new Character
                 {
                     Name = AnotherCharacterName,
                     ServerID = (long)mockedGuildObject.Id,
-                    Owner = new User { DiscordID = (long)mockedUserObject.Id },
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = new User { DiscordID = (long)mockedUserObject.Id }
                 };
 
                 this.Database.Characters.Add(_character);
@@ -1088,9 +1054,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     AvatarUrl = AvatarURL,
-                    Owner = _owner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _owner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -1159,9 +1123,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     Nickname = Nickname,
-                    Owner = _owner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _owner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -1238,9 +1200,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     Summary = Summary,
-                    Owner = _owner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _owner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -1317,9 +1277,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     Description = Description,
-                    Owner = _owner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _owner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -1390,9 +1348,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     PronounProviderFamily = PronounFamily,
-                    Owner = _owner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _owner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -1470,9 +1426,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     IsNSFW = IsNSFW,
-                    Owner = _owner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _owner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -1526,9 +1480,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     ServerID = (long)_guild.Id,
-                    Owner = _dbOldOwner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _dbOldOwner
                 };
 
                 this.Database.Characters.Add(_character);
@@ -1577,9 +1529,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var character = new Character
                 {
                     Owner = new User { DiscordID = 1 },
-                    ServerID = (long)_guild.Id,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Add(character);
@@ -1594,9 +1544,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var character = new Character
                 {
-                    Owner = _dbOwner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _dbOwner
                 };
 
                 this.Database.Characters.Add(character);
@@ -1612,9 +1560,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var character = new Character
                 {
                     Owner = _dbOwner,
-                    ServerID = (long)_guild.Id,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Add(character);
@@ -1630,9 +1576,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var character = new Character
                 {
                     Owner = _dbOwner,
-                    ServerID = (long)_guild.Id,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Add(character);
@@ -1648,17 +1592,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var character1 = new Character
                 {
                     Owner = _dbOwner,
-                    ServerID = (long)_guild.Id,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    ServerID = (long)_guild.Id
                 };
 
                 var character2 = new Character
                 {
                     Owner = _dbOwner,
-                    ServerID = (long)_guild.Id,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Add(character1);
@@ -1692,9 +1632,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     Owner = _dbOwner,
-                    ServerID = (long)_guild.Id,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Add(character);
@@ -1736,9 +1674,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     Owner = _user,
-                    ServerID = (long)_guild.Id,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Add(_character);
@@ -1813,9 +1749,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     Owner = _user,
-                    ServerID = (long)_guild.Id,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Add(_character);
@@ -2088,9 +2022,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     Owner = user,
-                    ServerID = (long)_guild.Id,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Add(_character);
@@ -2161,9 +2093,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 {
                     Name = CharacterName,
                     Owner = user,
-                    ServerID = (long)_guild.Id,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Add(_character);

@@ -35,9 +35,9 @@ namespace DIGOS.Ambassador.Transformations
     public class SexToken : ReplacableTextToken<SexToken>
     {
         /// <inheritdoc />
-        public override string GetText(Character character, AppearanceComponent component)
+        public override string GetText(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
         {
-            var genderedParts = character.CurrentAppearance.Components
+            var genderedParts = appearanceConfiguration.CurrentAppearance.Components
                 .Where(c => !c.Bodypart.IsGenderNeutral())
                 .Select(c => c.Bodypart)
                 .ToList();

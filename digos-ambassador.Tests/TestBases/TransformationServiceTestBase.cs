@@ -53,9 +53,19 @@ namespace DIGOS.Ambassador.Tests.TestBases
         }
 
         /// <inheritdoc />
-        public virtual async Task InitializeAsync()
+        public async Task InitializeAsync()
         {
             await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
+            await InitializeTestAsync();
+        }
+
+        /// <summary>
+        /// Initializes the test data.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        protected virtual Task InitializeTestAsync()
+        {
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />

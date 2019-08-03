@@ -81,6 +81,50 @@ namespace DIGOS.Ambassador.Services
         }
 
         /// <summary>
+        /// Retrieves an existing appearance configuration for the given character, or creates a new one if one does
+        /// not exist.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="character">The character.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<AppearanceConfiguration>> GetOrCreateAppearanceConfigurationAsync
+        (
+            [NotNull] AmbyDatabaseContext db,
+            [NotNull] Character character
+        )
+        {
+            var appearanceConfiguration = await db.AppearanceConfigurations.FirstOrDefaultAsync
+            (
+                apc => apc.Character == character
+            );
+
+            if (!(appearanceConfiguration is null))
+            {
+                return RetrieveEntityResult<AppearanceConfiguration>.FromSuccess(appearanceConfiguration);
+            }
+
+            var createDefaultAppearanceResult = await Appearance.CreateDefaultAsync(db, this);
+            if (!createDefaultAppearanceResult.IsSuccess)
+            {
+                return RetrieveEntityResult<AppearanceConfiguration>.FromError(createDefaultAppearanceResult);
+            }
+
+            var defaultAppearance = createDefaultAppearanceResult.Entity;
+            var newAppearanceConfiguration = new AppearanceConfiguration
+            {
+                Character = character,
+                DefaultAppearance = defaultAppearance,
+                CurrentAppearance = Appearance.CopyFrom(defaultAppearance)
+            };
+
+            db.AppearanceConfigurations.Update(newAppearanceConfiguration);
+            await db.SaveChangesAsync();
+
+            // Requery the database
+            return await GetOrCreateAppearanceConfigurationAsync(db, character);
+        }
+
+        /// <summary>
         /// Removes the given character's bodypart.
         /// </summary>
         /// <param name="db">The database where characters and transformations are stored.</param>
@@ -105,15 +149,23 @@ namespace DIGOS.Ambassador.Services
                 return ShiftBodypartResult.FromError(canTransformResult);
             }
 
-            if (!character.TryGetAppearanceComponent(bodyPart, chirality, out var component))
+            var getAppearanceConfigurationResult = await GetOrCreateAppearanceConfigurationAsync(db, character);
+            if (!getAppearanceConfigurationResult.IsSuccess)
+            {
+                return ShiftBodypartResult.FromError(getAppearanceConfigurationResult);
+            }
+
+            var appearanceConfiguration = getAppearanceConfigurationResult.Entity;
+
+            if (!appearanceConfiguration.TryGetAppearanceComponent(bodyPart, chirality, out var component))
             {
                 return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
             }
 
-            character.CurrentAppearance.Components.Remove(component);
+            appearanceConfiguration.CurrentAppearance.Components.Remove(component);
             await db.SaveChangesAsync();
 
-            string removeMessage = _descriptionBuilder.BuildRemoveMessage(character, component);
+            string removeMessage = _descriptionBuilder.BuildRemoveMessage(appearanceConfiguration, component);
             return ShiftBodypartResult.FromSuccess(removeMessage, ShiftBodypartAction.Remove);
         }
 
@@ -175,7 +227,15 @@ namespace DIGOS.Ambassador.Services
             Chirality chirality
         )
         {
-            if (character.TryGetAppearanceComponent(bodyPart, chirality, out var existingComponent))
+            var getAppearanceConfigurationResult = await GetOrCreateAppearanceConfigurationAsync(db, character);
+            if (!getAppearanceConfigurationResult.IsSuccess)
+            {
+                return ShiftBodypartResult.FromError(getAppearanceConfigurationResult);
+            }
+
+            var appearanceConfiguration = getAppearanceConfigurationResult.Entity;
+
+            if (appearanceConfiguration.TryGetAppearanceComponent(bodyPart, chirality, out var existingComponent))
             {
                 if (existingComponent.Transformation.Species.Name.Equals(transformation.Species.Name))
                 {
@@ -190,19 +250,20 @@ namespace DIGOS.Ambassador.Services
 
             string shiftMessage;
 
-            if (!character.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
+            if (!appearanceConfiguration.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
             {
                 currentComponent = AppearanceComponent.CreateFrom(transformation, chirality);
-                character.CurrentAppearance.Components.Add(currentComponent);
 
-                shiftMessage = _descriptionBuilder.BuildGrowMessage(character, currentComponent);
+                appearanceConfiguration.CurrentAppearance.Components.Add(currentComponent);
+
+                shiftMessage = _descriptionBuilder.BuildGrowMessage(appearanceConfiguration, currentComponent);
                 await db.SaveChangesAsync();
                 return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Add);
             }
 
             currentComponent.Transformation = transformation;
 
-            shiftMessage = _descriptionBuilder.BuildShiftMessage(character, currentComponent);
+            shiftMessage = _descriptionBuilder.BuildShiftMessage(appearanceConfiguration, currentComponent);
 
             await db.SaveChangesAsync();
             return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
@@ -219,7 +280,7 @@ namespace DIGOS.Ambassador.Services
             string BuildMessageFromResult
             (
                 ShiftBodypartResult result,
-                Character targetCharacter,
+                AppearanceConfiguration targetConfiguration,
                 AppearanceComponent targetComponent
             )
             {
@@ -227,16 +288,16 @@ namespace DIGOS.Ambassador.Services
                 {
                     case ShiftBodypartAction.Add:
                     {
-                        return _descriptionBuilder.BuildGrowMessage(targetCharacter, targetComponent);
+                        return _descriptionBuilder.BuildGrowMessage(targetConfiguration, targetComponent);
                     }
 
                     case ShiftBodypartAction.Remove:
                     {
-                        return _descriptionBuilder.BuildRemoveMessage(targetCharacter, targetComponent);
+                        return _descriptionBuilder.BuildRemoveMessage(targetConfiguration, targetComponent);
                     }
                     case ShiftBodypartAction.Shift:
                     {
-                        return _descriptionBuilder.BuildShiftMessage(targetCharacter, targetComponent);
+                        return _descriptionBuilder.BuildShiftMessage(targetConfiguration, targetComponent);
                     }
                     case ShiftBodypartAction.Nothing:
                     {
@@ -293,6 +354,14 @@ namespace DIGOS.Ambassador.Services
 
                 var transformation = getTFResult.Entity.First();
 
+                var getAppearanceConfigurationResult = await GetOrCreateAppearanceConfigurationAsync(db, character);
+                if (!getAppearanceConfigurationResult.IsSuccess)
+                {
+                    return ShiftBodypartResult.FromError(getAppearanceConfigurationResult);
+                }
+
+                var appearanceConfiguration = getAppearanceConfigurationResult.Entity;
+
                 if (composingPart.IsChiral())
                 {
                     var leftShift = await ShiftBodypartAsync(db, character, transformation, composingPart, Chirality.Left);
@@ -311,33 +380,33 @@ namespace DIGOS.Ambassador.Services
                         continue;
                     }
 
-                    if (!character.TryGetAppearanceComponent(composingPart, Chirality.Left, out var component))
+                    if (!appearanceConfiguration.TryGetAppearanceComponent(composingPart, Chirality.Left, out var component))
                     {
                         throw new InvalidOperationException("Couldn't retrieve a component to base off of.");
                     }
 
                     if (leftShift.Action == ShiftBodypartAction.Shift && rightShift.Action == ShiftBodypartAction.Shift)
                     {
-                        var uniformShiftMessage = _descriptionBuilder.BuildUniformShiftMessage(character, component);
+                        var uniformShiftMessage = _descriptionBuilder.BuildUniformShiftMessage(appearanceConfiguration, component);
                         InsertShiftMessage(uniformShiftMessage);
                         continue;
                     }
 
                     if (leftShift.Action == ShiftBodypartAction.Add && rightShift.Action == ShiftBodypartAction.Add)
                     {
-                        var uniformGrowMessage = _descriptionBuilder.BuildUniformGrowMessage(character, component);
+                        var uniformGrowMessage = _descriptionBuilder.BuildUniformGrowMessage(appearanceConfiguration, component);
                         InsertShiftMessage(uniformGrowMessage);
                         continue;
                     }
 
                     if (leftShift.Action != ShiftBodypartAction.Nothing)
                     {
-                        InsertShiftMessage(BuildMessageFromResult(leftShift, character, component));
+                        InsertShiftMessage(BuildMessageFromResult(leftShift, appearanceConfiguration, component));
                     }
 
                     if (rightShift.Action != ShiftBodypartAction.Nothing)
                     {
-                        InsertShiftMessage(BuildMessageFromResult(rightShift, character, component));
+                        InsertShiftMessage(BuildMessageFromResult(rightShift, appearanceConfiguration, component));
                     }
                 }
                 else
@@ -351,14 +420,14 @@ namespace DIGOS.Ambassador.Services
                         Chirality.Center
                     );
 
-                    if (!character.TryGetAppearanceComponent(composingPart, Chirality.Center, out var component))
+                    if (!appearanceConfiguration.TryGetAppearanceComponent(composingPart, Chirality.Center, out var component))
                     {
                         throw new InvalidOperationException("Couldn't retrieve a component to base off of.");
                     }
 
                     if (simpleShiftResult.Action != ShiftBodypartAction.Nothing)
                     {
-                        InsertShiftMessage(BuildMessageFromResult(simpleShiftResult, character, component));
+                        InsertShiftMessage(BuildMessageFromResult(simpleShiftResult, appearanceConfiguration, component));
                     }
                 }
             }
@@ -420,7 +489,15 @@ namespace DIGOS.Ambassador.Services
                 return ShiftBodypartResult.FromError(canTransformResult);
             }
 
-            if (!character.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
+            var getAppearanceConfigurationResult = await GetOrCreateAppearanceConfigurationAsync(db, character);
+            if (!getAppearanceConfigurationResult.IsSuccess)
+            {
+                return ShiftBodypartResult.FromError(getAppearanceConfigurationResult);
+            }
+
+            var appearanceConfiguration = getAppearanceConfigurationResult.Entity;
+
+            if (!appearanceConfiguration.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
             {
                 return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
             }
@@ -435,7 +512,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            string shiftMessage = _descriptionBuilder.BuildColourShiftMessage(character, originalColour, currentComponent);
+            string shiftMessage = _descriptionBuilder.BuildColourShiftMessage(appearanceConfiguration, originalColour, currentComponent);
             return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
         }
 
@@ -468,7 +545,15 @@ namespace DIGOS.Ambassador.Services
                 return ShiftBodypartResult.FromError(canTransformResult);
             }
 
-            if (!character.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
+            var getAppearanceConfigurationResult = await GetOrCreateAppearanceConfigurationAsync(db, character);
+            if (!getAppearanceConfigurationResult.IsSuccess)
+            {
+                return ShiftBodypartResult.FromError(getAppearanceConfigurationResult);
+            }
+
+            var appearanceConfiguration = getAppearanceConfigurationResult.Entity;
+
+            if (!appearanceConfiguration.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
             {
                 return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
             }
@@ -486,7 +571,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            string shiftMessage = _descriptionBuilder.BuildPatternShiftMessage(character, originalPattern, originalColour, currentComponent);
+            string shiftMessage = _descriptionBuilder.BuildPatternShiftMessage(appearanceConfiguration, originalPattern, originalColour, currentComponent);
             return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
         }
 
@@ -517,7 +602,15 @@ namespace DIGOS.Ambassador.Services
                 return ShiftBodypartResult.FromError(canTransformResult);
             }
 
-            if (!character.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
+            var getAppearanceConfigurationResult = await GetOrCreateAppearanceConfigurationAsync(db, character);
+            if (!getAppearanceConfigurationResult.IsSuccess)
+            {
+                return ShiftBodypartResult.FromError(getAppearanceConfigurationResult);
+            }
+
+            var appearanceConfiguration = getAppearanceConfigurationResult.Entity;
+
+            if (!appearanceConfiguration.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
             {
                 return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
             }
@@ -538,7 +631,7 @@ namespace DIGOS.Ambassador.Services
             await db.SaveChangesAsync();
 
             // ReSharper disable once AssignNullToNotNullAttribute - Having a pattern implies having a pattern colour
-            string shiftMessage = _descriptionBuilder.BuildPatternColourShiftMessage(character, originalColour, currentComponent);
+            string shiftMessage = _descriptionBuilder.BuildPatternColourShiftMessage(appearanceConfiguration, originalColour, currentComponent);
             return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
         }
 
@@ -604,15 +697,17 @@ namespace DIGOS.Ambassador.Services
         /// Generate a complete textual description of the given character, and format it into an embed.
         /// </summary>
         /// <param name="context">The context of the generation.</param>
-        /// <param name="character">The character to generate the description for.</param>
+        /// <param name="appearanceConfiguration">The character to generate the description for.</param>
         /// <returns>An embed with a formatted description.</returns>
         [Pure]
         public async Task<(Embed, string)> GenerateCharacterDescriptionAsync
         (
             [NotNull] ICommandContext context,
-            [NotNull] Character character
+            [NotNull] AppearanceConfiguration appearanceConfiguration
         )
         {
+            var character = appearanceConfiguration.Character;
+
             var eb = new EmbedBuilder();
             eb.WithColor(Color.DarkPurple);
             eb.WithTitle($"{character.Name} {(character.Nickname is null ? string.Empty : $"\"{character.Nickname}\"")}".Trim());
@@ -629,7 +724,7 @@ namespace DIGOS.Ambassador.Services
 
             eb.AddField("Description", character.Description);
 
-            string visualDescription = _descriptionBuilder.BuildVisualDescription(character);
+            string visualDescription = _descriptionBuilder.BuildVisualDescription(appearanceConfiguration);
             return (eb.Build(), visualDescription);
         }
 
@@ -674,17 +769,16 @@ namespace DIGOS.Ambassador.Services
             [NotNull] Character character
         )
         {
-            if (character.DefaultAppearance is null)
+            var getAppearanceConfigurationResult = await GetOrCreateAppearanceConfigurationAsync(db, character);
+            if (!getAppearanceConfigurationResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "The character has no default appearance.");
+                return ModifyEntityResult.FromError(getAppearanceConfigurationResult);
             }
 
-            if (!(character.CurrentAppearance is null))
-            {
-                db.Remove(character.CurrentAppearance);
-            }
+            var appearanceConfiguration = getAppearanceConfigurationResult.Entity;
 
-            character.CurrentAppearance = Appearance.CopyFrom(character.DefaultAppearance);
+            db.Remove(appearanceConfiguration.CurrentAppearance);
+            appearanceConfiguration.CurrentAppearance = Appearance.CopyFrom(appearanceConfiguration.DefaultAppearance);
             await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -702,13 +796,16 @@ namespace DIGOS.Ambassador.Services
             [NotNull] Character character
         )
         {
-            if (!(character.DefaultAppearance is null))
+            var getAppearanceConfigurationResult = await GetOrCreateAppearanceConfigurationAsync(db, character);
+            if (!getAppearanceConfigurationResult.IsSuccess)
             {
-                db.Remove(character.DefaultAppearance);
+                return ModifyEntityResult.FromError(getAppearanceConfigurationResult);
             }
 
-            character.DefaultAppearance = Appearance.CopyFrom(character.CurrentAppearance);
+            var appearanceConfiguration = getAppearanceConfigurationResult.Entity;
 
+            db.Remove(appearanceConfiguration.DefaultAppearance);
+            appearanceConfiguration.DefaultAppearance = Appearance.CopyFrom(appearanceConfiguration.CurrentAppearance);
             await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();

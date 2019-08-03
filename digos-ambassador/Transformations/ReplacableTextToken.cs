@@ -43,13 +43,13 @@ namespace DIGOS.Ambassador.Transformations
 
         /// <inheritdoc />
         [NotNull]
-        public abstract string GetText(Character character, AppearanceComponent component);
+        public abstract string GetText(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component);
 
         /// <inheritdoc />
         [NotNull]
-        public virtual Task<string> GetTextAsync(Character character, AppearanceComponent component)
+        public virtual Task<string> GetTextAsync(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
         {
-            return Task.Run(() => GetText(character, component));
+            return Task.Run(() => GetText(appearanceConfiguration, component));
         }
 
         /// <summary>

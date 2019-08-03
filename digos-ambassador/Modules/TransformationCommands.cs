@@ -678,7 +678,24 @@ namespace DIGOS.Ambassador.Modules
         [Summary("Describes the current physical appearance of a character.")]
         public async Task DescribeCharacterAsync([NotNull] Character character)
         {
-            var (eb, description) = await _transformation.GenerateCharacterDescriptionAsync(this.Context, character);
+            var getAppearanceConfigurationResult = await _transformation.GetOrCreateAppearanceConfigurationAsync
+            (
+                this.Database,
+                character
+            );
+
+            if (!getAppearanceConfigurationResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getAppearanceConfigurationResult.ErrorReason);
+                return;
+            }
+
+            var appearanceConfiguration = getAppearanceConfigurationResult.Entity;
+            var (eb, description) = await _transformation.GenerateCharacterDescriptionAsync
+            (
+                this.Context,
+                appearanceConfiguration
+            );
 
             await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
             await _feedback.SendPrivateEmbedAsync
@@ -725,45 +742,6 @@ namespace DIGOS.Ambassador.Modules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Character form reset.");
-        }
-
-        /// <summary>
-        /// Saves your current form as a new character.
-        /// </summary>
-        /// <param name="newCharacterName">The name of the character to save the form as.</param>
-        [UsedImplicitly]
-        [Alias("save", "save-current")]
-        [Command("save")]
-        [Summary("Saves your current form as a new character.")]
-        public async Task SaveCurrentFormAsync([NotNull] string newCharacterName)
-        {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
-            if (!getInvokerResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
-                return;
-            }
-
-            var invoker = getInvokerResult.Entity;
-
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
-            if (!getCurrentCharacterResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-                return;
-            }
-
-            var character = getCurrentCharacterResult.Entity;
-            var currentAppearance = character.CurrentAppearance;
-
-            var cloneCharacterResult = await _characters.CreateCharacterFromAppearanceAsync(this.Database, this.Context, newCharacterName, currentAppearance);
-            if (!cloneCharacterResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, cloneCharacterResult.ErrorReason);
-                return;
-            }
-
-            await _feedback.SendConfirmationAsync(this.Context, $"Current appearance saved as new character \"{newCharacterName}\"");
         }
 
         /// <summary>

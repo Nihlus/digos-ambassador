@@ -50,8 +50,9 @@ namespace DIGOS.Ambassador.Transformations
         }
 
         /// <inheritdoc />
-        public override string GetText(Character character, AppearanceComponent component)
+        public override string GetText(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
         {
+            var character = appearanceConfiguration.Character;
             var pronounProvider = _characters.GetPronounProvider(character);
 
             return pronounProvider.GetForm(this.Form);

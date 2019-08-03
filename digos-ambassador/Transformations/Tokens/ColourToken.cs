@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.Transformations
         public string Part { get; private set; }
 
         /// <inheritdoc />
-        public override string GetText(Character character, AppearanceComponent component)
+        public override string GetText(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
         {
             if (component is null)
             {

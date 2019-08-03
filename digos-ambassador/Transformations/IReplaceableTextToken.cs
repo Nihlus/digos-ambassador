@@ -45,17 +45,25 @@ namespace DIGOS.Ambassador.Transformations
         /// <summary>
         /// Gets the text that the token should be replaced with.
         /// </summary>
-        /// <param name="character">The character that the text should be relevant for.</param>
+        /// <param name="appearanceConfiguration">The appearance that the text should be relevant for.</param>
         /// <param name="component">The component that the text originates from.</param>
         /// <returns>The text that the token should be replaced with.</returns>
-        string GetText([NotNull] Character character, [CanBeNull] AppearanceComponent component);
+        string GetText
+        (
+            [NotNull] AppearanceConfiguration appearanceConfiguration,
+            [CanBeNull] AppearanceComponent component
+        );
 
         /// <summary>
         /// Gets the text that the token should be replaced with.
         /// </summary>
-        /// <param name="character">The character that the text should be relevant for.</param>
+        /// <param name="appearanceConfiguration">The appearance that the text should be relevant for.</param>
         /// <param name="component">The component that the text originates from.</param>
         /// <returns>The text that the token should be replaced with.</returns>
-        Task<string> GetTextAsync([NotNull] Character character, [CanBeNull] AppearanceComponent component);
+        Task<string> GetTextAsync
+        (
+            [NotNull] AppearanceConfiguration appearanceConfiguration,
+            [CanBeNull] AppearanceComponent component
+        );
     }
 }

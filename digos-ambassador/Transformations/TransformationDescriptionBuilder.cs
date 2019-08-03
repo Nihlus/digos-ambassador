@@ -58,19 +58,19 @@ namespace DIGOS.Ambassador.Transformations
         /// Replaces tokens in a piece of text with their respective contents.
         /// </summary>
         /// <param name="text">The text to replace in.</param>
-        /// <param name="character">The character for which the text should be valid.</param>
+        /// <param name="appearanceConfiguration">The character and appearance for which the text should be valid.</param>
         /// <param name="component">The transformation that the text belongs to.</param>
         /// <returns>A string with no tokens in it.</returns>
         [NotNull]
         public string ReplaceTokensWithContent
         (
             [NotNull] string text,
-            [NotNull] Character character,
+            [NotNull] AppearanceConfiguration appearanceConfiguration,
             [CanBeNull] AppearanceComponent component
         )
         {
             var tokens = _tokenizer.GetTokens(text);
-            var tokenContentMap = tokens.ToDictionary(token => token, token => token.GetText(character, component));
+            var tokenContentMap = tokens.ToDictionary(token => token, token => token.GetText(appearanceConfiguration, component));
 
             int relativeOffset = 0;
             var sb = new StringBuilder(text);
@@ -90,21 +90,21 @@ namespace DIGOS.Ambassador.Transformations
         /// <summary>
         /// Builds a complete visual description of the given character.
         /// </summary>
-        /// <param name="character">The character to describe.</param>
+        /// <param name="appearanceConfiguration">The character to describe.</param>
         /// <returns>A visual description of the character.</returns>
         [NotNull]
         [Pure]
-        public string BuildVisualDescription([NotNull] Character character)
+        public string BuildVisualDescription([NotNull] AppearanceConfiguration appearanceConfiguration)
         {
             var sb = new StringBuilder();
-            sb.Append(ReplaceTokensWithContent("{@target} is a {@sex} {@species}.", character, null));
+            sb.Append(ReplaceTokensWithContent("{@target} is a {@sex} {@species}.", appearanceConfiguration, null));
             sb.AppendLine();
             sb.AppendLine();
 
             var partsToSkip = new List<AppearanceComponent>();
             int componentCount = 0;
 
-            var orderedComponents = character.CurrentAppearance.Components.OrderByDescending
+            var orderedComponents = appearanceConfiguration.CurrentAppearance.Components.OrderByDescending
             (
                 c =>
                 {
@@ -134,7 +134,7 @@ namespace DIGOS.Ambassador.Transformations
                 var transformation = component.Transformation;
                 if (component.Bodypart.IsChiral())
                 {
-                    var sameSpecies = AreChiralPartsTheSameSpecies(character, component);
+                    var sameSpecies = AreChiralPartsTheSameSpecies(appearanceConfiguration, component);
                     csb.Append
                     (
                         sameSpecies
@@ -144,7 +144,7 @@ namespace DIGOS.Ambassador.Transformations
 
                     if (sameSpecies)
                     {
-                        if (character.TryGetAppearanceComponent(component.Bodypart, component.Chirality.Opposite(), out var partToSkip))
+                        if (appearanceConfiguration.TryGetAppearanceComponent(component.Bodypart, component.Chirality.Opposite(), out var partToSkip))
                         {
                             partsToSkip.Add(partToSkip);
                         }
@@ -161,7 +161,7 @@ namespace DIGOS.Ambassador.Transformations
                 }
 
                 var tokenizedDesc = csb.ToString();
-                var componentDesc = ReplaceTokensWithContent(tokenizedDesc, character, component);
+                var componentDesc = ReplaceTokensWithContent(tokenizedDesc, appearanceConfiguration, component);
 
                 sb.Append(componentDesc);
             }
@@ -175,12 +175,16 @@ namespace DIGOS.Ambassador.Transformations
         /// <summary>
         /// Determines if the chiral parts on the character are the same species.
         /// </summary>
-        /// <param name="character">The character.</param>
+        /// <param name="appearanceConfiguration">The character and its appearances.</param>
         /// <param name="component">The chiral component.</param>
         /// <returns>true if the parts are the same species; otherwise, false.</returns>
-        private bool AreChiralPartsTheSameSpecies([NotNull] Character character, [NotNull] AppearanceComponent component)
+        private bool AreChiralPartsTheSameSpecies
+        (
+            [NotNull] AppearanceConfiguration appearanceConfiguration,
+            [NotNull] AppearanceComponent component
+        )
         {
-            if (!character.TryGetAppearanceComponent(component.Bodypart, component.Chirality.Opposite(), out var opposingComponent))
+            if (!appearanceConfiguration.TryGetAppearanceComponent(component.Bodypart, component.Chirality.Opposite(), out var opposingComponent))
             {
                 return false;
             }
@@ -191,28 +195,28 @@ namespace DIGOS.Ambassador.Transformations
         /// <summary>
         /// Builds a shift message for the given character if the given transformation were to be applied.
         /// </summary>
-        /// <param name="character">The character to use as a base.</param>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The shift message.</returns>
         [NotNull]
         [Pure]
-        public string BuildShiftMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
+        public string BuildShiftMessage([NotNull]AppearanceConfiguration appearanceConfiguration, [NotNull] AppearanceComponent component)
         {
             var transformation = component.Transformation;
 
-            return ReplaceTokensWithContent(transformation.ShiftMessage, character, component);
+            return ReplaceTokensWithContent(transformation.ShiftMessage, appearanceConfiguration, component);
         }
 
         /// <summary>
         /// Builds a shift message for the given character if the given transformation were to be applied to both chiral
         /// components at the same time.
         /// </summary>
-        /// <param name="character">The character to use as a base.</param>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The uniform shift message.</returns>
         [NotNull]
         [Pure]
-        public string BuildUniformShiftMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
+        public string BuildUniformShiftMessage([NotNull]AppearanceConfiguration appearanceConfiguration, [NotNull] AppearanceComponent component)
         {
             var transformation = component.Transformation;
 
@@ -221,34 +225,34 @@ namespace DIGOS.Ambassador.Transformations
                 throw new InvalidOperationException("Missing uniform shift description.");
             }
 
-            return ReplaceTokensWithContent(transformation.UniformShiftMessage, character, component);
+            return ReplaceTokensWithContent(transformation.UniformShiftMessage, appearanceConfiguration, component);
         }
 
         /// <summary>
         /// Builds a grow message for the given character if the given transformation were to be applied.
         /// </summary>
-        /// <param name="character">The character to use as a base.</param>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The grow message.</returns>
         [NotNull]
         [Pure]
-        public string BuildGrowMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
+        public string BuildGrowMessage([NotNull]AppearanceConfiguration appearanceConfiguration, [NotNull] AppearanceComponent component)
         {
             var transformation = component.Transformation;
 
-            return ReplaceTokensWithContent(transformation.GrowMessage, character, component);
+            return ReplaceTokensWithContent(transformation.GrowMessage, appearanceConfiguration, component);
         }
 
         /// <summary>
         /// Builds a grow message for the given character if the given transformation were to be applied to both chiral
         /// components at the same time.
         /// </summary>
-        /// <param name="character">The character to use as a base.</param>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The uniform grow message.</returns>
         [NotNull]
         [Pure]
-        public string BuildUniformGrowMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
+        public string BuildUniformGrowMessage([NotNull]AppearanceConfiguration appearanceConfiguration, [NotNull] AppearanceComponent component)
         {
             var transformation = component.Transformation;
 
@@ -257,18 +261,18 @@ namespace DIGOS.Ambassador.Transformations
                 throw new InvalidOperationException("Missing uniform grow description.");
             }
 
-            return ReplaceTokensWithContent(transformation.UniformGrowMessage, character, component);
+            return ReplaceTokensWithContent(transformation.UniformGrowMessage, appearanceConfiguration, component);
         }
 
         /// <summary>
         /// Builds a removal message for the given character if the given transformation were to be applied.
         /// </summary>
-        /// <param name="character">The character to use as a base.</param>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The removal message.</returns>
         [NotNull]
         [Pure]
-        public string BuildRemoveMessage([NotNull] Character character, [NotNull] AppearanceComponent component)
+        public string BuildRemoveMessage([NotNull]AppearanceConfiguration appearanceConfiguration, [NotNull] AppearanceComponent component)
         {
             var transformation = component.Transformation;
 
@@ -353,13 +357,13 @@ namespace DIGOS.Ambassador.Transformations
                 }
             }
 
-            return ReplaceTokensWithContent(removalText, character, component);
+            return ReplaceTokensWithContent(removalText, appearanceConfiguration, component);
         }
 
         /// <summary>
         /// Builds a pattern colour shifting message for the given character and component.
         /// </summary>
-        /// <param name="character">The character to use as a base.</param>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="originalColour">The original colour of the pattern.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
@@ -367,7 +371,7 @@ namespace DIGOS.Ambassador.Transformations
         [Pure]
         public string BuildPatternColourShiftMessage
         (
-            [NotNull] Character character,
+            [NotNull]AppearanceConfiguration appearanceConfiguration,
             [NotNull] Colour originalColour,
             [NotNull] AppearanceComponent currentComponent
         )
@@ -376,13 +380,13 @@ namespace DIGOS.Ambassador.Transformations
                 $"{{@target}}'s {currentComponent.Bodypart.Humanize()} morphs, as" +
                 $" {{@f|their}} {{@pattern}} {originalColour} hues turn into {currentComponent.PatternColour}.";
 
-            return ReplaceTokensWithContent(shiftMessage, character, currentComponent);
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
 
         /// <summary>
         /// Builds a pattern shifting message for the given character and component.
         /// </summary>
-        /// <param name="character">The character to use as a base.</param>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="originalPattern">The original pattern.</param>
         /// <param name="originalColour">The original colour of the pattern.</param>
         /// <param name="currentComponent">The current component.</param>
@@ -391,7 +395,7 @@ namespace DIGOS.Ambassador.Transformations
         [Pure]
         public string BuildPatternShiftMessage
         (
-            [NotNull] Character character,
+            [NotNull]AppearanceConfiguration appearanceConfiguration,
             [CanBeNull] Pattern? originalPattern,
             [NotNull] Colour originalColour,
             [NotNull] AppearanceComponent currentComponent
@@ -402,13 +406,13 @@ namespace DIGOS.Ambassador.Transformations
                 " {@colour|pattern} {@pattern} patterns spread across it" +
                 $"{(originalPattern.HasValue ? $", replacing their {originalColour} {originalPattern.Humanize().Pluralize()}." : ".")}";
 
-            return ReplaceTokensWithContent(shiftMessage, character, currentComponent);
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
 
         /// <summary>
         /// Builds a base colour shifting message for the given character and component.
         /// </summary>
-        /// <param name="character">The character to use as a base.</param>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="originalColour">The original colour of the pattern.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
@@ -416,7 +420,7 @@ namespace DIGOS.Ambassador.Transformations
         [Pure]
         public string BuildColourShiftMessage
         (
-            [NotNull] Character character,
+            [NotNull]AppearanceConfiguration appearanceConfiguration,
             [NotNull] Colour originalColour,
             [NotNull] AppearanceComponent currentComponent
         )
@@ -425,7 +429,7 @@ namespace DIGOS.Ambassador.Transformations
                 $"{{@target}}'s {currentComponent.Bodypart.Humanize().Transform(To.LowerCase)} morphs, as" +
                 $" {{@f|their}} {originalColour} hues turn into {currentComponent.BaseColour}.";
 
-            return ReplaceTokensWithContent(shiftMessage, character, currentComponent);
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
     }
 }

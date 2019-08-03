@@ -50,12 +50,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
     {
         public class UpdateTransformationDatabaseAsync : TransformationServiceTestBase
         {
-            public override Task InitializeAsync()
-            {
-                // Let tests initialize the transformation database.
-                return Task.CompletedTask;
-            }
-
             [Fact]
             public async Task FindsBundledSpecies()
             {
@@ -161,9 +155,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
         {
             private Species _templateSpecies;
 
-            public override async Task InitializeAsync()
+            protected override async Task InitializeTestAsync()
             {
-                await base.InitializeAsync();
                 _templateSpecies = this.Database.Species.First(s => s.Name == "template");
             }
 
@@ -198,9 +191,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
         {
             private Species _templateSpecies;
 
-            public override async Task InitializeAsync()
+            protected override async Task InitializeTestAsync()
             {
-                await base.InitializeAsync();
                 _templateSpecies = this.Database.Species.First(s => s.Name == "template");
             }
 
@@ -548,19 +540,27 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private User _owner;
             private Character _character;
 
-            public override async Task InitializeAsync()
+            private AppearanceConfiguration _appearanceConfiguration;
+
+            protected override async Task InitializeTestAsync()
             {
                 _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
 
                 _character = new Character
                 {
-                    Owner = _owner,
-                    CurrentAppearance = new Appearance(),
-                    DefaultAppearance = new Appearance()
+                    Owner = _owner
                 };
 
                 this.Database.Characters.Add(_character);
                 this.Database.SaveChanges();
+
+                // Set up the default appearance
+                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
+                (
+                    this.Database, _character
+                );
+
+                _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
             }
 
             [Fact]
@@ -571,7 +571,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     Height = 10
                 };
 
-                _character.CurrentAppearance = alteredAppearance;
+                _appearanceConfiguration.CurrentAppearance = alteredAppearance;
 
                 var result = await this.Transformations.SetCurrentAppearanceAsDefaultForCharacterAsync
                 (
@@ -581,8 +581,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 Assert.True(result.IsSuccess);
                 Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
-                Assert.NotNull(_character.DefaultAppearance);
-                Assert.Equal(10, _character.DefaultAppearance.Height);
+                Assert.NotNull(_appearanceConfiguration.DefaultAppearance);
+                Assert.Equal(10, _appearanceConfiguration.DefaultAppearance.Height);
             }
         }
 
@@ -592,18 +592,27 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private User _owner;
             private Character _character;
 
-            public override async Task InitializeAsync()
+            private AppearanceConfiguration _appearanceConfiguration;
+
+            protected override async Task InitializeTestAsync()
             {
                 _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
 
                 _character = new Character
                 {
-                    Owner = _owner,
-                    CurrentAppearance = new Appearance()
+                    Owner = _owner
                 };
 
                 this.Database.Characters.Add(_character);
                 this.Database.SaveChanges();
+
+                // Set up the default appearance
+                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
+                (
+                    this.Database, _character
+                );
+
+                _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
             }
 
             [Fact]
@@ -614,23 +623,14 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     Height = 256
                 };
 
-                _character.DefaultAppearance = defaultAppearance;
+                _appearanceConfiguration.DefaultAppearance = defaultAppearance;
 
                 var result = await this.Transformations.ResetCharacterFormAsync(this.Database, _character);
 
                 Assert.True(result.IsSuccess);
                 Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
-                Assert.NotNull(_character.CurrentAppearance);
-                Assert.Equal(_character.DefaultAppearance.Height, _character.CurrentAppearance.Height);
-            }
-
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfCharacterDoesNotHaveADefaultAppearance()
-            {
-                var result = await this.Transformations.ResetCharacterFormAsync(this.Database, _character);
-
-                Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
+                Assert.NotNull(_appearanceConfiguration.CurrentAppearance);
+                Assert.Equal(_appearanceConfiguration.DefaultAppearance.Height, _appearanceConfiguration.CurrentAppearance.Height);
             }
         }
 
@@ -655,11 +655,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
         public class GetAvailableSpeciesAsync : TransformationServiceTestBase
         {
-            public override Task InitializeAsync()
-            {
-                return Task.CompletedTask;
-            }
-
             [Fact]
             public async Task ReturnsNonEmptySetForUpdatedDatabase()
             {
@@ -667,14 +662,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.GetAvailableSpeciesAsync(this.Database);
 
                 Assert.NotEmpty(result);
-            }
-
-            [Fact]
-            public async Task ReturnsEmptySetForEmptyDatabase()
-            {
-                var result = await this.Transformations.GetAvailableSpeciesAsync(this.Database);
-
-                Assert.Empty(result);
             }
         }
 
@@ -807,6 +794,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private readonly ICommandContext _context;
             private Character _character;
 
+            private AppearanceConfiguration _appearanceConfiguration;
+
             public RemoveBodypartAsync()
             {
                 var mockedGuild = new Mock<IGuild>();
@@ -839,10 +828,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
             }
 
-            public override async Task InitializeAsync()
+            protected override async Task InitializeTestAsync()
             {
-                await base.InitializeAsync();
-
                 // Ensure owner is opted into transformations
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
@@ -857,11 +844,18 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     Name = "Test",
-                    CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
                     Owner = owner
                 };
 
                 this.Database.Characters.Add(_character);
+
+                // Set up the default appearance
+                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
+                (
+                    this.Database, _character
+                );
+
+                _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
 
                 await this.Database.SaveChangesAsync();
             }
@@ -881,7 +875,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 Assert.False(result.IsSuccess);
                 Assert.Equal(CommandError.UnmetPrecondition, result.Error);
-                Assert.True(_character.HasComponent(Bodypart.Face, Chirality.Center));
+                Assert.True(_appearanceConfiguration.HasComponent(Bodypart.Face, Chirality.Center));
             }
 
             [Fact]
@@ -917,7 +911,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task RemovesCorrectBodypart()
             {
-                Assert.Contains(_character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
+                Assert.Contains(_appearanceConfiguration.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
 
                 await this.Transformations.RemoveBodypartAsync
                 (
@@ -927,7 +921,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     Bodypart.Face
                 );
 
-                Assert.DoesNotContain(_character.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
+                Assert.DoesNotContain(_appearanceConfiguration.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
             }
 
             [Fact]
@@ -954,6 +948,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             private readonly ICommandContext _context;
             private Character _character;
+
+            private AppearanceConfiguration _appearanceConfiguration;
 
             public ShiftBodypartAsync()
             {
@@ -995,10 +991,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
             }
 
-            public override async Task InitializeAsync()
+            protected override async Task InitializeTestAsync()
             {
-                await base.InitializeAsync();
-
                 // Ensure owner is opted into transformations
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
@@ -1014,13 +1008,19 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     Name = "Test",
-                    DefaultAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
-                    CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
                     Owner = owner,
                     PronounProviderFamily = "Feminine"
                 };
 
                 this.Database.Characters.Add(_character);
+
+                // Set up the default appearance
+                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
+                (
+                    this.Database, _character
+                );
+
+                _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
 
                 await this.Database.SaveChangesAsync();
             }
@@ -1095,7 +1095,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task AddsBodypartIfItDoesNotAlreadyExist()
             {
-                Assert.False(_character.HasComponent(Bodypart.Tail, Chirality.Center));
+                Assert.False(_appearanceConfiguration.HasComponent(Bodypart.Tail, Chirality.Center));
 
                 var result = await this.Transformations.ShiftBodypartAsync
                 (
@@ -1107,7 +1107,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.True(_character.HasComponent(Bodypart.Tail, Chirality.Center));
+                Assert.True(_appearanceConfiguration.HasComponent(Bodypart.Tail, Chirality.Center));
             }
 
             [Fact]
@@ -1123,7 +1123,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal("shark", _character.GetAppearanceComponent(Bodypart.Face, Chirality.Center).Transformation.Species.Name);
+                Assert.Equal("shark", _appearanceConfiguration.GetAppearanceComponent(Bodypart.Face, Chirality.Center).Transformation.Species.Name);
             }
 
             [Fact]
@@ -1157,7 +1157,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 Assert.NotEqual
                 (
                     "shark",
-                    _character.DefaultAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+                    _appearanceConfiguration.DefaultAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
                 );
             }
 
@@ -1182,7 +1182,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 Assert.NotEqual
                 (
                     "shark",
-                    _character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+                    _appearanceConfiguration.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
                 );
             }
 
@@ -1207,7 +1207,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 Assert.Equal
                 (
                     "shark",
-                    _character.DefaultAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+                    _appearanceConfiguration.DefaultAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
                 );
             }
 
@@ -1247,7 +1247,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 Assert.Equal
                 (
                     "shark",
-                    _character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
+                    _appearanceConfiguration.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face).Transformation.Species.Name
                 );
             }
         }
@@ -1265,6 +1265,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private Character _character;
 
             private Colour _originalColour;
+
+            private AppearanceConfiguration _appearanceConfiguration;
 
             public ShiftBodypartColourAsync()
             {
@@ -1312,10 +1314,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 Colour.TryParse("bright purple", out _newColour);
             }
 
-            public override async Task InitializeAsync()
+            protected override async Task InitializeTestAsync()
             {
-                await base.InitializeAsync();
-
                 // Ensure owner is opted into transformations
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
@@ -1331,14 +1331,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     Name = "Test",
-                    CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
                     Owner = owner,
                     PronounProviderFamily = "They"
                 };
 
-                _originalColour = _character.GetAppearanceComponent(Bodypart.Face, Chirality.Center).BaseColour;
-
                 this.Database.Characters.Add(_character);
+
+                // Set up the default appearance
+                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
+                (
+                    this.Database, _character
+                );
+
+                _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
+                _originalColour = _appearanceConfiguration.GetAppearanceComponent(Bodypart.Face, Chirality.Center).BaseColour;
 
                 await this.Database.SaveChangesAsync();
             }
@@ -1421,7 +1427,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     _newColour
                 );
 
-                var face = _character.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face);
+                var face = _appearanceConfiguration.CurrentAppearance.Components.First(c => c.Bodypart == Bodypart.Face);
                 Assert.Same(_newColour, face.BaseColour);
             }
 
@@ -1454,6 +1460,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             private readonly ICommandContext _context;
             private Character _character;
+
+            private AppearanceConfiguration _appearanceConfiguration;
 
             public ShiftBodypartPatternAsync()
             {
@@ -1500,10 +1508,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 Colour.TryParse("bright purple", out _newPatternColour);
             }
 
-            public override async Task InitializeAsync()
+            protected override async Task InitializeTestAsync()
             {
-                await base.InitializeAsync();
-
                 // Ensure owner is opted into transformations
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
@@ -1519,12 +1525,19 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 _character = new Character
                 {
                     Name = "Test",
-                    CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
                     Owner = owner,
                     PronounProviderFamily = "They"
                 };
 
                 this.Database.Characters.Add(_character);
+
+                // Set up the default appearance
+                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
+                (
+                    this.Database, _character
+                );
+
+                _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
 
                 await this.Database.SaveChangesAsync();
             }
@@ -1622,7 +1635,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     _newPatternColour
                 );
 
-                var face = _character.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
+                var face = _appearanceConfiguration.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
                 Assert.Equal(_newPattern, face.Pattern);
             }
 
@@ -1639,7 +1652,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     _newPatternColour
                 );
 
-                var face = _character.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
+                var face = _appearanceConfiguration.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
                 Assert.Equal(_newPatternColour, face.PatternColour);
             }
 
@@ -1674,6 +1687,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             private Character _character;
 
             private Colour _originalPatternColour;
+
+            private AppearanceConfiguration _appearanceConfiguration;
 
             public ShiftBodypartPatternColourAsync()
             {
@@ -1721,10 +1736,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 Colour.TryParse("bright purple", out _newPatternColour);
             }
 
-            public override async Task InitializeAsync()
+            protected override async Task InitializeTestAsync()
             {
-                await base.InitializeAsync();
-
                 // Ensure owner is opted into transformations
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
@@ -1737,13 +1750,17 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
-                _character = new Character
+                var character = new Character
                 {
                     Name = "Test",
-                    CurrentAppearance = (await Appearance.CreateDefaultAsync(this.Database, this.Transformations)).Entity,
                     Owner = owner,
                     PronounProviderFamily = "They"
                 };
+
+                this.Database.Characters.Add(character);
+                await this.Database.SaveChangesAsync();
+
+                _character = this.Database.Characters.First();
 
                 Colour.TryParse("dull white", out _originalPatternColour);
                 Assert.NotNull(_originalPatternColour);
@@ -1758,9 +1775,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     _originalPatternColour
                 );
 
-                this.Database.Characters.Add(_character);
+                // Set up the default appearance
+                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
+                (
+                    this.Database, _character
+                );
 
-                await this.Database.SaveChangesAsync();
+                _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
             }
 
             [Fact]
@@ -1867,7 +1888,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     _newPatternColour
                 );
 
-                var face = _character.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
+                var face = _appearanceConfiguration.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
                 Assert.Equal(_newPatternColour, face.PatternColour);
             }
 
