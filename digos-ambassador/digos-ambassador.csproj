@@ -63,5 +63,4 @@
   <Target Name="GenerateDocs" AfterTargets="PostBuildEvent" Condition="Exists('$(DocGeneratorAssembly)')">
     <Exec Command="$(DocGenerator) --assembly $(OutputPath)$(AssemblyName)$(TargetExt) --output $(ProjectDir)../docs" ContinueOnError="true" />
   </Target>
-  <Import Project="..\msbuild\netfx-mono.props" />
 </Project>
