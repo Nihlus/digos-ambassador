@@ -33,7 +33,6 @@ using DIGOS.Ambassador.Doc.Extensions;
 using DIGOS.Ambassador.Doc.Nodes;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using Discord.Commands;
@@ -83,9 +82,6 @@ namespace DIGOS.Ambassador.Doc
                 .AddSingleton<RoleplayService>()
                 .AddSingleton<DiscordService>()
                 .AddSingleton<CharacterService>()
-                .AddSingleton<UserFeedbackService>()
-                .AddSingleton<DossierService>()
-                .AddSingleton<InteractivityService>()
                 .AddSingleton<TransformationService>()
                 .AddSingleton<LuaService>()
                 .AddSingleton<KinkService>()

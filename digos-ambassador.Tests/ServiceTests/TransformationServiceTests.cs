@@ -22,6 +22,8 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
@@ -108,7 +110,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.GetSpeciesByNameAsync(this.Database, "aasddduaiii");
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -138,7 +139,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = this.Transformations.GetSpeciesByName(this.Database, "aasddduaiii");
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -227,7 +227,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -241,7 +240,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
         }
 
@@ -406,7 +404,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.BlacklistUserAsync(this.Database, _user, _blacklistedUser);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -415,7 +412,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.BlacklistUserAsync(this.Database, _user, _user);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
         }
 
@@ -446,7 +442,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.WhitelistUserAsync(this.Database, _user, _whitelistedUser);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -455,7 +450,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Transformations.WhitelistUserAsync(this.Database, _user, _user);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
         }
 
@@ -494,7 +488,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
         }
 
@@ -530,7 +523,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
         }
 
@@ -684,7 +676,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -702,7 +693,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -726,7 +716,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -874,7 +863,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
                 Assert.True(_appearanceConfiguration.HasComponent(Bodypart.Face, Chirality.Center));
             }
 
@@ -891,7 +879,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -1040,7 +1027,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -1056,7 +1042,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -1073,7 +1058,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -1089,7 +1073,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1364,7 +1347,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -1381,7 +1363,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -1397,7 +1378,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1558,7 +1538,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -1576,7 +1555,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -1603,7 +1581,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1799,7 +1776,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -1816,7 +1792,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -1833,7 +1808,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -1858,7 +1832,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]

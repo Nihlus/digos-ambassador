@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Version>1.0.0</Version>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -25,6 +29,14 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
+        <PackageReference Include="Humanizer" Version="2.6.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
+      <ProjectReference Include="..\DIGOS.Ambassador.Database.Abstractions\DIGOS.Ambassador.Database.Abstractions.csproj" />
+      <ProjectReference Include="..\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
       <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Abstractions\DIGOS.Ambassador.Plugins.Abstractions.csproj" />
     </ItemGroup>
 

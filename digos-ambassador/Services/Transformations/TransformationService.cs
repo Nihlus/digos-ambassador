@@ -25,7 +25,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
@@ -159,7 +161,7 @@ namespace DIGOS.Ambassador.Services
 
             if (!appearanceConfiguration.TryGetAppearanceComponent(bodyPart, chirality, out var component))
             {
-                return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
+                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
             }
 
             appearanceConfiguration.CurrentAppearance.Components.Remove(component);
@@ -243,7 +245,7 @@ namespace DIGOS.Ambassador.Services
 
                     return ShiftBodypartResult.FromError
                     (
-                        CommandError.Unsuccessful, message
+                        message
                     );
                 }
             }
@@ -499,12 +501,12 @@ namespace DIGOS.Ambassador.Services
 
             if (!appearanceConfiguration.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
             {
-                return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
+                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
             }
 
             if (currentComponent.BaseColour.IsSameColourAs(colour))
             {
-                return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The bodypart is already that colour.");
+                return ShiftBodypartResult.FromError("The bodypart is already that colour.");
             }
 
             var originalColour = currentComponent.BaseColour;
@@ -555,12 +557,12 @@ namespace DIGOS.Ambassador.Services
 
             if (!appearanceConfiguration.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
             {
-                return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
+                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
             }
 
             if (currentComponent.Pattern == pattern)
             {
-                return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The character already has that pattern.");
+                return ShiftBodypartResult.FromError("The character already has that pattern.");
             }
 
             var originalPattern = currentComponent.Pattern;
@@ -612,17 +614,17 @@ namespace DIGOS.Ambassador.Services
 
             if (!appearanceConfiguration.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
             {
-                return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The character doesn't have that bodypart.");
+                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
             }
 
             if (!currentComponent.Pattern.HasValue)
             {
-                return ShiftBodypartResult.FromError(CommandError.ObjectNotFound, "The bodypart doesn't have a pattern.");
+                return ShiftBodypartResult.FromError("The bodypart doesn't have a pattern.");
             }
 
             if (!(currentComponent.PatternColour is null) && currentComponent.PatternColour.IsSameColourAs(patternColour))
             {
-                return ShiftBodypartResult.FromError(CommandError.Unsuccessful, "The pattern is already that colour.");
+                return ShiftBodypartResult.FromError("The pattern is already that colour.");
             }
 
             var originalColour = currentComponent.PatternColour;
@@ -835,7 +837,7 @@ namespace DIGOS.Ambassador.Services
 
             if (protection.DefaultType == protectionType)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, $"{protectionType.Humanize()} is already your default setting.");
+                return ModifyEntityResult.FromError($"{protectionType.Humanize()} is already your default setting.");
             }
 
             protection.DefaultType = protectionType;
@@ -870,7 +872,7 @@ namespace DIGOS.Ambassador.Services
 
             if (protection.Type == protectionType)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, $"{protectionType.Humanize()} is already your current setting.");
+                return ModifyEntityResult.FromError($"{protectionType.Humanize()} is already your current setting.");
             }
 
             protection.Type = protectionType;
@@ -895,7 +897,7 @@ namespace DIGOS.Ambassador.Services
         {
             if (discordUser == whitelistedUser)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You can't whitelist yourself.");
+                return ModifyEntityResult.FromError("You can't whitelist yourself.");
             }
 
             var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
@@ -908,7 +910,7 @@ namespace DIGOS.Ambassador.Services
 
             if (protection.Whitelist.Any(u => u.DiscordID == (long)whitelistedUser.Id))
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already whitelisted that user.");
+                return ModifyEntityResult.FromError("You've already whitelisted that user.");
             }
 
             var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == (long)discordUser.Id);
@@ -957,7 +959,7 @@ namespace DIGOS.Ambassador.Services
         {
             if (discordUser == blacklistedUser)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You can't blacklist yourself.");
+                return ModifyEntityResult.FromError("You can't blacklist yourself.");
             }
 
             var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
@@ -970,7 +972,7 @@ namespace DIGOS.Ambassador.Services
 
             if (protection.Blacklist.Any(u => u.DiscordID == (long)blacklistedUser.Id))
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You've already blacklisted that user.");
+                return ModifyEntityResult.FromError("You've already blacklisted that user.");
             }
 
             var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == (long)discordUser.Id);
@@ -1211,7 +1213,7 @@ namespace DIGOS.Ambassador.Services
 
             if (!transformations.Any())
             {
-                return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError(CommandError.ObjectNotFound, "No transformation found for that combination.");
+                return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError("No transformation found for that combination.");
             }
 
             return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromSuccess(transformations);
@@ -1267,7 +1269,7 @@ namespace DIGOS.Ambassador.Services
             var species = await db.Species.FirstOrDefaultAsync(s => string.Equals(s.Name, speciesName, StringComparison.OrdinalIgnoreCase));
             if (species is null)
             {
-                return RetrieveEntityResult<Species>.FromError(CommandError.ObjectNotFound, "There is no species with that name in the database.");
+                return RetrieveEntityResult<Species>.FromError("There is no species with that name in the database.");
             }
 
             return RetrieveEntityResult<Species>.FromSuccess(species);

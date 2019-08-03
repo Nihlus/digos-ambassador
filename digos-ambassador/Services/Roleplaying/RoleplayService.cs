@@ -24,11 +24,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using Discord;
@@ -175,7 +175,7 @@ namespace DIGOS.Ambassador.Services
         {
             if (!roleplay.HasJoined(message.Author))
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The given message was not authored by a participant of the roleplay.");
+                return ModifyEntityResult.FromError("The given message was not authored by a participant of the roleplay.");
             }
 
             string userNick = message.Author.Username;
@@ -191,7 +191,7 @@ namespace DIGOS.Ambassador.Services
 
                 if (existingMessage.Contents.Equals(message.Content))
                 {
-                    return ModifyEntityResult.FromError(CommandError.Unsuccessful, "Nothing to do; message content match.");
+                    return ModifyEntityResult.FromError("Nothing to do; message content match.");
                 }
 
                 existingMessage.Contents = message.Content;
@@ -269,8 +269,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return RetrieveEntityResult<Roleplay>.FromError
                 (
-                    CommandError.MultipleMatches,
-                    "There's more than one roleplay with that name. Please specify which user it belongs to."
+                                        "There's more than one roleplay with that name. Please specify which user it belongs to."
                 );
             }
 
@@ -279,7 +278,7 @@ namespace DIGOS.Ambassador.Services
 
             if (roleplay is null)
             {
-                return RetrieveEntityResult<Roleplay>.FromError(CommandError.ObjectNotFound, "No roleplay with that name found.");
+                return RetrieveEntityResult<Roleplay>.FromError("No roleplay with that name found.");
             }
 
             return RetrieveEntityResult<Roleplay>.FromSuccess(roleplay);
@@ -307,7 +306,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return RetrieveEntityResult<Roleplay>.FromError
                 (
-                    CommandError.ObjectNotFound, "There is no roleplay that is currently active in this channel."
+                    "There is no roleplay that is currently active in this channel."
                 );
             }
 
@@ -417,7 +416,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You don't own a roleplay with that name."
                     : "The user doesn't own a roleplay with that name.";
 
-                return RetrieveEntityResult<Roleplay>.FromError(CommandError.ObjectNotFound, errorMessage);
+                return RetrieveEntityResult<Roleplay>.FromError(errorMessage);
             }
 
             return RetrieveEntityResult<Roleplay>.FromSuccess(roleplay);
@@ -431,7 +430,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="roleplay">The roleplay to remove the user from.</param>
         /// <param name="kickedUser">The user to remove from the roleplay.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        public async Task<ExecuteResult> KickUserFromRoleplayAsync
+        public async Task<ModifyEntityResult> KickUserFromRoleplayAsync
         (
             [NotNull] AmbyDatabaseContext db,
             [NotNull] SocketCommandContext context,
@@ -441,7 +440,7 @@ namespace DIGOS.Ambassador.Services
         {
             if (!roleplay.HasJoined(kickedUser) && !roleplay.IsInvited(kickedUser))
             {
-                return ExecuteResult.FromError(CommandError.ObjectNotFound, "That user is neither invited to or a participant of the roleplay.");
+                return ModifyEntityResult.FromError("That user is neither invited to or a participant of the roleplay.");
             }
 
             if (!roleplay.HasJoined(kickedUser))
@@ -458,7 +457,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ExecuteResult.FromSuccess();
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -469,7 +468,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="roleplay">The roleplay to remove the user from.</param>
         /// <param name="removedUser">The user to remove from the roleplay.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        public async Task<ExecuteResult> RemoveUserFromRoleplayAsync
+        public async Task<ModifyEntityResult> RemoveUserFromRoleplayAsync
         (
             [NotNull] AmbyDatabaseContext db,
             [NotNull] SocketCommandContext context,
@@ -484,7 +483,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You're not in that roleplay."
                     : "No matching user found in the roleplay.";
 
-                return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
+                return ModifyEntityResult.FromError(errorMessage);
             }
 
             if (roleplay.IsOwner(removedUser))
@@ -493,7 +492,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You can't leave a roleplay you own."
                     : "The owner of a roleplay can't be removed from it.";
 
-                return ExecuteResult.FromError(CommandError.Unsuccessful, errorMessage);
+                return ModifyEntityResult.FromError(errorMessage);
             }
 
             var participantEntry = roleplay.JoinedUsers.First(p => p.User.DiscordID == (long)removedUser.Id);
@@ -501,7 +500,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ExecuteResult.FromSuccess();
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -527,7 +526,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You're already in that roleplay."
                     : "The user is aleady in that roleplay.";
 
-                return CreateEntityResult<RoleplayParticipant>.FromError(CommandError.Unsuccessful, errorMessage);
+                return CreateEntityResult<RoleplayParticipant>.FromError(errorMessage);
             }
 
             if (roleplay.IsKicked(newUser))
@@ -536,7 +535,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You've been kicked from that roleplay, and can't rejoin unless invited."
                     : "The user has been kicked from that roleplay, and can't rejoin unless invited.";
 
-                return CreateEntityResult<RoleplayParticipant>.FromError(CommandError.UnmetPrecondition, errorMessage);
+                return CreateEntityResult<RoleplayParticipant>.FromError(errorMessage);
             }
 
             // Check the invite list for nonpublic roleplays.
@@ -546,7 +545,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You haven't been invited to that roleplay."
                     : "The user hasn't been invited to that roleplay.";
 
-                return CreateEntityResult<RoleplayParticipant>.FromError(CommandError.UnmetPrecondition, errorMessage);
+                return CreateEntityResult<RoleplayParticipant>.FromError(errorMessage);
             }
 
             var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)newUser.Id);
@@ -580,7 +579,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="roleplay">The roleplay to invite the user to.</param>
         /// <param name="invitedUser">The user to invite.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        public async Task<ExecuteResult> InviteUserAsync
+        public async Task<ModifyEntityResult> InviteUserAsync
         (
             [NotNull] AmbyDatabaseContext db,
             [NotNull] Roleplay roleplay,
@@ -589,12 +588,12 @@ namespace DIGOS.Ambassador.Services
         {
             if (roleplay.IsPublic && !roleplay.IsKicked(invitedUser))
             {
-                return ExecuteResult.FromError(CommandError.UnmetPrecondition, "The roleplay is not set to private.");
+                return ModifyEntityResult.FromError("The roleplay is not set to private.");
             }
 
             if (roleplay.InvitedUsers.Any(p => p.User.DiscordID == (long)invitedUser.Id))
             {
-                return ExecuteResult.FromError(CommandError.Unsuccessful, "The user has already been invited to that roleplay.");
+                return ModifyEntityResult.FromError("The user has already been invited to that roleplay.");
             }
 
             // Remove the invited user from the kick list, if they're on it
@@ -604,7 +603,7 @@ namespace DIGOS.Ambassador.Services
                 var getUserResult = await _users.GetOrRegisterUserAsync(db, invitedUser);
                 if (!getUserResult.IsSuccess)
                 {
-                    return ExecuteResult.FromError(getUserResult);
+                    return ModifyEntityResult.FromError(getUserResult);
                 }
 
                 var user = getUserResult.Entity;
@@ -619,7 +618,7 @@ namespace DIGOS.Ambassador.Services
 
             await db.SaveChangesAsync();
 
-            return ExecuteResult.FromSuccess();
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -666,12 +665,12 @@ namespace DIGOS.Ambassador.Services
         {
             if (string.IsNullOrWhiteSpace(newRoleplayName))
             {
-                return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
+                return ModifyEntityResult.FromError("You need to provide a name.");
             }
 
             if (newRoleplayName.Contains("\""))
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The name may not contain double quotes.");
+                return ModifyEntityResult.FromError("The name may not contain double quotes.");
             }
 
             var isCurrentUser = context.Message.Author.Id == (ulong)roleplay.Owner.DiscordID;
@@ -681,7 +680,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You already have a roleplay with that name."
                     : "The user already has a roleplay with that name.";
 
-                return ModifyEntityResult.FromError(CommandError.MultipleMatches, errorMessage);
+                return ModifyEntityResult.FromError(errorMessage);
             }
 
             var commandModule = _commands.Modules.First(m => m.Name == "roleplay");
@@ -713,7 +712,7 @@ namespace DIGOS.Ambassador.Services
         {
             if (string.IsNullOrWhiteSpace(newRoleplaySummary))
             {
-                return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new summary.");
+                return ModifyEntityResult.FromError("You need to provide a new summary.");
             }
 
             roleplay.Summary = newRoleplaySummary;
@@ -738,7 +737,7 @@ namespace DIGOS.Ambassador.Services
         {
             if (roleplay.Messages.Count > 0 && roleplay.IsNSFW && !isNSFW)
             {
-                return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "You can't mark a NSFW roleplay with messages in it as non-NSFW.");
+                return ModifyEntityResult.FromError("You can't mark a NSFW roleplay with messages in it as non-NSFW.");
             }
 
             roleplay.IsNSFW = isNSFW;
@@ -786,8 +785,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return CreateEntityResult<IGuildChannel>.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    "I don't have permission to manage channels, so I can't create dedicated RP channels."
+                                        "I don't have permission to manage channels, so I can't create dedicated RP channels."
                 );
             }
 
@@ -796,8 +794,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return CreateEntityResult<IGuildChannel>.FromError
                 (
-                    CommandError.Unsuccessful,
-                    "The roleplay already has a dedicated channel."
+                                        "The roleplay already has a dedicated channel."
                 );
             }
 
@@ -863,8 +860,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    "I don't have permission to manage channels, so I can't delete dedicated RP channels."
+                                        "I don't have permission to manage channels, so I can't delete dedicated RP channels."
                 );
             }
 
@@ -872,7 +868,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.ObjectNotFound, "The roleplay doesn't have a dedicated channel."
+                    "The roleplay doesn't have a dedicated channel."
                 );
             }
 
@@ -910,13 +906,13 @@ namespace DIGOS.Ambassador.Services
 
                 return RetrieveEntityResult<IGuildChannel>.FromError
                 (
-                    CommandError.ObjectNotFound, "The roleplay had a channel set, but it appears to have been deleted."
+                    "Attempted to delete a channel, but it appears to have been deleted."
                 );
             }
 
             return RetrieveEntityResult<IGuildChannel>.FromError
             (
-                CommandError.ObjectNotFound, "The roleplay doesn't have a dedicated channel."
+                "The roleplay doesn't have a dedicated channel."
             );
         }
 
@@ -1046,15 +1042,14 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    "I don't have permission to manage channels, so I can't change permissions on dedicated RP channels."
+                                        "I don't have permission to manage channels, so I can't change permissions on dedicated RP channels."
                 );
             }
 
             var user = context.Guild.GetUser(participant.Id);
             if (user is null)
             {
-                return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "User not found in guild.");
+                return ModifyEntityResult.FromError("User not found in guild.");
             }
 
             await dedicatedChannel.RemovePermissionOverwriteAsync(user);

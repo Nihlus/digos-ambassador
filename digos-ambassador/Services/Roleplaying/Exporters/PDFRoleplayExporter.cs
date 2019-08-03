@@ -25,11 +25,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Extensions;
-
-using Discord;
 using Discord.Commands;
 
 using iTextSharp.text;

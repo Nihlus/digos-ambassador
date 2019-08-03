@@ -23,11 +23,11 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Extensions;
 using Discord.Commands;
 
 using Humanizer;
@@ -92,8 +92,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.Unsuccessful,
-                    $"That person already owns the {entity.EntityTypeDisplayName}."
+                                        $"That person already owns the {entity.EntityTypeDisplayName}."
                         .Humanize().Transform(To.SentenceCase)
                 );
             }
@@ -102,8 +101,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.MultipleMatches,
-                    $"That user already owns a {entity.EntityTypeDisplayName} named {entity.Name}. Please rename it first."
+                                        $"That user already owns a {entity.EntityTypeDisplayName} named {entity.Name}. Please rename it first."
                         .Humanize().Transform(To.SentenceCase)
                 );
             }
@@ -132,15 +130,14 @@ namespace DIGOS.Ambassador.Services
         {
             if (entityName.IsNullOrWhitespace())
             {
-                return DetermineConditionResult.FromError(CommandError.ObjectNotFound, "Names cannot be empty.");
+                return DetermineConditionResult.FromError("Names cannot be empty.");
             }
 
             if (entityName.Any(c => _reservedNameCharacters.Contains(c)))
             {
                 return DetermineConditionResult.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    $"Names may not contain any of the following characters: {_reservedNameCharacters.Humanize()}"
+                                        $"Names may not contain any of the following characters: {_reservedNameCharacters.Humanize()}"
                 );
             }
 
@@ -148,8 +145,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return DetermineConditionResult.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    "That is a reserved name."
+                                        "That is a reserved name."
                 );
             }
 
@@ -165,7 +161,7 @@ namespace DIGOS.Ambassador.Services
 
             if (commandNames.Any(entityName.Contains))
             {
-                return DetermineConditionResult.FromError(CommandError.UnmetPrecondition, "Names may not be the same as a command.");
+                return DetermineConditionResult.FromError("Names may not be the same as a command.");
             }
 
             return DetermineConditionResult.FromSuccess();

@@ -22,7 +22,6 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Abstractions.Entities;
-using DIGOS.Ambassador.Database.Interfaces;
 
 namespace DIGOS.Ambassador.Database.Users
 {

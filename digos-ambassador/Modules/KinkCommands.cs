@@ -28,12 +28,13 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.FList.Kinks;
 using DIGOS.Ambassador.Modules.Base;
-using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.TypeReaders;
 using DIGOS.Ambassador.Wizards;
 

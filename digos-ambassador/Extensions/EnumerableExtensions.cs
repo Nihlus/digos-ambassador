@@ -25,10 +25,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Utility;
-
-using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
@@ -75,7 +73,7 @@ namespace DIGOS.Ambassador.Extensions
             var selectedObject = await @this.FirstOrDefaultAsync(i => selectorFunc(i) == selectedString);
             if (selectedObject is null)
             {
-                return RetrieveEntityResult<TResult>.FromError(CommandError.ObjectNotFound, "No matching object for the selector found.");
+                return RetrieveEntityResult<TResult>.FromError("No matching object for the selector found.");
             }
 
             var result = selector(selectedObject);
@@ -118,7 +116,7 @@ namespace DIGOS.Ambassador.Extensions
             var selectedObject = enumerable.FirstOrDefault(i => stringSelector(i) == selectedString);
             if (selectedObject is null)
             {
-                return RetrieveEntityResult<TResult>.FromError(CommandError.ObjectNotFound, "No matching object for the selector found.");
+                return RetrieveEntityResult<TResult>.FromError("No matching object for the selector found.");
             }
 
             var result = selector(selectedObject);
@@ -149,7 +147,7 @@ namespace DIGOS.Ambassador.Extensions
             var hasAnyPassing = await candidates.Where(c => c.Item3 <= tolerance).AnyAsync();
             if (!hasAnyPassing)
             {
-                return RetrieveEntityResult<string>.FromError(CommandError.ObjectNotFound, "No sufficiently close match found.");
+                return RetrieveEntityResult<string>.FromError("No sufficiently close match found.");
             }
 
             var best = await candidates.OrderBy(x => x.Item2).FirstAsync();
@@ -185,7 +183,7 @@ namespace DIGOS.Ambassador.Extensions
             var passing = candidates.Where(c => c.percentile <= tolerance).ToList();
             if (!passing.Any())
             {
-                return RetrieveEntityResult<string>.FromError(CommandError.ObjectNotFound, "No sufficiently close match found.");
+                return RetrieveEntityResult<string>.FromError("No sufficiently close match found.");
             }
 
             var best = passing.MinBy(c => c.distance).First();

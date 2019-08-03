@@ -25,11 +25,12 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity.Messages;
-
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -549,7 +550,7 @@ namespace DIGOS.Ambassador.Wizards
         /// </summary>
         /// <param name="moduleName">The name of the module.</param>
         /// <returns>A execution result which may or may not have succeeded.</returns>
-        public Task<ExecuteResult> OpenModule(string moduleName)
+        public Task<ModifyEntityResult> OpenModule(string moduleName)
         {
             var moduleSearchTerms = _modules.Select
             (
@@ -560,7 +561,7 @@ namespace DIGOS.Ambassador.Wizards
             var getModuleResult = moduleSearchTerms.BestLevenshteinMatch(moduleName, 0.75);
             if (!getModuleResult.IsSuccess)
             {
-                return Task.FromResult(ExecuteResult.FromError(getModuleResult));
+                return Task.FromResult(ModifyEntityResult.FromError(getModuleResult));
             }
 
             var bestMatch = getModuleResult.Entity;
@@ -577,7 +578,7 @@ namespace DIGOS.Ambassador.Wizards
 
             _state = HelpWizardState.CommandListing;
 
-            return Task.FromResult(ExecuteResult.FromSuccess());
+            return Task.FromResult(ModifyEntityResult.FromSuccess());
         }
 
         [SuppressMessage("Style", "SA1118", Justification = "Large text blocks.")]

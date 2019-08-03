@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\digos-ambassador\digos-ambassador.csproj" />
+    <ProjectReference Include="..\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
   </ItemGroup>
   <Target Name="FixRidSpecificHost" AfterTargets="_ComputeNETCoreBuildOutputFiles">
     <ItemGroup>

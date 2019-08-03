@@ -20,9 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
-using DIGOS.Ambassador.Extensions;
 
 namespace DIGOS.Ambassador.Transformations
 {

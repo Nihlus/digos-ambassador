@@ -23,14 +23,15 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Modules.Base;
-using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;

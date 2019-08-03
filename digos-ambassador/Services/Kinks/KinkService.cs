@@ -23,14 +23,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services.Users;
 using Discord;
-using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -254,7 +253,7 @@ namespace DIGOS.Ambassador.Services
 
             if (user.Kinks.Any(k => k.Kink.FListID == kink.FListID))
             {
-                return CreateEntityResult<UserKink>.FromError(CommandError.MultipleMatches, "The user already has a preference for that kink.");
+                return CreateEntityResult<UserKink>.FromError("The user already has a preference for that kink.");
             }
 
             var userKink = UserKink.CreateFrom(kink);
@@ -286,7 +285,7 @@ namespace DIGOS.Ambassador.Services
             var kink = await db.Kinks.FirstOrDefaultAsync(k => k.FListID == onlineKinkID);
             if (kink is null)
             {
-                return RetrieveEntityResult<Kink>.FromError(CommandError.ObjectNotFound, "No kink with that ID found.");
+                return RetrieveEntityResult<Kink>.FromError("No kink with that ID found.");
             }
 
             return RetrieveEntityResult<Kink>.FromSuccess(kink);
@@ -305,8 +304,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return RetrieveEntityResult<IEnumerable<Kink>>.FromError
                 (
-                    CommandError.ObjectNotFound,
-                    "There are no kinks in that category."
+                                        "There are no kinks in that category."
                 );
             }
 
@@ -406,7 +404,7 @@ namespace DIGOS.Ambassador.Services
 
             if (kinkWithoutPreference is null)
             {
-                return RetrieveEntityResult<Kink>.FromError(CommandError.ObjectNotFound, "No kink without a set preference found.");
+                return RetrieveEntityResult<Kink>.FromError("No kink without a set preference found.");
             }
 
             return RetrieveEntityResult<Kink>.FromSuccess(kinkWithoutPreference);
@@ -455,7 +453,7 @@ namespace DIGOS.Ambassador.Services
 
             if (nextKink is null)
             {
-                return RetrieveEntityResult<Kink>.FromError(CommandError.ObjectNotFound, "The current kink was the last one in the category.");
+                return RetrieveEntityResult<Kink>.FromError("The current kink was the last one in the category.");
             }
 
             return RetrieveEntityResult<Kink>.FromSuccess(nextKink);

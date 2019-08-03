@@ -22,13 +22,11 @@
 
 using System;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.ServerInfo;
-using DIGOS.Ambassador.Extensions;
 using Discord;
-using Discord.Commands;
-
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -113,7 +111,7 @@ namespace DIGOS.Ambassador.Services.Servers
         {
             if (server.Description.IsNullOrWhitespace())
             {
-                return RetrieveEntityResult<string>.FromError(CommandError.ObjectNotFound, "No description set.");
+                return RetrieveEntityResult<string>.FromError("No description set.");
             }
 
             return RetrieveEntityResult<string>.FromSuccess(server.Description);
@@ -137,8 +135,7 @@ namespace DIGOS.Ambassador.Services.Servers
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    "The description must not be empty."
+                                        "The description must not be empty."
                 );
             }
 
@@ -146,8 +143,7 @@ namespace DIGOS.Ambassador.Services.Servers
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.Unsuccessful,
-                    "That's already the server's description."
+                                        "That's already the server's description."
                 );
             }
 
@@ -155,8 +151,7 @@ namespace DIGOS.Ambassador.Services.Servers
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    "The description may not be longer than 800 characters."
+                                        "The description may not be longer than 800 characters."
                 );
             }
 
@@ -176,7 +171,7 @@ namespace DIGOS.Ambassador.Services.Servers
         {
             if (server.JoinMessage.IsNullOrWhitespace())
             {
-                return RetrieveEntityResult<string>.FromError(CommandError.ObjectNotFound, "No join message set.");
+                return RetrieveEntityResult<string>.FromError("No join message set.");
             }
 
             return RetrieveEntityResult<string>.FromSuccess(server.JoinMessage);
@@ -200,8 +195,7 @@ namespace DIGOS.Ambassador.Services.Servers
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    "The join message must not be empty."
+                                        "The join message must not be empty."
                 );
             }
 
@@ -209,8 +203,7 @@ namespace DIGOS.Ambassador.Services.Servers
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.Unsuccessful,
-                    "That's already the server's join message."
+                                        "That's already the server's join message."
                 );
             }
 
@@ -218,8 +211,7 @@ namespace DIGOS.Ambassador.Services.Servers
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    "The join message may not be longer than 1200 characters."
+                                        "The join message may not be longer than 1200 characters."
                 );
             }
 
@@ -248,8 +240,7 @@ namespace DIGOS.Ambassador.Services.Servers
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.Unsuccessful,
-                    $"The server is already {(isNsfw ? string.Empty : "not")} NSFW."
+                                        $"The server is already {(isNsfw ? string.Empty : "not")} NSFW."
                 );
             }
 
@@ -277,8 +268,7 @@ namespace DIGOS.Ambassador.Services.Servers
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.Unsuccessful,
-                    $"The server already {(sendJoinMessage ? string.Empty : "not")} sending first-join messages."
+                                        $"The server already {(sendJoinMessage ? string.Empty : "not")} sending first-join messages."
                 );
             }
 

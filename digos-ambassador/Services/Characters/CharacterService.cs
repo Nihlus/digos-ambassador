@@ -25,12 +25,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Utility;
@@ -234,7 +234,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You haven't assumed a character."
                     : "The user hasn't assumed a character.";
 
-                return RetrieveEntityResult<Character>.FromError(CommandError.ObjectNotFound, errorMessage);
+                return RetrieveEntityResult<Character>.FromError(errorMessage);
             }
 
             var currentCharacter = await GetUserCharacters(db, discordUser, context.Guild)
@@ -245,7 +245,7 @@ namespace DIGOS.Ambassador.Services
 
             if (currentCharacter is null)
             {
-                return RetrieveEntityResult<Character>.FromError(CommandError.Unsuccessful, "Failed to retrieve a current character.");
+                return RetrieveEntityResult<Character>.FromError("Failed to retrieve a current character.");
             }
 
             return RetrieveEntityResult<Character>.FromSuccess(currentCharacter);
@@ -271,8 +271,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return RetrieveEntityResult<Character>.FromError
                 (
-                    CommandError.MultipleMatches,
-                    "There's more than one character with that name. Please specify which user it belongs to."
+                                        "There's more than one character with that name. Please specify which user it belongs to."
                 );
             }
 
@@ -280,7 +279,7 @@ namespace DIGOS.Ambassador.Services
 
             if (character is null)
             {
-                return RetrieveEntityResult<Character>.FromError(CommandError.ObjectNotFound, "No character with that name found.");
+                return RetrieveEntityResult<Character>.FromError("No character with that name found.");
             }
 
             return RetrieveEntityResult<Character>.FromSuccess(character);
@@ -329,7 +328,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You don't own a character with that name."
                     : "The user doesn't own a character with that name.";
 
-                return RetrieveEntityResult<Character>.FromError(CommandError.ObjectNotFound, errorMessage);
+                return RetrieveEntityResult<Character>.FromError(errorMessage);
             }
 
             return RetrieveEntityResult<Character>.FromSuccess(character);
@@ -361,7 +360,7 @@ namespace DIGOS.Ambassador.Services
 
             if (character.IsCurrent)
             {
-                return ModifyEntityResult.FromError(CommandError.MultipleMatches, "The character is already current on the server.");
+                return ModifyEntityResult.FromError("The character is already current on the server.");
             }
 
             await ClearCurrentCharacterOnServerAsync(db, user, discordServer);
@@ -389,7 +388,7 @@ namespace DIGOS.Ambassador.Services
         {
             if (!await HasActiveCharacterOnServerAsync(db, discordUser, discordServer))
             {
-                return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "There's no current character on this server.");
+                return ModifyEntityResult.FromError("There's no current character on this server.");
             }
 
             var currentCharactersOnServer = GetUserCharacters(db, discordUser, discordServer).Where(ch => ch.IsCurrent);
@@ -558,7 +557,7 @@ namespace DIGOS.Ambassador.Services
                     ? "That's already your default character."
                     : "That's already the user's default character.";
 
-                return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, errorMessage);
+                return ModifyEntityResult.FromError(errorMessage);
             }
 
             targetUser.DefaultCharacter = newDefaultCharacter;
@@ -588,7 +587,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You don't have a default character."
                     : "That user doesn't have a default character.";
 
-                return ModifyEntityResult.FromError(CommandError.ObjectNotFound, errorMessage);
+                return ModifyEntityResult.FromError(errorMessage);
             }
 
             targetUser.DefaultCharacter = null;
@@ -615,17 +614,17 @@ namespace DIGOS.Ambassador.Services
         {
             if (string.IsNullOrWhiteSpace(newCharacterName))
             {
-                return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a name.");
+                return ModifyEntityResult.FromError("You need to provide a name.");
             }
 
             if (string.Equals(character.Name, newCharacterName, StringComparison.OrdinalIgnoreCase))
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character already has that name.");
+                return ModifyEntityResult.FromError("The character already has that name.");
             }
 
             if (newCharacterName.Contains("\""))
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The name may not contain double quotes.");
+                return ModifyEntityResult.FromError("The name may not contain double quotes.");
             }
 
             var isCurrentUser = context.Message.Author.Id == (ulong)character.Owner.DiscordID;
@@ -635,7 +634,7 @@ namespace DIGOS.Ambassador.Services
                     ? "You already have a character with that name."
                     : "The user already has a character with that name.";
 
-                return ModifyEntityResult.FromError(CommandError.MultipleMatches, errorMessage);
+                return ModifyEntityResult.FromError(errorMessage);
             }
 
             var commandModule = _commands.Modules.FirstOrDefault(m => m.Name == "character");
@@ -670,17 +669,17 @@ namespace DIGOS.Ambassador.Services
         {
             if (string.IsNullOrWhiteSpace(newCharacterAvatarUrl))
             {
-                return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new avatar url.");
+                return ModifyEntityResult.FromError("You need to provide a new avatar url.");
             }
 
             if (!Uri.TryCreate(newCharacterAvatarUrl, UriKind.Absolute, out _))
             {
-                return ModifyEntityResult.FromError(CommandError.BadArgCount, "The given image URL wasn't valid.");
+                return ModifyEntityResult.FromError("The given image URL wasn't valid.");
             }
 
             if (character.AvatarUrl == newCharacterAvatarUrl)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character's avatar is already set to that URL.");
+                return ModifyEntityResult.FromError("The character's avatar is already set to that URL.");
             }
 
             character.AvatarUrl = newCharacterAvatarUrl;
@@ -705,17 +704,17 @@ namespace DIGOS.Ambassador.Services
         {
             if (string.IsNullOrWhiteSpace(newCharacterNickname))
             {
-                return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new nickname.");
+                return ModifyEntityResult.FromError("You need to provide a new nickname.");
             }
 
             if (character.Nickname == newCharacterNickname)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character already has that nickname.");
+                return ModifyEntityResult.FromError("The character already has that nickname.");
             }
 
             if (newCharacterNickname.Length > 32)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The nickname is too long. It can be at most 32 characters.");
+                return ModifyEntityResult.FromError("The nickname is too long. It can be at most 32 characters.");
             }
 
             character.Nickname = newCharacterNickname;
@@ -740,17 +739,17 @@ namespace DIGOS.Ambassador.Services
         {
             if (string.IsNullOrWhiteSpace(newCharacterSummary))
             {
-                return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new summary.");
+                return ModifyEntityResult.FromError("You need to provide a new summary.");
             }
 
             if (character.Summary == newCharacterSummary)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "That's already the character's summary.");
+                return ModifyEntityResult.FromError("That's already the character's summary.");
             }
 
             if (newCharacterSummary.Length > 240)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The summary is too long. It can be at most 240 characters.");
+                return ModifyEntityResult.FromError("The summary is too long. It can be at most 240 characters.");
             }
 
             character.Summary = newCharacterSummary;
@@ -775,17 +774,17 @@ namespace DIGOS.Ambassador.Services
         {
             if (string.IsNullOrWhiteSpace(newCharacterDescription))
             {
-                return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a new description.");
+                return ModifyEntityResult.FromError("You need to provide a new description.");
             }
 
             if (character.Description == newCharacterDescription)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character already has that description.");
+                return ModifyEntityResult.FromError("The character already has that description.");
             }
 
             if (newCharacterDescription.Length > 1000)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The description is too long. It can be at most 1000 characters.");
+                return ModifyEntityResult.FromError("The description is too long. It can be at most 1000 characters.");
             }
             character.Description = newCharacterDescription;
             await db.SaveChangesAsync();
@@ -809,17 +808,17 @@ namespace DIGOS.Ambassador.Services
         {
             if (pronounFamily.IsNullOrWhitespace())
             {
-                return ModifyEntityResult.FromError(CommandError.BadArgCount, "You need to provide a pronoun family.");
+                return ModifyEntityResult.FromError("You need to provide a pronoun family.");
             }
 
             if (!_pronounProviders.ContainsKey(pronounFamily))
             {
-                return ModifyEntityResult.FromError(CommandError.ObjectNotFound, "Could not find a pronoun provider for that family.");
+                return ModifyEntityResult.FromError("Could not find a pronoun provider for that family.");
             }
 
             if (character.PronounProviderFamily == pronounFamily)
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "The character is already using that pronoun set.");
+                return ModifyEntityResult.FromError("The character is already using that pronoun set.");
             }
 
             var pronounProvider = _pronounProviders[pronounFamily];
@@ -849,7 +848,7 @@ namespace DIGOS.Ambassador.Services
                     ? "The character is already NSFW."
                     : "The character is alreadu SFW.";
 
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, message);
+                return ModifyEntityResult.FromError(message);
             }
 
             character.IsNSFW = isNSFW;
@@ -949,12 +948,12 @@ namespace DIGOS.Ambassador.Services
             bool isImageNameUnique = !character.Images.Any(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
             if (!isImageNameUnique)
             {
-                return ModifyEntityResult.FromError(CommandError.MultipleMatches, "The character already has an image with that name.");
+                return ModifyEntityResult.FromError("The character already has an image with that name.");
             }
 
             if (imageName.IsNullOrWhitespace())
             {
-                return ModifyEntityResult.FromError(CommandError.Unsuccessful, "You need to specify a name.");
+                return ModifyEntityResult.FromError("You need to specify a name.");
             }
 
             if (imageCaption.IsNullOrWhitespace())
@@ -966,8 +965,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.Unsuccessful,
-                    $"That URL doesn't look valid. Please check \"{imageUrl}\" for errors."
+                                        $"That URL doesn't look valid. Please check \"{imageUrl}\" for errors."
                 );
             }
 
@@ -1002,7 +1000,7 @@ namespace DIGOS.Ambassador.Services
             bool hasNamedImage = character.Images.Any(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
             if (!hasNamedImage)
             {
-                return ModifyEntityResult.FromError(CommandError.MultipleMatches, "The character has no image with that name.");
+                return ModifyEntityResult.FromError("The character has no image with that name.");
             }
 
             character.Images.RemoveAll(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
@@ -1030,8 +1028,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return CreateEntityResult<CharacterRole>.FromError
                 (
-                    CommandError.MultipleMatches,
-                    "That role is already registered as a character role."
+                                        "That role is already registered as a character role."
                 );
             }
 
@@ -1087,8 +1084,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return RetrieveEntityResult<CharacterRole>.FromError
                 (
-                    CommandError.ObjectNotFound,
-                    "That role is not registered as a character role."
+                                        "That role is not registered as a character role."
                 );
             }
 
@@ -1132,8 +1128,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.Unsuccessful,
-                    "The role already has those access conditions."
+                                        "The role already has those access conditions."
                 );
             }
 
@@ -1161,8 +1156,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.Unsuccessful,
-                    "The character already has that role."
+                                        "The character already has that role."
                 );
             }
 
@@ -1189,8 +1183,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.Unsuccessful,
-                    "The character doesn't have a role set."
+                                        "The character doesn't have a role set."
                 );
             }
 

@@ -22,17 +22,19 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Behaviours;
-using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Transformations;
@@ -104,7 +106,6 @@ namespace DIGOS.Ambassador
                 .AddSingleton<DiscordService>()
                 .AddSingleton<CharacterService>()
                 .AddSingleton<UserFeedbackService>()
-                .AddSingleton<DossierService>()
                 .AddSingleton<InteractivityService>()
                 .AddSingleton<TransformationService>()
                 .AddSingleton<LuaService>()

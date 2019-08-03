@@ -22,12 +22,10 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Pagination;
-using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity;
-
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;

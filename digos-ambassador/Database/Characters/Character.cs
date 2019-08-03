@@ -20,17 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using DIGOS.Ambassador.Database.Interfaces;
-using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Transformations;
-
 using Discord;
 using JetBrains.Annotations;
 using Image = DIGOS.Ambassador.Database.Characters.Data.Image;

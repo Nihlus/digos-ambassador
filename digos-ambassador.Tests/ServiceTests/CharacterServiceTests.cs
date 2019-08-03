@@ -24,12 +24,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Modules;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
@@ -173,7 +174,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, null, null);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -182,7 +182,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, null, "NonExistant");
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -210,7 +209,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, null);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -219,7 +217,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, string.Empty);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -228,7 +225,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.GetBestMatchingCharacterAsync(this.Database, _context, _dbOwner, "NonExistant");
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             /*
@@ -389,7 +385,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.GetCurrentCharacterAsync(this.Database, _context, _dbOwner);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -443,7 +438,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.GetNamedCharacterAsync(this.Database, "NonExistant", _guild);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -462,7 +456,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.GetNamedCharacterAsync(this.Database, CharacterName, _guild);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.MultipleMatches, result.Error);
             }
 
             [Fact]
@@ -639,7 +632,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.GetUserCharacterByNameAsync(this.Database, _context, _dbOwner, "NonExistant");
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -728,7 +720,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.MakeCharacterCurrentOnServerAsync(this.Database, _context, _guild, _character);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.MultipleMatches, result.Error);
             }
         }
 
@@ -760,7 +751,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.ClearCurrentCharacterOnServerAsync(this.Database, _dbOwner, _guild);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -980,7 +970,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterNameAsync(this.Database, _context, _character, null);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -989,7 +978,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterNameAsync(this.Database, _context, _character, string.Empty);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -998,7 +986,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterNameAsync(this.Database, _context, _character, CharacterName);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1007,7 +994,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterNameAsync(this.Database, _context, _character, AnotherCharacterName);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.MultipleMatches, result.Error);
             }
 
             [Fact]
@@ -1016,7 +1002,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterNameAsync(this.Database, _context, _character, "create");
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -1068,7 +1053,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterAvatarAsync(this.Database, _character, null);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -1077,7 +1061,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterAvatarAsync(this.Database, _character, string.Empty);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -1086,7 +1069,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterAvatarAsync(this.Database, _character, AvatarURL);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1137,7 +1119,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterNicknameAsync(this.Database, _character, null);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -1146,7 +1127,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterNicknameAsync(this.Database, _character, string.Empty);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -1155,7 +1135,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterNicknameAsync(this.Database, _character, Nickname);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1164,7 +1143,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterNicknameAsync(this.Database, _character, new string('a', 33));
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1214,7 +1192,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterSummaryAsync(this.Database, _character, null);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -1223,7 +1200,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterSummaryAsync(this.Database, _character, string.Empty);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -1232,7 +1208,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterSummaryAsync(this.Database, _character, Summary);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1241,7 +1216,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterSummaryAsync(this.Database, _character, new string('a', 241));
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1291,7 +1265,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterDescriptionAsync(this.Database, _character, null);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -1300,7 +1273,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterDescriptionAsync(this.Database, _character, string.Empty);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -1309,7 +1281,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterDescriptionAsync(this.Database, _character, Description);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1362,7 +1333,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterPronounAsync(this.Database, _character, null);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -1371,7 +1341,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterPronounAsync(this.Database, _character, string.Empty);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.BadArgCount, result.Error);
             }
 
             [Fact]
@@ -1380,7 +1349,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterPronounAsync(this.Database, _character, PronounFamily);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1389,7 +1357,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterPronounAsync(this.Database, _character, "ahwooooga");
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -1439,7 +1406,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Characters.SetCharacterIsNSFWAsync(this.Database, _character, IsNSFW);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -1726,7 +1692,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
                 Assert.Same(_character, _user.DefaultCharacter);
             }
         }
@@ -1799,7 +1764,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
                 Assert.Null(_user.DefaultCharacter);
             }
         }
@@ -1866,7 +1830,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.MultipleMatches, result.Error);
             }
         }
 
@@ -1951,7 +1914,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
         }
 
@@ -2071,7 +2033,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
         }
 
@@ -2140,7 +2101,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
         }
     }

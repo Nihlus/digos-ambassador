@@ -24,6 +24,7 @@
 #pragma warning disable CS1591
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Services;
 using Moq;
 using Xunit;

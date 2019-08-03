@@ -25,15 +25,14 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity.Messages;
-
 using Discord;
-using Discord.Commands;
 using Discord.WebSocket;
 
 using Humanizer;
@@ -358,17 +357,17 @@ namespace DIGOS.Ambassador.Wizards
             await UpdateAsync();
         }
 
-        private async Task<ExecuteResult> OpenCategory(string categoryName)
+        private async Task<ModifyEntityResult> OpenCategory(string categoryName)
         {
             var getCategoryResult = _categories.Select(c => c.ToString()).BestLevenshteinMatch(categoryName, 0.75);
             if (!getCategoryResult.IsSuccess)
             {
-                return ExecuteResult.FromError(getCategoryResult);
+                return ModifyEntityResult.FromError(getCategoryResult);
             }
 
             if (!Enum.TryParse<KinkCategory>(getCategoryResult.Entity, true, out var category))
             {
-                return ExecuteResult.FromError(CommandError.ParseFailed, "Could not parse kink category.");
+                return ModifyEntityResult.FromError("Could not parse kink category.");
             }
 
             var getKinkResult = await _kinks.GetFirstKinkWithoutPreferenceInCategoryAsync(_database, _targetUser, category);
@@ -379,7 +378,7 @@ namespace DIGOS.Ambassador.Wizards
 
             if (!getKinkResult.IsSuccess)
             {
-                return ExecuteResult.FromError(getKinkResult);
+                return ModifyEntityResult.FromError(getKinkResult);
             }
 
             var kink = getKinkResult.Entity;
@@ -387,7 +386,7 @@ namespace DIGOS.Ambassador.Wizards
 
             _state = KinkWizardState.KinkPreference;
 
-            return ExecuteResult.FromSuccess();
+            return ModifyEntityResult.FromSuccess();
         }
 
         [SuppressMessage("Style", "SA1118", Justification = "Large text blocks.")]

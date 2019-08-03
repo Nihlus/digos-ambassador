@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.TypeReaders
                 }
             }
 
-            return TypeReaderResult.FromError(CommandError.ObjectNotFound, "Message not found.");
+            return TypeReaderResult.FromError(CommandError.Unsuccessful, "Message not found.");
         }
     }
 }

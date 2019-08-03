@@ -26,6 +26,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Results;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -61,11 +62,11 @@ namespace DIGOS.Ambassador.Services
             }
             catch (HttpRequestException hex)
             {
-                return RetrieveEntityResult<Stream>.FromError(CommandError.Exception, hex.ToString());
+                return RetrieveEntityResult<Stream>.FromError(hex.ToString());
             }
             catch (TaskCanceledException)
             {
-                return RetrieveEntityResult<Stream>.FromError(CommandError.Unsuccessful, "The download operation timed out.");
+                return RetrieveEntityResult<Stream>.FromError("The download operation timed out.");
             }
         }
 
@@ -85,12 +86,12 @@ namespace DIGOS.Ambassador.Services
         {
             if (!HasPermission(context, GuildPermission.ManageNicknames))
             {
-                return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I'm not allowed to set nicknames on this server.");
+                return ModifyEntityResult.FromError("I'm not allowed to set nicknames on this server.");
             }
 
             if (context.Guild.OwnerId == guildUser.Id)
             {
-                return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I can't set the nickname of the server's owner.");
+                return ModifyEntityResult.FromError("I can't set the nickname of the server's owner.");
             }
 
             try
@@ -99,7 +100,7 @@ namespace DIGOS.Ambassador.Services
             }
             catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
             {
-                return ModifyEntityResult.FromError(CommandError.UnmetPrecondition, "I couldn't modify the nickname due to a priority issue.");
+                return ModifyEntityResult.FromError("I couldn't modify the nickname due to a priority issue.");
             }
 
             return ModifyEntityResult.FromSuccess();
@@ -123,7 +124,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.UnmetPrecondition, "I'm not allowed to manage roles on this server."
+                    "I'm not allowed to manage roles on this server."
                 );
             }
 
@@ -140,8 +141,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    "I couldn't modify the roles due to a priority issue."
+                                        "I couldn't modify the roles due to a priority issue."
                 );
             }
 
@@ -166,7 +166,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.UnmetPrecondition, "I'm not allowed to manage roles on this server."
+                    "I'm not allowed to manage roles on this server."
                 );
             }
 
@@ -183,8 +183,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    "I couldn't modify the roles due to a priority issue."
+                                        "I couldn't modify the roles due to a priority issue."
                 );
             }
 

@@ -27,10 +27,10 @@ using System.Threading.Tasks;
 
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
-using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.TypeReaders;
 

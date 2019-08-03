@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Permissions.Preconditions
             var result = await roleplayService.GetActiveRoleplayAsync(db, context.Channel);
             if (!result.IsSuccess)
             {
-                return PreconditionResult.FromError(result);
+                return PreconditionResult.FromError(result.ErrorReason);
             }
 
             if (_requireOwner)

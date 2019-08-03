@@ -22,11 +22,9 @@
 
 using System;
 using System.Threading.Tasks;
-
-using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity;
-using DIGOS.Ambassador.Services.Interactivity.Messages;
-
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Discord;
 using Discord.Commands;
 using Discord.Net;

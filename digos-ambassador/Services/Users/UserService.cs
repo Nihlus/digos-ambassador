@@ -22,10 +22,10 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Users;
 using Discord;
-using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -65,8 +65,7 @@ namespace DIGOS.Ambassador.Services.Users
             {
                 return RetrieveEntityResult<User>.FromError
                 (
-                    CommandError.UnmetPrecondition,
-                    "Users cannot be viewed or created for bots or webhooks."
+                                        "Users cannot be viewed or created for bots or webhooks."
                 );
             }
 

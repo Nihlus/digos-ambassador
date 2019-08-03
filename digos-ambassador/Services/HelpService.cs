@@ -22,7 +22,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Extensions;
 
 using Discord;

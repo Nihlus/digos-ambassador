@@ -24,12 +24,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Modules;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
@@ -162,7 +165,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _originalDBUser, ownerEntities, entityMock.Object);
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -183,7 +185,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _newDBUser, ownerEntities, entityOwnedByOriginal.Object);
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.MultipleMatches, result.Error);
             }
 
             [Fact]
@@ -257,7 +258,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = this.Entities.IsEntityNameValid(_commandModule, null);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Theory]
@@ -267,7 +267,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = this.Entities.IsEntityNameValid(_commandModule, $"Test{invalidCharacter}");
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Theory]
@@ -277,7 +276,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = this.Entities.IsEntityNameValid(_commandModule, reservedName);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Theory]
@@ -291,7 +289,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = this.Entities.IsEntityNameValid(_commandModule, commandName);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Theory]

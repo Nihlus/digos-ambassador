@@ -26,11 +26,9 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database.Interfaces;
-using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services;
-
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
@@ -60,7 +58,7 @@ namespace DIGOS.Ambassador.TypeReaders
                 var userParseResult = await ReadUserAsync(context, rawUser);
                 if (!userParseResult.IsSuccess)
                 {
-                    return TypeReaderResult.FromError(userParseResult);
+                    return TypeReaderResult.FromError(CommandError.Unsuccessful, userParseResult.ErrorReason);
                 }
 
                 owner = userParseResult.Entity;
@@ -88,7 +86,7 @@ namespace DIGOS.Ambassador.TypeReaders
 
                             return TypeReaderResult.FromError
                             (
-                                CommandError.MultipleMatches,
+                                CommandError.Unsuccessful,
                                 message
                             );
                         }
@@ -110,13 +108,13 @@ namespace DIGOS.Ambassador.TypeReaders
             {
                 if (!(owner is null))
                 {
-                    return TypeReaderResult.FromError(retrieveEntityResult);
+                    return TypeReaderResult.FromError(CommandError.Unsuccessful, retrieveEntityResult.ErrorReason);
                 }
 
                 var retrieveUserEntityResult = await RetrieveEntityAsync(context.User, entityName, context, services);
                 if (!retrieveUserEntityResult.IsSuccess)
                 {
-                    return TypeReaderResult.FromError(retrieveUserEntityResult);
+                    return TypeReaderResult.FromError(CommandError.Unsuccessful, retrieveUserEntityResult.ErrorReason);
                 }
 
                 return TypeReaderResult.FromSuccess(retrieveUserEntityResult.Entity);
@@ -168,7 +166,7 @@ namespace DIGOS.Ambassador.TypeReaders
                 return RetrieveEntityResult<TUser>.FromSuccess(partialMatch);
             }
 
-            return RetrieveEntityResult<TUser>.FromError(CommandError.ObjectNotFound, "No matching user found.");
+            return RetrieveEntityResult<TUser>.FromError("No matching user found.");
         }
 
         private async Task<RetrieveEntityResult<IUser>> GetUserByIdAsync([NotNull] ICommandContext context, ulong id)
@@ -187,8 +185,7 @@ namespace DIGOS.Ambassador.TypeReaders
             {
                 return RetrieveEntityResult<IUser>.FromError
                 (
-                    CommandError.ObjectNotFound,
-                    "User could not be retrieved."
+                                        "User could not be retrieved."
                 );
             }
 
@@ -301,7 +298,7 @@ namespace DIGOS.Ambassador.TypeReaders
                 }
             }
 
-            return RetrieveEntityResult<IUser>.FromError(CommandError.ObjectNotFound, "User not found.");
+            return RetrieveEntityResult<IUser>.FromError("User not found.");
         }
     }
 }

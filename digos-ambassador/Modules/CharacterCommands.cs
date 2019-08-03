@@ -25,16 +25,20 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
 using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Permissions.Preconditions;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;
 using Discord;
@@ -403,14 +407,7 @@ namespace DIGOS.Ambassador.Modules
 
                     if (!removeRoleResult.IsSuccess)
                     {
-                        if (removeRoleResult.Error != CommandError.UnmetPrecondition)
-                        {
-                            await _feedback.SendErrorAsync(this.Context, removeRoleResult.ErrorReason);
-                        }
-                        else if (!currentServer.SuppressPermissonWarnings)
-                        {
-                            await _feedback.SendWarningAsync(this.Context, removeRoleResult.ErrorReason);
-                        }
+                        await _feedback.SendErrorAsync(this.Context, removeRoleResult.ErrorReason);
                     }
                 }
 
@@ -425,14 +422,7 @@ namespace DIGOS.Ambassador.Modules
 
                     if (!resetNickResult.IsSuccess)
                     {
-                        if (resetNickResult.Error != CommandError.UnmetPrecondition)
-                        {
-                            await _feedback.SendErrorAsync(this.Context, resetNickResult.ErrorReason);
-                        }
-                        else if (!currentServer.SuppressPermissonWarnings)
-                        {
-                            await _feedback.SendWarningAsync(this.Context, resetNickResult.ErrorReason);
-                        }
+                        await _feedback.SendErrorAsync(this.Context, resetNickResult.ErrorReason);
                     }
                 }
             }
@@ -609,14 +599,7 @@ namespace DIGOS.Ambassador.Modules
 
                     if (!removePreviousRoleResult.IsSuccess)
                     {
-                        if (removePreviousRoleResult.Error != CommandError.UnmetPrecondition)
-                        {
-                            await _feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
-                        }
-                        else if (!currentServer.SuppressPermissonWarnings)
-                        {
-                            await _feedback.SendWarningAsync(this.Context, removePreviousRoleResult.ErrorReason);
-                        }
+                        await _feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
                     }
                 }
 
@@ -632,14 +615,7 @@ namespace DIGOS.Ambassador.Modules
 
                     if (!addNewRoleResult.IsSuccess)
                     {
-                        if (addNewRoleResult.Error != CommandError.UnmetPrecondition)
-                        {
-                            await _feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
-                        }
-                        else if (!currentServer.SuppressPermissonWarnings)
-                        {
-                            await _feedback.SendWarningAsync(this.Context, addNewRoleResult.ErrorReason);
-                        }
+                        await _feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
                     }
                 }
             }
@@ -754,11 +730,7 @@ namespace DIGOS.Ambassador.Modules
 
                         if (!modifyRolesResult.IsSuccess)
                         {
-                            if (modifyRolesResult.Error == CommandError.UnmetPrecondition &&
-                                !currentServer.SuppressPermissonWarnings)
-                            {
-                                await _feedback.SendWarningAsync(this.Context, modifyRolesResult.ErrorReason);
-                            }
+                            await _feedback.SendWarningAsync(this.Context, modifyRolesResult.ErrorReason);
                         }
                     }
                 }
@@ -1246,11 +1218,7 @@ namespace DIGOS.Ambassador.Modules
 
                     if (!modifyRolesResult.IsSuccess)
                     {
-                        if (modifyRolesResult.Error == CommandError.UnmetPrecondition &&
-                            !currentServer.SuppressPermissonWarnings)
-                        {
-                            await _feedback.SendWarningAsync(this.Context, modifyRolesResult.ErrorReason);
-                        }
+                        await _feedback.SendWarningAsync(this.Context, modifyRolesResult.ErrorReason);
                     }
                 }
 
@@ -1643,14 +1611,7 @@ namespace DIGOS.Ambassador.Modules
 
                         if (!removePreviousRoleResult.IsSuccess)
                         {
-                            if (removePreviousRoleResult.Error != CommandError.UnmetPrecondition)
-                            {
-                                await _feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
-                            }
-                            else if (!currentServer.SuppressPermissonWarnings)
-                            {
-                                await _feedback.SendWarningAsync(this.Context, removePreviousRoleResult.ErrorReason);
-                            }
+                            await _feedback.SendErrorAsync(this.Context, removePreviousRoleResult.ErrorReason);
                         }
                     }
 
@@ -1666,14 +1627,7 @@ namespace DIGOS.Ambassador.Modules
 
                         if (!addNewRoleResult.IsSuccess)
                         {
-                            if (addNewRoleResult.Error != CommandError.UnmetPrecondition)
-                            {
-                                await _feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
-                            }
-                            else if (!currentServer.SuppressPermissonWarnings)
-                            {
-                                await _feedback.SendWarningAsync(this.Context, addNewRoleResult.ErrorReason);
-                            }
+                            await _feedback.SendErrorAsync(this.Context, addNewRoleResult.ErrorReason);
                         }
                     }
                 }

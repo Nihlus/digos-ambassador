@@ -24,12 +24,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database.Abstractions.Entities;
-using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Transformations;
-using Discord.Commands;
 using JetBrains.Annotations;
 using static DIGOS.Ambassador.Transformations.Bodypart;
 
@@ -107,7 +106,7 @@ namespace DIGOS.Ambassador.Database.Transformations.Appearances
             var getSpeciesResult = await transformations.GetSpeciesByNameAsync(db, "template");
             if (!getSpeciesResult.IsSuccess)
             {
-                return CreateEntityResult<Appearance>.FromError(CommandError.ObjectNotFound, "Could not find the default species.");
+                return CreateEntityResult<Appearance>.FromError("Could not find the default species.");
             }
 
             var templateSpecies = getSpeciesResult.Entity;

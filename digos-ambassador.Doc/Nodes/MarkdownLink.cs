@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Extensions;
 using JetBrains.Annotations;
 

@@ -23,10 +23,8 @@
 using System;
 using System.IO;
 using CommandLine;
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database.Transformations;
-using DIGOS.Ambassador.Services;
-
-using Discord.Commands;
 using YamlDotNet.Core;
 using Parser = CommandLine.Parser;
 
@@ -72,7 +70,7 @@ namespace DIGOS.Ambassador.Tools
             if (!verifyResult.IsSuccess)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                if (verifyResult.Error == CommandError.Exception)
+                if (!(verifyResult.Exception is null))
                 {
                     Console.WriteLine($"File \"{verifyResult.ErrorReason}\" failed verification.");
 

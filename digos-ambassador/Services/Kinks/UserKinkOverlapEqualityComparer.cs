@@ -22,7 +22,6 @@
 
 using System.Collections.Generic;
 using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.Database.Users;
 
 namespace DIGOS.Ambassador.Services
 {

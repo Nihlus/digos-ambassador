@@ -25,8 +25,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Discord.Commands;
-
+using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Core.Services.Content;
 using JetBrains.Annotations;
 using NLua;
 
@@ -229,8 +229,7 @@ namespace DIGOS.Ambassador.Services
                         {
                             return RetrieveEntityResult<string>.FromError
                             (
-                                CommandError.Unsuccessful,
-                                "Timed out while waiting for the script to complete."
+                                                                "Timed out while waiting for the script to complete."
                             );
                         }
 
@@ -239,15 +238,13 @@ namespace DIGOS.Ambassador.Services
                         {
                             return RetrieveEntityResult<string>.FromError
                             (
-                                CommandError.UnmetPrecondition,
-                                $"Usage of {erroringFunction} is prohibited."
+                                                                $"Usage of {erroringFunction} is prohibited."
                             );
                         }
 
                         return RetrieveEntityResult<string>.FromError
                         (
-                            CommandError.ParseFailed,
-                            $"Lua error: {result}"
+                                                        $"Lua error: {result}"
                         );
                     }
                 }

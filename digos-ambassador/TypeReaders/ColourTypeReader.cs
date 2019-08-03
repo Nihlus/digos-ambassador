@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.TypeReaders
         {
             if (!Colour.TryParse(input, out var colour))
             {
-                return Task.FromResult(TypeReaderResult.FromError(CommandError.ParseFailed, "Failed to parse a valid colour."));
+                return Task.FromResult(TypeReaderResult.FromError(CommandError.Unsuccessful, "Failed to parse a valid colour."));
             }
 
             return Task.FromResult(TypeReaderResult.FromSuccess(colour));

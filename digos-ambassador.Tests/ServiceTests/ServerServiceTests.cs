@@ -25,9 +25,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
-
-using Discord.Commands;
-
 using Xunit;
 
 #pragma warning disable SA1600
@@ -53,7 +50,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = this.Servers.GetDescription(_server);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -64,7 +60,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = this.Servers.GetDescription(_server);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -75,7 +70,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = this.Servers.GetDescription(_server);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -107,7 +101,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Servers.SetDescriptionAsync(this.Database, _server, null);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -116,7 +109,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Servers.SetDescriptionAsync(this.Database, _server, string.Empty);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -125,7 +117,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Servers.SetDescriptionAsync(this.Database, _server, "     ");
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -137,7 +128,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Servers.SetDescriptionAsync(this.Database, _server, old);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -147,7 +137,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Servers.SetDescriptionAsync(this.Database, _server, newDescription);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -177,7 +166,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = this.Servers.GetJoinMessage(_server);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -188,7 +176,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = this.Servers.GetJoinMessage(_server);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -199,7 +186,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = this.Servers.GetJoinMessage(_server);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.ObjectNotFound, result.Error);
             }
 
             [Fact]
@@ -231,7 +217,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Servers.SetJoinMessageAsync(this.Database, _server, null);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -240,7 +225,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Servers.SetJoinMessageAsync(this.Database, _server, string.Empty);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -249,7 +233,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Servers.SetJoinMessageAsync(this.Database, _server, "     ");
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -261,7 +244,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Servers.SetJoinMessageAsync(this.Database, _server, old);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -271,7 +253,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var result = await this.Servers.SetJoinMessageAsync(this.Database, _server, newJoinMessage);
 
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.UnmetPrecondition, result.Error);
             }
 
             [Fact]
@@ -300,7 +281,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var result = await this.Servers.SetIsNSFWAsync(this.Database, _server, true);
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]
@@ -328,7 +308,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var result = await this.Servers.SetSendJoinMessageAsync(this.Database, _server, false);
                 Assert.False(result.IsSuccess);
-                Assert.Equal(CommandError.Unsuccessful, result.Error);
             }
 
             [Fact]

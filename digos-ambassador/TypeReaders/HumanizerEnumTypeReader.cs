@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.TypeReaders
             catch (NoMatchFoundException)
             {
                 var message = $"Couldn't parse \"{input}\" as an enum of type \"{typeof(T).Name}\"";
-                return Task.FromResult(TypeReaderResult.FromError(CommandError.ObjectNotFound, message));
+                return Task.FromResult(TypeReaderResult.FromError(CommandError.Unsuccessful, message));
             }
             finally
             {

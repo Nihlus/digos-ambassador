@@ -21,7 +21,6 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
 using JetBrains.Annotations;
 

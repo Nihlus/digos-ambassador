@@ -23,12 +23,12 @@
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Users;
-
+using DIGOS.Ambassador.Discord.Feedback;
 using Discord;
-using Discord.Commands;
 using Discord.Net;
 
 using JetBrains.Annotations;
@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Services.Users
         /// <param name="content">The content service.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <returns>An execution result.</returns>
-        public async Task<ExecuteResult> RequestConsentAsync
+        public async Task<DetermineConditionResult> RequestConsentAsync
         (
             [NotNull] IDMChannel channel,
             [NotNull] ContentService content,
@@ -82,10 +82,10 @@ namespace DIGOS.Ambassador.Services.Users
             }
             catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
             {
-                return ExecuteResult.FromError(CommandError.Exception, "Could not send the privacy message over DM.");
+                return DetermineConditionResult.FromError("Could not send the privacy message over DM.");
             }
 
-            return ExecuteResult.FromSuccess();
+            return DetermineConditionResult.FromSuccess();
         }
 
         /// <summary>

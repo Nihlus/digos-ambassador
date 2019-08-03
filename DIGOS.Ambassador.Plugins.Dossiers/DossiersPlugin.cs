@@ -20,7 +20,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Abstractions;
+using DIGOS.Ambassador.Plugins.Dossiers.CommandModules;
+using DIGOS.Ambassador.Plugins.Dossiers.Services;
+using Discord.Commands;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Plugins.Dossiers
 {
@@ -34,5 +40,22 @@ namespace DIGOS.Ambassador.Plugins.Dossiers
 
         /// <inheritdoc />
         public override string Description => "Provides a way to store and view dossiers about DIGOS units.";
+
+        /// <inheritdoc/>
+        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddSingleton<DossierService>();
+
+            return Task.FromResult(true);
+        }
+
+        /// <inheritdoc/>
+        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
+        {
+            var commandService = serviceProvider.GetRequiredService<CommandService>();
+            await commandService.AddModuleAsync<DossierCommands>(serviceProvider);
+
+            return true;
+        }
     }
 }

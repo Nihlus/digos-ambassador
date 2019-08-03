@@ -20,8 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-// Originally licensed under the ISC license; modified from https://github.com/foxbot/Discord.Addons.Interactive
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Pagination;
 using Discord;
 using Image = DIGOS.Ambassador.Database.Characters.Data.Image;
 
