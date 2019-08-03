@@ -28,6 +28,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos-ambassador.Tools", "d
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos-ambassador.DocumentationGenerator", "digos-ambassador.Doc\digos-ambassador.Doc.csproj", "{B90660FB-2903-4FE4-BBE3-4E46A3D1A29B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{41FE81C8-EF37-422C-BB3C-CC043740FCDD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1EDC2213-9E6B-4F55-974F-6466F48B4385}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Applications", "Applications", "{17D597D5-7B05-494F-9146-678154314931}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,5 +59,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B90660FB-2903-4FE4-BBE3-4E46A3D1A29B} = {41FE81C8-EF37-422C-BB3C-CC043740FCDD}
+		{60C5B2AC-336F-45FA-87CC-B18265F073F7} = {1EDC2213-9E6B-4F55-974F-6466F48B4385}
+		{D44A340E-6344-4E42-827C-E63C12C603BE} = {17D597D5-7B05-494F-9146-678154314931}
+		{3F5CD95D-F64C-4CD0-82BF-224156733C9B} = {17D597D5-7B05-494F-9146-678154314931}
 	EndGlobalSection
 EndGlobal
