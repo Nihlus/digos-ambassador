@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using DIGOS.Ambassador.Database.Abstractions.Entities;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Database.Kinks;

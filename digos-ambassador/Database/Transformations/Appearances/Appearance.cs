@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Database.Abstractions.Entities;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services;

@@ -1,5 +1,5 @@
-﻿//
-//  UserConsent.cs
+//
+//  EFEntity.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,29 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.ComponentModel.DataAnnotations.Schema;
-using DIGOS.Ambassador.Database.Abstractions.Entities;
-using DIGOS.Ambassador.Database.Interfaces;
-
-namespace DIGOS.Ambassador.Database.Users
+namespace DIGOS.Ambassador.Database.Abstractions.Entities
 {
     /// <summary>
-    /// Holds information about whether or not a user has granted consent to store user data.
+    /// Acts as a base class for EF Core entities.
     /// </summary>
-    [Table("UserConsents", Schema = "Core")]
-    public class UserConsent : IEFEntity
+    public abstract class EFEntity : IEFEntity
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public long ID { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Discord ID of the user.
-        /// </summary>
-        public long DiscordID { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether or not the user has consented.
-        /// </summary>
-        public bool HasConsented { get; set; }
     }
 }

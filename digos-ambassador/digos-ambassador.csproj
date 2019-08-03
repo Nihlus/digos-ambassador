@@ -50,8 +50,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\Portraits" />
+    <Folder Include="Database\Dossiers" />
     <Folder Include="Migrations" />
-    <Folder Include="Services\Dossiers" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DIGOS.Ambassador.Database.Abstractions\DIGOS.Ambassador.Database.Abstractions.csproj" />
   </ItemGroup>
   <Target Name="DeleteNetHttpMono" AfterTargets="AfterBuild">
     <Delete Files="$(OutputPath)\System.Net.Http.dll" Condition="'$(OS)' == 'Unix'" />

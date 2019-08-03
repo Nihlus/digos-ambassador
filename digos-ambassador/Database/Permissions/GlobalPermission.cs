@@ -22,6 +22,7 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Database.Abstractions.Entities;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Permissions;
 using JetBrains.Annotations;

@@ -23,7 +23,7 @@
 using System.ComponentModel.DataAnnotations;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Database.Interfaces
+namespace DIGOS.Ambassador.Database.Abstractions.Entities
 {
     /// <summary>
     /// Simple interface for enforcing a unique ID in EF entity classes.

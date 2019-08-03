@@ -23,6 +23,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using DIGOS.Ambassador.Database.Abstractions.Entities;
 using DIGOS.Ambassador.Database.Interfaces;
 using DIGOS.Ambassador.Extensions;
 using Humanizer;

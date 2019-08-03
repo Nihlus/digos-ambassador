@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Database.Abstractions.Entities;
+
 namespace DIGOS.Ambassador.Database.Interfaces
 {
     /// <summary>

@@ -23,7 +23,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
-using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Database.Abstractions.Entities;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Kinks
@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Database.Kinks
     [Table("Kinks", Schema = "KinkModule")]
     public class Kink : IEquatable<Kink>, IEFEntity
     {
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public long ID { get; set; }
 
         /// <summary>
