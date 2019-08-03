@@ -22,8 +22,10 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Database.Abstractions.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Dossiers.CommandModules;
+using DIGOS.Ambassador.Plugins.Dossiers.Model;
 using DIGOS.Ambassador.Plugins.Dossiers.Services;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers
         /// <inheritdoc/>
         public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
         {
+            serviceCollection.AddSchemaAwareDbContextPool<DossiersDatabaseContext>();
             serviceCollection.AddSingleton<DossierService>();
 
             return Task.FromResult(true);

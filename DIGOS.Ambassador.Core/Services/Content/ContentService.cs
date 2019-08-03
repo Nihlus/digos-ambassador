@@ -30,7 +30,7 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Core.Services.Content
+namespace DIGOS.Ambassador.Core.Services
 {
     /// <summary>
     /// Management class for content that comes bundled with the bot. Responsible for loading and providing access to
@@ -96,6 +96,11 @@ namespace DIGOS.Ambassador.Core.Services.Content
         public string LocalizationCatalogPath { get; }
 
         /// <summary>
+        /// Gets the path to the database credentials.
+        /// </summary>
+        public string DatabaseCredentialsPath { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ContentService"/> class.
         /// </summary>
         public ContentService()
@@ -115,6 +120,8 @@ namespace DIGOS.Ambassador.Core.Services.Content
             this.PrivacyPolicyUri = new Uri(this.BaseRemoteContentUri, "PrivacyPolicy.pdf");
 
             this.LocalizationCatalogPath = Path.Combine(this.BaseContentPath, "Localization", "locale");
+
+            this.DatabaseCredentialsPath = Path.Combine(this.BaseContentPath, "database.credentials");
         }
 
         /// <summary>

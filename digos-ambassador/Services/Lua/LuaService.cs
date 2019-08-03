@@ -26,6 +26,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Core.Services.Content;
 using JetBrains.Annotations;
 using NLua;

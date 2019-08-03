@@ -27,6 +27,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Xml;
+using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Services;
 using JetBrains.Annotations;

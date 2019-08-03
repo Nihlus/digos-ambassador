@@ -20,10 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.IO;
+using System;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DIGOS.Ambassador.Database.Abstractions
 {
@@ -32,52 +31,36 @@ namespace DIGOS.Ambassador.Database.Abstractions
     /// </summary>
     public abstract class SchemaAwareDbContext : DbContext
     {
-        private readonly string _schema;
+        /// <summary>
+        /// Gets the schema of the database.
+        /// </summary>
+        public string Schema { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SchemaAwareDbContext"/> class.
         /// </summary>
         /// <param name="schema">The schema.</param>
-        protected SchemaAwareDbContext(string schema)
+        /// <param name="contextOptions">The context options.</param>
+        protected SchemaAwareDbContext(string schema, DbContextOptions contextOptions)
+            : base(contextOptions)
         {
-            _schema = schema;
+            this.Schema = schema;
         }
 
         /// <inheritdoc />
         protected override void OnConfiguring([NotNull] DbContextOptionsBuilder optionsBuilder)
         {
-            var passfilePath = Path.Combine("Content", "database.credentials");
-            if (!File.Exists(passfilePath))
+            if (!optionsBuilder.IsConfigured)
             {
-                throw new FileNotFoundException("Could not find PostgreSQL credentials.", passfilePath);
+                throw new InvalidOperationException("Configure the context before use.");
             }
-
-            var passfileContents = File.ReadAllText(passfilePath).Split(':');
-            if (passfileContents.Length != 5)
-            {
-                throw new InvalidDataException("The credential file was of an invalid format.");
-            }
-
-            optionsBuilder
-                .UseLazyLoadingProxies()
-                .UseNpgsql
-                (
-                    $"Server={passfileContents[0]};" +
-                    $"Port={ushort.Parse(passfileContents[1])};" +
-                    $"Database={passfileContents[2]};" +
-                    $"Username={passfileContents[3]};" +
-                    $"Password={passfileContents[4]}",
-                    b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + _schema)
-                );
-
-            optionsBuilder.ReplaceService<IMigrationsModelDiffer, SchemaAwareMigrationsModelDiffer>();
         }
 
         /// <inheritdoc />
         protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.HasDefaultSchema(_schema);
+            modelBuilder.HasDefaultSchema(this.Schema);
         }
     }
 }

@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Async;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Transformations;

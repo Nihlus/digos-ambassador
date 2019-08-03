@@ -47,8 +47,9 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="DossiersDatabaseContext"/> class.
         /// </summary>
-        public DossiersDatabaseContext()
-            : base(Schema)
+        /// <param name="contextOptions">The context options.</param>
+        public DossiersDatabaseContext(DbContextOptions contextOptions)
+            : base(Schema, contextOptions)
         {
         }
     }
