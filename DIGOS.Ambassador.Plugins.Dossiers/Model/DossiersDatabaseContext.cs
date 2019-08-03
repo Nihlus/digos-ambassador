@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Model
     /// </summary>
     public class DossiersDatabaseContext : SchemaAwareDbContext
     {
-        private const string Schema = "DossiersModule";
+        private const string SchemaName = "DossiersModule";
 
         /// <summary>
         /// Gets or sets the table where dossiers are stored.
@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Model
         /// </summary>
         /// <param name="contextOptions">The context options.</param>
         public DossiersDatabaseContext(DbContextOptions contextOptions)
-            : base(Schema, contextOptions)
+            : base(SchemaName, contextOptions)
         {
         }
     }

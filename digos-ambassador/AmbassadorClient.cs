@@ -21,10 +21,12 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Database.Abstractions.Services;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Roleplaying;
@@ -34,6 +36,8 @@ using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Permissions;
+using DIGOS.Ambassador.Plugins.Abstractions;
+using DIGOS.Ambassador.Plugins.Services;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Behaviours;
 using DIGOS.Ambassador.Services.Servers;
@@ -71,9 +75,9 @@ namespace DIGOS.Ambassador
 
         private readonly CommandService _commands;
 
-        private readonly IServiceProvider _services;
-
         private readonly BehaviourService _behaviours;
+
+        private IServiceProvider _services;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorClient"/> class.
@@ -94,8 +98,17 @@ namespace DIGOS.Ambassador
             _commands = new CommandService();
 
             _behaviours = new BehaviourService();
+        }
 
-            _services = new ServiceCollection()
+        /// <summary>
+        /// Initializes the bot and its services.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task InitializeAsync()
+        {
+            var pluginService = new PluginService();
+
+            var serviceCollection = new ServiceCollection()
                 .AddSingleton(this)
                 .AddSingleton(_client)
                 .AddSingleton<BaseSocketClient>(_client)
@@ -117,8 +130,30 @@ namespace DIGOS.Ambassador
                 .AddSingleton<ServerService>()
                 .AddSingleton<OwnedEntityService>()
                 .AddSingleton<Random>()
-                .AddDbContext<AmbyDatabaseContext>(builder => AmbyDatabaseContext.ConfigureOptions(builder))
-                .BuildServiceProvider();
+                .AddSingleton(pluginService)
+                .AddSingleton<SchemaAwareDbContextService>()
+                .AddDbContext<AmbyDatabaseContext>(builder => AmbyDatabaseContext.ConfigureOptions(builder));
+
+            var successfullyRegisteredPlugins = new List<IPluginDescriptor>();
+
+            var availablePlugins = pluginService.LoadAvailablePlugins();
+            foreach (var availablePlugin in availablePlugins)
+            {
+                if (!await availablePlugin.RegisterServicesAsync(serviceCollection))
+                {
+                    Log.Warn
+                    (
+                        $"The plugin \"{availablePlugin.Name}\" (v{availablePlugin.Version}) failed to " +
+                        $"register its services. It will not be loaded."
+                    );
+
+                    continue;
+                }
+
+                successfullyRegisteredPlugins.Add(availablePlugin);
+            }
+
+            _services = serviceCollection.BuildServiceProvider();
 
             var transformationService = _services.GetRequiredService<TransformationService>();
             transformationService.WithDescriptionBuilder
@@ -128,6 +163,18 @@ namespace DIGOS.Ambassador
 
             var characterService = _services.GetRequiredService<CharacterService>();
             characterService.DiscoverPronounProviders();
+
+            foreach (var successfullyRegisteredPlugin in successfullyRegisteredPlugins)
+            {
+                if (!await successfullyRegisteredPlugin.InitializeAsync(_services))
+                {
+                    Log.Warn
+                    (
+                        $"The plugin \"{successfullyRegisteredPlugin.Name}\"" +
+                        $" (v{successfullyRegisteredPlugin.Version}) failed to initialize. It may not be functional."
+                    );
+                }
+            }
         }
 
         /// <summary>

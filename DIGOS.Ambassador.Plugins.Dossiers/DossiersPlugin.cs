@@ -24,11 +24,15 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Abstractions.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
+using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
+using DIGOS.Ambassador.Plugins.Dossiers;
 using DIGOS.Ambassador.Plugins.Dossiers.CommandModules;
 using DIGOS.Ambassador.Plugins.Dossiers.Model;
 using DIGOS.Ambassador.Plugins.Dossiers.Services;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
+
+[assembly: AmbassadorPlugin(typeof(DossiersPlugin))]
 
 namespace DIGOS.Ambassador.Plugins.Dossiers
 {

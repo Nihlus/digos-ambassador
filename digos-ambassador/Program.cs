@@ -82,6 +82,7 @@ namespace DIGOS.Ambassador
             }
 
             var ambassadorClient = new AmbassadorClient(contentService);
+            await ambassadorClient.InitializeAsync();
             await ambassadorClient.LoginAsync();
             await ambassadorClient.StartAsync();
 

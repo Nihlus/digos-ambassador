@@ -60,6 +60,8 @@
     <ProjectReference Include="..\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Discord.Interactivity\DIGOS.Ambassador.Discord.Interactivity.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
+    <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Dossiers\DIGOS.Ambassador.Plugins.Dossiers.csproj" />
+    <ProjectReference Include="..\DIGOS.Ambassador.Plugins\DIGOS.Ambassador.Plugins.csproj" />
   </ItemGroup>
   <Target Name="DeleteNetHttpMono" AfterTargets="AfterBuild">
     <Delete Files="$(OutputPath)\System.Net.Http.dll" Condition="'$(OS)' == 'Unix'" />
