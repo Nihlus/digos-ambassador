@@ -60,12 +60,6 @@ namespace DIGOS.Ambassador.Database.Users
         public int? Timezone { get; set; }
 
         /// <summary>
-        /// Gets or sets the kinks or fetishes of a user, as well as their preferences for each.
-        /// </summary>
-        [NotNull]
-        public virtual List<UserKink> Kinks { get; set; } = new List<UserKink>();
-
-        /// <summary>
         /// Gets or sets a value indicating whether new roleplays that appear should be hidden by default.
         /// </summary>
         public virtual bool HideNewRoleplays { get; set; }

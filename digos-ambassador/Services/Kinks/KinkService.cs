@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
+using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Services.Users;
@@ -91,15 +92,15 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByNameAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser, string name)
         {
-            var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
-            if (!getUserResult.IsSuccess)
+            var getUserKinksResult = await GetUserKinksAsync(db, discordUser);
+            if (!getUserKinksResult.IsSuccess)
             {
-                return RetrieveEntityResult<UserKink>.FromError(getUserResult);
+                return RetrieveEntityResult<UserKink>.FromError(getUserKinksResult);
             }
 
-            var user = getUserResult.Entity;
+            var userKinks = getUserKinksResult.Entity;
 
-            return user.Kinks.SelectFromBestLevenshteinMatch(x => x, k => k.Kink.Name, name);
+            return userKinks.SelectFromBestLevenshteinMatch(x => x, k => k.Kink.Name, name);
         }
 
         /// <summary>
@@ -124,16 +125,18 @@ namespace DIGOS.Ambassador.Services
         /// <param name="db">The database.</param>
         /// <param name="discordUser">The user.</param>
         /// <returns>The user's kinks.</returns>
-        public async Task<RetrieveEntityResult<IEnumerable<UserKink>>> GetUserKinksAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser)
+        public async Task<RetrieveEntityResult<IQueryable<UserKink>>> GetUserKinksAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser)
         {
             var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
             if (!getUserResult.IsSuccess)
             {
-                return RetrieveEntityResult<IEnumerable<UserKink>>.FromError(getUserResult);
+                return RetrieveEntityResult<IQueryable<UserKink>>.FromError(getUserResult);
             }
 
             var user = getUserResult.Entity;
-            return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess(user.Kinks);
+            var userKinks = db.UserKinks.Where(k => k.User == user);
+
+            return RetrieveEntityResult<IQueryable<UserKink>>.FromSuccess(userKinks);
         }
 
         /// <summary>
@@ -209,15 +212,14 @@ namespace DIGOS.Ambassador.Services
                 return RetrieveEntityResult<UserKink>.FromError(getKinkResult);
             }
 
-            var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
-            if (!getUserResult.IsSuccess)
+            var getUserKinksResult = await GetUserKinksAsync(db, discordUser);
+            if (!getUserKinksResult.IsSuccess)
             {
-                return RetrieveEntityResult<UserKink>.FromError(getUserResult);
+                return RetrieveEntityResult<UserKink>.FromError(getUserKinksResult);
             }
 
-            var user = getUserResult.Entity;
-
-            var userKink = user.Kinks.FirstOrDefault(k => k.Kink.FListID == onlineKinkID);
+            var userKinks = getUserKinksResult.Entity;
+            var userKink = await userKinks.FirstOrDefaultAsync(k => k.Kink.FListID == onlineKinkID);
 
             if (!(userKink is null))
             {
@@ -243,6 +245,19 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<UserKink>> AddUserKinkAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser, Kink kink)
         {
+            var getUserKinksResult = await GetUserKinksAsync(db, discordUser);
+            if (!getUserKinksResult.IsSuccess)
+            {
+                return CreateEntityResult<UserKink>.FromError(getUserKinksResult);
+            }
+
+            var userKinks = getUserKinksResult.Entity;
+
+            if (userKinks.Any(k => k.Kink.FListID == kink.FListID))
+            {
+                return CreateEntityResult<UserKink>.FromError("The user already has a preference for that kink.");
+            }
+
             var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
             if (!getUserResult.IsSuccess)
             {
@@ -251,13 +266,10 @@ namespace DIGOS.Ambassador.Services
 
             var user = getUserResult.Entity;
 
-            if (user.Kinks.Any(k => k.Kink.FListID == kink.FListID))
-            {
-                return CreateEntityResult<UserKink>.FromError("The user already has a preference for that kink.");
-            }
-
             var userKink = UserKink.CreateFrom(kink);
-            user.Kinks.Add(userKink);
+            userKink.User = user;
+
+            db.UserKinks.Update(userKink);
 
             await db.SaveChangesAsync();
             return CreateEntityResult<UserKink>.FromSuccess(userKink);
@@ -353,7 +365,8 @@ namespace DIGOS.Ambassador.Services
             }
 
             var user = getUserResult.Entity;
-            user.Kinks.Clear();
+
+            db.UserKinks.RemoveRange(db.UserKinks.Where(k => k.User == user));
 
             await db.SaveChangesAsync();
 

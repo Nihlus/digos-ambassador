@@ -207,6 +207,17 @@ namespace DIGOS.Ambassador.Database
         }
 
         /// <summary>
+        /// Gets or sets the table where user kinks are stored.
+        /// </summary>
+        public DbSet<UserKink> UserKinks
+        {
+            get;
+
+            [UsedImplicitly]
+            set;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AmbyDatabaseContext"/> class.
         /// </summary>
         /// <param name="options">The context options.</param>
@@ -262,8 +273,6 @@ namespace DIGOS.Ambassador.Database
         /// <inheritdoc />
         protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>().HasMany(u => u.Kinks).WithOne().IsRequired();
-
             modelBuilder.Entity<Character>().HasOne(ch => ch.Owner).WithMany();
             modelBuilder.Entity<Character>().HasMany(ch => ch.Images).WithOne().IsRequired();
 

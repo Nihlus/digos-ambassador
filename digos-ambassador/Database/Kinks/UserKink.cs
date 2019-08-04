@@ -23,7 +23,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Abstractions.Entities;
+using DIGOS.Ambassador.Database.Users;
 using JetBrains.Annotations;
+using Org.BouncyCastle.Ocsp;
 
 namespace DIGOS.Ambassador.Database.Kinks
 {
@@ -35,6 +37,12 @@ namespace DIGOS.Ambassador.Database.Kinks
     {
         /// <inheritdoc />
         public long ID { get; set; }
+
+        /// <summary>
+        /// Gets or sets the user the kink belongs to.
+        /// </summary>
+        [Required]
+        public virtual User User { get; set; }
 
         /// <summary>
         /// Gets or sets the kink.
