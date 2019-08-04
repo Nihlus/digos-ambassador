@@ -25,8 +25,8 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services.Servers;
-
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
@@ -41,7 +41,7 @@ namespace DIGOS.Ambassador.Behaviours
     public class JoinMessageBehaviour : BehaviourBase
     {
         [ProvidesContext]
-        private readonly AmbyDatabaseContext _database;
+        private readonly CoreDatabaseContext _database;
 
         private readonly UserFeedbackService _feedback;
         private readonly ServerService _servers;
@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Behaviours
         public JoinMessageBehaviour
         (
             DiscordSocketClient client,
-            AmbyDatabaseContext database,
+            CoreDatabaseContext database,
             UserFeedbackService feedback,
             ServerService servers
         )
@@ -89,7 +89,7 @@ namespace DIGOS.Ambassador.Behaviours
         /// <param name="user">The user.</param>
         private async Task OnUserJoined([NotNull] SocketGuildUser user)
         {
-            var server = await _servers.GetOrRegisterServerAsync(_database, user.Guild);
+            var server = await _servers.GetOrRegisterServerAsync(user.Guild);
 
             if (!server.SendJoinMessage)
             {

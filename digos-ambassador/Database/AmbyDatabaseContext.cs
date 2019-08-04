@@ -24,12 +24,12 @@ using System.IO;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.Database.Permissions;
 using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.ServerInfo;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
-using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Plugins.Permissions.Model.Permissions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Image = DIGOS.Ambassador.Database.Characters.Data.Image;
@@ -41,17 +41,6 @@ namespace DIGOS.Ambassador.Database
     /// </summary>
     public class AmbyDatabaseContext : DbContext
     {
-        /// <summary>
-        /// Gets or sets the table where the user information is stored.
-        /// </summary>
-        public DbSet<User> Users
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
         /// <summary>
         /// Gets or sets the table where characters are stored.
         /// </summary>
@@ -67,39 +56,6 @@ namespace DIGOS.Ambassador.Database
         /// Gets or sets the table where kinks are stored.
         /// </summary>
         public DbSet<Kink> Kinks
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where server-specific settings are stored.
-        /// </summary>
-        public DbSet<Server> Servers
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where granted local permissions are stored.
-        /// </summary>
-        public DbSet<LocalPermission> LocalPermissions
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where granted global permissions are stored.
-        /// </summary>
-        public DbSet<GlobalPermission> GlobalPermissions
         {
             get;
 
@@ -174,17 +130,6 @@ namespace DIGOS.Ambassador.Database
         }
 
         /// <summary>
-        /// Gets or sets the table where user consents are stored.
-        /// </summary>
-        public DbSet<UserConsent> UserConsents
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
         /// Gets or sets the table where character roles are stored.
         /// </summary>
         public DbSet<CharacterRole> CharacterRoles
@@ -221,7 +166,7 @@ namespace DIGOS.Ambassador.Database
         /// Initializes a new instance of the <see cref="AmbyDatabaseContext"/> class.
         /// </summary>
         /// <param name="options">The context options.</param>
-        public AmbyDatabaseContext([NotNull] DbContextOptions options)
+        public AmbyDatabaseContext([NotNull] DbContextOptions<AmbyDatabaseContext> options)
             : base(options)
         {
         }
@@ -259,15 +204,6 @@ namespace DIGOS.Ambassador.Database
                 );
 
             return optionsBuilder;
-        }
-
-        /// <inheritdoc />
-        protected override void OnConfiguring([NotNull] DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                ConfigureOptions(optionsBuilder);
-            }
         }
 
         /// <inheritdoc />

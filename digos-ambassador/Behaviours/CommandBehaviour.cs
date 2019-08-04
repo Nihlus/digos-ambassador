@@ -33,10 +33,13 @@ using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Plugins.Core.Attributes;
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using DIGOS.Ambassador.Plugins.Permissions.Model;
+using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
-
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -53,7 +56,8 @@ namespace DIGOS.Ambassador.Behaviours
     /// </summary>
     public class CommandBehaviour : ContinuousBehaviour
     {
-        private readonly AmbyDatabaseContext _database;
+        private readonly CoreDatabaseContext _database;
+        private readonly PermissionsDatabaseContext _permissionsDatabase;
 
         private readonly IServiceProvider _services;
 
@@ -85,10 +89,11 @@ namespace DIGOS.Ambassador.Behaviours
         /// <param name="help">The help service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
+        /// <param name="permissionsDatabase">The permissions database.</param>
         public CommandBehaviour
         (
             DiscordSocketClient client,
-            AmbyDatabaseContext database,
+            CoreDatabaseContext database,
             IServiceProvider services,
             UserFeedbackService feedback,
             PrivacyService privacy,
@@ -97,7 +102,8 @@ namespace DIGOS.Ambassador.Behaviours
             PermissionService permissions,
             HelpService help,
             UserService users,
-            ServerService servers
+            ServerService servers,
+            PermissionsDatabaseContext permissionsDatabase
         )
             : base(client)
         {
@@ -111,6 +117,7 @@ namespace DIGOS.Ambassador.Behaviours
             _help = help;
             _users = users;
             _servers = servers;
+            _permissionsDatabase = permissionsDatabase;
 
             this.RunningCommands = new ConcurrentQueue<Task>();
         }
@@ -225,11 +232,11 @@ namespace DIGOS.Ambassador.Behaviours
             var context = new SocketCommandContext(this.Client, message);
 
             // Perform first-time user checks, making sure the user has their default permissions, has consented, etc
-            if (!await _privacy.HasUserConsentedAsync(_database, context.User) && !IsPrivacyExemptCommand(context, argumentPos))
+            if (!await _privacy.HasUserConsentedAsync(context.User) && !IsPrivacyExemptCommand(context, argumentPos))
             {
                 // Ask for consent
                 var userDMChannel = await arg.Author.GetOrCreateDMChannelAsync();
-                var result = await _privacy.RequestConsentAsync(userDMChannel, _content, _feedback);
+                var result = await _privacy.RequestConsentAsync(userDMChannel);
                 if (result.IsSuccess)
                 {
                     return;
@@ -247,7 +254,7 @@ namespace DIGOS.Ambassador.Behaviours
             var guild = (message.Channel as SocketGuildChannel)?.Guild;
             if (guild != null)
             {
-                var registerUserResult = await _users.GetOrRegisterUserAsync(_database, arg.Author);
+                var registerUserResult = await _users.GetOrRegisterUserAsync(arg.Author);
                 if (!registerUserResult.IsSuccess)
                 {
                     return;
@@ -255,12 +262,12 @@ namespace DIGOS.Ambassador.Behaviours
 
                 var user = registerUserResult.Entity;
 
-                var server = await _servers.GetOrRegisterServerAsync(_database, guild);
+                var server = await _servers.GetOrRegisterServerAsync(guild);
 
                 // Grant permissions to new users
                 if (!server.IsUserKnown(arg.Author))
                 {
-                    await _permissions.GrantDefaultPermissionsAsync(_database, guild, arg.Author);
+                    await _permissions.GrantDefaultPermissionsAsync(guild, arg.Author);
                     server.KnownUsers.Add(user);
 
                     await _database.SaveChangesAsync();

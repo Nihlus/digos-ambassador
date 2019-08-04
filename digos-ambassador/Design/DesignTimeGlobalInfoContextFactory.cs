@@ -39,9 +39,10 @@ namespace DIGOS.Ambassador.Design
         [NotNull]
         public AmbyDatabaseContext CreateDbContext(string[] args)
         {
-            var options = AmbyDatabaseContext.ConfigureOptions(new DbContextOptionsBuilder<AmbyDatabaseContext>()).Options;
+            var optionsBuilder = new DbContextOptionsBuilder<AmbyDatabaseContext>();
+            AmbyDatabaseContext.ConfigureOptions(optionsBuilder);
 
-            return new AmbyDatabaseContext(options);
+            return new AmbyDatabaseContext(optionsBuilder.Options);
         }
     }
 }

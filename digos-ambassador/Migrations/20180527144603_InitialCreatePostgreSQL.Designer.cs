@@ -5,8 +5,6 @@
 // ReSharper disable RedundantUsingDirective
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Transformations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;

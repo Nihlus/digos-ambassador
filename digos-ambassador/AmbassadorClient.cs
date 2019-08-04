@@ -30,17 +30,19 @@ using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
-using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Permissions;
 using DIGOS.Ambassador.Plugins.Abstractions;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using DIGOS.Ambassador.Plugins.Permissions.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
 using DIGOS.Ambassador.Plugins.Services;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Behaviours;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Transformations;
 using DIGOS.Ambassador.TypeReaders;
 using DIGOS.Ambassador.Utility;
@@ -53,6 +55,7 @@ using log4net;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Permissions.PermissionTarget;
 
 #pragma warning disable SA1118 // Parameter spans multiple lines, big strings
 
@@ -208,7 +211,7 @@ namespace DIGOS.Ambassador
             _commands.AddEnumReader<Bodypart>();
             _commands.AddEnumReader<Pattern>();
             _commands.AddEnumReader<Permission>();
-            _commands.AddEnumReader<Permissions.PermissionTarget>();
+            _commands.AddEnumReader<PermissionTarget>();
 
             // Load modules and behaviours from the assembly this type was declared in
             var localAssembly = GetType().Assembly;

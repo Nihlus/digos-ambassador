@@ -27,7 +27,8 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Interfaces;
-using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Discord.Commands;
 
 using Humanizer;

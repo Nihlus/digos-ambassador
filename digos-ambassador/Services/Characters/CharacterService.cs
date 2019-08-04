@@ -30,9 +30,10 @@ using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Utility;
 
 using Discord;
@@ -49,6 +50,7 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class CharacterService
     {
+        private readonly CoreDatabaseContext _coreDatabase;
         private readonly ServerService _servers;
         private readonly TransformationService _transformations;
         private readonly CommandService _commands;
@@ -67,6 +69,7 @@ namespace DIGOS.Ambassador.Services
         /// <param name="transformations">The transformation service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
+        /// <param name="coreDatabase">The core database.</param>
         public CharacterService
         (
             CommandService commands,
@@ -74,7 +77,8 @@ namespace DIGOS.Ambassador.Services
             ContentService content,
             TransformationService transformations,
             UserService users,
-            ServerService servers
+            ServerService servers,
+            CoreDatabaseContext coreDatabase
         )
         {
             _commands = commands;
@@ -83,6 +87,7 @@ namespace DIGOS.Ambassador.Services
             _transformations = transformations;
             _users = users;
             _servers = servers;
+            _coreDatabase = coreDatabase;
 
             _pronounProviders = new Dictionary<string, IPronounProvider>(new CaseInsensitiveStringEqualityComparer());
         }
@@ -172,7 +177,7 @@ namespace DIGOS.Ambassador.Services
             [CanBeNull] string characterName
         )
         {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(db, context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(context.User);
             if (!getInvokerResult.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getInvokerResult);
@@ -350,7 +355,7 @@ namespace DIGOS.Ambassador.Services
             [NotNull] Character character
         )
         {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(db, context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(context.User);
             if (!getInvokerResult.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getInvokerResult);
@@ -470,7 +475,7 @@ namespace DIGOS.Ambassador.Services
             // Default the nickname to the character name
             characterNickname = characterNickname ?? characterName;
 
-            var getOwnerResult = await _users.GetOrRegisterUserAsync(db, context.Message.Author);
+            var getOwnerResult = await _users.GetOrRegisterUserAsync(context.Message.Author);
             if (!getOwnerResult.IsSuccess)
             {
                 return CreateEntityResult<Character>.FromError(getOwnerResult);
@@ -526,7 +531,7 @@ namespace DIGOS.Ambassador.Services
                 return CreateEntityResult<Character>.FromError(modifyEntityResult);
             }
 
-            db.Characters.Update(character);
+            db.Characters.Add(character);
             await db.SaveChangesAsync();
 
             return CreateEntityResult<Character>.FromSuccess(character);
@@ -1039,7 +1044,7 @@ namespace DIGOS.Ambassador.Services
                 );
             }
 
-            var server = await _servers.GetOrRegisterServerAsync(db, role.Guild);
+            var server = await _servers.GetOrRegisterServerAsync(role.Guild);
 
             var characterRole = new CharacterRole
             {
@@ -1110,7 +1115,7 @@ namespace DIGOS.Ambassador.Services
             [NotNull] IGuild guild
         )
         {
-            var server = await _servers.GetOrRegisterServerAsync(db, guild);
+            var server = await _servers.GetOrRegisterServerAsync(guild);
 
             var roles = db.CharacterRoles.Where(r => r.Server == server);
 

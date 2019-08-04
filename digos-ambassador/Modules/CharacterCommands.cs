@@ -36,11 +36,12 @@ using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Modules.Base;
 using DIGOS.Ambassador.Pagination;
-using DIGOS.Ambassador.Permissions;
-using DIGOS.Ambassador.Permissions.Preconditions;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using DIGOS.Ambassador.Plugins.Permissions.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions.Permissions.Preconditions;
+using DIGOS.Ambassador.Preconditions;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -49,7 +50,7 @@ using JetBrains.Annotations;
 using log4net;
 using Microsoft.EntityFrameworkCore;
 using static Discord.Commands.ContextType;
-using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
+using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Permissions.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -191,7 +192,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ShowCharacterAsync()
         {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Context.User);
             if (!getInvokerResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
@@ -393,7 +394,7 @@ namespace DIGOS.Ambassador.Modules
             if (character.IsCurrent)
             {
                 var owner = this.Context.Guild.GetUser((ulong)character.Owner.DiscordID);
-                var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
+                var currentServer = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
 
                 if (!(character.Role is null))
                 {
@@ -441,7 +442,7 @@ namespace DIGOS.Ambassador.Modules
         {
             discordUser = discordUser ?? this.Context.Message.Author;
 
-            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -485,7 +486,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task AssumeRandomCharacterFormAsync()
         {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Context.User);
             if (!getInvokerResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
@@ -549,7 +550,7 @@ namespace DIGOS.Ambassador.Modules
             Character character
         )
         {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Context.User);
             if (!getInvokerResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
@@ -574,7 +575,7 @@ namespace DIGOS.Ambassador.Modules
             await _characters.MakeCharacterCurrentOnServerAsync(this.Database, this.Context, this.Context.Guild, character);
 
             var guildUser = (IGuildUser)this.Context.User;
-            var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
+            var currentServer = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
 
             if (!character.Nickname.IsNullOrWhitespace())
             {
@@ -637,7 +638,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ClearDefaultCharacterAsync()
         {
-            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            var getUserResult = await _users.GetOrRegisterUserAsync(this.Context.User);
             if (!getUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -666,7 +667,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireContext(Guild)]
         public async Task ClearCharacterFormAsync()
         {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Context.User);
             if (!getInvokerResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
@@ -708,7 +709,7 @@ namespace DIGOS.Ambassador.Modules
 
             if (this.Context.Message.Author is IGuildUser guildUser)
             {
-                var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
+                var currentServer = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
 
                 ModifyEntityResult modifyNickResult;
                 if (getDefaultCharacterResult.IsSuccess && !getDefaultCharacterResult.Entity.Nickname.IsNullOrWhitespace())
@@ -954,7 +955,7 @@ namespace DIGOS.Ambassador.Modules
             Character character
         )
         {
-            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, newOwner);
+            var getUserResult = await _users.GetOrRegisterUserAsync(newOwner);
             if (!getUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -1219,7 +1220,7 @@ namespace DIGOS.Ambassador.Modules
                 }
 
                 var guildUser = (IGuildUser)this.Context.User;
-                var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
+                var currentServer = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
 
                 if (!(previousRole is null))
                 {
@@ -1586,7 +1587,7 @@ namespace DIGOS.Ambassador.Modules
 
                 var commandInvoker = (IGuildUser)this.Context.User;
                 var characterOwner = (IGuildUser)this.Context.Guild.GetUser((ulong)character.Owner.DiscordID);
-                var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
+                var currentServer = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
 
                 var role = getRoleResult.Entity;
                 if (role.Access == RoleAccess.Restricted)
@@ -1657,7 +1658,7 @@ namespace DIGOS.Ambassador.Modules
             [RequireContext(Guild)]
             public async Task SetDefaultCharacterAsync()
             {
-                var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+                var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Context.User);
                 if (!getInvokerResult.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
@@ -1691,7 +1692,7 @@ namespace DIGOS.Ambassador.Modules
                 Character character
             )
             {
-                var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, this.Context.User);
+                var getUserResult = await _users.GetOrRegisterUserAsync(this.Context.User);
                 if (!getUserResult.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);

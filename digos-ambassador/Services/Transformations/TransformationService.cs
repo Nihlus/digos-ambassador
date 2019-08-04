@@ -33,8 +33,9 @@ using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Transformations;
 
 using Discord;
@@ -51,6 +52,7 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class TransformationService
     {
+        private readonly CoreDatabaseContext _coreDatabase;
         private readonly UserService _users;
         private readonly ServerService _servers;
         private readonly ContentService _content;
@@ -63,11 +65,19 @@ namespace DIGOS.Ambassador.Services
         /// <param name="content">The content service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
-        public TransformationService(ContentService content, UserService users, ServerService servers)
+        /// <param name="coreDatabase">The core database.</param>
+        public TransformationService
+        (
+            ContentService content,
+            UserService users,
+            ServerService servers,
+            CoreDatabaseContext coreDatabase
+        )
         {
             _content = content;
             _users = users;
             _servers = servers;
+            _coreDatabase = coreDatabase;
         }
 
         /// <summary>
@@ -916,7 +926,7 @@ namespace DIGOS.Ambassador.Services
             var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == (long)discordUser.Id);
             if (protectionEntry is null)
             {
-                var getUserResult = await _users.GetOrRegisterUserAsync(db, whitelistedUser);
+                var getUserResult = await _users.GetOrRegisterUserAsync(whitelistedUser);
                 if (!getUserResult.IsSuccess)
                 {
                     return ModifyEntityResult.FromError(getUserResult);
@@ -938,6 +948,7 @@ namespace DIGOS.Ambassador.Services
                 protectionEntry.Type = ListingType.Whitelist;
             }
 
+            await _coreDatabase.SaveChangesAsync();
             await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -978,7 +989,7 @@ namespace DIGOS.Ambassador.Services
             var protectionEntry = protection.UserListing.FirstOrDefault(u => u.User.DiscordID == (long)discordUser.Id);
             if (protectionEntry is null)
             {
-                var getUserResult = await _users.GetOrRegisterUserAsync(db, blacklistedUser);
+                var getUserResult = await _users.GetOrRegisterUserAsync(blacklistedUser);
                 if (!getUserResult.IsSuccess)
                 {
                     return ModifyEntityResult.FromError(getUserResult);
@@ -1000,6 +1011,7 @@ namespace DIGOS.Ambassador.Services
                 protectionEntry.Type = ListingType.Blacklist;
             }
 
+            await _coreDatabase.SaveChangesAsync();
             await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -1025,7 +1037,7 @@ namespace DIGOS.Ambassador.Services
                 return RetrieveEntityResult<GlobalUserProtection>.FromSuccess(protection);
             }
 
-            var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
             {
                 return RetrieveEntityResult<GlobalUserProtection>.FromError(getUserResult);
@@ -1036,6 +1048,8 @@ namespace DIGOS.Ambassador.Services
             protection = GlobalUserProtection.CreateDefault(user);
 
             await db.GlobalUserProtections.AddAsync(protection);
+
+            await _coreDatabase.SaveChangesAsync();
             await db.SaveChangesAsync();
 
             return RetrieveEntityResult<GlobalUserProtection>.FromSuccess(protection);
@@ -1066,7 +1080,7 @@ namespace DIGOS.Ambassador.Services
                 return RetrieveEntityResult<ServerUserProtection>.FromSuccess(protection);
             }
 
-            var server = await _servers.GetOrRegisterServerAsync(db, guild);
+            var server = await _servers.GetOrRegisterServerAsync(guild);
             var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(db, discordUser);
             if (!getGlobalProtectionResult.IsSuccess)
             {
@@ -1078,6 +1092,8 @@ namespace DIGOS.Ambassador.Services
             protection = ServerUserProtection.CreateDefault(globalProtection, server);
 
             await db.ServerUserProtections.AddAsync(protection);
+
+            await _coreDatabase.SaveChangesAsync();
             await db.SaveChangesAsync();
 
             return RetrieveEntityResult<ServerUserProtection>.FromSuccess(protection);

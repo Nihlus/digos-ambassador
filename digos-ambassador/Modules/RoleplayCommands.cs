@@ -30,13 +30,15 @@ using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
+using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Modules.Base;
-using DIGOS.Ambassador.Permissions;
-using DIGOS.Ambassador.Permissions.Preconditions;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using DIGOS.Ambassador.Plugins.Permissions.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions.Permissions.Preconditions;
+using DIGOS.Ambassador.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Exporters;
-using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.TypeReaders;
 
 using Discord;
@@ -47,7 +49,7 @@ using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using static Discord.Commands.ContextType;
-using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
+using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Permissions.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -187,7 +189,7 @@ namespace DIGOS.Ambassador.Modules
         {
             discordUser = discordUser ?? this.Context.Message.Author;
 
-            var getUserResult = await _users.GetOrRegisterUserAsync(this.Database, discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
@@ -847,7 +849,7 @@ namespace DIGOS.Ambassador.Modules
             Roleplay roleplay
         )
         {
-            var getNewOwnerResult = await _users.GetOrRegisterUserAsync(this.Database, newOwner);
+            var getNewOwnerResult = await _users.GetOrRegisterUserAsync(newOwner);
             if (!getNewOwnerResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getNewOwnerResult.ErrorReason);

@@ -26,8 +26,9 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Characters;
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Users;
 using Discord;
 using Discord.Commands;
 
@@ -51,9 +52,11 @@ namespace DIGOS.Ambassador.TypeReaders
         {
             var characterService = services.GetRequiredService<CharacterService>();
             var userService = services.GetRequiredService<UserService>();
+
+            var coreDb = services.GetRequiredService<CoreDatabaseContext>();
             var db = services.GetRequiredService<AmbyDatabaseContext>();
 
-            var getInvokerResult = await userService.GetOrRegisterUserAsync(db, context.User);
+            var getInvokerResult = await userService.GetOrRegisterUserAsync(context.User);
             if (!getInvokerResult.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getInvokerResult);
@@ -70,7 +73,7 @@ namespace DIGOS.Ambassador.TypeReaders
                 return await characterService.GetBestMatchingCharacterAsync(db, context, null, entityName);
             }
 
-            var getOwnerResult = await userService.GetOrRegisterUserAsync(db, entityOwner);
+            var getOwnerResult = await userService.GetOrRegisterUserAsync(entityOwner);
             if (!getOwnerResult.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getOwnerResult);

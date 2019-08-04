@@ -47,8 +47,6 @@
   <ItemGroup>
     <Folder Include="Content\Portraits" />
     <Folder Include="Migrations" />
-    <Folder Include="Services\Feedback" />
-    <Folder Include="Services\Interactivity" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
@@ -56,7 +54,9 @@
     <ProjectReference Include="..\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Discord.Interactivity\DIGOS.Ambassador.Discord.Interactivity.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
+    <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Dossiers\DIGOS.Ambassador.Plugins.Dossiers.csproj" />
+    <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Permissions\DIGOS.Ambassador.Plugins.Permissions.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Plugins\DIGOS.Ambassador.Plugins.csproj" />
   </ItemGroup>
   <Target Name="DeleteNetHttpMono" AfterTargets="AfterBuild">

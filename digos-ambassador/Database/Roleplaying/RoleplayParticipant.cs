@@ -23,7 +23,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Abstractions.Entities;
-using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Database.Roleplaying

@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;

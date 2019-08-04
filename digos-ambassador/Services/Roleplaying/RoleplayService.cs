@@ -28,9 +28,10 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -44,6 +45,7 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class RoleplayService
     {
+        private readonly CoreDatabaseContext _coreDatabase;
         private readonly ServerService _servers;
         private readonly UserService _users;
         private readonly CommandService _commands;
@@ -56,12 +58,21 @@ namespace DIGOS.Ambassador.Services
         /// <param name="entityService">The application's owned entity service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
-        public RoleplayService(CommandService commands, OwnedEntityService entityService, UserService users, ServerService servers)
+        /// <param name="coreDatabase">The core database.</param>
+        public RoleplayService
+        (
+            CommandService commands,
+            OwnedEntityService entityService,
+            UserService users,
+            ServerService servers,
+            CoreDatabaseContext coreDatabase
+        )
         {
             _commands = commands;
             _ownedEntities = entityService;
             _users = users;
             _servers = servers;
+            _coreDatabase = coreDatabase;
         }
 
         /// <summary>
@@ -103,7 +114,7 @@ namespace DIGOS.Ambassador.Services
             bool isPublic
         )
         {
-            var getOwnerResult = await _users.GetOrRegisterUserAsync(db, context.User);
+            var getOwnerResult = await _users.GetOrRegisterUserAsync(context.User);
             if (!getOwnerResult.IsSuccess)
             {
                 return CreateEntityResult<Roleplay>.FromError(getOwnerResult);
@@ -148,6 +159,7 @@ namespace DIGOS.Ambassador.Services
             }
 
             await db.Roleplays.AddAsync(roleplay);
+
             await db.SaveChangesAsync();
 
             var roleplayResult = await GetUserRoleplayByNameAsync(db, context, context.Message.Author, roleplayName);
@@ -551,7 +563,7 @@ namespace DIGOS.Ambassador.Services
             var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)newUser.Id);
             if (participantEntry is null)
             {
-                var getUserResult = await _users.GetOrRegisterUserAsync(db, newUser);
+                var getUserResult = await _users.GetOrRegisterUserAsync(newUser);
                 if (!getUserResult.IsSuccess)
                 {
                     return CreateEntityResult<RoleplayParticipant>.FromError(getUserResult);
@@ -600,7 +612,7 @@ namespace DIGOS.Ambassador.Services
             var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)invitedUser.Id);
             if (participantEntry is null)
             {
-                var getUserResult = await _users.GetOrRegisterUserAsync(db, invitedUser);
+                var getUserResult = await _users.GetOrRegisterUserAsync(invitedUser);
                 if (!getUserResult.IsSuccess)
                 {
                     return ModifyEntityResult.FromError(getUserResult);
@@ -780,7 +792,7 @@ namespace DIGOS.Ambassador.Services
             [NotNull] Roleplay roleplay
         )
         {
-            var server = await _servers.GetOrRegisterServerAsync(db, context.Guild);
+            var server = await _servers.GetOrRegisterServerAsync(context.Guild);
             if (!context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageChannels)
             {
                 return CreateEntityResult<IGuildChannel>.FromError
@@ -1042,7 +1054,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                                        "I don't have permission to manage channels, so I can't change permissions on dedicated RP channels."
+                    "I don't have permission to manage channels, so I can't change permissions on dedicated RP channels."
                 );
             }
 

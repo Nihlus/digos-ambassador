@@ -26,10 +26,10 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services.Users;
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord;
 using Humanizer;
 using JetBrains.Annotations;
@@ -43,6 +43,7 @@ namespace DIGOS.Ambassador.Services
     /// </summary>
     public class KinkService
     {
+        private readonly CoreDatabaseContext _coreDatabase;
         private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
 
@@ -51,10 +52,12 @@ namespace DIGOS.Ambassador.Services
         /// </summary>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="users">The user service.</param>
-        public KinkService(UserFeedbackService feedback, UserService users)
+        /// <param name="coreDatabase">The core database.</param>
+        public KinkService(UserFeedbackService feedback, UserService users, CoreDatabaseContext coreDatabase)
         {
             _feedback = feedback;
             _users = users;
+            _coreDatabase = coreDatabase;
         }
 
         /// <summary>
@@ -127,7 +130,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>The user's kinks.</returns>
         public async Task<RetrieveEntityResult<IQueryable<UserKink>>> GetUserKinksAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser)
         {
-            var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
             {
                 return RetrieveEntityResult<IQueryable<UserKink>>.FromError(getUserResult);
@@ -258,7 +261,7 @@ namespace DIGOS.Ambassador.Services
                 return CreateEntityResult<UserKink>.FromError("The user already has a preference for that kink.");
             }
 
-            var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
             {
                 return CreateEntityResult<UserKink>.FromError(getUserResult);
@@ -358,7 +361,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A task that must be awaited.</returns>
         public async Task<ModifyEntityResult> ResetUserKinksAsync([NotNull] AmbyDatabaseContext db, [NotNull] IUser discordUser)
         {
-            var getUserResult = await _users.GetOrRegisterUserAsync(db, discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getUserResult);
