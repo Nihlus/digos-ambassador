@@ -526,8 +526,7 @@ namespace DIGOS.Ambassador.Services
                 return CreateEntityResult<Character>.FromError(modifyEntityResult);
             }
 
-            owner.Characters.Add(character);
-            await db.Characters.AddAsync(character);
+            db.Characters.Update(character);
             await db.SaveChangesAsync();
 
             return CreateEntityResult<Character>.FromSuccess(character);
@@ -549,18 +548,25 @@ namespace DIGOS.Ambassador.Services
             [NotNull] User targetUser
         )
         {
-            var isCurrentUser = context.Message.Author.Id == (ulong)newDefaultCharacter.Owner.DiscordID;
-            var isSameCharacter = targetUser.DefaultCharacter?.Name == newDefaultCharacter.Name;
-            if (isSameCharacter)
+            var getDefaultCharacterResult = await GetDefaultCharacterAsync(db, targetUser, context.Guild);
+            if (getDefaultCharacterResult.IsSuccess)
             {
-                var errorMessage = isCurrentUser
-                    ? "That's already your default character."
-                    : "That's already the user's default character.";
+                var currentDefault = getDefaultCharacterResult.Entity;
+                if (currentDefault == newDefaultCharacter)
+                {
+                    var isCurrentUser = context.Message.Author.Id == (ulong)newDefaultCharacter.Owner.DiscordID;
 
-                return ModifyEntityResult.FromError(errorMessage);
+                    var errorMessage = isCurrentUser
+                        ? "That's already your default character."
+                        : "That's already the user's default character.";
+
+                    return ModifyEntityResult.FromError(errorMessage);
+                }
+
+                currentDefault.IsDefault = false;
             }
 
-            targetUser.DefaultCharacter = newDefaultCharacter;
+            newDefaultCharacter.IsDefault = true;
             await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -580,9 +586,10 @@ namespace DIGOS.Ambassador.Services
             [NotNull] User targetUser
         )
         {
-            var isCurrentUser = context.Message.Author.Id == (ulong)targetUser.DiscordID;
-            if (targetUser.DefaultCharacter is null)
+            var getDefaultCharacterResult = await GetDefaultCharacterAsync(db, targetUser, context.Guild);
+            if (!getDefaultCharacterResult.IsSuccess)
             {
+                var isCurrentUser = context.Message.Author.Id == (ulong)targetUser.DiscordID;
                 var errorMessage = isCurrentUser
                     ? "You don't have a default character."
                     : "That user doesn't have a default character.";
@@ -590,7 +597,7 @@ namespace DIGOS.Ambassador.Services
                 return ModifyEntityResult.FromError(errorMessage);
             }
 
-            targetUser.DefaultCharacter = null;
+            getDefaultCharacterResult.Entity.IsDefault = false;
             await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -1156,7 +1163,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                                        "The character already has that role."
+                    "The character already has that role."
                 );
             }
 
@@ -1183,7 +1190,7 @@ namespace DIGOS.Ambassador.Services
             {
                 return ModifyEntityResult.FromError
                 (
-                                        "The character doesn't have a role set."
+                    "The character doesn't have a role set."
                 );
             }
 
@@ -1192,6 +1199,32 @@ namespace DIGOS.Ambassador.Services
             await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Retrieves the given user's default character.
+        /// </summary>
+        /// <param name="db">The database.</param>
+        /// <param name="user">The user.</param>
+        /// <param name="guild">The server the user is on.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<Character>> GetDefaultCharacterAsync
+        (
+            [NotNull] AmbyDatabaseContext db,
+            [NotNull] User user,
+            [NotNull] IGuild guild
+        )
+        {
+            var userCharacters = GetUserCharacters(db, user, guild);
+            var defaultCharacter = await userCharacters
+                .FirstOrDefaultAsync(c => c.IsDefault);
+
+            if (defaultCharacter is null)
+            {
+                return RetrieveEntityResult<Character>.FromError("The user doesn't have a default character.");
+            }
+
+            return RetrieveEntityResult<Character>.FromSuccess(defaultCharacter);
         }
     }
 }

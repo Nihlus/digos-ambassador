@@ -682,9 +682,17 @@ namespace DIGOS.Ambassador.Modules
                 invoker
             );
 
+            var getDefaultCharacterResult = await _characters.GetDefaultCharacterAsync
+            (
+                this.Database,
+                invoker,
+                this.Context.Guild
+            );
+
             if (getCurrentCharacterResult.IsSuccess)
             {
-                if (invoker.DefaultCharacter == getCurrentCharacterResult.Entity)
+                if (getDefaultCharacterResult.IsSuccess &&
+                    getDefaultCharacterResult.Entity == getCurrentCharacterResult.Entity)
                 {
                     await _feedback.SendErrorAsync(this.Context, "You're already your default form.");
                     return;
@@ -703,9 +711,14 @@ namespace DIGOS.Ambassador.Modules
                 var currentServer = await _servers.GetOrRegisterServerAsync(this.Database, this.Context.Guild);
 
                 ModifyEntityResult modifyNickResult;
-                if (!(invoker.DefaultCharacter is null) && !invoker.DefaultCharacter.Nickname.IsNullOrWhitespace())
+                if (getDefaultCharacterResult.IsSuccess && !getDefaultCharacterResult.Entity.Nickname.IsNullOrWhitespace())
                 {
-                    modifyNickResult = await _discord.SetUserNicknameAsync(this.Context, guildUser, invoker.DefaultCharacter.Nickname);
+                    modifyNickResult = await _discord.SetUserNicknameAsync
+                    (
+                        this.Context,
+                        guildUser,
+                        getDefaultCharacterResult.Entity.Nickname
+                    );
                 }
                 else
                 {
@@ -736,13 +749,13 @@ namespace DIGOS.Ambassador.Modules
                 }
             }
 
-            if (invoker.DefaultCharacter is null)
+            if (!getDefaultCharacterResult.IsSuccess)
             {
                 await _feedback.SendConfirmationAsync(this.Context, "Character cleared.");
             }
             else
             {
-                await AssumeCharacterFormAsync(invoker.DefaultCharacter);
+                await AssumeCharacterFormAsync(getDefaultCharacterResult.Entity);
             }
         }
 

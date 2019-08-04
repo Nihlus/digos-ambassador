@@ -60,18 +60,6 @@ namespace DIGOS.Ambassador.Database.Users
         public int? Timezone { get; set; }
 
         /// <summary>
-        /// Gets or sets the user's default character.
-        /// </summary>
-        [CanBeNull]
-        public virtual Character DefaultCharacter { get; set; }
-
-        /// <summary>
-        /// Gets or sets the characters that the user owns.
-        /// </summary>
-        [NotNull]
-        public virtual List<Character> Characters { get; set; } = new List<Character>();
-
-        /// <summary>
         /// Gets or sets the kinks or fetishes of a user, as well as their preferences for each.
         /// </summary>
         [NotNull]

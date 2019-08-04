@@ -262,20 +262,9 @@ namespace DIGOS.Ambassador.Database
         /// <inheritdoc />
         protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.Characters)
-                .WithOne(u => u.Owner)
-                .IsRequired();
-
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.DefaultCharacter)
-                .WithOne()
-                .HasForeignKey(typeof(User).FullName, "DefaultCharacterID");
-
-            modelBuilder.Entity<User>().Property(typeof(long?), "DefaultCharacterID").IsRequired(false);
             modelBuilder.Entity<User>().HasMany(u => u.Kinks).WithOne().IsRequired();
 
-            modelBuilder.Entity<Character>().HasOne(ch => ch.Owner).WithMany(u => u.Characters);
+            modelBuilder.Entity<Character>().HasOne(ch => ch.Owner).WithMany();
             modelBuilder.Entity<Character>().HasMany(ch => ch.Images).WithOne().IsRequired();
 
             modelBuilder.Entity<Roleplay>().HasOne(u => u.Owner).WithMany().IsRequired();

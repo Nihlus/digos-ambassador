@@ -1652,6 +1652,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var contextMock = new Mock<ICommandContext>();
                 contextMock.Setup(c => c.Message.Author.Id).Returns(_owner.Id);
+                contextMock.Setup(c => c.Guild).Returns(_guild);
 
                 var context = contextMock.Object;
 
@@ -1664,7 +1665,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.Same(_character, _user.DefaultCharacter);
+
+                var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
+                (
+                    this.Database,
+                    _user,
+                    _guild
+                );
+
+                Assert.Same(_character, defaultCharacterResult.Entity);
             }
 
             [Fact]
@@ -1672,6 +1681,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var contextMock = new Mock<ICommandContext>();
                 contextMock.Setup(c => c.Message.Author.Id).Returns(_owner.Id);
+                contextMock.Setup(c => c.Guild).Returns(_guild);
 
                 var context = contextMock.Object;
 
@@ -1692,7 +1702,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Same(_character, _user.DefaultCharacter);
+
+                var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
+                (
+                    this.Database,
+                    _user,
+                    _guild
+                );
+
+                Assert.Same(_character, defaultCharacterResult.Entity);
             }
         }
 
@@ -1726,6 +1744,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var contextMock = new Mock<ICommandContext>();
                 contextMock.Setup(c => c.Message.Author.Id).Returns(_owner.Id);
+                contextMock.Setup(c => c.Guild).Returns(_guild);
 
                 var context = contextMock.Object;
 
@@ -1745,7 +1764,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.Null(_user.DefaultCharacter);
+
+                var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
+                (
+                    this.Database,
+                    _user,
+                    _guild
+                );
+
+                Assert.False(defaultCharacterResult.IsSuccess);
             }
 
             [Fact]
@@ -1753,6 +1780,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             {
                 var contextMock = new Mock<ICommandContext>();
                 contextMock.Setup(c => c.Message.Author.Id).Returns(_owner.Id);
+                contextMock.Setup(c => c.Guild).Returns(_guild);
 
                 var context = contextMock.Object;
 
@@ -1764,7 +1792,15 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.Null(_user.DefaultCharacter);
+
+                var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
+                (
+                    this.Database,
+                    _user,
+                    _guild
+                );
+
+                Assert.False(defaultCharacterResult.IsSuccess);
             }
         }
 
