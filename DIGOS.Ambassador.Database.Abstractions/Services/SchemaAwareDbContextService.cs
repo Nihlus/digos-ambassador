@@ -66,8 +66,7 @@ namespace DIGOS.Ambassador.Database.Abstractions.Services
         /// </summary>
         /// <param name="optionsBuilder">The unconfigured options builder.</param>
         /// <typeparam name="TContext">The context type.</typeparam>
-        /// <returns>The configured options.</returns>
-        public DbContextOptionsBuilder ConfigureSchemaAwareContext<TContext>(DbContextOptionsBuilder optionsBuilder)
+        public void ConfigureSchemaAwareContext<TContext>(DbContextOptionsBuilder optionsBuilder)
             where TContext : SchemaAwareDbContext
         {
             EnsureSchemaIsCached<TContext>();
@@ -87,8 +86,6 @@ namespace DIGOS.Ambassador.Database.Abstractions.Services
                 );
 
             optionsBuilder.ReplaceService<IMigrationsModelDiffer, SchemaAwareMigrationsModelDiffer>();
-
-            return optionsBuilder;
         }
     }
 }
