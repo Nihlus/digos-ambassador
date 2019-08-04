@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Async;
 using DIGOS.Ambassador.Core.Extensions;
@@ -53,7 +54,7 @@ namespace DIGOS.Ambassador.Core.Services
         /// <summary>
         /// Gets the base content path.
         /// </summary>
-        public string BaseContentPath { get; } = Path.GetFullPath(Path.Combine("Content"));
+        public string BaseContentPath { get; }
 
         /// <summary>
         /// Gets the base dossier path.
@@ -105,6 +106,9 @@ namespace DIGOS.Ambassador.Core.Services
         /// </summary>
         public ContentService()
         {
+            var executingLocation = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
+            this.BaseContentPath = Path.GetFullPath(Path.Combine(executingLocation, "Content"));
+
             this.BaseRemoteUri = new Uri("https://raw.githubusercontent.com/Nihlus/digos-ambassador/master/");
             this.BaseRemoteContentUri = new Uri(this.BaseRemoteUri, "digos-ambassador/Content/");
             this.DefaultAvatarUri = new Uri(this.BaseRemoteContentUri, "Avatars/Default/Discord_DIGOS.png");

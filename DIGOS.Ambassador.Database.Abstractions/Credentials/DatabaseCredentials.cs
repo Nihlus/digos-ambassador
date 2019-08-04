@@ -96,6 +96,7 @@ namespace DIGOS.Ambassador.Database.Abstractions.Credentials
         [ContractAnnotation("=> true, credentials : notnull; => false, credentials : null")]
         public static bool TryParse(string path, out DatabaseCredentials credentials)
         {
+            Console.WriteLine(path);
             credentials = null;
 
             if (!File.Exists(path))

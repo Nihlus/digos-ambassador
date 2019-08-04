@@ -25,7 +25,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Migrations.Design;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DIGOS.Ambassador.Design
+namespace DIGOS.Ambassador.Database.Abstractions.Design
 {
     /// <inheritdoc />
     [UsedImplicitly]

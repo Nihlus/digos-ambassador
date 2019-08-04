@@ -35,4 +35,10 @@
       <ProjectReference Include="..\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include="Content\database.credentials">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>
