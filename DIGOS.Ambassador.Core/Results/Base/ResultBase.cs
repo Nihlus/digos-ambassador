@@ -141,14 +141,22 @@ namespace DIGOS.Ambassador.Core.Results.Base
             [CanBeNull] Exception exception = null
         )
         {
-            return (TResultType)Activator.CreateInstance
+            var constructor = typeof(TResultType).GetConstructor
             (
-                typeof(TResultType),
-                BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy,
+                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance,
                 null,
-                new object[] { reason, exception },
-                CultureInfo.InvariantCulture
+                new[] { typeof(string), typeof(Exception) },
+                null
             );
+
+            if (constructor is null)
+            {
+                var typeName = typeof(TResultType).Name;
+                throw new MissingMethodException(typeName, $"{typeName}(string, Exception)");
+            }
+
+            var resultInstance = constructor.Invoke(new object[] { reason, exception });
+            return (TResultType)resultInstance;
         }
 
         /// <inheritdoc />
