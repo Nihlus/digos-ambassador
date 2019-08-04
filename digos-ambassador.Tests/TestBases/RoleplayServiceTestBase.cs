@@ -20,35 +20,52 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
 using Discord.Commands;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
     /// <summary>
     /// Serves as a test base for roleplay service tests.
     /// </summary>
-    public class RoleplayServiceTestBase
+    public abstract class RoleplayServiceTestBase : DatabaseProvidingTestBase
     {
         /// <summary>
         /// Gets the roleplay service object.
         /// </summary>
-        protected RoleplayService Roleplays { get; }
+        protected RoleplayService Roleplays { get; private set; }
 
-        /// <summary>
-        /// Gets the command service dependency.
-        /// </summary>
-        protected CommandService Commands { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleplayServiceTestBase"/> class.
-        /// </summary>
-        protected RoleplayServiceTestBase()
+        /// <inheritdoc />
+        protected override void RegisterServices(IServiceCollection serviceCollection)
         {
-            this.Commands = new CommandService();
-            this.Roleplays = new RoleplayService(this.Commands, new OwnedEntityService(), new UserService(), new ServerService());
+            serviceCollection
+                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
+                .AddDbContext<AmbyDatabaseContext>(ConfigureOptions<AmbyDatabaseContext>);
+
+            serviceCollection
+                .AddScoped<CommandService>()
+                .AddScoped<OwnedEntityService>()
+                .AddScoped<UserService>()
+                .AddScoped<ServerService>()
+                .AddScoped<RoleplayService>();
+        }
+
+        /// <inheritdoc />
+        protected override void ConfigureServices(IServiceProvider serviceProvider)
+        {
+            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+            coreDatabase.Database.EnsureCreated();
+
+            var ambyDatabase = serviceProvider.GetRequiredService<AmbyDatabaseContext>();
+            ambyDatabase.Database.EnsureCreated();
+
+            this.Roleplays = serviceProvider.GetRequiredService<RoleplayService>();
         }
     }
 }

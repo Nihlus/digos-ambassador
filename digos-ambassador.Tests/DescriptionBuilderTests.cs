@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Tests
                 CurrentAppearance = appearance
             };
 
-            var characterService = new CharacterService(null, null, null, null, null, null)
+            var characterService = new CharacterService(null, null, null, null, null, null, null)
                 .WithPronounProvider(new FemininePronounProvider());
 
             var serviceProvider = new ServiceCollection()

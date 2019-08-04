@@ -27,10 +27,10 @@ using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
-using DIGOS.Ambassador.Database.Users;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
 using DIGOS.Ambassador.Transformations;
@@ -315,7 +315,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task CreatedObjectRespectsGlobalDefaults()
             {
-                var user = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
+                var user = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
 
                 var globalSetting = new GlobalUserProtection
                 {
@@ -536,7 +536,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             protected override async Task InitializeTestAsync()
             {
-                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
 
                 _character = new Character
                 {
@@ -588,7 +588,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             protected override async Task InitializeTestAsync()
             {
-                _owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _user)).Entity;
+                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
 
                 _character = new Character
                 {
@@ -829,7 +829,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
                 _character = new Character
                 {
                     Name = "Test",
@@ -938,6 +938,17 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             private AppearanceConfiguration _appearanceConfiguration;
 
+            /// <inheritdoc />
+            protected override void RegisterServices(IServiceCollection serviceCollection)
+            {
+                base.RegisterServices(serviceCollection);
+
+                serviceCollection
+                    .AddScoped<OwnedEntityService>()
+                    .AddScoped<CommandService>()
+                    .AddScoped<CharacterService>();
+            }
+
             public ShiftBodypartAsync()
             {
                 var mockedGuild = new Mock<IGuild>();
@@ -962,20 +973,10 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 _context = mockedContext.Object;
 
-                var services = new ServiceCollection()
-                    .AddSingleton<ServerService>()
-                    .AddSingleton<UserService>()
-                    .AddSingleton(this.Transformations)
-                    .AddSingleton<ContentService>()
-                    .AddSingleton<OwnedEntityService>()
-                    .AddSingleton<CommandService>()
-                    .AddSingleton<CharacterService>()
-                    .BuildServiceProvider();
-
-                var characterService = services.GetRequiredService<CharacterService>();
+                var characterService = this.Services.GetRequiredService<CharacterService>();
                 characterService.WithPronounProvider(new FemininePronounProvider());
 
-                this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
+                this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(this.Services));
             }
 
             protected override async Task InitializeTestAsync()
@@ -991,7 +992,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
                 _character = new Character
                 {
                     Name = "Test",
@@ -1275,30 +1276,25 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 _context = mockedContext.Object;
 
-                var services = new ServiceCollection()
-                    .AddSingleton<ServerService>()
-                    .AddSingleton<UserService>()
-                    .AddSingleton<ContentService>()
-                    .AddSingleton<CommandService>()
-                    .AddSingleton<OwnedEntityService>()
-                    .AddSingleton(this.Transformations)
-                    .AddSingleton
-                    (
-                        s =>
-                            ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider
-                            (
-                                new TheyPronounProvider()
-                            )
-                    )
-                    .BuildServiceProvider();
-
-                this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
-
                 Colour.TryParse("bright purple", out _newColour);
+            }
+
+            /// <inheritdoc />
+            protected override void RegisterServices(IServiceCollection serviceCollection)
+            {
+                base.RegisterServices(serviceCollection);
+
+                serviceCollection
+                    .AddScoped<OwnedEntityService>()
+                    .AddScoped<CommandService>()
+                    .AddScoped<CharacterService>();
             }
 
             protected override async Task InitializeTestAsync()
             {
+                this.Services.GetRequiredService<CharacterService>().WithPronounProvider(new TheyPronounProvider());
+                this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(this.Services));
+
                 // Ensure owner is opted into transformations
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
@@ -1310,7 +1306,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
                 _character = new Character
                 {
                     Name = "Test",
@@ -1501,7 +1497,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
                 _character = new Character
                 {
                     Name = "Test",
@@ -1691,30 +1687,25 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 _context = mockedContext.Object;
 
-                var services = new ServiceCollection()
-                    .AddSingleton<ServerService>()
-                    .AddSingleton<UserService>()
-                    .AddSingleton<ContentService>()
-                    .AddSingleton<CommandService>()
-                    .AddSingleton<OwnedEntityService>()
-                    .AddSingleton(this.Transformations)
-                    .AddSingleton
-                    (
-                        s =>
-                            ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider
-                            (
-                                new TheyPronounProvider()
-                            )
-                    )
-                    .BuildServiceProvider();
-
-                this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
-
                 Colour.TryParse("bright purple", out _newPatternColour);
+            }
+
+            /// <inheritdoc />
+            protected override void RegisterServices(IServiceCollection serviceCollection)
+            {
+                base.RegisterServices(serviceCollection);
+
+                serviceCollection
+                    .AddScoped<OwnedEntityService>()
+                    .AddScoped<CommandService>()
+                    .AddScoped<CharacterService>();
             }
 
             protected override async Task InitializeTestAsync()
             {
+                this.Services.GetRequiredService<CharacterService>().WithPronounProvider(new TheyPronounProvider());
+                this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(this.Services));
+
                 // Ensure owner is opted into transformations
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
@@ -1726,7 +1717,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
-                var owner = (await this.Users.GetOrRegisterUserAsync(this.Database, _owner)).Entity;
+                var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
                 var character = new Character
                 {
                     Name = "Test",

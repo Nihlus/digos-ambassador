@@ -20,26 +20,42 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Services;
+using System;
+using DIGOS.Ambassador.Plugins.Permissions.Model;
+using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
     /// <summary>
     /// Serves as a test base for permission service tests.
     /// </summary>
-    public abstract class PermissionServiceTestBase : DatabaseDependantTestBase
+    public abstract class PermissionServiceTestBase : DatabaseProvidingTestBase
     {
         /// <summary>
         /// Gets the permission service instance.
         /// </summary>
-        protected PermissionService Permissions { get; }
+        protected PermissionService Permissions { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PermissionServiceTestBase"/> class.
+        /// Gets the permission database.
         /// </summary>
-        protected PermissionServiceTestBase()
+        protected PermissionsDatabaseContext Database { get; private set; }
+
+        /// <inheritdoc />
+        protected sealed override void RegisterServices(IServiceCollection serviceCollection)
         {
-            this.Permissions = new PermissionService();
+            serviceCollection.AddDbContext<PermissionsDatabaseContext>(ConfigureOptions<PermissionsDatabaseContext>);
+            serviceCollection.AddScoped<PermissionService>();
+        }
+
+        /// <inheritdoc />
+        protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
+        {
+            this.Database = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
+            this.Database.Database.EnsureCreated();
+
+            this.Permissions = serviceProvider.GetRequiredService<PermissionService>();
         }
     }
 }

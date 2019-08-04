@@ -20,33 +20,60 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Users;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
     /// <summary>
     /// Serves as a test base for owned entity service tests.
     /// </summary>
-    public abstract class OwnedEntityServiceTestBase : DatabaseDependantTestBase
+    public abstract class OwnedEntityServiceTestBase : DatabaseProvidingTestBase
     {
+        /// <summary>
+        /// Gets the database.
+        /// </summary>
+        protected AmbyDatabaseContext Database { get; private set; }
+
         /// <summary>
         /// Gets the owned entity service object.
         /// </summary>
-        protected OwnedEntityService Entities { get; }
+        protected OwnedEntityService Entities { get; private set; }
 
         /// <summary>
         /// Gets the user service.
         /// </summary>
-        protected UserService Users { get; }
+        protected UserService Users { get; private set; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="OwnedEntityServiceTestBase"/> class.
-        /// </summary>
-        protected OwnedEntityServiceTestBase()
+        /// <inheritdoc />
+        protected override void RegisterServices(IServiceCollection serviceCollection)
         {
-            this.Entities = new OwnedEntityService();
-            this.Users = new UserService();
+            serviceCollection
+                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
+                .AddDbContext<AmbyDatabaseContext>(ConfigureOptions<AmbyDatabaseContext>);
+
+            serviceCollection
+                .AddScoped<OwnedEntityService>()
+                .AddScoped<UserService>();
+        }
+
+        /// <inheritdoc />
+        protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
+        {
+            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+            coreDatabase.Database.EnsureCreated();
+
+            var ambyDatabase = serviceProvider.GetRequiredService<AmbyDatabaseContext>();
+            ambyDatabase.Database.EnsureCreated();
+
+            this.Database = ambyDatabase;
+
+            this.Entities = serviceProvider.GetRequiredService<OwnedEntityService>();
+            this.Users = serviceProvider.GetRequiredService<UserService>();
         }
     }
 }

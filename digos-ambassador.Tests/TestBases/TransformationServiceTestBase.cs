@@ -20,11 +20,15 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.TestBases
@@ -32,25 +36,49 @@ namespace DIGOS.Ambassador.Tests.TestBases
     /// <summary>
     /// Serves as a test base for transformation service tests.
     /// </summary>
-    public abstract class TransformationServiceTestBase : DatabaseDependantTestBase, IAsyncLifetime
+    public abstract class TransformationServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
     {
+        /// <summary>
+        /// Gets the database.
+        /// </summary>
+        protected AmbyDatabaseContext Database { get; private set; }
+
         /// <summary>
         /// Gets the transformation service object.
         /// </summary>
-        protected TransformationService Transformations { get; }
+        protected TransformationService Transformations { get; private set; }
 
         /// <summary>
         /// Gets the user service.
         /// </summary>
-        protected UserService Users { get; }
+        protected UserService Users { get; private set; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransformationServiceTestBase"/> class.
-        /// </summary>
-        protected TransformationServiceTestBase()
+        /// <inheritdoc />
+        protected override void RegisterServices(IServiceCollection serviceCollection)
         {
-            this.Transformations = new TransformationService(new ContentService(), new UserService(), new ServerService());
-            this.Users = new UserService();
+            serviceCollection
+                .AddDbContext<AmbyDatabaseContext>(ConfigureOptions<AmbyDatabaseContext>)
+                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
+
+            serviceCollection
+                .AddScoped<TransformationService>()
+                .AddScoped<ContentService>()
+                .AddScoped<UserService>()
+                .AddScoped<ServerService>()
+                .AddScoped<UserService>();
+        }
+
+        /// <inheritdoc />
+        protected override void ConfigureServices(IServiceProvider serviceProvider)
+        {
+            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+            coreDatabase.Database.EnsureCreated();
+
+            this.Database = serviceProvider.GetRequiredService<AmbyDatabaseContext>();
+            this.Database.Database.EnsureCreated();
+
+            this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
+            this.Users = serviceProvider.GetRequiredService<UserService>();
         }
 
         /// <inheritdoc />

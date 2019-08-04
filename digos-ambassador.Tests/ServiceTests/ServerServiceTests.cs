@@ -21,8 +21,7 @@
 //
 
 using System.Threading.Tasks;
-
-using DIGOS.Ambassador.Database.ServerInfo;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
 using Xunit;
@@ -41,7 +40,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(serverMock);
             }
 
             [Fact]
@@ -92,13 +91,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(serverMock);
             }
 
             [Fact]
             public async Task ReturnsErrorIfNewDescriptionIsNull()
             {
-                var result = await this.Servers.SetDescriptionAsync(this.Database, _server, null);
+                var result = await this.Servers.SetDescriptionAsync(_server, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -106,7 +105,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsErrorIfNewDescriptionIsEmpty()
             {
-                var result = await this.Servers.SetDescriptionAsync(this.Database, _server, string.Empty);
+                var result = await this.Servers.SetDescriptionAsync(_server, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -114,7 +113,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsErrorIfNewDescriptionIsWhitespace()
             {
-                var result = await this.Servers.SetDescriptionAsync(this.Database, _server, "     ");
+                var result = await this.Servers.SetDescriptionAsync(_server, "     ");
 
                 Assert.False(result.IsSuccess);
             }
@@ -125,7 +124,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var old = "oogabooga";
                 _server.Description = old;
 
-                var result = await this.Servers.SetDescriptionAsync(this.Database, _server, old);
+                var result = await this.Servers.SetDescriptionAsync(_server, old);
 
                 Assert.False(result.IsSuccess);
             }
@@ -134,7 +133,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public async Task ReturnsErrorIfNewDescriptionIsTooLong()
             {
                 var newDescription = new string('a', 801);
-                var result = await this.Servers.SetDescriptionAsync(this.Database, _server, newDescription);
+                var result = await this.Servers.SetDescriptionAsync(_server, newDescription);
 
                 Assert.False(result.IsSuccess);
             }
@@ -143,7 +142,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public async Task CanSetDescription()
             {
                 var newDescription = "oogabooga";
-                var result = await this.Servers.SetDescriptionAsync(this.Database, _server, newDescription);
+                var result = await this.Servers.SetDescriptionAsync(_server, newDescription);
 
                 Assert.True(result.IsSuccess);
                 Assert.Equal(newDescription, _server.Description);
@@ -157,7 +156,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(serverMock);
             }
 
             [Fact]
@@ -208,13 +207,13 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(serverMock);
             }
 
             [Fact]
             public async Task ReturnsErrorIfNewJoinMessageIsNull()
             {
-                var result = await this.Servers.SetJoinMessageAsync(this.Database, _server, null);
+                var result = await this.Servers.SetJoinMessageAsync(_server, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -222,7 +221,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsErrorIfNewJoinMessageIsEmpty()
             {
-                var result = await this.Servers.SetJoinMessageAsync(this.Database, _server, string.Empty);
+                var result = await this.Servers.SetJoinMessageAsync(_server, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -230,7 +229,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             [Fact]
             public async Task ReturnsErrorIfNewJoinMessageIsWhitespace()
             {
-                var result = await this.Servers.SetJoinMessageAsync(this.Database, _server, "     ");
+                var result = await this.Servers.SetJoinMessageAsync(_server, "     ");
 
                 Assert.False(result.IsSuccess);
             }
@@ -241,7 +240,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var old = "oogabooga";
                 _server.JoinMessage = old;
 
-                var result = await this.Servers.SetJoinMessageAsync(this.Database, _server, old);
+                var result = await this.Servers.SetJoinMessageAsync(_server, old);
 
                 Assert.False(result.IsSuccess);
             }
@@ -250,7 +249,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public async Task ReturnsErrorIfNewJoinMessageIsTooLong()
             {
                 var newJoinMessage = new string('a', 1201);
-                var result = await this.Servers.SetJoinMessageAsync(this.Database, _server, newJoinMessage);
+                var result = await this.Servers.SetJoinMessageAsync(_server, newJoinMessage);
 
                 Assert.False(result.IsSuccess);
             }
@@ -259,7 +258,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public async Task CanSetJoinMessage()
             {
                 var newJoinMessage = "oogabooga";
-                var result = await this.Servers.SetJoinMessageAsync(this.Database, _server, newJoinMessage);
+                var result = await this.Servers.SetJoinMessageAsync(_server, newJoinMessage);
 
                 Assert.True(result.IsSuccess);
                 Assert.Equal(newJoinMessage, _server.JoinMessage);
@@ -273,20 +272,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(serverMock);
             }
 
             [Fact]
             public async Task ReturnsErrorIfValueIsSameAsCurrent()
             {
-                var result = await this.Servers.SetIsNSFWAsync(this.Database, _server, true);
+                var result = await this.Servers.SetIsNSFWAsync(_server, true);
                 Assert.False(result.IsSuccess);
             }
 
             [Fact]
             public async Task CanSetValue()
             {
-                var result = await this.Servers.SetIsNSFWAsync(this.Database, _server, false);
+                var result = await this.Servers.SetIsNSFWAsync(_server, false);
 
                 Assert.True(result.IsSuccess);
                 Assert.False(_server.IsNSFW);
@@ -300,20 +299,20 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Servers.GetOrRegisterServerAsync(this.Database, serverMock);
+                _server = await this.Servers.GetOrRegisterServerAsync(serverMock);
             }
 
             [Fact]
             public async Task ReturnsErrorIfValueIsSameAsCurrent()
             {
-                var result = await this.Servers.SetSendJoinMessageAsync(this.Database, _server, false);
+                var result = await this.Servers.SetSendJoinMessageAsync(_server, false);
                 Assert.False(result.IsSuccess);
             }
 
             [Fact]
             public async Task CanSetValue()
             {
-                var result = await this.Servers.SetSendJoinMessageAsync(this.Database, _server, true);
+                var result = await this.Servers.SetSendJoinMessageAsync(_server, true);
 
                 Assert.True(result.IsSuccess);
                 Assert.True(_server.SendJoinMessage);

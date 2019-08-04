@@ -20,8 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Database.Permissions;
-using DIGOS.Ambassador.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions.Model.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions.Permissions;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
 
@@ -29,7 +29,7 @@ using Discord;
 
 using Moq;
 using Xunit;
-using PermissionTarget = DIGOS.Ambassador.Permissions.PermissionTarget;
+using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Permissions.PermissionTarget;
 
 #pragma warning disable SA1600
 #pragma warning disable CS1591
@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 // Set up mocked permissions
                 var requiredPermission = (Permission.SetClass, PermissionTarget.Other);
 
-                var result = await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission);
+                var result = await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission);
 
                 Assert.False(result);
             }
@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Database.LocalPermissions.AddAsync(grantedPermission);
                 await this.Database.SaveChangesAsync();
 
-                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
+                Assert.True(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -99,7 +99,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 await this.Database.SaveChangesAsync();
 
-                Assert.False(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
+                Assert.False(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -119,7 +119,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 await this.Database.SaveChangesAsync();
 
-                Assert.False(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
+                Assert.False(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -139,7 +139,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 await this.Database.SaveChangesAsync();
 
-                Assert.False(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
+                Assert.False(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -167,7 +167,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 await this.Database.SaveChangesAsync();
 
-                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
+                Assert.True(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -185,7 +185,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 await this.Database.GlobalPermissions.AddAsync(grantedGlobalPermission);
                 await this.Database.SaveChangesAsync();
 
-                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
+                Assert.True(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
             }
 
             [Fact]
@@ -213,7 +213,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 await this.Database.SaveChangesAsync();
 
-                Assert.True(await this.Permissions.HasPermissionAsync(this.Database, _guild, _user, requiredPermission));
+                Assert.True(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
             }
         }
     }

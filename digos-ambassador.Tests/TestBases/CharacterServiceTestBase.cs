@@ -20,12 +20,16 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
 using Discord.Commands;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.TestBases
@@ -33,50 +37,68 @@ namespace DIGOS.Ambassador.Tests.TestBases
     /// <summary>
     /// Serves as a test base for character service tests.
     /// </summary>
-    public abstract class CharacterServiceTestBase : DatabaseDependantTestBase, IAsyncLifetime
+    public abstract class CharacterServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
     {
+        /// <summary>
+        /// Gets the database.
+        /// </summary>
+        protected AmbyDatabaseContext Database { get; private set; }
+
         /// <summary>
         /// Gets the character service object.
         /// </summary>
-        protected CharacterService Characters { get; }
+        protected CharacterService Characters { get; private set; }
 
         /// <summary>
         /// Gets the user service.
         /// </summary>
-        protected UserService Users { get; }
+        protected UserService Users { get; private set; }
 
         /// <summary>
         /// Gets the command service dependency.
         /// </summary>
-        protected CommandService Commands { get; }
+        protected CommandService Commands { get; private set; }
 
-        private readonly TransformationService _transformations;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CharacterServiceTestBase"/> class.
-        /// </summary>
-        protected CharacterServiceTestBase()
+        /// <inheritdoc />
+        protected override void RegisterServices(IServiceCollection serviceCollection)
         {
-            this.Commands = new CommandService();
-            var content = new ContentService();
-            _transformations = new TransformationService(content, this.Users, new ServerService());
+            serviceCollection
+                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
+                .AddDbContext<AmbyDatabaseContext>(ConfigureOptions<AmbyDatabaseContext>);
 
-            this.Users = new UserService();
-            this.Characters = new CharacterService
-            (
-                this.Commands,
-                new OwnedEntityService(),
-                content,
-                _transformations,
-                this.Users,
-                new ServerService()
-            );
+            serviceCollection
+                .AddScoped<CommandService>()
+                .AddScoped<ContentService>()
+                .AddScoped<ServerService>()
+                .AddScoped<TransformationService>()
+                .AddScoped<UserService>()
+                .AddScoped<OwnedEntityService>()
+                .AddScoped<CharacterService>();
+        }
+
+        /// <inheritdoc />
+        protected override void ConfigureServices(IServiceProvider serviceProvider)
+        {
+            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+            coreDatabase.Database.EnsureCreated();
+
+            var ambyDatabase = serviceProvider.GetRequiredService<AmbyDatabaseContext>();
+            ambyDatabase.Database.EnsureCreated();
+
+            this.Database = ambyDatabase;
+
+            this.Characters = serviceProvider.GetRequiredService<CharacterService>();
+            this.Users = serviceProvider.GetRequiredService<UserService>();
+            this.Commands = serviceProvider.GetRequiredService<CommandService>();
         }
 
         /// <inheritdoc />
         public virtual async Task InitializeAsync()
         {
-            await _transformations.UpdateTransformationDatabaseAsync(this.Database);
+            var transformations = this.Services.GetRequiredService<TransformationService>();
+            var db = this.Services.GetRequiredService<AmbyDatabaseContext>();
+
+            await transformations.UpdateTransformationDatabaseAsync(db);
         }
 
         /// <inheritdoc />
