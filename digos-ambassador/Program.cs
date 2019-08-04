@@ -28,7 +28,6 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Xml;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Services;
 using JetBrains.Annotations;
 using log4net;
 using log4net.Config;

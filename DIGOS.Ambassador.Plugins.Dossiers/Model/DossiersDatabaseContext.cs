@@ -20,13 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database.Abstractions;
-using DIGOS.Ambassador.Database.Abstractions.Design;
-using DIGOS.Ambassador.Database.Abstractions.Services;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 
 namespace DIGOS.Ambassador.Plugins.Dossiers.Model
 {

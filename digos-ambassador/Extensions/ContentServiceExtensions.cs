@@ -27,7 +27,6 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Async;
-using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database;

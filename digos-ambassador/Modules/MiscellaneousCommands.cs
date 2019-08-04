@@ -30,8 +30,6 @@ using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.EmojiTools;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services;
-
 using Discord;
 using Discord.Commands;
 using Discord.Net;

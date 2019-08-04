@@ -26,7 +26,6 @@ using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Modules.Base;
-using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Users;
 
 using Discord.Commands;
