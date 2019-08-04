@@ -21,6 +21,7 @@
 //
 
 using System.IO;
+using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Permissions;
@@ -222,7 +223,8 @@ namespace DIGOS.Ambassador.Database
         [NotNull]
         public static DbContextOptionsBuilder ConfigureOptions([NotNull] DbContextOptionsBuilder optionsBuilder)
         {
-            var passfilePath = Path.Combine("Content", "database.credentials");
+            var contentService = new ContentService();
+            var passfilePath = contentService.DatabaseCredentialsPath;
             if (!File.Exists(passfilePath))
             {
                 throw new FileNotFoundException("Could not find PostgreSQL credentials.", passfilePath);

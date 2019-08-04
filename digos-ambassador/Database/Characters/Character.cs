@@ -55,6 +55,11 @@ namespace DIGOS.Ambassador.Database.Characters
         public string EntityTypeDisplayName => nameof(Character);
 
         /// <summary>
+        /// Gets or sets a value indicating whether the character is the user's default character.
+        /// </summary>
+        public bool IsDefault { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the character is currently in use on the server.
         /// </summary>
         public bool IsCurrent { get; set; }

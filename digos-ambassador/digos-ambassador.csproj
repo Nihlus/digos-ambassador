@@ -46,7 +46,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\Portraits" />
-    <Folder Include="Database\Dossiers" />
     <Folder Include="Migrations" />
     <Folder Include="Services\Feedback" />
     <Folder Include="Services\Interactivity" />
