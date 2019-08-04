@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database.Abstractions.Credentials;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;

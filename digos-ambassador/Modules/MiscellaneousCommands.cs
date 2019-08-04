@@ -26,7 +26,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.EmojiTools;

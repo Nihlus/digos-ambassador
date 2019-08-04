@@ -22,7 +22,6 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Servers;
 using DIGOS.Ambassador.Services.Users;

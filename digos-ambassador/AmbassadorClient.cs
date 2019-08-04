@@ -24,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Abstractions.Services;
 using DIGOS.Ambassador.Database.Characters;

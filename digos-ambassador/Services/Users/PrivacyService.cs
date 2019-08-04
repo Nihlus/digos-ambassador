@@ -25,7 +25,6 @@ using System.Net;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Core.Services.Content;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Users;
 using DIGOS.Ambassador.Discord.Feedback;
