@@ -36,4 +36,10 @@
       <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Characters\DIGOS.Ambassador.Plugins.Characters.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="Content\**\*.*">
+            <CopyToOutputDirectory>always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
 </Project>
