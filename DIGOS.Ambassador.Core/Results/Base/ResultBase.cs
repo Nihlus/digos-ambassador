@@ -73,7 +73,6 @@ namespace DIGOS.Ambassador.Core.Results.Base
         /// <summary>
         /// Initializes a new instance of the <see cref="ResultBase{TResultType}"/> class.
         /// </summary>
-        /// <param name="error">The error (if any).</param>
         /// <param name="errorReason">A more detailed error description.</param>
         /// <param name="exception">The exception that caused the error (if any).</param>
         protected ResultBase
