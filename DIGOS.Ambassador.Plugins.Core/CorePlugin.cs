@@ -26,6 +26,7 @@ using DIGOS.Ambassador.Database.Abstractions.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Core.CommandModules;
 using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord.Commands;
@@ -51,6 +52,7 @@ namespace DIGOS.Ambassador.Plugins.Core
                 .AddScoped<ServerService>()
                 .AddScoped<UserService>()
                 .AddScoped<PrivacyService>()
+                .AddScoped<OwnedEntityService>()
                 .AddSchemaAwareDbContextPool<CoreDatabaseContext>();
 
             return Task.FromResult(true);
