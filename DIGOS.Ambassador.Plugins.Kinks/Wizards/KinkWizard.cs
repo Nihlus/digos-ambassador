@@ -128,7 +128,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
                 throw new InvalidOperationException("The wizard is already active in a channel.");
             }
 
-            _categories = (await _kinks.GetKinkCategoriesAsync(_database)).ToList();
+            _categories = (await _kinks.GetKinkCategoriesAsync()).ToList();
             _state = KinkWizardState.CategorySelection;
 
             return await channel.SendMessageAsync(string.Empty, embed: _loadingEmbed).ConfigureAwait(false);
@@ -239,7 +239,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             {
                 await SetCurrentKinkPreference(preference.Value);
 
-                var getNextKinkResult = await _kinks.GetNextKinkByCurrentFListIDAsync(_database, _currentFListKinkID);
+                var getNextKinkResult = await _kinks.GetNextKinkByCurrentFListIDAsync(_currentFListKinkID);
                 if (!getNextKinkResult.IsSuccess)
                 {
                     _currentFListKinkID = -1;
@@ -369,10 +369,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
                 return ModifyEntityResult.FromError("Could not parse kink category.");
             }
 
-            var getKinkResult = await _kinks.GetFirstKinkWithoutPreferenceInCategoryAsync(_database, _targetUser, category);
+            var getKinkResult = await _kinks.GetFirstKinkWithoutPreferenceInCategoryAsync(_targetUser, category);
             if (!getKinkResult.IsSuccess)
             {
-                getKinkResult = await _kinks.GetFirstKinkInCategoryAsync(_database, category);
+                getKinkResult = await _kinks.GetFirstKinkInCategoryAsync(category);
             }
 
             if (!getKinkResult.IsSuccess)
@@ -439,7 +439,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
 
         private async Task SetCurrentKinkPreference(KinkPreference preference)
         {
-            var getUserKinkResult = await _kinks.GetUserKinkByFListIDAsync(_database, _targetUser, _currentFListKinkID);
+            var getUserKinkResult = await _kinks.GetUserKinkByFListIDAsync(_targetUser, _currentFListKinkID);
             if (!getUserKinkResult.IsSuccess)
             {
                 await _feedback.SendErrorAndDeleteAsync(this.MessageContext, getUserKinkResult.ErrorReason);
@@ -447,7 +447,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             }
 
             var userKink = getUserKinkResult.Entity;
-            var setPreferenceResult = await _kinks.SetKinkPreferenceAsync(_database, userKink, preference);
+            var setPreferenceResult = await _kinks.SetKinkPreferenceAsync(userKink, preference);
             if (!setPreferenceResult.IsSuccess)
             {
                 await _feedback.SendErrorAndDeleteAsync(this.MessageContext, setPreferenceResult.ErrorReason);
@@ -527,7 +527,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
                 }
                 case KinkWizardState.KinkPreference:
                 {
-                    var getUserKinkResult = await _kinks.GetUserKinkByFListIDAsync(_database, _targetUser, _currentFListKinkID);
+                    var getUserKinkResult = await _kinks.GetUserKinkByFListIDAsync(_targetUser, _currentFListKinkID);
                     if (!getUserKinkResult.IsSuccess)
                     {
                         await _feedback.SendErrorAndDeleteAsync(this.MessageContext, "Failed to get the user kink.", TimeSpan.FromSeconds(10));
