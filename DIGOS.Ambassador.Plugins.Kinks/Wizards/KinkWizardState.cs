@@ -1,5 +1,5 @@
 ﻿//
-//  KinkVisibility.cs
+//  KinkWizardState.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,26 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
 {
     /// <summary>
-    /// Holds options for the visibility of a user's kink list.
+    /// Represents the state that the kink wizard is in.
     /// </summary>
-    public enum KinkVisibility
+    public enum KinkWizardState
     {
         /// <summary>
-        /// Anyone can view your kinks.
+        /// The category selection page.
         /// </summary>
-        All,
+        CategorySelection,
 
         /// <summary>
-        /// Only your friends can view your kinks.
+        /// The kink preference selection page.
         /// </summary>
-        Friends,
-
-        /// <summary>
-        /// Only people on your whitelist can view your kinks.
-        /// </summary>
-        Whitelist
+        KinkPreference
     }
 }

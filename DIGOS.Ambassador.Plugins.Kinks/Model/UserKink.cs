@@ -25,9 +25,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Database.Abstractions.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
-using Org.BouncyCastle.Ocsp;
 
-namespace DIGOS.Ambassador.Database.Kinks
+namespace DIGOS.Ambassador.Plugins.Kinks.Model
 {
     /// <summary>
     /// Represents a user's kink, along with their preference for it.

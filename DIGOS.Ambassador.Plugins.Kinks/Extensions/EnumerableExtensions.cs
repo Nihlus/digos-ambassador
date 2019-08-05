@@ -26,7 +26,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
-using DIGOS.Ambassador.Utility;
+using DIGOS.Ambassador.Core.Utility;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;

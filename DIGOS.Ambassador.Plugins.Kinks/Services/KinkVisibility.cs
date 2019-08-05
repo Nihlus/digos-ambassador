@@ -1,8 +1,8 @@
 ﻿//
-//  IWizard.cs
+//  KinkVisibility.cs
 //
 //  Author:
-//        Jarl Gullberg <jarl.gullberg@gmail.com>
+//       Jarl Gullberg <jarl.gullberg@gmail.com>
 //
 //  Copyright (c) 2017 Jarl Gullberg
 //
@@ -20,30 +20,26 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Discord;
-using JetBrains.Annotations;
-
-namespace DIGOS.Ambassador.Wizards
+namespace DIGOS.Ambassador.Plugins.Kinks.Services
 {
     /// <summary>
-    /// Represents an interactive wizard.
+    /// Holds options for the visibility of a user's kink list.
     /// </summary>
-    public interface IWizard
+    public enum KinkVisibility
     {
         /// <summary>
-        /// Gets the emotes that should be active for the current page.
+        /// Anyone can view your kinks.
         /// </summary>
-        /// <returns>The emotes.</returns>
-        [NotNull, ItemNotNull]
-        IEnumerable<IEmote> GetCurrentPageEmotes();
+        All,
 
         /// <summary>
-        /// Gets the current page in the wizard.
+        /// Only your friends can view your kinks.
         /// </summary>
-        /// <returns>The current page.</returns>
-        [NotNull, ItemNotNull]
-        Task<Embed> GetCurrentPageAsync();
+        Friends,
+
+        /// <summary>
+        /// Only people on your whitelist can view your kinks.
+        /// </summary>
+        Whitelist
     }
 }

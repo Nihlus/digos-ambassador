@@ -21,9 +21,9 @@
 //
 
 using System.Collections.Generic;
-using DIGOS.Ambassador.Database.Kinks;
+using DIGOS.Ambassador.Plugins.Kinks.Model;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Plugins.Kinks.Services
 {
     /// <summary>
     /// Determines overlap equality for two user kinks.

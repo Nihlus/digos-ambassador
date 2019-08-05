@@ -26,19 +26,18 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
-using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
+using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Plugins.Kinks.Model;
+using DIGOS.Ambassador.Plugins.Kinks.Services;
 using Discord;
 using Discord.WebSocket;
-
 using Humanizer;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Wizards
+namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
 {
     /// <summary>
     /// Acts as an interactive wizard for interactively setting the kink preferences of users.
@@ -46,7 +45,7 @@ namespace DIGOS.Ambassador.Wizards
     public class KinkWizard : InteractiveMessage, IWizard
     {
         [ProvidesContext]
-        private readonly AmbyDatabaseContext _database;
+        private readonly KinksDatabaseContext _database;
         private readonly UserFeedbackService _feedback;
         private readonly KinkService _kinks;
 
@@ -99,7 +98,7 @@ namespace DIGOS.Ambassador.Wizards
         /// <param name="targetUser">The target user.</param>
         public KinkWizard
         (
-            AmbyDatabaseContext database,
+            KinksDatabaseContext database,
             UserFeedbackService feedback,
             KinkService kinkService,
             IUser targetUser

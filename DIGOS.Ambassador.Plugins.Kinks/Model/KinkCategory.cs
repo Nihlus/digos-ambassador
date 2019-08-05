@@ -23,7 +23,7 @@
 using System.ComponentModel;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Database.Kinks
+namespace DIGOS.Ambassador.Plugins.Kinks.Model
 {
     /// <summary>
     /// Represents kink categories. Values are taken from the F-list API.

@@ -1,5 +1,5 @@
 ﻿//
-//  KinkWizardState.cs
+//  KinkPreference.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,21 +20,36 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Wizards
+namespace DIGOS.Ambassador.Plugins.Kinks.Model
 {
     /// <summary>
-    /// Represents the state that the kink wizard is in.
+    /// Represents a user's preference for a certain sexual kink or fetish.
     /// </summary>
-    public enum KinkWizardState
+    public enum KinkPreference
     {
         /// <summary>
-        /// The category selection page.
+        /// The user has no preference, either for or against this kink.
         /// </summary>
-        CategorySelection,
+        NoPreference,
 
         /// <summary>
-        /// The kink preference selection page.
+        /// The user will not participate in or reciprocate this kink.
         /// </summary>
-        KinkPreference
+        No,
+
+        /// <summary>
+        /// The user may be open to participating in or reciprocating this kink, depending on other factors.
+        /// </summary>
+        Maybe,
+
+        /// <summary>
+        /// The user would participate in or reciprocate this kink.
+        /// </summary>
+        Like,
+
+        /// <summary>
+        /// The user is very interested in this kink.
+        /// </summary>
+        Favourite
     }
 }

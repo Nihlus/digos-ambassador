@@ -100,44 +100,6 @@ namespace DIGOS.Ambassador.Migrations
                     b.ToTable("Images","CharacterModule");
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Kinks.Kink", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Category");
-
-                    b.Property<string>("Description");
-
-                    b.Property<uint>("FListID");
-
-                    b.Property<string>("Name");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Kinks","KinkModule");
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Kinks.UserKink", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<long>("KinkID");
-
-                    b.Property<int>("Preference");
-
-                    b.Property<long>("UserID");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("KinkID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("UserKinks","KinkModule");
-                });
-
             modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.Roleplay", b =>
                 {
                     b.Property<long>("ID")
@@ -499,19 +461,6 @@ namespace DIGOS.Ambassador.Migrations
                     b.HasOne("DIGOS.Ambassador.Database.Characters.Character")
                         .WithMany("Images")
                         .HasForeignKey("CharacterID")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Kinks.UserKink", b =>
-                {
-                    b.HasOne("DIGOS.Ambassador.Database.Kinks.Kink", "Kink")
-                        .WithMany()
-                        .HasForeignKey("KinkID")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

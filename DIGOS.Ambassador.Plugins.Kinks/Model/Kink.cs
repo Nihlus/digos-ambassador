@@ -26,7 +26,7 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Database.Abstractions.Entities;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Database.Kinks
+namespace DIGOS.Ambassador.Plugins.Kinks.Model
 {
     /// <summary>
     /// Represents a sexual kink or fetish.

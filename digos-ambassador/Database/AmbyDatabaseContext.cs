@@ -23,7 +23,6 @@
 using System.IO;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Kinks;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
@@ -45,17 +44,6 @@ namespace DIGOS.Ambassador.Database
         /// Gets or sets the table where characters are stored.
         /// </summary>
         public DbSet<Character> Characters
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where kinks are stored.
-        /// </summary>
-        public DbSet<Kink> Kinks
         {
             get;
 
@@ -144,17 +132,6 @@ namespace DIGOS.Ambassador.Database
         /// Gets or sets the table where appearance configurations are stored.
         /// </summary>
         public DbSet<AppearanceConfiguration> AppearanceConfigurations
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where user kinks are stored.
-        /// </summary>
-        public DbSet<UserKink> UserKinks
         {
             get;
 

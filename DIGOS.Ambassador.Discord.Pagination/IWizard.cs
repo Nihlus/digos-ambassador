@@ -1,8 +1,8 @@
 ﻿//
-//  KinkPreference.cs
+//  IWizard.cs
 //
 //  Author:
-//       Jarl Gullberg <jarl.gullberg@gmail.com>
+//        Jarl Gullberg <jarl.gullberg@gmail.com>
 //
 //  Copyright (c) 2017 Jarl Gullberg
 //
@@ -20,36 +20,30 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Database.Kinks
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Discord;
+using JetBrains.Annotations;
+
+namespace DIGOS.Ambassador.Discord.Pagination
 {
     /// <summary>
-    /// Represents a user's preference for a certain sexual kink or fetish.
+    /// Represents an interactive wizard.
     /// </summary>
-    public enum KinkPreference
+    public interface IWizard
     {
         /// <summary>
-        /// The user has no preference, either for or against this kink.
+        /// Gets the emotes that should be active for the current page.
         /// </summary>
-        NoPreference,
+        /// <returns>The emotes.</returns>
+        [NotNull, ItemNotNull]
+        IEnumerable<IEmote> GetCurrentPageEmotes();
 
         /// <summary>
-        /// The user will not participate in or reciprocate this kink.
+        /// Gets the current page in the wizard.
         /// </summary>
-        No,
-
-        /// <summary>
-        /// The user may be open to participating in or reciprocating this kink, depending on other factors.
-        /// </summary>
-        Maybe,
-
-        /// <summary>
-        /// The user would participate in or reciprocate this kink.
-        /// </summary>
-        Like,
-
-        /// <summary>
-        /// The user is very interested in this kink.
-        /// </summary>
-        Favourite
+        /// <returns>The current page.</returns>
+        [NotNull, ItemNotNull]
+        Task<Embed> GetCurrentPageAsync();
     }
 }
