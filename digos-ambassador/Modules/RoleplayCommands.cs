@@ -37,11 +37,8 @@ using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Permissions.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Permissions.Preconditions;
-using DIGOS.Ambassador.Preconditions;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Exporters;
-using DIGOS.Ambassador.TypeReaders;
-
 using Discord;
 using Discord.Commands;
 using Discord.Net;

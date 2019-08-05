@@ -63,7 +63,11 @@ namespace DIGOS.Ambassador.Plugins.Characters
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
             await commands.AddModuleAsync<CharacterCommands>(serviceProvider);
+
             commands.AddTypeReader<Character>(new CharacterTypeReader());
+
+            var characterService = serviceProvider.GetRequiredService<CharacterService>();
+            characterService.DiscoverPronounProviders();
 
             return true;
         }

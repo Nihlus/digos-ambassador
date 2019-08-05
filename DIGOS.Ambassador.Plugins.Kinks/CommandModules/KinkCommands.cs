@@ -23,7 +23,6 @@
 using System;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;

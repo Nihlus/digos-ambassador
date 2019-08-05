@@ -28,30 +28,16 @@ using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Abstractions.Services;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Discord;
+using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.TypeReaders;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
-using DIGOS.Ambassador.Plugins.Characters.Model;
-using DIGOS.Ambassador.Plugins.Characters.Services;
-using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using DIGOS.Ambassador.Plugins.Core.Services.Servers;
-using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Plugins.Kinks.Model;
-using DIGOS.Ambassador.Plugins.Kinks.Services;
-using DIGOS.Ambassador.Plugins.Permissions.Permissions;
-using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
 using DIGOS.Ambassador.Plugins.Services;
-using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
-using DIGOS.Ambassador.Plugins.Transformations.Services;
-using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
-using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Services.Behaviours;
 using DIGOS.Ambassador.TypeReaders;
-using DIGOS.Ambassador.Utility;
 
 using Discord;
 using Discord.Commands;
@@ -61,7 +47,6 @@ using log4net;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
-using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Permissions.PermissionTarget;
 
 #pragma warning disable SA1118 // Parameter spans multiple lines, big strings
 
@@ -93,9 +78,7 @@ namespace DIGOS.Ambassador
         /// <param name="content">The content service.</param>
         public AmbassadorClient([NotNull] ContentService content)
         {
-            _client = Type.GetType("Mono.Runtime") is null
-                ? new DiscordSocketClient()
-                : new DiscordSocketClient(new DiscordSocketConfig { WebSocketProvider = () => new WebSocketSharpProvider() });
+            _client = new DiscordSocketClient();
 
             _client.Log += OnDiscordLogEvent;
 
@@ -154,15 +137,6 @@ namespace DIGOS.Ambassador
 
             _services = serviceCollection.BuildServiceProvider();
 
-            var transformationService = _services.GetRequiredService<TransformationService>();
-            transformationService.WithDescriptionBuilder
-            (
-                ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(_services)
-            );
-
-            var characterService = _services.GetRequiredService<CharacterService>();
-            characterService.DiscoverPronounProviders();
-
             foreach (var successfullyRegisteredPlugin in successfullyRegisteredPlugins)
             {
                 if (!await successfullyRegisteredPlugin.InitializeAsync(_services))
@@ -200,14 +174,8 @@ namespace DIGOS.Ambassador
 
             _commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
             _commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
-            _commands.AddTypeReader<Colour>(new ColourTypeReader());
 
             _commands.AddEnumReader<UserClass>();
-            _commands.AddEnumReader<KinkPreference>();
-            _commands.AddEnumReader<Bodypart>();
-            _commands.AddEnumReader<Pattern>();
-            _commands.AddEnumReader<Permission>();
-            _commands.AddEnumReader<PermissionTarget>();
 
             // Load modules and behaviours from the assembly this type was declared in
             var localAssembly = GetType().Assembly;

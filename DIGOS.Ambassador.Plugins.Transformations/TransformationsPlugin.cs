@@ -23,13 +23,17 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Abstractions.Extensions;
+using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.CommandModules;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
+using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations;
+using DIGOS.Ambassador.Plugins.Transformations.TypeReaders;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -64,6 +68,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
             await commands.AddModuleAsync<TransformationCommands>(serviceProvider);
+
+            commands.AddTypeReader<Colour>(new ColourTypeReader());
+
+            commands.AddEnumReader<Bodypart>();
+            commands.AddEnumReader<Pattern>();
+
+            var transformationService = serviceProvider.GetRequiredService<TransformationService>();
+            transformationService.WithDescriptionBuilder
+            (
+                ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(serviceProvider)
+            );
 
             return true;
         }

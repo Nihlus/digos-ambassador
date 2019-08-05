@@ -26,7 +26,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Attributes;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;

@@ -21,10 +21,9 @@
 //
 
 using DIGOS.Ambassador.Discord.TypeReaders;
-using DIGOS.Ambassador.TypeReaders;
 using Discord.Commands;
 
-namespace DIGOS.Ambassador.Extensions
+namespace DIGOS.Ambassador.Discord.Extensions
 {
     /// <summary>
     /// Extensions to the <see cref="CommandService"/> class.

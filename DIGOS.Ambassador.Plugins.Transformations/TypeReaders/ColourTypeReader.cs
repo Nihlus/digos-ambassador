@@ -26,10 +26,10 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using Discord.Commands;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.TypeReaders
+namespace DIGOS.Ambassador.Plugins.Transformations.TypeReaders
 {
     /// <summary>
-    /// Reads owned characters as command arguments.
+    /// Reads colours as command arguments.
     /// </summary>
     public sealed class ColourTypeReader : TypeReader
     {

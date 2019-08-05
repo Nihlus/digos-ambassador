@@ -29,7 +29,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Attributes;

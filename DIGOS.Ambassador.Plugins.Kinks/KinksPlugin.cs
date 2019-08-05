@@ -23,6 +23,7 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Abstractions.Extensions;
+using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Kinks;
@@ -62,6 +63,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
             await commands.AddModuleAsync<KinkCommands>(serviceProvider);
+
+            commands.AddEnumReader<KinkPreference>();
 
             return true;
         }

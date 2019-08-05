@@ -22,7 +22,6 @@
 
 using System;
 using System.IO;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;

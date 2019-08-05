@@ -21,7 +21,6 @@
 //
 
 using System.Linq;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using static DIGOS.Ambassador.Plugins.Transformations.Transformations.Bodypart;

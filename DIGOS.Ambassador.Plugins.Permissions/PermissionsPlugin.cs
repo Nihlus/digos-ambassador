@@ -23,11 +23,13 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Abstractions.Extensions;
+using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.CommandModules;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
+using DIGOS.Ambassador.Plugins.Permissions.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
@@ -62,6 +64,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
             await commands.AddModuleAsync<PermissionCommands>(serviceProvider);
+
+            commands.AddEnumReader<Permission>();
+            commands.AddEnumReader<PermissionTarget>();
 
             return true;
         }
