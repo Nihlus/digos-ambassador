@@ -26,6 +26,7 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
+using DIGOS.Ambassador.Plugins.Core.TypeReaders;
 using DIGOS.Ambassador.Services;
 
 using Discord;

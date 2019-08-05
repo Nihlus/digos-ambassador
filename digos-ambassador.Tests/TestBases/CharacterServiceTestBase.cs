@@ -24,11 +24,15 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Services;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -42,7 +46,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <summary>
         /// Gets the database.
         /// </summary>
-        protected AmbyDatabaseContext Database { get; private set; }
+        protected CharactersDatabaseContext Database { get; private set; }
 
         /// <summary>
         /// Gets the character service object.
@@ -64,7 +68,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         {
             serviceCollection
                 .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
-                .AddDbContext<AmbyDatabaseContext>(ConfigureOptions<AmbyDatabaseContext>);
+                .AddDbContext<CharactersDatabaseContext>(ConfigureOptions<CharactersDatabaseContext>);
 
             serviceCollection
                 .AddScoped<CommandService>()
@@ -80,12 +84,12 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.EnsureCreated();
+            coreDatabase.Database.Migrate();
 
-            var ambyDatabase = serviceProvider.GetRequiredService<AmbyDatabaseContext>();
-            ambyDatabase.Database.EnsureCreated();
+            var charactersDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
+            charactersDatabase.Database.Migrate();
 
-            this.Database = ambyDatabase;
+            this.Database = charactersDatabase;
 
             this.Characters = serviceProvider.GetRequiredService<CharacterService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();
@@ -93,12 +97,9 @@ namespace DIGOS.Ambassador.Tests.TestBases
         }
 
         /// <inheritdoc />
-        public virtual async Task InitializeAsync()
+        public virtual Task InitializeAsync()
         {
-            var transformations = this.Services.GetRequiredService<TransformationService>();
-            var db = this.Services.GetRequiredService<AmbyDatabaseContext>();
-
-            await transformations.UpdateTransformationDatabaseAsync(db);
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />

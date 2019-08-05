@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -62,7 +63,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             var database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            database.Database.EnsureCreated();
+            database.Database.Migrate();
 
             this.Servers = serviceProvider.GetRequiredService<ServerService>();
         }

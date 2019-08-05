@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Data;
 using DIGOS.Ambassador.Database.Abstractions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +34,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
     /// </summary>
     public abstract class DatabaseProvidingTestBase : ServiceProvidingTestBase, IDisposable
     {
-        private SqliteConnection _connection;
+        private readonly SqliteConnection _connection = new SqliteConnection("DataSource=:memory:");
 
         /// <summary>
         /// Configures the given options builder to use the underlying test database.
@@ -42,8 +43,10 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <typeparam name="TContext">The context type to configure.</typeparam>
         protected void ConfigureOptions<TContext>(DbContextOptionsBuilder optionsBuilder) where TContext : DbContext
         {
-            _connection = new SqliteConnection("DataSource=:memory:");
-            _connection.Open();
+            if (_connection.State != ConnectionState.Open)
+            {
+                _connection.Open();
+            }
 
             optionsBuilder
                 .UseLazyLoadingProxies()

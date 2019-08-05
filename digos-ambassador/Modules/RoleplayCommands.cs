@@ -33,6 +33,7 @@ using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Modules.Base;
+using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Permissions.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Permissions.Preconditions;

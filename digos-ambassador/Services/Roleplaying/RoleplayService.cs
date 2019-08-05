@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;

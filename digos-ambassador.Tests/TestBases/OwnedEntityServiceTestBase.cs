@@ -22,9 +22,12 @@
 
 using System;
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Tests.TestBases
@@ -37,7 +40,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <summary>
         /// Gets the database.
         /// </summary>
-        protected AmbyDatabaseContext Database { get; private set; }
+        protected CoreDatabaseContext Database { get; private set; }
 
         /// <summary>
         /// Gets the owned entity service object.
@@ -53,8 +56,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
-                .AddDbContext<AmbyDatabaseContext>(ConfigureOptions<AmbyDatabaseContext>);
+                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
 
             serviceCollection
                 .AddScoped<OwnedEntityService>()
@@ -64,13 +66,8 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <inheritdoc />
         protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.EnsureCreated();
-
-            var ambyDatabase = serviceProvider.GetRequiredService<AmbyDatabaseContext>();
-            ambyDatabase.Database.EnsureCreated();
-
-            this.Database = ambyDatabase;
+            this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+            this.Database.Database.Migrate();
 
             this.Entities = serviceProvider.GetRequiredService<OwnedEntityService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();

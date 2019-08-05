@@ -22,6 +22,8 @@
 
 using System;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
+using DIGOS.Ambassador.Plugins.Characters.Services;
+using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Services;
 
 namespace DIGOS.Ambassador.Transformations

@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\Portraits" />
+    <Folder Include="Database\Interfaces" />
     <Folder Include="Migrations" />
   </ItemGroup>
   <ItemGroup>
@@ -54,6 +55,8 @@
     <ProjectReference Include="..\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Discord.Interactivity\DIGOS.Ambassador.Discord.Interactivity.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
+    <ProjectReference Include="..\DIGOS.Ambassador.Discord\DIGOS.Ambassador.Discord.csproj" />
+    <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Characters\DIGOS.Ambassador.Plugins.Characters.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Dossiers\DIGOS.Ambassador.Plugins.Dossiers.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Kinks\DIGOS.Ambassador.Plugins.Kinks.csproj" />

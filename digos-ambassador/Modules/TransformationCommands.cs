@@ -25,13 +25,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Modules.Base;
+using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Transformations;
@@ -184,7 +185,7 @@ namespace DIGOS.Ambassador.Modules
 
             var targetUser = getTargetUserResult.Entity;
 
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, targetUser);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, targetUser);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -298,7 +299,7 @@ namespace DIGOS.Ambassador.Modules
 
             var targetUser = getTargetUserResult.Entity;
 
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, targetUser);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, targetUser);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -426,7 +427,7 @@ namespace DIGOS.Ambassador.Modules
 
             var targetUser = getTargetUserResult.Entity;
 
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, targetUser);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, targetUser);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -543,7 +544,7 @@ namespace DIGOS.Ambassador.Modules
 
             var targetUser = getTargetUserResult.Entity;
 
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, targetUser);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, targetUser);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -661,7 +662,7 @@ namespace DIGOS.Ambassador.Modules
 
             var invoker = getInvokerResult.Entity;
 
-            var result = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
+            var result = await _characters.GetCurrentCharacterAsync(this.Context, invoker);
             if (!result.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -728,7 +729,7 @@ namespace DIGOS.Ambassador.Modules
 
             var invoker = getInvokerResult.Entity;
 
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, invoker);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -764,7 +765,7 @@ namespace DIGOS.Ambassador.Modules
 
             var invoker = getInvokerResult.Entity;
 
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Database, this.Context, invoker);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, invoker);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);

@@ -26,14 +26,17 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Abstractions.Services;
-using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
+using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
+using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Characters.Services;
+using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -203,7 +206,6 @@ namespace DIGOS.Ambassador
             }
 
             _commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
-            _commands.AddTypeReader<Character>(new CharacterTypeReader());
             _commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
             _commands.AddTypeReader<Colour>(new ColourTypeReader());
 

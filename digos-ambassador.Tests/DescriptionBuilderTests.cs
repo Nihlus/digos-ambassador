@@ -21,9 +21,11 @@
 //
 
 using System.Collections.Generic;
-using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
+using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Characters.Services;
+using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Services;
 using DIGOS.Ambassador.Transformations;
 using Microsoft.Extensions.DependencyInjection;
@@ -74,7 +76,7 @@ namespace DIGOS.Ambassador.Tests
                 CurrentAppearance = appearance
             };
 
-            var characterService = new CharacterService(null, null, null, null, null, null, null)
+            var characterService = new CharacterService(null, null, null, null, null, null)
                 .WithPronounProvider(new FemininePronounProvider());
 
             var serviceProvider = new ServiceCollection()

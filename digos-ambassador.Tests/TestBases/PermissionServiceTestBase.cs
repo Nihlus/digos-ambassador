@@ -23,6 +23,7 @@
 using System;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Tests.TestBases
@@ -53,7 +54,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.Database = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
-            this.Database.Database.EnsureCreated();
+            this.Database.Database.Migrate();
 
             this.Permissions = serviceProvider.GetRequiredService<PermissionService>();
         }

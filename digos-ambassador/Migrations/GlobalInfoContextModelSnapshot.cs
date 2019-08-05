@@ -22,84 +22,6 @@ namespace DIGOS.Ambassador.Migrations
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.Character", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("AvatarUrl");
-
-                    b.Property<string>("Description");
-
-                    b.Property<bool>("IsCurrent");
-
-                    b.Property<bool>("IsDefault");
-
-                    b.Property<bool>("IsNSFW");
-
-                    b.Property<string>("Name");
-
-                    b.Property<string>("Nickname");
-
-                    b.Property<long>("OwnerID");
-
-                    b.Property<string>("PronounProviderFamily");
-
-                    b.Property<long?>("RoleID");
-
-                    b.Property<long>("ServerID");
-
-                    b.Property<string>("Summary");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("OwnerID");
-
-                    b.HasIndex("RoleID");
-
-                    b.ToTable("Characters","CharacterModule");
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.CharacterRole", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Access");
-
-                    b.Property<long>("DiscordID");
-
-                    b.Property<long>("ServerID");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ServerID");
-
-                    b.ToTable("CharacterRoles","CharacterModule");
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.Data.Image", b =>
-                {
-                    b.Property<long>("ID")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("Caption");
-
-                    b.Property<long>("CharacterID");
-
-                    b.Property<bool>("IsNSFW");
-
-                    b.Property<string>("Name");
-
-                    b.Property<string>("Url");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("CharacterID");
-
-                    b.ToTable("Images","CharacterModule");
-                });
-
             modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.Roleplay", b =>
                 {
                     b.Property<long>("ID")
@@ -388,6 +310,84 @@ namespace DIGOS.Ambassador.Migrations
                     b.ToTable("UserProtectionEntries","TransformationModule");
                 });
 
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.Character", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("AvatarUrl");
+
+                    b.Property<string>("Description");
+
+                    b.Property<bool>("IsCurrent");
+
+                    b.Property<bool>("IsDefault");
+
+                    b.Property<bool>("IsNSFW");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Nickname");
+
+                    b.Property<long>("OwnerID");
+
+                    b.Property<string>("PronounProviderFamily");
+
+                    b.Property<long?>("RoleID");
+
+                    b.Property<long>("ServerID");
+
+                    b.Property<string>("Summary");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("OwnerID");
+
+                    b.HasIndex("RoleID");
+
+                    b.ToTable("Characters","CharacterModule");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.CharacterRole", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Access");
+
+                    b.Property<long>("DiscordID");
+
+                    b.Property<long>("ServerID");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ServerID");
+
+                    b.ToTable("CharacterRoles","CharacterModule");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.Data.Image", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Caption");
+
+                    b.Property<long?>("CharacterID");
+
+                    b.Property<bool>("IsNSFW");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Url");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CharacterID");
+
+                    b.ToTable("Images","CharacterModule");
+                });
+
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", b =>
                 {
                     b.Property<long>("ID")
@@ -434,34 +434,6 @@ namespace DIGOS.Ambassador.Migrations
                     b.HasIndex("ServerID");
 
                     b.ToTable("Users","Core");
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.Character", b =>
-                {
-                    b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerID")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("DIGOS.Ambassador.Database.Characters.CharacterRole", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleID");
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.CharacterRole", b =>
-                {
-                    b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
-                        .WithMany()
-                        .HasForeignKey("ServerID")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Characters.Data.Image", b =>
-                {
-                    b.HasOne("DIGOS.Ambassador.Database.Characters.Character")
-                        .WithMany("Images")
-                        .HasForeignKey("CharacterID")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.Roleplay", b =>
@@ -517,7 +489,7 @@ namespace DIGOS.Ambassador.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Database.Transformations.Appearances.AppearanceConfiguration", b =>
                 {
-                    b.HasOne("DIGOS.Ambassador.Database.Characters.Character", "Character")
+                    b.HasOne("DIGOS.Ambassador.Plugins.Characters.Model.Character", "Character")
                         .WithMany()
                         .HasForeignKey("CharacterID")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -589,6 +561,33 @@ namespace DIGOS.Ambassador.Migrations
                         .WithMany()
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.Character", b =>
+                {
+                    b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("DIGOS.Ambassador.Plugins.Characters.Model.CharacterRole", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleID");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.CharacterRole", b =>
+                {
+                    b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
+                        .WithMany()
+                        .HasForeignKey("ServerID")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Characters.Model.Data.Image", b =>
+                {
+                    b.HasOne("DIGOS.Ambassador.Plugins.Characters.Model.Character")
+                        .WithMany("Images")
+                        .HasForeignKey("CharacterID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Core.Model.Users.User", b =>

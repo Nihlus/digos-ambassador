@@ -26,12 +26,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Interfaces;
+using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Modules;
+using DIGOS.Ambassador.Plugins.Characters.CommandModules;
+using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Characters.Services;
+using DIGOS.Ambassador.Plugins.Characters.TypeReaders;
 using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -42,6 +46,7 @@ using DIGOS.Ambassador.TypeReaders;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MockQueryable.Moq;
 using Moq;
@@ -229,6 +234,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 base.RegisterServices(serviceCollection);
 
                 serviceCollection
+                    .AddDbContext<CharactersDatabaseContext>(ConfigureOptions<CharactersDatabaseContext>);
+
+                serviceCollection
+                    .AddScoped<ServerService>()
+                    .AddScoped<CharacterService>()
+                    .AddScoped<ContentService>()
                     .AddScoped<CommandService>()
                     .AddScoped<DiscordService>()
                     .AddScoped<UserFeedbackService>()
@@ -239,6 +250,9 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public async Task InitializeAsync()
             {
+                var charactersDatabase = this.Services.GetRequiredService<CharactersDatabaseContext>();
+                charactersDatabase.Database.Migrate();
+
                 var commands = this.Services.GetRequiredService<CommandService>();
 
                 commands.AddTypeReader<Character>(new CharacterTypeReader());

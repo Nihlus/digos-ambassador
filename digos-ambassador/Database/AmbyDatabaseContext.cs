@@ -22,16 +22,11 @@
 
 using System.IO;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Database.Characters;
 using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Database.Transformations.Appearances;
-using DIGOS.Ambassador.Plugins.Core.Model.Servers;
-using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using DIGOS.Ambassador.Plugins.Permissions.Model.Permissions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Image = DIGOS.Ambassador.Database.Characters.Data.Image;
 
 namespace DIGOS.Ambassador.Database
 {
@@ -41,31 +36,9 @@ namespace DIGOS.Ambassador.Database
     public class AmbyDatabaseContext : DbContext
     {
         /// <summary>
-        /// Gets or sets the table where characters are stored.
-        /// </summary>
-        public DbSet<Character> Characters
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
         /// Gets or sets the table where roleplays are stored.
         /// </summary>
         public DbSet<Roleplay> Roleplays
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where images are stored.
-        /// </summary>
-        public DbSet<Image> Images
         {
             get;
 
@@ -110,17 +83,6 @@ namespace DIGOS.Ambassador.Database
         /// Gets or sets the table where server-specific transformation protections are stored.
         /// </summary>
         public DbSet<ServerUserProtection> ServerUserProtections
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where character roles are stored.
-        /// </summary>
-        public DbSet<CharacterRole> CharacterRoles
         {
             get;
 
@@ -186,9 +148,6 @@ namespace DIGOS.Ambassador.Database
         /// <inheritdoc />
         protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Character>().HasOne(ch => ch.Owner).WithMany();
-            modelBuilder.Entity<Character>().HasMany(ch => ch.Images).WithOne().IsRequired();
-
             modelBuilder.Entity<Roleplay>().HasOne(u => u.Owner).WithMany().IsRequired();
             modelBuilder.Entity<Roleplay>().HasMany(u => u.ParticipatingUsers).WithOne(p => p.Roleplay);
             modelBuilder.Entity<Roleplay>().HasMany(r => r.Messages).WithOne().IsRequired();

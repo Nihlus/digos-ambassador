@@ -24,10 +24,12 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -44,6 +46,11 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected AmbyDatabaseContext Database { get; private set; }
 
         /// <summary>
+        /// Gets the character database.
+        /// </summary>
+        protected CharactersDatabaseContext CharacterDatabase { get; private set; }
+
+        /// <summary>
         /// Gets the transformation service object.
         /// </summary>
         protected TransformationService Transformations { get; private set; }
@@ -58,7 +65,8 @@ namespace DIGOS.Ambassador.Tests.TestBases
         {
             serviceCollection
                 .AddDbContext<AmbyDatabaseContext>(ConfigureOptions<AmbyDatabaseContext>)
-                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
+                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
+                .AddDbContext<CharactersDatabaseContext>(ConfigureOptions<CharactersDatabaseContext>);
 
             serviceCollection
                 .AddScoped<TransformationService>()
@@ -71,11 +79,14 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.EnsureCreated();
-
             this.Database = serviceProvider.GetRequiredService<AmbyDatabaseContext>();
             this.Database.Database.EnsureCreated();
+
+            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+            coreDatabase.Database.Migrate();
+
+            this.CharacterDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
+            this.CharacterDatabase.Database.Migrate();
 
             this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();
