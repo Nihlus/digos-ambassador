@@ -373,7 +373,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                     // 3: one part was shifted and one was added
                     // 4: both parts were added
                     // 5: no changes were made
-
                     if (leftShift.Action == ShiftBodypartAction.Nothing && rightShift.Action == ShiftBodypartAction.Nothing)
                     {
                         // No change, keep moving

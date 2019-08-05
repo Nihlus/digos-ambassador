@@ -38,6 +38,7 @@ using Discord;
 using Discord.Commands;
 
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
@@ -156,7 +157,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             protected override async Task InitializeTestAsync()
             {
-                _templateSpecies = this.Database.Species.First(s => s.Name == "template");
+                _templateSpecies = await this.Database.Species.FirstAsync(s => s.Name == "template");
             }
 
             [Fact]
@@ -190,7 +191,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             protected override async Task InitializeTestAsync()
             {
-                _templateSpecies = this.Database.Species.First(s => s.Name == "template");
+                _templateSpecies = await this.Database.Species.FirstAsync(s => s.Name == "template");
             }
 
             [Fact]
