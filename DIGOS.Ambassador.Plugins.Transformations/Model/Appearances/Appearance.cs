@@ -95,12 +95,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Creates a default appearance using the template species (a featureless, agendered species).
         /// </summary>
-        /// <param name="db">The database.</param>
         /// <param name="transformations">The transformation service.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public static async Task<CreateEntityResult<Appearance>> CreateDefaultAsync
         (
-            [NotNull] TransformationsDatabaseContext db,
             [NotNull] TransformationService transformations
         )
         {

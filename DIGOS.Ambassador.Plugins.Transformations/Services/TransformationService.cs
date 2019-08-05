@@ -109,7 +109,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 return RetrieveEntityResult<AppearanceConfiguration>.FromSuccess(appearanceConfiguration);
             }
 
-            var createDefaultAppearanceResult = await Appearance.CreateDefaultAsync(_database, this);
+            var createDefaultAppearanceResult = await Appearance.CreateDefaultAsync(this);
             if (!createDefaultAppearanceResult.IsSuccess)
             {
                 return RetrieveEntityResult<AppearanceConfiguration>.FromError(createDefaultAppearanceResult);
@@ -907,6 +907,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                     Type = ListingType.Whitelist
                 };
 
+                // Ensure we don't try to add the user we got from another context
+                _database.Update(protectionEntry);
                 protection.UserListing.Add(protectionEntry);
             }
             else
@@ -967,6 +969,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                     Type = ListingType.Blacklist
                 };
 
+                // Ensure we don't try to add the user we got from another context
+                _database.Update(protectionEntry);
                 protection.UserListing.Add(protectionEntry);
             }
             else
@@ -1007,7 +1011,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             protection = GlobalUserProtection.CreateDefault(user);
 
-            await _database.GlobalUserProtections.AddAsync(protection);
+            _database.GlobalUserProtections.Update(protection);
 
             await _database.SaveChangesAsync();
 
@@ -1048,7 +1052,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             protection = ServerUserProtection.CreateDefault(globalProtection, server);
 
-            await _database.ServerUserProtections.AddAsync(protection);
+            _database.ServerUserProtections.Update(protection);
 
             await _database.SaveChangesAsync();
 

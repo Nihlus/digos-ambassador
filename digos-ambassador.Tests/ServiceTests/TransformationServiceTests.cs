@@ -316,7 +316,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     User = user
                 };
 
-                this.Database.GlobalUserProtections.Add(globalSetting);
+                this.Database.GlobalUserProtections.Update(globalSetting);
                 await this.Database.SaveChangesAsync();
 
                 var localSetting = await this.Transformations.GetOrCreateServerUserProtectionAsync
@@ -530,7 +530,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     Owner = _owner
                 };
 
-                this.CharacterDatabase.Characters.Add(_character);
+                this.CharacterDatabase.Characters.Update(_character);
                 this.CharacterDatabase.SaveChanges();
 
                 // Set up the default appearance
@@ -581,7 +581,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     Owner = _owner
                 };
 
-                this.CharacterDatabase.Characters.Add(_character);
+                this.CharacterDatabase.Characters.Update(_character);
                 this.CharacterDatabase.SaveChanges();
 
                 // Set up the default appearance
@@ -807,13 +807,16 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                _character = new Character
+                var character = new Character
                 {
                     Name = "Test",
                     Owner = owner
                 };
 
-                this.CharacterDatabase.Characters.Add(_character);
+                this.CharacterDatabase.Characters.Update(character);
+                await this.CharacterDatabase.SaveChangesAsync();
+
+                _character = this.CharacterDatabase.Characters.First();
 
                 // Set up the default appearance
                 var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
@@ -822,8 +825,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
-
-                await this.CharacterDatabase.SaveChangesAsync();
             }
 
             [Fact]
@@ -964,14 +965,17 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                _character = new Character
+                var character = new Character
                 {
                     Name = "Test",
                     Owner = owner,
                     PronounProviderFamily = "Feminine"
                 };
 
-                this.CharacterDatabase.Characters.Add(_character);
+                this.CharacterDatabase.Characters.Update(character);
+                await this.CharacterDatabase.SaveChangesAsync();
+
+                _character = this.CharacterDatabase.Characters.First();
 
                 // Set up the default appearance
                 var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
@@ -980,8 +984,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 );
 
                 _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
-
-                await this.CharacterDatabase.SaveChangesAsync();
             }
 
             [Fact]
@@ -1261,14 +1263,17 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                _character = new Character
+                var character = new Character
                 {
                     Name = "Test",
                     Owner = owner,
                     PronounProviderFamily = "They"
                 };
 
-                this.CharacterDatabase.Characters.Add(_character);
+                this.CharacterDatabase.Characters.Update(character);
+                await this.CharacterDatabase.SaveChangesAsync();
+
+                _character = this.CharacterDatabase.Characters.First();
 
                 // Set up the default appearance
                 var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
@@ -1278,8 +1283,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
                 _originalColour = _appearanceConfiguration.GetAppearanceComponent(Bodypart.Face, Chirality.Center).BaseColour;
-
-                await this.CharacterDatabase.SaveChangesAsync();
             }
 
             [Fact]
@@ -1445,14 +1448,17 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                _character = new Character
+                var character = new Character
                 {
                     Name = "Test",
                     Owner = owner,
                     PronounProviderFamily = "They"
                 };
 
-                this.CharacterDatabase.Characters.Add(_character);
+                this.CharacterDatabase.Characters.Update(character);
+                await this.CharacterDatabase.SaveChangesAsync();
+
+                _character = this.CharacterDatabase.Characters.First();
 
                 // Set up the default appearance
                 var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
@@ -1663,7 +1669,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     PronounProviderFamily = "They"
                 };
 
-                this.CharacterDatabase.Characters.Add(character);
+                this.CharacterDatabase.Characters.Update(character);
                 await this.CharacterDatabase.SaveChangesAsync();
 
                 _character = this.CharacterDatabase.Characters.First();
