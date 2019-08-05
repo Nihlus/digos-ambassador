@@ -35,7 +35,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
     <PackageReference Include="morelinq" Version="3.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="NLua" Version="1.4.18" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.2" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
     <PackageReference Include="WebSocketSharp.CustomHeaders.Standard" Version="1.0.2" />
@@ -46,8 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\Portraits" />
-    <Folder Include="Database\Interfaces" />
     <Folder Include="Migrations" />
+    <Folder Include="Transformations" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
@@ -61,6 +60,7 @@
     <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Dossiers\DIGOS.Ambassador.Plugins.Dossiers.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Kinks\DIGOS.Ambassador.Plugins.Kinks.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Permissions\DIGOS.Ambassador.Plugins.Permissions.csproj" />
+    <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Transformations\DIGOS.Ambassador.Plugins.Transformations.csproj" />
     <ProjectReference Include="..\DIGOS.Ambassador.Plugins\DIGOS.Ambassador.Plugins.csproj" />
   </ItemGroup>
   <Target Name="DeleteNetHttpMono" AfterTargets="AfterBuild">

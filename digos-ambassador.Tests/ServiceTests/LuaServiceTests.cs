@@ -25,6 +25,8 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Plugins.Transformations.Services;
+using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 using DIGOS.Ambassador.Services;
 using Moq;
 using Xunit;

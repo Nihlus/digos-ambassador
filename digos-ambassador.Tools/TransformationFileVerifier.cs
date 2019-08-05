@@ -23,8 +23,8 @@
 using System.IO;
 using System.Linq;
 using DIGOS.Ambassador.Core.Results;
-using DIGOS.Ambassador.Database.Transformations;
-using DIGOS.Ambassador.Transformations;
+using DIGOS.Ambassador.Plugins.Transformations.Model;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;

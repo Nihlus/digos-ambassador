@@ -21,7 +21,7 @@
 //
 
 using System.IO;
-using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Tests.ContentTests.Data;
 using Xunit;
 

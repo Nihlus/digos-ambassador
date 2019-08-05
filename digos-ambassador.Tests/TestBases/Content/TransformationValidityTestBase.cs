@@ -21,9 +21,9 @@
 //
 
 using System.IO;
-using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Plugins.Transformations.Model;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tools;
-using DIGOS.Ambassador.Transformations;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;

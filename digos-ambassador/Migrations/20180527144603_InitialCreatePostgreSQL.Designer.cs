@@ -4,7 +4,6 @@
 // ReSharper disable PartialTypeWithSinglePart
 // ReSharper disable RedundantUsingDirective
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Transformations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;

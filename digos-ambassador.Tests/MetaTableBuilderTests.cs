@@ -24,6 +24,8 @@
 #pragma warning disable CS1591
 
 using System.Linq;
+using DIGOS.Ambassador.Plugins.Transformations.Services;
+using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 using DIGOS.Ambassador.Services;
 using Xunit;
 

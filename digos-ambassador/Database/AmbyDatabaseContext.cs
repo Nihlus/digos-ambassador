@@ -23,8 +23,8 @@
 using System.IO;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.Transformations;
-using DIGOS.Ambassador.Database.Transformations.Appearances;
+using DIGOS.Ambassador.Plugins.Transformations.Model;
+using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,61 +39,6 @@ namespace DIGOS.Ambassador.Database
         /// Gets or sets the table where roleplays are stored.
         /// </summary>
         public DbSet<Roleplay> Roleplays
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where transformation species are stored.
-        /// </summary>
-        public DbSet<Species> Species
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where transformations are stored.
-        /// </summary>
-        public DbSet<Transformation> Transformations
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where global transformation protections are stored.
-        /// </summary>
-        public DbSet<GlobalUserProtection> GlobalUserProtections
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where server-specific transformation protections are stored.
-        /// </summary>
-        public DbSet<ServerUserProtection> ServerUserProtections
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where appearance configurations are stored.
-        /// </summary>
-        public DbSet<AppearanceConfiguration> AppearanceConfigurations
         {
             get;
 

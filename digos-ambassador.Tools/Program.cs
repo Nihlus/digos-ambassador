@@ -24,7 +24,7 @@ using System;
 using System.IO;
 using CommandLine;
 using DIGOS.Ambassador.Core.Results;
-using DIGOS.Ambassador.Database.Transformations;
+using DIGOS.Ambassador.Plugins.Transformations.Model;
 using YamlDotNet.Core;
 using Parser = CommandLine.Parser;
 

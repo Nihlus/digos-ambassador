@@ -5,8 +5,6 @@
 // ReSharper disable RedundantUsingDirective
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.Transformations;
-using DIGOS.Ambassador.Transformations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;

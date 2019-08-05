@@ -22,11 +22,12 @@
 
 using System;
 using System.IO;
-using DIGOS.Ambassador.Database.Transformations;
 using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Plugins.Transformations.Extensions;
+using DIGOS.Ambassador.Plugins.Transformations.Model;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tests.ContentTests.Data;
 using DIGOS.Ambassador.Tests.TestBases.Content;
-using DIGOS.Ambassador.Transformations;
 using Xunit;
 
 #pragma warning disable SA1600

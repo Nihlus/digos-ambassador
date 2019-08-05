@@ -28,6 +28,8 @@ using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using DIGOS.Ambassador.Plugins.Transformations.Model;
+using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,7 +45,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <summary>
         /// Gets the database.
         /// </summary>
-        protected AmbyDatabaseContext Database { get; private set; }
+        protected TransformationsDatabaseContext Database { get; private set; }
 
         /// <summary>
         /// Gets the character database.
@@ -64,8 +66,8 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddDbContext<AmbyDatabaseContext>(ConfigureOptions<AmbyDatabaseContext>)
                 .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
+                .AddDbContext<TransformationsDatabaseContext>(ConfigureOptions<TransformationsDatabaseContext>)
                 .AddDbContext<CharactersDatabaseContext>(ConfigureOptions<CharactersDatabaseContext>);
 
             serviceCollection
@@ -79,8 +81,8 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            this.Database = serviceProvider.GetRequiredService<AmbyDatabaseContext>();
-            this.Database.Database.EnsureCreated();
+            this.Database = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
+            this.Database.Database.Migrate();
 
             var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
             coreDatabase.Database.Migrate();
@@ -95,7 +97,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <inheritdoc />
         public async Task InitializeAsync()
         {
-            await this.Transformations.UpdateTransformationDatabaseAsync(this.Database);
+            await this.Transformations.UpdateTransformationDatabaseAsync();
             await InitializeTestAsync();
         }
 

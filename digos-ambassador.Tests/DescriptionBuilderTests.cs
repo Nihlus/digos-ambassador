@@ -21,13 +21,13 @@
 //
 
 using System.Collections.Generic;
-using DIGOS.Ambassador.Database.Transformations;
-using DIGOS.Ambassador.Database.Transformations.Appearances;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+using DIGOS.Ambassador.Plugins.Transformations.Model;
+using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Transformations;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
