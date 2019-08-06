@@ -75,6 +75,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
     {
         private readonly CharactersDatabaseContext _database;
 
+        private readonly PronounService _pronouns;
         private readonly ServerService _servers;
         private readonly UserService _users;
         private readonly DiscordService _discord;
@@ -96,6 +97,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <param name="random">A cached, application-level entropy source.</param>
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
+        /// <param name="pronouns">The pronoun service.</param>
         public CharacterCommands
         (
             CharactersDatabaseContext database,
@@ -106,7 +108,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             InteractivityService interactivity,
             Random random,
             UserService users,
-            ServerService servers
+            ServerService servers,
+            PronounService pronouns
         )
         {
             _database = database;
@@ -118,6 +121,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             _random = random;
             _users = users;
             _servers = servers;
+            _pronouns = pronouns;
         }
 
         /// <summary>
@@ -146,7 +150,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 return ef;
             }
 
-            var pronounProviders = _characters.GetAvailablePronounProviders().ToList();
+            var pronounProviders = _pronouns.GetAvailablePronounProviders().ToList();
             if (!pronounProviders.Any())
             {
                 await _feedback.SendErrorAsync(this.Context, "There doesn't seem to be any pronouns available.");

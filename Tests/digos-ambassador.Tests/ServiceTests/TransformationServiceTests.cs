@@ -944,8 +944,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 _context = mockedContext.Object;
 
-                var characterService = this.Services.GetRequiredService<CharacterService>();
-                characterService.WithPronounProvider(new FemininePronounProvider());
+                var pronounService = this.Services.GetRequiredService<PronounService>();
+                pronounService.WithPronounProvider(new FemininePronounProvider());
 
                 this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(this.Services));
             }
@@ -1247,7 +1247,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             protected override async Task InitializeTestAsync()
             {
-                this.Services.GetRequiredService<CharacterService>().WithPronounProvider(new TheyPronounProvider());
+                this.Services.GetRequiredService<PronounService>().WithPronounProvider(new TheyPronounProvider());
                 this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(this.Services));
 
                 // Ensure owner is opted into transformations
@@ -1420,11 +1420,12 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     .AddSingleton
                     (
                         s =>
-                            ActivatorUtilities.CreateInstance<CharacterService>(s).WithPronounProvider
+                            ActivatorUtilities.CreateInstance<PronounService>(s).WithPronounProvider
                             (
                                 new TheyPronounProvider()
                             )
                     )
+                    .AddSingleton<CharacterService>()
                     .BuildServiceProvider();
 
                 this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
@@ -1646,7 +1647,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             protected override async Task InitializeTestAsync()
             {
-                this.Services.GetRequiredService<CharacterService>().WithPronounProvider(new TheyPronounProvider());
+                this.Services.GetRequiredService<PronounService>().WithPronounProvider(new TheyPronounProvider());
                 this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(this.Services));
 
                 // Ensure owner is opted into transformations

@@ -48,66 +48,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 {
     public class CharacterServiceTests
     {
-        public class WithPronounProvider : CharacterServiceTestBase
-        {
-            [Fact]
-            public void AddsCorrectProvider()
-            {
-                var provider = new TheyPronounProvider();
-                this.Characters.WithPronounProvider(provider);
-
-                Assert.Collection(this.Characters.GetAvailablePronounProviders(), p => Assert.Same(provider, p));
-            }
-        }
-
-        public class GetPronounProvider : CharacterServiceTestBase
-        {
-            private readonly Character _character;
-
-            public GetPronounProvider()
-            {
-                _character = new Character
-                {
-                    PronounProviderFamily = new TheyPronounProvider().Family
-                };
-            }
-
-            [Fact]
-            public void ThrowsIfNoMatchingProviderIsFound()
-            {
-                Assert.Throws<KeyNotFoundException>(() => this.Characters.GetPronounProvider(_character));
-            }
-
-            [Fact]
-            public void ReturnsCorrectProvider()
-            {
-                var expected = new TheyPronounProvider();
-                this.Characters.WithPronounProvider(expected);
-
-                var actual = this.Characters.GetPronounProvider(_character);
-
-                Assert.Same(expected, actual);
-            }
-        }
-
-        public class GetAvailablePronounProviders : CharacterServiceTestBase
-        {
-            [Fact]
-            public void ReturnsEmptySetWhenNoProvidersHaveBeenAdded()
-            {
-                Assert.Empty(this.Characters.GetAvailablePronounProviders());
-            }
-
-            [Fact]
-            public void ReturnsNonEmptySetWhenProvidersHaveBeenAdded()
-            {
-                var provider = new TheyPronounProvider();
-                this.Characters.WithPronounProvider(provider);
-
-                Assert.NotEmpty(this.Characters.GetAvailablePronounProviders());
-            }
-        }
-
         public class GetBestMatchingCharacterAsync : CharacterServiceTestBase
         {
             private const string CharacterName = "Test";
@@ -844,7 +784,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public CreateCharacterAsync()
             {
-                this.Characters.WithPronounProvider(new TheyPronounProvider());
+                this.Services.GetRequiredService<PronounService>().WithPronounProvider(new TheyPronounProvider());
 
                 var mockedUser = new Mock<IUser>();
                 mockedUser.Setup(u => u.Id).Returns(0);
@@ -1300,8 +1240,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                this.Characters.WithPronounProvider(new TheyPronounProvider());
-                this.Characters.WithPronounProvider(new ZeHirPronounProvider());
+                this.Services.GetRequiredService<PronounService>().WithPronounProvider(new TheyPronounProvider());
+                this.Services.GetRequiredService<PronounService>().WithPronounProvider(new ZeHirPronounProvider());
 
                 _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
                 _character = new Character

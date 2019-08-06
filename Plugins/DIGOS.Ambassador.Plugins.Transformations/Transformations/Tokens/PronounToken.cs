@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     [TokenIdentifier("pronoun", "pr")]
     public class PronounToken : ReplacableTextToken<PronounToken>
     {
-        private readonly CharacterService _characters;
+        private readonly PronounService _pronouns;
 
         /// <summary>
         /// Gets the form of the pronoun.
@@ -43,17 +43,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// <summary>
         /// Initializes a new instance of the <see cref="PronounToken"/> class.
         /// </summary>
-        /// <param name="characters">The character service.</param>
-        public PronounToken(CharacterService characters)
+        /// <param name="pronouns">The character service.</param>
+        public PronounToken(PronounService pronouns)
         {
-            _characters = characters;
+            _pronouns = pronouns;
         }
 
         /// <inheritdoc />
         public override string GetText(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
         {
             var character = appearanceConfiguration.Character;
-            var pronounProvider = _characters.GetPronounProvider(character);
+            var pronounProvider = _pronouns.GetPronounProvider(character);
 
             return pronounProvider.GetForm(this.Form);
         }

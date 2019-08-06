@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Plugins.Characters;
 using DIGOS.Ambassador.Plugins.Characters.CommandModules;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
+using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Characters.TypeReaders;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,6 +53,7 @@ namespace DIGOS.Ambassador.Plugins.Characters
         public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
         {
             serviceCollection
+                .AddSingleton<PronounService>()
                 .AddScoped<CharacterService>()
                 .AddSchemaAwareDbContextPool<CharactersDatabaseContext>();
 
@@ -67,8 +69,8 @@ namespace DIGOS.Ambassador.Plugins.Characters
 
             await commands.AddModuleAsync<CharacterCommands>(serviceProvider);
 
-            var characterService = serviceProvider.GetRequiredService<CharacterService>();
-            characterService.DiscoverPronounProviders();
+            var pronounService = serviceProvider.GetRequiredService<PronounService>();
+            pronounService.DiscoverPronounProviders();
 
             return true;
         }

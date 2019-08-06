@@ -55,8 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         private readonly OwnedEntityService _ownedEntities;
         private readonly ContentService _content;
         private readonly UserService _users;
-
-        private readonly Dictionary<string, IPronounProvider> _pronounProviders;
+        private readonly PronounService _pronouns;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterService"/> class.
@@ -67,6 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
         /// <param name="database">The core database.</param>
+        /// <param name="pronouns">The pronoun service.</param>
         public CharacterService
         (
             CommandService commands,
@@ -74,7 +74,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             ContentService content,
             UserService users,
             ServerService servers,
-            CharactersDatabaseContext database
+            CharactersDatabaseContext database,
+            PronounService pronouns
         )
         {
             _commands = commands;
@@ -83,75 +84,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             _users = users;
             _servers = servers;
             _database = database;
-
-            _pronounProviders = new Dictionary<string, IPronounProvider>(new CaseInsensitiveStringEqualityComparer());
-        }
-
-        /// <summary>
-        /// Discovers available pronoun providers in the assembly, adding them to the available providers.
-        /// </summary>
-        public void DiscoverPronounProviders()
-        {
-            _pronounProviders.Clear();
-
-            var assembly = Assembly.GetExecutingAssembly();
-            var pronounProviderTypes = assembly.DefinedTypes.Where
-            (
-                t => t.ImplementedInterfaces.Contains(typeof(IPronounProvider))
-                && t.IsClass
-                && !t.IsAbstract
-            );
-
-            foreach (var type in pronounProviderTypes)
-            {
-                var pronounProvider = Activator.CreateInstance(type) as IPronounProvider;
-                if (pronounProvider is null)
-                {
-                    continue;
-                }
-
-                WithPronounProvider(pronounProvider);
-            }
-        }
-
-        /// <summary>
-        /// Adds the given pronoun provider to the service.
-        /// </summary>
-        /// <param name="pronounProvider">The pronoun provider to add.</param>
-        /// <returns>The service with the provider.</returns>
-        [NotNull]
-        public CharacterService WithPronounProvider([NotNull] IPronounProvider pronounProvider)
-        {
-            _pronounProviders.Add(pronounProvider.Family, pronounProvider);
-            return this;
-        }
-
-        /// <summary>
-        /// Gets the pronoun provider for the specified character.
-        /// </summary>
-        /// <param name="character">The character.</param>
-        /// <returns>A pronoun provider.</returns>
-        /// <exception cref="ArgumentException">Thrown if no pronoun provider exists for the character's preference.</exception>
-        [NotNull]
-        public virtual IPronounProvider GetPronounProvider([NotNull] Character character)
-        {
-            if (_pronounProviders.ContainsKey(character.PronounProviderFamily))
-            {
-                return _pronounProviders[character.PronounProviderFamily];
-            }
-
-            throw new KeyNotFoundException("No pronoun provider for that family found.");
-        }
-
-        /// <summary>
-        /// Gets the available pronoun providers.
-        /// </summary>
-        /// <returns>An enumerator over the available pronouns.</returns>
-        [NotNull]
-        [ItemNotNull]
-        public IEnumerable<IPronounProvider> GetAvailablePronounProviders()
-        {
-            return _pronounProviders.Values;
+            _pronouns = pronouns;
         }
 
         /// <summary>
@@ -504,7 +437,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return CreateEntityResult<Character>.FromError(modifyEntityResult);
             }
 
-            var defaultPronounFamilyName = _pronounProviders.FirstOrDefault(p => p.Value is TheyPronounProvider).Value?.Family ?? new TheyPronounProvider().Family;
+            var defaultPronounFamilyName = new TheyPronounProvider().Family;
             modifyEntityResult = await SetCharacterPronounAsync(character, defaultPronounFamilyName);
             if (!modifyEntityResult.IsSuccess)
             {
@@ -787,17 +720,18 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError("You need to provide a pronoun family.");
             }
 
-            if (!_pronounProviders.ContainsKey(pronounFamily))
-            {
-                return ModifyEntityResult.FromError("Could not find a pronoun provider for that family.");
-            }
-
             if (character.PronounProviderFamily == pronounFamily)
             {
                 return ModifyEntityResult.FromError("The character is already using that pronoun set.");
             }
 
-            var pronounProvider = _pronounProviders[pronounFamily];
+            var getPronounProviderResult = _pronouns.GetPronounProvider(pronounFamily);
+            if (!getPronounProviderResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getPronounProviderResult);
+            }
+
+            var pronounProvider = getPronounProviderResult.Entity;
             character.PronounProviderFamily = pronounProvider.Family;
 
             await _database.SaveChangesAsync();

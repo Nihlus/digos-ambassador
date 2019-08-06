@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
+using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
@@ -70,6 +71,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
                 .AddDbContext<CharactersDatabaseContext>(ConfigureOptions<CharactersDatabaseContext>);
 
             serviceCollection
+                .AddSingleton<PronounService>()
                 .AddScoped<CommandService>()
                 .AddScoped<ContentService>()
                 .AddScoped<ServerService>()
