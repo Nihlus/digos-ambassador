@@ -24,7 +24,7 @@ using System.Net;
 using Discord.Net;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Extensions
+namespace DIGOS.Ambassador.Discord.Extensions
 {
     /// <summary>
     /// Extension methods for the <see cref="HttpException"/> class.

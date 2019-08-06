@@ -22,8 +22,8 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Behaviours;
+using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using Discord;

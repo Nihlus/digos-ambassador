@@ -22,7 +22,7 @@
 
 using Newtonsoft.Json;
 
-namespace DIGOS.Ambassador.FList.Kinks
+namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
 {
     /// <summary>
     /// Represents a JSON kink from the F-list API.

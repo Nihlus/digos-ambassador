@@ -29,7 +29,7 @@ using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Plugins.Kinks.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
 using DIGOS.Ambassador.Plugins.Kinks.Services;
 using Discord;

@@ -25,7 +25,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Extensions;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;

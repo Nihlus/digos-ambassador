@@ -24,7 +24,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
-namespace DIGOS.Ambassador.FList.Kinks
+namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
 {
     /// <summary>
     /// Represents a JSON kink collection from the F-list API, organized into categories.

@@ -31,7 +31,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq;
 
-namespace DIGOS.Ambassador.Extensions
+namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
 {
     /// <summary>
     /// Extensions for enumerables.

@@ -22,16 +22,15 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
-
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Extensions
+namespace DIGOS.Ambassador.Discord.Interactivity
 {
     /// <summary>
     /// Extensions for the <see cref="InteractivityService"/> class.

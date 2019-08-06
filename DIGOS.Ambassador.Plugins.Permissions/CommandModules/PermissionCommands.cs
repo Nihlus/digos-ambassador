@@ -26,7 +26,6 @@ using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Discord.TypeReaders;
-using DIGOS.Ambassador.Extensions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Model.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Permissions;
