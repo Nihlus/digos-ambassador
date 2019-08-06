@@ -67,12 +67,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
-            await commands.AddModuleAsync<TransformationCommands>(serviceProvider);
 
             commands.AddTypeReader<Colour>(new ColourTypeReader());
 
             commands.AddEnumReader<Bodypart>();
             commands.AddEnumReader<Pattern>();
+
+            await commands.AddModuleAsync<TransformationCommands>(serviceProvider);
 
             var transformationService = serviceProvider.GetRequiredService<TransformationService>();
             transformationService.WithDescriptionBuilder

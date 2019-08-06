@@ -66,10 +66,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
-            await commands.AddModuleAsync<RoleplayCommands>(serviceProvider);
 
             commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
             commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
+
+            await commands.AddModuleAsync<RoleplayCommands>(serviceProvider);
 
             var behaviours = serviceProvider.GetRequiredService<BehaviourService>();
             await behaviours.AddBehavioursAsync(Assembly.GetExecutingAssembly(), serviceProvider);

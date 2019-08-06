@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Plugins.Services
                 Assembly assembly;
                 try
                 {
-                    assembly = Assembly.LoadFile(assemblyPath);
+                    assembly = Assembly.LoadFrom(assemblyPath);
                 }
                 catch
                 {

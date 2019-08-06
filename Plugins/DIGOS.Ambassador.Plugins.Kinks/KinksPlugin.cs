@@ -62,9 +62,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
-            await commands.AddModuleAsync<KinkCommands>(serviceProvider);
 
             commands.AddEnumReader<KinkPreference>();
+
+            await commands.AddModuleAsync<KinkCommands>(serviceProvider);
 
             return true;
         }

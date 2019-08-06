@@ -63,10 +63,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
-            await commands.AddModuleAsync<PermissionCommands>(serviceProvider);
 
             commands.AddEnumReader<Permission>();
             commands.AddEnumReader<PermissionTarget>();
+
+            await commands.AddModuleAsync<PermissionCommands>(serviceProvider);
 
             return true;
         }

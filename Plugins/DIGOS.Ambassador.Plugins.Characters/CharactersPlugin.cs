@@ -62,9 +62,10 @@ namespace DIGOS.Ambassador.Plugins.Characters
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
-            await commands.AddModuleAsync<CharacterCommands>(serviceProvider);
 
             commands.AddTypeReader<Character>(new CharacterTypeReader());
+
+            await commands.AddModuleAsync<CharacterCommands>(serviceProvider);
 
             var characterService = serviceProvider.GetRequiredService<CharacterService>();
             characterService.DiscoverPronounProviders();

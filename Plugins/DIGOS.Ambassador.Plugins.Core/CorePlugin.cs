@@ -24,6 +24,8 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Abstractions.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
+using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
+using DIGOS.Ambassador.Plugins.Core;
 using DIGOS.Ambassador.Plugins.Core.CommandModules;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
@@ -31,6 +33,8 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
+
+[assembly: AmbassadorPlugin(typeof(CorePlugin))]
 
 namespace DIGOS.Ambassador.Plugins.Core
 {
