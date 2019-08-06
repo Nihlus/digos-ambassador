@@ -219,7 +219,7 @@ namespace DIGOS.Ambassador.Modules
                     }
                 }
 
-                var emojiCode = string.Join('-', hexValues);
+                var emojiCode = string.Join("-", hexValues);
                 emoteUrl = $"https://raw.githubusercontent.com/twitter/twemoji/gh-pages/2/72x72/{emojiCode}.png";
             }
 

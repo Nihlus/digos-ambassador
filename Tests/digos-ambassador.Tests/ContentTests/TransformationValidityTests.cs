@@ -116,19 +116,19 @@ namespace DIGOS.Ambassador.Tests.ContentTests
         {
             var transformation = Deserialize<Transformation>(transformationFile);
 
-            Assert.True(transformation.Description.EndsWith('.'), "Text fields must end with a dot.");
-            Assert.True(transformation.SingleDescription.EndsWith('.'));
+            Assert.True(transformation.Description.EndsWith("."), "Text fields must end with a dot.");
+            Assert.EndsWith(".", transformation.SingleDescription);
 
             if (transformation.Part.IsChiral())
             {
-                Assert.True(transformation.UniformShiftMessage?.EndsWith('.'), "Text fields must end with a dot.");
-                Assert.True(transformation.UniformGrowMessage?.EndsWith('.'), "Text fields must end with a dot.");
-                Assert.True(transformation.UniformDescription?.EndsWith('.'), "Text fields must end with a dot.");
+                Assert.True(transformation.UniformShiftMessage?.EndsWith("."), "Text fields must end with a dot.");
+                Assert.True(transformation.UniformGrowMessage?.EndsWith("."), "Text fields must end with a dot.");
+                Assert.True(transformation.UniformDescription?.EndsWith("."), "Text fields must end with a dot.");
             }
             else
             {
-                Assert.True(transformation.ShiftMessage.EndsWith('.'), "Text fields must end with a dot.");
-                Assert.True(transformation.GrowMessage.EndsWith('.'), "Text fields must end with a dot.");
+                Assert.True(transformation.ShiftMessage.EndsWith("."), "Text fields must end with a dot.");
+                Assert.True(transformation.GrowMessage.EndsWith("."), "Text fields must end with a dot.");
             }
         }
 

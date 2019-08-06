@@ -2,7 +2,7 @@
   
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.2;netstandard2.0</TargetFrameworks>
     <RootNamespace>DIGOS.Ambassador</RootNamespace>
     <AssemblyName>DIGOS.Ambassador</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -31,22 +31,14 @@
   </ItemGroup>
   
   <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
     <PackageReference Include="Humanizer" Version="2.6.2" />
-    <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" PrivateAssets="all" />
-    <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
-    <PackageReference Include="morelinq" Version="3.2.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.2" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
-    <PackageReference Include="WebSocketSharp.CustomHeaders.Standard" Version="1.0.2" />
-    <PackageReference Include="YamlDotNet" Version="6.1.1" />
   </ItemGroup>
-
-  <ItemGroup Condition="$(NETCoreSdkVersion) &lt; 2.1">
-    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.2" />
+    
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" PrivateAssets="all" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,10 +53,6 @@
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Transformations\DIGOS.Ambassador.Plugins.Transformations.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins\DIGOS.Ambassador.Plugins.csproj" />
   </ItemGroup>
-
-  <Target Name="DeleteNetHttpMono" AfterTargets="AfterBuild">
-    <Delete Files="$(OutputPath)\System.Net.Http.dll" Condition="'$(OS)' == 'Unix'" />
-  </Target>
 
   <PropertyGroup>
     <DocGeneratorAssembly>$(ProjectDir)..\digos-ambassador.Doc\bin\Debug\netcoreapp2.0\DIGOS.Ambassador.Doc.dll</DocGeneratorAssembly>
