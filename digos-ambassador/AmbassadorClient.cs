@@ -111,8 +111,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton<HelpService>()
                 .AddSingleton<Random>()
                 .AddSingleton(pluginService)
-                .AddSingleton<SchemaAwareDbContextService>()
-                .AddDbContext<AmbyDatabaseContext>(builder => AmbyDatabaseContext.ConfigureOptions(builder));
+                .AddSingleton<SchemaAwareDbContextService>();
 
             var successfullyRegisteredPlugins = new List<IPluginDescriptor>();
 
