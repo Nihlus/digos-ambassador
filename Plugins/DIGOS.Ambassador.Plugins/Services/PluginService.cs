@@ -23,7 +23,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 
@@ -55,6 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Services
                 SearchOption.AllDirectories
             );
 
+            var pluginAssemblies = new List<Assembly>();
             foreach (var assemblyPath in assemblies)
             {
                 Assembly assembly;
@@ -73,6 +76,25 @@ namespace DIGOS.Ambassador.Plugins.Services
                     continue;
                 }
 
+                pluginAssemblies.Add(assembly);
+            }
+
+            var sorted = pluginAssemblies.TopologicalSort
+            (
+                a => a.GetReferencedAssemblies()
+                    .Where
+                    (
+                        n => pluginAssemblies.Any(pa => pa.GetName().FullName == n.FullName)
+                    )
+                    .Select
+                    (
+                        n => pluginAssemblies.First(pa => pa.GetName().FullName == n.FullName)
+                    )
+            );
+
+            foreach (var pluginAssembly in sorted)
+            {
+                var pluginAttribute = pluginAssembly.GetCustomAttribute<AmbassadorPlugin>();
                 var descriptor = (IPluginDescriptor)Activator.CreateInstance(pluginAttribute.PluginDescriptor);
                 yield return descriptor;
             }

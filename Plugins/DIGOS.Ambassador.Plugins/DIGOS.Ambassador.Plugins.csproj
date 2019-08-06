@@ -25,6 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
       <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Abstractions\DIGOS.Ambassador.Plugins.Abstractions.csproj" />
     </ItemGroup>
 

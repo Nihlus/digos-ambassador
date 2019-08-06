@@ -23,12 +23,14 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Database.Abstractions.Extensions;
+using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Core;
 using DIGOS.Ambassador.Plugins.Core.CommandModules;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord.Commands;
@@ -66,6 +68,9 @@ namespace DIGOS.Ambassador.Plugins.Core
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
+
+            commands.AddEnumReader<UserClass>();
+
             await commands.AddModuleAsync<PrivacyCommands>(serviceProvider);
             await commands.AddModuleAsync<ServerCommands>(serviceProvider);
             await commands.AddModuleAsync<UserCommands>(serviceProvider);

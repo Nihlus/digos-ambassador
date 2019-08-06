@@ -159,15 +159,6 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the start action.</returns>
         public async Task StartAsync()
         {
-            var db = _services.GetRequiredService<AmbyDatabaseContext>();
-            if (!((RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>()).Exists())
-            {
-                Log.Error("The database doesn't exist.");
-                return;
-            }
-
-            _commands.AddEnumReader<UserClass>();
-
             // Load modules and behaviours from the assembly this type was declared in
             var localAssembly = GetType().Assembly;
             await _commands.AddModulesAsync(localAssembly, _services);
