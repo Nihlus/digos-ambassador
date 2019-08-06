@@ -133,6 +133,19 @@ namespace DIGOS.Ambassador
 
             foreach (var successfullyRegisteredPlugin in successfullyRegisteredPlugins)
             {
+                if (successfullyRegisteredPlugin is IMigratablePlugin migratablePlugin)
+                {
+                    if (!await migratablePlugin.MigratePluginAsync(_services))
+                    {
+                        Log.Warn
+                        (
+                            $"The plugin \"{successfullyRegisteredPlugin.Name}\"" +
+                            $" (v{successfullyRegisteredPlugin.Version}) failed to migrate its database. It may not " +
+                            $"be functional."
+                        );
+                    }
+                }
+
                 if (!await successfullyRegisteredPlugin.InitializeAsync(_services))
                 {
                     Log.Warn

@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(CorePlugin))]
@@ -43,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Core
     /// <summary>
     /// Describes the plugin containing core functionality.
     /// </summary>
-    public class CorePlugin : PluginDescriptor
+    public class CorePlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Core";
@@ -74,6 +75,16 @@ namespace DIGOS.Ambassador.Plugins.Core
             await commands.AddModuleAsync<PrivacyCommands>(serviceProvider);
             await commands.AddModuleAsync<ServerCommands>(serviceProvider);
             await commands.AddModuleAsync<UserCommands>(serviceProvider);
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+
+            await context.Database.MigrateAsync();
 
             return true;
         }

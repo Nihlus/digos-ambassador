@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Kinks.CommandModules;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
 using DIGOS.Ambassador.Plugins.Kinks.Services;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(KinksPlugin))]
@@ -40,7 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks
     /// <summary>
     /// Describes the kink plugin.
     /// </summary>
-    public class KinksPlugin : PluginDescriptor
+    public class KinksPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Kinks";
@@ -66,6 +67,16 @@ namespace DIGOS.Ambassador.Plugins.Kinks
             commands.AddEnumReader<KinkPreference>();
 
             await commands.AddModuleAsync<KinkCommands>(serviceProvider);
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<KinksDatabaseContext>();
+
+            await context.Database.MigrateAsync();
 
             return true;
         }

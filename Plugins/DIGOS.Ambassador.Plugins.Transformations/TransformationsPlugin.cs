@@ -35,6 +35,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.TypeReaders;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(TransformationsPlugin))]
@@ -44,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations
     /// <summary>
     /// Describes the transformation plugin.
     /// </summary>
-    public class TransformationsPlugin : PluginDescriptor
+    public class TransformationsPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Transformations";
@@ -80,6 +81,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations
             (
                 ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(serviceProvider)
             );
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
+
+            await context.Database.MigrateAsync();
 
             return true;
         }

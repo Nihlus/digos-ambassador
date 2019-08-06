@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Dossiers.CommandModules;
 using DIGOS.Ambassador.Plugins.Dossiers.Model;
 using DIGOS.Ambassador.Plugins.Dossiers.Services;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(DossiersPlugin))]
@@ -39,7 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers
     /// <summary>
     /// Describes the Dossiers plugin.
     /// </summary>
-    public class DossiersPlugin : PluginDescriptor
+    public class DossiersPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Dossiers";
@@ -61,6 +62,16 @@ namespace DIGOS.Ambassador.Plugins.Dossiers
         {
             var commandService = serviceProvider.GetRequiredService<CommandService>();
             await commandService.AddModuleAsync<DossierCommands>(serviceProvider);
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<DossiersDatabaseContext>();
+
+            await context.Database.MigrateAsync();
 
             return true;
         }

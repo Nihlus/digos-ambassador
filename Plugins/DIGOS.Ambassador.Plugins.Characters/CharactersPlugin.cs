@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Characters.TypeReaders;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(CharactersPlugin))]
@@ -41,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Characters
     /// <summary>
     /// Describes the character plugin.
     /// </summary>
-    public class CharactersPlugin : PluginDescriptor
+    public class CharactersPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Characters";
@@ -71,6 +72,16 @@ namespace DIGOS.Ambassador.Plugins.Characters
 
             var pronounService = serviceProvider.GetRequiredService<PronounService>();
             pronounService.DiscoverPronounProviders();
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
+
+            await context.Database.MigrateAsync();
 
             return true;
         }

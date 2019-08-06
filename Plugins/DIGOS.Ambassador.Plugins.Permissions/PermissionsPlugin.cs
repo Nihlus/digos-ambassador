@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(PermissionsPlugin))]
@@ -41,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions
     /// <summary>
     /// Describes the permission plugin.
     /// </summary>
-    public class PermissionsPlugin : PluginDescriptor
+    public class PermissionsPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Permissions";
@@ -68,6 +69,16 @@ namespace DIGOS.Ambassador.Plugins.Permissions
             commands.AddEnumReader<PermissionTarget>();
 
             await commands.AddModuleAsync<PermissionCommands>(serviceProvider);
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
+
+            await context.Database.MigrateAsync();
 
             return true;
         }

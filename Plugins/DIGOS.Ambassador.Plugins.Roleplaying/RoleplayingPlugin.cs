@@ -35,6 +35,7 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders;
 using Discord;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(RoleplayingPlugin))]
@@ -44,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
     /// <summary>
     /// Describes the roleplay plugin.
     /// </summary>
-    public class RoleplayingPlugin : PluginDescriptor
+    public class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Roleplays";
@@ -74,6 +75,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
 
             var behaviours = serviceProvider.GetRequiredService<BehaviourService>();
             await behaviours.AddBehavioursAsync(Assembly.GetExecutingAssembly(), serviceProvider);
+
+            return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
+
+            await context.Database.MigrateAsync();
 
             return true;
         }
