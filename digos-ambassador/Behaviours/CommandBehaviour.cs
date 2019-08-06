@@ -56,7 +56,6 @@ namespace DIGOS.Ambassador.Behaviours
     public class CommandBehaviour : ContinuousBehaviour
     {
         private readonly CoreDatabaseContext _database;
-        private readonly PermissionsDatabaseContext _permissionsDatabase;
 
         private readonly IServiceProvider _services;
 
@@ -116,7 +115,6 @@ namespace DIGOS.Ambassador.Behaviours
             _help = help;
             _users = users;
             _servers = servers;
-            _permissionsDatabase = permissionsDatabase;
 
             this.RunningCommands = new ConcurrentQueue<Task>();
         }
