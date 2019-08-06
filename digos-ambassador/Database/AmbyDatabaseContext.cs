@@ -22,9 +22,6 @@
 
 using System.IO;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Plugins.Transformations.Model;
-using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,19 +31,7 @@ namespace DIGOS.Ambassador.Database
     /// Database context for global information.
     /// </summary>
     public class AmbyDatabaseContext : DbContext
-    {
-        /// <summary>
-        /// Gets or sets the table where roleplays are stored.
-        /// </summary>
-        public DbSet<Roleplay> Roleplays
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
+    {/// <summary>
         /// Initializes a new instance of the <see cref="AmbyDatabaseContext"/> class.
         /// </summary>
         /// <param name="options">The context options.</param>
@@ -88,21 +73,6 @@ namespace DIGOS.Ambassador.Database
                 );
 
             return optionsBuilder;
-        }
-
-        /// <inheritdoc />
-        protected override void OnModelCreating([NotNull] ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Roleplay>().HasOne(u => u.Owner).WithMany().IsRequired();
-            modelBuilder.Entity<Roleplay>().HasMany(u => u.ParticipatingUsers).WithOne(p => p.Roleplay);
-            modelBuilder.Entity<Roleplay>().HasMany(r => r.Messages).WithOne().IsRequired();
-
-            modelBuilder.Entity<RoleplayParticipant>().HasOne(u => u.User).WithMany();
-
-            modelBuilder.Entity<GlobalUserProtection>().HasMany(p => p.UserListing).WithOne(u => u.GlobalProtection);
-            modelBuilder.Entity<UserProtectionEntry>().HasOne(u => u.User).WithMany();
-
-            modelBuilder.Entity<Appearance>().HasMany(a => a.Components).WithOne().IsRequired();
         }
     }
 }

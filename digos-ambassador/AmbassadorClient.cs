@@ -26,19 +26,18 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Database.Abstractions.Services;
-using DIGOS.Ambassador.Database.Roleplaying;
 using DIGOS.Ambassador.Discord;
+using DIGOS.Ambassador.Discord.Behaviours.Services;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Plugins.Roleplaying.Model;
+using DIGOS.Ambassador.Plugins.Roleplaying.Services;
+using DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders;
 using DIGOS.Ambassador.Plugins.Services;
-using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Behaviours;
-using DIGOS.Ambassador.TypeReaders;
-
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -106,7 +105,6 @@ namespace DIGOS.Ambassador
                 .AddSingleton(_behaviours)
                 .AddSingleton(_content)
                 .AddSingleton(_commands)
-                .AddSingleton<RoleplayService>()
                 .AddSingleton<DiscordService>()
                 .AddSingleton<UserFeedbackService>()
                 .AddSingleton<InteractivityService>()
@@ -171,9 +169,6 @@ namespace DIGOS.Ambassador
                 Log.Error("The database doesn't exist.");
                 return;
             }
-
-            _commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
-            _commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
 
             _commands.AddEnumReader<UserClass>();
 

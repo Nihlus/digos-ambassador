@@ -22,16 +22,15 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Extensions;
-
 using Discord;
 using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Discord.Behaviours.Services
 {
     /// <summary>
     /// Provides helper methods for building help output.

@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Behaviours;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Extensions;
 using Discord;
