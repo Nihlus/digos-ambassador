@@ -21,7 +21,7 @@
 //
 
 using System.ComponentModel.DataAnnotations.Schema;
-using DIGOS.Ambassador.Database.Abstractions.Entities;
+using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Users

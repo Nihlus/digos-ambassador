@@ -22,7 +22,7 @@
 
 using System;
 using System.Data;
-using DIGOS.Ambassador.Database.Abstractions;
+using DIGOS.Ambassador.Core.Database;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;

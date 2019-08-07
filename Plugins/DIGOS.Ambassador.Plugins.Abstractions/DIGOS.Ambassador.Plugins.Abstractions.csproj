@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Version>1.0.0</Version>
+        <Description>A development package for creating your own plugins.</Description>
+    </PropertyGroup>
+    
+    <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -27,5 +32,7 @@
         <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" PrivateAssets="all" />
         <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="all" />
     </ItemGroup>
+
+    <Import Project="..\..\msbuild\nuget-common.props" />
 
 </Project>

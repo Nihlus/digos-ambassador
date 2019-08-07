@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Database.Abstractions;
+using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Plugins.Permissions.Model.Permissions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;

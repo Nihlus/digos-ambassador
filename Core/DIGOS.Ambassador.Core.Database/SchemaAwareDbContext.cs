@@ -24,7 +24,7 @@ using System;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
-namespace DIGOS.Ambassador.Database.Abstractions
+namespace DIGOS.Ambassador.Core.Database
 {
     /// <summary>
     /// Acts as a base class for EF Core database contexts that take the schema of the model into account.

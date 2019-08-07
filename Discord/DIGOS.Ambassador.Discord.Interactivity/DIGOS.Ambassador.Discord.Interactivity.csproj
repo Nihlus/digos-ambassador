@@ -39,4 +39,6 @@
       <ProjectReference Include="..\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
     </ItemGroup>
 
+    <Import Project="..\..\msbuild\nuget-common.props" />
+
 </Project>

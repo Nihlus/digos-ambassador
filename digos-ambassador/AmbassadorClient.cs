@@ -23,9 +23,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Services;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.Abstractions.Services;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Behaviours.Services;
 using DIGOS.Ambassador.Discord.Extensions;

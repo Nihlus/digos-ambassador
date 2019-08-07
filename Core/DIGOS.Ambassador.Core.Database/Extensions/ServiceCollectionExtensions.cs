@@ -20,10 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Database.Abstractions.Services;
+using DIGOS.Ambassador.Core.Database.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DIGOS.Ambassador.Database.Abstractions.Extensions
+namespace DIGOS.Ambassador.Core.Database.Extensions
 {
     /// <summary>
     /// Extension methods for service collections.

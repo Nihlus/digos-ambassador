@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <IsPackable>false</IsPackable>
+        <Description>Internal package for using plugins.</Description>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <RunCodeAnalysis>true</RunCodeAnalysis>

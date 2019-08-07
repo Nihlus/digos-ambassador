@@ -23,7 +23,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
-using DIGOS.Ambassador.Database.Abstractions.Entities;
+using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.Model

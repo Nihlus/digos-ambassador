@@ -35,7 +35,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Database.Abstractions\DIGOS.Ambassador.Database.Abstractions.csproj" />
+      <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.TypeReaders\DIGOS.Ambassador.Discord.TypeReaders.csproj" />
       <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Abstractions\DIGOS.Ambassador.Plugins.Abstractions.csproj" />

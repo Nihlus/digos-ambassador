@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Database.Abstractions.Entities;
+using DIGOS.Ambassador.Core.Database.Entities;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
 {

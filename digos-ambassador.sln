@@ -14,11 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "metadata", ".\", "{F1A57014
 	EndProjectSection
 EndProject
 
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "msbuild", ".\msbuild", "{1F056E04-1788-4B80-8736-FDBE38BAE01B}"
-	ProjectSection(SolutionItems) = preProject
-		msbuild/netfx-mono.props = msbuild/netfx-mono.props
-	EndProjectSection
-EndProject
 
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos_ambassador", "digos-ambassador/digos-ambassador.csproj", "{D44A340E-6344-4E42-827C-E63C12C603BE}"
 EndProject
@@ -36,7 +31,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Plugins.Ab
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Plugins.Dossiers", "Plugins\DIGOS.Ambassador.Plugins.Dossiers\DIGOS.Ambassador.Plugins.Dossiers.csproj", "{89E2F9ED-492B-478A-BE50-A328F44F9E29}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Database.Abstractions", "Core\DIGOS.Ambassador.Database.Abstractions\DIGOS.Ambassador.Database.Abstractions.csproj", "{69AC79BB-424F-4DDB-BE5F-7A8337BC9DBC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Core.Database", "Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj", "{69AC79BB-424F-4DDB-BE5F-7A8337BC9DBC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{4FA808D1-BAC7-4987-BBC7-54B497CC7178}"
 EndProject

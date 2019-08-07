@@ -1,5 +1,5 @@
-//
-//  EFEntity.cs
+﻿//
+//  IEFEntity.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,14 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Database.Abstractions.Entities
+using System.ComponentModel.DataAnnotations;
+using JetBrains.Annotations;
+
+namespace DIGOS.Ambassador.Core.Database.Entities
 {
     /// <summary>
-    /// Acts as a base class for EF Core entities.
+    /// Simple interface for enforcing a unique ID in EF entity classes.
     /// </summary>
-    public abstract class EFEntity : IEFEntity
+    public interface IEFEntity
     {
-        /// <inheritdoc/>
-        public long ID { get; set; }
+        /// <summary>
+        /// Gets or sets the unique database ID for this entity.
+        /// </summary>
+        [Key]
+        [UsedImplicitly]
+        long ID { get; set; }
     }
 }

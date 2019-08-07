@@ -3,6 +3,7 @@
   <component name="ContentModelUserStore">
     <attachedFolders>
       <Path>docs</Path>
+      <Path>msbuild</Path>
     </attachedFolders>
     <explicitIncludes />
     <explicitExcludes />

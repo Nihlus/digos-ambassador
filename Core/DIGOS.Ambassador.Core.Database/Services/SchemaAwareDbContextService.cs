@@ -22,12 +22,12 @@
 
 using System;
 using System.Collections.Generic;
+using DIGOS.Ambassador.Core.Database.Credentials;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Database.Abstractions.Credentials;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DIGOS.Ambassador.Database.Abstractions.Services
+namespace DIGOS.Ambassador.Core.Database.Services
 {
     /// <summary>
     /// Serves functionality for schema-aware database contexts.

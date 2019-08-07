@@ -32,7 +32,7 @@ using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update.Internal;
 
-namespace DIGOS.Ambassador.Database.Abstractions
+namespace DIGOS.Ambassador.Core.Database
 {
     /// <summary>
     /// Generates differences between migrations, taking the schema of the model entities into account.
@@ -177,7 +177,7 @@ namespace DIGOS.Ambassador.Database.Abstractions
             /// <inheritdoc/>
             public override IEnumerable<TableMapping> GetSourceTables()
             {
-                var schemaToInclude = Source.Relational().DefaultSchema;
+                var schemaToInclude = this.Source.Relational().DefaultSchema;
                 var tables = base.GetSourceTables();
 
                 return tables.Where(x => x.Schema == schemaToInclude);
@@ -186,7 +186,7 @@ namespace DIGOS.Ambassador.Database.Abstractions
             /// <inheritdoc/>
             public override IEnumerable<TableMapping> GetTargetTables()
             {
-                var schemaToInclude = Target.Relational().DefaultSchema;
+                var schemaToInclude = this.Target.Relational().DefaultSchema;
                 var tables = base.GetTargetTables();
 
                 return tables.Where(x => x.Schema == schemaToInclude);

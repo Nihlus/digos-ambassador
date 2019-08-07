@@ -23,7 +23,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using DIGOS.Ambassador.Database.Abstractions.Entities;
+using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Discord;
 using JetBrains.Annotations;

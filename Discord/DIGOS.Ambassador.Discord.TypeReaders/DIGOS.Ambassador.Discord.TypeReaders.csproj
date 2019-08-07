@@ -34,4 +34,6 @@
         <PackageReference Include="Discord.Net" Version="2.1.1" />
     </ItemGroup>
 
+    <Import Project="..\..\msbuild\nuget-common.props" />
+
 </Project>

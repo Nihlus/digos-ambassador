@@ -37,4 +37,6 @@
       <ProjectReference Include="..\DIGOS.Ambassador.Discord.TypeReaders\DIGOS.Ambassador.Discord.TypeReaders.csproj" />
     </ItemGroup>
 
+    <Import Project="..\..\msbuild\nuget-common.props" />
+
 </Project>

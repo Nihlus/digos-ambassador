@@ -22,7 +22,7 @@
 
 using System;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Database.Abstractions.Extensions;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Dossiers;

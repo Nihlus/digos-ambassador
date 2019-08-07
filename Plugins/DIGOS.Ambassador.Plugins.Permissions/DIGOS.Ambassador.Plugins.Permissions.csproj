@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <Version>1.0.0</Version>
+        <Description>Provides a crude permissions system. This plugin is not recommended.</Description>
+    </PropertyGroup>
+    
+    <PropertyGroup>
         <TargetFrameworks>netcoreapp2.2;netstandard2.0</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <RunCodeAnalysis>true</RunCodeAnalysis>
@@ -29,11 +34,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Database.Abstractions\DIGOS.Ambassador.Database.Abstractions.csproj" />
+      <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
       <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Abstractions\DIGOS.Ambassador.Plugins.Abstractions.csproj" />
     </ItemGroup>
+
+    <Import Project="..\..\msbuild\nuget-common.props" />
 
 </Project>

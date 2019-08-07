@@ -23,7 +23,7 @@
 using System.IO;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Database.Abstractions.Credentials
+namespace DIGOS.Ambassador.Core.Database.Credentials
 {
     /// <summary>
     /// Represents a set of configured database credentials.

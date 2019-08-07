@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp2.2;netstandard2.0</TargetFrameworks>
     <RuntimeIdentifiers>linux-x64,osx-x64,win-x64</RuntimeIdentifiers>
@@ -11,11 +15,7 @@
     <CodeAnalysisRuleSet>..\stylecop.ruleset</CodeAnalysisRuleSet>
     <LangVersion>7.1</LangVersion>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
-
+  
   <ItemGroup>
     <AdditionalFiles Include="$(ProjectDir)\..\stylecop.json">
       <Link>stylecop.json</Link>

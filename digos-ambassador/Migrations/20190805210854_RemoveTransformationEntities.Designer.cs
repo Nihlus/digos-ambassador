@@ -24,7 +24,7 @@ namespace DIGOS.Ambassador.Migrations
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.Roleplay", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Core.Database.Roleplaying.Roleplay", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd();
@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Migrations
                     b.ToTable("Roleplays","RoleplayModule");
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.RoleplayParticipant", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Core.Database.Roleplaying.RoleplayParticipant", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd();
@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.Migrations
                     b.ToTable("RoleplayParticipants","RoleplayModule");
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.UserMessage", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Core.Database.Roleplaying.UserMessage", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd();
@@ -288,7 +288,7 @@ namespace DIGOS.Ambassador.Migrations
                     b.ToTable("UserProtectionEntries","TransformationModule");
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.Roleplay", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Core.Database.Roleplaying.Roleplay", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "Owner")
                         .WithMany()
@@ -296,9 +296,9 @@ namespace DIGOS.Ambassador.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.RoleplayParticipant", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Core.Database.Roleplaying.RoleplayParticipant", b =>
                 {
-                    b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay", "Roleplay")
+                    b.HasOne("DIGOS.Ambassador.Core.Database.Roleplaying.Roleplay", "Roleplay")
                         .WithMany("ParticipatingUsers")
                         .HasForeignKey("RoleplayID")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -309,9 +309,9 @@ namespace DIGOS.Ambassador.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("DIGOS.Ambassador.Database.Roleplaying.UserMessage", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Core.Database.Roleplaying.UserMessage", b =>
                 {
-                    b.HasOne("DIGOS.Ambassador.Database.Roleplaying.Roleplay")
+                    b.HasOne("DIGOS.Ambassador.Core.Database.Roleplaying.Roleplay")
                         .WithMany("Messages")
                         .HasForeignKey("RoleplayID")
                         .OnDelete(DeleteBehavior.Cascade);

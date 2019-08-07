@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <Version>1.0.0</Version>
-        <Description>Services for Discord.</Description>
+        <Description>Internal package for Discord functionality.</Description>
     </PropertyGroup>
 
     <PropertyGroup>
