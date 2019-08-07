@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations
         public override string Name => "Transformations";
 
         /// <inheritdoc />
-        public override string Description => "Provides user-managed transformation libraries.";
+        public override string Description => "Provides user-managed transformation services.";
 
         /// <inheritdoc />
         public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)

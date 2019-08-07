@@ -141,7 +141,7 @@ namespace DIGOS.Ambassador.Discord
             {
                 return ModifyEntityResult.FromError
                 (
-                                        "I couldn't modify the roles due to a priority issue."
+                    "I couldn't modify the roles due to a priority issue."
                 );
             }
 
@@ -183,7 +183,7 @@ namespace DIGOS.Ambassador.Discord
             {
                 return ModifyEntityResult.FromError
                 (
-                                        "I couldn't modify the roles due to a priority issue."
+                    "I couldn't modify the roles due to a priority issue."
                 );
             }
 
