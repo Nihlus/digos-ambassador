@@ -33,6 +33,9 @@ using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Characters.TypeReaders;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(CharactersPlugin))]
@@ -84,6 +87,15 @@ namespace DIGOS.Ambassador.Plugins.Characters
             await context.Database.MigrateAsync();
 
             return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
+            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
+
+            return appliedMigrations.Any();
         }
     }
 }

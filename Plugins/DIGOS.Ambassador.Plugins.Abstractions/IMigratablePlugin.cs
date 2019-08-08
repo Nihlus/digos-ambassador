@@ -36,5 +36,12 @@ namespace DIGOS.Ambassador.Plugins.Abstractions
         /// <param name="serviceProvider">The available services.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task<bool> MigratePluginAsync(IServiceProvider serviceProvider);
+
+        /// <summary>
+        /// Determines whether the database has been created.
+        /// </summary>
+        /// <param name="serviceProvider">The available services.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider);
     }
 }

@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
@@ -36,6 +37,8 @@ using DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(RoleplayingPlugin))]
@@ -87,6 +90,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
             await context.Database.MigrateAsync();
 
             return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
+            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
+
+            return appliedMigrations.Any();
         }
     }
 }

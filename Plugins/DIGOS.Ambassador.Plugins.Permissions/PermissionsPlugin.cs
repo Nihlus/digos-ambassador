@@ -33,6 +33,9 @@ using DIGOS.Ambassador.Plugins.Permissions.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(PermissionsPlugin))]
@@ -81,6 +84,15 @@ namespace DIGOS.Ambassador.Plugins.Permissions
             await context.Database.MigrateAsync();
 
             return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
+            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
+
+            return appliedMigrations.Any();
         }
     }
 }

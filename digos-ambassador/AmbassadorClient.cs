@@ -127,7 +127,31 @@ namespace DIGOS.Ambassador
 
             _services = serviceCollection.BuildServiceProvider();
 
-            // Run migrations in reverse
+            // Create plugin databases
+            foreach (var plugin in successfullyRegisteredPlugins)
+            {
+                if (!(plugin is IMigratablePlugin migratablePlugin))
+                {
+                    continue;
+                }
+
+                if (await migratablePlugin.IsDatabaseCreatedAsync(_services))
+                {
+                    continue;
+                }
+
+                if (!await migratablePlugin.MigratePluginAsync(_services))
+                {
+                    Log.Warn
+                    (
+                        $"The plugin \"{plugin.Name}\"" +
+                        $" (v{plugin.Version}) failed to migrate its database. It may not " +
+                        $"be functional."
+                    );
+                }
+            }
+
+            // Then, run migrations in reverse
             foreach (var plugin in successfullyRegisteredPlugins.AsEnumerable().Reverse())
             {
                 if (!(plugin is IMigratablePlugin migratablePlugin))

@@ -31,6 +31,9 @@ using DIGOS.Ambassador.Plugins.Dossiers.Model;
 using DIGOS.Ambassador.Plugins.Dossiers.Services;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(DossiersPlugin))]
@@ -74,6 +77,15 @@ namespace DIGOS.Ambassador.Plugins.Dossiers
             await context.Database.MigrateAsync();
 
             return true;
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        {
+            var context = serviceProvider.GetRequiredService<DossiersDatabaseContext>();
+            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
+
+            return appliedMigrations.Any();
         }
     }
 }
