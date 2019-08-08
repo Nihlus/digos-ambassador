@@ -138,28 +138,6 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         }
 
         /// <summary>
-        /// Clears the channel category to use for dedicated roleplays.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("clear-roleplay-category")]
-        [Summary("Clears the channel category to use for dedicated roleplays.")]
-        [RequireContext(Guild)]
-        [RequireUserPermission(GuildPermission.ManageGuild)]
-        public async Task ClearDedicatedRoleplayChannelCategory()
-        {
-            var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
-            var result = await _servers.SetDedicatedRoleplayChannelCategoryAsync(server, null);
-
-            if (!result.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                return;
-            }
-
-            await _feedback.SendConfirmationAsync(this.Context, "Dedicated channel category cleared.");
-        }
-
-        /// <summary>
         /// Server info setter commands.
         /// </summary>
         [UsedImplicitly]
@@ -281,33 +259,6 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                     this.Context,
                     $"The server {willDo}."
                 );
-            }
-
-            /// <summary>
-            /// Sets the channel category to use for dedicated roleplays.
-            /// </summary>
-            /// <param name="category">The category to use.</param>
-            [UsedImplicitly]
-            [Command("roleplay-category")]
-            [Summary("Sets the channel category to use for dedicated roleplays.")]
-            [RequireContext(Guild)]
-            [RequireUserPermission(GuildPermission.ManageGuild)]
-            public async Task SetDedicatedRoleplayChannelCategory(ICategoryChannel category)
-            {
-                var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
-                var result = await _servers.SetDedicatedRoleplayChannelCategoryAsync
-                (
-                    server,
-                    category
-                );
-
-                if (!result.IsSuccess)
-                {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
-                }
-
-                await _feedback.SendConfirmationAsync(this.Context, "Dedicated channel category set.");
             }
         }
     }

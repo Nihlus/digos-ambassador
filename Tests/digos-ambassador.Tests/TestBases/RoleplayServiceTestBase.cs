@@ -21,11 +21,11 @@
 //
 
 using System;
-using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +39,11 @@ namespace DIGOS.Ambassador.Tests.TestBases
     public abstract class RoleplayServiceTestBase : DatabaseProvidingTestBase
     {
         /// <summary>
+        /// Gets the database.
+        /// </summary>
+        public RoleplayingDatabaseContext Database { get; private set; }
+
+        /// <summary>
         /// Gets the roleplay service object.
         /// </summary>
         protected RoleplayService Roleplays { get; private set; }
@@ -48,7 +53,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         {
             serviceCollection
                 .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
-                .AddDbContext<AmbyDatabaseContext>(ConfigureOptions<AmbyDatabaseContext>);
+                .AddDbContext<RoleplayingDatabaseContext>(ConfigureOptions<RoleplayingDatabaseContext>);
 
             serviceCollection
                 .AddScoped<CommandService>()
@@ -61,11 +66,11 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            var ambyDatabase = serviceProvider.GetRequiredService<AmbyDatabaseContext>();
-            ambyDatabase.Database.EnsureCreated();
-
             var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
             coreDatabase.Database.Migrate();
+
+            this.Database = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
+            this.Database.Database.Migrate();
 
             this.Roleplays = serviceProvider.GetRequiredService<RoleplayService>();
         }

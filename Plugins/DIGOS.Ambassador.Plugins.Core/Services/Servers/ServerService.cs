@@ -276,23 +276,5 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
 
             return ModifyEntityResult.FromSuccess();
         }
-
-        /// <summary>
-        /// Sets the channel category to use for dedicated roleplay channels.
-        /// </summary>
-        /// <param name="server">The server.</param>
-        /// <param name="category">The category to use.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetDedicatedRoleplayChannelCategoryAsync
-        (
-            [NotNull] Server server,
-            [CanBeNull] ICategoryChannel category
-        )
-        {
-            server.DedicatedRoleplayChannelsCategory = (long?)category?.Id;
-            await _database.SaveChangesAsync();
-
-            return ModifyEntityResult.FromSuccess();
-        }
     }
 }

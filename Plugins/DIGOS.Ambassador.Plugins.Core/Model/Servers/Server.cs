@@ -79,11 +79,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         public string JoinMessage { get; set; }
 
         /// <summary>
-        /// Gets or sets the channel category generated roleplay channels should be created under.
-        /// </summary>
-        public long? DedicatedRoleplayChannelsCategory { get; set; }
-
-        /// <summary>
         /// Determines whether or not a given user is known to this server.
         /// </summary>
         /// <param name="user">The user.</param>

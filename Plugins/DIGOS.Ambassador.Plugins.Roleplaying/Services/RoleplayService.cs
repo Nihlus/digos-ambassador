@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -771,12 +772,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 );
             }
 
+            var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
+            if (!getSettingsResult.IsSuccess)
+            {
+                return CreateEntityResult<IGuildChannel>.FromError(getSettingsResult);
+            }
+
+            var settings = getSettingsResult.Entity;
+
             var dedicatedChannel = await context.Guild.CreateTextChannelAsync
             (
                 $"{roleplay.Name}-rp",
                 properties =>
                 {
-                    properties.CategoryId = new Optional<ulong?>((ulong?)server.DedicatedRoleplayChannelsCategory);
+                    properties.CategoryId = new Optional<ulong?>((ulong?)settings.DedicatedRoleplayChannelsCategory);
                     properties.IsNsfw = roleplay.IsNSFW;
                     properties.Topic = $"Dedicated roleplay channel for {roleplay.Name}.";
                 }
@@ -1023,6 +1032,61 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             await dedicatedChannel.RemovePermissionOverwriteAsync(user);
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Gets or creates a set of server-specific roleplaying settings for the given server.
+        /// </summary>
+        /// <param name="server">The server.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<ServerRoleplaySettings>> GetOrCreateServerRoleplaySettingsAsync
+        (
+            [NotNull] Server server
+        )
+        {
+            var existingSettings = await _database.ServerSettings.FirstOrDefaultAsync(s => s.Server == server);
+
+            if (!(existingSettings is null))
+            {
+                return RetrieveEntityResult<ServerRoleplaySettings>.FromSuccess(existingSettings);
+            }
+
+            existingSettings = new ServerRoleplaySettings
+            {
+                Server = server
+            };
+
+            _database.ServerSettings.Update(existingSettings);
+            await _database.SaveChangesAsync();
+
+            // Requery the database
+            return await GetOrCreateServerRoleplaySettingsAsync(server);
+        }
+
+        /// <summary>
+        /// Sets the channel category to use for dedicated roleplay channels.
+        /// </summary>
+        /// <param name="server">The server.</param>
+        /// <param name="category">The category to use.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetDedicatedRoleplayChannelCategoryAsync
+        (
+            [NotNull] Server server,
+            [CanBeNull] ICategoryChannel category
+        )
+        {
+            var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
+            if (!getSettingsResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getSettingsResult);
+            }
+
+            var settings = getSettingsResult.Entity;
+
+            settings.DedicatedRoleplayChannelsCategory = (long?)category?.Id;
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
     }

@@ -45,6 +45,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         }
 
         /// <summary>
+        /// Gets or sets the table where server settings are stored.
+        /// </summary>
+        public DbSet<ServerRoleplaySettings> ServerSettings
+        {
+            get;
+
+            [UsedImplicitly]
+            set;
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayingDatabaseContext"/> class.
         /// </summary>
         /// <param name="contextOptions">The context options.</param>
