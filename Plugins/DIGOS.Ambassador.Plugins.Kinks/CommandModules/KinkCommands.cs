@@ -49,7 +49,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
     [Summary("Commands for viewing and configuring user kinks.")]
     public class KinkCommands : ModuleBase<SocketCommandContext>
     {
-        private readonly KinksDatabaseContext _database;
         private readonly KinkService _kinks;
         private readonly UserFeedbackService _feedback;
 
@@ -58,19 +57,16 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// <summary>
         /// Initializes a new instance of the <see cref="KinkCommands"/> class.
         /// </summary>
-        /// <param name="database">A database context from the context pool.</param>
         /// <param name="kinks">The application's kink service.</param>
         /// <param name="feedback">The application's feedback service.</param>
         /// <param name="interactivity">The interactivity service.</param>
         public KinkCommands
         (
-            KinksDatabaseContext database,
             KinkService kinks,
             UserFeedbackService feedback,
             InteractivityService interactivity
         )
         {
-            _database = database;
             _kinks = kinks;
             _feedback = feedback;
             _interactivity = interactivity;
@@ -270,7 +266,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         {
             var wizard = new KinkWizard
             (
-                _database,
                 _feedback,
                 _kinks,
                 this.Context.User

@@ -22,7 +22,6 @@
 
 using System;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
 using Discord.Commands;
 using JetBrains.Annotations;
@@ -52,7 +51,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Permissions.Preconditions
         protected override async Task<PreconditionResult> CheckPrioritizedPermissions([NotNull] ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var permissionService = services.GetRequiredService<PermissionService>();
-            var db = services.GetRequiredService<PermissionsDatabaseContext>();
 
             if (await permissionService.HasPermissionAsync(context.Guild, context.User, _requiredPermission))
             {

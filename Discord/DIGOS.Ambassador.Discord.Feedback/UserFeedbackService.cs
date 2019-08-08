@@ -37,6 +37,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
     /// <summary>
     /// Handles sending formatted messages to the users.
     /// </summary>
+    [PublicAPI]
     public class UserFeedbackService
     {
         /// <summary>
@@ -45,6 +46,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="context">The context.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
+        [NotNull]
         public async Task SendErrorAndDeleteAsync
         (
             [NotNull] ICommandContext context,
@@ -61,6 +63,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="context">The context.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
+        [NotNull]
         public async Task SendWarningAndDeleteAsync
         (
             [NotNull] ICommandContext context,
@@ -77,6 +80,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="context">The context.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
+        [NotNull]
         public async Task SendConfirmationAndDeleteAsync
         (
             [NotNull] ICommandContext context,
@@ -94,6 +98,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="colour">The colour of the embed.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
+        [NotNull]
         public async Task SendEmbedAndDeleteAsync
         (
             [NotNull] ICommandContext context,
@@ -111,6 +116,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
+        [NotNull]
         public async Task SendConfirmationAsync([NotNull] ICommandContext context, [NotNull] string contents)
         {
             await SendEmbedAsync(context, Color.DarkPurple, contents);
@@ -121,6 +127,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
+        [NotNull]
         public async Task SendErrorAsync([NotNull] ICommandContext context, [NotNull] string contents)
         {
             await SendEmbedAsync(context, Color.Red, contents);
@@ -131,6 +138,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
+        [NotNull]
         public async Task SendWarningAsync([NotNull] ICommandContext context, [NotNull] string contents)
         {
             await SendEmbedAsync(context, Color.Orange, contents);
@@ -141,6 +149,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
+        [NotNull]
         public async Task SendInfoAsync([NotNull] ICommandContext context, [NotNull] string contents)
         {
             await SendEmbedAsync(context, Color.Blue, contents);
@@ -151,6 +160,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="channel">The context of the send operation.</param>
         /// <param name="eb">The embed to send.</param>
+        [NotNull]
         public async Task SendEmbedAsync([NotNull] IMessageChannel channel, [NotNull] Embed eb)
         {
             using (channel.EnterTypingState())
@@ -166,11 +176,12 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="eb">The embed.</param>
         /// <param name="timeout">The timeout after which the embed will be deleted. Defaults to 15 seconds.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [NotNull]
         public async Task SendEmbedAndDeleteAsync
         (
             [NotNull] IMessageChannel channel,
             [NotNull] Embed eb,
-            TimeSpan? timeout = null
+            [CanBeNull] TimeSpan? timeout = null
         )
         {
             timeout = timeout ?? TimeSpan.FromSeconds(15.0);
@@ -184,6 +195,14 @@ namespace DIGOS.Ambassador.Discord.Feedback
             }
         }
 
+        /// <summary>
+        /// Sends the given string as one or more sequential embeds, chunked into sets of 1024 characters.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="color">The embed colour.</param>
+        /// <param name="contents">The contents to send.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [NotNull]
         private async Task SendEmbedAsync([NotNull] ICommandContext context, Color color, [NotNull] string contents)
         {
             // Sometimes the content is > 2048 in length. We'll chunk it into embeds of 1024 here.
@@ -226,7 +245,14 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="user">The user to send the embed to.</param>
         /// <param name="eb">The embed to send.</param>
         /// <param name="notify">Whether or not to notify the user that they've been sent a message.</param>
-        public async Task SendPrivateEmbedAsync([NotNull] SocketCommandContext context, IUser user, Embed eb, bool notify = true)
+        [NotNull]
+        public async Task SendPrivateEmbedAsync
+        (
+            [NotNull] SocketCommandContext context,
+            [NotNull] IUser user,
+            [NotNull] Embed eb,
+            bool notify = true
+        )
         {
             await user.SendMessageAsync(string.Empty, false, eb);
 
@@ -245,10 +271,11 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="color">The color of the embed.</param>
         /// <param name="contents">The contents of the embed to send.</param>
         /// <param name="notify">Whether or not to notify the user that they've been sent a message.</param>
+        [NotNull]
         public async Task SendPrivateEmbedAsync
         (
             [NotNull] ICommandContext context,
-            IUser user,
+            [NotNull] IUser user,
             Color color,
             [NotNull] string contents,
             bool notify = true
@@ -315,7 +342,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <returns>A basic embed.</returns>
         [Pure]
         [NotNull]
-        public EmbedBuilder CreateEmbedBase(Color? color = null)
+        public EmbedBuilder CreateEmbedBase([CanBeNull] Color? color = null)
         {
             color = color ?? Color.DarkPurple;
 
@@ -331,7 +358,8 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="message">The message to quote.</param>
         /// <param name="quotingUser">The user that is quoting the message.</param>
         /// <returns>The quote.</returns>
-        public EmbedBuilder CreateMessageQuote([NotNull] IMessage message, IMentionable quotingUser)
+        [NotNull]
+        public EmbedBuilder CreateMessageQuote([NotNull] IMessage message, [NotNull] IMentionable quotingUser)
         {
             var eb = new EmbedBuilder();
 
@@ -359,7 +387,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
         /// <returns>true if information was added; otherwise, false.</returns>
-        private bool TryAddImageAttachmentInfo([NotNull] IMessage message, ref EmbedBuilder embed)
+        private bool TryAddImageAttachmentInfo([NotNull] IMessage message, [NotNull] ref EmbedBuilder embed)
         {
             var firstAttachment = message.Attachments.FirstOrDefault();
             if (firstAttachment is null || firstAttachment.Height is null)
@@ -378,7 +406,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
         /// <returns>true if information was added; otherwise, false.</returns>
-        private bool TryAddOtherAttachmentInfo([NotNull] IMessage message, ref EmbedBuilder embed)
+        private bool TryAddOtherAttachmentInfo([NotNull] IMessage message, [NotNull] ref EmbedBuilder embed)
         {
             var firstAttachment = message.Attachments.FirstOrDefault();
             if (firstAttachment is null)
@@ -398,7 +426,12 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="executingUser">The user that quoted the message.</param>
         /// <param name="embed">The embed to replace.</param>
         /// <returns>true if a rich embed was copied; otherwise, false.</returns>
-        private bool TryCopyRichEmbed([NotNull] IMessage message, IMentionable executingUser, ref EmbedBuilder embed)
+        private bool TryCopyRichEmbed
+        (
+            [NotNull] IMessage message,
+            [NotNull] IMentionable executingUser,
+            [NotNull] ref EmbedBuilder embed
+        )
         {
             var firstEmbed = message.Embeds.FirstOrDefault();
             if (firstEmbed?.Type != EmbedType.Rich)
@@ -429,7 +462,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
-        private void AddActivity([NotNull] IMessage message, ref EmbedBuilder embed)
+        private void AddActivity([NotNull] IMessage message, [NotNull] ref EmbedBuilder embed)
         {
             if (message.Activity is null)
             {
@@ -446,7 +479,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
-        private void AddOtherEmbed([NotNull] IMessage message, ref EmbedBuilder embed)
+        private void AddOtherEmbed([NotNull] IMessage message, [NotNull] ref EmbedBuilder embed)
         {
             if (!message.Embeds.Any())
             {
@@ -462,7 +495,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the content to.</param>
-        private void AddContent([NotNull] IMessage message, ref EmbedBuilder embed)
+        private void AddContent([NotNull] IMessage message, [NotNull] ref EmbedBuilder embed)
         {
             if (string.IsNullOrWhiteSpace(message.Content))
             {
@@ -485,7 +518,12 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="message">The quoted message.</param>
         /// <param name="quotingUser">The quoting user.</param>
         /// <param name="embed">The embed to add the information to.</param>
-        private void AddMeta([NotNull] IMessage message, [NotNull] IMentionable quotingUser, ref EmbedBuilder embed)
+        private void AddMeta
+        (
+            [NotNull] IMessage message,
+            [NotNull] IMentionable quotingUser,
+            [NotNull] ref EmbedBuilder embed
+        )
         {
             embed
                 .WithAuthor(message.Author)

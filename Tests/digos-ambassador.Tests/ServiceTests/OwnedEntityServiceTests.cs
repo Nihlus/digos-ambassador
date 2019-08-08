@@ -32,10 +32,12 @@ using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Plugins.Characters.CommandModules;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
+using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Characters.TypeReaders;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Discord;
 using Discord.Commands;
@@ -232,6 +234,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
                 serviceCollection
                     .AddScoped<ServerService>()
+                    .AddSingleton<PronounService>()
                     .AddScoped<CharacterService>()
                     .AddScoped<ContentService>()
                     .AddScoped<CommandService>()
@@ -245,7 +248,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public async Task InitializeAsync()
             {
                 var charactersDatabase = this.Services.GetRequiredService<CharactersDatabaseContext>();
-                charactersDatabase.Database.Migrate();
+                charactersDatabase.Database.Create();
 
                 var commands = this.Services.GetRequiredService<CommandService>();
 

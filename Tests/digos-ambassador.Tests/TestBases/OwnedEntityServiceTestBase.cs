@@ -24,6 +24,7 @@ using System;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using DIGOS.Ambassador.Tests.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -64,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected sealed override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            this.Database.Database.Migrate();
+            this.Database.Database.Create();
 
             this.Entities = serviceProvider.GetRequiredService<OwnedEntityService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();

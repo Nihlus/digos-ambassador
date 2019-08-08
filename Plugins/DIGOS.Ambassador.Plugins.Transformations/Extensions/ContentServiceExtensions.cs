@@ -119,7 +119,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
             var transformations = new List<Transformation>();
             var deser = new DeserializerBuilder()
                 .WithTypeConverter(new ColourYamlConverter())
-                .WithTypeConverter(new SpeciesYamlConverter(db, transformation))
+                .WithTypeConverter(new SpeciesYamlConverter(transformation))
                 .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
                 .WithNamingConvention(new UnderscoredNamingConvention())
                 .Build();

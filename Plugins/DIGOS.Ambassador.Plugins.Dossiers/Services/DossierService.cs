@@ -301,8 +301,8 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         )
         {
             var originalDossierPath = dossier.Path;
-            var newDossierPath = Path.GetFullPath(Path.Combine(BaseDossierPath, $"{dossier.Title}.pdf"));
-            if (Directory.GetParent(newDossierPath).FullName != BaseDossierPath)
+            var newDossierPath = Path.GetFullPath(Path.Combine(this.BaseDossierPath, $"{dossier.Title}.pdf"));
+            if (Directory.GetParent(newDossierPath).FullName != this.BaseDossierPath)
             {
                 return ModifyEntityResult.FromError("Invalid data path.");
             }

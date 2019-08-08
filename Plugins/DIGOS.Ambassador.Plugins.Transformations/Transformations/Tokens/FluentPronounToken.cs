@@ -21,7 +21,6 @@
 //
 
 using System;
-using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 

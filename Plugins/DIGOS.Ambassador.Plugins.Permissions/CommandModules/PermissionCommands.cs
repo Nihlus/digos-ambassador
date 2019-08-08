@@ -166,24 +166,19 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [Group("grant")]
         public class GrantCommands : ModuleBase<SocketCommandContext>
         {
-            private readonly PermissionsDatabaseContext _database;
             private readonly UserFeedbackService _feedback;
             private readonly PermissionService _permissions;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="GrantCommands"/> class.
             /// </summary>
-            /// <param name="database">A database context from the context pool.</param>
             /// <param name="feedback">The user feedback service.</param>
             /// <param name="permissions">The permission service.</param>
             public GrantCommands
             (
-                PermissionsDatabaseContext database,
                 UserFeedbackService feedback,
-                PermissionService permissions
-            )
+                PermissionService permissions)
             {
-                _database = database;
                 _feedback = feedback;
                 _permissions = permissions;
             }
@@ -227,24 +222,19 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [Group("revoke")]
         public class RevokeCommands : ModuleBase<SocketCommandContext>
         {
-            private readonly PermissionsDatabaseContext _database;
             private readonly UserFeedbackService _feedback;
             private readonly PermissionService _permissions;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="RevokeCommands"/> class.
             /// </summary>
-            /// <param name="database">A database context from the context pool.</param>
             /// <param name="feedback">The user feedback service.</param>
             /// <param name="permissions">The permission service.</param>
             public RevokeCommands
             (
-                PermissionsDatabaseContext database,
                 UserFeedbackService feedback,
-                PermissionService permissions
-            )
+                PermissionService permissions)
             {
-                _database = database;
                 _feedback = feedback;
                 _permissions = permissions;
             }

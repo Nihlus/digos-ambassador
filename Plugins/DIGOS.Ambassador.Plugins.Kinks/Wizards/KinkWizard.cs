@@ -44,8 +44,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
     /// </summary>
     public class KinkWizard : InteractiveMessage, IWizard
     {
-        [ProvidesContext]
-        private readonly KinksDatabaseContext _database;
         private readonly UserFeedbackService _feedback;
         private readonly KinkService _kinks;
 
@@ -92,20 +90,17 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// <summary>
         /// Initializes a new instance of the <see cref="KinkWizard"/> class.
         /// </summary>
-        /// <param name="database">A database context from the context pool.</param>
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="kinkService">The kink service.</param>
         /// <param name="targetUser">The target user.</param>
         public KinkWizard
         (
-            KinksDatabaseContext database,
             UserFeedbackService feedback,
             KinkService kinkService,
             IUser targetUser
         )
             : base(targetUser)
         {
-            _database = database;
             _feedback = feedback;
             _kinks = kinkService;
 

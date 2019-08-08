@@ -24,11 +24,13 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
+using DIGOS.Ambassador.Tests.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -69,6 +71,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
                 .AddDbContext<CharactersDatabaseContext>(ConfigureOptions<CharactersDatabaseContext>);
 
             serviceCollection
+                .AddSingleton<PronounService>()
                 .AddScoped<TransformationService>()
                 .AddScoped<ContentService>()
                 .AddScoped<UserService>()
@@ -80,13 +83,13 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             this.Database = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
-            this.Database.Database.Migrate();
+            this.Database.Database.Create();
 
             var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Migrate();
+            coreDatabase.Database.Create();
 
             this.CharacterDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-            this.CharacterDatabase.Database.Migrate();
+            this.CharacterDatabase.Database.Create();
 
             this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();

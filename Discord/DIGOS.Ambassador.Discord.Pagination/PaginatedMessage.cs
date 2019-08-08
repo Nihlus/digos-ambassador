@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         private UserFeedbackService Feedback { get; }
 
         /// <inheritdoc />
-        public virtual IList<TContent> Pages { get; protected set; }
+        public virtual IList<TContent> Pages { get; protected set; } = new List<TContent>();
 
         /// <inheritdoc />
         public PaginatedAppearanceOptions Appearance { get; set; } = PaginatedAppearanceOptions.Default;
@@ -67,8 +67,6 @@ namespace DIGOS.Ambassador.Discord.Pagination
             : base(sourceUser)
         {
             this.Feedback = feedbackService;
-            this.Pages = new List<TContent>();
-
             this.Appearance.Color = Color.DarkPurple;
         }
 

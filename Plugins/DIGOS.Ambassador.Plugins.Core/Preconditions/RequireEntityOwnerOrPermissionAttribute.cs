@@ -23,7 +23,6 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
-using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
 using Discord.Commands;
@@ -66,7 +65,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Preconditions
             }
 
             var permissionService = services.GetRequiredService<PermissionService>();
-            var db = services.GetRequiredService<PermissionsDatabaseContext>();
 
             if (entity.IsOwner(context.User))
             {

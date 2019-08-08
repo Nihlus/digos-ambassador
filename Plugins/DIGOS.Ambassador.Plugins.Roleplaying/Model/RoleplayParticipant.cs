@@ -22,6 +22,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
@@ -68,6 +69,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="roleplay">The roleplay that the user is participating in.</param>
         /// <param name="user">The user that is participating in the roleplay.</param>
         /// <param name="status">The status of the user.</param>
+        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Used by EF Core proxies.")]
         public RoleplayParticipant
         (
             [NotNull] Roleplay roleplay,

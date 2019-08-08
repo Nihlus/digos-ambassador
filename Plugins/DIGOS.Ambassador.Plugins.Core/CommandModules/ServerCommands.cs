@@ -144,7 +144,6 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Group("set")]
         public class SetCommands : ModuleBase<SocketCommandContext>
         {
-            private readonly CoreDatabaseContext _database;
             private readonly UserFeedbackService _feedback;
             private readonly ServerService _servers;
 
@@ -156,7 +155,6 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             /// <param name="servers">The servers service.</param>
             public SetCommands(CoreDatabaseContext database, UserFeedbackService feedback, ServerService servers)
             {
-                _database = database;
                 _feedback = feedback;
                 _servers = servers;
             }

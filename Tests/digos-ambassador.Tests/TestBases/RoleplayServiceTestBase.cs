@@ -27,6 +27,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
+using DIGOS.Ambassador.Tests.Extensions;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -67,10 +68,10 @@ namespace DIGOS.Ambassador.Tests.TestBases
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
             var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Migrate();
+            coreDatabase.Database.Create();
 
             this.Database = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
-            this.Database.Database.Migrate();
+            this.Database.Database.Create();
 
             this.Roleplays = serviceProvider.GetRequiredService<RoleplayService>();
         }

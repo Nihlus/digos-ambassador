@@ -35,18 +35,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// </summary>
     public class SpeciesYamlConverter : IYamlTypeConverter
     {
-        private TransformationsDatabaseContext Database { get; }
-
         private TransformationService Transformation { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SpeciesYamlConverter"/> class.
         /// </summary>
-        /// <param name="database">The database.</param>
         /// <param name="transformation">The transformation service.</param>
-        public SpeciesYamlConverter(TransformationsDatabaseContext database, TransformationService transformation)
+        public SpeciesYamlConverter(TransformationService transformation)
         {
-            this.Database = database;
             this.Transformation = transformation;
         }
 
