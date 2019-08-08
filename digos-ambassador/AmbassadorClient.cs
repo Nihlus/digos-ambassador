@@ -22,17 +22,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Services;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Database;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Behaviours.Services;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Plugins.Abstractions;
-using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Services;
 using DIGOS.Ambassador.Services;
 using Discord;
@@ -40,8 +38,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using log4net;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 #pragma warning disable SA1118 // Parameter spans multiple lines, big strings
@@ -131,27 +127,33 @@ namespace DIGOS.Ambassador
 
             _services = serviceCollection.BuildServiceProvider();
 
-            foreach (var successfullyRegisteredPlugin in successfullyRegisteredPlugins)
+            // Run migrations in reverse
+            foreach (var plugin in successfullyRegisteredPlugins.AsEnumerable().Reverse())
             {
-                if (successfullyRegisteredPlugin is IMigratablePlugin migratablePlugin)
+                if (!(plugin is IMigratablePlugin migratablePlugin))
                 {
-                    if (!await migratablePlugin.MigratePluginAsync(_services))
-                    {
-                        Log.Warn
-                        (
-                            $"The plugin \"{successfullyRegisteredPlugin.Name}\"" +
-                            $" (v{successfullyRegisteredPlugin.Version}) failed to migrate its database. It may not " +
-                            $"be functional."
-                        );
-                    }
+                    continue;
                 }
 
-                if (!await successfullyRegisteredPlugin.InitializeAsync(_services))
+                if (!await migratablePlugin.MigratePluginAsync(_services))
                 {
                     Log.Warn
                     (
-                        $"The plugin \"{successfullyRegisteredPlugin.Name}\"" +
-                        $" (v{successfullyRegisteredPlugin.Version}) failed to initialize. It may not be functional."
+                        $"The plugin \"{plugin.Name}\"" +
+                        $" (v{plugin.Version}) failed to migrate its database. It may not " +
+                        $"be functional."
+                    );
+                }
+            }
+
+            foreach (var plugin in successfullyRegisteredPlugins)
+            {
+                if (!await plugin.InitializeAsync(_services))
+                {
+                    Log.Warn
+                    (
+                        $"The plugin \"{plugin.Name}\"" +
+                        $" (v{plugin.Version}) failed to initialize. It may not be functional."
                     );
                 }
             }
