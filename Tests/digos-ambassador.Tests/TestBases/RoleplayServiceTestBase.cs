@@ -29,7 +29,6 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using DIGOS.Ambassador.Tests.Extensions;
 using Discord.Commands;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Tests.TestBases

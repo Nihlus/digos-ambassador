@@ -42,7 +42,6 @@ using DIGOS.Ambassador.Tests.TestBases;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MockQueryable.Moq;
 using Moq;

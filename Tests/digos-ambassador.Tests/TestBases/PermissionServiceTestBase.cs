@@ -24,7 +24,6 @@ using System;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
 using DIGOS.Ambassador.Tests.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Tests.TestBases
