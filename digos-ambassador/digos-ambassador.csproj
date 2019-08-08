@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  
+
   <PropertyGroup>
+    <Version>2.0.0</Version>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-  
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp2.2;netstandard2.0</TargetFrameworks>
@@ -14,32 +15,32 @@
     <CodeAnalysisRuleSet>..\stylecop.ruleset</CodeAnalysisRuleSet>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <AdditionalFiles Include="$(ProjectDir)\..\stylecop.json">
       <Link>stylecop.json</Link>
       <InProject>false</InProject>
     </AdditionalFiles>
-    
+
     <AdditionalFiles Include="$(ProjectDir)\..\stylecop.ruleset">
       <Link>stylecop.ruleset</Link>
       <InProject>false</InProject>
     </AdditionalFiles>
     <EmbeddedResource Include="log4net.config" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <Content Include="Content\**\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
     <PackageReference Include="Humanizer" Version="2.6.2" />
   </ItemGroup>
-    
+
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" Version="2019.1.1" PrivateAssets="all" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
