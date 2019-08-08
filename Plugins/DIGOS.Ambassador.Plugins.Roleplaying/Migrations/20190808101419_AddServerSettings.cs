@@ -42,9 +42,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 column: "ServerID");
 
             const string seedQuery =
-                "insert into \"RoleplayModule\".\"ServerSettings\"" +
-                "(\"ServerID\", \"DedicatedRoleplayChannelsCategory\")" +
-                "select \"ID\", \"DedicatedRoleplayChannelsCategory\" from \"Core\".\"Servers\";";
+                "do $$" +
+                "    begin" +
+                "    if exists(select column_name from information_schema.columns where table_name='Servers' and column_name='DedicatedRoleplayChannelsCategory') then" +
+                "        insert into \"RoleplayModule\".\"ServerSettings\"" +
+                "        (\"ServerID\", \"DedicatedRoleplayChannelsCategory\")" +
+                "        select \"ID\", \"DedicatedRoleplayChannelsCategory\" from \"Core\".\"Servers\";" + "" +
+                "    end if;" +
+                "    end" +
+                "$$;";
 
             migrationBuilder.Sql(seedQuery);
         }
