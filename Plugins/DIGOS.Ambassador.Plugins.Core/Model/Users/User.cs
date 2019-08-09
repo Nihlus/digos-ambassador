@@ -50,10 +50,5 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         /// </summary>
         [CanBeNull]
         public int? Timezone { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether new roleplays that appear should be hidden by default.
-        /// </summary>
-        public virtual bool HideNewRoleplays { get; set; }
     }
 }
