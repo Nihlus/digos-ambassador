@@ -161,7 +161,18 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services.Permissions
                     ServerDiscordID = (long)server.Id
                 };
 
-                await _database.Permissions.AddAsync(scopedPermission);
+                var doesPermissionExist = await _database.Permissions
+                    .Where
+                    (
+                        p => p.UserDiscordID == scopedPermission.UserDiscordID &&
+                             p.ServerDiscordID == scopedPermission.ServerDiscordID
+                    )
+                    .AnyAsync();
+
+                if (!doesPermissionExist)
+                {
+                    await _database.Permissions.AddAsync(scopedPermission);
+                }
             }
 
             await _database.SaveChangesAsync();
