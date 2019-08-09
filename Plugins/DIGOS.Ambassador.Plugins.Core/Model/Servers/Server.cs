@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// Gets or sets the users known to the bot on this server.
         /// </summary>
         [NotNull]
-        public virtual List<User> KnownUsers { get; set; } = new List<User>();
+        public virtual List<ServerUser> KnownUsers { get; set; } = new List<ServerUser>();
 
         /// <summary>
         /// Gets or sets the server's description.
@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// <returns>true if the user is known; otherwise, false.</returns>
         public bool IsUserKnown([NotNull] IUser user)
         {
-            return this.KnownUsers.Any(u => u.DiscordID == (long)user.Id);
+            return this.KnownUsers.Any(su => su.User.DiscordID == (long)user.Id);
         }
 
         /// <summary>

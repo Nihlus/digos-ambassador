@@ -76,5 +76,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
             : base(SchemaName, contextOptions)
         {
         }
+
+        /// <inheritdoc />
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<ServerUser>().HasOne(su => su.Server).WithMany(s => s.KnownUsers);
+            modelBuilder.Entity<ServerUser>().HasOne(su => su.User).WithMany();
+        }
     }
 }
