@@ -20,9 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
 {
@@ -35,6 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets or sets the server the settings are relevant for.
         /// </summary>
+        [NotNull, Required]
         public virtual Server Server { get; set; }
 
         /// <summary>
