@@ -120,7 +120,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             var newUser = new User
             {
                 DiscordID = (long)discordUser.Id,
-                Class = UserClass.Other,
                 Bio = null,
                 Timezone = null
             };

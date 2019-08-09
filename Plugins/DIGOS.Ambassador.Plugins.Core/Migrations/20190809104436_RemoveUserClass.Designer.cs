@@ -8,14 +8,16 @@ using DIGOS.Ambassador.Plugins.Core.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Plugins.Core.Migrations
 {
     [DbContext(typeof(CoreDatabaseContext))]
-    partial class CoreDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190809104436_RemoveUserClass")]
+    partial class RemoveUserClass
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

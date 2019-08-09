@@ -41,11 +41,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         public long DiscordID { get; set; }
 
         /// <summary>
-        /// Gets or sets the class of the user within the DIGOS 'verse.
-        /// </summary>
-        public UserClass Class { get; set; }
-
-        /// <summary>
         /// Gets or sets the biography of the user. This contains useful information that the users provide themselves.
         /// </summary>
         public string Bio { get; set; }

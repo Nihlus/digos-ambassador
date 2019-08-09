@@ -73,8 +73,6 @@ namespace DIGOS.Ambassador.Plugins.Core
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
 
-            commands.AddEnumReader<UserClass>();
-
             await commands.AddModuleAsync<PrivacyCommands>(serviceProvider);
             await commands.AddModuleAsync<ServerCommands>(serviceProvider);
             await commands.AddModuleAsync<UserCommands>(serviceProvider);

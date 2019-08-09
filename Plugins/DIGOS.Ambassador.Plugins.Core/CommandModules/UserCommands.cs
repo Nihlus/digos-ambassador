@@ -22,6 +22,7 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
@@ -33,6 +34,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Permissions.Preconditions;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using Humanizer;
 using Humanizer.Localisation;
 using JetBrains.Annotations;
@@ -116,36 +118,20 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             eb.WithAuthor(discordUser);
             eb.WithThumbnailUrl(discordUser.GetAvatarUrl());
 
-            switch (user.Class)
+            if (discordUser is SocketGuildUser guildUser)
             {
-                case UserClass.Other:
+                var primaryRole = guildUser.Roles.OrderByDescending(r => r.Position).FirstOrDefault();
+                if (!(primaryRole is null) && !primaryRole.IsEveryone)
                 {
-                    eb.WithColor(1.0f, 1.0f, 1.0f); // White
-                    break;
+                    eb.WithColor(primaryRole.Color);
                 }
-                case UserClass.DIGOSInfrastructure:
+                else
                 {
-                    eb.WithColor(Color.Purple);
-                    break;
-                }
-                case UserClass.DIGOSDronie:
-                {
-                    eb.WithColor(Color.DarkOrange);
-                    break;
-                }
-                case UserClass.DIGOSUnit:
-                {
-                    eb.WithColor(Color.DarkPurple);
-                    break;
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException();
+                    eb.WithColor(Color.LighterGrey);
                 }
             }
 
             eb.AddField("Name", discordUser.Username);
-            eb.AddField("Class", user.Class.Humanize().Transform(To.TitleCase));
 
             string timezoneValue;
             if (user.Timezone is null)
@@ -217,72 +203,6 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 _database = database;
                 _feedback = feedback;
                 _users = users;
-            }
-
-            /// <summary>
-            /// Sets the invoking user's class.
-            /// </summary>
-            /// <param name="userClass">The user's new class.</param>
-            [UsedImplicitly]
-            [Command("class")]
-            [Summary("Sets the invoking user's class.")]
-            [RequirePermission(Permission.SetClass)]
-            public async Task SetUserClassAsync
-            (
-                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<UserClass>))]
-                UserClass userClass
-            )
-            {
-                // Add the user to the user database if they're not already in it
-                var getUserResult = await _users.GetOrRegisterUserAsync(this.Context.Message.Author);
-                if (!getUserResult.IsSuccess)
-                {
-                    await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
-                    return;
-                }
-
-                var user = getUserResult.Entity;
-
-                user.Class = userClass;
-
-                await _database.SaveChangesAsync();
-
-                await _feedback.SendConfirmationAsync(this.Context, "Class updated.");
-            }
-
-            /// <summary>
-            /// Sets the target user's class.
-            /// </summary>
-            /// <param name="discordUser">The Discord user to change the class of.</param>
-            /// <param name="userClass">The user's new class.</param>
-            [UsedImplicitly]
-            [Command("class")]
-            [Summary("Sets the target user's class.")]
-            [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.SetClass, PermissionTarget.Other)]
-            public async Task SetUserClassAsync
-            (
-                [NotNull]
-                IUser discordUser,
-                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<UserClass>))]
-                UserClass userClass
-            )
-            {
-                // Add the user to the user database if they're not already in it
-                var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
-                if (!getUserResult.IsSuccess)
-                {
-                    await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
-                    return;
-                }
-
-                var user = getUserResult.Entity;
-
-                user.Class = userClass;
-
-                await _database.SaveChangesAsync();
-
-                await _feedback.SendConfirmationAsync(this.Context, $"Class of {discordUser.Mention} updated.");
             }
 
             /// <summary>
