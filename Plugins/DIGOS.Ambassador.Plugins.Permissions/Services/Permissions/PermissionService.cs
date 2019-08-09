@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services.Permissions
 
             if (existingPermission is null)
             {
-                await _database.LocalPermissions.AddAsync(grantedPermission);
+                await _database.Permissions.AddAsync(grantedPermission);
             }
             else
             {
@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services.Permissions
 
             if (existingPermission != null)
             {
-                _database.LocalPermissions.Remove(existingPermission);
+                _database.Permissions.Remove(existingPermission);
                 await _database.SaveChangesAsync();
             }
         }
@@ -161,7 +161,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services.Permissions
                     ServerDiscordID = (long)server.Id
                 };
 
-                await _database.LocalPermissions.AddAsync(scopedPermission);
+                await _database.Permissions.AddAsync(scopedPermission);
             }
 
             await _database.SaveChangesAsync();
@@ -198,19 +198,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services.Permissions
                 return true;
             }
 
-            // First, check if the user has the permission on a global level
-            var hasGlobalPermission = await GetGlobalUserPermissions(discordUser).AnyAsync
-            (
-                gp =>
-                    gp.Permission == requiredPermission.Permission &&
-                    gp.Target.HasFlag(requiredPermission.Target)
-            );
-
-            if (hasGlobalPermission)
-            {
-                return true;
-            }
-
             // Then, check the user's local permissions
             return await GetLocalUserPermissions(discordUser, discordServer).AnyAsync
             (
@@ -229,27 +216,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services.Permissions
         [NotNull]
         public IQueryable<LocalPermission> GetLocalUserPermissions(IUser contextUser, IGuild guild)
         {
-            return _database.LocalPermissions
+            return _database.Permissions
                 .Where
                 (
                     p =>
                         p.ServerDiscordID == (long)guild.Id &&
-                        p.UserDiscordID == (long)contextUser.Id
-                );
-        }
-
-        /// <summary>
-        /// Gets the global permissions granted to the given user.
-        /// </summary>
-        /// <param name="contextUser">The user.</param>
-        /// <returns>The permissions.</returns>
-        [NotNull]
-        public IQueryable<GlobalPermission> GetGlobalUserPermissions(IUser contextUser)
-        {
-            return _database.GlobalPermissions
-                .Where
-                (
-                    p =>
                         p.UserDiscordID == (long)contextUser.Id
                 );
         }

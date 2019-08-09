@@ -37,18 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// <summary>
         /// Gets or sets the table where granted local permissions are stored.
         /// </summary>
-        public DbSet<LocalPermission> LocalPermissions
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
-
-        /// <summary>
-        /// Gets or sets the table where granted global permissions are stored.
-        /// </summary>
-        public DbSet<GlobalPermission> GlobalPermissions
+        public DbSet<LocalPermission> Permissions
         {
             get;
 

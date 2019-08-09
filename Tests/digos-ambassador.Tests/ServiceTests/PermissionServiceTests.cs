@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     UserDiscordID = (long)_user.Id
                 };
 
-                await this.Database.LocalPermissions.AddAsync(grantedPermission);
+                await this.Database.Permissions.AddAsync(grantedPermission);
                 await this.Database.SaveChangesAsync();
 
                 Assert.True(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     UserDiscordID = (long)_user.Id
                 };
 
-                await this.Database.LocalPermissions.AddAsync(grantedPermission);
+                await this.Database.Permissions.AddAsync(grantedPermission);
 
                 await this.Database.SaveChangesAsync();
 
@@ -115,105 +115,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                     UserDiscordID = (long)_user.Id
                 };
 
-                await this.Database.LocalPermissions.AddAsync(grantedPermission);
+                await this.Database.Permissions.AddAsync(grantedPermission);
 
                 await this.Database.SaveChangesAsync();
 
                 Assert.False(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
-            }
-
-            [Fact]
-            public async void GrantedLocalPermissionReturnsFalseIfServerIDsDiffer()
-            {
-                var anotherServer = MockHelper.CreateDiscordGuild(2);
-                var requiredPermission = (Permission.SetClass, PermissionTarget.Self);
-
-                var grantedPermission = new LocalPermission
-                {
-                    Permission = Permission.SetClass,
-                    Target = PermissionTarget.Other,
-                    ServerDiscordID = (long)anotherServer.Id
-                };
-
-                await this.Database.LocalPermissions.AddAsync(grantedPermission);
-
-                await this.Database.SaveChangesAsync();
-
-                Assert.False(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
-            }
-
-            [Fact]
-            public async void GrantedGlobalPermissionReturnsTrueForGrantedLocal()
-            {
-                var requiredPermission = (Permission.SetClass, PermissionTarget.Self);
-
-                var grantedLocalPermission = new LocalPermission
-                {
-                    Permission = Permission.SetClass,
-                    Target = PermissionTarget.Self,
-                    ServerDiscordID = (long)_guild.Id,
-                    UserDiscordID = (long)_user.Id
-                };
-
-                var grantedGlobalPermission = new GlobalPermission
-                {
-                    Permission = Permission.SetClass,
-                    Target = PermissionTarget.Self,
-                    UserDiscordID = (long)_user.Id
-                };
-
-                await this.Database.GlobalPermissions.AddAsync(grantedGlobalPermission);
-                await this.Database.LocalPermissions.AddAsync(grantedLocalPermission);
-
-                await this.Database.SaveChangesAsync();
-
-                Assert.True(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
-            }
-
-            [Fact]
-            public async void GrantedGlobalPermissionReturnsTrueForNonGrantedLocal()
-            {
-                var requiredPermission = (Permission.SetClass, PermissionTarget.Self);
-
-                var grantedGlobalPermission = new GlobalPermission
-                {
-                    Permission = Permission.SetClass,
-                    Target = PermissionTarget.Self,
-                    UserDiscordID = (long)_user.Id
-                };
-
-                await this.Database.GlobalPermissions.AddAsync(grantedGlobalPermission);
-                await this.Database.SaveChangesAsync();
-
-                Assert.True(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
-            }
-
-            [Fact]
-            public async void GrantedGlobalPermissionReturnsTrueForGrantedLocalWithDifferingTarget()
-            {
-                var requiredPermission = (Permission.SetClass, PermissionTarget.Self);
-
-                var grantedLocalPermission = new LocalPermission
-                {
-                    Permission = Permission.SetClass,
-                    Target = PermissionTarget.Self,
-                    ServerDiscordID = (long)_guild.Id,
-                    UserDiscordID = (long)_user.Id
-                };
-
-                var grantedGlobalPermission = new GlobalPermission
-                {
-                    Permission = Permission.SetClass,
-                    Target = PermissionTarget.Other,
-                    UserDiscordID = (long)_user.Id
-                };
-
-                await this.Database.GlobalPermissions.AddAsync(grantedGlobalPermission);
-                await this.Database.LocalPermissions.AddAsync(grantedLocalPermission);
-
-                await this.Database.SaveChangesAsync();
-
-                Assert.True(await this.Permissions.HasPermissionAsync(_guild, _user, requiredPermission));
             }
         }
     }
