@@ -52,5 +52,11 @@ namespace DIGOS.Ambassador.Plugins.Abstractions
         {
             return Task.FromResult(true);
         }
+
+        /// <inheritdoc/>
+        public sealed override string ToString()
+        {
+            return Name;
+        }
     }
 }
