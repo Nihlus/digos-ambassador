@@ -37,10 +37,101 @@ namespace DIGOS.Ambassador.Plugins.Services
     public class PluginService
     {
         /// <summary>
-        /// Loads the available plugins.
+        /// Loads the available plugins into a dependency tree.
         /// </summary>
-        /// <returns>The descriptors of the available plugins.</returns>
-        public IEnumerable<IPluginDescriptor> LoadAvailablePlugins()
+        /// <returns>The dependency tree.</returns>
+        public PluginDependencyTree LoadPluginDescriptors()
+        {
+            var pluginAssemblies = LoadAvailablePluginAssemblies().ToList();
+            var pluginsWithDependencies = pluginAssemblies.ToDictionary
+            (
+                a => a,
+                a => a.GetReferencedAssemblies()
+                    .Where(ra => pluginAssemblies.Any(pa => pa.FullName == ra.FullName))
+                    .Select(ra => pluginAssemblies.First(pa => pa.FullName == ra.FullName))
+            );
+
+            bool IsDependency(Assembly assembly, Assembly other)
+            {
+                var dependencies = pluginsWithDependencies[assembly];
+                foreach (var dependency in dependencies)
+                {
+                    if (dependency == other)
+                    {
+                        return true;
+                    }
+
+                    if (IsDependency(dependency, other))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            bool IsDirectDependency(Assembly assembly, Assembly dependency)
+            {
+                var dependencies = pluginsWithDependencies[assembly];
+                if (IsDependency(assembly, dependency) && dependencies.All(d => !IsDependency(d, dependency)))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+
+            var tree = new PluginDependencyTree();
+            var nodes = new Dictionary<Assembly, PluginDependencyTreeNode>();
+
+            var sorted = pluginsWithDependencies.Keys.TopologicalSort(k => pluginsWithDependencies[k]).ToList();
+            while (sorted.Count > 0)
+            {
+                var current = sorted[0];
+                var node = new PluginDependencyTreeNode(LoadPluginDescriptor(current));
+
+                var dependencies = pluginsWithDependencies[current].ToList();
+                if (!dependencies.Any())
+                {
+                    // This is a root of a chain
+                    tree.AddBranch(node);
+                }
+
+                foreach (var dependency in dependencies)
+                {
+                    if (!IsDirectDependency(current, dependency))
+                    {
+                        continue;
+                    }
+
+                    var dependencyNode = nodes[dependency];
+                    dependencyNode.AddDependant(node);
+                }
+
+                nodes.Add(current, node);
+                sorted.Remove(current);
+            }
+
+            return tree;
+        }
+
+        /// <summary>
+        /// Loads the plugin descriptor from the given assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly.</param>
+        /// <returns>The plugin descriptor.</returns>
+        public IPluginDescriptor LoadPluginDescriptor(Assembly assembly)
+        {
+            var pluginAttribute = assembly.GetCustomAttribute<AmbassadorPlugin>();
+            var descriptor = (IPluginDescriptor)Activator.CreateInstance(pluginAttribute.PluginDescriptor);
+            return descriptor;
+        }
+
+        /// <summary>
+        /// Loads the available plugin assemblies.
+        /// </summary>
+        /// <returns>The available assemblies.</returns>
+        public IEnumerable<Assembly> LoadAvailablePluginAssemblies()
         {
             var entryAssemblyPath = Assembly.GetEntryAssembly()?.Location;
 
@@ -57,7 +148,6 @@ namespace DIGOS.Ambassador.Plugins.Services
                 SearchOption.AllDirectories
             );
 
-            var pluginAssemblies = new List<Assembly>();
             foreach (var assemblyPath in assemblies)
             {
                 Assembly assembly;
@@ -76,9 +166,17 @@ namespace DIGOS.Ambassador.Plugins.Services
                     continue;
                 }
 
-                pluginAssemblies.Add(assembly);
+                yield return assembly;
             }
+        }
 
+        /// <summary>
+        /// Loads the available plugins.
+        /// </summary>
+        /// <returns>The descriptors of the available plugins.</returns>
+        public IEnumerable<IPluginDescriptor> LoadAvailablePlugins()
+        {
+            var pluginAssemblies = LoadAvailablePluginAssemblies().ToList();
             var sorted = pluginAssemblies.TopologicalSort
             (
                 a => a.GetReferencedAssemblies()
