@@ -23,21 +23,17 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Core;
 using DIGOS.Ambassador.Plugins.Core.CommandModules;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
-using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(CorePlugin))]

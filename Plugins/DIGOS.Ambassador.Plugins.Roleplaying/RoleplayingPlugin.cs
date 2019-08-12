@@ -37,8 +37,6 @@ using DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(RoleplayingPlugin))]

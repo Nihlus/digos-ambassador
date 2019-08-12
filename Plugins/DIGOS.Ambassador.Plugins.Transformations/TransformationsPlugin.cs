@@ -36,9 +36,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.TypeReaders;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(TransformationsPlugin))]

@@ -33,9 +33,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(PermissionsPlugin))]

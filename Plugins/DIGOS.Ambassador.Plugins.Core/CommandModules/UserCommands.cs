@@ -26,7 +26,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;

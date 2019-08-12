@@ -32,9 +32,7 @@ using DIGOS.Ambassador.Plugins.Kinks.Model;
 using DIGOS.Ambassador.Plugins.Kinks.Services;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 [assembly: AmbassadorPlugin(typeof(KinksPlugin))]

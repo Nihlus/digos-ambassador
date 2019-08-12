@@ -1867,8 +1867,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
         {
             private readonly IRole _discordRole;
 
-            private CharacterRole _role;
-
             public SetCharacterRoleAccessAsync()
             {
                 var guild = MockHelper.CreateDiscordGuild(0);
@@ -1877,13 +1875,11 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
 
             public override async Task InitializeAsync()
             {
-                var result = await this.Characters.CreateCharacterRoleAsync
+                await this.Characters.CreateCharacterRoleAsync
                 (
                     _discordRole,
                     RoleAccess.Open
                 );
-
-                _role = result.Entity;
             }
 
             [Fact]

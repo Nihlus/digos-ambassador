@@ -37,7 +37,6 @@ using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
 using DIGOS.Ambassador.Services;
 using Discord;
@@ -88,7 +87,6 @@ namespace DIGOS.Ambassador.Behaviours
         /// <param name="help">The help service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
-        /// <param name="permissionsDatabase">The permissions database.</param>
         public CommandBehaviour
         (
             DiscordSocketClient client,
@@ -101,8 +99,7 @@ namespace DIGOS.Ambassador.Behaviours
             PermissionService permissions,
             HelpService help,
             UserService users,
-            ServerService servers,
-            PermissionsDatabaseContext permissionsDatabase
+            ServerService servers
         )
             : base(client)
         {
