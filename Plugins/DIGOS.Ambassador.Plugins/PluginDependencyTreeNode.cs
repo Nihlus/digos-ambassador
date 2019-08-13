@@ -76,6 +76,23 @@ namespace DIGOS.Ambassador.Plugins
             _dependants.Add(node);
         }
 
+        /// <summary>
+        /// Gets all the dependant plugins in this branch.
+        /// </summary>
+        /// <returns>The dependant plugins.</returns>
+        public IEnumerable<PluginDependencyTreeNode> GetAllDependants()
+        {
+            foreach (var dependant in this.Dependants)
+            {
+                yield return dependant;
+
+                foreach (var sub in dependant.GetAllDependants())
+                {
+                    yield return sub;
+                }
+            }
+        }
+
         /// <inheritdoc/>
         public override string ToString()
         {

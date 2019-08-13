@@ -20,7 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Results.Base;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins
@@ -47,6 +51,90 @@ namespace DIGOS.Ambassador.Plugins
         public PluginDependencyTree([CanBeNull, ItemNotNull] List<PluginDependencyTreeNode> branches = null)
         {
             _branches = branches ?? new List<PluginDependencyTreeNode>();
+        }
+
+        /// <summary>
+        /// Walks the plugin tree, performing the given operation on each node. If the operation fails, the walk
+        /// terminates at that point.
+        /// </summary>
+        /// <param name="errorFactory">A factory method to create an error result.</param>
+        /// <param name="preOperation">The operation to perform while walking down into the tree.</param>
+        /// <param name="postOperation">The operation to perform while walking up into the tree.</param>
+        /// <typeparam name="TResult">The result type.</typeparam>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<IEnumerable<TResult>> WalkAsync<TResult>
+        (
+            [NotNull] Func<PluginDependencyTreeNode, Exception, TResult> errorFactory,
+            [NotNull] Func<PluginDependencyTreeNode, Task<TResult>> preOperation,
+            [CanBeNull] Func<PluginDependencyTreeNode, Task<TResult>> postOperation = null
+        )
+            where TResult : IResult
+        {
+            var results = new List<TResult>();
+            foreach (var branch in _branches)
+            {
+                results.AddRange(await WalkNodeAsync(branch, errorFactory, preOperation, postOperation));
+            }
+
+            return results;
+        }
+
+        private async Task<IEnumerable<TResult>> WalkNodeAsync<TResult>
+        (
+            [NotNull] PluginDependencyTreeNode node,
+            [NotNull] Func<PluginDependencyTreeNode, Exception, TResult> errorFactory,
+            [NotNull] Func<PluginDependencyTreeNode, Task<TResult>> preOperation,
+            [CanBeNull] Func<PluginDependencyTreeNode, Task<TResult>> postOperation = null
+        )
+            where TResult : IResult
+        {
+            var results = new List<TResult>();
+
+            try
+            {
+                var result = await preOperation(node);
+                results.Add(result);
+
+                if (!result.IsSuccess)
+                {
+                    results.AddRange(node.GetAllDependants().Select(d => errorFactory(d, null)));
+                    return results;
+                }
+            }
+            catch (Exception e)
+            {
+                results.Add(errorFactory(node, e));
+                results.AddRange(node.GetAllDependants().Select(d => errorFactory(d, null)));
+                return results;
+            }
+
+            foreach (var dependant in node.Dependants)
+            {
+                results.AddRange(await WalkNodeAsync(dependant, errorFactory, preOperation, postOperation));
+            }
+
+            if (!(postOperation is null))
+            {
+                try
+                {
+                    var result = await postOperation(node);
+                    results.Add(result);
+
+                    if (!result.IsSuccess)
+                    {
+                        results.AddRange(node.GetAllDependants().Select(d => errorFactory(d, null)));
+                        return results;
+                    }
+                }
+                catch (Exception e)
+                {
+                    results.Add(errorFactory(node, e));
+                    results.AddRange(node.GetAllDependants().Select(d => errorFactory(d, null)));
+                    return results;
+                }
+            }
+
+            return results;
         }
 
         /// <summary>
