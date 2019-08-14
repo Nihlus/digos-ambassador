@@ -117,7 +117,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return CreateEntityResult<Roleplay>.FromError(getOwnerResult);
             }
 
+            // Ensure the user is attached, so we don't create any conflicts.
             var owner = getOwnerResult.Entity;
+            _database.Attach(owner);
 
             var roleplay = new Roleplay
             {
@@ -547,6 +549,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
                 var user = getUserResult.Entity;
 
+                // Ensure the user is attached, so we don't create any conflicts.
+                _database.Attach(user);
                 participantEntry = new RoleplayParticipant(roleplay, user, ParticipantStatus.Joined);
                 roleplay.ParticipatingUsers.Add(participantEntry);
             }
@@ -594,6 +598,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
                 var user = getUserResult.Entity;
 
+                // Ensure the user is attached, so we don't create any conflicts.
+                _database.Attach(user);
                 participantEntry = new RoleplayParticipant(roleplay, user, ParticipantStatus.Invited);
                 roleplay.ParticipatingUsers.Add(participantEntry);
             }
