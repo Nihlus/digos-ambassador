@@ -155,7 +155,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return CreateEntityResult<Roleplay>.FromError(setIsPublicResult);
             }
 
-            await _database.Roleplays.AddAsync(roleplay);
+            _database.Roleplays.Update(roleplay);
 
             await _database.SaveChangesAsync();
 

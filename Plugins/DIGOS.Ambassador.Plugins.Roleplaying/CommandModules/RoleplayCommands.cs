@@ -171,11 +171,46 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         }
 
         /// <summary>
+        /// Lists all available roleplays in the server.
+        /// </summary>
+        [UsedImplicitly]
+        [Alias("list")]
+        [Command("list")]
+        [Summary("Lists all available roleplays in the server.")]
+        [RequireContext(ContextType.Guild)]
+        public async Task ListServerRoleplaysAsync()
+        {
+            var roleplays = _roleplays.GetRoleplays(this.Context.Guild)
+                .Where(r => r.IsPublic);
+
+            var appearance = PaginatedAppearanceOptions.Default;
+            appearance.Title = "Available Roleplays";
+
+            var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                _feedback,
+                this.Context.User,
+                roleplays,
+                r => r.Name,
+                r => r.Summary,
+                "There are no roleplays in the server that you can view.",
+                appearance
+            );
+
+            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            (
+                this.Context.Channel,
+                paginatedEmbed,
+                TimeSpan.FromMinutes(5.0)
+            );
+        }
+
+        /// <summary>
         /// Lists the roleplays that the given user owns.
         /// </summary>
         /// <param name="discordUser">The user to show the roleplays of.</param>
         [UsedImplicitly]
-        [Alias("list-owned", "list")]
+        [Alias("list-owned")]
         [Command("list-owned")]
         [Summary("Lists the roleplays that the given user owns.")]
         [RequireContext(ContextType.Guild)]
