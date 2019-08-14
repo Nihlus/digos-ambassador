@@ -180,6 +180,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task ListServerRoleplaysAsync()
         {
+            // TODO: Filter so that ones where the user has joined but are private are also included
             var roleplays = _roleplays.GetRoleplays(this.Context.Guild)
                 .Where(r => r.IsPublic);
 
