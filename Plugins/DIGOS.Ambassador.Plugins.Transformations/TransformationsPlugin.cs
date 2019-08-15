@@ -59,7 +59,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations
         {
             serviceCollection
                 .AddScoped<LuaService>()
-                .AddScoped<TransformationService>()
+                .AddScoped<TransformationService>
+                (
+                    provider =>
+                        ActivatorUtilities.CreateInstance<TransformationService>(provider)
+                            .WithDescriptionBuilder(new TransformationDescriptionBuilder(provider))
+                )
                 .AddSchemaAwareDbContextPool<TransformationsDatabaseContext>();
 
             return Task.FromResult(true);
