@@ -26,9 +26,12 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Services;
+using System.Xml;
+using DIGOS.Ambassador.Core.Services;
 using JetBrains.Annotations;
 using log4net;
+using log4net.Config;
+using log4net.Repository.Hierarchy;
 
 namespace DIGOS.Ambassador
 {
@@ -52,8 +55,15 @@ namespace DIGOS.Ambassador
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
             // Configure logging
-            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
-            log4net.Config.XmlConfigurator.Configure(logRepository, new FileInfo("app.config"));
+            const string configurationName = "DIGOS.Ambassador.log4net.config";
+            var logConfig = new XmlDocument();
+            using (var configStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(configurationName))
+            {
+                logConfig.Load(configStream);
+            }
+
+            var repo = LogManager.CreateRepository(Assembly.GetEntryAssembly(), typeof(Hierarchy));
+            XmlConfigurator.Configure(repo, logConfig["log4net"]);
 
             Log.Debug($"Running on {RuntimeInformation.FrameworkDescription}");
 
@@ -70,6 +80,7 @@ namespace DIGOS.Ambassador
             }
 
             var ambassadorClient = new AmbassadorClient(contentService);
+            await ambassadorClient.InitializeAsync();
             await ambassadorClient.LoginAsync();
             await ambassadorClient.StartAsync();
 

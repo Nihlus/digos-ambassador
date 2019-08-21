@@ -24,10 +24,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using DIGOS.Ambassador.Extensions;
+using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Plugins.Kinks.Extensions;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity;
 using DIGOS.Ambassador.Wizards;
 using Discord.Commands;
 using JetBrains.Annotations;

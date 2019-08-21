@@ -22,13 +22,9 @@
 
 using System.IO;
 using System.Linq;
-
-using DIGOS.Ambassador.Database.Transformations;
-using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Transformations;
-
-using Discord.Commands;
-
+using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Plugins.Transformations.Model;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -89,7 +85,7 @@ namespace DIGOS.Ambassador.Tools
 
             if (files.Count <= 0)
             {
-                return DetermineConditionResult.FromError(CommandError.ObjectNotFound, "No files to verify in input directory.");
+                return DetermineConditionResult.FromError("No files to verify in input directory.");
             }
 
             foreach (var file in files)

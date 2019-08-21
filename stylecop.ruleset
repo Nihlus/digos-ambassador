@@ -1,4 +1,4 @@
-<RuleSet Name="OpenTK Rules" ToolsVersion="12.0">
+<RuleSet Name="OpenTK Rules" ToolsVersion="14.0">
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
 
     <!-- Special rules -->
@@ -70,7 +70,7 @@
     <Rule Id="SA1131" Action="Error" /> <!-- Use readable conditions -->
     <Rule Id="SA1132" Action="Error" /> <!-- Do not combine fields -->
     <Rule Id="SA1133" Action="None" /> <!-- Do not combine attributes -->
-    <Rule Id="SA1134" Action="Error" /> <!-- Attributes must not share line -->
+    <Rule Id="SA1134" Action="None" /> <!-- Attributes must not share line -->
     <Rule Id="SA1136" Action="Error" /> <!-- Enum values should be on separate lines -->
     <Rule Id="SA1137" Action="Error" /> <!-- Elements should have the same indentation -->
     <Rule Id="SA1139" Action="Error" /> <!-- Use literals suffix notation instead of casting -->

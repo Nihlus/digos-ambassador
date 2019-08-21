@@ -1,0 +1,12 @@
+<Project>
+
+  <PropertyGroup>
+    <HasCommonProperties>true</HasCommonProperties>
+    <Copyright>Jarl Gullberg 2019</Copyright>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SolutionRoot>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)\..\))</SolutionRoot>
+  </PropertyGroup>
+
+</Project>

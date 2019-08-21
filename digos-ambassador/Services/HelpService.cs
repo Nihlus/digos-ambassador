@@ -22,9 +22,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
-
-using DIGOS.Ambassador.Extensions;
-
+using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Feedback;
 using Discord;
 using Discord.Commands;
 using Humanizer;

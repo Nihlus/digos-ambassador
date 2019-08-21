@@ -21,31 +21,23 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Database;
-using DIGOS.Ambassador.Database.Appearances;
-using DIGOS.Ambassador.Database.Characters;
-using DIGOS.Ambassador.Database.Kinks;
-using DIGOS.Ambassador.Database.Roleplaying;
-using DIGOS.Ambassador.Database.Users;
-using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Permissions;
+using DIGOS.Ambassador.Core.Database.Services;
+using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord;
+using DIGOS.Ambassador.Discord.Behaviours.Services;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Plugins.Abstractions;
+using DIGOS.Ambassador.Plugins.Services;
 using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Behaviours;
-using DIGOS.Ambassador.Services.Interactivity;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
-using DIGOS.Ambassador.Transformations;
-using DIGOS.Ambassador.TypeReaders;
-using DIGOS.Ambassador.Utility;
-
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using log4net;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 #pragma warning disable SA1118 // Parameter spans multiple lines, big strings
@@ -68,9 +60,9 @@ namespace DIGOS.Ambassador
 
         private readonly CommandService _commands;
 
-        private readonly IServiceProvider _services;
-
         private readonly BehaviourService _behaviours;
+
+        private IServiceProvider _services;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorClient"/> class.
@@ -78,9 +70,7 @@ namespace DIGOS.Ambassador
         /// <param name="content">The content service.</param>
         public AmbassadorClient([NotNull] ContentService content)
         {
-            _client = Type.GetType("Mono.Runtime") is null
-                ? new DiscordSocketClient()
-                : new DiscordSocketClient(new DiscordSocketConfig { WebSocketProvider = () => new WebSocketSharpProvider() });
+            _client = new DiscordSocketClient();
 
             _client.Log += OnDiscordLogEvent;
 
@@ -91,41 +81,106 @@ namespace DIGOS.Ambassador
             _commands = new CommandService();
 
             _behaviours = new BehaviourService();
+        }
 
-            _services = new ServiceCollection()
+        /// <summary>
+        /// Initializes the bot and its services.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task InitializeAsync()
+        {
+            var pluginService = new PluginService();
+
+            var serviceCollection = new ServiceCollection()
                 .AddSingleton(this)
                 .AddSingleton(_client)
                 .AddSingleton<BaseSocketClient>(_client)
                 .AddSingleton(_behaviours)
                 .AddSingleton(_content)
                 .AddSingleton(_commands)
-                .AddSingleton<UserService>()
-                .AddSingleton<RoleplayService>()
                 .AddSingleton<DiscordService>()
-                .AddSingleton<CharacterService>()
                 .AddSingleton<UserFeedbackService>()
-                .AddSingleton<DossierService>()
                 .AddSingleton<InteractivityService>()
-                .AddSingleton<TransformationService>()
-                .AddSingleton<LuaService>()
-                .AddSingleton<KinkService>()
-                .AddSingleton<PermissionService>()
-                .AddSingleton<PrivacyService>()
                 .AddSingleton<HelpService>()
-                .AddSingleton<ServerService>()
-                .AddSingleton<OwnedEntityService>()
                 .AddSingleton<Random>()
-                .AddDbContext<AmbyDatabaseContext>(builder => AmbyDatabaseContext.ConfigureOptions(builder))
-                .BuildServiceProvider();
+                .AddSingleton(pluginService)
+                .AddSingleton<SchemaAwareDbContextService>();
 
-            var transformationService = _services.GetRequiredService<TransformationService>();
-            transformationService.WithDescriptionBuilder
-            (
-                ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(_services)
-            );
+            var successfullyRegisteredPlugins = new List<IPluginDescriptor>();
 
-            var characterService = _services.GetRequiredService<CharacterService>();
-            characterService.DiscoverPronounProviders();
+            var availablePlugins = pluginService.LoadAvailablePlugins();
+            foreach (var availablePlugin in availablePlugins)
+            {
+                if (!await availablePlugin.RegisterServicesAsync(serviceCollection))
+                {
+                    Log.Warn
+                    (
+                        $"The plugin \"{availablePlugin.Name}\" (v{availablePlugin.Version}) failed to " +
+                        $"register its services. It will not be loaded."
+                    );
+
+                    continue;
+                }
+
+                successfullyRegisteredPlugins.Add(availablePlugin);
+            }
+
+            _services = serviceCollection.BuildServiceProvider();
+
+            // Create plugin databases
+            foreach (var plugin in successfullyRegisteredPlugins)
+            {
+                if (!(plugin is IMigratablePlugin migratablePlugin))
+                {
+                    continue;
+                }
+
+                if (await migratablePlugin.IsDatabaseCreatedAsync(_services))
+                {
+                    continue;
+                }
+
+                if (!await migratablePlugin.MigratePluginAsync(_services))
+                {
+                    Log.Warn
+                    (
+                        $"The plugin \"{plugin.Name}\"" +
+                        $" (v{plugin.Version}) failed to migrate its database. It may not " +
+                        $"be functional."
+                    );
+                }
+            }
+
+            // Then, run migrations in reverse
+            foreach (var plugin in successfullyRegisteredPlugins.AsEnumerable().Reverse())
+            {
+                if (!(plugin is IMigratablePlugin migratablePlugin))
+                {
+                    continue;
+                }
+
+                if (!await migratablePlugin.MigratePluginAsync(_services))
+                {
+                    Log.Warn
+                    (
+                        $"The plugin \"{plugin.Name}\"" +
+                        $" (v{plugin.Version}) failed to migrate its database. It may not " +
+                        $"be functional."
+                    );
+                }
+            }
+
+            foreach (var plugin in successfullyRegisteredPlugins)
+            {
+                if (!await plugin.InitializeAsync(_services))
+                {
+                    Log.Warn
+                    (
+                        $"The plugin \"{plugin.Name}\"" +
+                        $" (v{plugin.Version}) failed to initialize. It may not be functional."
+                    );
+                }
+            }
         }
 
         /// <summary>
@@ -143,25 +198,6 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the start action.</returns>
         public async Task StartAsync()
         {
-            var db = _services.GetRequiredService<AmbyDatabaseContext>();
-            if (!((RelationalDatabaseCreator)db.Database.GetService<IDatabaseCreator>()).Exists())
-            {
-                Log.Error("The database doesn't exist.");
-                return;
-            }
-
-            _commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
-            _commands.AddTypeReader<Character>(new CharacterTypeReader());
-            _commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
-            _commands.AddTypeReader<Colour>(new ColourTypeReader());
-
-            _commands.AddEnumReader<UserClass>();
-            _commands.AddEnumReader<KinkPreference>();
-            _commands.AddEnumReader<Bodypart>();
-            _commands.AddEnumReader<Pattern>();
-            _commands.AddEnumReader<Permission>();
-            _commands.AddEnumReader<Permissions.PermissionTarget>();
-
             // Load modules and behaviours from the assembly this type was declared in
             var localAssembly = GetType().Assembly;
             await _commands.AddModulesAsync(localAssembly, _services);

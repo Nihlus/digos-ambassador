@@ -23,10 +23,8 @@
 using System;
 using System.IO;
 using CommandLine;
-using DIGOS.Ambassador.Database.Transformations;
-using DIGOS.Ambassador.Services;
-
-using Discord.Commands;
+using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Plugins.Transformations.Model;
 using YamlDotNet.Core;
 using Parser = CommandLine.Parser;
 
@@ -37,16 +35,16 @@ namespace DIGOS.Ambassador.Tools
     /// </summary>
     internal static class Program
     {
-        private static CommandLineOptions Options;
+        private static CommandLineOptions _options;
 
         private static int Main(string[] args)
         {
             Parser.Default.ParseArguments<CommandLineOptions>(args)
-            .WithParsed(r => Options = r);
+            .WithParsed(r => _options = r);
 
             var verifier = new TransformationFileVerifier();
 
-            var path = Path.GetFullPath(Options.VerifyPath);
+            var path = Path.GetFullPath(_options.VerifyPath);
             DetermineConditionResult verifyResult;
             if (File.Exists(path))
             {
@@ -72,7 +70,7 @@ namespace DIGOS.Ambassador.Tools
             if (!verifyResult.IsSuccess)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                if (verifyResult.Error == CommandError.Exception)
+                if (!(verifyResult.Exception is null))
                 {
                     Console.WriteLine($"File \"{verifyResult.ErrorReason}\" failed verification.");
 

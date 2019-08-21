@@ -28,16 +28,10 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Database;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Doc.Extensions;
 using DIGOS.Ambassador.Doc.Nodes;
-using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Services.Interactivity;
-using DIGOS.Ambassador.Services.Servers;
-using DIGOS.Ambassador.Services.Users;
 using Discord.Commands;
-using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -71,31 +65,8 @@ namespace DIGOS.Ambassador.Doc
 
             _commands = new CommandService(new CommandServiceConfig { ThrowOnError = false });
 
-            var dummyClient = new DiscordSocketClient();
-
             // Dummy services
             _services = new ServiceCollection()
-                .AddSingleton<UserService>()
-                .AddSingleton<BaseSocketClient>(new DiscordSocketClient())
-                .AddSingleton(dummyClient)
-                .AddSingleton<ContentService>()
-                .AddSingleton(_commands)
-                .AddSingleton<RoleplayService>()
-                .AddSingleton<DiscordService>()
-                .AddSingleton<CharacterService>()
-                .AddSingleton<UserFeedbackService>()
-                .AddSingleton<DossierService>()
-                .AddSingleton<InteractivityService>()
-                .AddSingleton<TransformationService>()
-                .AddSingleton<LuaService>()
-                .AddSingleton<KinkService>()
-                .AddSingleton<PermissionService>()
-                .AddSingleton<PrivacyService>()
-                .AddSingleton<HelpService>()
-                .AddSingleton<ServerService>()
-                .AddSingleton<OwnedEntityService>()
-                .AddSingleton<Random>()
-                .AddDbContext<AmbyDatabaseContext>()
                 .BuildServiceProvider();
         }
 

@@ -24,10 +24,9 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
-using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services;
-
+using DIGOS.Ambassador.Discord.Behaviours;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Feedback;
 using Discord;
 using Discord.Commands;
 using Discord.Net;

@@ -25,11 +25,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.EmojiTools;
-using DIGOS.Ambassador.Extensions;
-using DIGOS.Ambassador.Services;
-
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -220,7 +219,7 @@ namespace DIGOS.Ambassador.Modules
                     }
                 }
 
-                var emojiCode = string.Join('-', hexValues);
+                var emojiCode = string.Join("-", hexValues);
                 emoteUrl = $"https://raw.githubusercontent.com/twitter/twemoji/gh-pages/2/72x72/{emojiCode}.png";
             }
 
