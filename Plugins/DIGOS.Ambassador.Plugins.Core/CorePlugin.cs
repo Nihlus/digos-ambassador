@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
@@ -70,27 +71,13 @@ namespace DIGOS.Ambassador.Plugins.Core
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
             var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+            var registrationResult = permissionRegistry.RegisterPermissions
+            (
+                Assembly.GetExecutingAssembly(),
+                serviceProvider
+            );
 
-            var editServerResult = permissionRegistry.RegisterPermission<EditServerInfo>(serviceProvider);
-            if (!editServerResult.IsSuccess)
-            {
-                return false;
-            }
-
-            var editUserResult = permissionRegistry.RegisterPermission<EditUserInfo>(serviceProvider);
-            if (!editUserResult.IsSuccess)
-            {
-                return false;
-            }
-
-            var showServerResult = permissionRegistry.RegisterPermission<ShowServerInfo>(serviceProvider);
-            if (!showServerResult.IsSuccess)
-            {
-                return false;
-            }
-
-            var showUserResult = permissionRegistry.RegisterPermission<ShowUserInfo>(serviceProvider);
-            if (!showUserResult.IsSuccess)
+            if (!registrationResult.IsSuccess)
             {
                 return false;
             }

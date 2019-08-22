@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Extensions;
@@ -65,15 +66,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
             var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+            var registrationResult = permissionRegistry.RegisterPermissions
+            (
+                Assembly.GetExecutingAssembly(),
+                serviceProvider
+            );
 
-            var registerGrantPermissionResult = permissionRegistry.RegisterPermission<GrantPermission>(serviceProvider);
-            if (!registerGrantPermissionResult.IsSuccess)
-            {
-                return false;
-            }
-
-            var registerRevokePermissionResult = permissionRegistry.RegisterPermission<RevokePermission>(serviceProvider);
-            if (!registerRevokePermissionResult.IsSuccess)
+            if (!registrationResult.IsSuccess)
             {
                 return false;
             }

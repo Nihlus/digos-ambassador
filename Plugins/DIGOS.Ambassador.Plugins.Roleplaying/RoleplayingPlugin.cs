@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Discord.Behaviours.Services;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
+using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying;
 using DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
@@ -67,6 +68,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
         /// <inheritdoc />
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
+            var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+            var registrationResult = permissionRegistry.RegisterPermissions
+            (
+                Assembly.GetExecutingAssembly(),
+                serviceProvider
+            );
+
+            if (!registrationResult.IsSuccess)
+            {
+                return false;
+            }
+
             var commands = serviceProvider.GetRequiredService<CommandService>();
 
             commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());

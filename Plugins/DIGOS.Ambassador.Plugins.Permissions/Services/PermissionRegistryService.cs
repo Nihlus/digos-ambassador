@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using DIGOS.Ambassador.Core.Results;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,6 +44,27 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         public IEnumerable<IPermission> RegisteredPermissions => _registeredPermissions.Values;
 
         /// <summary>
+        /// Registers the permissions available in the given assembly.
+        /// </summary>
+        /// <param name="assembly">The assembly to register permissions from.</param>
+        /// <param name="services">The services.</param>
+        /// <returns>true if all permissions were successfully registered; otherwise, false.</returns>
+        public ModifyEntityResult RegisterPermissions(Assembly assembly, [NotNull] IServiceProvider services)
+        {
+            var permissionTypes = assembly.DefinedTypes.Where(t => t.ImplementedInterfaces.Contains(typeof(IPermission)));
+            foreach (var permissionType in permissionTypes)
+            {
+                var result = RegisterPermission(permissionType, services);
+                if (!result.IsSuccess)
+                {
+                    return ModifyEntityResult.FromError(result);
+                }
+            }
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
         /// Registers the given permission type, making it available to the system.
         /// </summary>
         /// <param name="services">The application's services.</param>
@@ -53,31 +75,48 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             where TPermission : class, IPermission
         {
             var permissionType = typeof(TPermission);
-            if (_registeredPermissions.ContainsKey(permissionType))
+            var registerPermissionResult = RegisterPermission(permissionType, services);
+            if (!registerPermissionResult.IsSuccess)
             {
-                return CreateEntityResult<TPermission>.FromError("The given permission has already been registered.");
+                return CreateEntityResult<TPermission>.FromError(registerPermissionResult);
             }
 
-            TPermission permissionInstance;
+            return CreateEntityResult<TPermission>.FromSuccess((TPermission)registerPermissionResult.Entity);
+        }
+
+        /// <summary>
+        /// Registers the given permission type, making it available to the system.
+        /// </summary>
+        /// <param name="permissionType">The permission type.</param>
+        /// <param name="services">The application's services.</param>
+        /// <returns>A creation result which may or may not have succeeded.</returns>
+        public CreateEntityResult<IPermission> RegisterPermission(Type permissionType, IServiceProvider services)
+        {
+            if (_registeredPermissions.ContainsKey(permissionType))
+            {
+                return CreateEntityResult<IPermission>.FromError("The given permission has already been registered.");
+            }
+
+            IPermission permissionInstance;
             try
             {
-                permissionInstance = ActivatorUtilities.CreateInstance<TPermission>(services);
+                permissionInstance = (IPermission)ActivatorUtilities.CreateInstance(services, permissionType, null);
             }
             catch (Exception e)
             {
-                return CreateEntityResult<TPermission>.FromError(e);
+                return CreateEntityResult<IPermission>.FromError(e);
             }
 
             if (_registeredPermissions.Values.Any(p => p.UniqueIdentifier == permissionInstance.UniqueIdentifier))
             {
-                return CreateEntityResult<TPermission>.FromError
+                return CreateEntityResult<IPermission>.FromError
                 (
                     "A permission with that identifier has already been registered."
                 );
             }
 
             _registeredPermissions.Add(permissionType, permissionInstance);
-            return CreateEntityResult<TPermission>.FromSuccess(permissionInstance);
+            return CreateEntityResult<IPermission>.FromSuccess(permissionInstance);
         }
 
         /// <summary>
