@@ -52,7 +52,12 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
         }
 
         /// <inheritdoc />
-        protected override async Task<PreconditionResult> CheckPrioritizedPermissions([NotNull] ICommandContext context, CommandInfo command, IServiceProvider services)
+        protected override async Task<PreconditionResult> CheckPrioritizedPermissions
+        (
+            [NotNull] ICommandContext context,
+            CommandInfo command,
+            IServiceProvider services
+        )
         {
             if (context.Guild is null || !(context.User is SocketGuildUser guildUser))
             {

@@ -47,6 +47,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         /// <summary>
         /// Gets the human-readable description of what the permission allows.
         /// </summary>
+        [NotNull]
         string Description { get; }
 
         /// <summary>
@@ -65,6 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         /// </summary>
         /// <param name="target">The target.</param>
         /// <returns>true if the permission is granted by default to the target; otherwise, false.</returns>
+        [Pure]
         bool IsGrantedByDefaultTo(PermissionTarget target);
     }
 }
