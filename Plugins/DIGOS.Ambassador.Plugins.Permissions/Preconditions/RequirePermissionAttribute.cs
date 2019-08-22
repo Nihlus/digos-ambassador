@@ -22,12 +22,14 @@
 
 using System;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions.Model;
+using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
+using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DIGOS.Ambassador.Plugins.Permissions.Permissions.Preconditions
+namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
 {
     /// <summary>
     /// This attribute can be attached to Discord.Net.Commands module commands to restrict them to certain predefined
@@ -35,29 +37,53 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Permissions.Preconditions
     /// </summary>
     public class RequirePermissionAttribute : PrioritizedPreconditionAttribute
     {
-        private readonly (Permission Permission, PermissionTarget Target) _requiredPermission;
+        private readonly Type _permissionType;
+        private readonly PermissionTarget _target;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequirePermissionAttribute"/> class.
         /// </summary>
-        /// <param name="permission">The required permission.</param>
+        /// <param name="permissionType">The required permission.</param>
         /// <param name="target">The required target scope.</param>
-        public RequirePermissionAttribute(Permission permission, PermissionTarget target = PermissionTarget.Self)
+        public RequirePermissionAttribute(Type permissionType, PermissionTarget target)
         {
-            _requiredPermission = (permission, target);
+            _permissionType = permissionType;
+            _target = target;
         }
 
         /// <inheritdoc />
         protected override async Task<PreconditionResult> CheckPrioritizedPermissions([NotNull] ICommandContext context, CommandInfo command, IServiceProvider services)
         {
-            var permissionService = services.GetRequiredService<PermissionService>();
+            if (context.Guild is null || !(context.User is SocketGuildUser guildUser))
+            {
+                return PreconditionResult.FromError("Permissions are only supported on guild commands.");
+            }
 
-            if (await permissionService.HasPermissionAsync(context.Guild, context.User, _requiredPermission))
+            var permissionService = services.GetRequiredService<PermissionService>();
+            var permissionRegistry = services.GetRequiredService<PermissionRegistryService>();
+
+            var getPermissionResult = permissionRegistry.GetPermission(_permissionType);
+            if (!getPermissionResult.IsSuccess)
+            {
+                return PreconditionResult.FromError(getPermissionResult.ErrorReason);
+            }
+
+            var permission = getPermissionResult.Entity;
+
+            var hasPermissionResult = await permissionService.HasPermissionAsync
+            (
+                context.Guild,
+                guildUser,
+                permission,
+                _target
+            );
+
+            if (hasPermissionResult.IsSuccess)
             {
                 return PreconditionResult.FromSuccess();
             }
 
-            return PreconditionResult.FromError("You don't have permission to run that command.");
+            return PreconditionResult.FromError(hasPermissionResult.ErrorReason);
         }
     }
 }

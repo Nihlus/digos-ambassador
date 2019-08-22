@@ -27,7 +27,7 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Permissions.Permissions.Preconditions
+namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
 {
     /// <summary>
     /// Represents a prioritized precondition that is ordered and tested by its priority.

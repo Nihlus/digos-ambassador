@@ -20,8 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Plugins.Permissions.Model.Permissions;
-using DIGOS.Ambassador.Plugins.Permissions.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
 
@@ -29,7 +28,7 @@ using Discord;
 
 using Moq;
 using Xunit;
-using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Permissions.PermissionTarget;
+using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1600
 #pragma warning disable CS1591

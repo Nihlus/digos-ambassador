@@ -1,5 +1,5 @@
-﻿//
-//  PermissionTarget.cs
+//
+//  RevokePermission.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,28 +21,23 @@
 //
 
 using System;
+using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Permissions.Permissions
+namespace DIGOS.Ambassador.Plugins.Permissions
 {
     /// <summary>
-    /// Represents target permissions for commands.
+    /// Represents a permission that allows a user to revoke a permission.
     /// </summary>
-    [Flags]
-    public enum PermissionTarget
+    [PublicAPI]
+    public sealed class RevokePermission : Permission
     {
-        /// <summary>
-        /// Does not allow execution of the command.
-        /// </summary>
-        None = 0,
+        /// <inheritdoc />
+        public override Guid UniqueIdentifier { get; } = new Guid("6BD7972F-FB72-41F4-9BC2-B2FC67A362FB");
 
-        /// <summary>
-        /// Allows execution of a command exclusively on the invoking user.
-        /// </summary>
-        Self = 1,
+        /// <inheritdoc />
+        public override string FriendlyName => nameof(RevokePermission);
 
-        /// <summary>
-        /// Allows execution of a command on other users.
-        /// </summary>
-        Other = 2
+        /// <inheritdoc />
+        public override string Description => "Allows a user to revoke permissions.";
     }
 }

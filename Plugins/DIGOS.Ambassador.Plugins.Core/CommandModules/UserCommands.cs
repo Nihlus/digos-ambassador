@@ -29,15 +29,15 @@ using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Plugins.Permissions.Permissions;
-using DIGOS.Ambassador.Plugins.Permissions.Permissions.Preconditions;
+using DIGOS.Ambassador.Plugins.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Humanizer;
 using Humanizer.Localisation;
 using JetBrains.Annotations;
-using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Permissions.PermissionTarget;
+using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 

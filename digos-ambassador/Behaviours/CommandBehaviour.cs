@@ -37,7 +37,7 @@ using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Commands;

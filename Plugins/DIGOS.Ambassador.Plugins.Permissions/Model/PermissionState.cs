@@ -1,5 +1,5 @@
-﻿//
-//  IPermission.cs
+//
+//  PermissionState.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,39 +20,26 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using DIGOS.Ambassador.Plugins.Permissions.Permissions;
-
-#pragma warning disable SA1402
-
-namespace DIGOS.Ambassador.Plugins.Permissions.Model.Permissions
+namespace DIGOS.Ambassador.Plugins.Permissions.Model
 {
     /// <summary>
-    /// Member interface for permissions.
+    /// Defines the state a recorded permission can be in.
     /// </summary>
-    public interface IPermission
+    public enum PermissionState
     {
         /// <summary>
-        /// Gets or sets the discord ID of the user that this permission has been granted to.
+        /// The permission has been explicitly granted.
         /// </summary>
-        long UserDiscordID { get; set; }
+        Granted,
 
         /// <summary>
-        /// Gets or sets the granted permission.
+        /// The permission has been explicitly denied.
         /// </summary>
-        Permission Permission { get; set; }
+        Denied,
 
         /// <summary>
-        /// Gets or sets the allowed targets.
+        /// The permission inherits superseding values, or uses the permission's default.
         /// </summary>
-        PermissionTarget Target { get; set; }
-    }
-
-    /// <summary>
-    /// Equation interface for permissions.
-    /// </summary>
-    /// <typeparam name="T">The type of the permission class.</typeparam>
-    public interface IPermission<T> : IEquatable<T>, IPermission where T : IPermission<T>
-    {
+        InheritOrDefault
     }
 }

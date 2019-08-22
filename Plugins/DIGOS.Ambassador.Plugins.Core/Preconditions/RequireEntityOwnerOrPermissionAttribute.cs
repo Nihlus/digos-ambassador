@@ -23,8 +23,9 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
-using DIGOS.Ambassador.Plugins.Permissions.Permissions;
-using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions.Model;
+using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 

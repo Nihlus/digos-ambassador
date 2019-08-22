@@ -29,8 +29,7 @@ using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.CommandModules;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
-using DIGOS.Ambassador.Plugins.Permissions.Permissions;
-using DIGOS.Ambassador.Plugins.Permissions.Services.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -55,6 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
         {
             serviceCollection
+                .AddSingleton<PermissionRegistryService>()
                 .AddScoped<PermissionService>()
                 .AddSchemaAwareDbContextPool<PermissionsDatabaseContext>();
 
@@ -64,11 +64,23 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         /// <inheritdoc />
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
+            var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+
+            var registerGrantPermissionResult = permissionRegistry.RegisterPermission<GrantPermission>(serviceProvider);
+            if (!registerGrantPermissionResult.IsSuccess)
+            {
+                return false;
+            }
+
+            var registerRevokePermissionResult = permissionRegistry.RegisterPermission<RevokePermission>(serviceProvider);
+            if (!registerRevokePermissionResult.IsSuccess)
+            {
+                return false;
+            }
+
             var commands = serviceProvider.GetRequiredService<CommandService>();
 
-            commands.AddEnumReader<Permission>();
             commands.AddEnumReader<PermissionTarget>();
-
             await commands.AddModuleAsync<PermissionCommands>(serviceProvider);
 
             return true;

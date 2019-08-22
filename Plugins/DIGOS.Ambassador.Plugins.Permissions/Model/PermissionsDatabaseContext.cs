@@ -21,7 +21,6 @@
 //
 
 using DIGOS.Ambassador.Core.Database;
-using DIGOS.Ambassador.Plugins.Permissions.Model.Permissions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,9 +34,20 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         private const string SchemaName = "PermissionModule";
 
         /// <summary>
-        /// Gets or sets the table where granted local permissions are stored.
+        /// Gets or sets the table where role-associated permissions are stored.
         /// </summary>
-        public DbSet<LocalPermission> Permissions
+        public DbSet<RolePermission> RolePermissions
+        {
+            get;
+
+            [UsedImplicitly]
+            set;
+        }
+
+        /// <summary>
+        /// Gets or sets the table where user-associated permissions are stored.
+        /// </summary>
+        public DbSet<UserPermission> UserPermissions
         {
             get;
 

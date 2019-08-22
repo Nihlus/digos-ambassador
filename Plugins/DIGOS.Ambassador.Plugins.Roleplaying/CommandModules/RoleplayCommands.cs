@@ -31,8 +31,8 @@ using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Plugins.Permissions.Permissions;
-using DIGOS.Ambassador.Plugins.Permissions.Permissions.Preconditions;
+using DIGOS.Ambassador.Plugins.Permissions;
+using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
@@ -43,7 +43,7 @@ using Discord.Net;
 using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
-using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Permissions.PermissionTarget;
+using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
