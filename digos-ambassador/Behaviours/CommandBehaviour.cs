@@ -246,29 +246,6 @@ namespace DIGOS.Ambassador.Behaviours
                 return;
             }
 
-            var guild = (message.Channel as SocketGuildChannel)?.Guild;
-            if (guild != null)
-            {
-                var registerUserResult = await _users.GetOrRegisterUserAsync(arg.Author);
-                if (!registerUserResult.IsSuccess)
-                {
-                    return;
-                }
-
-                var user = registerUserResult.Entity;
-
-                var server = await _servers.GetOrRegisterServerAsync(guild);
-
-                // Grant permissions to new users
-                if (!server.IsUserKnown(arg.Author))
-                {
-                    await _permissions.GrantDefaultPermissionsAsync(guild, arg.Author);
-                    server.KnownUsers.Add(new ServerUser(server, user));
-
-                    await _database.SaveChangesAsync();
-                }
-            }
-
             // Run the command asynchronously, but we'll await it later
             this.RunningCommands.Enqueue(SaneExecuteCommandWrapperAsync(context, argumentPos));
         }
