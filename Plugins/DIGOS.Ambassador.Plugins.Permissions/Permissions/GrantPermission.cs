@@ -38,6 +38,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         public override string FriendlyName => nameof(GrantPermission);
 
         /// <inheritdoc />
-        public override string Description => "Allows a user to grant permissions.";
+        public override string Description => "Allows you to grant permissions.";
     }
 }

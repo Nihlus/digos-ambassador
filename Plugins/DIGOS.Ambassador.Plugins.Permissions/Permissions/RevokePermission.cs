@@ -38,6 +38,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         public override string FriendlyName => nameof(RevokePermission);
 
         /// <inheritdoc />
-        public override string Description => "Allows a user to revoke permissions.";
+        public override string Description => "Allows you to revoke permissions.";
     }
 }
