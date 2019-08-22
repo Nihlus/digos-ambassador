@@ -35,12 +35,12 @@ using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Pagination;
+using DIGOS.Ambassador.Plugins.Characters.Permissions;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using Discord;
 using Discord.Commands;
@@ -337,7 +337,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("create")]
         [Summary("Creates a new character.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.CreateCharacter)]
+        [RequirePermission(typeof(CreateCharacter), PermissionTarget.Self)]
         public async Task CreateCharacterAsync
         (
             [NotNull] string characterName,
@@ -378,11 +378,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("delete")]
         [Summary("Deletes the named character.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.DeleteCharacter)]
+        [RequirePermission(typeof(DeleteCharacter), PermissionTarget.Self)]
         public async Task DeleteCharacterAsync
         (
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.DeleteCharacter, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(DeleteCharacter), PermissionTarget.Other)]
             Character character
         )
         {
@@ -541,10 +541,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("assume")]
         [Summary("Sets the named character as the user's current character.")]
         [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(AssumeCharacter), PermissionTarget.Self)]
         public async Task AssumeCharacterFormAsync
         (
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.AssumeCharacter, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(AssumeCharacter), PermissionTarget.Other)]
             Character character
         )
         {
@@ -833,11 +834,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("add-image")]
         [Summary("Adds an attached image to a character's gallery.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.EditCharacter)]
+        [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
         public async Task AddImageAsync
         (
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
             Character character,
             [CanBeNull] string imageName = null,
             [CanBeNull] string imageCaption = null,
@@ -880,11 +881,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("add-image")]
         [Summary("Adds a linked image to a character's gallery.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.EditCharacter)]
+        [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
         public async Task AddImageAsync
         (
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
             Character character,
             [NotNull] string imageName,
             [NotNull] string imageUrl,
@@ -912,11 +913,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("remove-image")]
         [Summary("Removes an image from a character's gallery.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.EditCharacter)]
+        [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
         public async Task RemoveImageAsync
         (
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
             Character character,
             [NotNull] string imageName
         )
@@ -941,12 +942,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("transfer-ownership")]
         [Summary("Transfers ownership of the named character to another user.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.TransferCharacter)]
+        [RequirePermission(typeof(TransferCharacter), PermissionTarget.Self)]
         public async Task TransferCharacterOwnershipAsync
         (
             [NotNull] IUser newOwner,
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.TransferCharacter, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(TransferCharacter), PermissionTarget.Other)]
             Character character
         )
         {
@@ -1189,11 +1190,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("clear")]
             [Summary("Clears the role from a character.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditCharacter)]
+            [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
             public async Task ClearCharacterRoleAsync
             (
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character
             )
             {
@@ -1271,11 +1272,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("name")]
             [Summary("Sets the name of a character.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditCharacter)]
+            [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
             public async Task SetCharacterNameAsync
             (
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
                 [NotNull]
                 string newCharacterName
@@ -1300,11 +1301,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("avatar")]
             [Summary("Sets the avatar of a character. You can attach an image instead of passing a url as a parameter.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditCharacter)]
+            [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
             public async Task SetCharacterAvatarAsync
             (
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
                 [CanBeNull] string newCharacterAvatarUrl = null
             )
@@ -1356,11 +1357,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("nickname")]
             [Summary("Sets the nickname that the user should have when the character is active.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditCharacter)]
+            [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
             public async Task SetCharacterNicknameAsync
             (
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
                 [NotNull]
                 string newCharacterNickname
@@ -1410,11 +1411,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("summary")]
             [Summary("Sets the summary of a character.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditCharacter)]
+            [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
             public async Task SetCharacterSummaryAsync
             (
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
                 [NotNull]
                 string newCharacterSummary
@@ -1440,11 +1441,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("description")]
             [Summary("Sets the description of a character. You can attach a plaintext document instead of passing the contents as a parameter.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditCharacter)]
+            [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
             public async Task SetCharacterDescriptionAsync
             (
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
                 [CanBeNull]
                 string newCharacterDescription = null
@@ -1494,11 +1495,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("nsfw")]
             [Summary("Sets whether or not a character is NSFW.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditCharacter)]
+            [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
             public async Task SetCharacterIsNSFWAsync
             (
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
                 bool isNSFW
             )
@@ -1518,11 +1519,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("pronoun")]
             [Summary("Sets the preferred pronoun of a character.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditCharacter)]
+            [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
             public async Task SetCharacterPronounAsync
             (
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
                 [NotNull]
                 string pronounFamily
@@ -1547,11 +1548,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("role")]
             [Summary("Sets the given character's display role.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditCharacter)]
+            [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
             public async Task SetCharacterRoleAsync
             (
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditCharacter, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
                 [NotNull]
                 IRole discordRole
