@@ -23,8 +23,10 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Permissions.Model;
+using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
+using DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
-using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
@@ -72,7 +74,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Command("clear-roleplay-category")]
             [Summary("Clears the channel category to use for dedicated roleplays.")]
             [RequireContext(Guild)]
-            [RequireUserPermission(GuildPermission.ManageGuild)]
+            [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
             public async Task ClearDedicatedRoleplayChannelCategory()
             {
                 var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);

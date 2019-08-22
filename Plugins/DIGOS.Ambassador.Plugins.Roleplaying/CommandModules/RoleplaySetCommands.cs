@@ -27,6 +27,7 @@ using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
+using DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Discord.Commands;
 using JetBrains.Annotations;
@@ -72,13 +73,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Command("name")]
             [Summary("Sets the new name of the named roleplay.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditRoleplay)]
             public async Task SetRoleplayNameAsync
             (
                 [NotNull]
                 string newRoleplayName,
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
                 Roleplay roleplay
             )
             {
@@ -114,13 +114,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Command("summary")]
             [Summary("Sets the summary of the named roleplay.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditRoleplay)]
             public async Task SetRoleplaySummaryAsync
             (
                 [NotNull]
                 string newRoleplaySummary,
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
                 Roleplay roleplay
             )
             {
@@ -144,12 +143,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Command("nsfw")]
             [Summary("Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditRoleplay)]
             public async Task SetRoleplayIsNSFW
             (
                 bool isNSFW,
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
                 Roleplay roleplay
             )
             {
@@ -172,11 +170,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Command("private")]
             [Summary("Sets a value indicating whether or not the named roleplay is private. This restricts replays to participants.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditRoleplay)]
             public Task SetRoleplayIsPrivate
             (
                 bool isPrivate,
-                [NotNull] [RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
+                [NotNull]
+                [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
                 Roleplay roleplay
             )
                 => SetRoleplayIsPublic(!isPrivate, roleplay);
@@ -190,12 +188,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Command("public")]
             [Summary("Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditRoleplay)]
             public async Task SetRoleplayIsPublic
             (
                 bool isPublic,
                 [NotNull]
-                [RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
+                [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
                 Roleplay roleplay
             )
             {

@@ -35,6 +35,7 @@ using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
+using DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
 using Discord;
@@ -264,7 +265,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("create")]
         [Summary("Creates a new roleplay with the specified name.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.CreateRoleplay)]
+        [RequirePermission(typeof(CreateRoleplay), PermissionTarget.Self)]
         public async Task CreateRoleplayAsync
         (
             [NotNull] string roleplayName,
@@ -291,11 +292,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("delete")]
         [Summary("Deletes the specified roleplay.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.DeleteRoleplay)]
+        [RequirePermission(typeof(DeleteRoleplay), PermissionTarget.Self)]
         public async Task DeleteRoleplayAsync
         (
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.DeleteRoleplay, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(DeleteRoleplay), PermissionTarget.Other)]
             Roleplay roleplay
         )
         {
@@ -346,7 +347,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("join")]
         [Summary("Joins the roleplay owned by the given person with the given name.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.JoinRoleplay)]
+        [RequirePermission(typeof(JoinRoleplay), PermissionTarget.Self)]
         public async Task JoinRoleplayAsync([NotNull] Roleplay roleplay)
         {
             var addUserResult = await _roleplays.AddUserToRoleplayAsync(this.Context, roleplay, this.Context.Message.Author);
@@ -393,13 +394,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("invite")]
         [Summary("Invites the specified user to the given roleplay.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.EditRoleplay)]
+        [RequirePermission(typeof(EditRoleplay), PermissionTarget.Self)]
         public async Task InvitePlayerAsync
         (
             [NotNull]
             IUser playerToInvite,
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
             Roleplay roleplay
         )
         {
@@ -476,13 +477,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("kick")]
         [Summary("Kicks the given user from the named roleplay.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.KickRoleplayMember)]
+        [RequirePermission(typeof(KickRoleplayMember), PermissionTarget.Self)]
         public async Task KickRoleplayParticipantAsync
         (
             [NotNull]
             IUser discordUser,
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.KickRoleplayMember, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(KickRoleplayMember), PermissionTarget.Other)]
             Roleplay roleplay
         )
         {
@@ -539,11 +540,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("channel")]
         [Summary("Makes the roleplay with the given name current in the current channel.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.StartStopRoleplay)]
+        [RequirePermission(typeof(StartStopRoleplay), PermissionTarget.Self)]
         public async Task ShowOrCreateDedicatedRoleplayChannel
         (
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.StartStopRoleplay, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(StartStopRoleplay), PermissionTarget.Other)]
             Roleplay roleplay
         )
         {
@@ -600,11 +601,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("start")]
         [Summary("Starts the roleplay with the given name.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.StartStopRoleplay)]
+        [RequirePermission(typeof(StartStopRoleplay), PermissionTarget.Self)]
         public async Task StartRoleplayAsync
         (
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.StartStopRoleplay, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(StartStopRoleplay), PermissionTarget.Other)]
             Roleplay roleplay
         )
         {
@@ -739,11 +740,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("stop")]
         [Summary("Stops the given roleplay.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.StartStopRoleplay)]
+        [RequirePermission(typeof(StartStopRoleplay), PermissionTarget.Self)]
         public async Task StopRoleplayAsync
         (
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.StartStopRoleplay, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(StartStopRoleplay), PermissionTarget.Other)]
             Roleplay roleplay
         )
         {
@@ -811,11 +812,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("include-previous")]
         [Summary("Includes previous messages into the roleplay, starting at the given message.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.EditRoleplay)]
+        [RequirePermission(typeof(EditRoleplay), PermissionTarget.Self)]
         public async Task IncludePreviousMessagesAsync
         (
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.EditRoleplay, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
             Roleplay roleplay,
             [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
             IMessage startMessage,
@@ -868,12 +869,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("transfer-ownership")]
         [Summary("Transfers ownership of the named roleplay to the specified user.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.TransferRoleplay)]
+        [RequirePermission(typeof(TransferRoleplay), PermissionTarget.Self)]
         public async Task TransferRoleplayOwnershipAsync
         (
             [NotNull] IUser newOwner,
             [NotNull]
-            [RequireEntityOwnerOrPermission(Permission.TransferRoleplay, PermissionTarget.Other)]
+            [RequireEntityOwnerOrPermission(typeof(TransferRoleplay), PermissionTarget.Other)]
             Roleplay roleplay
         )
         {
@@ -905,10 +906,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("export")]
         [Summary(" Exports the named roleplay owned by the given user, sending you a file with the contents.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.ReplayRoleplay)]
+        [RequirePermission(typeof(ExportRoleplay), PermissionTarget.Self)]
         public async Task ExportRoleplayAsync
         (
             [NotNull]
+            [RequireEntityOwnerOrPermission(typeof(ExportRoleplay), PermissionTarget.Other)]
             Roleplay roleplay,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<ExportFormat>))]
             ExportFormat format = ExportFormat.PDF
@@ -951,10 +953,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("replay")]
         [Summary("Replays the named roleplay owned by the given user to you.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(Permission.ReplayRoleplay)]
+        [RequirePermission(typeof(ExportRoleplay), PermissionTarget.Self)]
         public async Task ReplayRoleplayAsync
         (
-            [NotNull] Roleplay roleplay,
+            [NotNull]
+            [RequireEntityOwnerOrPermission(typeof(ExportRoleplay), PermissionTarget.Other)]
+            Roleplay roleplay,
             DateTimeOffset from = default,
             DateTimeOffset to = default
         )
