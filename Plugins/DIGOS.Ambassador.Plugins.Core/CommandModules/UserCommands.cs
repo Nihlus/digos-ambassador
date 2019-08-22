@@ -28,8 +28,8 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Plugins.Core.Permissions;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using Discord;
 using Discord.Commands;
@@ -72,18 +72,8 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [UsedImplicitly]
         [Command("info")]
         [Summary("Shows known information about the invoking user.")]
-        public async Task ShowInfoAsync()
-        {
-            var getUserResult = await _users.GetOrRegisterUserAsync(this.Context.Message.Author);
-            if (!getUserResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
-                return;
-            }
-
-            var user = getUserResult.Entity;
-            await ShowUserInfoAsync(this.Context.Message.Author, user);
-        }
+        [RequirePermission(typeof(ShowUserInfo), PermissionTarget.Self)]
+        public async Task ShowInfoAsync() => await ShowInfoAsync(this.Context.User);
 
         /// <summary>
         /// Shows known information about the mentioned user.
@@ -92,6 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [UsedImplicitly]
         [Command("info")]
         [Summary("Shows known information about the target user.")]
+        [RequirePermission(typeof(ShowUserInfo), PermissionTarget.Other)]
         public async Task ShowInfoAsync([NotNull] IUser discordUser)
         {
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
@@ -211,25 +202,8 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [UsedImplicitly]
             [Command("bio")]
             [Summary("Sets the invoking user's bio.")]
-            [RequirePermission(Permission.EditUser)]
-            public async Task SetUserBioAsync([NotNull] string bio)
-            {
-                // Add the user to the user database if they're not already in it
-                var getUserResult = await _users.GetOrRegisterUserAsync(this.Context.User);
-                if (!getUserResult.IsSuccess)
-                {
-                    await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
-                    return;
-                }
-
-                var user = getUserResult.Entity;
-
-                user.Bio = bio;
-
-                await _database.SaveChangesAsync();
-
-                await _feedback.SendConfirmationAsync(this.Context, "Bio updated.");
-            }
+            [RequirePermission(typeof(EditUserInfo), PermissionTarget.Self)]
+            public async Task SetUserBioAsync([NotNull] string bio) => await SetUserBioAsync(this.Context.User, bio);
 
             /// <summary>
             /// Sets the target user's bio.
@@ -240,7 +214,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Command("bio")]
             [Summary("Sets the target user's bio.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditUser, PermissionTarget.Other)]
+            [RequirePermission(typeof(EditUserInfo), PermissionTarget.Other)]
             public async Task SetUserBioAsync([NotNull] IUser discordUser, [NotNull] string bio)
             {
                 // Add the user to the user database if they're not already in it
@@ -267,25 +241,9 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [UsedImplicitly]
             [Command("timezone")]
             [Summary("Sets the invoking user's UTC timezone hour offset.")]
-            [RequirePermission(Permission.EditUser)]
+            [RequirePermission(typeof(EditUserInfo), PermissionTarget.Self)]
             public async Task SetUserTimezoneAsync(int timezone)
-            {
-                // Add the user to the user database if they're not already in it
-                var getUserResult = await _users.GetOrRegisterUserAsync(this.Context.User);
-                if (!getUserResult.IsSuccess)
-                {
-                    await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
-                    return;
-                }
-
-                var user = getUserResult.Entity;
-
-                user.Timezone = timezone;
-
-                await _database.SaveChangesAsync();
-
-                await _feedback.SendConfirmationAsync(this.Context, "Timezone updated.");
-            }
+                => await SetUserTimezoneAsync(this.Context.User, timezone);
 
             /// <summary>
             /// Sets the target user's UTC timezone hour offset.
@@ -296,7 +254,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Command("timezone")]
             [Summary("Sets the target user's UTC timezone hour offset.")]
             [RequireContext(ContextType.Guild)]
-            [RequirePermission(Permission.EditUser, PermissionTarget.Other)]
+            [RequirePermission(typeof(EditUserInfo), PermissionTarget.Other)]
             public async Task SetUserTimezoneAsync([NotNull] IUser discordUser, int timezone)
             {
                 // Add the user to the user database if they're not already in it

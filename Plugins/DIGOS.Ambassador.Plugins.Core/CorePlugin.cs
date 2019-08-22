@@ -29,8 +29,10 @@ using DIGOS.Ambassador.Plugins.Core;
 using DIGOS.Ambassador.Plugins.Core.CommandModules;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
+using DIGOS.Ambassador.Plugins.Core.Permissions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -67,6 +69,32 @@ namespace DIGOS.Ambassador.Plugins.Core
         /// <inheritdoc />
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
+            var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+
+            var editServerResult = permissionRegistry.RegisterPermission<EditServerInfo>(serviceProvider);
+            if (!editServerResult.IsSuccess)
+            {
+                return false;
+            }
+
+            var editUserResult = permissionRegistry.RegisterPermission<EditUserInfo>(serviceProvider);
+            if (!editUserResult.IsSuccess)
+            {
+                return false;
+            }
+
+            var showServerResult = permissionRegistry.RegisterPermission<ShowServerInfo>(serviceProvider);
+            if (!showServerResult.IsSuccess)
+            {
+                return false;
+            }
+
+            var showUserResult = permissionRegistry.RegisterPermission<ShowUserInfo>(serviceProvider);
+            if (!showUserResult.IsSuccess)
+            {
+                return false;
+            }
+
             var commands = serviceProvider.GetRequiredService<CommandService>();
 
             await commands.AddModuleAsync<PrivacyCommands>(serviceProvider);

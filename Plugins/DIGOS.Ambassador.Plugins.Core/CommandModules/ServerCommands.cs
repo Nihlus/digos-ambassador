@@ -23,11 +23,14 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Model;
+using DIGOS.Ambassador.Plugins.Core.Permissions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
-using Discord;
+using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
+
 using Discord.Commands;
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
+using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -65,6 +68,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Alias("show", "info")]
         [Summary("Shows general information about the current server.")]
         [RequireContext(Guild)]
+        [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
         public async Task ShowServerAsync()
         {
             var eb = _feedback.CreateEmbedBase();
@@ -118,6 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Command("join-message")]
         [Summary("Shows the server's join message.")]
         [RequireContext(Guild)]
+        [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
         public async Task ShowJoinMessageAsync()
         {
             var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
@@ -167,7 +172,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Command("description")]
             [Summary("Sets the server's description.")]
             [RequireContext(Guild)]
-            [RequireUserPermission(GuildPermission.ManageGuild)]
+            [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
             public async Task SetDescriptionAsync([NotNull] string newDescription)
             {
                 var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
@@ -189,7 +194,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Command("join-message")]
             [Summary("Sets the server's first-join message.")]
             [RequireContext(Guild)]
-            [RequireUserPermission(GuildPermission.ManageGuild)]
+            [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
             public async Task SetJoinMessageAsync([NotNull] string newJoinMessage)
             {
                 var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
@@ -211,7 +216,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Command("is-nsfw")]
             [Summary("Sets whether the server is NSFW.")]
             [RequireContext(Guild)]
-            [RequireUserPermission(GuildPermission.ManageGuild)]
+            [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
             public async Task SetIsNSFWAsync(bool isNsfw)
             {
                 var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
@@ -237,7 +242,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Command("send-join-messages")]
             [Summary("Sets whether the bot sends join messages to new users.")]
             [RequireContext(Guild)]
-            [RequireUserPermission(GuildPermission.ManageGuild)]
+            [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
             public async Task SetSendJoinMessagesAsync(bool sendJoinMessage)
             {
                 var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);

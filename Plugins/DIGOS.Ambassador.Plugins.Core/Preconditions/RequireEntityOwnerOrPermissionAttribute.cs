@@ -25,8 +25,10 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
+using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
+using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Plugins.Core.Preconditions
@@ -36,50 +38,64 @@ namespace DIGOS.Ambassador.Plugins.Core.Preconditions
     /// </summary>
     public class RequireEntityOwnerOrPermissionAttribute : ParameterPreconditionAttribute
     {
-        /// <summary>
-        /// Gets the required permission.
-        /// </summary>
-        public Permission Permission { get;  }
-
-        /// <summary>
-        /// Gets the required target.
-        /// </summary>
-        public PermissionTarget Target { get; }
+        private readonly Type _permissionType;
+        private readonly PermissionTarget _target;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequireEntityOwnerOrPermissionAttribute"/> class.
         /// </summary>
-        /// <param name="permission">The permission to require.</param>
+        /// <param name="permissionType">The permission to require.</param>
         /// <param name="target">The target to require.</param>
-        public RequireEntityOwnerOrPermissionAttribute(Permission permission, PermissionTarget target)
+        public RequireEntityOwnerOrPermissionAttribute(Type permissionType, PermissionTarget target)
         {
-            this.Permission = permission;
-            this.Target = target;
+            _permissionType = permissionType;
+            _target = target;
         }
 
         /// <inheritdoc />
-        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, ParameterInfo parameter, object value, IServiceProvider services)
+        public override async Task<PreconditionResult> CheckPermissionsAsync
+        (
+            ICommandContext context,
+            ParameterInfo parameter,
+            object value,
+            IServiceProvider services
+        )
         {
             if (!(value is IOwnedNamedEntity entity))
             {
                 return PreconditionResult.FromError("The value isn't an owned entity.");
             }
 
-            var permissionService = services.GetRequiredService<PermissionService>();
-
             if (entity.IsOwner(context.User))
             {
                 return PreconditionResult.FromSuccess();
             }
 
-            bool hasPermission = await permissionService.HasPermissionAsync
+            if (context.Guild is null || !(context.User is SocketGuildUser guildUser))
+            {
+                return PreconditionResult.FromError("Permissions are only supported on guild commands.");
+            }
+
+            var permissionService = services.GetRequiredService<PermissionService>();
+            var permissionRegistry = services.GetRequiredService<PermissionRegistryService>();
+
+            var getPermissionResult = permissionRegistry.GetPermission(_permissionType);
+            if (!getPermissionResult.IsSuccess)
+            {
+                return PreconditionResult.FromError(getPermissionResult.ErrorReason);
+            }
+
+            var permission = getPermissionResult.Entity;
+
+            var hasPermissionResult = await permissionService.HasPermissionAsync
             (
                 context.Guild,
-                context.User,
-                (this.Permission, this.Target)
+                guildUser,
+                permission,
+                _target
             );
 
-            if (!hasPermission)
+            if (!hasPermissionResult.IsSuccess)
             {
                 return PreconditionResult.FromError("You don't have permission to do that.");
             }
