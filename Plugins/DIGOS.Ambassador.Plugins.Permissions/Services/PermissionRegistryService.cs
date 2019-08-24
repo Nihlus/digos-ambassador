@@ -36,11 +36,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
     [PublicAPI]
     public class PermissionRegistryService
     {
+        [NotNull]
         private readonly Dictionary<Type, IPermission> _registeredPermissions = new Dictionary<Type, IPermission>();
 
         /// <summary>
         /// Gets the permissions that have been registered in the service.
         /// </summary>
+        [NotNull]
         public IEnumerable<IPermission> RegisteredPermissions => _registeredPermissions.Values;
 
         /// <summary>
@@ -49,9 +51,14 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="assembly">The assembly to register permissions from.</param>
         /// <param name="services">The services.</param>
         /// <returns>true if all permissions were successfully registered; otherwise, false.</returns>
-        public ModifyEntityResult RegisterPermissions(Assembly assembly, [NotNull] IServiceProvider services)
+        [NotNull]
+        public ModifyEntityResult RegisterPermissions([NotNull] Assembly assembly, [NotNull] IServiceProvider services)
         {
-            var permissionTypes = assembly.DefinedTypes.Where(t => t.ImplementedInterfaces.Contains(typeof(IPermission)));
+            var permissionTypes = assembly.DefinedTypes.Where
+            (
+                t => t.ImplementedInterfaces.Contains(typeof(IPermission))
+            );
+
             foreach (var permissionType in permissionTypes)
             {
                 var result = RegisterPermission(permissionType, services);
@@ -90,7 +97,12 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="permissionType">The permission type.</param>
         /// <param name="services">The application's services.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public CreateEntityResult<IPermission> RegisterPermission(Type permissionType, IServiceProvider services)
+        [NotNull]
+        public CreateEntityResult<IPermission> RegisterPermission
+        (
+            [NotNull] Type permissionType,
+            [NotNull] IServiceProvider services
+        )
         {
             if (_registeredPermissions.ContainsKey(permissionType))
             {

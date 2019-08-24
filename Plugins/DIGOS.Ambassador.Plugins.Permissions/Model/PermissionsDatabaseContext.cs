@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
+    [PublicAPI]
     public class PermissionsDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "PermissionModule";
@@ -36,6 +38,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// <summary>
         /// Gets or sets the table where role-associated permissions are stored.
         /// </summary>
+        [NotNull]
+        [ItemNotNull]
         public DbSet<RolePermission> RolePermissions
         {
             get;
@@ -47,6 +51,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// <summary>
         /// Gets or sets the table where user-associated permissions are stored.
         /// </summary>
+        [NotNull]
+        [ItemNotNull]
         public DbSet<UserPermission> UserPermissions
         {
             get;
@@ -59,6 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// Initializes a new instance of the <see cref="PermissionsDatabaseContext"/> class.
         /// </summary>
         /// <param name="contextOptions">The context options.</param>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
         public PermissionsDatabaseContext(DbContextOptions<PermissionsDatabaseContext> contextOptions)
             : base(SchemaName, contextOptions)
         {

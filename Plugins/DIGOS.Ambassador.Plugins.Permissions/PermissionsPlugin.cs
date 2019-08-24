@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Plugins.Permissions.CommandModules;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -43,6 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions
     /// <summary>
     /// Describes the permission plugin.
     /// </summary>
+    [PublicAPI]
     public class PermissionsPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />

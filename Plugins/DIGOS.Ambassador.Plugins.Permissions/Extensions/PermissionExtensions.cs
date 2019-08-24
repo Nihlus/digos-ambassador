@@ -21,20 +21,22 @@
 //
 
 using System.Text;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Permissions.Extensions
 {
     /// <summary>
     /// Extension methods for the <see cref="IPermission"/> interface and <see cref="Permission"/> class.
     /// </summary>
-    public static class PermissionExtensions
+    internal static class PermissionExtensions
     {
         /// <summary>
         /// Formats the data in the permission as a title, including the allowed targets.
         /// </summary>
         /// <param name="permission">The permission to format.</param>
         /// <returns>The formatted title.</returns>
-        public static string FormatTitle(this IPermission permission)
+        [NotNull, Pure]
+        public static string FormatTitle([NotNull] this IPermission permission)
         {
             if (!permission.IsGrantedByDefaultToSelf && !permission.IsGrantedByDefaultToOthers)
             {

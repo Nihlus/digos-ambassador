@@ -32,6 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
     /// <summary>
     /// Represents a prioritized precondition that is ordered and tested by its priority.
     /// </summary>
+    [PublicAPI]
     public abstract class PrioritizedPreconditionAttribute : PreconditionAttribute
     {
         /// <summary>
@@ -40,9 +41,18 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
         public int Priority { get; set; }
 
         /// <inheritdoc />
-        public sealed override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, [NotNull] CommandInfo command, IServiceProvider services)
+        public sealed override async Task<PreconditionResult> CheckPermissionsAsync
+        (
+            [NotNull] ICommandContext context,
+            [NotNull] CommandInfo command,
+            [NotNull] IServiceProvider services
+        )
         {
-            var prioPreconditions = command.Preconditions.Where(a => a is PrioritizedPreconditionAttribute).Cast<PrioritizedPreconditionAttribute>();
+            var prioPreconditions = command.Preconditions.Where
+            (
+                a =>
+                    a is PrioritizedPreconditionAttribute
+            ).Cast<PrioritizedPreconditionAttribute>();
 
             foreach (var prioConditionGroup in prioPreconditions.GroupBy(p => p.Group, StringComparer.Ordinal))
             {
@@ -51,7 +61,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
                     // Just check the permissions as normal
                     foreach (var prioPrecondition in prioConditionGroup.OrderBy(p => p.Priority))
                     {
-                        var checkResult = await prioPrecondition.CheckPrioritizedPermissions(context, command, services);
+                        var checkResult = await prioPrecondition.CheckPrioritizedPermissions
+                        (
+                            context,
+                            command,
+                            services
+                        );
+
                         if (!checkResult.IsSuccess)
                         {
                             return checkResult;
@@ -68,7 +84,10 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
 
                     if (!results.Any(p => p.IsSuccess))
                     {
-                        return PreconditionGroupResult.FromError($"Prioritized precondition group \"{prioConditionGroup.Key}\" failed.", results);
+                        return PreconditionGroupResult.FromError
+                        (
+                            $"Prioritized precondition group \"{prioConditionGroup.Key}\" failed.", results
+                        );
                     }
                 }
             }
@@ -84,6 +103,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
         /// <param name="command">The invoked command.</param>
         /// <param name="services">The services.</param>
         /// <returns>The result of the permission check.</returns>
-        protected abstract Task<PreconditionResult> CheckPrioritizedPermissions(ICommandContext context, CommandInfo command, IServiceProvider services);
+        protected abstract Task<PreconditionResult> CheckPrioritizedPermissions
+        (
+            ICommandContext context,
+            CommandInfo command,
+            IServiceProvider services
+        );
     }
 }

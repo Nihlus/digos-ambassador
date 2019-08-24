@@ -47,15 +47,21 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
     /// <summary>
     /// Permission-related commands for granting, revoking and checking user permissions.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     [Group("permission")]
     [Summary("Permission-related commands for granting, revoking and checking user permissions.")]
     public class PermissionCommands : ModuleBase<SocketCommandContext>
     {
+        [NotNull]
         private readonly UserFeedbackService _feedback;
+
+        [NotNull]
         private readonly InteractivityService _interactivity;
 
+        [NotNull]
         private readonly PermissionService _permissions;
+
+        [NotNull]
         private readonly PermissionRegistryService _permissionRegistry;
 
         /// <summary>
@@ -68,11 +74,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// <param name="permissionRegistry">The permission registry service.</param>
         public PermissionCommands
         (
-            PermissionsDatabaseContext database,
-            UserFeedbackService feedback,
-            PermissionService permissions,
-            InteractivityService interactivity,
-            PermissionRegistryService permissionRegistry
+            [NotNull] PermissionsDatabaseContext database,
+            [NotNull] UserFeedbackService feedback,
+            [NotNull] PermissionService permissions,
+            [NotNull] InteractivityService interactivity,
+            [NotNull] PermissionRegistryService permissionRegistry
         )
         {
             _feedback = feedback;
@@ -84,7 +90,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// <summary>
         /// Lists all available permissions.
         /// </summary>
-        [UsedImplicitly]
         [Command("list")]
         [Summary("Lists all available permissions.")]
         public async Task ListPermissionsAsync()
@@ -120,8 +125,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// <summary>
         /// Lists all permissions that have been granted to the invoking user.
         /// </summary>
-        [NotNull]
-        [UsedImplicitly]
         [Command("list-granted")]
         [Summary("Lists all permissions that have been granted to the invoking user.")]
         [RequireContext(Guild)]
@@ -131,7 +134,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// Lists all permissions that have been granted to target user.
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
-        [UsedImplicitly]
         [Command("list-granted")]
         [Summary("Lists all permissions that have been granted to target user.")]
         [RequireContext(Guild)]
@@ -191,13 +193,17 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// <summary>
         /// Commands for granting users permissions.
         /// </summary>
-        [UsedImplicitly]
+        [PublicAPI]
         [Group("grant")]
         public class GrantCommands : ModuleBase<SocketCommandContext>
         {
+            [NotNull]
             private readonly UserFeedbackService _feedback;
 
+            [NotNull]
             private readonly PermissionService _permissions;
+
+            [NotNull]
             private readonly PermissionRegistryService _permissionRegistry;
 
             /// <summary>
@@ -208,9 +214,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             /// <param name="permissionRegistry">The permission registry service.</param>
             public GrantCommands
             (
-                UserFeedbackService feedback,
-                PermissionService permissions,
-                PermissionRegistryService permissionRegistry
+                [NotNull] UserFeedbackService feedback,
+                [NotNull] PermissionService permissions,
+                [NotNull] PermissionRegistryService permissionRegistry
             )
             {
                 _feedback = feedback;
@@ -223,7 +229,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             /// </summary>
             /// <param name="permissionName">The permission that is to be revoked.</param>
             /// <param name="revokedTarget">The target that is to be revoked.</param>
-            [UsedImplicitly]
             [Command]
             [Summary("Grant yourself the given permission.")]
             [RequirePermission(typeof(RevokePermission), PermissionTarget.Self)]
@@ -241,7 +246,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             /// <param name="discordUser">The Discord user.</param>
             /// <param name="permissionName">The permission that is to be granted.</param>
             /// <param name="grantedTarget">The target that the permission should be valid for.</param>
-            [UsedImplicitly]
             [Command]
             [Summary("Grant the targeted user the given permission.")]
             [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
@@ -286,13 +290,17 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// <summary>
         /// Commands for revoking permissions from users.
         /// </summary>
-        [UsedImplicitly]
+        [PublicAPI]
         [Group("revoke")]
         public class RevokeCommands : ModuleBase<SocketCommandContext>
         {
+            [NotNull]
             private readonly UserFeedbackService _feedback;
 
+            [NotNull]
             private readonly PermissionService _permissions;
+
+            [NotNull]
             private readonly PermissionRegistryService _permissionRegistry;
 
             /// <summary>
@@ -303,9 +311,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             /// <param name="permissionRegistry">The permission registry service.</param>
             public RevokeCommands
             (
-                UserFeedbackService feedback,
-                PermissionService permissions,
-                PermissionRegistryService permissionRegistry
+                [NotNull] UserFeedbackService feedback,
+                [NotNull] PermissionService permissions,
+                [NotNull] PermissionRegistryService permissionRegistry
             )
             {
                 _feedback = feedback;
@@ -318,7 +326,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             /// </summary>
             /// <param name="permissionName">The permission that is to be revoked.</param>
             /// <param name="revokedTarget">The target that is to be revoked.</param>
-            [UsedImplicitly]
             [Command]
             [Summary("Revoke the given permission from yourself.")]
             [RequirePermission(typeof(RevokePermission), PermissionTarget.Self)]
@@ -336,7 +343,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             /// <param name="discordUser">The Discord user.</param>
             /// <param name="permissionName">The permission that is to be revoked.</param>
             /// <param name="revokedTarget">The target that is to be revoked.</param>
-            [UsedImplicitly]
             [Command]
             [Summary("Revoke the given permission from the targeted user.")]
             [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]

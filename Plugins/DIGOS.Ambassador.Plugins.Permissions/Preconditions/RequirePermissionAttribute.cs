@@ -35,8 +35,10 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
     /// This attribute can be attached to Discord.Net.Commands module commands to restrict them to certain predefined
     /// permissions.
     /// </summary>
+    [PublicAPI]
     public class RequirePermissionAttribute : PrioritizedPreconditionAttribute
     {
+        [NotNull]
         private readonly Type _permissionType;
         private readonly PermissionTarget _target;
 
@@ -45,7 +47,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
         /// </summary>
         /// <param name="permissionType">The required permission.</param>
         /// <param name="target">The required target scope.</param>
-        public RequirePermissionAttribute(Type permissionType, PermissionTarget target)
+        public RequirePermissionAttribute([NotNull] Type permissionType, PermissionTarget target)
         {
             _permissionType = permissionType;
             _target = target;
@@ -55,8 +57,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
         protected override async Task<PreconditionResult> CheckPrioritizedPermissions
         (
             [NotNull] ICommandContext context,
-            CommandInfo command,
-            IServiceProvider services
+            [NotNull] CommandInfo command,
+            [NotNull] IServiceProvider services
         )
         {
             if (context.Guild is null || !(context.User is SocketGuildUser guildUser))

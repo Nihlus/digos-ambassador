@@ -36,15 +36,17 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
     /// <summary>
     /// Encapsulates business logic for permissions.
     /// </summary>
+    [PublicAPI]
     public class PermissionService
     {
+        [NotNull]
         private readonly PermissionsDatabaseContext _database;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PermissionService"/> class.
         /// </summary>
         /// <param name="database">The database.</param>
-        public PermissionService(PermissionsDatabaseContext database)
+        public PermissionService([NotNull] PermissionsDatabaseContext database)
         {
             _database = database;
         }
@@ -57,6 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="grantedPermission">The granted permission.</param>
         /// <param name="target">The granted target.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [ItemNotNull]
         public async Task<ModifyEntityResult> GrantPermissionAsync
         (
             [NotNull] IGuild discordServer,
@@ -126,6 +129,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="grantedPermission">The granted permission.</param>
         /// <param name="target">The granted target.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [ItemNotNull]
         public async Task<ModifyEntityResult> GrantPermissionAsync
         (
             [NotNull] IRole discordRole,
@@ -193,6 +197,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="revokedPermission">The revoked permission.</param>
         /// <param name="target">The revoked target.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [ItemNotNull]
         public async Task<ModifyEntityResult> RevokePermissionAsync
         (
             [NotNull] IGuild discordServer,
@@ -262,6 +267,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="revokedPermission">The revoked permission.</param>
         /// <param name="target">The revoked target.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [ItemNotNull]
         public async Task<ModifyEntityResult> RevokePermissionAsync
         (
             [NotNull] IRole discordRole,
@@ -332,7 +338,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="requiredPermission">The permission.</param>
         /// <param name="target">The target of the permission.</param>
         /// <returns><value>true</value> if the user has the permission; otherwise, <value>false</value>.</returns>
-        [Pure]
+        [Pure, ItemNotNull]
         public async Task<DetermineConditionResult> HasPermissionAsync
         (
             [NotNull] IGuild discordServer,
@@ -424,6 +430,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="discordServer">The server the user is on.</param>
         /// <param name="discordUser">The user.</param>
         /// <returns>An object representing the query.</returns>
+        [NotNull, ItemNotNull]
         public IQueryable<UserPermission> GetApplicableUserPermissions
         (
             [NotNull] IGuild discordServer,
@@ -440,6 +447,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// </summary>
         /// <param name="discordUser">The user.</param>
         /// <returns>An object representing the query.</returns>
+        [NotNull, ItemNotNull]
         public IOrderedQueryable<RolePermission> GetApplicableRolePermissions
         (
             [NotNull] IGuildUser discordUser
@@ -459,10 +467,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="permission">The permission.</param>
         /// <param name="target">The target.</param>
         /// <returns>A retrieval result which may or may not have finished.</returns>
+        [ItemNotNull]
         private async Task<RetrieveEntityResult<RolePermission>> GetOrCreateRolePermissionAsync
         (
-            IRole discordRole,
-            IPermission permission,
+            [NotNull] IRole discordRole,
+            [NotNull] IPermission permission,
             PermissionTarget target
         )
         {
@@ -505,11 +514,12 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="permission">The permission.</param>
         /// <param name="target">The target.</param>
         /// <returns>A retrieval result which may or may not have finished.</returns>
+        [ItemNotNull]
         private async Task<RetrieveEntityResult<UserPermission>> GetOrCreateUserPermissionAsync
         (
-            IGuild discordGuild,
-            IUser discordUser,
-            IPermission permission,
+            [NotNull] IGuild discordGuild,
+            [NotNull] IUser discordUser,
+            [NotNull] IPermission permission,
             PermissionTarget target
         )
         {

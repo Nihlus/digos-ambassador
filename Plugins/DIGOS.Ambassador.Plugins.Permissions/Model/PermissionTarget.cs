@@ -22,13 +22,14 @@
 
 using System;
 using System.ComponentModel;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Permissions.Model
 {
     /// <summary>
     /// Represents target permissions for commands.
     /// </summary>
-    [Flags]
+    [PublicAPI, Flags]
     public enum PermissionTarget
     {
         /// <summary>
