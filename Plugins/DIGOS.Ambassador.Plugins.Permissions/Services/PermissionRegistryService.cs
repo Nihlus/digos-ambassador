@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             IPermission permissionInstance;
             try
             {
-                permissionInstance = (IPermission)ActivatorUtilities.CreateInstance(services, permissionType, null);
+                permissionInstance = (IPermission)ActivatorUtilities.CreateInstance(services, permissionType);
             }
             catch (Exception e)
             {
