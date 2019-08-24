@@ -25,10 +25,11 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Tests.Extensions;
+using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.TestBases
+namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     /// <summary>
     /// Serves as a test base for server service tests.
@@ -40,7 +41,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// </summary>
         protected ServerService Servers { get; private set; }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public virtual Task InitializeAsync()
         {
             return Task.CompletedTask;
