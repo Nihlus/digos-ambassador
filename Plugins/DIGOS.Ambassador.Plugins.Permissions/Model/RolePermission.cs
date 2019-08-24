@@ -23,6 +23,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Permissions.Model
 {
@@ -35,17 +36,17 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// <summary>
         /// Gets the role's Discord ID.
         /// </summary>
-        public long RoleID { get; }
+        public long RoleID { get; [UsedImplicitly] private set; }
 
         /// <summary>
         /// Gets the permission's unique identifier.
         /// </summary>
-        public Guid Permission { get; }
+        public Guid Permission { get; [UsedImplicitly] private set; }
 
         /// <summary>
         /// Gets the allowed targets for the permission.
         /// </summary>
-        public PermissionTarget Target { get; }
+        public PermissionTarget Target { get; [UsedImplicitly] private set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the permission has been granted.

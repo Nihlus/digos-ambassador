@@ -8,14 +8,16 @@ using DIGOS.Ambassador.Plugins.Permissions.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Plugins.Permissions.Migrations
 {
     [DbContext(typeof(PermissionsDatabaseContext))]
-    partial class PermissionsDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190824163849_ReworkModel")]
+    partial class ReworkModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
