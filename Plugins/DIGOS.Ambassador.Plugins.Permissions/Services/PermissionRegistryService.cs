@@ -56,7 +56,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         {
             var permissionTypes = assembly.DefinedTypes.Where
             (
-                t => t.ImplementedInterfaces.Contains(typeof(IPermission))
+                t =>
+                    t.ImplementedInterfaces.Contains(typeof(IPermission)) &&
+                    !t.IsAbstract
             );
 
             foreach (var permissionType in permissionTypes)

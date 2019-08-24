@@ -55,12 +55,12 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Extensions
             {
                 if (permission.IsGrantedByDefaultToSelf)
                 {
-                    extraInfo.Append("yourself.");
+                    extraInfo.Append("yourself");
                 }
 
                 if (permission.IsGrantedByDefaultToOthers)
                 {
-                    extraInfo.Append("others.");
+                    extraInfo.Append("others");
                 }
             }
 
