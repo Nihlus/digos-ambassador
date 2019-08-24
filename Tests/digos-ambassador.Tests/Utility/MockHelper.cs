@@ -21,6 +21,7 @@
 //
 
 using Discord;
+using Discord.WebSocket;
 using JetBrains.Annotations;
 using Moq;
 
@@ -61,11 +62,17 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// Creates a simple mocked <see cref="IGuild"/> object with the given ID.
         /// </summary>
         /// <param name="id">The ID of the object.</param>
+        /// <param name="ownerId">The ID of the guild owner.</param>
         /// <returns>A mocked object.</returns>
-        public static IGuild CreateDiscordGuild(long id)
+        public static IGuild CreateDiscordGuild(long id, [CanBeNull] long? ownerId = null)
         {
             var mock = new Mock<IGuild>();
             mock.Setup(u => u.Id).Returns((ulong)id);
+
+            if (!(ownerId is null))
+            {
+                mock.Setup(u => u.OwnerId).Returns((ulong)ownerId.Value);
+            }
 
             return mock.Object;
         }

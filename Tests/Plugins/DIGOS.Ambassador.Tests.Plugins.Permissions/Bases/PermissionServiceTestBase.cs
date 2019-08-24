@@ -21,12 +21,14 @@
 //
 
 using System;
+using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Tests.Extensions;
+using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DIGOS.Ambassador.Tests.TestBases
+namespace DIGOS.Ambassador.Tests.Plugins.Permissions
 {
     /// <summary>
     /// Serves as a test base for permission service tests.

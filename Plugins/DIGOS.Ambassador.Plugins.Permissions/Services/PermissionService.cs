@@ -26,7 +26,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using Discord;
-using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -85,20 +84,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                     PermissionTarget.Other
                 );
 
-                if (grantSelfResult.IsSuccess && grantOtherResult.IsSuccess)
+                if (grantSelfResult.IsSuccess || grantOtherResult.IsSuccess)
                 {
                     return ModifyEntityResult.FromSuccess();
                 }
 
-                if (!grantSelfResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(grantSelfResult);
-                }
-
-                if (!grantOtherResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(grantOtherResult);
-                }
+                // Both are false, so we'll just inherit the error from the self grant.
+                return ModifyEntityResult.FromError(grantSelfResult);
             }
 
             var getPermissionResult = await GetOrCreateUserPermissionAsync
@@ -121,78 +113,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             }
 
             permission.IsGranted = true;
-
-            await _database.SaveChangesAsync();
-
-            return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <summary>
-        /// Revokes the given permission from the given Discord role.
-        /// </summary>
-        /// <param name="discordRole">The Discord role.</param>
-        /// <param name="revokedPermission">The revoked permission.</param>
-        /// <param name="target">The revoked target.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> RevokePermissionAsync
-        (
-            [NotNull] IRole discordRole,
-            [NotNull] IPermission revokedPermission,
-            PermissionTarget target
-        )
-        {
-            // Special All target handling
-            if (target == PermissionTarget.All)
-            {
-                var revokeSelfResult = await RevokePermissionAsync
-                (
-                    discordRole,
-                    revokedPermission,
-                    PermissionTarget.Self
-                );
-
-                var revokeOtherResult = await RevokePermissionAsync
-                (
-                    discordRole,
-                    revokedPermission,
-                    PermissionTarget.Other
-                );
-
-                if (revokeSelfResult.IsSuccess && revokeOtherResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromSuccess();
-                }
-
-                if (!revokeSelfResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(revokeSelfResult);
-                }
-
-                if (!revokeOtherResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(revokeOtherResult);
-                }
-            }
-
-            var getPermissionResult = await GetOrCreateRolePermissionAsync
-            (
-                discordRole,
-                revokedPermission,
-                target
-            );
-
-            if (!getPermissionResult.IsSuccess)
-            {
-                return ModifyEntityResult.FromError(getPermissionResult);
-            }
-
-            var permission = getPermissionResult.Entity;
-            if (!permission.IsGranted)
-            {
-                return ModifyEntityResult.FromError("The role is already prohibited from doing that.");
-            }
-
-            permission.IsGranted = false;
 
             await _database.SaveChangesAsync();
 
@@ -230,20 +150,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                     PermissionTarget.Other
                 );
 
-                if (grantSelfResult.IsSuccess && grantOtherResult.IsSuccess)
+                if (grantSelfResult.IsSuccess || grantOtherResult.IsSuccess)
                 {
                     return ModifyEntityResult.FromSuccess();
                 }
 
-                if (!grantSelfResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(grantSelfResult);
-                }
-
-                if (!grantOtherResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(grantOtherResult);
-                }
+                // Both are false, so we'll just inherit the self result.
+                return ModifyEntityResult.FromError(grantSelfResult);
             }
 
             var getPermissionResult = await GetOrCreateRolePermissionAsync
@@ -307,20 +220,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                     PermissionTarget.Other
                 );
 
-                if (revokeSelfResult.IsSuccess && revokeOtherResult.IsSuccess)
+                if (revokeSelfResult.IsSuccess || revokeOtherResult.IsSuccess)
                 {
                     return ModifyEntityResult.FromSuccess();
                 }
 
-                if (!revokeSelfResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(revokeSelfResult);
-                }
-
-                if (!revokeOtherResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(revokeOtherResult);
-                }
+                // Both are false, so we'll just inherit the self result.
+                return ModifyEntityResult.FromError(revokeSelfResult);
             }
 
             var getPermissionResult = await GetOrCreateUserPermissionAsync
@@ -350,6 +256,71 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         }
 
         /// <summary>
+        /// Revokes the given permission from the given Discord role.
+        /// </summary>
+        /// <param name="discordRole">The Discord role.</param>
+        /// <param name="revokedPermission">The revoked permission.</param>
+        /// <param name="target">The revoked target.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> RevokePermissionAsync
+        (
+            [NotNull] IRole discordRole,
+            [NotNull] IPermission revokedPermission,
+            PermissionTarget target
+        )
+        {
+            // Special All target handling
+            if (target == PermissionTarget.All)
+            {
+                var revokeSelfResult = await RevokePermissionAsync
+                (
+                    discordRole,
+                    revokedPermission,
+                    PermissionTarget.Self
+                );
+
+                var revokeOtherResult = await RevokePermissionAsync
+                (
+                    discordRole,
+                    revokedPermission,
+                    PermissionTarget.Other
+                );
+
+                if (revokeSelfResult.IsSuccess || revokeOtherResult.IsSuccess)
+                {
+                    return ModifyEntityResult.FromSuccess();
+                }
+
+                // Both are false, so we'll just inherit the self result.
+                return ModifyEntityResult.FromError(revokeSelfResult);
+            }
+
+            var getPermissionResult = await GetOrCreateRolePermissionAsync
+            (
+                discordRole,
+                revokedPermission,
+                target
+            );
+
+            if (!getPermissionResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getPermissionResult);
+            }
+
+            var permission = getPermissionResult.Entity;
+            if (!permission.IsGranted)
+            {
+                return ModifyEntityResult.FromError("The role is already prohibited from doing that.");
+            }
+
+            permission.IsGranted = false;
+
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
         /// Determines whether or not the user has the given permission. The permission hierarchy roughly follows that
         /// of Discord, wherein user-specific permissions override those given implicitly through role memberships.
         ///
@@ -365,7 +336,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         public async Task<DetermineConditionResult> HasPermissionAsync
         (
             [NotNull] IGuild discordServer,
-            [NotNull] SocketGuildUser discordUser,
+            [NotNull] IGuildUser discordUser,
             IPermission requiredPermission,
             PermissionTarget target
         )
@@ -471,14 +442,14 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <returns>An object representing the query.</returns>
         public IOrderedQueryable<RolePermission> GetApplicableRolePermissions
         (
-            [NotNull] SocketGuildUser discordUser
+            [NotNull] IGuildUser discordUser
         )
         {
-            var userRoles = discordUser.Roles;
+            var userRoles = discordUser.RoleIds;
 
             return _database.RolePermissions
-                .Where(p => userRoles.Any(r => r.Id == (ulong)p.RoleID))
-                .OrderBy(p => userRoles.IndexOf(userRoles.First(r => r.Id == (ulong)p.RoleID)));
+                .Where(p => userRoles.Any(r => r == (ulong)p.RoleID))
+                .OrderBy(p => userRoles.IndexOf(userRoles.First(r => r == (ulong)p.RoleID)));
         }
 
         /// <summary>
