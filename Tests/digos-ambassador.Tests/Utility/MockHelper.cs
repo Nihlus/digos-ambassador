@@ -21,7 +21,6 @@
 //
 
 using Discord;
-using Discord.WebSocket;
 using JetBrains.Annotations;
 using Moq;
 
