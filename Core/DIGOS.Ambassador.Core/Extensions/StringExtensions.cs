@@ -98,5 +98,28 @@ namespace DIGOS.Ambassador.Core.Extensions
 
             return @this;
         }
+
+        /// <summary>
+        /// Surrounds the given string in quotation marks, if required.
+        /// </summary>
+        /// <param name="this">The string.</param>
+        /// <param name="quoteChar">The quote character.</param>
+        /// <returns>The quoted string.</returns>
+        [CanBeNull]
+        [ContractAnnotation("this : null => null; this : notnull => notnull")]
+        public static string Quote([CanBeNull] this string @this, char quoteChar = '"')
+        {
+            if (@this is null)
+            {
+                return null;
+            }
+
+            if (@this[0] == quoteChar && @this.Last() == quoteChar)
+            {
+                return @this;
+            }
+
+            return $"{quoteChar}{@this}{quoteChar}";
+        }
     }
 }

@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
@@ -415,8 +416,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var userDMChannel = await playerToInvite.GetOrCreateDMChannelAsync();
             try
             {
-                await userDMChannel.SendMessageAsync(
-                    $"You've been invited to join {roleplay.Name}. Use \"!rp join {roleplay.Name}\" to join.");
+                var roleplayName = roleplay.Name.Contains(" ") ? roleplay.Name.Quote() : roleplay.Name;
+
+                await userDMChannel.SendMessageAsync
+                (
+                    $"You've been invited to join {roleplay.Name}. Use `!rp join {roleplayName}` to join."
+                );
             }
             catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
             {
