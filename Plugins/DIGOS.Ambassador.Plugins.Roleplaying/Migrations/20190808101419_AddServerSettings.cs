@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
             const string seedQuery =
                 "do $$" +
                 "    begin" +
-                "    if exists(select column_name from information_schema.columns where table_name='Servers' and column_name='DedicatedRoleplayChannelsCategory') then" +
+                "    if exists(select column_name from information_schema.columns where table_name='Servers' and table_schema='Core' and column_name='DedicatedRoleplayChannelsCategory') then" +
                 "        insert into \"RoleplayModule\".\"ServerSettings\"" +
                 "        (\"ServerID\", \"DedicatedRoleplayChannelsCategory\")" +
                 "        select \"ID\", \"DedicatedRoleplayChannelsCategory\" from \"Core\".\"Servers\";" + "" +
