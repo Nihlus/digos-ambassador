@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
@@ -31,6 +32,7 @@ using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Characters.TypeReaders;
+using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -65,10 +67,21 @@ namespace DIGOS.Ambassador.Plugins.Characters
         /// <inheritdoc />
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
+            var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+            var registrationResult = permissionRegistry.RegisterPermissions
+            (
+                Assembly.GetExecutingAssembly(),
+                serviceProvider
+            );
+
+            if (!registrationResult.IsSuccess)
+            {
+                return false;
+            }
+
             var commands = serviceProvider.GetRequiredService<CommandService>();
 
             commands.AddTypeReader<Character>(new CharacterTypeReader());
-
             await commands.AddModuleAsync<CharacterCommands>(serviceProvider);
 
             var pronounService = serviceProvider.GetRequiredService<PronounService>();
