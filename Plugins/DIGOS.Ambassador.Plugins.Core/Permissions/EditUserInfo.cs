@@ -41,8 +41,5 @@ namespace DIGOS.Ambassador.Plugins.Core.Permissions
 
         /// <inheritdoc />
         public override bool IsGrantedByDefaultToSelf => true;
-
-        /// <inheritdoc />
-        public override bool IsGrantedByDefaultToOthers => true;
     }
 }
