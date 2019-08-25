@@ -33,10 +33,7 @@ using DIGOS.Ambassador.Discord.Behaviours;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
-using DIGOS.Ambassador.Plugins.Core.Model;
-using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Commands;
@@ -54,17 +51,12 @@ namespace DIGOS.Ambassador.Behaviours
     /// </summary>
     public class CommandBehaviour : ContinuousBehaviour
     {
-        private readonly CoreDatabaseContext _database;
-
         private readonly IServiceProvider _services;
 
-        private readonly ServerService _servers;
-        private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
         private readonly PrivacyService _privacy;
         private readonly ContentService _content;
         private readonly CommandService _commands;
-        private readonly PermissionService _permissions;
         private readonly HelpService _help;
 
         /// <summary>
@@ -76,42 +68,30 @@ namespace DIGOS.Ambassador.Behaviours
         /// Initializes a new instance of the <see cref="CommandBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
-        /// <param name="database">The database.</param>
         /// <param name="services">The available services.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="privacy">The privacy service.</param>
         /// <param name="content">The content service.</param>
         /// <param name="commands">The command service.</param>
-        /// <param name="permissions">The permission service.</param>
         /// <param name="help">The help service.</param>
-        /// <param name="users">The user service.</param>
-        /// <param name="servers">The server service.</param>
         public CommandBehaviour
         (
             DiscordSocketClient client,
-            CoreDatabaseContext database,
             IServiceProvider services,
             UserFeedbackService feedback,
             PrivacyService privacy,
             ContentService content,
             CommandService commands,
-            PermissionService permissions,
-            HelpService help,
-            UserService users,
-            ServerService servers
+            HelpService help
         )
             : base(client)
         {
-            _database = database;
             _services = services;
             _feedback = feedback;
             _privacy = privacy;
             _content = content;
             _commands = commands;
-            _permissions = permissions;
             _help = help;
-            _users = users;
-            _servers = servers;
 
             this.RunningCommands = new ConcurrentQueue<Task>();
         }
@@ -391,7 +371,13 @@ namespace DIGOS.Ambassador.Behaviours
                         await sw.WriteLineAsync("====================");
                         await sw.WriteLineAsync();
                         await sw.WriteLineAsync($"Generated at: {now}");
-                        await sw.WriteLineAsync($"Bot version: {Assembly.GetEntryAssembly().GetName().Version}");
+
+                        var entryAssembly = Assembly.GetEntryAssembly();
+                        if (!(entryAssembly is null))
+                        {
+                            await sw.WriteLineAsync($"Bot version: {entryAssembly.GetName().Version}");
+                        }
+
                         await sw.WriteLineAsync($"Command message link: {context.Message.GetJumpUrl()}");
                         await sw.WriteLineAsync
                         (

@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Tests.TestBases
@@ -38,6 +39,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <summary>
         /// Initializes a new instance of the <see cref="ServiceProvidingTestBase"/> class.
         /// </summary>
+        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required.")]
         protected ServiceProvidingTestBase()
         {
             var serviceCollection = new ServiceCollection();

@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations
         {
             serviceCollection
                 .AddScoped<LuaService>()
-                .AddScoped<TransformationService>
+                .AddScoped
                 (
                     provider =>
                         ActivatorUtilities.CreateInstance<TransformationService>(provider)
