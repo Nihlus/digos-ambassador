@@ -169,16 +169,22 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The user that has revoked consent.</param>
         /// <returns>A task that must be awaited.</returns>
-        public async Task RevokeUserConsentAsync([NotNull] IUser discordUser)
+        public async Task<ModifyEntityResult> RevokeUserConsentAsync([NotNull] IUser discordUser)
         {
-            var userConsent = await _database.UserConsents.FirstOrDefaultAsync(uc => uc.DiscordID == (long)discordUser.Id);
+            var userConsent = await _database.UserConsents.FirstOrDefaultAsync
+            (
+                uc => uc.DiscordID == (long)discordUser.Id
+            );
 
-            if (!(userConsent is null))
+            if (userConsent is null)
             {
-                userConsent.HasConsented = false;
+                return ModifyEntityResult.FromError("The user has not consented.");
             }
 
+            userConsent.HasConsented = false;
             await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
         }
     }
 }
