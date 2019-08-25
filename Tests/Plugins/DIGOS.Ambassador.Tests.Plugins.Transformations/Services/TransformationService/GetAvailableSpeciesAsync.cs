@@ -1,5 +1,5 @@
 //
-//  SpeciesDataProvider.cs
+//  GetAvailableSpeciesAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,30 +20,27 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
+#pragma warning disable SA1600
+#pragma warning disable CS1591
+#pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.ContentTests.Data
+using System.Threading.Tasks;
+using Xunit;
+
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
-    /// <summary>
-    /// Provides a feed of paths to bundled species files for use as test parameters.
-    /// </summary>
-    public class SpeciesDataProvider : IEnumerable<object[]>
+    public partial class TransformationServiceTests
     {
-        /// <inheritdoc/>
-        public IEnumerator<object[]> GetEnumerator()
+        public class GetAvailableSpeciesAsync : TransformationServiceTestBase
         {
-            var baseContentPath = Path.Combine("Content", "Transformations", "Species");
-            var speciesDirectories = Directory.EnumerateDirectories(baseContentPath);
-
-            foreach (var speciesDirectory in speciesDirectories)
+            [Fact]
+            public async Task ReturnsNonEmptySetForUpdatedDatabase()
             {
-                yield return new object[] { Path.Combine(speciesDirectory, "Species.yml") };
+                await this.Transformations.UpdateTransformationDatabaseAsync();
+                var result = await this.Transformations.GetAvailableSpeciesAsync();
+
+                Assert.NotEmpty(result);
             }
         }
-
-        /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

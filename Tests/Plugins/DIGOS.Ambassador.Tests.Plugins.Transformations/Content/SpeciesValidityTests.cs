@@ -22,13 +22,12 @@
 
 using System.IO;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
-using DIGOS.Ambassador.Tests.ContentTests.Data;
 using Xunit;
 
 #pragma warning disable SA1600
 #pragma warning disable CS1591
 
-namespace DIGOS.Ambassador.Tests.ContentTests
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
     public class SpeciesValidityTests : TransformationValidityTests
     {

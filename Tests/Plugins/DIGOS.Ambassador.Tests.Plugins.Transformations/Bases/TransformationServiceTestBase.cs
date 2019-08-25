@@ -31,11 +31,12 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Tests.Extensions;
+using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.TestBases
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
     /// <summary>
     /// Serves as a test base for transformation service tests.

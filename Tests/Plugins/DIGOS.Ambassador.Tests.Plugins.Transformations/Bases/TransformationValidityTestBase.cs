@@ -28,7 +28,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
 
-namespace DIGOS.Ambassador.Tests.TestBases.Content
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
     /// <summary>
     /// Acts as a base for transformation validity tests.

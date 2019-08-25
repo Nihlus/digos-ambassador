@@ -27,7 +27,7 @@ using System.Linq;
 using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
     public class MetaTableBuilderTests
     {

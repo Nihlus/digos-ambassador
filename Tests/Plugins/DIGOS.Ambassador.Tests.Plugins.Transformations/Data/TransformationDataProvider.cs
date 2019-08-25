@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace DIGOS.Ambassador.Tests.ContentTests.Data
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
     /// <summary>
     /// Provides a feed of paths to bundled transformation files for use as test parameters.

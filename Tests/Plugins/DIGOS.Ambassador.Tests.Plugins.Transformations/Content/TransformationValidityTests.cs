@@ -25,14 +25,12 @@ using System.IO;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using DIGOS.Ambassador.Tests.ContentTests.Data;
-using DIGOS.Ambassador.Tests.TestBases.Content;
 using Xunit;
 
 #pragma warning disable SA1600
 #pragma warning disable CS1591
 
-namespace DIGOS.Ambassador.Tests.ContentTests
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
     public class TransformationValidityTests : TransformationValidityTestBase
     {

@@ -30,7 +30,7 @@ using Xunit;
 #pragma warning disable SA1600
 #pragma warning disable CS1591
 
-namespace DIGOS.Ambassador.Tests
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
     public class TokenizerTests
     {
