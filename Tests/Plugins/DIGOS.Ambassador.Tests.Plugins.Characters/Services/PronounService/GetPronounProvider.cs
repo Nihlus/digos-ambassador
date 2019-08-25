@@ -1,5 +1,5 @@
 //
-//  PronounServiceTests.cs
+//  GetPronounProvider.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -23,31 +23,16 @@
 using System.Collections.Generic;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
-using DIGOS.Ambassador.Tests.TestBases;
 using Xunit;
 
 #pragma warning disable SA1600
 #pragma warning disable CS1591
+#pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Tests.ServiceTests
+namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
-    /// <summary>
-    /// Tests for the pronoun service.
-    /// </summary>
-    public class PronounServiceTests
+    public partial class PronounServiceTests
     {
-        public class WithPronounProvider : PronounServiceTestBase
-        {
-            [Fact]
-            public void AddsCorrectProvider()
-            {
-                var provider = new TheyPronounProvider();
-                this.Pronouns.WithPronounProvider(provider);
-
-                Assert.Collection(this.Pronouns.GetAvailablePronounProviders(), p => Assert.Same(provider, p));
-            }
-        }
-
         public class GetPronounProvider : PronounServiceTestBase
         {
             private readonly Character _character;
@@ -75,24 +60,6 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
                 var actual = this.Pronouns.GetPronounProvider(_character);
 
                 Assert.Same(expected, actual);
-            }
-        }
-
-        public class GetAvailablePronounProviders : PronounServiceTestBase
-        {
-            [Fact]
-            public void ReturnsEmptySetWhenNoProvidersHaveBeenAdded()
-            {
-                Assert.Empty(this.Pronouns.GetAvailablePronounProviders());
-            }
-
-            [Fact]
-            public void ReturnsNonEmptySetWhenProvidersHaveBeenAdded()
-            {
-                var provider = new TheyPronounProvider();
-                this.Pronouns.WithPronounProvider(provider);
-
-                Assert.NotEmpty(this.Pronouns.GetAvailablePronounProviders());
             }
         }
     }

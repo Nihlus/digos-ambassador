@@ -23,10 +23,11 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
-namespace DIGOS.Ambassador.Tests.TestBases
+namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     /// <summary>
     /// Serves as a test base for pronoun service tests.

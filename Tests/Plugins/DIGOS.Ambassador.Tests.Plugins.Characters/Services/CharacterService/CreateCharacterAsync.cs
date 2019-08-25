@@ -23,7 +23,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
-using DIGOS.Ambassador.Tests.TestBases;
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
