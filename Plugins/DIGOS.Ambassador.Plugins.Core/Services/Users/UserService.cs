@@ -68,20 +68,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         ([NotNull] IUser discordUser
         )
         {
-            if (discordUser.IsBot || discordUser.IsWebhook)
-            {
-                return RetrieveEntityResult<User>.FromError
-                (
-                    "Users cannot be viewed or created for bots or webhooks."
-                );
-            }
-
             if (!await IsUserKnownAsync(discordUser))
             {
-                return RetrieveEntityResult<User>.FromSuccess(await AddUserAsync(discordUser));
+                return await AddUserAsync(discordUser);
             }
 
-            return RetrieveEntityResult<User>.FromSuccess(await GetUser(discordUser));
+            return await GetUserAsync(discordUser);
         }
 
         /// <summary>
@@ -90,13 +82,20 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>Stored information about the user.</returns>
         [Pure, ItemNotNull]
-        public async Task<User> GetUser([NotNull] IUser discordUser)
+        public async Task<RetrieveEntityResult<User>> GetUserAsync([NotNull] IUser discordUser)
         {
-            return await _database.Users.FirstAsync
+            var user = await _database.Users.FirstOrDefaultAsync
             (
                 u =>
                     u.DiscordID == (long)discordUser.Id
             );
+
+            if (user is null)
+            {
+                return RetrieveEntityResult<User>.FromError("Unknown user.");
+            }
+
+            return RetrieveEntityResult<User>.FromSuccess(user);
         }
 
         /// <summary>
@@ -106,14 +105,21 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <returns>The freshly created information about the user.</returns>
         /// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
         [NotNull, ItemNotNull]
-        public async Task<User> AddUserAsync([NotNull] IUser discordUser)
+        public async Task<RetrieveEntityResult<User>> AddUserAsync([NotNull] IUser discordUser)
         {
+            if (discordUser.IsBot || discordUser.IsWebhook)
+            {
+                return RetrieveEntityResult<User>.FromError
+                (
+                    "Users cannot be viewed or created for bots or webhooks."
+                );
+            }
+
             if (await IsUserKnownAsync(discordUser))
             {
-                throw new ArgumentException
+                return RetrieveEntityResult<User>.FromError
                 (
-                    $"A user with the ID {discordUser.Id} has already been added to the database.",
-                    nameof(discordUser)
+                    $"A user with the ID {discordUser.Id} has already been added to the database."
                 );
             }
 
@@ -128,7 +134,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
 
             await _database.SaveChangesAsync();
 
-            return await GetUser(discordUser);
+            // Requery the database
+            return await GetUserAsync(discordUser);
         }
     }
 }

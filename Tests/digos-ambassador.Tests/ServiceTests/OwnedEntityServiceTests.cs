@@ -136,8 +136,8 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public async Task InitializeAsync()
             {
                 // Set up mocked database users
-                _originalDBUser = await this.Users.AddUserAsync(_originalUser);
-                _newDBUser = await this.Users.AddUserAsync(_newUser);
+                _originalDBUser = (await this.Users.AddUserAsync(_originalUser)).Entity;
+                _newDBUser = (await this.Users.AddUserAsync(_newUser)).Entity;
 
                 await this.Database.SaveChangesAsync();
             }
