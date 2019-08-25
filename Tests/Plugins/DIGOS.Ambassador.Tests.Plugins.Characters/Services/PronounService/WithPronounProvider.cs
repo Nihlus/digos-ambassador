@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 var provider = new TheyPronounProvider();
                 this.Pronouns.WithPronounProvider(provider);
 
-                Assert.Collection<IPronounProvider>(this.Pronouns.GetAvailablePronounProviders(), p => Assert.Same(provider, p));
+                Assert.Collection(this.Pronouns.GetAvailablePronounProviders(), p => Assert.Same(provider, p));
             }
         }
     }

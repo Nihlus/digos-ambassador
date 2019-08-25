@@ -23,7 +23,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
-using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
 using Xunit;
 

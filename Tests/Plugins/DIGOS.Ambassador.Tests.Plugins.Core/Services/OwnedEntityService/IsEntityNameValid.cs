@@ -20,11 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Discord.Commands;
-using Moq;
 using Xunit;
 
 #pragma warning disable SA1600

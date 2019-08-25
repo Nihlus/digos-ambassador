@@ -30,7 +30,6 @@ using DIGOS.Ambassador.Plugins.Characters.CommandModules;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.TypeReaders;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using DIGOS.Ambassador.Tests.TestBases;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
 using Discord.Commands;

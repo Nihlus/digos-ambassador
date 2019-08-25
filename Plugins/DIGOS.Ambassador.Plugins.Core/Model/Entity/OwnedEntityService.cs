@@ -27,7 +27,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
