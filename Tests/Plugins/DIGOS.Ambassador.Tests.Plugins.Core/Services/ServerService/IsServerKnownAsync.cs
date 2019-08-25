@@ -1,5 +1,5 @@
 //
-//  SetIsNSFWAsync.cs
+//  IsServerKnownAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Tests.Utility;
+using Discord;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -33,30 +34,31 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     public static partial class ServerServiceTests
     {
-        public class SetIsNSFWAsync : ServerServiceTestBase
+        public class IsServerKnownAsync : ServerServiceTestBase
         {
-            private Server _server;
+            private readonly IGuild _discordGuild;
 
-            public override async Task InitializeAsync()
+            public IsServerKnownAsync()
             {
-                var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
+                _discordGuild = MockHelper.CreateDiscordGuild(0);
             }
 
             [Fact]
-            public async Task ReturnsErrorIfValueIsSameAsCurrent()
+            public async Task ReturnsFalseIfServerHasNotBeenRegistered()
             {
-                var result = await this.Servers.SetIsNSFWAsync(_server, true);
-                Assert.False(result.IsSuccess);
+                var result = await this.Servers.IsServerKnownAsync(_discordGuild);
+
+                Assert.False(result);
             }
 
             [Fact]
-            public async Task CanSetValue()
+            public async Task ReturnsTrueIfServerHasBeenRegistered()
             {
-                var result = await this.Servers.SetIsNSFWAsync(_server, false);
+                await this.Servers.AddServerAsync(_discordGuild);
 
-                Assert.True(result.IsSuccess);
-                Assert.False(_server.IsNSFW);
+                var result = await this.Servers.IsServerKnownAsync(_discordGuild);
+
+                Assert.True(result);
             }
         }
     }

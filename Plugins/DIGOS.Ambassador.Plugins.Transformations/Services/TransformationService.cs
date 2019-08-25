@@ -1040,7 +1040,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 return RetrieveEntityResult<ServerUserProtection>.FromSuccess(protection);
             }
 
-            var server = await _servers.GetOrRegisterServerAsync(guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guild);
+            if (!getServerResult.IsSuccess)
+            {
+                return RetrieveEntityResult<ServerUserProtection>.FromError(getServerResult);
+            }
+
+            var server = getServerResult.Entity;
+
             var getGlobalProtectionResult = await GetOrCreateGlobalUserProtectionAsync(discordUser);
             if (!getGlobalProtectionResult.IsSuccess)
             {

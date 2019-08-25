@@ -1,5 +1,5 @@
 //
-//  GetJoinMessage.cs
+//  GetServerAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Tests.Utility;
+using Discord;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -33,54 +34,43 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     public static partial class ServerServiceTests
     {
-        public class GetJoinMessage : ServerServiceTestBase
+        public class GetServerAsync : ServerServiceTestBase
         {
-            private Server _server;
+            private readonly IGuild _discordGuild;
 
-            public override async Task InitializeAsync()
+            public GetServerAsync()
             {
-                var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
+                _discordGuild = MockHelper.CreateDiscordGuild(0);
             }
 
             [Fact]
-            public void ReturnsErrorIfJoinMessageIsNull()
+            public async Task ReturnsFalseIfServerHasNotBeenRegistered()
             {
-                var result = this.Servers.GetJoinMessage(_server);
+                var result = await this.Servers.GetServerAsync(_discordGuild);
 
                 Assert.False(result.IsSuccess);
             }
 
             [Fact]
-            public void ReturnsErrorIfJoinMessageIsEmpty()
+            public async Task ReturnsTrueIfServerHaBeenRegistered()
             {
-                _server.JoinMessage = string.Empty;
+                await this.Servers.AddServerAsync(_discordGuild);
 
-                var result = this.Servers.GetJoinMessage(_server);
-
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
-            public void ReturnsErrorIfJoinMessageIsWhitespace()
-            {
-                _server.JoinMessage = "      ";
-
-                var result = this.Servers.GetJoinMessage(_server);
-
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
-            public void CanGetJoinMessage()
-            {
-                const string expected = "oogabooga";
-                _server.JoinMessage = expected;
-
-                var result = this.Servers.GetJoinMessage(_server);
+                var result = await this.Servers.GetServerAsync(_discordGuild);
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal(expected, result.Entity);
+            }
+
+            [Fact]
+            public async Task ReturnsCorrectServerIfServerHasBeenRegistered()
+            {
+                await this.Servers.AddServerAsync(_discordGuild);
+
+                var result = await this.Servers.GetServerAsync(_discordGuild);
+
+                var server = result.Entity;
+
+                Assert.Equal((long)_discordGuild.Id, server.DiscordID);
             }
         }
     }

@@ -88,7 +88,13 @@ namespace DIGOS.Ambassador.Behaviours
         /// <param name="user">The user.</param>
         private async Task OnUserJoined([NotNull] SocketGuildUser user)
         {
-            var server = await _servers.GetOrRegisterServerAsync(user.Guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(user.Guild);
+            if (!getServerResult.IsSuccess)
+            {
+                return;
+            }
+
+            var server = getServerResult.Entity;
 
             if (!server.SendJoinMessage)
             {

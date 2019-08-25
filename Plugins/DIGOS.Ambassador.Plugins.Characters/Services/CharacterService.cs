@@ -925,7 +925,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 );
             }
 
-            var server = await _servers.GetOrRegisterServerAsync(role.Guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(role.Guild);
+            if (!getServerResult.IsSuccess)
+            {
+                return CreateEntityResult<CharacterRole>.FromError(getServerResult);
+            }
+
+            var server = getServerResult.Entity;
 
             var characterRole = new CharacterRole
             {
@@ -990,7 +996,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             [NotNull] IGuild guild
         )
         {
-            var server = await _servers.GetOrRegisterServerAsync(guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guild);
+            if (!getServerResult.IsSuccess)
+            {
+                return RetrieveEntityResult<IQueryable<CharacterRole>>.FromError(getServerResult);
+            }
+
+            var server = getServerResult.Entity;
 
             var roles = _database.CharacterRoles.Where(r => r.Server == server);
 

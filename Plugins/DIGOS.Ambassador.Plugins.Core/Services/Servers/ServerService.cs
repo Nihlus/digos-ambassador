@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// <param name="discordServer">The Discord server.</param>
         /// <returns>Stored information about the server.</returns>
         [ItemNotNull]
-        public async Task<Server> GetOrRegisterServerAsync([NotNull] IGuild discordServer)
+        public async Task<RetrieveEntityResult<Server>> GetOrRegisterServerAsync([NotNull] IGuild discordServer)
         {
             if (!await IsServerKnownAsync(discordServer))
             {
@@ -82,9 +82,15 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// <returns>Stored information about the server.</returns>
         [Pure]
         [ItemNotNull]
-        public async Task<Server> GetServerAsync([NotNull] IGuild discordServer)
+        public async Task<RetrieveEntityResult<Server>> GetServerAsync([NotNull] IGuild discordServer)
         {
-            return await _database.Servers.FirstAsync(u => u.DiscordID == (long)discordServer.Id);
+            var server = await _database.Servers.FirstOrDefaultAsync(u => u.DiscordID == (long)discordServer.Id);
+            if (server is null)
+            {
+                return RetrieveEntityResult<Server>.FromError("That server has not been registered in the database.");
+            }
+
+            return RetrieveEntityResult<Server>.FromSuccess(server);
         }
 
         /// <summary>
@@ -94,11 +100,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// <returns>The freshly created information about the server.</returns>
         /// <exception cref="ArgumentException">Thrown if the server already exists in the database.</exception>
         [ItemNotNull]
-        public async Task<Server> AddServerAsync([NotNull] IGuild discordServer)
+        public async Task<RetrieveEntityResult<Server>> AddServerAsync([NotNull] IGuild discordServer)
         {
             if (await IsServerKnownAsync(discordServer))
             {
-                throw new ArgumentException($"A server with the ID {discordServer.Id} has already been added to the database.", nameof(discordServer));
+                return RetrieveEntityResult<Server>.FromError
+                (
+                    $"A server with the ID {discordServer.Id} has already been added to the database."
+                );
             }
 
             var server = Server.CreateDefault(discordServer);
@@ -106,7 +115,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             await _database.Servers.AddAsync(server);
             await _database.SaveChangesAsync();
 
-            return server;
+            return RetrieveEntityResult<Server>.FromSuccess(server);
         }
 
         /// <summary>

@@ -760,7 +760,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             [NotNull] Roleplay roleplay
         )
         {
-            var server = await _servers.GetOrRegisterServerAsync(context.Guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(context.Guild);
+            if (!getServerResult.IsSuccess)
+            {
+                return CreateEntityResult<IGuildChannel>.FromError(getServerResult);
+            }
+
+            var server = getServerResult.Entity;
+
             if (!context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageChannels)
             {
                 return CreateEntityResult<IGuildChannel>.FromError

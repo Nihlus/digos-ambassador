@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             public override async Task InitializeAsync()
             {
                 var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = await this.Servers.GetOrRegisterServerAsync(serverMock);
+                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
             }
 
             [Fact]

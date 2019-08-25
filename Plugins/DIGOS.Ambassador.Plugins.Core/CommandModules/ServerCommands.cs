@@ -74,7 +74,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var eb = _feedback.CreateEmbedBase();
 
             var guild = this.Context.Guild;
-            var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+
+            var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+            if (!getServerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
+                return;
+            }
+
+            var server = getServerResult.Entity;
 
             eb.WithTitle(guild.Name);
 
@@ -125,7 +133,14 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
         public async Task ShowJoinMessageAsync()
         {
-            var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+            if (!getServerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
+                return;
+            }
+
+            var server = getServerResult.Entity;
 
             var getJoinMessageResult = _servers.GetJoinMessage(server);
             if (!getJoinMessageResult.IsSuccess)
@@ -175,7 +190,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
             public async Task SetDescriptionAsync([NotNull] string newDescription)
             {
-                var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                if (!getServerResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
+                    return;
+                }
+
+                var server = getServerResult.Entity;
+
                 var result = await _servers.SetDescriptionAsync(server, newDescription);
                 if (!result.IsSuccess)
                 {
@@ -197,7 +220,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
             public async Task SetJoinMessageAsync([NotNull] string newJoinMessage)
             {
-                var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                if (!getServerResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
+                    return;
+                }
+
+                var server = getServerResult.Entity;
+
                 var result = await _servers.SetJoinMessageAsync(server, newJoinMessage);
                 if (!result.IsSuccess)
                 {
@@ -219,7 +250,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
             public async Task SetIsNSFWAsync(bool isNsfw)
             {
-                var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                if (!getServerResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
+                    return;
+                }
+
+                var server = getServerResult.Entity;
+
                 var result = await _servers.SetIsNSFWAsync(server, isNsfw);
                 if (!result.IsSuccess)
                 {
@@ -245,7 +284,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
             public async Task SetSendJoinMessagesAsync(bool sendJoinMessage)
             {
-                var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                if (!getServerResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
+                    return;
+                }
+
+                var server = getServerResult.Entity;
+
                 var result = await _servers.SetSendJoinMessageAsync(server, sendJoinMessage);
                 if (!result.IsSuccess)
                 {

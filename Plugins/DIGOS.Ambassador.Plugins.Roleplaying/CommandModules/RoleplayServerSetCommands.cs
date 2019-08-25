@@ -79,7 +79,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
                 public async Task SetDedicatedRoleplayChannelCategory(ICategoryChannel category)
                 {
-                    var server = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                    var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                    if (!getServerResult.IsSuccess)
+                    {
+                        await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
+                        return;
+                    }
+
+                    var server = getServerResult.Entity;
+
                     var result = await _roleplaying.SetDedicatedRoleplayChannelCategoryAsync
                     (
                         server,

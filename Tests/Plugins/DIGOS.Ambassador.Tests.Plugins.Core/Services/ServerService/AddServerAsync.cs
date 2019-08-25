@@ -1,5 +1,5 @@
 //
-//  SetIsNSFWAsync.cs
+//  AddServerAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,8 +21,9 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Tests.Utility;
+using Discord;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -33,30 +34,42 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     public static partial class ServerServiceTests
     {
-        public class SetIsNSFWAsync : ServerServiceTestBase
+        public class AddServerAsync : ServerServiceTestBase
         {
-            private Server _server;
+            private readonly IGuild _discordGuild;
 
-            public override async Task InitializeAsync()
+            public AddServerAsync()
             {
-                var serverMock = MockHelper.CreateDiscordGuild(0);
-                _server = (await this.Servers.GetOrRegisterServerAsync(serverMock)).Entity;
+                _discordGuild = MockHelper.CreateDiscordGuild(0);
             }
 
             [Fact]
-            public async Task ReturnsErrorIfValueIsSameAsCurrent()
+            public async Task ReturnsTrueIfServerHasNotBeenRegisteredBefore()
             {
-                var result = await this.Servers.SetIsNSFWAsync(_server, true);
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task CanSetValue()
-            {
-                var result = await this.Servers.SetIsNSFWAsync(_server, false);
+                var result = await this.Servers.AddServerAsync(_discordGuild);
 
                 Assert.True(result.IsSuccess);
-                Assert.False(_server.IsNSFW);
+            }
+
+            [Fact]
+            public async Task ActuallyRegistersServerIfServerHasNotBeenRegisteredBefore()
+            {
+                await this.Servers.AddServerAsync(_discordGuild);
+
+                var server = await this.Database.Servers.FirstOrDefaultAsync();
+
+                Assert.NotNull(server);
+                Assert.Equal((long)_discordGuild.Id, server.DiscordID);
+            }
+
+            [Fact]
+            public async Task ReturnsFalseIfServerHasBeenRegisteredBefore()
+            {
+                await this.Servers.AddServerAsync(_discordGuild);
+
+                var result = await this.Servers.AddServerAsync(_discordGuild);
+
+                Assert.False(result.IsSuccess);
             }
         }
     }

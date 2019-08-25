@@ -573,12 +573,19 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             await _characters.MakeCharacterCurrentOnServerAsync(this.Context, this.Context.Guild, character);
 
             var guildUser = (IGuildUser)this.Context.User;
-            var currentServer = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+            if (!getServerResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
+                return;
+            }
+
+            var server = getServerResult.Entity;
 
             if (!character.Nickname.IsNullOrWhitespace())
             {
                 var modifyNickResult = await _discord.SetUserNicknameAsync(this.Context, guildUser, character.Nickname);
-                if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
+                if (!modifyNickResult.IsSuccess && !server.SuppressPermissonWarnings)
                 {
                     await _feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
                 }
@@ -705,7 +712,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             if (this.Context.Message.Author is IGuildUser guildUser)
             {
-                var currentServer = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                if (!getServerResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
+                    return;
+                }
+
+                var server = getServerResult.Entity;
 
                 ModifyEntityResult modifyNickResult;
                 if (getDefaultCharacterResult.IsSuccess && !getDefaultCharacterResult.Entity.Nickname.IsNullOrWhitespace())
@@ -722,7 +736,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     modifyNickResult = await _discord.SetUserNicknameAsync(this.Context, guildUser, guildUser.Username);
                 }
 
-                if (!modifyNickResult.IsSuccess && !currentServer.SuppressPermissonWarnings)
+                if (!modifyNickResult.IsSuccess && !server.SuppressPermissonWarnings)
                 {
                     await _feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
                 }

@@ -41,6 +41,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         /// </summary>
         protected ServerService Servers { get; private set; }
 
+        /// <summary>
+        /// Gets the database.
+        /// </summary>
+        protected CoreDatabaseContext Database { get; private set; }
+
         /// <inheritdoc />
         public virtual Task InitializeAsync()
         {
@@ -63,8 +68,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            var database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            database.Database.Create();
+            this.Database = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+            this.Database.Database.Create();
 
             this.Servers = serviceProvider.GetRequiredService<ServerService>();
         }
