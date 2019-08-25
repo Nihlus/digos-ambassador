@@ -21,6 +21,7 @@
 //
 
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
@@ -29,13 +30,14 @@ namespace DIGOS.Ambassador.Tests.Extensions
     /// <summary>
     /// Extension methods for the <see cref="DatabaseFacade"/> class.
     /// </summary>
+    [PublicAPI]
     public static class DatabaseFacadeExtensions
     {
         /// <summary>
         /// Directly creates the schema of the database.
         /// </summary>
         /// <param name="facade">The database.</param>
-        public static void Create(this DatabaseFacade facade)
+        public static void Create([NotNull] this DatabaseFacade facade)
         {
             facade.ExecuteSqlCommand(facade.GenerateCreateScript());
         }
@@ -45,7 +47,7 @@ namespace DIGOS.Ambassador.Tests.Extensions
         /// </summary>
         /// <param name="facade">The database.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static Task CreateAsync(this DatabaseFacade facade)
+        public static Task CreateAsync([NotNull] this DatabaseFacade facade)
         {
             return facade.ExecuteSqlCommandAsync(facade.GenerateCreateScript());
         }

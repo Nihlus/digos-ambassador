@@ -29,6 +29,7 @@ namespace DIGOS.Ambassador.Tests.Utility
     /// <summary>
     /// Helper methods for mocking objects.
     /// </summary>
+    [PublicAPI]
     public static class MockHelper
     {
         /// <summary>
@@ -36,6 +37,7 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// </summary>
         /// <param name="id">The ID of the object.</param>
         /// <returns>A mocked object.</returns>
+        [NotNull]
         public static IUser CreateDiscordUser(long id)
         {
             var mock = new Mock<IUser>();
@@ -49,6 +51,7 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// </summary>
         /// <param name="id">The ID of the object.</param>
         /// <returns>A mocked object.</returns>
+        [NotNull]
         public static IGuildUser CreateDiscordGuildUser(long id)
         {
             var mock = new Mock<IGuildUser>();
@@ -63,6 +66,7 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// <param name="id">The ID of the object.</param>
         /// <param name="ownerId">The ID of the guild owner.</param>
         /// <returns>A mocked object.</returns>
+        [NotNull]
         public static IGuild CreateDiscordGuild(long id, [CanBeNull] long? ownerId = null)
         {
             var mock = new Mock<IGuild>();
@@ -82,6 +86,7 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// <param name="id">The ID of the object.</param>
         /// <param name="guild">The guild of the role.</param>
         /// <returns>A mocked object.</returns>
+        [NotNull]
         public static IRole CreateDiscordRole(int id, [CanBeNull] IGuild guild = null)
         {
             var mock = new Mock<IRole>();

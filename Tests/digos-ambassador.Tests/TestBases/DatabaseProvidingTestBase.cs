@@ -23,6 +23,7 @@
 using System;
 using System.Data;
 using DIGOS.Ambassador.Core.Database;
+using JetBrains.Annotations;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -32,8 +33,10 @@ namespace DIGOS.Ambassador.Tests.TestBases
     /// <summary>
     /// Serves as a test base for tests that depend on a database context.
     /// </summary>
+    [PublicAPI]
     public abstract class DatabaseProvidingTestBase : ServiceProvidingTestBase, IDisposable
     {
+        [NotNull]
         private readonly SqliteConnection _connection = new SqliteConnection("DataSource=:memory:");
 
         /// <summary>
@@ -41,7 +44,8 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// </summary>
         /// <param name="optionsBuilder">The builder to configure.</param>
         /// <typeparam name="TContext">The context type to configure.</typeparam>
-        protected void ConfigureOptions<TContext>(DbContextOptionsBuilder optionsBuilder) where TContext : DbContext
+        protected void ConfigureOptions<TContext>([NotNull] DbContextOptionsBuilder optionsBuilder)
+            where TContext : DbContext
         {
             if (_connection.State != ConnectionState.Open)
             {

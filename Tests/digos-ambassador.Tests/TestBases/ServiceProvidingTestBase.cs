@@ -22,6 +22,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Tests.TestBases
@@ -34,6 +35,7 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <summary>
         /// Gets the available services.
         /// </summary>
+        [NotNull]
         protected IServiceProvider Services { get; }
 
         /// <summary>
@@ -54,12 +56,12 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// Registers services provided by the test base in the test base's service provider.
         /// </summary>
         /// <param name="serviceCollection">The service collection to register services in.</param>
-        protected abstract void RegisterServices(IServiceCollection serviceCollection);
+        protected abstract void RegisterServices([NotNull] IServiceCollection serviceCollection);
 
         /// <summary>
         /// Configures the test base using the registered services.
         /// </summary>
         /// <param name="serviceProvider">The available services.</param>
-        protected abstract void ConfigureServices(IServiceProvider serviceProvider);
+        protected abstract void ConfigureServices([NotNull] IServiceProvider serviceProvider);
     }
 }
