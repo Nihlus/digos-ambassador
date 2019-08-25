@@ -28,10 +28,11 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using DIGOS.Ambassador.Tests.Extensions;
+using DIGOS.Ambassador.Tests.TestBases;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DIGOS.Ambassador.Tests.TestBases
+namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
 {
     /// <summary>
     /// Serves as a test base for roleplay service tests.
