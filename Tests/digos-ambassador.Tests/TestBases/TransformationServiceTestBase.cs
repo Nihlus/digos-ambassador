@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Tests.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -81,14 +82,14 @@ namespace DIGOS.Ambassador.Tests.TestBases
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            this.Database = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
-            this.Database.Database.Create();
-
             var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
             coreDatabase.Database.Create();
 
             this.CharacterDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-            this.CharacterDatabase.Database.Create();
+            this.CharacterDatabase.Database.Migrate();
+
+            this.Database = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
+            this.Database.Database.Migrate();
 
             this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();

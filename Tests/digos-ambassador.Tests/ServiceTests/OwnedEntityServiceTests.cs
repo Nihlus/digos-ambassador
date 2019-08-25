@@ -42,6 +42,7 @@ using DIGOS.Ambassador.Tests.TestBases;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using MockQueryable.Moq;
 using Moq;
@@ -247,7 +248,7 @@ namespace DIGOS.Ambassador.Tests.ServiceTests
             public async Task InitializeAsync()
             {
                 var charactersDatabase = this.Services.GetRequiredService<CharactersDatabaseContext>();
-                charactersDatabase.Database.Create();
+                charactersDatabase.Database.Migrate();
 
                 var commands = this.Services.GetRequiredService<CommandService>();
 
