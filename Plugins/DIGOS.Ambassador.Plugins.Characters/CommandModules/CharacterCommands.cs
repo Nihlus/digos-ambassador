@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         "\n" +
         "You can also substitute any character name for \"current\", and your active character will be used instead."
     )]
-    public class CharacterCommands : ModuleBase<SocketCommandContext>
+    public class CharacterCommands : ModuleBase
     {
         private readonly CharactersDatabaseContext _database;
 
@@ -211,7 +211,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             var character = retrieveCurrentCharacterResult.Entity;
-            var eb = CreateCharacterInfoEmbed(character);
+            var eb = await CreateCharacterInfoEmbedAsync(character);
 
             // Override the colour if a role is set.
             if (!(character.Role is null))
@@ -235,7 +235,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task ShowCharacterAsync([NotNull] Character character)
         {
-            var eb = CreateCharacterInfoEmbed(character);
+            var eb = await CreateCharacterInfoEmbedAsync(character);
 
             // Override the colour if a role is set
             if (!(character.Role is null))
@@ -261,7 +261,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                         await userDMChannel.SendFileAsync(ds, $"{character.Name}_description.txt");
                     }
 
-                    if (!this.Context.IsPrivate)
+                    if (this.Context is SocketCommandContext socketContext && socketContext.IsPrivate)
                     {
                         await _feedback.SendConfirmationAsync(this.Context, "Please check your private messages.");
                     }
@@ -287,11 +287,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         }
 
         [NotNull]
-        private EmbedBuilder CreateCharacterInfoEmbed([NotNull] Character character)
+        private async Task<EmbedBuilder> CreateCharacterInfoEmbedAsync([NotNull] Character character)
         {
             var eb = _feedback.CreateEmbedBase();
 
-            eb.WithAuthor(this.Context.Client.GetUser((ulong)character.Owner.DiscordID));
+            eb.WithAuthor(await this.Context.Client.GetUserAsync((ulong)character.Owner.DiscordID));
 
             var characterInfoTitle = character.Nickname.IsNullOrWhitespace()
                 ? character.Name
@@ -394,7 +394,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             if (character.IsCurrent)
             {
-                var owner = this.Context.Guild.GetUser((ulong)character.Owner.DiscordID);
+                var owner = await this.Context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
 
                 if (!(character.Role is null))
                 {
@@ -989,7 +989,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Group("role")]
-        public class RoleCommands : ModuleBase<SocketCommandContext>
+        public class RoleCommands : ModuleBase
         {
             private readonly DiscordService _discord;
             private readonly UserFeedbackService _feedback;
@@ -1146,7 +1146,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
                 foreach (var character in currentCharactersWithRole)
                 {
-                    var owner = this.Context.Guild.GetUser((ulong)character.Owner.DiscordID);
+                    var owner = await this.Context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
                     var role = this.Context.Guild.GetRole((ulong)getExistingRoleResult.Entity.DiscordID);
 
                     await _discord.RemoveUserRoleAsync(this.Context, owner, role);
@@ -1245,7 +1245,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Group("set")]
-        public class SetCommands : ModuleBase<SocketCommandContext>
+        public class SetCommands : ModuleBase
         {
             private readonly DiscordService _discord;
             private readonly UserFeedbackService _feedback;
@@ -1582,7 +1582,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 var commandInvoker = (IGuildUser)this.Context.User;
-                var characterOwner = (IGuildUser)this.Context.Guild.GetUser((ulong)character.Owner.DiscordID);
+                var characterOwner = await this.Context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
 
                 var role = getRoleResult.Entity;
                 if (role.Access == RoleAccess.Restricted)

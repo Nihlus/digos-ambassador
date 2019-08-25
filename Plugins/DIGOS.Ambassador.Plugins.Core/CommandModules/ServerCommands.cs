@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
     [Group("server")]
     [Alias("server", "guild")]
     [Summary("Server-related commands, such as viewing or editing info about a specific server.")]
-    public class ServerCommands : ModuleBase<SocketCommandContext>
+    public class ServerCommands : ModuleBase
     {
         private readonly UserFeedbackService _feedback;
         private readonly ServerService _servers;
@@ -162,7 +162,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Group("set")]
-        public class SetCommands : ModuleBase<SocketCommandContext>
+        public class SetCommands : ModuleBase
         {
             private readonly UserFeedbackService _feedback;
             private readonly ServerService _servers;

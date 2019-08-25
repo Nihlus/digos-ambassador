@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         "\n" +
         "You can also substitute any roleplay name for \"current\", and the active roleplay will be used instead."
     )]
-    public partial class RoleplayCommands : ModuleBase<SocketCommandContext>
+    public partial class RoleplayCommands : ModuleBase
     {
         private readonly RoleplayingDatabaseContext _database;
         private readonly RoleplayService _roleplays;
@@ -121,7 +121,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             var roleplay = getCurrentRoleplayResult.Entity;
-            var eb = CreateRoleplayInfoEmbed(roleplay);
+            var eb = await CreateRoleplayInfoEmbedAsync(roleplay);
             await _feedback.SendEmbedAsync(this.Context.Channel, eb);
         }
 
@@ -136,16 +136,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task ShowRoleplayAsync([NotNull] Roleplay roleplay)
         {
-            var eb = CreateRoleplayInfoEmbed(roleplay);
+            var eb = await CreateRoleplayInfoEmbedAsync(roleplay);
             await _feedback.SendEmbedAsync(this.Context.Channel, eb);
         }
 
         [NotNull]
-        private Embed CreateRoleplayInfoEmbed([NotNull] Roleplay roleplay)
+        private async Task<Embed> CreateRoleplayInfoEmbedAsync([NotNull] Roleplay roleplay)
         {
             var eb = _feedback.CreateEmbedBase();
 
-            eb.WithAuthor(this.Context.Client.GetUser((ulong)roleplay.Owner.DiscordID));
+            eb.WithAuthor(await this.Context.Client.GetUserAsync((ulong)roleplay.Owner.DiscordID));
             eb.WithTitle(roleplay.Name);
             eb.WithDescription(roleplay.Summary);
 
@@ -160,10 +160,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             eb.AddField("NSFW", roleplay.IsNSFW ? "Yes" : "No");
             eb.AddField("Public", roleplay.IsPublic ? "Yes" : "No", true);
 
-            var joinedUsers = roleplay.JoinedUsers.Select(p => this.Context.Client.GetUser((ulong)p.User.DiscordID));
-            var joinedMentions = joinedUsers.Select(u => u.Mention);
+            var joinedUsers = roleplay.JoinedUsers.Select(async p => await this.Context.Client.GetUserAsync((ulong)p.User.DiscordID));
+            var joinedMentions = joinedUsers.Select(async u => (await u).Mention);
 
-            var participantList = joinedMentions.Humanize();
+            var participantList = (await Task.WhenAll(joinedMentions)).Humanize();
             participantList = string.IsNullOrEmpty(participantList) ? "None" : participantList;
 
             eb.AddField("Participants", $"{participantList}");
@@ -381,7 +381,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 }
             }
 
-            var roleplayOwnerUser = this.Context.Guild.GetUser((ulong)roleplay.Owner.DiscordID);
+            var roleplayOwnerUser = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
             await _feedback.SendConfirmationAsync(this.Context, $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
         }
 
@@ -468,7 +468,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 }
             }
 
-            var roleplayOwnerUser = this.Context.Guild.GetUser((ulong)roleplay.Owner.DiscordID);
+            var roleplayOwnerUser = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
             await _feedback.SendConfirmationAsync(this.Context, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
         }
 
@@ -627,7 +627,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
             else
             {
-                channel = this.Context.Channel;
+                channel = (ISocketMessageChannel)this.Context.Channel;
             }
 
             var isNsfwChannel = channel is ITextChannel textChannel && textChannel.IsNsfw;
@@ -686,7 +686,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 foreach (var participant in roleplay.ParticipatingUsers)
                 {
-                    var user = this.Context.Guild.GetUser((ulong)participant.User.DiscordID);
+                    var user = await this.Context.Guild.GetUserAsync((ulong)participant.User.DiscordID);
                     if (user is null)
                     {
                         continue;
@@ -723,10 +723,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
             await _database.SaveChangesAsync();
 
-            var joinedUsers = roleplay.JoinedUsers.Select(p => this.Context.Client.GetUser((ulong)p.User.DiscordID));
-            var joinedMentions = joinedUsers.Select(u => u.Mention);
+            var joinedUsers = roleplay.JoinedUsers.Select(async p => await this.Context.Client.GetUserAsync((ulong)p.User.DiscordID));
+            var joinedMentions = joinedUsers.Select(async u => (await u).Mention);
 
-            var participantList = joinedMentions.Humanize();
+            var participantList = (await Task.WhenAll(joinedMentions)).Humanize();
             await _feedback.SendConfirmationAsync
             (
                 this.Context,
@@ -768,7 +768,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 foreach (var participant in roleplay.ParticipatingUsers)
                 {
-                    var user = this.Context.Guild.GetUser((ulong)participant.User.DiscordID);
+                    var user = await this.Context.Guild.GetUserAsync((ulong)participant.User.DiscordID);
                     if (user is null)
                     {
                         continue;
@@ -978,7 +978,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             var userDMChannel = await this.Context.Message.Author.GetOrCreateDMChannelAsync();
-            var eb = CreateRoleplayInfoEmbed(roleplay);
+            var eb = await CreateRoleplayInfoEmbedAsync(roleplay);
 
             try
             {

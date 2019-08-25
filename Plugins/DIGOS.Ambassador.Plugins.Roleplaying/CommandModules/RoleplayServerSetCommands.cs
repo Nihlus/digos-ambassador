@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             /// </summary>
             [UsedImplicitly]
             [Group("set")]
-            public class ServerSetCommands : ModuleBase<SocketCommandContext>
+            public class ServerSetCommands : ModuleBase
             {
                 private readonly UserFeedbackService _feedback;
                 private readonly ServerService _servers;

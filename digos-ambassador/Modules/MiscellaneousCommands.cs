@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Modules
     [UsedImplicitly]
     [Name("miscellaneous")]
     [Summary("Assorted commands that don't really fit anywhere - just for fun, testing, etc.")]
-    public class MiscellaneousCommands : ModuleBase<SocketCommandContext>
+    public class MiscellaneousCommands : ModuleBase
     {
         private readonly ContentService _content;
 

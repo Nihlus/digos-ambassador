@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
     [PublicAPI]
     [Group("permission")]
     [Summary("Permission-related commands for granting, revoking and checking user permissions.")]
-    public class PermissionCommands : ModuleBase<SocketCommandContext>
+    public class PermissionCommands : ModuleBase
     {
         [NotNull]
         private readonly UserFeedbackService _feedback;
@@ -195,7 +195,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// </summary>
         [PublicAPI]
         [Group("grant")]
-        public class GrantCommands : ModuleBase<SocketCommandContext>
+        public class GrantCommands : ModuleBase
         {
             [NotNull]
             private readonly UserFeedbackService _feedback;
@@ -292,7 +292,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// </summary>
         [PublicAPI]
         [Group("revoke")]
-        public class RevokeCommands : ModuleBase<SocketCommandContext>
+        public class RevokeCommands : ModuleBase
         {
             [NotNull]
             private readonly UserFeedbackService _feedback;

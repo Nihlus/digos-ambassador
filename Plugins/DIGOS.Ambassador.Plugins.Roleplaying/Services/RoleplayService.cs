@@ -105,7 +105,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>A creation result which may or may not have been successful.</returns>
         public async Task<CreateEntityResult<Roleplay>> CreateRoleplayAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] string roleplayName,
             [NotNull] string roleplaySummary,
             bool isNSFW,
@@ -428,7 +428,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> KickUserFromRoleplayAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] Roleplay roleplay,
             [NotNull] IUser kickedUser
         )
@@ -464,7 +464,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> RemoveUserFromRoleplayAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] Roleplay roleplay,
             [NotNull] IUser removedUser
         )
@@ -505,7 +505,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<RoleplayParticipant>> AddUserToRoleplayAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] Roleplay roleplay,
             [NotNull] IUser newUser
         )
@@ -647,7 +647,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetRoleplayNameAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] Roleplay roleplay,
             [NotNull] string newRoleplayName
         )
@@ -757,7 +757,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<IGuildChannel>> CreateDedicatedRoleplayChannelAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] Roleplay roleplay
         )
         {
@@ -769,7 +769,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             var server = getServerResult.Entity;
 
-            if (!context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageChannels)
+            if (!(await context.Guild.GetUserAsync(context.Client.CurrentUser.Id)).GuildPermissions.ManageChannels)
             {
                 return CreateEntityResult<IGuildChannel>.FromError
                 (
@@ -810,13 +810,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             // Set up permission overrides
             foreach (var participant in roleplay.ParticipatingUsers)
             {
-                var discordUser = context.Guild.GetUser((ulong)participant.User.DiscordID);
+                var discordUser = await context.Guild.GetUserAsync((ulong)participant.User.DiscordID);
                 var basicPermissions = OverwritePermissions.InheritAll;
 
                 await dedicatedChannel.AddPermissionOverwriteAsync(discordUser, basicPermissions);
             }
 
-            var botDiscordUser = context.Guild.GetUser(context.Client.CurrentUser.Id);
+            var botDiscordUser = await context.Guild.GetUserAsync(context.Client.CurrentUser.Id);
             await SetDedicatedChannelWritabilityForUserAsync(dedicatedChannel, botDiscordUser, true);
             await SetDedicatedChannelVisibilityForUserAsync(dedicatedChannel, botDiscordUser, true);
 
@@ -846,10 +846,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> DeleteDedicatedRoleplayChannelAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] Roleplay roleplay)
         {
-            if (!context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageChannels)
+            if (!(await context.Guild.GetUserAsync(context.Client.CurrentUser.Id)).GuildPermissions.ManageChannels)
             {
                 return ModifyEntityResult.FromError
                 (
@@ -1026,12 +1026,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> RevokeUserDedicatedChannelAccessAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] IGuildChannel dedicatedChannel,
             [NotNull] IUser participant
         )
         {
-            if (!context.Guild.GetUser(context.Client.CurrentUser.Id).GuildPermissions.ManageChannels)
+            if (!(await context.Guild.GetUserAsync(context.Client.CurrentUser.Id)).GuildPermissions.ManageChannels)
             {
                 return ModifyEntityResult.FromError
                 (
@@ -1039,7 +1039,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 );
             }
 
-            var user = context.Guild.GetUser(participant.Id);
+            var user = await context.Guild.GetUserAsync(participant.Id);
             if (user is null)
             {
                 return ModifyEntityResult.FromError("User not found in guild.");

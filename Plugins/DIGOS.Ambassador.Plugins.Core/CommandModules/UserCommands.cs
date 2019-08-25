@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
     [UsedImplicitly]
     [Group("user")]
     [Summary("User-related commands, such as viewing or editing info about a specific user.")]
-    public class UserCommands : ModuleBase<SocketCommandContext>
+    public class UserCommands : ModuleBase
     {
         private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
@@ -176,7 +176,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Group("set")]
-        public class SetCommands : ModuleBase<SocketCommandContext>
+        public class SetCommands : ModuleBase
         {
             private readonly CoreDatabaseContext _database;
             private readonly UserService _users;

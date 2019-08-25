@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Modules
     [Group("help")]
     [Alias("help", "halp", "hlep", "commands")]
     [Summary("Help-related commands that explain other commands or modules.")]
-    public class HelpCommands : ModuleBase<SocketCommandContext>
+    public class HelpCommands : ModuleBase
     {
         private readonly CommandService _commands;
         private readonly UserFeedbackService _feedback;

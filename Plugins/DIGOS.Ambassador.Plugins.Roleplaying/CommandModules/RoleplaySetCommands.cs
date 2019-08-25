@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Group("set")]
-        public class SetCommands : ModuleBase<SocketCommandContext>
+        public class SetCommands : ModuleBase
         {
             private readonly RoleplayService _roleplays;
             private readonly UserFeedbackService _feedback;
@@ -229,7 +229,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Group("admin")]
-        public class AdminCommands : ModuleBase<SocketCommandContext>
+        public class AdminCommands : ModuleBase
         {
             private readonly RoleplayingDatabaseContext _database;
             private readonly UserFeedbackService _feedback;

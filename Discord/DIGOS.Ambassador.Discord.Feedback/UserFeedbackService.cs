@@ -248,7 +248,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         [NotNull]
         public async Task SendPrivateEmbedAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] IUser user,
             [NotNull] Embed eb,
             bool notify = true
@@ -256,9 +256,12 @@ namespace DIGOS.Ambassador.Discord.Feedback
         {
             await user.SendMessageAsync(string.Empty, false, eb);
 
-            if (!context.IsPrivate && notify)
+            if (context is SocketCommandContext socketContext)
             {
-                await SendConfirmationAsync(context, "Please check your private messages.");
+                if (!socketContext.IsPrivate && notify)
+                {
+                    await SendConfirmationAsync(context, "Please check your private messages.");
+                }
             }
         }
 

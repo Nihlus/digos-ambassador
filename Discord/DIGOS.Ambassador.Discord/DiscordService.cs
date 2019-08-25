@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Discord
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
         [MustUseReturnValue("The resulting stream must be disposed.")]
-        public async Task<RetrieveEntityResult<Stream>> GetAttachmentStreamAsync([NotNull] Attachment attachment)
+        public async Task<RetrieveEntityResult<Stream>> GetAttachmentStreamAsync([NotNull] IAttachment attachment)
         {
             try
             {
@@ -79,12 +79,12 @@ namespace DIGOS.Ambassador.Discord
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetUserNicknameAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] IGuildUser guildUser,
             [CanBeNull] string nickname
         )
         {
-            if (!HasPermission(context, GuildPermission.ManageNicknames))
+            if (!await HasPermissionAsync(context, GuildPermission.ManageNicknames))
             {
                 return ModifyEntityResult.FromError("I'm not allowed to set nicknames on this server.");
             }
@@ -115,12 +115,12 @@ namespace DIGOS.Ambassador.Discord
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> AddUserRoleAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] IGuildUser guildUser,
             [NotNull] IRole role
         )
         {
-            if (!HasPermission(context, GuildPermission.ManageRoles))
+            if (!await HasPermissionAsync(context, GuildPermission.ManageRoles))
             {
                 return ModifyEntityResult.FromError
                 (
@@ -157,12 +157,12 @@ namespace DIGOS.Ambassador.Discord
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> RemoveUserRoleAsync
         (
-            [NotNull] SocketCommandContext context,
+            [NotNull] ICommandContext context,
             [NotNull] IGuildUser guildUser,
             [NotNull] IRole role
         )
         {
-            if (!HasPermission(context, GuildPermission.ManageRoles))
+            if (!await HasPermissionAsync(context, GuildPermission.ManageRoles))
             {
                 return ModifyEntityResult.FromError
                 (
@@ -197,9 +197,9 @@ namespace DIGOS.Ambassador.Discord
         /// <param name="guildPermission">The permission to check.</param>
         /// <returns>true if she has permission; otherwise, false.</returns>
         [Pure]
-        public bool HasPermission([NotNull] SocketCommandContext context, GuildPermission guildPermission)
+        public async Task<bool> HasPermissionAsync([NotNull] ICommandContext context, GuildPermission guildPermission)
         {
-            var amby = context.Guild.GetUser(context.Client.CurrentUser.Id) as IGuildUser;
+            var amby = await context.Guild.GetUserAsync(context.Client.CurrentUser.Id);
             if (amby is null)
             {
                 return false;

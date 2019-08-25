@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
     /// </summary>
     [Group("kink")]
     [Summary("Commands for viewing and configuring user kinks.")]
-    public class KinkCommands : ModuleBase<SocketCommandContext>
+    public class KinkCommands : ModuleBase
     {
         private readonly KinkService _kinks;
         private readonly UserFeedbackService _feedback;

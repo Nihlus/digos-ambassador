@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
     [UsedImplicitly]
     [Group("privacy")]
     [Summary("Privacy-related commands (data storage, deleting requests, data protection, privacy contacts, etc).")]
-    public class PrivacyCommands : ModuleBase<SocketCommandContext>
+    public class PrivacyCommands : ModuleBase
     {
         private readonly DiscordSocketClient _client;
         private readonly PrivacyService _privacy;

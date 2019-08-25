@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Group("server")]
         [Alias("server", "guild")]
         [Summary("Server-related commands, such as viewing or editing info about a specific server.")]
-        public partial class RoleplayServerCommands : ModuleBase<SocketCommandContext>
+        public partial class RoleplayServerCommands : ModuleBase
         {
             private readonly UserFeedbackService _feedback;
             private readonly ServerService _servers;

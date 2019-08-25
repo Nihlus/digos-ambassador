@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Modules
     [UsedImplicitly]
     [Group("stats")]
     [Summary("Various statistics-related commands.")]
-    public class StatCommands : ModuleBase<SocketCommandContext>
+    public class StatCommands : ModuleBase
     {
         private readonly UserFeedbackService _feedback;
         private readonly InteractivityService _interactivity;
@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Modules
         [RequireOwner]
         public async Task ShowServersStatsAsync()
         {
-            var guilds = this.Context.Client.Guilds;
+            var guilds = await this.Context.Client.GetGuildsAsync();
             var pages = guilds.Select(CreateGuildInfoEmbed);
 
             var paginatedMessage = new PaginatedEmbed(_feedback, this.Context.User).WithPages(pages);
@@ -105,7 +105,7 @@ namespace DIGOS.Ambassador.Modules
         /// <param name="guild">The guild.</param>
         /// <returns>The embed.</returns>
         [NotNull]
-        private EmbedBuilder CreateGuildInfoEmbed([NotNull] SocketGuild guild)
+        private EmbedBuilder CreateGuildInfoEmbed([NotNull] IGuild guild)
         {
             var eb = _feedback.CreateEmbedBase();
 
@@ -126,8 +126,11 @@ namespace DIGOS.Ambassador.Modules
 
             eb.WithAuthor(authorBuilder);
 
-            eb.AddField("Owner", guild.Owner.Mention);
-            eb.AddField("Members", guild.MemberCount, true);
+            if (guild is SocketGuild socketGuild)
+            {
+                eb.AddField("Owner", socketGuild.Owner.Mention);
+                eb.AddField("Members", socketGuild.MemberCount, true);
+            }
 
             eb.AddField("Created at", guild.CreatedAt);
 

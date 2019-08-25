@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
     /// </summary>
     [Group("dossier")]
     [Summary("Commands for viewing, adding, and editing dossier entries.")]
-    public class DossierCommands : ModuleBase<SocketCommandContext>
+    public class DossierCommands : ModuleBase
     {
         private readonly DossiersDatabaseContext _database;
         private readonly UserFeedbackService _feedback;
@@ -215,7 +215,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
         /// Setters for dossier properties.
         /// </summary>
         [Group("set")]
-        public class SetCommands : ModuleBase<SocketCommandContext>
+        public class SetCommands : ModuleBase
         {
             private readonly DossiersDatabaseContext _database;
             private readonly UserFeedbackService _feedback;

@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
     [Alias("transform", "shift", "tf")]
     [Group("transform")]
     [Summary("Transformation-related commands, such as transforming certain body parts or saving transforms as characters.")]
-    public class TransformationCommands : ModuleBase<SocketCommandContext>
+    public class TransformationCommands : ModuleBase
     {
         private readonly TransformationsDatabaseContext _database;
         private readonly UserService _users;
