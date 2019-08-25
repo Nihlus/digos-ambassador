@@ -21,21 +21,10 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Plugins.Characters.CommandModules;
-using DIGOS.Ambassador.Plugins.Characters.Model;
-using DIGOS.Ambassador.Plugins.Characters.Services;
-using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
-using DIGOS.Ambassador.Plugins.Characters.TypeReaders;
-using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using Discord.Commands;
-using Discord.WebSocket;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -46,46 +35,20 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     public partial class OwnedEntityServiceTests
     {
-        public class IsEntityNameValid : OwnedEntityServiceTestBase, IAsyncLifetime
+        public class IsEntityNameValid : OwnedEntityServiceTestBase
         {
-            private ModuleInfo _commandModule;
+            private readonly IReadOnlyCollection<string> _commandNames;
 
-            protected override void RegisterServices(IServiceCollection serviceCollection)
+            public IsEntityNameValid()
             {
-                base.RegisterServices(serviceCollection);
-
-                serviceCollection
-                    .AddDbContext<CharactersDatabaseContext>(ConfigureOptions<CharactersDatabaseContext>);
-
-                serviceCollection
-                    .AddScoped<ServerService>()
-                    .AddSingleton<PronounService>()
-                    .AddScoped<CharacterService>()
-                    .AddScoped<ContentService>()
-                    .AddScoped<CommandService>()
-                    .AddScoped<DiscordService>()
-                    .AddScoped<UserFeedbackService>()
-                    .AddScoped<InteractivityService>()
-                    .AddScoped<BaseSocketClient>(p => new DiscordSocketClient())
-                    .AddScoped<Random>();
-            }
-
-            public async Task InitializeAsync()
-            {
-                var charactersDatabase = this.Services.GetRequiredService<CharactersDatabaseContext>();
-                charactersDatabase.Database.Migrate();
-
-                var commands = this.Services.GetRequiredService<CommandService>();
-
-                commands.AddTypeReader<Character>(new CharacterTypeReader());
-                _commandModule = await commands.AddModuleAsync<CharacterCommands>(this.Services);
+                _commandNames = new[] { "create", "set name", "show" };
             }
 
             [Fact]
             public void ReturnsFailureForNullNames()
             {
                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                var result = this.Entities.IsEntityNameValid(_commandModule, null);
+                var result = this.Entities.IsEntityNameValid(_commandNames, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -94,7 +57,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             [InlineData(':')]
             public void ReturnsFailureIfNameContainsInvalidCharacters(char invalidCharacter)
             {
-                var result = this.Entities.IsEntityNameValid(_commandModule, $"Test{invalidCharacter}");
+                var result = this.Entities.IsEntityNameValid(_commandNames, $"Test{invalidCharacter}");
 
                 Assert.False(result.IsSuccess);
             }
@@ -103,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             [InlineData("current")]
             public void ReturnsFailureIfNameIsAReservedName(string reservedName)
             {
-                var result = this.Entities.IsEntityNameValid(_commandModule, reservedName);
+                var result = this.Entities.IsEntityNameValid(_commandNames, reservedName);
 
                 Assert.False(result.IsSuccess);
             }
@@ -116,7 +79,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             [InlineData("set name Amby")]
             public void ReturnsFailureIfNameContainsACommandName(string commandName)
             {
-                var result = this.Entities.IsEntityNameValid(_commandModule, commandName);
+                var result = this.Entities.IsEntityNameValid(_commandNames, commandName);
 
                 Assert.False(result.IsSuccess);
             }
@@ -127,14 +90,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             [InlineData("August Strindberg")]
             public void ReturnsSuccessForNormalNames(string name)
             {
-                var result = this.Entities.IsEntityNameValid(_commandModule, name);
+                var result = this.Entities.IsEntityNameValid(_commandNames, name);
 
                 Assert.True(result.IsSuccess);
-            }
-
-            public Task DisposeAsync()
-            {
-                return Task.CompletedTask;
             }
         }
     }

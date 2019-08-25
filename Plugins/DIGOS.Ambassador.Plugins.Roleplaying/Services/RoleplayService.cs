@@ -26,6 +26,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -672,7 +673,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             var commandModule = _commands.Modules.First(m => m.Name == "roleplay");
-            var validNameResult = _ownedEntities.IsEntityNameValid(commandModule, newRoleplayName);
+            var validNameResult = _ownedEntities.IsEntityNameValid(commandModule.GetAllCommandNames(), newRoleplayName);
             if (!validNameResult.IsSuccess)
             {
                 return ModifyEntityResult.FromError(validNameResult);

@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Discord.Commands;
 using JetBrains.Annotations;
@@ -86,6 +87,17 @@ namespace DIGOS.Ambassador.Discord.Extensions
             }
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Gets all potential command names in the given module, including aliases and real names.
+        /// </summary>
+        /// <param name="module">The module to scan.</param>
+        /// <returns>The names.</returns>
+        public static IEnumerable<string> GetAllCommandNames([NotNull] this ModuleInfo module)
+        {
+            var allCommands = module.GetAllCommands().ToList();
+            return allCommands.SelectMany(c => c.Aliases).Union(allCommands.Select(c => c.Name));
         }
     }
 }

@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
@@ -113,17 +114,16 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         }
 
         /// <summary>
-        /// Builds a list of the command names and aliases in a given command module, and checks that the given
-        /// entity name is not one of them.
+        /// Verifies that the given entity name is not contained in the given command names, nor is otherwise invalid.
         /// </summary>
-        /// <param name="commandModule">The command module to scan.</param>
+        /// <param name="commandNames">The command names.</param>
         /// <param name="entityName">The name of the entity.</param>
         /// <returns>true if the name is valid; otherwise, false.</returns>
         [Pure]
         [ContractAnnotation("entityName:null => false")]
         public DetermineConditionResult IsEntityNameValid
         (
-            [NotNull] ModuleInfo commandModule,
+            [NotNull] IEnumerable<string> commandNames,
             [CanBeNull] string entityName
         )
         {
@@ -136,7 +136,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
             {
                 return DetermineConditionResult.FromError
                 (
-                                        $"Names may not contain any of the following characters: {_reservedNameCharacters.Humanize()}"
+                    $"Names may not contain any of the following characters: {_reservedNameCharacters.Humanize()}"
                 );
             }
 
@@ -144,19 +144,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
             {
                 return DetermineConditionResult.FromError
                 (
-                                        "That is a reserved name."
+                    "That is a reserved name."
                 );
             }
-
-            var submodules = commandModule.Submodules;
-
-            var commandNames = commandModule.Commands.SelectMany(c => c.Aliases);
-            commandNames = commandNames.Union(commandModule.Commands.Select(c => c.Name));
-
-            var submoduleCommandNames = submodules.SelectMany(s => s.Commands.SelectMany(c => c.Aliases));
-            submoduleCommandNames = submoduleCommandNames.Union(submodules.SelectMany(s => s.Commands.Select(c => c.Name)));
-
-            commandNames = commandNames.Union(submoduleCommandNames);
 
             if (commandNames.Any(entityName.Contains))
             {

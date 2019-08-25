@@ -25,11 +25,11 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
+using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Discord.Commands;
@@ -72,11 +72,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 .AddDbContext<CharactersDatabaseContext>(ConfigureOptions<CharactersDatabaseContext>);
 
             serviceCollection
-                .AddSingleton<Ambassador.Plugins.Characters.Services.Pronouns.PronounService>()
+                .AddSingleton<PronounService>()
                 .AddScoped<CommandService>()
                 .AddScoped<ContentService>()
                 .AddScoped<ServerService>()
-                .AddScoped<TransformationService>()
                 .AddScoped<UserService>()
                 .AddScoped<OwnedEntityService>()
                 .AddScoped<CharacterService>();

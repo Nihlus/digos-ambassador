@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
@@ -556,7 +557,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var commandModule = _commands.Modules.FirstOrDefault(m => m.Name == "character");
             if (!(commandModule is null))
             {
-                var validNameResult = _ownedEntities.IsEntityNameValid(commandModule, newCharacterName);
+                var validNameResult = _ownedEntities.IsEntityNameValid(commandModule.GetAllCommandNames(), newCharacterName);
                 if (!validNameResult.IsSuccess)
                 {
                     return ModifyEntityResult.FromError(validNameResult);
