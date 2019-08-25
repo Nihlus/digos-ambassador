@@ -21,7 +21,6 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
 using Xunit;

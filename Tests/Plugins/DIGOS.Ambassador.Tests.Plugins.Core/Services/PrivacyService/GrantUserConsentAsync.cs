@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;

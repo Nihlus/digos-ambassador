@@ -31,6 +31,8 @@ using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
+#pragma warning disable SA1648
+
 namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     /// <summary>

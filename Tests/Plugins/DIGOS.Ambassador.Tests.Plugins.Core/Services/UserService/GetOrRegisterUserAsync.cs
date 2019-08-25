@@ -23,7 +23,6 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
-using Moq;
 using Xunit;
 
 #pragma warning disable SA1600
