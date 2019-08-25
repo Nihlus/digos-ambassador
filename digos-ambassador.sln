@@ -17,7 +17,7 @@ EndProject
 
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos_ambassador", "digos-ambassador/digos-ambassador.csproj", "{D44A340E-6344-4E42-827C-E63C12C603BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos-ambassador.Tests", "Tests\digos-ambassador.Tests\digos-ambassador.Tests.csproj", "{60C5B2AC-336F-45FA-87CC-B18265F073F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Tests", "Tests\DIGOS.Ambassador.Tests\DIGOS.Ambassador.Tests.csproj", "{60C5B2AC-336F-45FA-87CC-B18265F073F7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos-ambassador.Tools", "digos-ambassador.Tools\digos-ambassador.Tools.csproj", "{3F5CD95D-F64C-4CD0-82BF-224156733C9B}"
 EndProject

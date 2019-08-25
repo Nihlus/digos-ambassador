@@ -35,7 +35,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\digos-ambassador.Tests\digos-ambassador.Tests.csproj" />
+      <ProjectReference Include="..\..\DIGOS.Ambassador.Tests\DIGOS.Ambassador.Tests.csproj" />
     </ItemGroup>
 
 </Project>
