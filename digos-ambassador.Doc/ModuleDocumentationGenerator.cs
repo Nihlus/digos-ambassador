@@ -20,19 +20,15 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Doc.Extensions;
 using DIGOS.Ambassador.Doc.Nodes;
 using DIGOS.Ambassador.Doc.Reflection;
-using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 using Mono.Cecil;
@@ -45,17 +41,17 @@ namespace DIGOS.Ambassador.Doc
     /// </summary>
     public class ModuleDocumentationGenerator : IDocumentationGenerator
     {
-        private readonly IEnumerable<ModuleDefinition> _commandModules;
+        private readonly IEnumerable<ModuleDefinition> _commandAssemblyModules;
         private readonly string _outputPath;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModuleDocumentationGenerator"/> class.
         /// </summary>
-        /// <param name="commandModules">The assembly containing the commands.</param>
+        /// <param name="commandAssemblyModules">The assembly containing the commands.</param>
         /// <param name="outputPath">The output path where documentation files should be written.</param>
-        public ModuleDocumentationGenerator(IEnumerable<ModuleDefinition> commandModules, string outputPath)
+        public ModuleDocumentationGenerator(IEnumerable<ModuleDefinition> commandAssemblyModules, string outputPath)
         {
-            _commandModules = commandModules;
+            _commandAssemblyModules = commandAssemblyModules;
             _outputPath = outputPath;
         }
 
@@ -68,11 +64,8 @@ namespace DIGOS.Ambassador.Doc
         /// <inheritdoc />
         public async Task GenerateDocumentationAsync()
         {
-            var types = _commandModules.SelectMany(c => c.Types)
-                .Where(t => t.IsClass)
-                .Where(t => !(t.BaseType is null))
-                .Where(t => !t.IsAbstract)
-                .Where(t => t.BaseType.FullName.Contains(nameof(ModuleBase)));
+            var types = _commandAssemblyModules.SelectMany(c => c.Types)
+                .Where(t => t.IsProbablyCommandModule());
 
             var modules = types.Select(t =>
             {
@@ -81,6 +74,7 @@ namespace DIGOS.Ambassador.Doc
             })
             .Where(wi => wi.wasCreated)
             .Select(wi => wi.info)
+            .OrderBy(i => i.Name)
             .ToList();
 
             var modulePages = GenerateDocumentationPages(modules);

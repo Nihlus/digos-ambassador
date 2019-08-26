@@ -23,10 +23,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using DIGOS.Ambassador.Doc.Extensions;
-using Discord.Commands;
 using JetBrains.Annotations;
 using Mono.Cecil;
-using MoreLinq;
 
 namespace DIGOS.Ambassador.Doc.Reflection
 {

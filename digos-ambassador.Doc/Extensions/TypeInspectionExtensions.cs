@@ -20,10 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Linq;
 using DIGOS.Ambassador.Doc.Reflection;
-using Discord.Commands;
 using JetBrains.Annotations;
 using Mono.Cecil;
 
@@ -77,7 +75,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
 
             var groupAttribute = provider.CustomAttributes.FirstOrDefault
             (
-                a => a.AttributeType.Name == nameof(GroupAttribute)
+                a => a.AttributeType.Name == "GroupAttribute"
             );
 
             if (groupAttribute is null)
@@ -103,7 +101,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
 
             var nameAttribute = provider.CustomAttributes.FirstOrDefault
             (
-                a => a.AttributeType.Name == nameof(NameAttribute)
+                a => a.AttributeType.Name == "NameAttribute"
             );
 
             if (nameAttribute is null)
@@ -129,7 +127,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
 
             var commandAttribute = provider.CustomAttributes.FirstOrDefault
             (
-                a => a.AttributeType.Name == nameof(CommandAttribute)
+                a => a.AttributeType.Name == "CommandAttribute"
             );
 
             if (commandAttribute is null)
@@ -164,7 +162,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
 
             var summaryAttribute = provider.CustomAttributes.FirstOrDefault
             (
-                a => a.AttributeType.Name == nameof(SummaryAttribute)
+                a => a.AttributeType.Name == "SummaryAttribute"
             );
 
             if (summaryAttribute is null)
@@ -199,7 +197,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
 
             var aliasesAttribute = provider.CustomAttributes.FirstOrDefault
             (
-                a => a.AttributeType.Name == nameof(AliasAttribute)
+                a => a.AttributeType.Name == "AliasAttribute"
             );
 
             if (aliasesAttribute is null)
@@ -314,7 +312,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
                 return false;
             }
 
-            return module.BaseType.FullName.Contains(nameof(ModuleBase));
+            return module.BaseType.FullName.Contains("ModuleBase");
         }
     }
 }
