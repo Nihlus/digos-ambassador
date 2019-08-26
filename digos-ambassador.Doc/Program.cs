@@ -39,6 +39,11 @@ namespace DIGOS.Ambassador.Doc
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(r => _options = r);
 
+            if (_options is null)
+            {
+                return;
+            }
+
             var modules = _options.AssemblyPaths.Select(ModuleDefinition.ReadModule);
             var generator = new ModuleDocumentationGenerator(modules, _options.OutputPath);
             await generator.GenerateDocumentationAsync();

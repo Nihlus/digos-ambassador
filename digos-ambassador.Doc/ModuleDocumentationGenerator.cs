@@ -79,10 +79,7 @@ namespace DIGOS.Ambassador.Doc
 
             var modulePages = GenerateDocumentationPages(modules);
 
-            foreach (var modulePage in modulePages.Values)
-            {
-                await SavePageAsync(modulePage, Path.Combine("docs", "modules"));
-            }
+            await Task.WhenAll(modulePages.Values.Select(p => SavePageAsync(p, Path.Combine("docs", "modules"))));
 
             var indexPage = GenerateDocumentationIndex
             (
