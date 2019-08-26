@@ -20,13 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Discord.Commands;
+using System.Collections.Generic;
+using DIGOS.Ambassador.Doc.Reflection;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Doc.Extensions
 {
     /// <summary>
-    /// Extension methods for the <see cref="ModuleInfo"/> class.
+    /// Extension methods for the <see cref="ModuleInformation"/> class.
     /// </summary>
     public static class ModuleExtensions
     {
@@ -34,11 +35,48 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// Gets the name chain of a module, that is, the name of its parent followed by the module's name.
         /// </summary>
         /// <param name="this">The module to get the chain of.</param>
+        /// <param name="onlyPrefixes">Whether to only include prefixes in the chain.</param>
         /// <returns>A name chain in the form of "[parentName] [childName]".</returns>
         [NotNull]
-        public static string GetNameChain([NotNull] this ModuleInfo @this)
+        public static string GetNameChain([NotNull] this ModuleInformation @this, bool onlyPrefixes = false)
         {
-            return @this.IsSubmodule ? $"{GetNameChain(@this.Parent)} {@this.Name}" : @this.Name;
+            string thisPrefix;
+            if (onlyPrefixes)
+            {
+                thisPrefix = @this.HasPrefix ? @this.Name : string.Empty;
+            }
+            else
+            {
+                thisPrefix = @this.Name;
+            }
+
+            // ReSharper disable once AssignNullToNotNullAttribute
+            return @this.IsSubmodule ? $"{GetNameChain(@this.Parent)} {thisPrefix}" : thisPrefix;
+        }
+
+        /// <summary>
+        /// Gets the alias chains of a module, that is, the name of its parent followed by the module's name, for each
+        /// alias.
+        /// </summary>
+        /// <param name="this">The module to get the chain of.</param>
+        /// <returns>A name chain in the form of "[parentName] [childName]".</returns>
+        public static IEnumerable<string> GetAliasChains([NotNull] this ModuleInformation @this)
+        {
+            foreach (var alias in @this.Aliases)
+            {
+                if (@this.IsSubmodule)
+                {
+                    // ReSharper disable once AssignNullToNotNullAttribute
+                    foreach (var parentAliasChain in GetAliasChains(@this.Parent))
+                    {
+                        yield return $"{parentAliasChain} {alias}";
+                    }
+                }
+                else
+                {
+                    yield return alias;
+                }
+            }
         }
     }
 }

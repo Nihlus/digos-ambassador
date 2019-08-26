@@ -20,9 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Reflection;
+using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
+using Mono.Cecil;
 
 namespace DIGOS.Ambassador.Doc
 {
@@ -38,9 +39,8 @@ namespace DIGOS.Ambassador.Doc
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(r => _options = r);
 
-            var assembly = Assembly.LoadFrom(_options.AssemblyPath);
-
-            var generator = new ModuleDocumentationGenerator(assembly, _options.OutputPath);
+            var modules = _options.AssemblyPaths.Select(ModuleDefinition.ReadModule);
+            var generator = new ModuleDocumentationGenerator(modules, _options.OutputPath);
             await generator.GenerateDocumentationAsync();
         }
     }

@@ -31,10 +31,11 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Doc.Extensions;
 using DIGOS.Ambassador.Doc.Nodes;
+using DIGOS.Ambassador.Doc.Reflection;
 using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
+using Mono.Cecil;
 using static DIGOS.Ambassador.Doc.Nodes.EmphasisType;
 
 namespace DIGOS.Ambassador.Doc
@@ -44,43 +45,18 @@ namespace DIGOS.Ambassador.Doc
     /// </summary>
     public class ModuleDocumentationGenerator : IDocumentationGenerator
     {
-        private readonly Assembly _commandAssembly;
+        private readonly IEnumerable<ModuleDefinition> _commandModules;
         private readonly string _outputPath;
-
-        private readonly CommandService _commands;
-
-        private readonly Regex _typeReaderTypeFinder = new Regex("(?<=No type reader found for type ).+?.(?=, one must be specified)", RegexOptions.Compiled);
-
-        private IServiceProvider _services;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModuleDocumentationGenerator"/> class.
         /// </summary>
-        /// <param name="commandAssembly">The assembly containing the commands.</param>
+        /// <param name="commandModules">The assembly containing the commands.</param>
         /// <param name="outputPath">The output path where documentation files should be written.</param>
-        public ModuleDocumentationGenerator(Assembly commandAssembly, string outputPath)
+        public ModuleDocumentationGenerator(IEnumerable<ModuleDefinition> commandModules, string outputPath)
         {
-            _commandAssembly = commandAssembly;
+            _commandModules = commandModules;
             _outputPath = outputPath;
-
-            _commands = new CommandService(new CommandServiceConfig { ThrowOnError = false });
-
-            // Dummy services
-            _services = new ServiceCollection()
-                .BuildServiceProvider();
-        }
-
-        /// <summary>
-        /// Adds a type reader to the internal command service.
-        /// </summary>
-        /// <param name="typeReader">The type reader.</param>
-        /// <typeparam name="T">The type that the reader reads.</typeparam>
-        /// <returns>The generator, with the type reader added.</returns>
-        [NotNull]
-        public ModuleDocumentationGenerator WithTypeReader<T>(TypeReader typeReader)
-        {
-            _commands.AddTypeReader<T>(typeReader);
-            return this;
         }
 
         /// <inheritdoc />
@@ -92,9 +68,21 @@ namespace DIGOS.Ambassador.Doc
         /// <inheritdoc />
         public async Task GenerateDocumentationAsync()
         {
-            await AddModulesAsync();
+            var types = _commandModules.SelectMany(c => c.Types)
+                .Where(t => t.IsClass)
+                .Where(t => !(t.BaseType is null))
+                .Where(t => !t.IsAbstract)
+                .Where(t => t.BaseType.FullName.Contains(nameof(ModuleBase)));
 
-            var modules = GetTopLevelModules(_commands.Modules);
+            var modules = types.Select(t =>
+            {
+                var wasCreated = ModuleInformation.TryCreate(t, out var info);
+                return (wasCreated, info);
+            })
+            .Where(wi => wi.wasCreated)
+            .Select(wi => wi.info)
+            .ToList();
+
             var modulePages = GenerateDocumentationPages(modules);
 
             foreach (var modulePage in modulePages.Values)
@@ -110,38 +98,18 @@ namespace DIGOS.Ambassador.Doc
             await SavePageAsync(indexPage, "docs");
         }
 
-        private async Task AddModulesAsync()
-        {
-            while (true)
-            {
-                try
-                {
-                    await _commands.AddModulesAsync(_commandAssembly, _services);
-                    break;
-                }
-                catch (InvalidOperationException iox)
-                {
-                    var typeName = _typeReaderTypeFinder.Match(iox.Message).Value;
-                    var typeInfo = _commandAssembly.DefinedTypes.FirstOrDefault(t => t.Name == typeName);
-                    if (typeInfo is null)
-                    {
-                        throw;
-                    }
-
-                    _commands.AddTypeReader(typeInfo.AsType(), new DummyTypeReader());
-                }
-            }
-        }
-
         /// <summary>
         /// Generates documentation pages for the given modules, and their submodules.
         /// </summary>
         /// <param name="modules">The modules to generate documentation pages for.</param>
-        /// <returns>A set of paired <see cref="ModuleInfo"/> and <see cref="MarkdownPage"/> objects.</returns>
+        /// <returns>A set of paired <see cref="ModuleInformation"/> and <see cref="MarkdownPage"/> objects.</returns>
         [NotNull]
-        protected virtual Dictionary<ModuleInfo, MarkdownPage> GenerateDocumentationPages([NotNull, ItemNotNull] IEnumerable<ModuleInfo> modules)
+        protected virtual Dictionary<ModuleInformation, MarkdownPage> GenerateDocumentationPages
+        (
+            [NotNull, ItemNotNull] IEnumerable<ModuleInformation> modules
+        )
         {
-            var modulePages = new Dictionary<ModuleInfo, MarkdownPage>();
+            var modulePages = new Dictionary<ModuleInformation, MarkdownPage>();
             foreach (var module in modules)
             {
                 modulePages.Add(module, GenerateModuleDocumentation(module));
@@ -151,11 +119,11 @@ namespace DIGOS.Ambassador.Doc
                     continue;
                 }
 
-                var submodules = new List<ModuleInfo>(module.Submodules);
+                var submodules = new List<ModuleInformation>(module.Submodules);
                 while (submodules.Any())
                 {
-                    var completedModules = new List<ModuleInfo>();
-                    var newSubmodules = new List<ModuleInfo>();
+                    var completedModules = new List<ModuleInformation>();
+                    var newSubmodules = new List<ModuleInformation>();
                     foreach (var submodule in submodules)
                     {
                         modulePages.Add(submodule, GenerateModuleDocumentation(submodule));
@@ -212,18 +180,6 @@ namespace DIGOS.Ambassador.Doc
         }
 
         /// <summary>
-        /// Determines whether or not the given module has a prefix.
-        /// </summary>
-        /// <param name="info">The module.</param>
-        /// <returns>true if the module has a prefix; otherwise, false.</returns>
-        private bool HasPrefix([NotNull] ModuleInfo info)
-        {
-            // Workaround for empty ModuleInfo::Attributes
-            var baseAlias = info.GetNameChain();
-            return info.Aliases.Contains(baseAlias);
-        }
-
-        /// <summary>
         /// Saves the given page to disk in the folder specified by <see cref="_outputPath"/>.
         /// </summary>
         /// <param name="page">The page to save.</param>
@@ -247,7 +203,7 @@ namespace DIGOS.Ambassador.Doc
         /// <param name="module">The module.</param>
         /// <returns>A Markdown page.</returns>
         [NotNull]
-        protected virtual MarkdownPage GenerateModuleDocumentation([NotNull] ModuleInfo module)
+        protected virtual MarkdownPage GenerateModuleDocumentation([NotNull] ModuleInformation module)
         {
             var page = new MarkdownPage
             (
@@ -278,21 +234,27 @@ namespace DIGOS.Ambassador.Doc
         /// <param name="module">The module.</param>
         /// <returns>A Markdown section with the information.</returns>
         [NotNull]
-        protected virtual MarkdownSection GenerateSummarySection([NotNull] ModuleInfo module)
+        protected virtual MarkdownSection GenerateSummarySection([NotNull] ModuleInformation module)
         {
             string modulePrefixText;
-            if (!HasPrefix(module))
+            if (!module.HasPrefix)
             {
                 modulePrefixText = "These commands have no prefix.";
             }
             else
             {
-                var relevantModuleAliases = module.Aliases.Skip(1).Select(a => new MarkdownInlineCode(a).Compile());
-                var moduleExtraAliases = module.Aliases.Count > 1
-                    ? $"You can also use {relevantModuleAliases.Humanize("or")} instead of `{module.GetNameChain()}`."
+                var moduleAliasChains = module.GetAliasChains().ToList();
+
+                var compiledAliases = moduleAliasChains
+                    .Skip(1)
+                    .Select(a => new MarkdownInlineCode(a).Compile())
+                    .Humanize("or");
+
+                var moduleExtraAliases = moduleAliasChains.Skip(1).Any()
+                    ? $"You can also use {compiledAliases} instead of `{module.GetNameChain(true)}`."
                     : string.Empty;
 
-                modulePrefixText = $"These commands are prefixed with `{module.GetNameChain()}`. {moduleExtraAliases}";
+                modulePrefixText = $"These commands are prefixed with `{module.GetNameChain(true)}`. {moduleExtraAliases}";
             }
 
             var summarySection = new MarkdownSection("Summary", 2).AppendContent
@@ -311,7 +273,7 @@ namespace DIGOS.Ambassador.Doc
         /// <param name="module">The module.</param>
         /// <returns>A Markdown section with the information.</returns>
         [NotNull]
-        protected virtual MarkdownSection GenerateCommandsSection([NotNull] ModuleInfo module)
+        protected virtual MarkdownSection GenerateCommandsSection([NotNull] ModuleInformation module)
         {
             var moduleCommandsSection = new MarkdownSection("Commands", 2);
             var commandGroups = module.Commands.GroupBy(c => c.Name).ToList();
@@ -328,7 +290,12 @@ namespace DIGOS.Ambassador.Doc
                     commandOverloads.AppendContentRange(GenerateCommandOverloadContent(command));
                 }
 
-                var commandSection = new MarkdownSection(commandGroup.Key, 3).AppendContent(commandOverloads);
+                // Filter out commands without names (we use the module's name chain instead)
+                var commandGroupName = commandGroup.Key.IsNullOrWhitespace()
+                    ? commandGroup.First().Module.GetNameChain(true)
+                    : commandGroup.Key;
+
+                var commandSection = new MarkdownSection(commandGroupName, 3).AppendContent(commandOverloads);
                 commandSection.Header.Title.Emphasis = Italic;
 
                 moduleCommandsSection.AppendContent(commandSection);
@@ -343,18 +310,18 @@ namespace DIGOS.Ambassador.Doc
         /// <param name="command">The command.</param>
         /// <returns>A list of Markdown content nodes.</returns>
         [NotNull, ItemNotNull]
-        protected virtual IEnumerable<IMarkdownNode> GenerateCommandOverloadContent([NotNull] CommandInfo command)
+        protected virtual IEnumerable<IMarkdownNode> GenerateCommandOverloadContent([NotNull] CommandInformation command)
         {
-            var relevantAliases = command.Aliases.Skip(1).Where(a => a.StartsWith(command.Module.Aliases.First())).ToList();
-            var prefix = relevantAliases.Count > 1
+            var invokableCommands = GetInvokableCommands(command).ToList();
+            var prefix = invokableCommands.Count > 2
                 ? "as well as"
                 : "or";
 
-            var commandExtraAliases = relevantAliases.Any()
-                ? $"({prefix} {relevantAliases.Select(a => new MarkdownInlineCode(a).Compile()).Humanize("or")})"
+            var commandExtraAliases = invokableCommands.Skip(1).Any()
+                ? $"({prefix} {invokableCommands.Skip(1).Select(a => new MarkdownInlineCode(a).Compile()).Humanize("or")})"
                 : string.Empty;
 
-            var commandDisplayAliases = $"{new MarkdownInlineCode(command.Aliases.First()).Compile()} {commandExtraAliases}".Trim();
+            var commandDisplayAliases = $"{new MarkdownInlineCode(invokableCommands.First()).Compile()} {commandExtraAliases}".Trim();
 
             yield return new MarkdownParagraph()
             .AppendLine
@@ -379,7 +346,7 @@ namespace DIGOS.Ambassador.Doc
         /// <param name="command">The command.</param>
         /// <returns>A Markdown table.</returns>
         [NotNull]
-        protected virtual MarkdownTable GenerateCommandParameterTable([NotNull] CommandInfo command)
+        protected virtual MarkdownTable GenerateCommandParameterTable([NotNull] CommandInformation command)
         {
             var parameterTable = new MarkdownTable();
             parameterTable.AppendColumn(new MarkdownTableColumn("Name"));
@@ -390,7 +357,7 @@ namespace DIGOS.Ambassador.Doc
             {
                 var row = new MarkdownTableRow()
                     .AppendCell(new MarkdownText(parameter.Name))
-                    .AppendCell(new MarkdownText(parameter.Type.Humanize()))
+                    .AppendCell(new MarkdownText(parameter.ParameterType.Humanize()))
                     .AppendCell(new MarkdownInlineCode(parameter.IsOptional ? "yes" : "no"));
 
                 parameterTable.AppendRow(row);
@@ -405,7 +372,7 @@ namespace DIGOS.Ambassador.Doc
         /// <param name="module">The module.</param>
         /// <returns>A Markdown section with the submodules.</returns>
         [NotNull]
-        protected virtual MarkdownSection GenerateSubmodulesSection([NotNull] ModuleInfo module)
+        protected virtual MarkdownSection GenerateSubmodulesSection([NotNull] ModuleInformation module)
         {
             var submoduleSection = new MarkdownSection("Submodules", 2);
             var submoduleList = new MarkdownList
@@ -431,28 +398,18 @@ namespace DIGOS.Ambassador.Doc
         }
 
         /// <summary>
-        /// Gets a list of the top-level modules in the given set of modules. This method recursively reduces or expands
-        /// the set as needed.
+        /// Generates the actual invokable commands for a given command.
         /// </summary>
-        /// <param name="modules">The modules to scan.</param>
-        /// <returns>A list of the top-level modules.</returns>
-        [NotNull, ItemNotNull]
-        private IEnumerable<ModuleInfo> GetTopLevelModules([NotNull, ItemNotNull] IEnumerable<ModuleInfo> modules)
+        /// <param name="information">The command.</param>
+        /// <returns>The invokable commands.</returns>
+        private IEnumerable<string> GetInvokableCommands(CommandInformation information)
         {
-            var results = new List<ModuleInfo>();
-            foreach (var module in modules)
-            {
-                if (module.IsSubmodule)
-                {
-                    results.AddRange(GetTopLevelModules(new List<ModuleInfo> { module.Parent }));
-                }
-                else
-                {
-                    results.Add(module);
-                }
-            }
+            var moduleNameChain = information.Module.GetNameChain(true);
 
-            return results.Distinct();
+            foreach (var alias in information.Aliases)
+            {
+                yield return $"{moduleNameChain} {alias}".Trim();
+            }
         }
     }
 }

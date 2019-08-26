@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Collections.Generic;
 using CommandLine;
 
 namespace DIGOS.Ambassador.Doc
@@ -33,7 +34,7 @@ namespace DIGOS.Ambassador.Doc
         /// Gets or sets the path to the assembly that documentation should be generated from.
         /// </summary>
         [Option('i', "assembly", Required = true)]
-        public string AssemblyPath { get; set; }
+        public IEnumerable<string> AssemblyPaths { get; set; }
 
         /// <summary>
         /// Gets or sets the path where documentation files should be emitted.
