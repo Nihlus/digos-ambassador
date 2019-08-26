@@ -4,27 +4,6 @@
 These commands are prefixed with `user set`.
 
 ## Commands
-### *class*
-#### Overloads
-**`user set class`**
-
-Sets the invoking user's class.
-
-| Name | Type | Optional |
-| --- | --- | --- |
-| userClass | UserClass | `no` |
-
-**`user set class`**
-
-Sets the target user's class.
-
-| Name | Type | Optional |
-| --- | --- | --- |
-| discordUser | IUser | `no` |
-| userClass | UserClass | `no` |
-
----
-
 ### *bio*
 #### Overloads
 **`user set bio`**

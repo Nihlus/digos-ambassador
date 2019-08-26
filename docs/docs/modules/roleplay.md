@@ -6,6 +6,7 @@ These commands are prefixed with `roleplay`. You can also use `rp` instead of `r
 Commands for interacting with and managing channel roleplays.
 
 ## Submodules
+* [Server](roleplay_server.md)
 * [Set](roleplay_set.md)
 * [Admin](roleplay_admin.md)
 
@@ -26,9 +27,17 @@ Shows information about the specified roleplay.
 
 ---
 
+### *list*
+#### Overloads
+**`roleplay list`**
+
+Lists all available roleplays in the server.
+
+---
+
 ### *list-owned*
 #### Overloads
-**`roleplay list-owned` (or `roleplay list`)**
+**`roleplay list-owned`**
 
 Lists the roleplays that the given user owns.
 

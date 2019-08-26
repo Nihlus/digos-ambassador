@@ -6,7 +6,7 @@ These commands are prefixed with `transform`. You can also use `shift` or `tf` i
 Transformation-related commands, such as transforming certain body parts or saving transforms as characters.
 
 ## Commands
-### *ShiftAsync*
+### *transform*
 #### Overloads
 **`transform`**
 
@@ -223,18 +223,6 @@ Describes the current physical appearance of a character.
 **`transform reset`**
 
 Resets your form to your default one.
-
----
-
-### *save*
-#### Overloads
-**`transform save` (or `transform save-current`)**
-
-Saves your current form as a new character.
-
-| Name | Type | Optional |
-| --- | --- | --- |
-| newCharacterName | string | `no` |
 
 ---
 

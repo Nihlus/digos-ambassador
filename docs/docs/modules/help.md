@@ -6,7 +6,7 @@ These commands are prefixed with `help`. You can also use `halp`, `hlep`, or `co
 Help-related commands that explain other commands or modules.
 
 ## Commands
-### *HelpAsync*
+### *help*
 #### Overloads
 **`help`**
 
