@@ -65,7 +65,7 @@
   </PropertyGroup>
 
   <Target Name="GenerateDocs" AfterTargets="PostBuildEvent" Condition="Exists('$(DocGeneratorAssembly)')">
-    <Exec Command="$(DocGenerator) --assembly $(OutputPath)$(AssemblyName)$(TargetExt) $(OutputPath)*.Plugins.*.dll --output $(ProjectDir)../docs" ContinueOnError="true" />
+    <Exec Command="$(DocGenerator) --assemblies $(OutputPath)$(AssemblyName)$(TargetExt) $(OutputPath)*.Plugins.*.dll --output $(ProjectDir)../docs" ContinueOnError="true" />
   </Target>
 
 </Project>

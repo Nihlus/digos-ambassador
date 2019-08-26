@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Doc
         /// <summary>
         /// Gets or sets the path to the assembly that documentation should be generated from.
         /// </summary>
-        [Option('i', "assembly", Required = true)]
+        [Option('i', "assemblies", Required = true)]
         public IEnumerable<string> AssemblyPaths { get; set; }
 
         /// <summary>
