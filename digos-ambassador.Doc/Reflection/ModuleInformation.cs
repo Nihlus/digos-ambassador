@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DIGOS.Ambassador.Doc.Extensions;
 using JetBrains.Annotations;
@@ -79,6 +80,14 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// Gets a value indicating whether this module has a prefix.
         /// </summary>
         public bool HasPrefix { get; private set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ModuleInformation"/> class.
+        /// </summary>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Only used in TryCreate")]
+        private ModuleInformation()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModuleInformation"/> class.

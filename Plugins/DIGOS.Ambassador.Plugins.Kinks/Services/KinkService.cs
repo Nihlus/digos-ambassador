@@ -32,6 +32,7 @@ using Discord;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using MoreLinq.Extensions;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.Services
@@ -331,14 +332,15 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
 
             var userKinks = getUserKinksResult.Entity;
 
-            var group = userKinks.GroupBy(k => k.Kink.Category).FirstOrDefault(g => g.Key == category);
+            var groups = userKinks.GroupBy(k => k.Kink.Category).ToList();
+            var first = groups.FirstOrDefault(g => g.Key == category);
 
-            if (group is null)
+            if (first is null)
             {
                 return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess(new UserKink[] { });
             }
 
-            return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess(group);
+            return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess(first);
         }
 
         /// <summary>

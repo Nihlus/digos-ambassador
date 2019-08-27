@@ -51,6 +51,11 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         protected InteractivityService Interactivity { get; private set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the message is in the process of getting deleted.
+        /// </summary>
+        private bool IsDeleting { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="InteractiveMessage"/> class.
         /// </summary>
         /// <param name="sourceUser">The source user.</param>
@@ -78,17 +83,49 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
                 throw new InvalidOperationException("The message hasn't been sent yet.");
             }
 
+            this.IsDeleting = true;
+
             return this.Message.DeleteAsync();
         }
 
         /// <inheritdoc/>
-        public virtual Task HandleAddedInteractionAsync(SocketReaction reaction)
+        public async Task HandleAddedInteractionAsync(SocketReaction reaction)
+        {
+            if (this.IsDeleting)
+            {
+                return;
+            }
+
+            await OnInteractionAddedAsync(reaction);
+        }
+
+        /// <summary>
+        /// Raised when a valid interaction is added.
+        /// </summary>
+        /// <param name="reaction">The reaction.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        protected virtual Task OnInteractionAddedAsync(SocketReaction reaction)
         {
             return Task.CompletedTask;
         }
 
         /// <inheritdoc/>
-        public virtual Task HandleRemovedInteractionAsync(SocketReaction reaction)
+        public async Task HandleRemovedInteractionAsync(SocketReaction reaction)
+        {
+            if (this.IsDeleting)
+            {
+                return;
+            }
+
+            await OnInteractionRemovedAsync(reaction);
+        }
+
+        /// <summary>
+        /// Raised when a valid interaction is removed.
+        /// </summary>
+        /// <param name="reaction">The reaction.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        protected virtual Task OnInteractionRemovedAsync(SocketReaction reaction)
         {
             return Task.CompletedTask;
         }
@@ -98,7 +135,22 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [NotNull]
-        protected virtual Task UpdateAsync()
+        protected async Task UpdateAsync()
+        {
+            if (this.IsDeleting)
+            {
+                return;
+            }
+
+            await OnUpdateAsync();
+        }
+
+        /// <summary>
+        /// Updates the message contents.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [NotNull]
+        protected virtual Task OnUpdateAsync()
         {
             return Task.CompletedTask;
         }
@@ -108,6 +160,21 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// </summary>
         /// <param name="channel">The channel.</param>
         /// <returns>The displayed message.</returns>
-        protected abstract Task<IUserMessage> DisplayAsync(IMessageChannel channel);
+        private async Task<IUserMessage> DisplayAsync(IMessageChannel channel)
+        {
+            if (this.IsDeleting)
+            {
+                return null;
+            }
+
+            return await OnDisplayAsync(channel);
+        }
+
+        /// <summary>
+        /// Displays the message in the given channel.
+        /// </summary>
+        /// <param name="channel">The channel.</param>
+        /// <returns>The displayed message.</returns>
+        protected abstract Task<IUserMessage> OnDisplayAsync(IMessageChannel channel);
     }
 }

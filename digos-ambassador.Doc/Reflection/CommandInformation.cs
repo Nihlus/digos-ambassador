@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DIGOS.Ambassador.Doc.Extensions;
 using JetBrains.Annotations;
@@ -63,6 +64,14 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// </summary>
         [NotNull]
         public ModuleInformation Module { get; private set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommandInformation"/> class.
+        /// </summary>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Only used in TryCreate")]
+        private CommandInformation()
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandInformation"/> class.

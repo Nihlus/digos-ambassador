@@ -29,6 +29,10 @@
         <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="all" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Behaviours\DIGOS.Ambassador.Discord.Behaviours.csproj" />
+    </ItemGroup>
+
     <Import Project="..\..\msbuild\nuget-common.props" />
 
 </Project>

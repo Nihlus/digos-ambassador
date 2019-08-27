@@ -24,12 +24,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core;
 using DIGOS.Ambassador.Core.Database.Services;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Behaviours.Services;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Services;
 using DIGOS.Ambassador.Services;
@@ -101,6 +103,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton<DiscordService>()
                 .AddSingleton<UserFeedbackService>()
                 .AddSingleton<InteractivityService>()
+                .AddSingleton<DelayedActionService>()
                 .AddSingleton<HelpService>()
                 .AddSingleton<Random>()
                 .AddSingleton(pluginService)
@@ -202,6 +205,8 @@ namespace DIGOS.Ambassador
             var localAssembly = GetType().Assembly;
             await _commands.AddModulesAsync(localAssembly, _services);
             await _behaviours.AddBehavioursAsync(localAssembly, _services);
+            await _behaviours.AddBehaviourAsync<InteractivityBehaviour>(_services);
+            await _behaviours.AddBehaviourAsync<DelayedActionBehaviour>(_services);
 
             await _client.StartAsync();
             await _behaviours.StartBehavioursAsync();

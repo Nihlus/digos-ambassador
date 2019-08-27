@@ -50,35 +50,58 @@ namespace DIGOS.Ambassador.Discord.Behaviours.Services
 
             foreach (var behaviourType in behaviourTypes)
             {
-                if (behaviourType.IsAbstract)
-                {
-                    continue;
-                }
-
-                // Since the behaviours run in their own threads, we'll do scoped contexts for them. The behaviours run
-                // until they're disposed, so they're responsible for clearing up their own scopes.
-                var scope = services.CreateScope();
-                var behaviour = (IBehaviour)ActivatorUtilities.CreateInstance
-                (
-                    scope.ServiceProvider,
-                    behaviourType
-                );
-
-                behaviour.WithScope(scope);
-
-                // Behaviours are implicitly singletons; there's only ever one instance of a behaviour at any given
-                // time.
-                var existingBehaviour = _registeredBehaviours.FirstOrDefault(b => b.GetType() == behaviourType);
-                if (!(existingBehaviour is null))
-                {
-                    _registeredBehaviours.Remove(existingBehaviour);
-
-                    await existingBehaviour.StopAsync();
-                    existingBehaviour.Dispose();
-                }
-
-                _registeredBehaviours.Add(behaviour);
+                await AddBehaviourAsync(services, behaviourType);
             }
+        }
+
+        /// <summary>
+        /// Adds the given behaviour to the service.
+        /// </summary>
+        /// <param name="services">The available services.</param>
+        /// <typeparam name="TBehaviour">The type of the behaviour.</typeparam>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task AddBehaviourAsync<TBehaviour>(IServiceProvider services)
+            where TBehaviour : IBehaviour
+        {
+            return AddBehaviourAsync(services, typeof(TBehaviour));
+        }
+
+        /// <summary>
+        /// Adds the given behaviour to the service.
+        /// </summary>
+        /// <param name="services">The available services.</param>
+        /// <param name="behaviourType">The type of the behaviour.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task AddBehaviourAsync(IServiceProvider services, Type behaviourType)
+        {
+            if (behaviourType.IsAbstract)
+            {
+                return;
+            }
+
+            // Since the behaviours run in their own threads, we'll do scoped contexts for them. The behaviours run
+            // until they're disposed, so they're responsible for clearing up their own scopes.
+            var scope = services.CreateScope();
+            var behaviour = (IBehaviour)ActivatorUtilities.CreateInstance
+            (
+                scope.ServiceProvider,
+                behaviourType
+            );
+
+            behaviour.WithScope(scope);
+
+            // Behaviours are implicitly singletons; there's only ever one instance of a behaviour at any given
+            // time.
+            var existingBehaviour = _registeredBehaviours.FirstOrDefault(b => b.GetType() == behaviourType);
+            if (!(existingBehaviour is null))
+            {
+                _registeredBehaviours.Remove(existingBehaviour);
+
+                await existingBehaviour.StopAsync();
+                existingBehaviour.Dispose();
+            }
+
+            _registeredBehaviours.Add(behaviour);
         }
 
         /// <summary>
