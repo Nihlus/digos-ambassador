@@ -283,7 +283,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 embeds.Add(embed);
             }
 
-            var paginatedEmbed = new PaginatedEmbed(_feedback, discordUser)
+            var paginatedEmbed = new PaginatedEmbed(_feedback, this.Context.User)
             {
                 Appearance =
                 {
