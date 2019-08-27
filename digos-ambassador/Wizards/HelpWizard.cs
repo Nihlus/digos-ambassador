@@ -432,7 +432,7 @@ namespace DIGOS.Ambassador.Wizards
 
                 var messageResult = await this.Interactivity.GetNextMessageAsync
                 (
-                    this.MessageContext.Channel,
+                    this.Channel,
                     Filter,
                     TimeSpan.FromSeconds(45)
                 );
@@ -458,7 +458,7 @@ namespace DIGOS.Ambassador.Wizards
 
                         await _feedback.SendEmbedAndDeleteAsync
                         (
-                            this.MessageContext.Channel,
+                            this.Channel,
                             eb.Build(),
                             TimeSpan.FromSeconds(45)
                         );
@@ -470,7 +470,7 @@ namespace DIGOS.Ambassador.Wizards
 
                         await _feedback.SendEmbedAndDeleteAsync
                         (
-                            this.MessageContext.Channel,
+                            this.Channel,
                             eb.Build()
                         );
                     }
@@ -540,7 +540,7 @@ namespace DIGOS.Ambassador.Wizards
 
                 var messageResult = await this.Interactivity.GetNextMessageAsync
                 (
-                    this.MessageContext.Channel,
+                    this.Channel,
                     Filter,
                     TimeSpan.FromSeconds(45)
                 );
@@ -643,7 +643,7 @@ namespace DIGOS.Ambassador.Wizards
                 }
             }
 
-            await _feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb.Build(), TimeSpan.FromSeconds(30));
+            await _feedback.SendEmbedAndDeleteAsync(this.Channel, eb.Build(), TimeSpan.FromSeconds(30));
         }
 
         /// <inheritdoc/>

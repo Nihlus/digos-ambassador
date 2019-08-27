@@ -34,6 +34,22 @@ Shows quick information about a character.
 
 ---
 
+### *view-characters*
+#### Overloads
+**`character view-characters` (or `character view-char`)**
+
+Shows a gallery of all your characters.
+
+**`character view-characters` (or `character view-char`)**
+
+Shows a gallery of all the user's characters.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| discordUser | IUser | `no` |
+
+---
+
 ### *create*
 #### Overloads
 **`character create`**

@@ -41,9 +41,14 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         public IUser SourceUser { get; }
 
         /// <summary>
+        /// Gets the channel the message is in.
+        /// </summary>
+        protected IMessageChannel Channel { get; private set; }
+
+        /// <summary>
         /// Gets the context of the message the interactive message wraps.
         /// </summary>
-        protected ICommandContext MessageContext { get; private set; }
+        protected ICommandContext MessageContext => new CommandContext(this.Interactivity.Client, this.Message);
 
         /// <summary>
         /// Gets the interactivity service that manages this interactive message.
@@ -69,8 +74,8 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         {
             this.Interactivity = service;
 
+            this.Channel = channel;
             this.Message = await DisplayAsync(channel);
-            this.MessageContext = new CommandContext(this.Interactivity.Client, this.Message);
 
             await UpdateAsync();
         }

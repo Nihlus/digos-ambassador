@@ -340,7 +340,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
 
                 var messageResult = await this.Interactivity.GetNextMessageAsync
                 (
-                    this.MessageContext.Channel,
+                    this.Channel,
                     Filter,
                     TimeSpan.FromSeconds(45)
                 );
@@ -443,7 +443,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
                 }
             }
 
-            await _feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb.Build(), TimeSpan.FromSeconds(30));
+            await _feedback.SendEmbedAndDeleteAsync(this.Channel, eb.Build(), TimeSpan.FromSeconds(30));
         }
 
         private async Task SetCurrentKinkPreference(KinkPreference preference)

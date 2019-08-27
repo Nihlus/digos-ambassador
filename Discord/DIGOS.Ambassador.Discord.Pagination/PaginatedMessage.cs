@@ -151,7 +151,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
                 if (interactingUser is IGuildUser guildUser)
                 {
                     // If the user has permission to manage messages, they should be allowed to interact in all cases
-                    if (!guildUser.GetPermissions(this.MessageContext.Channel as IGuildChannel).ManageMessages)
+                    if (!guildUser.GetPermissions(this.Channel as IGuildChannel).ManageMessages)
                     {
                         return;
                     }
@@ -200,7 +200,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             {
                 bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
 
-                var responseResult = await this.Interactivity.GetNextMessageAsync(this.MessageContext.Channel, Filter, TimeSpan.FromSeconds(15));
+                var responseResult = await this.Interactivity.GetNextMessageAsync(this.Channel, Filter, TimeSpan.FromSeconds(15));
                 if (!responseResult.IsSuccess)
                 {
                     return;
@@ -214,7 +214,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
 
                     var eb = this.Feedback.CreateFeedbackEmbed(response.Author, Color.DarkPurple, "Please specify a page to jump to.");
 
-                    await this.Feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb);
+                    await this.Feedback.SendEmbedAndDeleteAsync(this.Channel, eb);
                     return;
                 }
 
@@ -227,7 +227,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
                 var user = this.Interactivity.Client.GetUser(reaction.UserId);
                 var eb = this.Feedback.CreateFeedbackEmbed(user, Color.DarkPurple, this.Appearance.HelpText);
 
-                await this.Feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb, this.Appearance.InfoTimeout);
+                await this.Feedback.SendEmbedAndDeleteAsync(this.Channel, eb, this.Appearance.InfoTimeout);
                 return;
             }
 
@@ -236,7 +236,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
 
         private async Task<bool> CanManageMessages()
         {
-            if (this.MessageContext.Channel is IGuildChannel guildChannel)
+            if (this.Channel is IGuildChannel guildChannel)
             {
                 var botUser = this.Interactivity.Client.CurrentUser;
                 var botGuildUser = await guildChannel.Guild.GetUserAsync(botUser.Id);
