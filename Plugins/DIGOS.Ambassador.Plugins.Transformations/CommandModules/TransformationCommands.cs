@@ -31,7 +31,6 @@ using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
@@ -53,7 +52,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
     [Summary("Transformation-related commands, such as transforming certain body parts or saving transforms as characters.")]
     public class TransformationCommands : ModuleBase
     {
-        private readonly TransformationsDatabaseContext _database;
         private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
 
@@ -65,7 +63,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformationCommands"/> class.
         /// </summary>
-        /// <param name="database">A database context from the context pool.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="characters">The character service.</param>
         /// <param name="transformation">The transformation service.</param>
@@ -73,7 +70,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <param name="users">The user service.</param>
         public TransformationCommands
         (
-            TransformationsDatabaseContext database,
             UserFeedbackService feedback,
             CharacterService characters,
             TransformationService transformation,
@@ -81,7 +77,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             UserService users
         )
         {
-            _database = database;
             _feedback = feedback;
             _characters = characters;
             _transformation = transformation;
@@ -787,18 +782,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
         {
-            var getProtectionResult = await _transformation.GetOrCreateGlobalUserProtectionAsync(this.Context.User);
-            if (!getProtectionResult.IsSuccess)
+            var setDefaultOptInResult = await _transformation.SetDefaultOptInAsync(this.Context.User, shouldOptIn);
+            if (!setDefaultOptInResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
+                await _feedback.SendErrorAsync(this.Context, setDefaultOptInResult.ErrorReason);
                 return;
             }
-
-            var protection = getProtectionResult.Entity;
-
-            protection.DefaultOptIn = shouldOptIn;
-
-            await _database.SaveChangesAsync();
 
             await _feedback.SendConfirmationAsync
             (
@@ -816,17 +805,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task OptInToTransformationsAsync()
         {
-            var getProtectionResult = await _transformation.GetOrCreateServerUserProtectionAsync(this.Context.User, this.Context.Guild);
-            if (!getProtectionResult.IsSuccess)
+            var optInResult = await _transformation.OptInUserAsync(this.Context.User, this.Context.Guild);
+            if (!optInResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
+                await _feedback.SendErrorAsync(this.Context, optInResult.ErrorReason);
                 return;
             }
-
-            var protection = getProtectionResult.Entity;
-            protection.HasOptedIn = true;
-
-            await _database.SaveChangesAsync();
 
             await _feedback.SendConfirmationAsync(this.Context, "Opted into transformations. Have fun!");
         }
@@ -840,17 +824,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task OptOutOfTransformationsAsync()
         {
-            var getProtectionResult = await _transformation.GetOrCreateServerUserProtectionAsync(this.Context.User, this.Context.Guild);
-            if (!getProtectionResult.IsSuccess)
+            var optOutResult = await _transformation.OptOutUserAsync(this.Context.User, this.Context.Guild);
+            if (!optOutResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getProtectionResult.ErrorReason);
+                await _feedback.SendErrorAsync(this.Context, optOutResult.ErrorReason);
                 return;
             }
-
-            var protection = getProtectionResult.Entity;
-            protection.HasOptedIn = false;
-
-            await _database.SaveChangesAsync();
 
             await _feedback.SendConfirmationAsync(this.Context, "Opted out of transformations.");
         }

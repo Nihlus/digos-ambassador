@@ -1257,5 +1257,88 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         {
             return !await _database.Species.AnyAsync(s => string.Equals(s.Name, speciesName, StringComparison.OrdinalIgnoreCase));
         }
+
+        /// <summary>
+        /// Opts the given user into transformations on the given server.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <param name="guild">The guild.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> OptInUserAsync(IUser user, IGuild guild)
+        {
+            var getProtectionResult = await GetOrCreateServerUserProtectionAsync(user, guild);
+            if (!getProtectionResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getProtectionResult);
+            }
+
+            var protection = getProtectionResult.Entity;
+
+            if (protection.HasOptedIn)
+            {
+                return ModifyEntityResult.FromError("You're already opted into transformations.");
+            }
+
+            protection.HasOptedIn = true;
+
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Opts the given user out of transformations on the given server.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <param name="guild">The guild.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> OptOutUserAsync(IUser user, IGuild guild)
+        {
+            var getProtectionResult = await GetOrCreateServerUserProtectionAsync(user, guild);
+            if (!getProtectionResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getProtectionResult);
+            }
+
+            var protection = getProtectionResult.Entity;
+
+            if (!protection.HasOptedIn)
+            {
+                return ModifyEntityResult.FromError("You're already opted out of transformations.");
+            }
+
+            protection.HasOptedIn = false;
+
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Sets the default opt-in option for users on new servers.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <param name="shouldOptIn">Whether the user should be opted by default on new servers.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetDefaultOptInAsync(IUser user, bool shouldOptIn)
+        {
+            var getProtectionResult = await GetOrCreateGlobalUserProtectionAsync(user);
+            if (!getProtectionResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getProtectionResult);
+            }
+
+            var protection = getProtectionResult.Entity;
+            if (protection.DefaultOptIn == shouldOptIn)
+            {
+                return ModifyEntityResult.FromError($"You're already opted {(shouldOptIn ? "in" : "out")} by default.");
+            }
+
+            protection.DefaultOptIn = shouldOptIn;
+
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
     }
 }
