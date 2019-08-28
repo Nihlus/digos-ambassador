@@ -44,7 +44,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
     [Summary("Commands for viewing, adding, and editing dossier entries.")]
     public class DossierCommands : ModuleBase
     {
-        private readonly DossiersDatabaseContext _database;
         private readonly UserFeedbackService _feedback;
         private readonly DossierService _dossiers;
         private readonly InteractivityService _interactivity;
@@ -52,19 +51,16 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
         /// <summary>
         /// Initializes a new instance of the <see cref="DossierCommands"/> class.
         /// </summary>
-        /// <param name="database">A database context from the context pool.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="dossiers">The dossier service.</param>
         /// <param name="interactivity">The interactivity service.</param>
         public DossierCommands
         (
-            DossiersDatabaseContext database,
             UserFeedbackService feedback,
             DossierService dossiers,
             InteractivityService interactivity
         )
         {
-            _database = database;
             _feedback = feedback;
             _dossiers = dossiers;
             _interactivity = interactivity;
@@ -81,11 +77,20 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Dossier Database";
 
+            var getDossiersResult = _dossiers.GetDossiers();
+            if (!getDossiersResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getDossiersResult.ErrorReason);
+                return;
+            }
+
+            var dossiers = getDossiersResult.Entity;
+
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
                 this.Context.User,
-                _database.Dossiers,
+                dossiers,
                 d => d.Title,
                 d => d.Summary ?? "No summary set.",
                 "There are no dossiers available.",

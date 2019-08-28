@@ -33,6 +33,7 @@ using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace DIGOS.Ambassador.Plugins.Dossiers.Services
 {
@@ -60,6 +61,15 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         {
             _content = content;
             _database = database;
+        }
+
+        /// <summary>
+        /// Gets the available dossiers.
+        /// </summary>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public RetrieveEntityResult<IQueryable<Dossier>> GetDossiers()
+        {
+            return RetrieveEntityResult<IQueryable<Dossier>>.FromSuccess(_database.Dossiers);
         }
 
         /// <summary>
