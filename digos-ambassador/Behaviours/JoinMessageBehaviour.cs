@@ -37,11 +37,8 @@ namespace DIGOS.Ambassador.Behaviours
     /// <summary>
     /// Acts on user joins, sending them the server's join message.
     /// </summary>
-    public class JoinMessageBehaviour : BehaviourBase
+    public class JoinMessageBehaviour : ClientEventBehaviour
     {
-        [ProvidesContext]
-        private readonly CoreDatabaseContext _database;
-
         private readonly UserFeedbackService _feedback;
         private readonly ServerService _servers;
 
@@ -61,32 +58,12 @@ namespace DIGOS.Ambassador.Behaviours
         )
             : base(client)
         {
-            _database = database;
             _feedback = feedback;
             _servers = servers;
         }
 
         /// <inheritdoc />
-        protected override Task OnStartingAsync()
-        {
-            this.Client.UserJoined += OnUserJoined;
-
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        protected override Task OnStoppingAsync()
-        {
-            this.Client.UserJoined -= OnUserJoined;
-
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Handles new users joining.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        private async Task OnUserJoined([NotNull] SocketGuildUser user)
+        protected override async Task UserJoined(SocketGuildUser user)
         {
             var getServerResult = await _servers.GetOrRegisterServerAsync(user.Guild);
             if (!getServerResult.IsSuccess)
@@ -145,13 +122,6 @@ namespace DIGOS.Ambassador.Behaviours
                     }
                 }
             }
-        }
-
-        /// <inheritdoc/>
-        public override void Dispose()
-        {
-            base.Dispose();
-            _database.Dispose();
         }
     }
 }

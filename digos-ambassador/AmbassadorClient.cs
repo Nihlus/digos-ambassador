@@ -204,6 +204,7 @@ namespace DIGOS.Ambassador
             // Load modules and behaviours from the assembly this type was declared in
             var localAssembly = GetType().Assembly;
             await _commands.AddModulesAsync(localAssembly, _services);
+
             await _behaviours.AddBehavioursAsync(localAssembly, _services);
             await _behaviours.AddBehaviourAsync<InteractivityBehaviour>(_services);
             await _behaviours.AddBehaviourAsync<DelayedActionBehaviour>(_services);

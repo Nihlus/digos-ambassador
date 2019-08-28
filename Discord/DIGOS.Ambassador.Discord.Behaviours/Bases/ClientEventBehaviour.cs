@@ -978,7 +978,7 @@ namespace DIGOS.Ambassador.Discord.Behaviours
         }
 
         /// <inheritdoc />
-        protected override async Task OnTickAsync(CancellationToken ct)
+        protected sealed override async Task OnTickAsync(CancellationToken ct)
         {
             if (this.RunningEvents.TryDequeue(out var clientEvent))
             {
