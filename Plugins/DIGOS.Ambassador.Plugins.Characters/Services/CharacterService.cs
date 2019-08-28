@@ -86,6 +86,19 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         }
 
         /// <summary>
+        /// Deletes the given character.
+        /// </summary>
+        /// <param name="character">The character to delete.</param>
+        /// <returns>A deletion result which may or may not have succeeded.</returns>
+        public async Task<DeleteEntityResult> DeleteCharacterAsync([NotNull] Character character)
+        {
+            _database.Characters.Remove(character);
+            await _database.SaveChangesAsync();
+
+            return DeleteEntityResult.FromSuccess();
+        }
+
+        /// <summary>
         /// This method searches for the best matching character given an owner and a name. If no owner is provided, then
         /// the global list is searched for a unique name. If no match can be found, a failed result is returned.
         /// </summary>

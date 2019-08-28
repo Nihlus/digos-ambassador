@@ -74,8 +74,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
     )]
     public class CharacterCommands : ModuleBase
     {
-        private readonly CharactersDatabaseContext _database;
-
         private readonly PronounService _pronouns;
         private readonly ServerService _servers;
         private readonly UserService _users;
@@ -89,7 +87,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterCommands"/> class.
         /// </summary>
-        /// <param name="database">A database context from the context pool.</param>
         /// <param name="contentService">The content service.</param>
         /// <param name="discordService">The Discord integration service.</param>
         /// <param name="feedbackService">The feedback service.</param>
@@ -101,7 +98,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <param name="pronouns">The pronoun service.</param>
         public CharacterCommands
         (
-            CharactersDatabaseContext database,
             ContentService contentService,
             DiscordService discordService,
             UserFeedbackService feedbackService,
@@ -113,7 +109,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             PronounService pronouns
         )
         {
-            _database = database;
             _content = contentService;
             _discord = discordService;
             _feedback = feedbackService;
@@ -457,9 +452,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             Character character
         )
         {
-            _database.Characters.Remove(character);
-
-            await _database.SaveChangesAsync();
+            var deleteResult = await _characters.DeleteCharacterAsync(character);
+            if (!deleteResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, deleteResult.ErrorReason);
+                return;
+            }
 
             await _feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
 
