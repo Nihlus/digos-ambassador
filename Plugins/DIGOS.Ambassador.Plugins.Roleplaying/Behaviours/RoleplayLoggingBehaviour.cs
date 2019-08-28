@@ -23,7 +23,6 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Behaviours;
-using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Discord;
 using Discord.Commands;
@@ -38,9 +37,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     /// </summary>
     public class RoleplayLoggingBehaviour : ClientEventBehaviour
     {
-        [ProvidesContext]
-        private readonly RoleplayingDatabaseContext _database;
-
         private readonly RoleplayService _roleplays;
 
         /// <summary>
@@ -48,17 +44,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// </summary>
         /// <param name="client">The discord client.</param>
         /// <param name="roleplays">The roleplay service.</param>
-        /// <param name="database">The database.</param>
         public RoleplayLoggingBehaviour
         (
             DiscordSocketClient client,
-            RoleplayService roleplays,
-            RoleplayingDatabaseContext database
+            RoleplayService roleplays
         )
             : base(client)
         {
             _roleplays = roleplays;
-            _database = database;
         }
 
         /// <inheritdoc />
@@ -112,13 +105,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             }
 
             await MessageReceived(updatedMessage);
-        }
-
-        /// <inheritdoc/>
-        public override void Dispose()
-        {
-            base.Dispose();
-            _database.Dispose();
         }
     }
 }
