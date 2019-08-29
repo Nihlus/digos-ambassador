@@ -32,7 +32,6 @@ using Discord;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using MoreLinq.Extensions;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.Services

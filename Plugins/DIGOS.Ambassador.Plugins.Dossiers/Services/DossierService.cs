@@ -33,7 +33,6 @@ using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 
 namespace DIGOS.Ambassador.Plugins.Dossiers.Services
 {

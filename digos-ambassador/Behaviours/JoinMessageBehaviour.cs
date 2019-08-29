@@ -30,8 +30,6 @@ using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 
-using JetBrains.Annotations;
-
 namespace DIGOS.Ambassador.Behaviours
 {
     /// <summary>

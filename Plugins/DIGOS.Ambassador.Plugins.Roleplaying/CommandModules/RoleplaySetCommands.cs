@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Preconditions;
@@ -29,7 +28,6 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Discord.Commands;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks

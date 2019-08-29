@@ -41,7 +41,6 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
-using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
@@ -69,7 +68,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
     )]
     public partial class RoleplayCommands : ModuleBase
     {
-        private readonly RoleplayingDatabaseContext _database;
         private readonly RoleplayService _roleplays;
 
         private readonly UserService _users;
@@ -79,21 +77,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayCommands"/> class.
         /// </summary>
-        /// <param name="database">A database context from the context pool.</param>
         /// <param name="roleplays">The roleplay service.</param>
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="interactivity">The interactivity service.</param>
         /// <param name="users">The user service.</param>
         public RoleplayCommands
         (
-            RoleplayingDatabaseContext database,
             RoleplayService roleplays,
             UserFeedbackService feedback,
             InteractivityService interactivity,
             UserService users
         )
         {
-            _database = database;
             _roleplays = roleplays;
             _feedback = feedback;
             _interactivity = interactivity;
@@ -300,12 +295,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             Roleplay roleplay
         )
         {
-            _database.Roleplays.Remove(roleplay);
+            var deletionResult = await _roleplays.DeleteRoleplayAsync(roleplay);
+            if (!deletionResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, deletionResult.ErrorReason);
+                return;
+            }
 
-            var canSendMessageInCurrentChannelAfterDeletion = true;
             if (!(roleplay.DedicatedChannelID is null))
             {
-                var dedicatedChannelID = roleplay.DedicatedChannelID;
                 var deleteDedicatedChannelResult = await _roleplays.DeleteDedicatedRoleplayChannelAsync
                 (
                     this.Context,
@@ -317,14 +315,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     await _feedback.SendErrorAsync(this.Context, deleteDedicatedChannelResult.ErrorReason);
                     return;
                 }
-
-                if ((long)this.Context.Channel.Id == dedicatedChannelID)
-                {
-                    canSendMessageInCurrentChannelAfterDeletion = false;
-                }
             }
 
-            if (canSendMessageInCurrentChannelAfterDeletion)
+            var canReplyInChannelAfterDeletion = (long)this.Context.Channel.Id != roleplay.DedicatedChannelID;
+            if (canReplyInChannelAfterDeletion)
             {
                 await _feedback.SendConfirmationAsync(this.Context, $"Roleplay \"{roleplay.Name}\" deleted.");
             }
@@ -335,8 +329,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build(), false);
             }
-
-            await _database.SaveChangesAsync();
         }
 
         /// <summary>
@@ -613,71 +605,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             Roleplay roleplay
         )
         {
+            var startRoleplayResult = await _roleplays.StartRoleplayAsync(this.Context, roleplay);
+            if (!startRoleplayResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, startRoleplayResult.ErrorReason);
+                return;
+            }
+
             var getDedicatedChannelResult = await _roleplays.GetDedicatedRoleplayChannelAsync
             (
                 this.Context.Guild,
                 roleplay
             );
-
-            // Identify the channel to start the RP in. Preference is given to the roleplay's dedicated channel.
-            ISocketMessageChannel channel;
-            if (getDedicatedChannelResult.IsSuccess)
-            {
-                channel = (ISocketMessageChannel)getDedicatedChannelResult.Entity;
-            }
-            else
-            {
-                channel = (ISocketMessageChannel)this.Context.Channel;
-            }
-
-            var isNsfwChannel = channel is ITextChannel textChannel && textChannel.IsNsfw;
-            if (roleplay.IsNSFW && !isNsfwChannel)
-            {
-                await _feedback.SendErrorAsync
-                (
-                    this.Context,
-                    "This channel is not marked as NSFW, while your roleplay is... naughty!"
-                );
-
-                return;
-            }
-
-            if (await _roleplays.HasActiveRoleplayAsync(channel))
-            {
-                await _feedback.SendWarningAsync(this.Context, "There's already a roleplay active in this channel.");
-
-                var currentRoleplayResult = await _roleplays.GetActiveRoleplayAsync(channel);
-                if (!currentRoleplayResult.IsSuccess)
-                {
-                    await _feedback.SendErrorAsync(this.Context, currentRoleplayResult.ErrorReason);
-                    return;
-                }
-
-                var currentRoleplay = currentRoleplayResult.Entity;
-                var timeOfLastMessage = currentRoleplay.Messages.Last().Timestamp;
-                var currentTime = DateTimeOffset.Now;
-                if (timeOfLastMessage < currentTime.AddHours(-4))
-                {
-                    await _feedback.SendConfirmationAsync
-                    (
-                        this.Context,
-                        "However, that roleplay has been inactive for over four hours."
-                    );
-
-                    currentRoleplay.IsActive = false;
-                }
-                else
-                {
-                    return;
-                }
-            }
-
-            if (roleplay.ActiveChannelID != (long)channel.Id)
-            {
-                roleplay.ActiveChannelID = (long)channel.Id;
-            }
-
-            roleplay.IsActive = true;
 
             // Make the channel visible for all participants
             if (getDedicatedChannelResult.IsSuccess)
@@ -719,18 +658,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 }
             }
 
-            roleplay.LastUpdated = DateTime.Now;
-
-            await _database.SaveChangesAsync();
-
             var joinedUsers = roleplay.JoinedUsers.Select(async p => await this.Context.Client.GetUserAsync((ulong)p.User.DiscordID));
             var joinedMentions = joinedUsers.Select(async u => (await u).Mention);
+
+            // ReSharper disable once PossibleInvalidOperationException
+            var channel = await this.Context.Guild.GetTextChannelAsync((ulong)roleplay.ActiveChannelID);
+
+            var activationMessage = $"The roleplay \"{roleplay.Name}\" is now active in " +
+                                    $"{MentionUtils.MentionChannel(channel.Id)}.";
 
             var participantList = (await Task.WhenAll(joinedMentions)).Humanize();
             await _feedback.SendConfirmationAsync
             (
                 this.Context,
-                $"The roleplay \"{roleplay.Name}\" is now active in {MentionUtils.MentionChannel(channel.Id)}."
+                activationMessage
             );
 
             await channel.SendMessageAsync($"Calling {participantList}!");
@@ -800,8 +741,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     );
                 }
             }
-
-            await _database.SaveChangesAsync();
 
             await _feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplay.Name}\" has been stopped.");
         }
