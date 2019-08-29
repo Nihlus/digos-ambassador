@@ -48,13 +48,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <summary>
         /// Gets the base dossier path.
         /// </summary>
-        private static string BaseTransformationSpeciesPath { get; } = Path.GetFullPath
+        private static string BaseTransformationSpeciesPath { get; } = Path.Combine
         (
-            Path.Combine
-            (
-                "Transformations",
-                "Species"
-            )
+            "Transformations",
+            "Species"
         );
 
         /// <summary>
