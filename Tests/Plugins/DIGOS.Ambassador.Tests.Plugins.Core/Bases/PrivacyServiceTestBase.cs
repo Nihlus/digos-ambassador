@@ -67,6 +67,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         {
             serviceCollection.AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
 
+            serviceCollection.AddSingleton<DelayedActionService>();
             serviceCollection.AddScoped<ContentService>();
             serviceCollection.AddScoped<UserFeedbackService>();
             serviceCollection.AddScoped<PrivacyService>();
