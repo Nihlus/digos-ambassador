@@ -46,6 +46,18 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
     public static class ContentServiceExtensions
     {
         /// <summary>
+        /// Gets the base dossier path.
+        /// </summary>
+        private static string BaseTransformationSpeciesPath { get; } = Path.GetFullPath
+        (
+            Path.Combine
+            (
+                "Transformations",
+                "Species"
+            )
+        );
+
+        /// <summary>
         /// Discovers the species that have been bundled with the program.
         /// </summary>
         /// <param name="this">The content service.</param>
@@ -64,29 +76,46 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                 .Build();
 
             var species = new List<Species>();
-            var speciesFolders = Directory.EnumerateDirectories(@this.BaseTransformationSpeciesPath);
-            foreach (string directory in speciesFolders)
+            var speciesFolders = Directory.EnumerateDirectories
+            (
+                Path.Combine
+                (
+                    @this.BaseContentPath,
+                    BaseTransformationSpeciesPath
+                )
+            );
+
+            foreach (var directory in speciesFolders)
             {
-                string speciesFilePath = Path.Combine(directory, speciesFilename);
+                var speciesFilePath = Path.Combine(directory, speciesFilename);
                 if (!File.Exists(speciesFilePath))
                 {
                     continue;
                 }
 
-                string content = await FileAsync.ReadAllTextAsync(speciesFilePath, Encoding.UTF8);
-
-                try
+                var openStreamResult = @this.OpenLocalStream(speciesFilePath);
+                if (!openStreamResult.IsSuccess)
                 {
-                    species.Add(deser.Deserialize<Species>(content));
+                    return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(openStreamResult);
                 }
-                catch (YamlException yex)
-                {
-                    if (yex.InnerException is SerializationException sex)
-                    {
-                        return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(sex);
-                    }
 
-                    return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(yex);
+                using (var speciesFile = openStreamResult.Entity)
+                {
+                    var content = await AsyncIO.ReadAllTextAsync(speciesFile, Encoding.UTF8);
+
+                    try
+                    {
+                        species.Add(deser.Deserialize<Species>(content));
+                    }
+                    catch (YamlException yex)
+                    {
+                        if (yex.InnerException is SerializationException sex)
+                        {
+                            return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(sex);
+                        }
+
+                        return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(yex);
+                    }
                 }
             }
 
@@ -98,15 +127,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// must already be registered in the database.
         /// </summary>
         /// <param name="this">The content service.</param>
-        /// <param name="db">The database.</param>
         /// <param name="transformation">The transformation service.</param>
         /// <param name="species">The species to discover transformations for.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
         public static async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync
         (
-            this ContentService @this,
-            [NotNull] TransformationsDatabaseContext db,
+            [NotNull] this ContentService @this,
             [NotNull] TransformationService transformation,
             [NotNull] Species species
         )
@@ -126,7 +153,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
 
             foreach (var transformationFile in transformationFiles)
             {
-                string content = await FileAsync.ReadAllTextAsync(transformationFile);
+                var content = await AsyncIO.ReadAllTextAsync(transformationFile);
 
                 try
                 {
@@ -146,11 +173,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
             return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromSuccess(transformations);
         }
 
-        [NotNull]
         [Pure]
-        private static string GetSpeciesDirectory(this ContentService @this, [NotNull] Species species)
+        [NotNull]
+        private static string GetSpeciesDirectory([NotNull] this ContentService @this, [NotNull] Species species)
         {
-            return Path.Combine(@this.BaseTransformationSpeciesPath, species.Name);
+            return Path.Combine(@this.BaseContentPath, BaseTransformationSpeciesPath, species.Name);
         }
 
         /// <summary>
@@ -162,7 +189,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <returns>The path to the script.</returns>
         [Pure]
         [NotNull]
-        public static string GetLuaScriptPath(this ContentService @this, [NotNull] Transformation transformation, [NotNull] string scriptName)
+        public static string GetLuaScriptPath
+        (
+            [NotNull] this ContentService @this,
+            [NotNull] Transformation transformation,
+            [NotNull] string scriptName
+        )
         {
             var scriptNameWithoutExtension = scriptName.EndsWith(".lua")
                 ? scriptName
@@ -170,7 +202,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
 
             return Path.Combine
             (
-                @this.BaseTransformationSpeciesPath,
+                @this.BaseContentPath,
+                BaseTransformationSpeciesPath,
                 transformation.Species.Name,
                 "Scripts",
                 scriptNameWithoutExtension

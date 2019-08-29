@@ -1,5 +1,5 @@
 ﻿//
-//  FileAsync.cs
+//  AsyncIO.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Core.Async
     /// <summary>
     /// Asynchronous file operations.
     /// </summary>
-    public static class FileAsync
+    public static class AsyncIO
     {
         /// <summary>
         /// This is the same default buffer size as
@@ -66,19 +66,35 @@ namespace DIGOS.Ambassador.Core.Async
         [ItemNotNull]
         public static async Task<string[]> ReadAllLinesAsync(string path, [NotNull] Encoding encoding)
         {
-            var lines = new List<string>();
-
             // Open the FileStream with the same FileMode, FileAccess
             // and FileShare as a call to File.OpenText would've done.
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
             {
-                using (var reader = new StreamReader(stream, encoding))
+                return await ReadAllLinesAsync(stream, encoding);
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously reads all lines from the given stream.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="encoding">The encoding of the file.</param>
+        /// <param name="leaveOpen">Whether to leave the stream open after the call.</param>
+        /// <returns>The contents of the file.</returns>
+        public static async Task<string[]> ReadAllLinesAsync
+        (
+            Stream stream,
+            Encoding encoding,
+            bool leaveOpen = true
+        )
+        {
+            var lines = new List<string>();
+            using (var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen))
+            {
+                string line;
+                while ((line = await reader.ReadLineAsync()) != null)
                 {
-                    string line;
-                    while ((line = await reader.ReadLineAsync()) != null)
-                    {
-                        lines.Add(line);
-                    }
+                    lines.Add(line);
                 }
             }
 
@@ -108,10 +124,22 @@ namespace DIGOS.Ambassador.Core.Async
             // and FileShare as a call to File.OpenText would've done.
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
             {
-                using (var reader = new StreamReader(stream, encoding))
-                {
-                    return await reader.ReadToEndAsync();
-                }
+                return await ReadAllTextAsync(stream, encoding);
+            }
+        }
+
+        /// <summary>
+        /// Asynchronously reads all text from the given stream.
+        /// </summary>
+        /// <param name="stream">The stream.</param>
+        /// <param name="encoding">The encoding to use.</param>
+        /// <param name="leaveOpen">Whether to leave the stream open after the read.</param>
+        /// <returns>The contents of the stream.</returns>
+        public static async Task<string> ReadAllTextAsync(Stream stream, Encoding encoding, bool leaveOpen = true)
+        {
+            using (var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen))
+            {
+                return await reader.ReadToEndAsync();
             }
         }
     }

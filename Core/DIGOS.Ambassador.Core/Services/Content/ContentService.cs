@@ -57,11 +57,6 @@ namespace DIGOS.Ambassador.Core.Services
         public string BaseContentPath { get; }
 
         /// <summary>
-        /// Gets the base dossier path.
-        /// </summary>
-        public string BaseTransformationSpeciesPath { get; } = Path.GetFullPath(Path.Combine("Content", "Transformations", "Species"));
-
-        /// <summary>
         /// Gets the <see cref="Uri"/> pointing to the default avatar used by the bot for characters.
         /// </summary>
         public Uri DefaultAvatarUri { get; }
@@ -156,8 +151,8 @@ namespace DIGOS.Ambassador.Core.Services
                 _sassNSFW = new List<string>();
             }
 
-            _sass = (await FileAsync.ReadAllLinesAsync(sassPath)).ToList();
-            _sassNSFW = (await FileAsync.ReadAllLinesAsync(sassNSFWPath)).ToList();
+            _sass = (await AsyncIO.ReadAllLinesAsync(sassPath)).ToList();
+            _sassNSFW = (await AsyncIO.ReadAllLinesAsync(sassNSFWPath)).ToList();
         }
 
         /// <summary>
@@ -174,7 +169,7 @@ namespace DIGOS.Ambassador.Core.Services
                 throw new FileNotFoundException("The bot token file could not be found.", tokenPath);
             }
 
-            var token = await FileAsync.ReadAllTextAsync(tokenPath);
+            var token = await AsyncIO.ReadAllTextAsync(tokenPath);
 
             if (string.IsNullOrEmpty(token))
             {
