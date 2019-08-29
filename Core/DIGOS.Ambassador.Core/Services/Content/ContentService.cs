@@ -85,11 +85,6 @@ namespace DIGOS.Ambassador.Core.Services
         public Uri BwehUri { get; }
 
         /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to the localization catalog.
-        /// </summary>
-        public string LocalizationCatalogPath { get; }
-
-        /// <summary>
         /// Gets the path to the database credentials.
         /// </summary>
         public string DatabaseCredentialsPath { get; }
@@ -114,8 +109,6 @@ namespace DIGOS.Ambassador.Core.Services
             this.BrokenAmbyUri = new Uri(this.BaseRemoteContentUri, "Portraits/maintenance.png");
             this.BwehUri = new Uri(this.BaseRemoteContentUri, "Portraits/bweh.png");
             this.PrivacyPolicyUri = new Uri(this.BaseRemoteContentUri, "PrivacyPolicy.pdf");
-
-            this.LocalizationCatalogPath = Path.Combine(this.BaseContentPath, "Localization", "locale");
 
             this.DatabaseCredentialsPath = Path.Combine(this.BaseContentPath, "database.credentials");
         }
