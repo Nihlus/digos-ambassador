@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             public ExecuteSnippetAsync()
             {
-                _lua = new LuaService(new Mock<ContentService>().Object);
+                _lua = new LuaService(new ContentService(FileSystemFactory.CreateContentFileSystem()));
             }
 
             [Fact]

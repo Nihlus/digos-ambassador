@@ -72,6 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 .AddDbContext<CharactersDatabaseContext>(ConfigureOptions<CharactersDatabaseContext>);
 
             serviceCollection
+                .AddSingleton(FileSystemFactory.CreateContentFileSystem())
                 .AddSingleton<PronounService>()
                 .AddScoped<CommandService>()
                 .AddScoped<ContentService>()

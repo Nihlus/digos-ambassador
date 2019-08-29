@@ -65,12 +65,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
-
-            serviceCollection.AddSingleton<DelayedActionService>();
-            serviceCollection.AddScoped<ContentService>();
-            serviceCollection.AddScoped<UserFeedbackService>();
-            serviceCollection.AddScoped<PrivacyService>();
+            serviceCollection
+                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>)
+                .AddSingleton(FileSystemFactory.CreateContentFileSystem())
+                .AddSingleton<DelayedActionService>()
+                .AddScoped<ContentService>()
+                .AddScoped<UserFeedbackService>()
+                .AddScoped<PrivacyService>();
         }
 
         /// <inheritdoc />
