@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
+using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Pagination;
 using DIGOS.Ambassador.Plugins.Characters.Permissions;
@@ -370,7 +371,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             (
                 !character.AvatarUrl.IsNullOrWhitespace()
                     ? character.AvatarUrl
-                    : _content.DefaultAvatarUri.ToString()
+                    : _content.GetDefaultAvatarUri().ToString()
             );
 
             eb.AddField("Preferred pronouns", character.PronounProviderFamily);
@@ -413,7 +414,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [CanBeNull] string characterAvatarUrl = null
         )
         {
-            characterAvatarUrl = characterAvatarUrl ?? _content.DefaultAvatarUri.ToString();
+            characterAvatarUrl = characterAvatarUrl ?? _content.GetDefaultAvatarUri().ToString();
 
             var createCharacterResult = await _characters.CreateCharacterAsync
             (

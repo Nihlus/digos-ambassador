@@ -49,17 +49,15 @@ namespace DIGOS.Ambassador.Core.Services
 
         private Uri BaseRemoteUri { get; }
 
-        private Uri BaseRemoteContentUri { get; }
+        /// <summary>
+        /// Gets the base remote content URI.
+        /// </summary>
+        public Uri BaseRemoteContentUri { get; }
 
         /// <summary>
         /// Gets the base content path.
         /// </summary>
         public string BaseContentPath { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to the default avatar used by the bot for characters.
-        /// </summary>
-        public Uri DefaultAvatarUri { get; }
 
         /// <summary>
         /// Gets the <see cref="Uri"/> pointing to a portrait of Amby.
@@ -106,7 +104,6 @@ namespace DIGOS.Ambassador.Core.Services
 
             this.BaseRemoteUri = new Uri("https://raw.githubusercontent.com/Nihlus/digos-ambassador/master/");
             this.BaseRemoteContentUri = new Uri(this.BaseRemoteUri, "digos-ambassador/Content/");
-            this.DefaultAvatarUri = new Uri(this.BaseRemoteContentUri, "Avatars/Default/Discord_DIGOS.png");
 
             this.AutomaticBugReportCreationUri = new Uri
             (
