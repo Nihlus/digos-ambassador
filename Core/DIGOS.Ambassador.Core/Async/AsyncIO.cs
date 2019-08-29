@@ -50,22 +50,17 @@ namespace DIGOS.Ambassador.Core.Async
         /// Asynchronously reads all lines from the given file.
         /// </summary>
         /// <param name="path">The path to the file.</param>
-        /// <returns>The contents of the file.</returns>
-        [NotNull]
-        public static Task<string[]> ReadAllLinesAsync(string path)
-        {
-            return ReadAllLinesAsync(path, Encoding.UTF8);
-        }
-
-        /// <summary>
-        /// Asynchronously reads all lines from the given file.
-        /// </summary>
-        /// <param name="path">The path to the file.</param>
         /// <param name="encoding">The encoding of the file.</param>
         /// <returns>The contents of the file.</returns>
         [ItemNotNull]
-        public static async Task<string[]> ReadAllLinesAsync(string path, [NotNull] Encoding encoding)
+        public static async Task<string[]> ReadAllLinesAsync
+        (
+            [NotNull] string path,
+            [CanBeNull] Encoding encoding = null
+        )
         {
+            encoding = encoding ?? Encoding.UTF8;
+
             // Open the FileStream with the same FileMode, FileAccess
             // and FileShare as a call to File.OpenText would've done.
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
@@ -83,11 +78,13 @@ namespace DIGOS.Ambassador.Core.Async
         /// <returns>The contents of the file.</returns>
         public static async Task<string[]> ReadAllLinesAsync
         (
-            Stream stream,
-            Encoding encoding,
+            [NotNull] Stream stream,
+            [CanBeNull] Encoding encoding = null,
             bool leaveOpen = true
         )
         {
+            encoding = encoding ?? Encoding.UTF8;
+
             var lines = new List<string>();
             using (var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen))
             {
@@ -105,21 +102,13 @@ namespace DIGOS.Ambassador.Core.Async
         /// Asynchronously reads all text from the given file.
         /// </summary>
         /// <param name="path">The path to the file.</param>
-        /// <returns>The contents of the file.</returns>
-        [NotNull]
-        public static Task<string> ReadAllTextAsync(string path)
-        {
-            return ReadAllTextAsync(path, Encoding.UTF8);
-        }
-
-        /// <summary>
-        /// Asynchronously reads all text from the given file.
-        /// </summary>
-        /// <param name="path">The path to the file.</param>
         /// <param name="encoding">The encoding of the file.</param>
         /// <returns>The contents of the file.</returns>
-        public static async Task<string> ReadAllTextAsync(string path, [NotNull] Encoding encoding)
+        [NotNull]
+        public static async Task<string> ReadAllTextAsync([NotNull] string path, [CanBeNull] Encoding encoding = null)
         {
+            encoding = encoding ?? Encoding.UTF8;
+
             // Open the FileStream with the same FileMode, FileAccess
             // and FileShare as a call to File.OpenText would've done.
             using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
@@ -135,8 +124,15 @@ namespace DIGOS.Ambassador.Core.Async
         /// <param name="encoding">The encoding to use.</param>
         /// <param name="leaveOpen">Whether to leave the stream open after the read.</param>
         /// <returns>The contents of the stream.</returns>
-        public static async Task<string> ReadAllTextAsync(Stream stream, Encoding encoding, bool leaveOpen = true)
+        public static async Task<string> ReadAllTextAsync
+        (
+            [NotNull] Stream stream,
+            [CanBeNull] Encoding encoding = null,
+            bool leaveOpen = true
+        )
         {
+            encoding = encoding ?? Encoding.UTF8;
+
             using (var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen))
             {
                 return await reader.ReadToEndAsync();

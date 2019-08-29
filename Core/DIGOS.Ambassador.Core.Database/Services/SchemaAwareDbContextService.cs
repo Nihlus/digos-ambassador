@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using DIGOS.Ambassador.Core.Database.Credentials;
 using DIGOS.Ambassador.Core.Services;
 using Microsoft.EntityFrameworkCore;
@@ -72,9 +73,20 @@ namespace DIGOS.Ambassador.Core.Database.Services
             EnsureSchemaIsCached<TContext>();
             var schema = _knownSchemas[typeof(TContext)];
 
-            if (!DatabaseCredentials.TryParse(_content.DatabaseCredentialsPath, out var credentials))
+            var getCredentialStream = _content.GetDatabaseCredentialStream();
+            if (!getCredentialStream.IsSuccess)
             {
-                throw new InvalidOperationException("Failed to get the database credentials.");
+                throw new InvalidOperationException("Failed to get the database credential stream.");
+            }
+
+            DatabaseCredentials credentials;
+            using (var credentialStream = new StreamReader(getCredentialStream.Entity))
+            {
+                var content = credentialStream.ReadToEnd();
+                if (!DatabaseCredentials.TryParse(content, out credentials))
+                {
+                    throw new InvalidOperationException("Failed to parse the database credentials.");
+                }
             }
 
             optionsBuilder

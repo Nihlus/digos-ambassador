@@ -21,7 +21,6 @@
 //
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -37,6 +36,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
+using Zio;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
 {
@@ -48,8 +48,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <summary>
         /// Gets the base dossier path.
         /// </summary>
-        private static string BaseTransformationSpeciesPath { get; } = Path.Combine
+        private static UPath BaseTransformationSpeciesPath { get; } = UPath.Combine
         (
+            UPath.Root,
             "Transformations",
             "Species"
         );
@@ -73,19 +74,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                 .Build();
 
             var species = new List<Species>();
-            var speciesFolders = Directory.EnumerateDirectories
+            var speciesFolders = @this.FileSystem.EnumerateDirectories
             (
-                Path.Combine
-                (
-                    @this.BaseContentPath,
-                    BaseTransformationSpeciesPath
-                )
+                BaseTransformationSpeciesPath
             );
 
             foreach (var directory in speciesFolders)
             {
-                var speciesFilePath = Path.Combine(directory, speciesFilename);
-                if (!File.Exists(speciesFilePath))
+                var speciesFilePath = UPath.Combine(directory, speciesFilename);
+                if (!@this.FileSystem.FileExists(speciesFilePath))
                 {
                     continue;
                 }
@@ -137,8 +134,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         {
             const string speciesFilename = "Species.yml";
 
-            var speciesDir = @this.GetSpeciesDirectory(species);
-            var transformationFiles = Directory.EnumerateFiles(speciesDir).Where(p => !p.EndsWith(speciesFilename));
+            var speciesDir = GetSpeciesDirectory(species);
+            var transformationFiles = @this.FileSystem.EnumerateFiles(speciesDir)
+                .Where(p => !p.ToString().EndsWith(speciesFilename));
 
             var transformations = new List<Transformation>();
             var deser = new DeserializerBuilder()
@@ -150,7 +148,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
 
             foreach (var transformationFile in transformationFiles)
             {
-                var content = await AsyncIO.ReadAllTextAsync(transformationFile);
+                var getTransformationFileStream = @this.OpenLocalStream(transformationFile);
+                if (!getTransformationFileStream.IsSuccess)
+                {
+                    continue;
+                }
+
+                string content;
+                using (var transformationFileStream = getTransformationFileStream.Entity)
+                {
+                    content = await AsyncIO.ReadAllTextAsync(transformationFileStream);
+                }
 
                 try
                 {
@@ -171,24 +179,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         }
 
         [Pure]
-        [NotNull]
-        private static string GetSpeciesDirectory([NotNull] this ContentService @this, [NotNull] Species species)
+        private static UPath GetSpeciesDirectory([NotNull] Species species)
         {
-            return Path.Combine(@this.BaseContentPath, BaseTransformationSpeciesPath, species.Name);
+            return UPath.Combine(BaseTransformationSpeciesPath, species.Name);
         }
 
         /// <summary>
         /// Gets the absolute path to a named lua script belonging to the given transformation.
         /// </summary>
-        /// <param name="this">The content service.</param>
         /// <param name="transformation">The transformation that the script belongs to.</param>
         /// <param name="scriptName">The name of the script.</param>
         /// <returns>The path to the script.</returns>
         [Pure]
-        [NotNull]
-        public static string GetLuaScriptPath
+        public static UPath GetLuaScriptPath
         (
-            [NotNull] this ContentService @this,
             [NotNull] Transformation transformation,
             [NotNull] string scriptName
         )
@@ -197,9 +201,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                 ? scriptName
                 : $"{scriptName}.lua";
 
-            return Path.Combine
+            return UPath.Combine
             (
-                @this.BaseContentPath,
                 BaseTransformationSpeciesPath,
                 transformation.Species.Name,
                 "Scripts",

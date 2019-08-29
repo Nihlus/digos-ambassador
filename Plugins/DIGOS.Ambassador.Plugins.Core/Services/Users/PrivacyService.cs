@@ -32,6 +32,7 @@ using Discord;
 using Discord.Net;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Zio;
 
 namespace DIGOS.Ambassador.Plugins.Core.Services.Users
 {
@@ -104,7 +105,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <returns>A task that must be awaited.</returns>
         public async Task SendPrivacyPolicyAsync([NotNull] IMessageChannel channel)
         {
-            var result = _content.OpenLocalStream(Path.Combine(_content.BaseContentPath, "PrivacyPolicy.pdf"));
+            var result = _content.OpenLocalStream(UPath.Combine(UPath.Root, "Privacy", "PrivacyPolicy.pdf"));
             if (!result.IsSuccess)
             {
                 var errorBuilder = _feedback.CreateEmbedBase(Color.Red);

@@ -33,6 +33,7 @@ using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Zio;
 
 namespace DIGOS.Ambassador.Plugins.Dossiers.Services
 {
@@ -49,7 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <summary>
         /// Gets the base dossier path.
         /// </summary>
-        public string BaseDossierPath => Path.GetFullPath(Path.Combine(_content.BaseContentPath, "Dossiers"));
+        private UPath BaseDossierPath => UPath.Combine(UPath.Root, "Dossiers");
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DossierService"/> class.
@@ -77,14 +78,16 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <param name="dossier">The dossier to get the data for.</param>
         /// <returns>A <see cref="FileStream"/> containing the dossier data.</returns>
         [Pure]
-        public RetrieveEntityResult<FileStream> GetDossierStream([NotNull] Dossier dossier)
+        public RetrieveEntityResult<Stream> GetDossierStream([NotNull] Dossier dossier)
         {
-            if (!File.Exists(dossier.Path) || dossier.Path.IsNullOrWhitespace())
+            var dossierContentPath = UPath.Combine(this.BaseDossierPath, dossier.Path);
+
+            if (!_content.FileSystem.FileExists(dossierContentPath) || dossier.Path.IsNullOrWhitespace())
             {
-                return RetrieveEntityResult<FileStream>.FromError("No file data set.");
+                return RetrieveEntityResult<Stream>.FromError("No file data set.");
             }
 
-            return _content.OpenLocalStream(dossier.Path, "Dossiers");
+            return _content.OpenLocalStream(dossierContentPath);
         }
 
         /// <summary>
@@ -96,14 +99,14 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         public Task<DeleteEntityResult> DeleteDossierDataAsync([NotNull] Dossier dossier)
         {
             var dataPath = GetDossierDataPath(dossier);
-            if (!File.Exists(dataPath))
+            if (!_content.FileSystem.FileExists(dataPath))
             {
                 return Task.FromResult(DeleteEntityResult.FromSuccess());
             }
 
             try
             {
-                File.Delete(dataPath);
+                _content.FileSystem.DeleteFile(dataPath);
             }
             catch (Exception e)
             {
@@ -119,10 +122,9 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <param name="dossier">The dossier.</param>
         /// <returns>The path.</returns>
         [Pure]
-        [NotNull]
-        public string GetDossierDataPath([NotNull] Dossier dossier)
+        public UPath GetDossierDataPath([NotNull] Dossier dossier)
         {
-            return Path.GetFullPath(Path.Combine(_content.BaseContentPath, "Dossiers", $"{dossier.Title}.pdf"));
+            return UPath.Combine(this.BaseDossierPath, $"{dossier.Title}.pdf");
         }
 
         /// <summary>
@@ -200,7 +202,11 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             [NotNull] string title
         )
         {
-            var dossier = await _database.Dossiers.FirstOrDefaultAsync(d => string.Equals(d.Title, title, StringComparison.OrdinalIgnoreCase));
+            var dossier = await _database.Dossiers.FirstOrDefaultAsync
+            (
+                d => string.Equals(d.Title, title, StringComparison.OrdinalIgnoreCase)
+            );
+
             if (dossier is null)
             {
                 return RetrieveEntityResult<Dossier>.FromError("No dossier with that title found.");
@@ -287,28 +293,25 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> UpdateDossierDataLocationAsync([NotNull] Dossier dossier)
         {
-            var originalDossierPath = dossier.Path;
-            var newDossierPath = Path.GetFullPath(Path.Combine(this.BaseDossierPath, $"{dossier.Title}.pdf"));
-            if (Directory.GetParent(newDossierPath).FullName != this.BaseDossierPath)
-            {
-                return ModifyEntityResult.FromError("Invalid data path.");
-            }
+            var originalDossierPath = GetDossierDataPath(dossier);
 
-            if (originalDossierPath.IsNullOrWhitespace() || !File.Exists(originalDossierPath) || originalDossierPath == newDossierPath)
+            var newDossierPath = UPath.Combine(this.BaseDossierPath, $"{dossier.Title}.pdf");
+
+            if (!_content.FileSystem.FileExists(originalDossierPath) || originalDossierPath == newDossierPath)
             {
                 return ModifyEntityResult.FromSuccess();
             }
 
             try
             {
-                File.Move(originalDossierPath, newDossierPath);
+                _content.FileSystem.MoveFile(originalDossierPath, newDossierPath);
             }
             catch (Exception e)
             {
                 return ModifyEntityResult.FromError(e.Message);
             }
 
-            dossier.Path = newDossierPath;
+            dossier.Path = newDossierPath.ToString();
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -326,13 +329,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             [NotNull] ICommandContext context
         )
         {
-            var dossierPath = Path.GetFullPath(Path.Combine(this.BaseDossierPath, $"{dossier.Title}.pdf"));
-
-            if (Directory.GetParent(dossierPath).FullName != this.BaseDossierPath)
-            {
-                return ModifyEntityResult.FromError("Invalid data path.");
-            }
-
             if (context.Message.Attachments.Count <= 0)
             {
                 return ModifyEntityResult.FromError("No file provided. Please attach a PDF with the dossier data.");
@@ -350,49 +346,40 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
 
                 try
                 {
+                    var dossierPath = GetDossierDataPath(dossier);
                     using (var dataStream = await client.GetStreamAsync(dossierAttachment.Url))
                     {
                         try
                         {
-                            using (var dataFile = File.Create(dossierPath))
+                            using (var dataFile = _content.FileSystem.CreateFile(dossierPath))
                             {
                                 await dataStream.CopyToAsync(dataFile);
 
                                 if (!await dataFile.HasSignatureAsync(FileSignatures.PDF))
                                 {
-                                    return ModifyEntityResult.FromError("Invalid dossier format. PDF files are accepted.");
+                                    return ModifyEntityResult.FromError
+                                    (
+                                        "Invalid dossier format. PDF files are accepted."
+                                    );
                                 }
                             }
                         }
                         catch (Exception e)
                         {
-                            switch (e)
-                            {
-                                case UnauthorizedAccessException _:
-                                case PathTooLongException _:
-                                case DirectoryNotFoundException _:
-                                case IOException _:
-                                {
-                                    if (File.Exists(dossierPath))
-                                    {
-                                        File.Delete(dossierPath);
-                                    }
-
-                                    return ModifyEntityResult.FromError($"Failed to set the dossier data: {e.Message}");
-                                }
-                            }
-
-                            throw;
+                            return ModifyEntityResult.FromError(e);
                         }
 
-                        dossier.Path = dossierPath;
+                        dossier.Path = dossierPath.ToString();
 
                         await _database.SaveChangesAsync();
                     }
                 }
                 catch (TaskCanceledException)
                 {
-                    return ModifyEntityResult.FromError("The download operation timed out. The data file was not added.");
+                    return ModifyEntityResult.FromError
+                    (
+                        "The download operation timed out. The data file was not added."
+                    );
                 }
             }
 

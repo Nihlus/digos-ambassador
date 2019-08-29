@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Design
         public PermissionsDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<PermissionsDatabaseContext>();
-            new SchemaAwareDbContextService(new ContentService())
+            new SchemaAwareDbContextService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
                 .ConfigureSchemaAwareContext<PermissionsDatabaseContext>(optionsBuilder);
 
             return new PermissionsDatabaseContext(optionsBuilder.Options);

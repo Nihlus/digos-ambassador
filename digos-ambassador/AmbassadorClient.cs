@@ -58,8 +58,6 @@ namespace DIGOS.Ambassador
 
         private readonly DiscordSocketClient _client;
 
-        private readonly ContentService _content;
-
         private readonly CommandService _commands;
 
         private readonly BehaviourService _behaviours;
@@ -69,8 +67,7 @@ namespace DIGOS.Ambassador
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorClient"/> class.
         /// </summary>
-        /// <param name="content">The content service.</param>
-        public AmbassadorClient([NotNull] ContentService content)
+        public AmbassadorClient()
         {
             _client = new DiscordSocketClient();
 
@@ -78,8 +75,6 @@ namespace DIGOS.Ambassador
 
             _commands = new CommandService();
             _commands.Log += OnDiscordLogEvent;
-
-            _content = content;
             _commands = new CommandService();
 
             _behaviours = new BehaviourService();
@@ -98,7 +93,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton(_client)
                 .AddSingleton<BaseSocketClient>(_client)
                 .AddSingleton(_behaviours)
-                .AddSingleton(_content)
+                .AddSingleton<ContentService>()
                 .AddSingleton(_commands)
                 .AddSingleton<DiscordService>()
                 .AddSingleton<UserFeedbackService>()
@@ -107,7 +102,8 @@ namespace DIGOS.Ambassador
                 .AddSingleton<HelpService>()
                 .AddSingleton<Random>()
                 .AddSingleton(pluginService)
-                .AddSingleton<SchemaAwareDbContextService>();
+                .AddSingleton<SchemaAwareDbContextService>()
+                .AddSingleton(FileSystemFactory.CreateContentFileSystem());
 
             var successfullyRegisteredPlugins = new List<IPluginDescriptor>();
 
@@ -129,6 +125,9 @@ namespace DIGOS.Ambassador
             }
 
             _services = serviceCollection.BuildServiceProvider();
+
+            var contentService = _services.GetRequiredService<ContentService>();
+            await contentService.InitializeAsync();
 
             // Create plugin databases
             foreach (var plugin in successfullyRegisteredPlugins)
@@ -192,7 +191,8 @@ namespace DIGOS.Ambassador
         /// <returns>A task representing the login action.</returns>
         public async Task LoginAsync()
         {
-            await _client.LoginAsync(TokenType.Bot, _content.BotToken.Trim());
+            var contentService = _services.GetRequiredService<ContentService>();
+            await _client.LoginAsync(TokenType.Bot, contentService.BotToken.Trim());
         }
 
         /// <summary>

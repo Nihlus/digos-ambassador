@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using JetBrains.Annotations;
+using Zio;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
 {
@@ -259,7 +260,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         [NotNull]
         public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync
         (
-            [NotNull, PathReference] string scriptPath,
+            [NotNull, PathReference] UPath scriptPath,
             [NotNull] params (string name, object value)[] variables
         )
         {

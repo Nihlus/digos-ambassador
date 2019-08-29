@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Design
         public CharactersDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<CharactersDatabaseContext>();
-            new SchemaAwareDbContextService(new ContentService())
+            new SchemaAwareDbContextService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
                 .ConfigureSchemaAwareContext<CharactersDatabaseContext>(optionsBuilder);
 
             return new CharactersDatabaseContext(optionsBuilder.Options);
