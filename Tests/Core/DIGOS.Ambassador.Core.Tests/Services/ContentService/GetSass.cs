@@ -169,11 +169,11 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
             }
 
             [Fact]
-            public void ReturnsFalseWhenNoSassIsAvailable()
+            public void ReturnsTrueWhenSassIsAvailable()
             {
                 var result = this.ContentService.GetSass();
 
-                Assert.False(result.IsSuccess);
+                Assert.True(result.IsSuccess);
             }
 
             [Fact]
