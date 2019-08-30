@@ -140,7 +140,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <summary>
         /// All of the available body parts.
         /// </summary>
-        [Composite(Head, Body, Arms, Legs, Tail, Wings, Vagina, Penis)]
+        [Composite(Head, Body, Arms, Legs, Tail, Wings)]
         Full
     }
 }
