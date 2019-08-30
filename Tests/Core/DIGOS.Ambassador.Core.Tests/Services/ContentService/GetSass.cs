@@ -36,6 +36,7 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
     {
         public class GetSass : ContentServiceTestBase
         {
+            // ReSharper disable once MemberHidesStaticFromOuterClass
             public override async Task InitializeAsync()
             {
                 await base.InitializeAsync();
@@ -94,6 +95,7 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
 
         public class GetSassWithOnlySFW : ContentServiceTestBase
         {
+            // ReSharper disable once MemberHidesStaticFromOuterClass
             public override async Task InitializeAsync()
             {
                 await base.InitializeAsync();
@@ -143,6 +145,7 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
 
         public class GetSassWithOnlyNSFW : ContentServiceTestBase
         {
+            // ReSharper disable once MemberHidesStaticFromOuterClass
             public override async Task InitializeAsync()
             {
                 await base.InitializeAsync();

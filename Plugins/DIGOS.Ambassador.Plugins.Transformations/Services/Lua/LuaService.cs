@@ -260,7 +260,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         [NotNull]
         public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync
         (
-            [NotNull, PathReference] UPath scriptPath,
+            [PathReference] UPath scriptPath,
             [NotNull] params (string name, object value)[] variables
         )
         {

@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// Discovers the species that have been bundled with the program.
         /// </summary>
         /// <param name="this">The content service.</param>
-        /// <returns>A retrieval result which may or may not have suceeded.</returns>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
         public static async Task<RetrieveEntityResult<IReadOnlyList<Species>>> DiscoverBundledSpeciesAsync
         (

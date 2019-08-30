@@ -24,7 +24,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Behaviours;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using Discord;
 using Discord.Net;
@@ -44,13 +43,11 @@ namespace DIGOS.Ambassador.Behaviours
         /// Initializes a new instance of the <see cref="JoinMessageBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
-        /// <param name="database">The database.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="servers">The server service.</param>
         public JoinMessageBehaviour
         (
             DiscordSocketClient client,
-            CoreDatabaseContext database,
             UserFeedbackService feedback,
             ServerService servers
         )
