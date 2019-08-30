@@ -58,11 +58,11 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             try
             {
                 var eb = feedback.CreateFeedbackEmbed(context.User, Color.DarkPurple, "Loading...");
-                await feedback.SendEmbedAndDeleteAsync(userChannel, eb, TimeSpan.Zero);
+                await feedback.SendEmbedAndDeleteAsync(userChannel, eb, TimeSpan.FromSeconds(1));
 
                 if (!(context.Channel is IDMChannel))
                 {
-                    _ = feedback.SendConfirmationAsync(context, "Please check your private messages.");
+                    await feedback.SendConfirmationAsync(context, "Please check your private messages.");
                 }
 
                 await @this.SendInteractiveMessageAsync(userChannel, message);
@@ -107,11 +107,11 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             try
             {
                 var eb = feedback.CreateFeedbackEmbed(context.User, Color.DarkPurple, "Loading...");
-                await feedback.SendEmbedAndDeleteAsync(userChannel, eb, TimeSpan.Zero);
+                await feedback.SendEmbedAndDeleteAsync(userChannel, eb, TimeSpan.FromSeconds(1));
 
                 if (!(context.Channel is IDMChannel))
                 {
-                    _ = feedback.SendConfirmationAsync(context, "Please check your private messages.");
+                    await feedback.SendConfirmationAsync(context, "Please check your private messages.");
                 }
 
                 await @this.SendInteractiveMessageAndDeleteAsync(userChannel, message, timeout);

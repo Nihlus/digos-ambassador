@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Behaviours
     /// <summary>
     /// Generates quotes from message links. Based on code from MODiX.
     /// </summary>
-    public class MessageQuoteBehaviour : BehaviourBase
+    public class MessageQuoteBehaviour : ClientEventBehaviour
     {
         private static readonly Regex Pattern = new Regex
         (
@@ -62,29 +62,30 @@ namespace DIGOS.Ambassador.Behaviours
         }
 
         /// <inheritdoc />
-        protected override Task OnStartingAsync()
+        protected override async Task MessageUpdated
+        (
+            Cacheable<IMessage, ulong> oldMessage,
+            [CanBeNull] SocketMessage updatedMessage,
+            ISocketMessageChannel messageChannel
+        )
         {
-            this.Client.MessageReceived += OnMessageReceived;
-            this.Client.MessageUpdated += OnMessageUpdated;
+            if (updatedMessage is null)
+            {
+                return;
+            }
 
-            return Task.CompletedTask;
+            // Ignore all changes except text changes
+            bool isTextUpdate = updatedMessage.EditedTimestamp.HasValue && (updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes());
+            if (!isTextUpdate)
+            {
+                return;
+            }
+
+            await MessageReceived(updatedMessage);
         }
 
         /// <inheritdoc />
-        protected override Task OnStoppingAsync()
-        {
-            this.Client.MessageReceived -= OnMessageReceived;
-            this.Client.MessageUpdated -= OnMessageUpdated;
-
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Handles incoming messages, passing them to the command context handler.
-        /// </summary>
-        /// <param name="arg">The message coming in from the socket client.</param>
-        /// <returns>A task representing the message handling.</returns>
-        private async Task OnMessageReceived(SocketMessage arg)
+        protected override async Task MessageReceived(SocketMessage arg)
         {
             if (!(arg is SocketUserMessage message))
             {
@@ -178,34 +179,6 @@ namespace DIGOS.Ambassador.Behaviours
                     .Any(d => d.Name == "Quoted by");
 
             return hasQuoteField.HasValue && hasQuoteField.Value;
-        }
-
-        /// <summary>
-        /// Handles reparsing of edited messages.
-        /// </summary>
-        /// <param name="oldMessage">The old message.</param>
-        /// <param name="updatedMessage">The new message.</param>
-        /// <param name="messageChannel">The channel of the message.</param>
-        private async Task OnMessageUpdated
-        (
-            Cacheable<IMessage, ulong> oldMessage,
-            [CanBeNull] SocketMessage updatedMessage,
-            ISocketMessageChannel messageChannel
-        )
-        {
-            if (updatedMessage is null)
-            {
-                return;
-            }
-
-            // Ignore all changes except text changes
-            bool isTextUpdate = updatedMessage.EditedTimestamp.HasValue && (updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes());
-            if (!isTextUpdate)
-            {
-                return;
-            }
-
-            await OnMessageReceived(updatedMessage);
         }
     }
 }

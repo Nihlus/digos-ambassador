@@ -22,6 +22,7 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -136,6 +137,61 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
 
             // Requery the database
             return await GetUserAsync(discordUser);
+        }
+
+        /// <summary>
+        /// Sets the user's timezone.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <param name="timezoneOffset">The timezone.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<ModifyEntityResult> SetUserTimezoneAsync([NotNull] User user, int timezoneOffset)
+        {
+            if (timezoneOffset < -12 || timezoneOffset > 14)
+            {
+                return ModifyEntityResult.FromError($"{timezoneOffset} is not a valid offset.");
+            }
+
+            if (user.Timezone == timezoneOffset)
+            {
+                return ModifyEntityResult.FromError("That's already your timezone.'");
+            }
+
+            user.Timezone = timezoneOffset;
+
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Sets the user's bio.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <param name="bio">The bio.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<ModifyEntityResult> SetUserBioAsync([NotNull] User user, [NotNull] string bio)
+        {
+            if (bio.IsNullOrWhitespace())
+            {
+                return ModifyEntityResult.FromError("You must provide a bio.");
+            }
+
+            if (bio.Length > 1024)
+            {
+                return ModifyEntityResult.FromError("Your bio may not be longer than 1024 characters.");
+            }
+
+            if (user.Bio == bio)
+            {
+                return ModifyEntityResult.FromError("That's already your bio.'");
+            }
+
+            user.Bio = bio;
+
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
         }
     }
 }

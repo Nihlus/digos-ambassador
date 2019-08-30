@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services;
 using Discord;
 using Discord.Commands;
 using Humanizer;
@@ -40,6 +41,17 @@ namespace DIGOS.Ambassador.Discord.Feedback
     [PublicAPI]
     public class UserFeedbackService
     {
+        private readonly DelayedActionService _delayedActions;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserFeedbackService"/> class.
+        /// </summary>
+        /// <param name="delayedActions">The delayed actions service.</param>
+        public UserFeedbackService(DelayedActionService delayedActions)
+        {
+            _delayedActions = delayedActions;
+        }
+
         /// <summary>
         /// Sends an error message, and deletes it after a specified timeout.
         /// </summary>
@@ -163,10 +175,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         [NotNull]
         public async Task SendEmbedAsync([NotNull] IMessageChannel channel, [NotNull] Embed eb)
         {
-            using (channel.EnterTypingState())
-            {
-                await channel.SendMessageAsync(string.Empty, false, eb);
-            }
+            await channel.SendMessageAsync(string.Empty, false, eb);
         }
 
         /// <summary>
@@ -186,13 +195,9 @@ namespace DIGOS.Ambassador.Discord.Feedback
         {
             timeout = timeout ?? TimeSpan.FromSeconds(15.0);
 
-            using (channel.EnterTypingState())
-            {
-                var message = await channel.SendMessageAsync(string.Empty, embed: eb);
-                _ = Task.Delay(timeout.Value)
-                    .ContinueWith(_ => message.DeleteAsync().ConfigureAwait(false))
-                    .ConfigureAwait(false);
-            }
+            var message = await channel.SendMessageAsync(string.Empty, embed: eb);
+
+            _delayedActions.DelayUntil(() => message.DeleteAsync(), timeout.Value);
         }
 
         /// <summary>

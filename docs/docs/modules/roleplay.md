@@ -8,7 +8,6 @@ Commands for interacting with and managing channel roleplays.
 ## Submodules
 * [Server](roleplay_server.md)
 * [Set](roleplay_set.md)
-* [Admin](roleplay_admin.md)
 
 ## Commands
 ### *show*

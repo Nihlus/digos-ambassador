@@ -24,12 +24,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Async;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using JetBrains.Annotations;
+using Zio;
 
 namespace DIGOS.Ambassador.Core.Services
 {
@@ -39,32 +39,28 @@ namespace DIGOS.Ambassador.Core.Services
     /// </summary>
     public class ContentService
     {
-        /// <summary>
-        /// Gets the Discord bot OAuth token.
-        /// </summary>o
-        public string BotToken { get; private set; }
-
         private List<string> _sass;
         private List<string> _sassNSFW;
 
+        /// <summary>
+        /// Gets the virtual filesystem that encapsulates the content.
+        /// </summary>
+        public IFileSystem FileSystem { get; }
+
+        /// <summary>
+        /// Gets the path to the database credentials.
+        /// </summary>
+        private UPath DatabaseCredentialsPath { get; }
+
+        /// <summary>
+        /// Gets the base remote content URI.
+        /// </summary>
         private Uri BaseRemoteUri { get; }
 
-        private Uri BaseRemoteContentUri { get; }
-
         /// <summary>
-        /// Gets the base content path.
+        /// Gets the base remote content URI.
         /// </summary>
-        public string BaseContentPath { get; }
-
-        /// <summary>
-        /// Gets the base dossier path.
-        /// </summary>
-        public string BaseTransformationSpeciesPath { get; } = Path.GetFullPath(Path.Combine("Content", "Transformations", "Species"));
-
-        /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to the default avatar used by the bot for characters.
-        /// </summary>
-        public Uri DefaultAvatarUri { get; }
+        public Uri BaseRemoteContentUri { get; }
 
         /// <summary>
         /// Gets the <see cref="Uri"/> pointing to a portrait of Amby.
@@ -92,26 +88,18 @@ namespace DIGOS.Ambassador.Core.Services
         public Uri BwehUri { get; }
 
         /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to the localization catalog.
-        /// </summary>
-        public string LocalizationCatalogPath { get; }
-
-        /// <summary>
-        /// Gets the path to the database credentials.
-        /// </summary>
-        public string DatabaseCredentialsPath { get; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ContentService"/> class.
         /// </summary>
-        public ContentService()
+        /// <param name="fileSystem">The filesystem abstraction.</param>
+        public ContentService(IFileSystem fileSystem)
         {
-            var executingLocation = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
-            this.BaseContentPath = Path.GetFullPath(Path.Combine(executingLocation, "Content"));
+            _sass = new List<string>();
+            _sassNSFW = new List<string>();
+
+            this.FileSystem = fileSystem;
 
             this.BaseRemoteUri = new Uri("https://raw.githubusercontent.com/Nihlus/digos-ambassador/master/");
             this.BaseRemoteContentUri = new Uri(this.BaseRemoteUri, "digos-ambassador/Content/");
-            this.DefaultAvatarUri = new Uri(this.BaseRemoteContentUri, "Avatars/Default/Discord_DIGOS.png");
 
             this.AutomaticBugReportCreationUri = new Uri
             (
@@ -123,9 +111,7 @@ namespace DIGOS.Ambassador.Core.Services
             this.BwehUri = new Uri(this.BaseRemoteContentUri, "Portraits/bweh.png");
             this.PrivacyPolicyUri = new Uri(this.BaseRemoteContentUri, "PrivacyPolicy.pdf");
 
-            this.LocalizationCatalogPath = Path.Combine(this.BaseContentPath, "Localization", "locale");
-
-            this.DatabaseCredentialsPath = Path.Combine(this.BaseContentPath, "database.credentials");
+            this.DatabaseCredentialsPath = UPath.Combine(UPath.Root, "Database", "database.credentials");
         }
 
         /// <summary>
@@ -135,7 +121,15 @@ namespace DIGOS.Ambassador.Core.Services
         public async Task InitializeAsync()
         {
             await LoadSassAsync();
-            await LoadBotTokenAsync();
+        }
+
+        /// <summary>
+        /// Retrieves the database credentials.
+        /// </summary>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public RetrieveEntityResult<Stream> GetDatabaseCredentialStream()
+        {
+            return OpenLocalStream(this.DatabaseCredentialsPath);
         }
 
         /// <summary>
@@ -143,21 +137,26 @@ namespace DIGOS.Ambassador.Core.Services
         /// </summary>
         private async Task LoadSassAsync()
         {
-            var sassPath = Path.Combine(this.BaseContentPath, "Sass", "sass.txt");
-            var sassNSFWPath = Path.Combine(this.BaseContentPath, "Sass", "sass-nsfw.txt");
+            var sassPath = UPath.Combine(UPath.Root, "Sass", "sass.txt");
+            var sassNSFWPath = UPath.Combine(UPath.Root, "Sass", "sass-nsfw.txt");
 
-            if (!File.Exists(sassPath))
+            var getSassStream = OpenLocalStream(sassPath);
+            if (getSassStream.IsSuccess)
             {
-                _sass = new List<string>();
+                using (var sassStream = getSassStream.Entity)
+                {
+                    _sass = (await AsyncIO.ReadAllLinesAsync(sassStream)).ToList();
+                }
             }
 
-            if (!File.Exists(sassNSFWPath))
+            var getNSFWSassStream = OpenLocalStream(sassNSFWPath);
+            if (getNSFWSassStream.IsSuccess)
             {
-                _sassNSFW = new List<string>();
+                using (var nsfwSassStream = getNSFWSassStream.Entity)
+                {
+                    _sassNSFW = (await AsyncIO.ReadAllLinesAsync(nsfwSassStream)).ToList();
+                }
             }
-
-            _sass = (await FileAsync.ReadAllLinesAsync(sassPath)).ToList();
-            _sassNSFW = (await FileAsync.ReadAllLinesAsync(sassNSFWPath)).ToList();
         }
 
         /// <summary>
@@ -165,76 +164,67 @@ namespace DIGOS.Ambassador.Core.Services
         /// </summary>
         /// <exception cref="FileNotFoundException">Thrown if the bot token file can't be found.</exception>
         /// <exception cref="InvalidDataException">Thrown if no token exists in the file.</exception>
-        private async Task LoadBotTokenAsync()
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<string>> GetBotTokenAsync()
         {
-            var tokenPath = Path.Combine(this.BaseContentPath, "bot.token");
+            var tokenPath = UPath.Combine(UPath.Root, "Discord", "bot.token");
 
-            if (!File.Exists(tokenPath))
+            if (!this.FileSystem.FileExists(tokenPath))
             {
-                throw new FileNotFoundException("The bot token file could not be found.", tokenPath);
+                return RetrieveEntityResult<string>.FromError("The token file could not be found.");
             }
 
-            var token = await FileAsync.ReadAllTextAsync(tokenPath);
-
-            if (string.IsNullOrEmpty(token))
+            var getTokenStream = OpenLocalStream(tokenPath);
+            if (!getTokenStream.IsSuccess)
             {
-                throw new InvalidDataException("Missing bot token.");
+                return RetrieveEntityResult<string>.FromError("The token file could not be opened.");
             }
 
-            this.BotToken = token;
-        }
+            using (var tokenStream = getTokenStream.Entity)
+            {
+                var token = await AsyncIO.ReadAllTextAsync(tokenStream);
 
-        /// <summary>
-        /// Gets or creates a stream with the given content-local path.
-        /// </summary>
-        /// <param name="relativePath">The relative path inside the content directory.</param>
-        /// <returns>A <see cref="FileStream"/> pointing to the path..</returns>
-        public RetrieveEntityResult<FileStream> GetOrCreateLocalStream([PathReference] [NotNull] string relativePath)
-        {
-            var guaranteedRelativePath = relativePath.TrimStart('.', '\\', '/');
-            var contentPath = Path.Combine(this.BaseContentPath, guaranteedRelativePath);
+                if (string.IsNullOrEmpty(token))
+                {
+                    return RetrieveEntityResult<string>.FromError("The token file did not contain a valid token.");
+                }
 
-            var openStreamResult = OpenLocalStream(contentPath, fileMode: FileMode.OpenOrCreate);
-            return openStreamResult;
+                return RetrieveEntityResult<string>.FromSuccess(token);
+            }
         }
 
         /// <summary>
         /// Gets the stream of a local content file.
         /// </summary>
         /// <param name="path">The path to the file.</param>
-        /// <param name="subdirectory">The subdirectory in the content folder, if any.</param>
         /// <param name="fileMode">The mode with which to open the stream.</param>
+        /// <param name="fileAccess">The access rights with which to open the stream.</param>
+        /// <param name="fileShare">The sharing rights with which to open the stream.</param>
         /// <returns>A <see cref="FileStream"/> with the file data.</returns>
         [Pure]
         [MustUseReturnValue("The resulting file stream must be disposed.")]
-        public RetrieveEntityResult<FileStream> OpenLocalStream([PathReference] [NotNull] string path, [CanBeNull] string subdirectory = null, FileMode fileMode = FileMode.Open)
+        public RetrieveEntityResult<Stream> OpenLocalStream
+        (
+            [PathReference] UPath path,
+            FileMode fileMode = FileMode.Open,
+            FileAccess fileAccess = FileAccess.Read,
+            FileShare fileShare = FileShare.Read
+        )
         {
-            var absolutePath = Path.GetFullPath(path);
-
-            if (!absolutePath.StartsWith(this.BaseContentPath))
+            if (!path.IsAbsolute)
             {
-                return RetrieveEntityResult<FileStream>.FromError
-                (
-                    "The path pointed to something that wasn't in the content folder."
-                );
+                return RetrieveEntityResult<Stream>.FromError("Content paths must be absolute.");
             }
 
-            if (!(subdirectory is null))
+            try
             {
-                var subdirectoryParentDir = Path.Combine(this.BaseContentPath, subdirectory);
-                if (!absolutePath.StartsWith(subdirectoryParentDir))
-                {
-                    return RetrieveEntityResult<FileStream>.FromError
-                    (
-                        "The path pointed to something that wasn't in the specified subdirectory."
-                    );
-                }
+                var file = this.FileSystem.OpenFile(path, fileMode, fileAccess, fileShare);
+                return RetrieveEntityResult<Stream>.FromSuccess(file);
             }
-
-            // Make sure that the directory chain is created
-            Directory.CreateDirectory(Directory.GetParent(absolutePath).FullName);
-
-            return RetrieveEntityResult<FileStream>.FromSuccess(File.Open(absolutePath, fileMode));
+            catch (IOException iex)
+            {
+                return RetrieveEntityResult<Stream>.FromError(iex);
+            }
         }
 
         /// <summary>
@@ -243,14 +233,28 @@ namespace DIGOS.Ambassador.Core.Services
         /// <param name="includeNSFW">Whether or not to include NSFW sass.</param>
         /// <returns>A sassy comment.</returns>
         [Pure]
-        public string GetSass(bool includeNSFW = false)
+        public RetrieveEntityResult<string> GetSass(bool includeNSFW = false)
         {
+            List<string> availableSass;
+
             if (includeNSFW)
             {
-                return _sass.Union(_sassNSFW).ToList().PickRandom();
+                availableSass = _sass.Union(_sassNSFW).ToList();
+            }
+            else
+            {
+                availableSass = _sass;
             }
 
-            return _sass.PickRandom();
+            if (availableSass.Count == 0)
+            {
+                return RetrieveEntityResult<string>.FromError
+                (
+                    "There's no available sass. You'll just have to provide your own."
+                );
+            }
+
+            return RetrieveEntityResult<string>.FromSuccess(availableSass.PickRandom());
         }
     }
 }

@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.IO;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Core.Database.Credentials
@@ -89,30 +88,15 @@ namespace DIGOS.Ambassador.Core.Database.Credentials
         /// Attempts to parse a <see cref="DatabaseCredentials"/> object from the contents of the file at the given
         /// path.
         /// </summary>
-        /// <param name="path">The path to the file.</param>
+        /// <param name="value">The string to parse.</param>
         /// <param name="credentials">The resulting credentials.</param>
         /// <returns>true if the credentials were successfully parsed; otherwise, false.</returns>
         [ContractAnnotation("=> true, credentials : notnull; => false, credentials : null")]
-        public static bool TryParse(string path, out DatabaseCredentials credentials)
+        public static bool TryParse(string value, out DatabaseCredentials credentials)
         {
             credentials = null;
 
-            if (!File.Exists(path))
-            {
-                return false;
-            }
-
-            string contents;
-            try
-            {
-                contents = File.ReadAllText(path);
-            }
-            catch
-            {
-                return false;
-            }
-
-            var parts = contents.Split(':');
+            var parts = value.Split(':');
             if (parts.Length != 5)
             {
                 return false;

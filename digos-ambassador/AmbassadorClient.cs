@@ -24,12 +24,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core;
 using DIGOS.Ambassador.Core.Database.Services;
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Behaviours.Services;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Services;
 using DIGOS.Ambassador.Services;
@@ -56,8 +59,6 @@ namespace DIGOS.Ambassador
 
         private readonly DiscordSocketClient _client;
 
-        private readonly ContentService _content;
-
         private readonly CommandService _commands;
 
         private readonly BehaviourService _behaviours;
@@ -67,8 +68,7 @@ namespace DIGOS.Ambassador
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorClient"/> class.
         /// </summary>
-        /// <param name="content">The content service.</param>
-        public AmbassadorClient([NotNull] ContentService content)
+        public AmbassadorClient()
         {
             _client = new DiscordSocketClient();
 
@@ -76,8 +76,6 @@ namespace DIGOS.Ambassador
 
             _commands = new CommandService();
             _commands.Log += OnDiscordLogEvent;
-
-            _content = content;
             _commands = new CommandService();
 
             _behaviours = new BehaviourService();
@@ -96,15 +94,17 @@ namespace DIGOS.Ambassador
                 .AddSingleton(_client)
                 .AddSingleton<BaseSocketClient>(_client)
                 .AddSingleton(_behaviours)
-                .AddSingleton(_content)
+                .AddSingleton<ContentService>()
                 .AddSingleton(_commands)
                 .AddSingleton<DiscordService>()
                 .AddSingleton<UserFeedbackService>()
                 .AddSingleton<InteractivityService>()
+                .AddSingleton<DelayedActionService>()
                 .AddSingleton<HelpService>()
                 .AddSingleton<Random>()
                 .AddSingleton(pluginService)
-                .AddSingleton<SchemaAwareDbContextService>();
+                .AddSingleton<SchemaAwareDbContextService>()
+                .AddSingleton(FileSystemFactory.CreateContentFileSystem());
 
             var successfullyRegisteredPlugins = new List<IPluginDescriptor>();
 
@@ -126,6 +126,9 @@ namespace DIGOS.Ambassador
             }
 
             _services = serviceCollection.BuildServiceProvider();
+
+            var contentService = _services.GetRequiredService<ContentService>();
+            await contentService.InitializeAsync();
 
             // Create plugin databases
             foreach (var plugin in successfullyRegisteredPlugins)
@@ -187,9 +190,21 @@ namespace DIGOS.Ambassador
         /// Logs the ambassador into Discord.
         /// </summary>
         /// <returns>A task representing the login action.</returns>
-        public async Task LoginAsync()
+        public async Task<ModifyEntityResult> LoginAsync()
         {
-            await _client.LoginAsync(TokenType.Bot, _content.BotToken.Trim());
+            var contentService = _services.GetRequiredService<ContentService>();
+
+            var getTokenResult = await contentService.GetBotTokenAsync();
+            if (!getTokenResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getTokenResult);
+            }
+
+            var token = getTokenResult.Entity.Trim();
+
+            await _client.LoginAsync(TokenType.Bot, token);
+
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -201,7 +216,10 @@ namespace DIGOS.Ambassador
             // Load modules and behaviours from the assembly this type was declared in
             var localAssembly = GetType().Assembly;
             await _commands.AddModulesAsync(localAssembly, _services);
+
             await _behaviours.AddBehavioursAsync(localAssembly, _services);
+            await _behaviours.AddBehaviourAsync<InteractivityBehaviour>(_services);
+            await _behaviours.AddBehaviourAsync<DelayedActionBehaviour>(_services);
 
             await _client.StartAsync();
             await _behaviours.StartBehavioursAsync();

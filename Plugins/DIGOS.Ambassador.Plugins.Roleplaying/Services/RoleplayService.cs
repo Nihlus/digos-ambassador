@@ -172,6 +172,88 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         }
 
         /// <summary>
+        /// Deletes the given roleplay.
+        /// </summary>
+        /// <param name="roleplay">The roleplay.</param>
+        /// <returns>A deletion result which may or may not have succeeded.</returns>
+        public async Task<DeleteEntityResult> DeleteRoleplayAsync(Roleplay roleplay)
+        {
+            _database.Roleplays.Remove(roleplay);
+
+            await _database.SaveChangesAsync();
+            return DeleteEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Starts the given roleplay.
+        /// </summary>
+        /// <param name="context">The context in which to start the roleplay.</param>
+        /// <param name="roleplay">The roleplay.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> StartRoleplayAsync(ICommandContext context, Roleplay roleplay)
+        {
+            var getDedicatedChannelResult = await GetDedicatedRoleplayChannelAsync
+            (
+                context.Guild,
+                roleplay
+            );
+
+            // Identify the channel to start the RP in. Preference is given to the roleplay's dedicated channel.
+            ISocketMessageChannel channel;
+            if (getDedicatedChannelResult.IsSuccess)
+            {
+                channel = (ISocketMessageChannel)getDedicatedChannelResult.Entity;
+            }
+            else
+            {
+                channel = (ISocketMessageChannel)context.Channel;
+            }
+
+            var isNsfwChannel = channel is ITextChannel textChannel && textChannel.IsNsfw;
+            if (roleplay.IsNSFW && !isNsfwChannel)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    "This channel is not marked as NSFW, while your roleplay is... naughty!"
+                );
+            }
+
+            if (await HasActiveRoleplayAsync(channel))
+            {
+                var currentRoleplayResult = await GetActiveRoleplayAsync(channel);
+                if (!currentRoleplayResult.IsSuccess)
+                {
+                    return ModifyEntityResult.FromError(currentRoleplayResult);
+                }
+
+                var currentRoleplay = currentRoleplayResult.Entity;
+                var timeOfLastMessage = currentRoleplay.Messages.Last().Timestamp;
+                var currentTime = DateTimeOffset.Now;
+
+                if (timeOfLastMessage < currentTime.AddHours(-4))
+                {
+                    currentRoleplay.IsActive = false;
+                }
+                else
+                {
+                    return ModifyEntityResult.FromError("There's already a roleplay active in this channel.");
+                }
+            }
+
+            if (roleplay.ActiveChannelID != (long)channel.Id)
+            {
+                roleplay.ActiveChannelID = (long)channel.Id;
+            }
+
+            roleplay.IsActive = true;
+            roleplay.LastUpdated = DateTime.Now;
+
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
         /// Adds a new message to the given roleplay, or edits it if there is an existing one.
         /// </summary>
         /// <param name="roleplay">The roleplay to modify.</param>

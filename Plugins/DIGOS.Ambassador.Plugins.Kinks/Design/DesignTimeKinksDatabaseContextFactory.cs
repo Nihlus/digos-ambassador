@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Design
         public KinksDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<KinksDatabaseContext>();
-            new SchemaAwareDbContextService(new ContentService())
+            new SchemaAwareDbContextService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
                 .ConfigureSchemaAwareContext<KinksDatabaseContext>(optionsBuilder);
 
             return new KinksDatabaseContext(optionsBuilder.Options);

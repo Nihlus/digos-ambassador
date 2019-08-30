@@ -22,12 +22,10 @@
 
 using System;
 using System.Globalization;
-using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Xml;
-using DIGOS.Ambassador.Core.Services;
 using JetBrains.Annotations;
 using log4net;
 using log4net.Config;
@@ -68,20 +66,16 @@ namespace DIGOS.Ambassador
             Log.Debug($"Running on {RuntimeInformation.FrameworkDescription}");
 
             // Initialize
-            var contentService = new ContentService();
-            try
+            var ambassadorClient = new AmbassadorClient();
+            await ambassadorClient.InitializeAsync();
+
+            var loginResult = await ambassadorClient.LoginAsync();
+            if (!loginResult.IsSuccess)
             {
-                await contentService.InitializeAsync();
-            }
-            catch (FileNotFoundException fex)
-            {
-                Log.Error("Could not initialize content service.", fex);
+                Log.Error(loginResult.ErrorReason);
                 return;
             }
 
-            var ambassadorClient = new AmbassadorClient(contentService);
-            await ambassadorClient.InitializeAsync();
-            await ambassadorClient.LoginAsync();
             await ambassadorClient.StartAsync();
 
             // Wait for shutdown

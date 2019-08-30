@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Design
         public DossiersDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<DossiersDatabaseContext>();
-            new SchemaAwareDbContextService(new ContentService())
+            new SchemaAwareDbContextService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
                 .ConfigureSchemaAwareContext<DossiersDatabaseContext>(optionsBuilder);
 
             return new DossiersDatabaseContext(optionsBuilder.Options);

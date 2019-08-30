@@ -26,7 +26,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Permissions;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -57,10 +56,9 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// <summary>
         /// Initializes a new instance of the <see cref="UserCommands"/> class.
         /// </summary>
-        /// <param name="database">A database context from the context pool.</param>
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="users">The user service.</param>
-        public UserCommands(CoreDatabaseContext database, UserFeedbackService feedback, UserService users)
+        public UserCommands(UserFeedbackService feedback, UserService users)
         {
             _feedback = feedback;
             _users = users;
@@ -178,19 +176,16 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Group("set")]
         public class SetCommands : ModuleBase
         {
-            private readonly CoreDatabaseContext _database;
             private readonly UserService _users;
             private readonly UserFeedbackService _feedback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
-            /// <param name="database">A database context from the context pool.</param>
             /// <param name="feedback">The user feedback service.</param>
             /// <param name="users">The user service.</param>
-            public SetCommands(CoreDatabaseContext database, UserFeedbackService feedback, UserService users)
+            public SetCommands(UserFeedbackService feedback, UserService users)
             {
-                _database = database;
                 _feedback = feedback;
                 _users = users;
             }
@@ -227,9 +222,12 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
 
                 var user = getUserResult.Entity;
 
-                user.Bio = bio;
-
-                await _database.SaveChangesAsync();
+                var setBioResult = await _users.SetUserBioAsync(user, bio);
+                if (!setBioResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, setBioResult.ErrorReason);
+                    return;
+                }
 
                 await _feedback.SendConfirmationAsync(this.Context, $"Bio of {discordUser.Mention} updated.");
             }
@@ -267,9 +265,12 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
 
                 var user = getUserResult.Entity;
 
-                user.Timezone = timezone;
-
-                await _database.SaveChangesAsync();
+                var setTimezoneResult = await _users.SetUserTimezoneAsync(user, timezone);
+                if (!setTimezoneResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, setTimezoneResult.ErrorReason);
+                    return;
+                }
 
                 await _feedback.SendConfirmationAsync(this.Context, $"Timezone of {discordUser.Mention} updated.");
             }

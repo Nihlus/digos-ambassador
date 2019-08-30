@@ -116,7 +116,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         }
 
         /// <inheritdoc />
-        protected override async Task<IUserMessage> DisplayAsync([NotNull] IMessageChannel channel)
+        protected override async Task<IUserMessage> OnDisplayAsync([NotNull] IMessageChannel channel)
         {
             if (!(this.Message is null))
             {
@@ -126,11 +126,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             _categories = (await _kinks.GetKinkCategoriesAsync()).ToList();
             _state = KinkWizardState.CategorySelection;
 
-            return await channel.SendMessageAsync(string.Empty, embed: _loadingEmbed).ConfigureAwait(false);
+            return await channel.SendMessageAsync(string.Empty, embed: _loadingEmbed);
         }
 
         /// <inheritdoc />
-        protected override async Task UpdateAsync()
+        protected override async Task OnUpdateAsync()
         {
             if (this.Message is null)
             {
@@ -160,31 +160,45 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             }
 
             var newEmbed = await GetCurrentPageAsync();
-            await this.Message.ModifyAsync(m => m.Embed = newEmbed);
+            var userMessage = this.Message;
+            if (userMessage != null)
+            {
+                await userMessage.ModifyAsync(m => m.Embed = newEmbed);
+            }
         }
 
-        /// <inheritdoc />
-        public override Task HandleAddedInteractionAsync(SocketReaction reaction)
+        /// <remarks>
+        /// This override forwards to the added handler, letting removed reactions act the same as added reactions.
+        /// </remarks>
+        /// <inheritdoc/>
+        protected override Task OnInteractionRemovedAsync(SocketReaction reaction) =>
+            OnInteractionAddedAsync(reaction);
+
+        /// <inheritdoc/>
+        protected override async Task OnInteractionAddedAsync(SocketReaction reaction)
         {
             if (reaction.Emote.Equals(Exit))
             {
-                this.Interactivity.DeleteInteractiveMessageAsync(this);
+                await this.Interactivity.DeleteInteractiveMessageAsync(this);
             }
 
             if (reaction.Emote.Equals(Info))
             {
-                return DisplayHelpTextAsync();
+                await DisplayHelpTextAsync();
+                return;
             }
 
             switch (_state)
             {
                 case KinkWizardState.CategorySelection:
                 {
-                    return ConsumeCategoryInteractionAsync(reaction);
+                    await ConsumeCategoryInteractionAsync(reaction);
+                    return;
                 }
                 case KinkWizardState.KinkPreference:
                 {
-                    return ConsumePreferenceInteractionAsync(reaction);
+                    await ConsumePreferenceInteractionAsync(reaction);
+                    return;
                 }
                 default:
                 {
@@ -326,7 +340,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
 
                 var messageResult = await this.Interactivity.GetNextMessageAsync
                 (
-                    this.MessageContext.Channel,
+                    this.Channel,
                     Filter,
                     TimeSpan.FromSeconds(45)
                 );
@@ -429,7 +443,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
                 }
             }
 
-            await _feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb.Build(), TimeSpan.FromSeconds(30));
+            await _feedback.SendEmbedAndDeleteAsync(this.Channel, eb.Build(), TimeSpan.FromSeconds(30));
         }
 
         private async Task SetCurrentKinkPreference(KinkPreference preference)

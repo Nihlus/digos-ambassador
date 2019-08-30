@@ -21,7 +21,6 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
@@ -34,7 +33,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     [TokenIdentifier("script", "sc")]
     public class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
     {
-        private readonly ContentService _content;
         private readonly LuaService _lua;
 
         /// <summary>
@@ -46,11 +44,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// Initializes a new instance of the <see cref="LuaScriptToken"/> class.
         /// </summary>
         /// <param name="luaService">The lua execution service.</param>
-        /// <param name="content">The application's content service.</param>
-        public LuaScriptToken(LuaService luaService, ContentService content)
+        public LuaScriptToken(LuaService luaService)
         {
             _lua = luaService;
-            _content = content;
         }
 
         /// <inheritdoc />
@@ -67,7 +63,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 return string.Empty;
             }
 
-            var scriptPath = _content.GetLuaScriptPath(component.Transformation, this.ScriptName);
+            var scriptPath = ContentServiceExtensions.GetLuaScriptPath(component.Transformation, this.ScriptName);
             var result = await _lua.ExecuteScriptAsync
             (
                 scriptPath,

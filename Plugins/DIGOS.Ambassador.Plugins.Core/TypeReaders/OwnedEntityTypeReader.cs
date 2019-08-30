@@ -174,11 +174,11 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
             IUser user;
             if (context.Guild != null)
             {
-                user = await context.Guild.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false);
+                user = await context.Guild.GetUserAsync(id, CacheMode.CacheOnly);
             }
             else
             {
-                user = await context.Channel.GetUserAsync(id, CacheMode.CacheOnly).ConfigureAwait(false);
+                user = await context.Channel.GetUserAsync(id, CacheMode.CacheOnly);
             }
 
             if (user is null)
@@ -223,16 +223,14 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
             [NotNull] string input
         )
         {
-            var channelUsers = (await context.Channel.GetUsersAsync(CacheMode.CacheOnly)
-                    .FlattenAsync()
-                    .ConfigureAwait(false))
+            var channelUsers = (await context.Channel.GetUsersAsync(CacheMode.CacheOnly).FlattenAsync())
                 .ToImmutableList();
 
             IReadOnlyCollection<IGuildUser> guildUsers = new List<IGuildUser>();
 
             if (!(context.Guild is null))
             {
-                guildUsers = await context.Guild.GetUsersAsync(CacheMode.CacheOnly).ConfigureAwait(false);
+                guildUsers = await context.Guild.GetUsersAsync(CacheMode.CacheOnly);
                 guildUsers = guildUsers.ExceptBy(channelUsers, u => u.Id).Cast<IGuildUser>().ToImmutableList();
             }
 

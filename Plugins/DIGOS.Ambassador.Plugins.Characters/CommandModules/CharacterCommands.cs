@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -33,6 +34,7 @@ using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
+using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Pagination;
 using DIGOS.Ambassador.Plugins.Characters.Permissions;
@@ -73,8 +75,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
     )]
     public class CharacterCommands : ModuleBase
     {
-        private readonly CharactersDatabaseContext _database;
-
         private readonly PronounService _pronouns;
         private readonly ServerService _servers;
         private readonly UserService _users;
@@ -88,7 +88,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterCommands"/> class.
         /// </summary>
-        /// <param name="database">A database context from the context pool.</param>
         /// <param name="contentService">The content service.</param>
         /// <param name="discordService">The Discord integration service.</param>
         /// <param name="feedbackService">The feedback service.</param>
@@ -100,7 +99,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// <param name="pronouns">The pronoun service.</param>
         public CharacterCommands
         (
-            CharactersDatabaseContext database,
             ContentService contentService,
             DiscordService discordService,
             UserFeedbackService feedbackService,
@@ -112,7 +110,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             PronounService pronouns
         )
         {
-            _database = database;
             _content = contentService;
             _discord = discordService;
             _feedback = feedbackService;
@@ -236,15 +233,78 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         public async Task ShowCharacterAsync([NotNull] Character character)
         {
             var eb = await CreateCharacterInfoEmbedAsync(character);
+            await ShowCharacterAsync(character, eb);
+        }
 
-            // Override the colour if a role is set
-            if (!(character.Role is null))
+        /// <summary>
+        /// Shows a gallery of all your characters.
+        /// </summary>
+        [UsedImplicitly]
+        [Alias("view-char")]
+        [Command("view-characters")]
+        [Summary("Shows a gallery of all your characters.")]
+        [RequireContext(ContextType.Guild)]
+        public Task ShowCharactersAsync() => ShowCharactersAsync(this.Context.User);
+
+        /// <summary>
+        /// Shows a gallery of all the user's characters.
+        /// </summary>
+        /// <param name="discordUser">The user.</param>
+        [UsedImplicitly]
+        [Alias("view-char")]
+        [Command("view-characters")]
+        [Summary("Shows a gallery of all the user's characters.")]
+        [RequireContext(ContextType.Guild)]
+        public async Task ShowCharactersAsync(IUser discordUser)
+        {
+            var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
+            if (!getUserResult.IsSuccess)
             {
-                var roleColour = this.Context.Guild.GetRole((ulong)character.Role.DiscordID).Color;
-                eb.WithColor(roleColour);
+                await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                return;
             }
 
-            await ShowCharacterAsync(character, eb);
+            var user = getUserResult.Entity;
+            var characters = _characters.GetUserCharacters(user, this.Context.Guild);
+
+            var embeds = new List<EmbedBuilder>();
+            foreach (var character in characters)
+            {
+                var embed = await CreateCharacterInfoEmbedAsync(character);
+                if (character.Description.Length + embed.Build().Length < 2000)
+                {
+                    embed.AddField("Description", character.Description);
+                }
+
+                embeds.Add(embed);
+            }
+
+            var paginatedEmbed = new PaginatedEmbed(_feedback, this.Context.User)
+            {
+                Appearance =
+                {
+                    Author = discordUser,
+                    Title =
+                        $"{(this.Context.User == discordUser ? "Your" : $"{discordUser.Mention}'s")} characters"
+                }
+            };
+
+            if (embeds.Count == 0)
+            {
+                var eb = paginatedEmbed.Appearance.CreateEmbedBase().WithDescription("You don't have any characters.");
+                paginatedEmbed.AppendPage(eb);
+            }
+            else
+            {
+                paginatedEmbed.WithPages(embeds);
+            }
+
+            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            (
+                this.Context.Channel,
+                paginatedEmbed,
+                TimeSpan.FromMinutes(5.0)
+            );
         }
 
         private async Task ShowCharacterAsync([NotNull] Character character, [NotNull] EmbedBuilder eb)
@@ -291,6 +351,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         {
             var eb = _feedback.CreateEmbedBase();
 
+            // Override the colour if a role is set
+            if (!(character.Role is null))
+            {
+                var roleColour = this.Context.Guild.GetRole((ulong)character.Role.DiscordID).Color;
+                eb.WithColor(roleColour);
+            }
+
             eb.WithAuthor(await this.Context.Client.GetUserAsync((ulong)character.Owner.DiscordID));
 
             var characterInfoTitle = character.Nickname.IsNullOrWhitespace()
@@ -304,7 +371,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             (
                 !character.AvatarUrl.IsNullOrWhitespace()
                     ? character.AvatarUrl
-                    : _content.DefaultAvatarUri.ToString()
+                    : _content.GetDefaultAvatarUri().ToString()
             );
 
             eb.AddField("Preferred pronouns", character.PronounProviderFamily);
@@ -347,7 +414,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [CanBeNull] string characterAvatarUrl = null
         )
         {
-            characterAvatarUrl = characterAvatarUrl ?? _content.DefaultAvatarUri.ToString();
+            characterAvatarUrl = characterAvatarUrl ?? _content.GetDefaultAvatarUri().ToString();
 
             var createCharacterResult = await _characters.CreateCharacterAsync
             (
@@ -386,9 +453,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             Character character
         )
         {
-            _database.Characters.Remove(character);
-
-            await _database.SaveChangesAsync();
+            var deleteResult = await _characters.DeleteCharacterAsync(character);
+            if (!deleteResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, deleteResult.ErrorReason);
+                return;
+            }
 
             await _feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
 

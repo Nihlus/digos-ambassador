@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Preconditions;
@@ -29,7 +28,6 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Discord.Commands;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -221,69 +219,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, $"Roleplay set to {(isPublic ? "public" : "private")}");
-            }
-        }
-
-        /// <summary>
-        /// Administrative commands for roleplays.
-        /// </summary>
-        [UsedImplicitly]
-        [Group("admin")]
-        public class AdminCommands : ModuleBase
-        {
-            private readonly RoleplayingDatabaseContext _database;
-            private readonly UserFeedbackService _feedback;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="AdminCommands"/> class.
-            /// </summary>
-            /// <param name="database">A database context from the context pool.</param>
-            /// <param name="roleplays">The roleplay service.</param>
-            /// <param name="feedback">The user feedback service.</param>
-            public AdminCommands
-            (
-                RoleplayingDatabaseContext database,
-                RoleplayService roleplays,
-                UserFeedbackService feedback
-            )
-            {
-                _database = database;
-                _feedback = feedback;
-            }
-
-            /// <summary>
-            /// Updates the timestamps of all roleplays in the bot.
-            /// </summary>
-            [UsedImplicitly]
-            [Command("update-timestamps")]
-            [Summary("Updates the timestamps of all roleplays in the bot.")]
-            [RequireContext(ContextType.DM)]
-            [RequireOwner]
-            public async Task UpdateTimestamps()
-            {
-                var roleplays = await _database.Roleplays.ToListAsync();
-                foreach (var roleplay in roleplays)
-                {
-                    var lastMessage = roleplay.Messages.OrderBy(m => m.Timestamp).LastOrDefault();
-                    if (lastMessage is null)
-                    {
-                        continue;
-                    }
-
-                    if (!(roleplay.LastUpdated is null))
-                    {
-                        var value = roleplay.LastUpdated.Value;
-                        if (value != default)
-                        {
-                            continue;
-                        }
-                    }
-
-                    roleplay.LastUpdated = lastMessage.Timestamp.DateTime;
-                }
-
-                await _database.SaveChangesAsync();
-                await _feedback.SendConfirmationAsync(this.Context, "Timestamps updated.");
             }
         }
     }

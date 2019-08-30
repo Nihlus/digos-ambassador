@@ -223,14 +223,13 @@ namespace DIGOS.Ambassador.Wizards
         }
 
         /// <inheritdoc/>
-        protected override async Task<IUserMessage> DisplayAsync([NotNull] IMessageChannel channel)
+        protected override async Task<IUserMessage> OnDisplayAsync([NotNull] IMessageChannel channel)
         {
-            return await channel.SendMessageAsync(string.Empty, embed: _loadingEmbed)
-                .ConfigureAwait(false);
+            return await channel.SendMessageAsync(string.Empty, embed: _loadingEmbed);
         }
 
         /// <inheritdoc />
-        protected override async Task UpdateAsync()
+        protected override async Task OnUpdateAsync()
         {
             if (this.Message is null)
             {
@@ -260,7 +259,12 @@ namespace DIGOS.Ambassador.Wizards
             }
 
             var newEmbed = await GetCurrentPageAsync();
-            await this.Message.ModifyAsync(m => m.Embed = newEmbed);
+
+            var userMessage = this.Message;
+            if (userMessage != null)
+            {
+                await userMessage.ModifyAsync(m => m.Embed = newEmbed);
+            }
         }
 
         /// <inheritdoc/>
@@ -288,6 +292,8 @@ namespace DIGOS.Ambassador.Wizards
                 case HelpWizardState.CommandListing:
                 {
                     var eb = _feedback.CreateEmbedBase();
+
+                    // ReSharper disable once PossibleNullReferenceException
                     eb.WithTitle($"Available commands in {_currentModule.Name}");
 
                     var description = $"Click {EnterModule} and type in a command to see detailed information." +
@@ -315,28 +321,38 @@ namespace DIGOS.Ambassador.Wizards
             }
         }
 
+        /// <remarks>
+        /// This override forwards to the added handler, letting removed reactions act the same as added reactions.
+        /// </remarks>
         /// <inheritdoc/>
-        public override Task HandleAddedInteractionAsync(SocketReaction reaction)
+        protected override Task OnInteractionRemovedAsync(SocketReaction reaction) =>
+            OnInteractionAddedAsync(reaction);
+
+        /// <inheritdoc/>
+        protected override async Task OnInteractionAddedAsync(SocketReaction reaction)
         {
             if (reaction.Emote.Equals(Exit))
             {
-                this.Interactivity.DeleteInteractiveMessageAsync(this);
+                await this.Interactivity.DeleteInteractiveMessageAsync(this);
             }
 
             if (reaction.Emote.Equals(Info))
             {
-                return DisplayHelpTextAsync();
+                await DisplayHelpTextAsync();
+                return;
             }
 
             switch (_state)
             {
                 case HelpWizardState.ModuleListing:
                 {
-                    return ConsumeModuleListInteractionAsync(reaction);
+                    await ConsumeModuleListInteractionAsync(reaction);
+                    return;
                 }
                 case HelpWizardState.CommandListing:
                 {
-                    return ConsumeCommandListInteractionAsync(reaction);
+                    await ConsumeCommandListInteractionAsync(reaction);
+                    return;
                 }
                 default:
                 {
@@ -364,6 +380,7 @@ namespace DIGOS.Ambassador.Wizards
 
             if (emote.Equals(Next))
             {
+                // ReSharper disable once AssignNullToNotNullAttribute
                 if (_commandListOffset + 1 > _commandListPages[_currentModule].Count - 1)
                 {
                     return;
@@ -386,12 +403,14 @@ namespace DIGOS.Ambassador.Wizards
             }
             else if (emote.Equals(Last))
             {
+                // ReSharper disable once AssignNullToNotNullAttribute
                 _commandListOffset = _commandListPages[_currentModule].Count - 1;
             }
             else if (emote.Equals(EnterModule))
             {
                 bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
 
+                // ReSharper disable once PossibleNullReferenceException
                 if (!_currentModule.Commands.Any())
                 {
                     await _feedback.SendWarningAndDeleteAsync
@@ -413,7 +432,7 @@ namespace DIGOS.Ambassador.Wizards
 
                 var messageResult = await this.Interactivity.GetNextMessageAsync
                 (
-                    this.MessageContext.Channel,
+                    this.Channel,
                     Filter,
                     TimeSpan.FromSeconds(45)
                 );
@@ -439,7 +458,7 @@ namespace DIGOS.Ambassador.Wizards
 
                         await _feedback.SendEmbedAndDeleteAsync
                         (
-                            this.MessageContext.Channel,
+                            this.Channel,
                             eb.Build(),
                             TimeSpan.FromSeconds(45)
                         );
@@ -451,7 +470,7 @@ namespace DIGOS.Ambassador.Wizards
 
                         await _feedback.SendEmbedAndDeleteAsync
                         (
-                            this.MessageContext.Channel,
+                            this.Channel,
                             eb.Build()
                         );
                     }
@@ -521,7 +540,7 @@ namespace DIGOS.Ambassador.Wizards
 
                 var messageResult = await this.Interactivity.GetNextMessageAsync
                 (
-                    this.MessageContext.Channel,
+                    this.Channel,
                     Filter,
                     TimeSpan.FromSeconds(45)
                 );
@@ -624,16 +643,8 @@ namespace DIGOS.Ambassador.Wizards
                 }
             }
 
-            await _feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb.Build(), TimeSpan.FromSeconds(30));
+            await _feedback.SendEmbedAndDeleteAsync(this.Channel, eb.Build(), TimeSpan.FromSeconds(30));
         }
-
-        /// <remarks>
-        /// This method forwards to the added interaction handler, resulting in removals being treated the same as
-        /// additions. Click for click, tat for tot.
-        /// </remarks>
-        /// <inheritdoc/>
-        public override Task HandleRemovedInteractionAsync(SocketReaction reaction)
-            => HandleAddedInteractionAsync(reaction);
 
         /// <inheritdoc/>
         public IEnumerable<IEmote> GetCurrentPageEmotes()

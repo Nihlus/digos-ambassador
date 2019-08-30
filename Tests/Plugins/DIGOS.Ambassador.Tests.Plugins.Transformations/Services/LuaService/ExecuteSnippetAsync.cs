@@ -27,7 +27,6 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
-using Moq;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations
@@ -40,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             public ExecuteSnippetAsync()
             {
-                _lua = new LuaService(new Mock<ContentService>().Object);
+                _lua = new LuaService(new ContentService(FileSystemFactory.CreateContentFileSystem()));
             }
 
             [Fact]

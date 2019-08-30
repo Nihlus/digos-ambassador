@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
         {
             if (ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out ulong id))
             {
-                if (await context.Channel.GetMessageAsync(id).ConfigureAwait(false) is T message)
+                if (await context.Channel.GetMessageAsync(id) is T message)
                 {
                     return TypeReaderResult.FromSuccess(message);
                 }

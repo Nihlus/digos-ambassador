@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Discord;
@@ -36,8 +37,9 @@ namespace DIGOS.Ambassador.Discord.Interactivity
     /// <summary>
     /// Acts as a Discord plugin for interactive messages.
     /// </summary>
-    public class InteractivityService : IDisposable
+    public class InteractivityService
     {
+        private readonly DelayedActionService _delayedActions;
         private readonly IList<IInteractiveMessage> _trackedMessages;
 
         /// <summary>
@@ -49,15 +51,13 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// Initializes a new instance of the <see cref="InteractivityService"/> class.
         /// </summary>
         /// <param name="client">The client to listen for messages from.</param>
-        public InteractivityService(BaseSocketClient client)
+        /// <param name="delayedActions">The delayed actions service.</param>
+        public InteractivityService(BaseSocketClient client, DelayedActionService delayedActions)
         {
             this.Client = client;
+            _delayedActions = delayedActions;
 
             _trackedMessages = new List<IInteractiveMessage>();
-
-            this.Client.ReactionAdded += OnReactionAdded;
-            this.Client.ReactionRemoved += OnReactionRemoved;
-            this.Client.MessageDeleted += OnMessageDeleted;
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             var trigger = messageTrigger.Task;
             var delay = Task.Delay(timeout.Value);
 
-            var task = await Task.WhenAny(trigger, delay).ConfigureAwait(false);
+            var task = await Task.WhenAny(trigger, delay);
 
             this.Client.MessageReceived -= Handler;
 
@@ -115,7 +115,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
 
             return RetrieveEntityResult<IUserMessage>.FromError
             (
-                                "No accepted message received within the timeout period."
+                "No accepted message received within the timeout period."
             );
         }
 
@@ -126,14 +126,19 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <param name="message">The message to send.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [NotNull]
-        public Task SendInteractiveMessageAsync
+        public async Task SendInteractiveMessageAsync
         (
             [NotNull] IMessageChannel channel,
             [NotNull] IInteractiveMessage message
         )
         {
             _trackedMessages.Add(message);
-            return message.SendAsync(this, channel);
+            await message.SendAsync(this, channel);
+
+            while (_trackedMessages.Contains(message))
+            {
+                await Task.Delay(TimeSpan.FromSeconds(5));
+            }
         }
 
         /// <summary>
@@ -155,9 +160,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             _trackedMessages.Add(message);
             await message.SendAsync(this, channel);
 
-            _ = Task.Delay(timeout.Value)
-                .ContinueWith(async _ => await DeleteInteractiveMessageAsync(message).ConfigureAwait(false))
-                .ConfigureAwait(false);
+            _delayedActions.DelayUntil(() => DeleteInteractiveMessageAsync(message), timeout.Value);
         }
 
         /// <summary>
@@ -176,10 +179,12 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// Handles the deletion of a message, removing it from the tracking list.
         /// </summary>
         /// <param name="message">The deleted message.</param>
-        /// <param name="channel">The channel the message was deleted in.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [NotNull]
-        private async Task OnMessageDeleted(Cacheable<IMessage, ulong> message, [NotNull] ISocketMessageChannel channel)
+        internal async Task OnMessageDeleted
+        (
+            Cacheable<IMessage, ulong> message
+        )
         {
             var userMessage = await message.GetOrDownloadAsync();
             if (userMessage is null)
@@ -195,93 +200,75 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         }
 
         /// <summary>
+        /// Handles reception of a message.
+        /// </summary>
+        /// <param name="message">The message.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        internal Task OnMessageReceived(SocketMessage message)
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <summary>
         /// Handles an removed reaction.
         /// </summary>
         /// <param name="message">The message the reaction was removed to.</param>
-        /// <param name="channel">The channel the reaction was removed in.</param>
         /// <param name="reaction">The removed reaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [NotNull]
-        private Task OnReactionRemoved
+        internal async Task OnReactionRemoved
         (
             Cacheable<IUserMessage, ulong> message,
-            [NotNull] ISocketMessageChannel channel,
             [NotNull] SocketReaction reaction
         )
         {
             if (reaction.User.IsSpecified && reaction.User.Value.IsMe(this.Client))
             {
-                return Task.CompletedTask;
+                return;
             }
 
-            _ = Task.Run
-            (
-                async () =>
-                {
-                    var userMessage = await message.GetOrDownloadAsync();
-                    if (userMessage is null)
-                    {
-                        return;
-                    }
+            var userMessage = await message.GetOrDownloadAsync();
+            if (userMessage is null)
+            {
+                return;
+            }
 
-                    var relevantMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
-                    var handlerTasks = relevantMessages
-                        .Select(relevantMessage => relevantMessage.HandleRemovedInteractionAsync(reaction));
+            var relevantMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
+            var handlerTasks = relevantMessages
+                .Select(relevantMessage => relevantMessage.HandleRemovedInteractionAsync(reaction));
 
-                    await Task.WhenAll(handlerTasks);
-                }
-            );
-
-            return Task.CompletedTask;
+            await Task.WhenAll(handlerTasks);
         }
 
         /// <summary>
         /// Handles an added reaction.
         /// </summary>
         /// <param name="message">The message the reaction was added to.</param>
-        /// <param name="channel">The channel the reaction was added in.</param>
         /// <param name="reaction">The added reaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [NotNull]
-        private Task OnReactionAdded
+        internal async Task OnReactionAdded
         (
             Cacheable<IUserMessage, ulong> message,
-            [NotNull] ISocketMessageChannel channel,
             [NotNull] SocketReaction reaction
         )
         {
             if (reaction.User.IsSpecified && reaction.User.Value.IsMe(this.Client))
             {
-                return Task.CompletedTask;
+                return;
             }
 
-            _ = Task.Run
-            (
-                async () =>
-                {
-                    var userMessage = await message.GetOrDownloadAsync();
-                    if (userMessage is null)
-                    {
-                        return;
-                    }
+            var userMessage = await message.GetOrDownloadAsync();
+            if (userMessage is null)
+            {
+                return;
+            }
 
-                    var relevantMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
-                    var handlerTasks = relevantMessages
-                        .Select(relevantMessage => relevantMessage.HandleAddedInteractionAsync(reaction)).ToList();
+            var relevantMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
+            var handlerTasks = relevantMessages
+                .Select(relevantMessage => relevantMessage.HandleAddedInteractionAsync(reaction)).ToList();
 
-                    await Task.WhenAll(handlerTasks);
-                }
-            );
-
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            this.Client.ReactionAdded -= OnReactionAdded;
-            this.Client.ReactionRemoved -= OnReactionRemoved;
-            this.Client.MessageDeleted -= OnMessageDeleted;
+            await Task.WhenAll(handlerTasks);
         }
     }
 }

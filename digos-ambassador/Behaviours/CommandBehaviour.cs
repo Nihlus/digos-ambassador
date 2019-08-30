@@ -21,12 +21,10 @@
 //
 
 using System;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Behaviours;
@@ -49,7 +47,7 @@ namespace DIGOS.Ambassador.Behaviours
     /// <summary>
     /// Acts as a behaviour for invoking commands, and logging their results.
     /// </summary>
-    public class CommandBehaviour : ContinuousBehaviour
+    public class CommandBehaviour : ClientEventBehaviour
     {
         private readonly IServiceProvider _services;
 
@@ -58,11 +56,6 @@ namespace DIGOS.Ambassador.Behaviours
         private readonly ContentService _content;
         private readonly CommandService _commands;
         private readonly HelpService _help;
-
-        /// <summary>
-        /// Gets the commands that are currently running.
-        /// </summary>
-        private ConcurrentQueue<Task> RunningCommands { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandBehaviour"/> class.
@@ -92,100 +85,35 @@ namespace DIGOS.Ambassador.Behaviours
             _content = content;
             _commands = commands;
             _help = help;
-
-            this.RunningCommands = new ConcurrentQueue<Task>();
-        }
-
-        /// <inheritdoc/>
-        protected override async Task OnTickAsync(CancellationToken ct)
-        {
-            if (this.RunningCommands.TryDequeue(out var command))
-            {
-                if (command.IsCompleted)
-                {
-                    try
-                    {
-                        await command;
-                    }
-                    catch (Exception e)
-                    {
-                        // Nom nom nom
-                        this.Log.Error("Error in command.", e);
-                    }
-                }
-                else
-                {
-                    // If it's not done yet, stick it back on the queue.
-                    this.RunningCommands.Enqueue(command);
-                }
-            }
-
-            // And we'll also run a short delay so we don't eat all the CPU time
-            await Task.Delay(TimeSpan.FromSeconds(1), ct);
-        }
-
-        private async Task SaneExecuteCommandWrapperAsync(ICommandContext context, int argumentPos)
-        {
-            // Create a service scope for this command
-            using (var scope = _services.CreateScope())
-            {
-                var result = await _commands.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
-                await HandleCommandResultAsync(context, result, argumentPos);
-            }
         }
 
         /// <inheritdoc />
-        protected override Task OnStartingAsync()
+        protected override async Task MessageUpdated
+        (
+            Cacheable<IMessage, ulong> oldMessage,
+            [CanBeNull] SocketMessage updatedMessage,
+            ISocketMessageChannel messageChannel
+        )
         {
-            base.OnStartingAsync();
+            if (updatedMessage is null)
+            {
+                return;
+            }
 
-            this.Client.MessageReceived += OnMessageReceived;
-            this.Client.MessageUpdated += OnMessageUpdated;
+            // Ignore all changes except text changes
+            var isTextUpdate = updatedMessage.EditedTimestamp.HasValue &&
+                               updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
 
-            return Task.CompletedTask;
+            if (!isTextUpdate)
+            {
+                return;
+            }
+
+            await MessageReceived(updatedMessage);
         }
 
         /// <inheritdoc />
-        protected override async Task OnStoppingAsync()
-        {
-            await base.OnStoppingAsync();
-
-            this.Client.MessageReceived -= OnMessageReceived;
-            this.Client.MessageUpdated -= OnMessageUpdated;
-        }
-
-        /// <summary>
-        /// Determines whether the currently running command is exempt from user consent.
-        /// </summary>
-        /// <param name="context">The command context.</param>
-        /// <param name="argumentPos">The position in the message where the command begins.</param>
-        /// <returns>true if the command is exempt from consent; otherwise, false.</returns>
-        private bool IsPrivacyExemptCommand(ICommandContext context, int argumentPos)
-        {
-            // We need to gather consent from the user
-            var commandSearchResult = _commands.Search(context, argumentPos);
-            if (!commandSearchResult.IsSuccess)
-            {
-                return false;
-            }
-
-            // Some command we recognize as being exempt from the privacy regulations
-            // (mostly privacy commands) - if this is one of them, just run it
-            var potentialPrivacyCommand = commandSearchResult.Commands.FirstOrDefault().Command;
-            if (potentialPrivacyCommand.Attributes.Any(a => a is PrivacyExemptAttribute))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Handles incoming messages, passing them to the command context handler.
-        /// </summary>
-        /// <param name="arg">The message coming in from the socket client.</param>
-        /// <returns>A task representing the message handling.</returns>
-        private async Task OnMessageReceived(SocketMessage arg)
+        protected override async Task MessageReceived(SocketMessage arg)
         {
             if (!(arg is SocketUserMessage message))
             {
@@ -225,8 +153,38 @@ namespace DIGOS.Ambassador.Behaviours
                 return;
             }
 
-            // Run the command asynchronously, but we'll await it later
-            this.RunningCommands.Enqueue(SaneExecuteCommandWrapperAsync(context, argumentPos));
+            // Create a service scope for this command
+            using (var scope = _services.CreateScope())
+            {
+                var result = await _commands.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
+                await HandleCommandResultAsync(context, result, argumentPos);
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the currently running command is exempt from user consent.
+        /// </summary>
+        /// <param name="context">The command context.</param>
+        /// <param name="argumentPos">The position in the message where the command begins.</param>
+        /// <returns>true if the command is exempt from consent; otherwise, false.</returns>
+        private bool IsPrivacyExemptCommand(ICommandContext context, int argumentPos)
+        {
+            // We need to gather consent from the user
+            var commandSearchResult = _commands.Search(context, argumentPos);
+            if (!commandSearchResult.IsSuccess)
+            {
+                return false;
+            }
+
+            // Some command we recognize as being exempt from the privacy regulations
+            // (mostly privacy commands) - if this is one of them, just run it
+            var potentialPrivacyCommand = commandSearchResult.Commands.FirstOrDefault().Command;
+            if (potentialPrivacyCommand.Attributes.Any(a => a is PrivacyExemptAttribute))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -409,36 +367,6 @@ namespace DIGOS.Ambassador.Behaviours
             {
                 await userDMChannel.CloseAsync();
             }
-        }
-
-        /// <summary>
-        /// Handles reparsing of edited messages.
-        /// </summary>
-        /// <param name="oldMessage">The old message.</param>
-        /// <param name="updatedMessage">The new message.</param>
-        /// <param name="messageChannel">The channel of the message.</param>
-        private async Task OnMessageUpdated
-        (
-            Cacheable<IMessage, ulong> oldMessage,
-            [CanBeNull] SocketMessage updatedMessage,
-            ISocketMessageChannel messageChannel
-        )
-        {
-            if (updatedMessage is null)
-            {
-                return;
-            }
-
-            // Ignore all changes except text changes
-            var isTextUpdate = updatedMessage.EditedTimestamp.HasValue &&
-                               updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
-
-            if (!isTextUpdate)
-            {
-                return;
-            }
-
-            await OnMessageReceived(updatedMessage);
         }
     }
 }

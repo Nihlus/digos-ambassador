@@ -89,7 +89,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         public abstract Embed BuildEmbed(int page);
 
         /// <inheritdoc/>
-        protected override async Task<IUserMessage> DisplayAsync([NotNull] IMessageChannel channel)
+        protected override async Task<IUserMessage> OnDisplayAsync([NotNull] IMessageChannel channel)
         {
             if (!this.Pages.Any())
             {
@@ -98,37 +98,33 @@ namespace DIGOS.Ambassador.Discord.Pagination
 
             var embed = BuildEmbed(_currentPage - 1);
 
-            var message = await channel.SendMessageAsync(string.Empty, embed: embed).ConfigureAwait(false);
+            var message = await channel.SendMessageAsync(string.Empty, embed: embed);
 
-            // Reactions take a while to add, don't wait for them
-            _ = Task.Run(async () =>
+            if (this.Pages.Count > 1)
             {
-                if (this.Pages.Count > 1)
+                await message.AddReactionAsync(this.Appearance.First);
+                await message.AddReactionAsync(this.Appearance.Back);
+                await message.AddReactionAsync(this.Appearance.Next);
+                await message.AddReactionAsync(this.Appearance.Last);
+
+                var manageMessages = await CanManageMessages();
+
+                var canJump =
+                    this.Appearance.JumpDisplayCondition == JumpDisplayCondition.Always ||
+                    (this.Appearance.JumpDisplayCondition == JumpDisplayCondition.WithManageMessages && manageMessages);
+
+                if (canJump)
                 {
-                    await message.AddReactionAsync(this.Appearance.First);
-                    await message.AddReactionAsync(this.Appearance.Back);
-                    await message.AddReactionAsync(this.Appearance.Next);
-                    await message.AddReactionAsync(this.Appearance.Last);
-
-                    var manageMessages = await CanManageMessages();
-
-                    var canJump =
-                        this.Appearance.JumpDisplayCondition == JumpDisplayCondition.Always ||
-                        (this.Appearance.JumpDisplayCondition == JumpDisplayCondition.WithManageMessages && manageMessages);
-
-                    if (canJump)
-                    {
-                        await message.AddReactionAsync(this.Appearance.Jump);
-                    }
-
-                    if (this.Appearance.DisplayInformationIcon)
-                    {
-                        await message.AddReactionAsync(this.Appearance.Help);
-                    }
+                    await message.AddReactionAsync(this.Appearance.Jump);
                 }
 
-                await message.AddReactionAsync(this.Appearance.Stop);
-            });
+                if (this.Appearance.DisplayInformationIcon)
+                {
+                    await message.AddReactionAsync(this.Appearance.Help);
+                }
+            }
+
+            await message.AddReactionAsync(this.Appearance.Stop);
 
             return message;
         }
@@ -137,11 +133,11 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// This override forwards to the added handler, letting removed reactions act the same as added reactions.
         /// </remarks>
         /// <inheritdoc/>
-        public override Task HandleRemovedInteractionAsync(SocketReaction reaction) =>
-            HandleAddedInteractionAsync(reaction);
+        protected override Task OnInteractionRemovedAsync(SocketReaction reaction) =>
+            OnInteractionAddedAsync(reaction);
 
         /// <inheritdoc/>
-        public override async Task HandleAddedInteractionAsync(SocketReaction reaction)
+        protected override async Task OnInteractionAddedAsync(SocketReaction reaction)
         {
             if (!reaction.User.IsSpecified)
             {
@@ -155,7 +151,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
                 if (interactingUser is IGuildUser guildUser)
                 {
                     // If the user has permission to manage messages, they should be allowed to interact in all cases
-                    if (!guildUser.GetPermissions(this.MessageContext.Channel as IGuildChannel).ManageMessages)
+                    if (!guildUser.GetPermissions(this.Channel as IGuildChannel).ManageMessages)
                     {
                         return;
                     }
@@ -202,51 +198,45 @@ namespace DIGOS.Ambassador.Discord.Pagination
             }
             else if (emote.Equals(this.Appearance.Jump))
             {
-                _ = Task.Run
-                (
-                    async () =>
-                    {
-                        bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
+                bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
 
-                        var responseResult = await this.Interactivity.GetNextMessageAsync(this.MessageContext.Channel, Filter, TimeSpan.FromSeconds(15));
-                        if (!responseResult.IsSuccess)
-                        {
-                            return;
-                        }
+                var responseResult = await this.Interactivity.GetNextMessageAsync(this.Channel, Filter, TimeSpan.FromSeconds(15));
+                if (!responseResult.IsSuccess)
+                {
+                    return;
+                }
 
-                        var response = responseResult.Entity;
+                var response = responseResult.Entity;
 
-                        if (!int.TryParse(response.Content, out int request) || request < 1 || request > this.Pages.Count)
-                        {
-                            _ = response.DeleteAsync().ConfigureAwait(false);
+                if (!int.TryParse(response.Content, out int request) || request < 1 || request > this.Pages.Count)
+                {
+                    await response.DeleteAsync();
 
-                            var eb = this.Feedback.CreateFeedbackEmbed(response.Author, Color.DarkPurple, "Please specify a page to jump to.");
+                    var eb = this.Feedback.CreateFeedbackEmbed(response.Author, Color.DarkPurple, "Please specify a page to jump to.");
 
-                            await this.Feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb);
-                            return;
-                        }
+                    await this.Feedback.SendEmbedAndDeleteAsync(this.Channel, eb);
+                    return;
+                }
 
-                        _currentPage = request;
-                        _ = response.DeleteAsync().ConfigureAwait(false);
-                        await UpdateAsync().ConfigureAwait(false);
-                    }
-                );
+                _currentPage = request;
+                await response.DeleteAsync();
+                await UpdateAsync();
             }
             else if (emote.Equals(this.Appearance.Help))
             {
                 var user = this.Interactivity.Client.GetUser(reaction.UserId);
                 var eb = this.Feedback.CreateFeedbackEmbed(user, Color.DarkPurple, this.Appearance.HelpText);
 
-                await this.Feedback.SendEmbedAndDeleteAsync(this.MessageContext.Channel, eb, this.Appearance.InfoTimeout);
+                await this.Feedback.SendEmbedAndDeleteAsync(this.Channel, eb, this.Appearance.InfoTimeout);
                 return;
             }
 
-            await UpdateAsync().ConfigureAwait(false);
+            await UpdateAsync();
         }
 
         private async Task<bool> CanManageMessages()
         {
-            if (this.MessageContext.Channel is IGuildChannel guildChannel)
+            if (this.Channel is IGuildChannel guildChannel)
             {
                 var botUser = this.Interactivity.Client.CurrentUser;
                 var botGuildUser = await guildChannel.Guild.GetUserAsync(botUser.Id);
@@ -258,11 +248,15 @@ namespace DIGOS.Ambassador.Discord.Pagination
         }
 
         /// <inheritdoc/>
-        protected override async Task UpdateAsync()
+        protected override async Task OnUpdateAsync()
         {
             var embed = BuildEmbed(_currentPage - 1);
 
-            await this.Message.ModifyAsync(m => m.Embed = embed).ConfigureAwait(false);
+            var userMessage = this.Message;
+            if (userMessage != null)
+            {
+                await userMessage.ModifyAsync(m => m.Embed = embed);
+            }
         }
     }
 }

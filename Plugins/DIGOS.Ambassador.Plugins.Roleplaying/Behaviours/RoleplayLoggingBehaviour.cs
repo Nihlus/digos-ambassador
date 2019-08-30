@@ -23,7 +23,6 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Behaviours;
-using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Discord;
 using Discord.Commands;
@@ -36,11 +35,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     /// <summary>
     /// Acts on user messages, logging them into an active roleplay if relevant.
     /// </summary>
-    public class RoleplayLoggingBehaviour : BehaviourBase
+    public class RoleplayLoggingBehaviour : ClientEventBehaviour
     {
-        [ProvidesContext]
-        private readonly RoleplayingDatabaseContext _database;
-
         private readonly RoleplayService _roleplays;
 
         /// <summary>
@@ -48,43 +44,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// </summary>
         /// <param name="client">The discord client.</param>
         /// <param name="roleplays">The roleplay service.</param>
-        /// <param name="database">The database.</param>
         public RoleplayLoggingBehaviour
         (
             DiscordSocketClient client,
-            RoleplayService roleplays,
-            RoleplayingDatabaseContext database
+            RoleplayService roleplays
         )
             : base(client)
         {
             _roleplays = roleplays;
-            _database = database;
         }
 
         /// <inheritdoc />
-        protected override Task OnStartingAsync()
-        {
-            this.Client.MessageReceived += OnMessageReceived;
-            this.Client.MessageUpdated += OnMessageUpdated;
-
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        protected override Task OnStoppingAsync()
-        {
-            this.Client.MessageReceived -= OnMessageReceived;
-            this.Client.MessageUpdated -= OnMessageUpdated;
-
-            return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Handles incoming messages, passing them to the command context handler.
-        /// </summary>
-        /// <param name="arg">The message coming in from the socket client.</param>
-        /// <returns>A task representing the message handling.</returns>
-        private async Task OnMessageReceived(SocketMessage arg)
+        protected override async Task MessageReceived(SocketMessage arg)
         {
             if (!(arg is SocketUserMessage message))
             {
@@ -111,13 +82,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             await _roleplays.ConsumeMessageAsync(new SocketCommandContext(this.Client, message));
         }
 
-        /// <summary>
-        /// Handles reparsing of edited messages.
-        /// </summary>
-        /// <param name="oldMessage">The old message.</param>
-        /// <param name="updatedMessage">The new message.</param>
-        /// <param name="messageChannel">The channel of the message.</param>
-        private async Task OnMessageUpdated
+        /// <inheritdoc />
+        protected override async Task MessageUpdated
         (
             Cacheable<IMessage, ulong> oldMessage,
             [CanBeNull] SocketMessage updatedMessage,
@@ -130,20 +96,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             }
 
             // Ignore all changes except text changes
-            bool isTextUpdate = updatedMessage.EditedTimestamp.HasValue && (updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes());
+            bool isTextUpdate = updatedMessage.EditedTimestamp.HasValue &&
+                                updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
+
             if (!isTextUpdate)
             {
                 return;
             }
 
-            await OnMessageReceived(updatedMessage);
-        }
-
-        /// <inheritdoc/>
-        public override void Dispose()
-        {
-            base.Dispose();
-            _database.Dispose();
+            await MessageReceived(updatedMessage);
         }
     }
 }

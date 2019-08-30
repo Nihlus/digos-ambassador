@@ -23,6 +23,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
@@ -111,6 +112,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 serviceCollection
                     .AddScoped<DiscordService>()
                     .AddScoped<UserFeedbackService>()
+                    .AddSingleton<DelayedActionService>()
                     .AddScoped<InteractivityService>()
                     .AddScoped<BaseSocketClient>(p => new DiscordSocketClient())
                     .AddScoped<Random>();

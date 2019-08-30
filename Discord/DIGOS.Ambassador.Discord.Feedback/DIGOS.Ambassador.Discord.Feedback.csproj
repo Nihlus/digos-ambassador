@@ -34,6 +34,10 @@
         <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="all" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
+    </ItemGroup>
+
     <Import Project="..\..\msbuild\nuget-common.props" />
 
 </Project>
