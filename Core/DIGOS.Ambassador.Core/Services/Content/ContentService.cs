@@ -88,16 +88,14 @@ namespace DIGOS.Ambassador.Core.Services
         public Uri BwehUri { get; }
 
         /// <summary>
-        /// Gets the Discord bot OAuth token.
-        /// </summary>o
-        public string BotToken { get; private set; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ContentService"/> class.
         /// </summary>
         /// <param name="fileSystem">The filesystem abstraction.</param>
         public ContentService(IFileSystem fileSystem)
         {
+            _sass = new List<string>();
+            _sassNSFW = new List<string>();
+
             this.FileSystem = fileSystem;
 
             this.BaseRemoteUri = new Uri("https://raw.githubusercontent.com/Nihlus/digos-ambassador/master/");
@@ -123,7 +121,6 @@ namespace DIGOS.Ambassador.Core.Services
         public async Task InitializeAsync()
         {
             await LoadSassAsync();
-            await LoadBotTokenAsync();
         }
 
         /// <summary>
@@ -142,16 +139,6 @@ namespace DIGOS.Ambassador.Core.Services
         {
             var sassPath = UPath.Combine(UPath.Root, "Sass", "sass.txt");
             var sassNSFWPath = UPath.Combine(UPath.Root, "Sass", "sass-nsfw.txt");
-
-            if (!this.FileSystem.FileExists(sassPath))
-            {
-                _sass = new List<string>();
-            }
-
-            if (!this.FileSystem.FileExists(sassNSFWPath))
-            {
-                _sassNSFW = new List<string>();
-            }
 
             var getSassStream = OpenLocalStream(sassPath);
             if (getSassStream.IsSuccess)
@@ -177,19 +164,20 @@ namespace DIGOS.Ambassador.Core.Services
         /// </summary>
         /// <exception cref="FileNotFoundException">Thrown if the bot token file can't be found.</exception>
         /// <exception cref="InvalidDataException">Thrown if no token exists in the file.</exception>
-        private async Task LoadBotTokenAsync()
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<string>> GetBotTokenAsync()
         {
             var tokenPath = UPath.Combine(UPath.Root, "Discord", "bot.token");
 
             if (!this.FileSystem.FileExists(tokenPath))
             {
-                throw new FileNotFoundException("The bot token file could not be found.", tokenPath.ToString());
+                return RetrieveEntityResult<string>.FromError("The token file could not be found.");
             }
 
             var getTokenStream = OpenLocalStream(tokenPath);
             if (!getTokenStream.IsSuccess)
             {
-                throw new InvalidDataException("Missing bot token.");
+                return RetrieveEntityResult<string>.FromError("The token file could not be opened.");
             }
 
             using (var tokenStream = getTokenStream.Entity)
@@ -198,10 +186,10 @@ namespace DIGOS.Ambassador.Core.Services
 
                 if (string.IsNullOrEmpty(token))
                 {
-                    throw new InvalidDataException("Missing bot token.");
+                    return RetrieveEntityResult<string>.FromError("The token file did not contain a valid token.");
                 }
 
-                this.BotToken = token;
+                return RetrieveEntityResult<string>.FromSuccess(token);
             }
         }
 
@@ -245,14 +233,28 @@ namespace DIGOS.Ambassador.Core.Services
         /// <param name="includeNSFW">Whether or not to include NSFW sass.</param>
         /// <returns>A sassy comment.</returns>
         [Pure]
-        public string GetSass(bool includeNSFW = false)
+        public RetrieveEntityResult<string> GetSass(bool includeNSFW = false)
         {
+            List<string> availableSass;
+
             if (includeNSFW)
             {
-                return _sass.Union(_sassNSFW).ToList().PickRandom();
+                availableSass = _sass.Union(_sassNSFW).ToList();
+            }
+            else
+            {
+                availableSass = _sass;
             }
 
-            return _sass.PickRandom();
+            if (availableSass.Count == 0)
+            {
+                return RetrieveEntityResult<string>.FromError
+                (
+                    "There's no available sass. You'll just have to provide your own."
+                );
+            }
+
+            return RetrieveEntityResult<string>.FromSuccess(availableSass.PickRandom());
         }
     }
 }

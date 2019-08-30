@@ -127,7 +127,14 @@ namespace DIGOS.Ambassador.Modules
         public async Task SassAsync()
         {
             var isNsfwChannel = this.Context.Channel is ITextChannel textChannel && textChannel.IsNsfw;
-            string sass = _content.GetSass(isNsfwChannel);
+            var getSassResult = _content.GetSass(isNsfwChannel);
+            if (!getSassResult.IsSuccess)
+            {
+                await _feedback.SendConfirmationAsync(this.Context, getSassResult.ErrorReason);
+                return;
+            }
+
+            var sass = getSassResult.Entity;
 
             await _feedback.SendConfirmationAsync(this.Context, sass);
         }

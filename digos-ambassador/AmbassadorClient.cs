@@ -26,6 +26,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core;
 using DIGOS.Ambassador.Core.Database.Services;
+using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Behaviours.Services;
@@ -189,10 +190,21 @@ namespace DIGOS.Ambassador
         /// Logs the ambassador into Discord.
         /// </summary>
         /// <returns>A task representing the login action.</returns>
-        public async Task LoginAsync()
+        public async Task<ModifyEntityResult> LoginAsync()
         {
             var contentService = _services.GetRequiredService<ContentService>();
-            await _client.LoginAsync(TokenType.Bot, contentService.BotToken.Trim());
+
+            var getTokenResult = await contentService.GetBotTokenAsync();
+            if (!getTokenResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getTokenResult);
+            }
+
+            var token = getTokenResult.Entity.Trim();
+
+            await _client.LoginAsync(TokenType.Bot, token);
+
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>

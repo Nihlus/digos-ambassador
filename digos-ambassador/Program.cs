@@ -68,7 +68,14 @@ namespace DIGOS.Ambassador
             // Initialize
             var ambassadorClient = new AmbassadorClient();
             await ambassadorClient.InitializeAsync();
-            await ambassadorClient.LoginAsync();
+
+            var loginResult = await ambassadorClient.LoginAsync();
+            if (!loginResult.IsSuccess)
+            {
+                Log.Error(loginResult.ErrorReason);
+                return;
+            }
+
             await ambassadorClient.StartAsync();
 
             // Wait for shutdown
