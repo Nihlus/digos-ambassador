@@ -263,6 +263,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Add);
             }
 
+            if (currentComponent.Transformation.Species.Name == "template")
+            {
+                // Apply default settings
+                currentComponent.BaseColour = transformation.DefaultBaseColour;
+
+                currentComponent.Pattern = transformation.DefaultPattern;
+                currentComponent.PatternColour = transformation.DefaultPatternColour;
+            }
+
             currentComponent.Transformation = transformation;
 
             shiftMessage = _descriptionBuilder.BuildShiftMessage(appearanceConfiguration, currentComponent);
