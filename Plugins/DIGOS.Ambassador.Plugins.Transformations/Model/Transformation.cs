@@ -75,6 +75,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// Gets or sets the default colour of the pattern (if any).
         /// </summary>
         [YamlMember(Alias = "default_pattern_colour")]
+        [CanBeNull]
         public virtual Colour DefaultPatternColour { get; set; }
 
         /// <summary>
