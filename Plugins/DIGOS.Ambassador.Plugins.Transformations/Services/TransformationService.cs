@@ -1179,7 +1179,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                         if (patternColourNeedsUpdate)
                         {
                             // This catches null-to-null changes
-                            if (existingTransformation.DefaultBaseColour != transformation.DefaultBaseColour)
+                            if (existingTransformation.DefaultPatternColour != transformation.DefaultPatternColour)
                             {
                                 existingEntry.State = EntityState.Modified;
                             }
