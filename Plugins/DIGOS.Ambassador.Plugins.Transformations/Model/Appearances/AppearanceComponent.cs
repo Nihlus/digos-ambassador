@@ -132,9 +132,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
             {
                 Transformation = transformation,
                 Chirality = chirality,
-                BaseColour = transformation.DefaultBaseColour,
+                BaseColour = transformation.DefaultBaseColour.Clone(),
                 Pattern = transformation.DefaultPattern,
-                PatternColour = transformation.DefaultPatternColour
+                PatternColour = transformation.DefaultPatternColour?.Clone()
             };
         }
 
@@ -161,9 +161,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
                 {
                     Transformation = transformation,
                     Chirality = chirality,
-                    BaseColour = transformation.DefaultBaseColour,
+                    BaseColour = transformation.DefaultBaseColour.Clone(),
                     Pattern = transformation.DefaultPattern,
-                    PatternColour = transformation.DefaultPatternColour
+                    PatternColour = transformation.DefaultPatternColour?.Clone()
                 };
             }
         }
