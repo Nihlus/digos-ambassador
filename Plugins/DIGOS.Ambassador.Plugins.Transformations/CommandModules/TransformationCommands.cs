@@ -672,7 +672,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         public async Task DescribeCharacterAsync([NotNull] Character character)
         {
             var getAppearanceConfigurationResult = await _transformation.GetOrCreateAppearanceConfigurationAsync
-            (character
+            (
+                character
             );
 
             if (!getAppearanceConfigurationResult.IsSuccess)

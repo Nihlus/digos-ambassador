@@ -266,10 +266,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             if (currentComponent.Transformation.Species.Name == "template")
             {
                 // Apply default settings
-                currentComponent.BaseColour = transformation.DefaultBaseColour;
+                currentComponent.BaseColour = transformation.DefaultBaseColour.Clone();
 
                 currentComponent.Pattern = transformation.DefaultPattern;
-                currentComponent.PatternColour = transformation.DefaultPatternColour;
+                currentComponent.PatternColour = transformation.DefaultPatternColour?.Clone();
             }
 
             currentComponent.Transformation = transformation;
@@ -1154,6 +1154,31 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
                         var existingEntry = _database.Entry(existingTransformation);
                         existingEntry.CurrentValues.SetValues(transformation);
+
+                        // Workarounds for some broken EF core behaviour
+                        if (!existingTransformation.DefaultBaseColour.IsSameColourAs(transformation
+                            .DefaultBaseColour))
+                        {
+                            existingEntry.Reference(t => t.DefaultBaseColour).TargetEntry.CurrentValues
+                                .SetValues(transformation.DefaultBaseColour);
+
+                            existingEntry.Reference(t => t.DefaultBaseColour).TargetEntry.State = EntityState.Modified;
+
+                            existingEntry.State = EntityState.Modified;
+                        }
+
+                        if (!existingTransformation.DefaultPatternColour.IsSameColourAs(transformation
+                            .DefaultPatternColour))
+                        {
+                            existingEntry.Reference(t => t.DefaultPatternColour).TargetEntry.CurrentValues
+                                .SetValues(transformation.DefaultPatternColour);
+
+                            existingEntry.Reference(t => t.DefaultPatternColour).TargetEntry.State = EntityState.Modified;
+
+                            existingEntry.State = EntityState.Modified;
+                        }
+
+                        _database.ChangeTracker.DetectChanges();
 
                         if (existingEntry.State == EntityState.Modified)
                         {

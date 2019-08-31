@@ -27,6 +27,7 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Core.Extensions;
 using Humanizer;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using YamlDotNet.Serialization;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
@@ -34,13 +35,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     /// <summary>
     /// Represents a colour shade with an optional modifier.
     /// </summary>
-    [Table("Colours", Schema = "TransformationModule")]
-    public class Colour : IEFEntity, IColour
+    [Owned]
+    public class Colour : IColour
     {
-        /// <inheritdoc />
-        [YamlIgnore]
-        public long ID { get; set; }
-
         /// <inheritdoc />
         public Shade Shade { get; set; }
 
@@ -54,8 +51,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="other">The other colour.</param>
         /// <returns>true if the colours are the same; otherwise, false.</returns>
         [Pure]
-        public bool IsSameColourAs([NotNull] Colour other)
+        public bool IsSameColourAs([CanBeNull] Colour other)
         {
+            if (other is null)
+            {
+                return false;
+            }
+
             return this.Shade == other.Shade && this.Modifier == other.Modifier;
         }
 
@@ -102,6 +104,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         public override string ToString()
         {
             return $"{(this.Modifier is null ? string.Empty : this.Modifier.Humanize())} {this.Shade.Humanize()}".Trim().Humanize(LetterCasing.LowerCase);
+        }
+
+        /// <summary>
+        /// Clones this colour, creating a new unbound colour with the same settings.
+        /// </summary>
+        /// <returns>The cloned colour.</returns>
+        public Colour Clone()
+        {
+            return new Colour { Shade = this.Shade, Modifier = this.Modifier };
         }
     }
 }

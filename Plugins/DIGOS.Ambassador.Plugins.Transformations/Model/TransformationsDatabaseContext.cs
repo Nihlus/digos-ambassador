@@ -97,5 +97,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
             : base(SchemaName, contextOptions)
         {
         }
+
+        /// <inheritdoc />
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Transformation>()
+                .OwnsOne(t => t.DefaultBaseColour, od => od.ToTable("DefaultBaseColours", SchemaName))
+                .OwnsOne(t => t.DefaultPatternColour, od => od.ToTable("DefaultPatternColours", SchemaName));
+
+            modelBuilder.Entity<AppearanceComponent>()
+                .OwnsOne(c => c.BaseColour, od => od.ToTable("BaseColours", SchemaName))
+                .OwnsOne(c => c.PatternColour, od => od.ToTable("PatternColours", SchemaName));
+        }
     }
 }

@@ -21,6 +21,7 @@
 //
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
@@ -31,6 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
     /// <summary>
     /// Represents a join table entry for a server-user mapping.
     /// </summary>
+    [Table("ServerUser", Schema = "Core")]
     public class ServerUser : EFEntity
     {
         /// <summary>
