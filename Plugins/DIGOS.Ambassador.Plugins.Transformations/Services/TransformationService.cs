@@ -1162,6 +1162,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
                         if (baseColourNeedsUpdate)
                         {
+                            // This catches null-to-null changes
+                            if (existingTransformation.DefaultBaseColour != transformation.DefaultBaseColour)
+                            {
+                                existingEntry.State = EntityState.Modified;
+                            }
+
                             existingTransformation.DefaultBaseColour =
                                 transformation.DefaultBaseColour.Clone();
                         }
@@ -1172,6 +1178,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
                         if (patternColourNeedsUpdate)
                         {
+                            // This catches null-to-null changes
+                            if (existingTransformation.DefaultBaseColour != transformation.DefaultBaseColour)
+                            {
+                                existingEntry.State = EntityState.Modified;
+                            }
+
                             existingTransformation.DefaultPatternColour =
                                 transformation.DefaultPatternColour?.Clone();
                         }
