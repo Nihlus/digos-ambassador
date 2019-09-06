@@ -74,11 +74,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         [CanBeNull]
         public virtual Colour PatternColour { get; set; }
 
-        /// <summary>
-        /// Gets or sets the size of the component. This is, by default, a unitless value and is only contextually relevant.
-        /// </summary>
-        public int Size { get; set; }
-
         /// <inheritdoc />
         public override string ToString()
         {
@@ -101,7 +96,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
                 BaseColour = Colour.CopyFrom(other.BaseColour),
                 Pattern = other.Pattern,
                 PatternColour = other.PatternColour is null ? null : Colour.CopyFrom(other.PatternColour),
-                Size = other.Size
             };
         }
 

@@ -79,11 +79,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         public double Weight { get; set; }
 
         /// <summary>
-        /// Gets or sets how feminine or masculine a character appears to be, on a -1 to 1 scale.
-        /// </summary>
-        public double GenderScale { get; set; }
-
-        /// <summary>
         /// Gets or sets how muscular a character appears to be, on a 0 to 1 scale.
         /// </summary>
         public double Muscularity { get; set; }
@@ -104,7 +99,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
                 Components = componentCopies,
                 Height = sourceAppearance.Height,
                 Weight = sourceAppearance.Weight,
-                GenderScale = sourceAppearance.GenderScale,
                 Muscularity = sourceAppearance.Muscularity
             };
 
@@ -172,7 +166,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
                 Components = templateComponents,
                 Height = 1.8,
                 Weight = 80,
-                GenderScale = 0,
                 Muscularity = 0.5
             };
 
