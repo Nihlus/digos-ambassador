@@ -693,7 +693,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             eb.WithColor(Color.DarkPurple);
             eb.WithTitle($"{character.Name} {(character.Nickname is null ? string.Empty : $"\"{character.Nickname}\"")}".Trim());
 
-            var user = await this.Context.Client.GetUserAsync((ulong)character.Owner.DiscordID);
+            var owner = character.Owner;
+            var user = await this.Context.Client.GetUserAsync((ulong)owner.DiscordID);
             eb.WithAuthor(user);
 
             eb.WithThumbnailUrl

@@ -232,7 +232,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         public IQueryable<Character> GetCharacters(IGuild guild)
         {
             return _database.Characters
-                .Where(c => c.ServerID == (long)guild.Id);
+                .Where(c => c.ServerID == (long)guild.Id)
+                .Include(c => c.Owner);
         }
 
         /// <summary>
@@ -416,11 +417,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var owner = getOwnerResult.Entity;
 
-            var character = new Character
-            {
-                Owner = owner,
-                ServerID = (long)context.Guild.Id
-            };
+            var character = _database.CreateProxy<Character>();
+            character.Owner = owner;
+            character.ServerID = (long)context.Guild.Id;
 
             var modifyEntityResult = await SetCharacterNameAsync(context, character, characterName);
             if (!modifyEntityResult.IsSuccess)
@@ -434,13 +433,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return CreateEntityResult<Character>.FromError(modifyEntityResult);
             }
 
-            if (!(characterNickname is null))
+            modifyEntityResult = await SetCharacterNicknameAsync(character, characterNickname);
+            if (!modifyEntityResult.IsSuccess)
             {
-                modifyEntityResult = await SetCharacterNicknameAsync(character, characterNickname);
-                if (!modifyEntityResult.IsSuccess)
-                {
-                    return CreateEntityResult<Character>.FromError(modifyEntityResult);
-                }
+                return CreateEntityResult<Character>.FromError(modifyEntityResult);
             }
 
             characterSummary = characterSummary ?? "No summary set.";
