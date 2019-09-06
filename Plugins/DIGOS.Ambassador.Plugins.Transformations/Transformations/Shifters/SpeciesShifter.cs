@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
@@ -175,7 +176,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
             appearance.Components.Remove(component);
 
-            var removeMessage = _descriptionBuilder.BuildRemoveMessage(appearance, component);
+            var removeMessage = _descriptionBuilder.BuildRemoveMessage(appearance, bodypart);
             return ShiftBodypartResult.FromSuccess(removeMessage, ShiftBodypartAction.Remove);
         }
 
@@ -196,8 +197,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <inheritdoc />
         protected override Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart)
         {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
-            return Task.FromResult(_descriptionBuilder.BuildRemoveMessage(this.Appearance, component));
+            return Task.FromResult(_descriptionBuilder.BuildRemoveMessage(this.Appearance, bodypart));
         }
 
         /// <inheritdoc />
@@ -217,8 +217,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <inheritdoc />
         protected override Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality)
         {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
-            return Task.FromResult(_descriptionBuilder.BuildRemoveMessage(this.Appearance, component));
+            return Task.FromResult(_descriptionBuilder.BuildRemoveMessage(this.Appearance, bodypart));
         }
 
         /// <inheritdoc />

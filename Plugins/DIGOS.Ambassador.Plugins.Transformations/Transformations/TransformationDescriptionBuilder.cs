@@ -268,16 +268,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// Builds a removal message for the given character if the given transformation were to be applied.
         /// </summary>
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
-        /// <param name="component">The component to build the message from.</param>
+        /// <param name="bodypart">The bodypart to build the message from.</param>
         /// <returns>The removal message.</returns>
         [NotNull]
         [Pure]
-        public string BuildRemoveMessage([NotNull]Appearance appearanceConfiguration, [NotNull] AppearanceComponent component)
+        public string BuildRemoveMessage([NotNull]Appearance appearanceConfiguration, Bodypart bodypart)
         {
-            var transformation = component.Transformation;
-
             string removalText;
-            switch (transformation.Part)
+            switch (bodypart)
             {
                 case Bodypart.Hair:
                 {
@@ -291,12 +289,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 }
                 case Bodypart.Ear:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize().Transform(To.LowerCase)} shrivels and vanishes.";
+                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} shrivels and vanishes.";
                     break;
                 }
                 case Bodypart.Eye:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize().Transform(To.LowerCase)} deflates as their eye socket closes, leaving nothing behind.";
+                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} deflates as their eye socket closes, leaving nothing behind.";
                     break;
                 }
                 case Bodypart.Teeth:
@@ -307,7 +305,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 case Bodypart.Leg:
                 case Bodypart.Arm:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize().Transform(To.LowerCase)} shrivels and retracts, vanishing.";
+                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} shrivels and retracts, vanishing.";
                     break;
                 }
                 case Bodypart.Tail:
@@ -317,7 +315,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 }
                 case Bodypart.Wing:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {transformation.Part.Humanize().Transform(To.LowerCase)} stiffens and shudders, before losing cohesion and disappearing into their body.";
+                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} stiffens and shudders, before losing cohesion and disappearing into their body.";
                     break;
                 }
                 case Bodypart.Penis:
@@ -338,7 +336,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 case Bodypart.Legs:
                 case Bodypart.Arms:
                 {
-                    removalText = $"{{@target}}'s {transformation.Part.Humanize().Transform(To.LowerCase)} shrivel and retract, vanishing.";
+                    removalText = $"{{@target}}'s {bodypart.Humanize().Transform(To.LowerCase)} shrivel and retract, vanishing.";
                     break;
                 }
                 case Bodypart.Body:
@@ -348,7 +346,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 }
                 case Bodypart.Wings:
                 {
-                    removalText = $"{{@target}}'s {transformation.Part.Humanize().Transform(To.LowerCase)} stiffen and shudder, before losing cohesion and disappearing into their body.";
+                    removalText = $"{{@target}}'s {bodypart.Humanize().Transform(To.LowerCase)} stiffen and shudder, before losing cohesion and disappearing into their body.";
                     break;
                 }
                 default:
@@ -357,7 +355,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 }
             }
 
-            return ReplaceTokensWithContent(removalText, appearanceConfiguration, component);
+            return ReplaceTokensWithContent(removalText, appearanceConfiguration, null);
         }
 
         /// <summary>
