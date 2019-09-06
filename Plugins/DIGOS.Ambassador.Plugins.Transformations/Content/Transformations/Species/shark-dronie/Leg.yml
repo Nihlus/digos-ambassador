@@ -11,4 +11,4 @@ uniform_shift_message: "{@colour} latex ripples downwards over {@target}'s legs,
 uniform_grow_message: "The sides of {@target}'s pelvis ripple and bulge, erupting into a pair of rubbery latex legs. The {@colour} liquid shifts as angular armor rises out of the masses, setting themselves into place over {@f|their} new rubber skin."
 
 single_description: "{@f|They have} a powerful, latex-covered {@side} leg, with angular armor pieces clicked into place around it."
-uniform_description: "{@f|They have} powerful, latex-covered {@side} leg, with angular armor pieces clicked into place around them."
+uniform_description: "{@f|They have} powerful, latex-covered legs, with angular armor pieces clicked into place around them."
