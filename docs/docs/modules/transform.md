@@ -202,6 +202,38 @@ Lists the available transformations for a given bodypart.
 
 ---
 
+### *parts*
+#### Overloads
+**`transform parts` (as well as `transform list-bodyparts` or `transform bodyparts`)**
+
+Lists the available bodyparts.
+
+---
+
+### *colours*
+#### Overloads
+**`transform colours` (as well as `transform list-colours`, `transform list-shades`, or `transform shades`)**
+
+Lists the available colours.
+
+---
+
+### *colour-modifiers*
+#### Overloads
+**`transform colour-modifiers` (as well as `transform list-colour-modifiers`, `transform list-shade-modifiers`, or `transform shade-modifiers`)**
+
+Lists the available colour modifiers.
+
+---
+
+### *colour-patterns*
+#### Overloads
+**`transform colour-patterns` (as well as `transform list-patterns` or `transform patterns`)**
+
+Lists the available patterns.
+
+---
+
 ### *describe*
 #### Overloads
 **`transform describe`**

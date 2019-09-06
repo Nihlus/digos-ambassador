@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
@@ -604,6 +605,148 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5.0)
             );
+        }
+
+        /// <summary>
+        /// Lists the available bodyparts.
+        /// </summary>
+        [UsedImplicitly]
+        [Alias("list-bodyparts", "bodyparts", "parts")]
+        [Command("parts")]
+        [Summary("Lists the available bodyparts.")]
+        public async Task ListAvailableBodypartsAsync()
+        {
+            var parts = Enum.GetValues(typeof(Bodypart))
+                .Cast<Bodypart>()
+                .OrderBy(b => b);
+
+            var options = new PaginatedAppearanceOptions
+            {
+                Color = Color.DarkPurple
+            };
+
+            var paginatedMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                _feedback,
+                this.Context.User,
+                parts,
+                b => b.Humanize(),
+                b =>
+                {
+                    if (b.IsChiral())
+                    {
+                        return "This part is available in both left and right versions.";
+                    }
+
+                    if (!b.IsGenderNeutral())
+                    {
+                        return "This part is considered NSFW.";
+                    }
+
+                    if (b.IsComposite())
+                    {
+                        return "This part is composed of smaller parts.";
+                    }
+
+                    return "This is a normal bodypart.";
+                },
+                appearance: options
+            );
+
+            await _interactivity.SendInteractiveMessageAsync(this.Context.Channel, paginatedMessage);
+        }
+
+        /// <summary>
+        /// Lists the available shades.
+        /// </summary>
+        [UsedImplicitly]
+        [Alias("list-colours", "list-shades", "colours", "shades")]
+        [Command("colours")]
+        [Summary("Lists the available colours.")]
+        public async Task ListAvailableShadesAsync()
+        {
+            var parts = Enum.GetValues(typeof(Shade))
+                .Cast<Shade>()
+                .OrderBy(s => s);
+
+            var options = new PaginatedAppearanceOptions
+            {
+                Color = Color.DarkPurple
+            };
+
+            var paginatedMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                _feedback,
+                this.Context.User,
+                parts,
+                b => b.Humanize(),
+                b => "\u200B",
+                appearance: options
+            );
+
+            await _interactivity.SendInteractiveMessageAsync(this.Context.Channel, paginatedMessage);
+        }
+
+        /// <summary>
+        /// Lists the available shade modifiers.
+        /// </summary>
+        [UsedImplicitly]
+        [Alias("list-colour-modifiers", "list-shade-modifiers", "colour-modifiers", "shade-modifiers")]
+        [Command("colour-modifiers")]
+        [Summary("Lists the available colour modifiers.")]
+        public async Task ListAvailableShadeModifiersAsync()
+        {
+            var parts = Enum.GetValues(typeof(ShadeModifier))
+                .Cast<ShadeModifier>()
+                .OrderBy(sm => sm);
+
+            var options = new PaginatedAppearanceOptions
+            {
+                Color = Color.DarkPurple
+            };
+
+            var paginatedMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                _feedback,
+                this.Context.User,
+                parts,
+                b => b.Humanize(),
+                b => "\u200B",
+                appearance: options
+            );
+
+            await _interactivity.SendInteractiveMessageAsync(this.Context.Channel, paginatedMessage);
+        }
+
+        /// <summary>
+        /// Lists the available patterns.
+        /// </summary>
+        [UsedImplicitly]
+        [Alias("list-patterns", "patterns")]
+        [Command("colour-patterns")]
+        [Summary("Lists the available patterns.")]
+        public async Task ListAvailablePatternsAsync()
+        {
+            var parts = Enum.GetValues(typeof(Pattern))
+                .Cast<Pattern>()
+                .OrderBy(c => c);
+
+            var options = new PaginatedAppearanceOptions
+            {
+                Color = Color.DarkPurple
+            };
+
+            var paginatedMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                _feedback,
+                this.Context.User,
+                parts,
+                b => b.Humanize(),
+                b => "\u200B",
+                appearance: options
+            );
+
+            await _interactivity.SendInteractiveMessageAsync(this.Context.Channel, paginatedMessage);
         }
 
         /// <summary>
