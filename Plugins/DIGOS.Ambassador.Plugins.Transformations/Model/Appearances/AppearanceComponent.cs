@@ -101,9 +101,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
             {
                 Transformation = other.Transformation,
                 Chirality = other.Chirality,
-                BaseColour = other.BaseColour,
+                BaseColour = Colour.CopyFrom(other.BaseColour),
                 Pattern = other.Pattern,
-                PatternColour = other.PatternColour,
+                PatternColour = other.PatternColour is null ? null : Colour.CopyFrom(other.PatternColour),
                 Size = other.Size
             };
         }

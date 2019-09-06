@@ -114,5 +114,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         {
             return new Colour { Shade = this.Shade, Modifier = this.Modifier };
         }
+
+        /// <summary>
+        /// Copies the given colour into a new colour.
+        /// </summary>
+        /// <param name="other">The other colour.</param>
+        /// <returns>The copied colour.</returns>
+        public static Colour CopyFrom([NotNull] Colour other)
+        {
+            return other.Clone();
+        }
     }
 }

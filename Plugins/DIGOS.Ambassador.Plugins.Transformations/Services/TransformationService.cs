@@ -772,7 +772,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var appearanceConfiguration = getAppearanceConfigurationResult.Entity;
 
-            _database.Remove(appearanceConfiguration.CurrentAppearance);
             appearanceConfiguration.CurrentAppearance = Appearance.CopyFrom(appearanceConfiguration.DefaultAppearance);
             await _database.SaveChangesAsync();
 

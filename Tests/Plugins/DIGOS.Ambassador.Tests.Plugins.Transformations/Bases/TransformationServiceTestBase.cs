@@ -88,10 +88,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             coreDatabase.Database.Create();
 
             this.CharacterDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-            this.CharacterDatabase.Database.Migrate();
+            this.CharacterDatabase.Database.Create();
 
             this.Database = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
-            this.Database.Database.Migrate();
+            this.Database.Database.Create();
 
             this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();
