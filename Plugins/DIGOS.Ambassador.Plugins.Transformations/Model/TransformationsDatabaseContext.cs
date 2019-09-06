@@ -107,14 +107,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
                 .OwnsOne(t => t.DefaultBaseColour, od => od.ToTable("DefaultBaseColours", SchemaName))
                 .OwnsOne(t => t.DefaultPatternColour, od => od.ToTable("DefaultPatternColours", SchemaName));
 
-            modelBuilder.Entity<AppearanceComponent>()
-                .OwnsOne(c => c.BaseColour, od => od.ToTable("BaseColours", SchemaName))
-                .OwnsOne(c => c.PatternColour, od => od.ToTable("PatternColours", SchemaName));
+            modelBuilder.Entity<Appearance>().OwnsMany(a => a.Components, ao =>
+            {
+                ao.ToTable("AppearanceComponents", SchemaName);
 
-            modelBuilder.Entity<AppearanceComponent>()
-                .HasOne<Appearance>()
-                .WithMany(a => a.Components)
-                .OnDelete(DeleteBehavior.Cascade);
+                ao.OwnsOne(c => c.BaseColour, od => od.ToTable("BaseColours", SchemaName));
+                ao.OwnsOne(c => c.PatternColour, od => od.ToTable("PatternColours", SchemaName));
+
+                ao.Property<long>("ID");
+                ao.HasKey("ID");
+            });
         }
     }
 }

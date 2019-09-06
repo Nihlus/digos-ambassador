@@ -24,11 +24,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Humanizer;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using static DIGOS.Ambassador.Plugins.Transformations.Transformations.Chirality;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
@@ -36,12 +36,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     /// <summary>
     /// Represents a distinct part of a character's appearance.
     /// </summary>
-    [Table("AppearanceComponents", Schema = "TransformationModule")]
-    public class AppearanceComponent : IEFEntity
+    [Owned]
+    public class AppearanceComponent
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
-
         /// <summary>
         /// Gets the bodypart that the component is.
         /// </summary>
