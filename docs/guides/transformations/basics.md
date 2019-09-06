@@ -18,6 +18,7 @@ to have.
 
 ```
 !ch create "Ada"
+!ch become "Ada"
 ```
 
 If you want to explore the character module and its available options more, give the `!help ch` command a go. Next, you
