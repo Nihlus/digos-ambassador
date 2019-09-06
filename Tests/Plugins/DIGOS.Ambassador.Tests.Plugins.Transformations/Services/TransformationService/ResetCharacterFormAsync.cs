@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             private User _owner;
             private Character _character;
 
-            private AppearanceConfiguration _appearanceConfiguration;
+            private Appearance _appearance;
 
             protected override async Task InitializeTestAsync()
             {
@@ -58,12 +58,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 this.CharacterDatabase.SaveChanges();
 
                 // Set up the default appearance
-                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
+                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateDefaultAppearanceAsync
                 (
                     _character
                 );
 
-                _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
+                _appearance = getAppearanceConfigurationResult.Entity;
             }
 
             [Fact]
@@ -74,14 +74,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     Height = 256
                 };
 
-                _appearanceConfiguration.DefaultAppearance = defaultAppearance;
+                _appearance = defaultAppearance;
 
                 var result = await this.Transformations.ResetCharacterFormAsync(_character);
 
                 Assert.True(result.IsSuccess);
                 Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
-                Assert.NotNull(_appearanceConfiguration.CurrentAppearance);
-                Assert.Equal(_appearanceConfiguration.DefaultAppearance.Height, _appearanceConfiguration.CurrentAppearance.Height);
+                Assert.NotNull(_appearance);
+                Assert.Equal(_appearance.Height, _appearance.Height);
             }
         }
     }

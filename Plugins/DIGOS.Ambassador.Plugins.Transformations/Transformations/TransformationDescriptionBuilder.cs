@@ -58,19 +58,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// Replaces tokens in a piece of text with their respective contents.
         /// </summary>
         /// <param name="text">The text to replace in.</param>
-        /// <param name="appearanceConfiguration">The character and appearance for which the text should be valid.</param>
+        /// <param name="appearance">The character and appearance for which the text should be valid.</param>
         /// <param name="component">The transformation that the text belongs to.</param>
         /// <returns>A string with no tokens in it.</returns>
         [NotNull]
         public string ReplaceTokensWithContent
         (
             [NotNull] string text,
-            [NotNull] AppearanceConfiguration appearanceConfiguration,
+            [NotNull] Appearance appearance,
             [CanBeNull] AppearanceComponent component
         )
         {
             var tokens = _tokenizer.GetTokens(text);
-            var tokenContentMap = tokens.ToDictionary(token => token, token => token.GetText(appearanceConfiguration, component));
+            var tokenContentMap = tokens.ToDictionary(token => token, token => token.GetText(appearance, component));
 
             int relativeOffset = 0;
             var sb = new StringBuilder(text);
@@ -90,21 +90,21 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <summary>
         /// Builds a complete visual description of the given character.
         /// </summary>
-        /// <param name="appearanceConfiguration">The character to describe.</param>
+        /// <param name="appearance">The appearance to describe.</param>
         /// <returns>A visual description of the character.</returns>
         [NotNull]
         [Pure]
-        public string BuildVisualDescription([NotNull] AppearanceConfiguration appearanceConfiguration)
+        public string BuildVisualDescription([NotNull] Appearance appearance)
         {
             var sb = new StringBuilder();
-            sb.Append(ReplaceTokensWithContent("{@target} is a {@sex} {@species}.", appearanceConfiguration, null));
+            sb.Append(ReplaceTokensWithContent("{@target} is a {@sex} {@species}.", appearance, null));
             sb.AppendLine();
             sb.AppendLine();
 
             var partsToSkip = new List<AppearanceComponent>();
             int componentCount = 0;
 
-            var orderedComponents = appearanceConfiguration.CurrentAppearance.Components.OrderByDescending
+            var orderedComponents = appearance.Components.OrderByDescending
             (
                 c =>
                 {
@@ -134,7 +134,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 var transformation = component.Transformation;
                 if (component.Bodypart.IsChiral())
                 {
-                    var sameSpecies = AreChiralPartsTheSameSpecies(appearanceConfiguration, component);
+                    var sameSpecies = AreChiralPartsTheSameSpecies(appearance, component);
                     csb.Append
                     (
                         sameSpecies
@@ -144,7 +144,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
 
                     if (sameSpecies)
                     {
-                        if (appearanceConfiguration.TryGetAppearanceComponent(component.Bodypart, component.Chirality.Opposite(), out var partToSkip))
+                        if (appearance.TryGetAppearanceComponent(component.Bodypart, component.Chirality.Opposite(), out var partToSkip))
                         {
                             partsToSkip.Add(partToSkip);
                         }
@@ -161,7 +161,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 }
 
                 var tokenizedDesc = csb.ToString();
-                var componentDesc = ReplaceTokensWithContent(tokenizedDesc, appearanceConfiguration, component);
+                var componentDesc = ReplaceTokensWithContent(tokenizedDesc, appearance, component);
 
                 sb.Append(componentDesc);
             }
@@ -180,7 +180,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <returns>true if the parts are the same species; otherwise, false.</returns>
         private bool AreChiralPartsTheSameSpecies
         (
-            [NotNull] AppearanceConfiguration appearanceConfiguration,
+            [NotNull] Appearance appearanceConfiguration,
             [NotNull] AppearanceComponent component
         )
         {
@@ -200,7 +200,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <returns>The shift message.</returns>
         [NotNull]
         [Pure]
-        public string BuildShiftMessage([NotNull]AppearanceConfiguration appearanceConfiguration, [NotNull] AppearanceComponent component)
+        public string BuildShiftMessage([NotNull]Appearance appearanceConfiguration, [NotNull] AppearanceComponent component)
         {
             var transformation = component.Transformation;
 
@@ -216,7 +216,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <returns>The uniform shift message.</returns>
         [NotNull]
         [Pure]
-        public string BuildUniformShiftMessage([NotNull]AppearanceConfiguration appearanceConfiguration, [NotNull] AppearanceComponent component)
+        public string BuildUniformShiftMessage([NotNull]Appearance appearanceConfiguration, [NotNull] AppearanceComponent component)
         {
             var transformation = component.Transformation;
 
@@ -236,7 +236,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <returns>The grow message.</returns>
         [NotNull]
         [Pure]
-        public string BuildGrowMessage([NotNull]AppearanceConfiguration appearanceConfiguration, [NotNull] AppearanceComponent component)
+        public string BuildGrowMessage([NotNull]Appearance appearanceConfiguration, [NotNull] AppearanceComponent component)
         {
             var transformation = component.Transformation;
 
@@ -252,7 +252,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <returns>The uniform grow message.</returns>
         [NotNull]
         [Pure]
-        public string BuildUniformGrowMessage([NotNull]AppearanceConfiguration appearanceConfiguration, [NotNull] AppearanceComponent component)
+        public string BuildUniformGrowMessage([NotNull]Appearance appearanceConfiguration, [NotNull] AppearanceComponent component)
         {
             var transformation = component.Transformation;
 
@@ -272,7 +272,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <returns>The removal message.</returns>
         [NotNull]
         [Pure]
-        public string BuildRemoveMessage([NotNull]AppearanceConfiguration appearanceConfiguration, [NotNull] AppearanceComponent component)
+        public string BuildRemoveMessage([NotNull]Appearance appearanceConfiguration, [NotNull] AppearanceComponent component)
         {
             var transformation = component.Transformation;
 
@@ -371,7 +371,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         [Pure]
         public string BuildPatternColourShiftMessage
         (
-            [NotNull]AppearanceConfiguration appearanceConfiguration,
+            [NotNull]Appearance appearanceConfiguration,
             [NotNull] Colour originalColour,
             [NotNull] AppearanceComponent currentComponent
         )
@@ -395,7 +395,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         [Pure]
         public string BuildPatternShiftMessage
         (
-            [NotNull]AppearanceConfiguration appearanceConfiguration,
+            [NotNull]Appearance appearanceConfiguration,
             [CanBeNull] Pattern? originalPattern,
             [NotNull] Colour originalColour,
             [NotNull] AppearanceComponent currentComponent
@@ -420,7 +420,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         [Pure]
         public string BuildColourShiftMessage
         (
-            [NotNull]AppearanceConfiguration appearanceConfiguration,
+            [NotNull]Appearance appearanceConfiguration,
             [NotNull] Colour originalColour,
             [NotNull] AppearanceComponent currentComponent
         )

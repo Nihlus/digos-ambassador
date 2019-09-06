@@ -23,11 +23,14 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Discord.TypeReaders;
+using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -55,6 +58,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
 
+        private readonly ContentService _content;
+
         private readonly CharacterService _characters;
 
         private readonly TransformationService _transformation;
@@ -68,13 +73,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <param name="transformation">The transformation service.</param>
         /// <param name="interactivity">The interactivity service.</param>
         /// <param name="users">The user service.</param>
+        /// <param name="content">The content service.</param>
         public TransformationCommands
         (
             UserFeedbackService feedback,
             CharacterService characters,
             TransformationService transformation,
             InteractivityService interactivity,
-            UserService users
+            UserService users,
+            ContentService content
         )
         {
             _feedback = feedback;
@@ -82,6 +89,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             _transformation = transformation;
             _interactivity = interactivity;
             _users = users;
+            _content = content;
         }
 
         /// <summary>
@@ -671,25 +679,35 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Summary("Describes the current physical appearance of a character.")]
         public async Task DescribeCharacterAsync([NotNull] Character character)
         {
-            var getAppearanceConfigurationResult = await _transformation.GetOrCreateAppearanceConfigurationAsync
-            (
-                character
+            var generateDescriptionAsync = await _transformation.GenerateCharacterDescriptionAsync
+            (character
             );
 
-            if (!getAppearanceConfigurationResult.IsSuccess)
+            if (!generateDescriptionAsync.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getAppearanceConfigurationResult.ErrorReason);
+                await _feedback.SendErrorAsync(this.Context, generateDescriptionAsync.ErrorReason);
                 return;
             }
 
-            var appearanceConfiguration = getAppearanceConfigurationResult.Entity;
-            var (eb, description) = await _transformation.GenerateCharacterDescriptionAsync
+            var eb = new EmbedBuilder();
+            eb.WithColor(Color.DarkPurple);
+            eb.WithTitle($"{character.Name} {(character.Nickname is null ? string.Empty : $"\"{character.Nickname}\"")}".Trim());
+
+            var user = await this.Context.Client.GetUserAsync((ulong)character.Owner.DiscordID);
+            eb.WithAuthor(user);
+
+            eb.WithThumbnailUrl
             (
-                this.Context,
-                appearanceConfiguration
+                !character.AvatarUrl.IsNullOrWhitespace()
+                    ? character.AvatarUrl
+                    : _content.GetDefaultAvatarUri().ToString()
             );
 
-            await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb);
+            eb.AddField("Description", character.Description);
+
+            var description = generateDescriptionAsync.Entity;
+
+            await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
             await _feedback.SendPrivateEmbedAsync
             (
                 this.Context,

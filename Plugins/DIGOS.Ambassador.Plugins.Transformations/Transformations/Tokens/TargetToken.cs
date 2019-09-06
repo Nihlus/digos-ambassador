@@ -32,9 +32,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     public class TargetToken : ReplacableTextToken<TargetToken>
     {
         /// <inheritdoc />
-        public override string GetText(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
+        public override string GetText(Appearance appearance, AppearanceComponent component)
         {
-            var character = appearanceConfiguration.Character;
+            var character = appearance.Character;
 
             return character.Nickname.IsNullOrWhitespace() ? character.Name : character.Nickname;
         }

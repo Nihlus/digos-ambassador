@@ -8,14 +8,16 @@ using DIGOS.Ambassador.Plugins.Transformations.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 {
     [DbContext(typeof(TransformationsDatabaseContext))]
-    partial class TransformationsDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190906131029_RemoveAppearanceConfiguration")]
+    partial class RemoveAppearanceConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

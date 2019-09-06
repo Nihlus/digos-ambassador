@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the table where appearance configurations are stored.
         /// </summary>
-        public DbSet<AppearanceConfiguration> AppearanceConfigurations
+        public DbSet<Appearance> Appearances
         {
             get;
 

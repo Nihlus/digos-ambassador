@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             private Colour _originalPatternColour;
 
-            private AppearanceConfiguration _appearanceConfiguration;
+            private Appearance _appearance;
 
             public ShiftBodypartPatternColourAsync()
             {
@@ -138,12 +138,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 );
 
                 // Set up the default appearance
-                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
+                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateCurrentAppearanceAsync
                 (
                     _character
                 );
 
-                _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
+                _appearance = getAppearanceConfigurationResult.Entity;
             }
 
             [Fact]
@@ -239,7 +239,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _newPatternColour
                 );
 
-                var face = _appearanceConfiguration.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
+                var face = _appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
                 Assert.Equal(_newPatternColour, face.PatternColour);
             }
 

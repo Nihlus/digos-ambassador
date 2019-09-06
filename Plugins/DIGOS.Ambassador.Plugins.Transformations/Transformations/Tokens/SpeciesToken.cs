@@ -33,11 +33,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     public class SpeciesToken : ReplacableTextToken<SpeciesToken>
     {
         /// <inheritdoc />
-        public override string GetText(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
+        public override string GetText(Appearance appearance, AppearanceComponent component)
         {
             var speciesShares = new Dictionary<string, int>();
 
-            foreach (var characterComponent in appearanceConfiguration.CurrentAppearance.Components)
+            foreach (var characterComponent in appearance.Components)
             {
                 var speciesName = characterComponent.Transformation.Species.Name;
 

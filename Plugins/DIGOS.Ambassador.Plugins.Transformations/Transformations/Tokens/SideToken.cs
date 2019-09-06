@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     public class SideToken : ReplacableTextToken<SideToken>
     {
         /// <inheritdoc />
-        public override string GetText(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
+        public override string GetText(Appearance appearance, AppearanceComponent component)
         {
             if (component is null)
             {

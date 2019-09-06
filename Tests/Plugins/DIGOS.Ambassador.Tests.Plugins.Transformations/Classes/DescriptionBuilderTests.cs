@@ -43,6 +43,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         [Fact]
         public void ReplacesFluentTokensCorrectly()
         {
+            var character = new Character
+            {
+                Name = "Amby",
+                PronounProviderFamily = "Feminine"
+            };
+
             var hairColour = new Colour
             {
                 Shade = Shade.White,
@@ -60,19 +66,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             var appearance = new Appearance
             {
-                Components = new List<AppearanceComponent> { hairComponent }
-            };
-
-            var character = new Character
-            {
-                Name = "Amby",
-                PronounProviderFamily = "Feminine"
-            };
-
-            var appearanceConfiguration = new AppearanceConfiguration
-            {
-                Character = character,
-                CurrentAppearance = appearance
+                Components = new List<AppearanceComponent> { hairComponent },
+                Character = character
             };
 
             var pronounService = new PronounService();
@@ -87,7 +82,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             var descriptionBuilder = new TransformationDescriptionBuilder(serviceProvider);
 
-            var result = descriptionBuilder.ReplaceTokensWithContent(SampleFluentText, appearanceConfiguration, hairComponent);
+            var result = descriptionBuilder.ReplaceTokensWithContent(SampleFluentText, appearance, hairComponent);
 
             Assert.Equal(ExpectedText, result);
         }

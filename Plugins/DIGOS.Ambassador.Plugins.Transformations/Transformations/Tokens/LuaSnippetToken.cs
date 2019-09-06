@@ -49,19 +49,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         }
 
         /// <inheritdoc />
-        public override string GetText(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
+        public override string GetText(Appearance appearance, AppearanceComponent component)
         {
-            return GetTextAsync(appearanceConfiguration, component).GetAwaiter().GetResult();
+            return GetTextAsync(appearance, component).GetAwaiter().GetResult();
         }
 
         /// <inheritdoc />
-        public override async Task<string> GetTextAsync(AppearanceConfiguration appearanceConfiguration, AppearanceComponent component)
+        public override async Task<string> GetTextAsync(Appearance appearance, AppearanceComponent component)
         {
             var result = await _lua.ExecuteSnippetAsync
             (
                 this.Snippet,
-                (nameof(appearanceConfiguration), appearanceConfiguration),
-                ("character", appearanceConfiguration.Character),
+                (nameof(appearance), appearance),
+                ("character", appearance.Character),
                 (nameof(component), component)
             );
 

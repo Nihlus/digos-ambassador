@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             private readonly ICommandContext _context;
             private Character _character;
 
-            private AppearanceConfiguration _appearanceConfiguration;
+            private Appearance _appearance;
 
             public RemoveBodypartAsync()
             {
@@ -109,12 +109,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 _character = this.CharacterDatabase.Characters.First();
 
                 // Set up the default appearance
-                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateAppearanceConfigurationAsync
+                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateCurrentAppearanceAsync
                 (
                     _character
                 );
 
-                _appearanceConfiguration = getAppearanceConfigurationResult.Entity;
+                _appearance = getAppearanceConfigurationResult.Entity;
             }
 
             [Fact]
@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 );
 
                 Assert.False(result.IsSuccess);
-                Assert.True(_appearanceConfiguration.HasComponent(Bodypart.Face, Chirality.Center));
+                Assert.True(_appearance.HasComponent(Bodypart.Face, Chirality.Center));
             }
 
             [Fact]
@@ -163,7 +163,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             [Fact]
             public async Task RemovesCorrectBodypart()
             {
-                Assert.Contains(_appearanceConfiguration.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
+                Assert.Contains(_appearance.Components, c => c.Bodypart == Bodypart.Face);
 
                 await this.Transformations.RemoveBodypartAsync
                 (
@@ -172,7 +172,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     Bodypart.Face
                 );
 
-                Assert.DoesNotContain(_appearanceConfiguration.CurrentAppearance.Components, c => c.Bodypart == Bodypart.Face);
+                Assert.DoesNotContain(_appearance.Components, c => c.Bodypart == Bodypart.Face);
             }
 
             [Fact]

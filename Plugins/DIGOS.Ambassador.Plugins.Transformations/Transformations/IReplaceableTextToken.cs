@@ -44,24 +44,24 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <summary>
         /// Gets the text that the token should be replaced with.
         /// </summary>
-        /// <param name="appearanceConfiguration">The appearance that the text should be relevant for.</param>
+        /// <param name="appearance">The appearance that the text should be relevant for.</param>
         /// <param name="component">The component that the text originates from.</param>
         /// <returns>The text that the token should be replaced with.</returns>
         string GetText
         (
-            [NotNull] AppearanceConfiguration appearanceConfiguration,
+            [NotNull] Appearance appearance,
             [CanBeNull] AppearanceComponent component
         );
 
         /// <summary>
         /// Gets the text that the token should be replaced with.
         /// </summary>
-        /// <param name="appearanceConfiguration">The appearance that the text should be relevant for.</param>
+        /// <param name="appearance">The appearance that the text should be relevant for.</param>
         /// <param name="component">The component that the text originates from.</param>
         /// <returns>The text that the token should be replaced with.</returns>
         Task<string> GetTextAsync
         (
-            [NotNull] AppearanceConfiguration appearanceConfiguration,
+            [NotNull] Appearance appearance,
             [CanBeNull] AppearanceComponent component
         );
     }
