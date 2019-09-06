@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             var tokens = _tokenizer.GetTokens(text);
             var tokenContentMap = tokens.ToDictionary(token => token, token => token.GetText(appearance, component));
 
-            int relativeOffset = 0;
+            var relativeOffset = 0;
             var sb = new StringBuilder(text);
 
             foreach (var (token, content) in tokenContentMap)
@@ -102,7 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             sb.AppendLine();
 
             var partsToSkip = new List<AppearanceComponent>();
-            int componentCount = 0;
+            var componentCount = 0;
 
             var orderedComponents = appearance.Components.OrderByDescending
             (
@@ -364,7 +364,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// Builds a pattern colour shifting message for the given character and component.
         /// </summary>
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
-        /// <param name="originalColour">The original colour of the pattern.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
         [NotNull]
@@ -372,13 +371,35 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         public string BuildPatternColourShiftMessage
         (
             [NotNull]Appearance appearanceConfiguration,
-            [NotNull] Colour originalColour,
             [NotNull] AppearanceComponent currentComponent
         )
         {
-            string shiftMessage =
+            var shiftMessage =
                 $"{{@target}}'s {currentComponent.Bodypart.Humanize()} morphs, as" +
-                $" {{@f|their}} {{@pattern}} {originalColour} hues turn into {currentComponent.PatternColour}.";
+                $" {{@f|their}} {{@pattern}} hues turn into {currentComponent.PatternColour}.";
+
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
+        }
+
+        /// <summary>
+        /// Builds a pattern colour shifting message for the given character and component.
+        /// </summary>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
+        /// <param name="currentComponent">The current component.</param>
+        /// <returns>The shifting message.</returns>
+        [NotNull]
+        [Pure]
+        public string BuildUniformPatternColourShiftMessage
+        (
+            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent currentComponent
+        )
+        {
+            var bodypartName = currentComponent.Bodypart.Humanize().Pluralize().ToLower();
+
+            var shiftMessage =
+                $"{{@target}}'s {bodypartName} morph, as" +
+                $" {{@f|their}} {{@pattern}} hues turn into {currentComponent.PatternColour}.";
 
             return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
@@ -387,8 +408,74 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// Builds a pattern shifting message for the given character and component.
         /// </summary>
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
-        /// <param name="originalPattern">The original pattern.</param>
-        /// <param name="originalColour">The original colour of the pattern.</param>
+        /// <param name="currentComponent">The current component.</param>
+        /// <returns>The shifting message.</returns>
+        [NotNull]
+        [Pure]
+        public string BuildUniformPatternShiftMessage
+        (
+            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent currentComponent
+        )
+        {
+            var bodypartName = currentComponent.Bodypart.Humanize().Pluralize().ToLower();
+
+            var shiftMessage =
+                $"The surface of {{@target}}'s {bodypartName} morph, as" +
+                " {@colour|pattern} {@pattern} patterns spread across them, replacing their existing ones.";
+
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
+        }
+
+        /// <summary>
+        /// Builds a pattern addition message for the given character and component.
+        /// </summary>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
+        /// <param name="currentComponent">The current component.</param>
+        /// <returns>The shifting message.</returns>
+        [NotNull]
+        [Pure]
+        public string BuildUniformPatternAddMessage
+        (
+            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent currentComponent
+        )
+        {
+            var bodypartName = currentComponent.Bodypart.Humanize().Pluralize().ToLower();
+
+            var shiftMessage =
+                $"The surface of {{@target}}'s {bodypartName} morph, as" +
+                " {@colour|pattern} {@pattern} patterns spread across them.";
+
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
+        }
+
+        /// <summary>
+        /// Builds a pattern removal message for the given character and component.
+        /// </summary>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
+        /// <param name="currentComponent">The current component.</param>
+        /// <returns>The shifting message.</returns>
+        [NotNull]
+        [Pure]
+        public string BuildUniformPatternRemoveMessage
+        (
+            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent currentComponent
+        )
+        {
+            var bodypartName = currentComponent.Bodypart.Humanize().Pluralize().ToLower();
+
+            var shiftMessage =
+                $"The surface of {{@target}}'s {bodypartName} shimmer, as the patterns on them fade and vanish.";
+
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
+        }
+
+        /// <summary>
+        /// Builds a pattern shifting message for the given character and component.
+        /// </summary>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
         [NotNull]
@@ -396,15 +483,57 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         public string BuildPatternShiftMessage
         (
             [NotNull]Appearance appearanceConfiguration,
-            [CanBeNull] Pattern? originalPattern,
-            [NotNull] Colour originalColour,
             [NotNull] AppearanceComponent currentComponent
         )
         {
-            string shiftMessage =
-                $"The surface of {{@target}}'s {currentComponent.Bodypart.Humanize().Transform(To.LowerCase)} morphs, as" +
-                " {@colour|pattern} {@pattern} patterns spread across it" +
-                $"{(originalPattern.HasValue ? $", replacing their {originalColour} {originalPattern.Humanize().Pluralize()}." : ".")}";
+            var shiftMessage =
+                $"The surface of {{@target}}'s {currentComponent.Bodypart.Humanize().Transform(To.LowerCase)} " +
+                "morphs, as {@colour|pattern} {@pattern} patterns spread across it, replacing their existing ones.";
+
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
+        }
+
+        /// <summary>
+        /// Builds a pattern addition message for the given character and component.
+        /// </summary>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
+        /// <param name="currentComponent">The current component.</param>
+        /// <returns>The shifting message.</returns>
+        [NotNull]
+        [Pure]
+        public string BuildPatternAddMessage
+        (
+            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent currentComponent
+        )
+        {
+            var bodypartName = currentComponent.Bodypart.Humanize().ToLower();
+
+            var shiftMessage =
+                $"The surface of {{@target}}'s {bodypartName} morphs, as" +
+                " {@colour|pattern} {@pattern} patterns spreads across it.";
+
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
+        }
+
+        /// <summary>
+        /// Builds a pattern removal message for the given character and component.
+        /// </summary>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
+        /// <param name="currentComponent">The current component.</param>
+        /// <returns>The shifting message.</returns>
+        [NotNull]
+        [Pure]
+        public string BuildPatternRemoveMessage
+        (
+            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent currentComponent
+        )
+        {
+            var bodypartName = currentComponent.Bodypart.Humanize().ToLower();
+
+            var shiftMessage =
+                $"The surface of {{@target}}'s {bodypartName} shimmers, as the pattern on it fades and vanishes.";
 
             return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
@@ -413,7 +542,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// Builds a base colour shifting message for the given character and component.
         /// </summary>
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
-        /// <param name="originalColour">The original colour of the pattern.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
         [NotNull]
@@ -421,13 +549,35 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         public string BuildColourShiftMessage
         (
             [NotNull]Appearance appearanceConfiguration,
-            [NotNull] Colour originalColour,
             [NotNull] AppearanceComponent currentComponent
         )
         {
-            string shiftMessage =
+            var shiftMessage =
                 $"{{@target}}'s {currentComponent.Bodypart.Humanize().Transform(To.LowerCase)} morphs, as" +
-                $" {{@f|their}} {originalColour} hues turn into {currentComponent.BaseColour}.";
+                $" {{@f|their}} existing hues turn into {currentComponent.BaseColour}.";
+
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
+        }
+
+        /// <summary>
+        /// Builds a base uniform colour shifting message for the given character and component.
+        /// </summary>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
+        /// <param name="currentComponent">The current component.</param>
+        /// <returns>The shifting message.</returns>
+        [NotNull]
+        [Pure]
+        public string BuildUniformColourShiftMessage
+        (
+            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent currentComponent
+        )
+        {
+            var bodypartName = currentComponent.Bodypart.Humanize().Pluralize().ToLower();
+
+            var shiftMessage =
+                $"{{@target}}'s {bodypartName} morph, as" +
+                $" {{@f|their}} existing hues turn into {currentComponent.BaseColour}.";
 
             return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }

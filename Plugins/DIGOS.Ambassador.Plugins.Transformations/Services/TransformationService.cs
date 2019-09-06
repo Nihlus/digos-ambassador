@@ -36,6 +36,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters;
 using Discord;
 using Discord.Commands;
 using Humanizer;
@@ -232,33 +233,36 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var appearance = getAppearanceResult.Entity;
 
-            if (!appearance.TryGetAppearanceComponent(bodyPart, chirality, out var component))
+            var speciesShifter = new SpeciesShifter
+            (
+                appearance,
+                this,
+                _descriptionBuilder
+            );
+
+            var shiftResult = await speciesShifter.RemoveAsync(bodyPart, chirality);
+
+            if (shiftResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
+                await _database.SaveChangesAsync();
             }
 
-            appearance.Components.Remove(component);
-            await _database.SaveChangesAsync();
-
-            string removeMessage = _descriptionBuilder.BuildRemoveMessage(appearance, component);
-            return ShiftBodypartResult.FromSuccess(removeMessage, ShiftBodypartAction.Remove);
+            return shiftResult;
         }
 
         /// <summary>
-        /// Shifts the given character's bodypart to the given species.
+        /// Removes the given character's bodypart.
         /// </summary>
         /// <param name="context">The context of the command.</param>
         /// <param name="character">The character to shift.</param>
-        /// <param name="bodyPart">The bodypart to shift.</param>
-        /// <param name="species">The species to shift the bodypart into.</param>
+        /// <param name="bodyPart">The bodypart to remove.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        public async Task<ShiftBodypartResult> ShiftBodypartAsync
+        public async Task<ShiftBodypartResult> RemoveBodypartPatternAsync
         (
             [NotNull] ICommandContext context,
             [NotNull] Character character,
             Bodypart bodyPart,
-            [NotNull] string species,
             Chirality chirality = Chirality.Center
         )
         {
@@ -269,44 +273,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 return ShiftBodypartResult.FromError(canTransformResult);
             }
 
-            var getSpeciesResult = await GetSpeciesByNameAsync(species);
-            if (!getSpeciesResult.IsSuccess)
-            {
-                return ShiftBodypartResult.FromError(getSpeciesResult);
-            }
-
-            if (bodyPart.IsComposite())
-            {
-                return await ShiftCompositeBodypartAsync(character, getSpeciesResult.Entity, bodyPart);
-            }
-
-            if (bodyPart.IsChiral() && chirality == Chirality.Center)
-            {
-                return ShiftBodypartResult.FromError
-                (
-                    $"Please specify if it's the left or right {bodyPart.Humanize().ToLower()}."
-                );
-            }
-
-            var getTFResult = await GetTransformationsByPartAndSpeciesAsync(bodyPart, getSpeciesResult.Entity);
-            if (!getTFResult.IsSuccess)
-            {
-                return ShiftBodypartResult.FromError(getTFResult);
-            }
-
-            // We know this part is not composite, so we'll just use the first result
-            var transformation = getTFResult.Entity.First();
-            return await ShiftBodypartAsync(character, transformation, bodyPart, chirality);
-        }
-
-        private async Task<ShiftBodypartResult> ShiftBodypartAsync
-        (
-            Character character,
-            Transformation transformation,
-            Bodypart bodyPart,
-            Chirality chirality
-        )
-        {
             var getAppearanceResult = await GetOrCreateCurrentAppearanceAsync(character);
             if (!getAppearanceResult.IsSuccess)
             {
@@ -315,237 +281,67 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var appearance = getAppearanceResult.Entity;
 
-            if (appearance.TryGetAppearanceComponent(bodyPart, chirality, out var existingComponent))
+            var patternShifter = new PatternShifter(appearance, this, _descriptionBuilder);
+            var shiftResult = await patternShifter.RemoveAsync(bodyPart, chirality);
+
+            if (shiftResult.IsSuccess)
             {
-                if (existingComponent.Transformation.Species.Name.Equals(transformation.Species.Name))
-                {
-                    var message = BuildNoChangeMessage(character, transformation.Species, bodyPart);
-
-                    return ShiftBodypartResult.FromError
-                    (
-                        message
-                    );
-                }
-            }
-
-            string shiftMessage;
-
-            if (!appearance.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
-            {
-                currentComponent = AppearanceComponent.CreateFrom(transformation, chirality);
-
-                appearance.Components.Add(currentComponent);
-
-                shiftMessage = _descriptionBuilder.BuildGrowMessage(appearance, currentComponent);
                 await _database.SaveChangesAsync();
-                return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Add);
             }
 
-            if (currentComponent.Transformation.Species.Name == "template")
-            {
-                // Apply default settings
-                currentComponent.BaseColour = transformation.DefaultBaseColour.Clone();
-
-                currentComponent.Pattern = transformation.DefaultPattern;
-                currentComponent.PatternColour = transformation.DefaultPatternColour?.Clone();
-            }
-
-            currentComponent.Transformation = transformation;
-
-            shiftMessage = _descriptionBuilder.BuildShiftMessage(appearance, currentComponent);
-
-            await _database.SaveChangesAsync();
-            return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
+            return shiftResult;
         }
 
-        private async Task<ShiftBodypartResult> ShiftCompositeBodypartAsync
+        /// <summary>
+        /// Shifts the given character's bodypart to the given species.
+        /// </summary>
+        /// <param name="context">The context of the command.</param>
+        /// <param name="character">The character to shift.</param>
+        /// <param name="bodyPart">The bodypart to shift.</param>
+        /// <param name="speciesName">The species to shift the bodypart into.</param>
+        /// <param name="chirality">The chirality of the bodypart.</param>
+        /// <returns>A shifting result which may or may not have succeeded.</returns>
+        public async Task<ShiftBodypartResult> ShiftBodypartAsync
         (
-            Character character,
-            Species species,
-            Bodypart bodyPart
+            [NotNull] ICommandContext context,
+            [NotNull] Character character,
+            Bodypart bodyPart,
+            [NotNull] string speciesName,
+            Chirality chirality = Chirality.Center
         )
         {
-            string BuildMessageFromResult
-            (
-                ShiftBodypartResult result,
-                Appearance targetConfiguration,
-                AppearanceComponent targetComponent
-            )
+            var discordUser = await context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
+            var canTransformResult = await CanUserTransformUserAsync(context.Guild, context.User, discordUser);
+            if (!canTransformResult.IsSuccess)
             {
-                switch (result.Action)
-                {
-                    case ShiftBodypartAction.Add:
-                    {
-                        return _descriptionBuilder.BuildGrowMessage(targetConfiguration, targetComponent);
-                    }
-
-                    case ShiftBodypartAction.Remove:
-                    {
-                        return _descriptionBuilder.BuildRemoveMessage(targetConfiguration, targetComponent);
-                    }
-                    case ShiftBodypartAction.Shift:
-                    {
-                        return _descriptionBuilder.BuildShiftMessage(targetConfiguration, targetComponent);
-                    }
-                    case ShiftBodypartAction.Nothing:
-                    {
-                        throw new InvalidOperationException("Can't build a message for something that didn't happen.");
-                    }
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
+                return ShiftBodypartResult.FromError(canTransformResult);
             }
 
-            var composingParts = bodyPart.GetComposingParts();
-
-            var currentParagraphLength = 0;
-            var messageBuilder = new StringBuilder();
-            void InsertShiftMessage(string message)
+            var getSpeciesResult = await GetSpeciesByNameAsync(speciesName);
+            if (!getSpeciesResult.IsSuccess)
             {
-                messageBuilder.Append(message);
-
-                if (!message.EndsWith(" "))
-                {
-                    messageBuilder.Append(" ");
-                }
-
-                if (currentParagraphLength > 240)
-                {
-                    messageBuilder.AppendLine();
-                    messageBuilder.AppendLine();
-
-                    currentParagraphLength = 0;
-                }
-
-                currentParagraphLength += message.Length;
+                return ShiftBodypartResult.FromError(getSpeciesResult);
             }
 
-            foreach (var composingPart in composingParts)
+            var species = getSpeciesResult.Entity;
+
+            var getCurrentAppearance = await GetOrCreateCurrentAppearanceAsync(character);
+            if (!getCurrentAppearance.IsSuccess)
             {
-                if (composingPart.IsComposite())
-                {
-                    var shiftResult = await ShiftCompositeBodypartAsync(character, species, composingPart);
-                    if (!shiftResult.IsSuccess || shiftResult.Action == ShiftBodypartAction.Nothing)
-                    {
-                        continue;
-                    }
-
-                    InsertShiftMessage(shiftResult.ShiftMessage);
-                    continue;
-                }
-
-                var getTFResult = await GetTransformationsByPartAndSpeciesAsync(composingPart, species);
-                if (!getTFResult.IsSuccess)
-                {
-                    continue;
-                }
-
-                var transformation = getTFResult.Entity.First();
-
-                var getAppearanceResult = await GetOrCreateCurrentAppearanceAsync(character);
-                if (!getAppearanceResult.IsSuccess)
-                {
-                    return ShiftBodypartResult.FromError(getAppearanceResult);
-                }
-
-                var appearance = getAppearanceResult.Entity;
-
-                if (composingPart.IsChiral())
-                {
-                    var leftShift = await ShiftBodypartAsync(character, transformation, composingPart, Chirality.Left);
-                    var rightShift = await ShiftBodypartAsync(character, transformation, composingPart, Chirality.Right);
-
-                    // There's a couple of cases here for us to deal with.
-                    // 1: both parts were shifted
-                    // 2: one part was shifted
-                    // 3: one part was shifted and one was added
-                    // 4: both parts were added
-                    // 5: no changes were made
-                    if (leftShift.Action == ShiftBodypartAction.Nothing && rightShift.Action == ShiftBodypartAction.Nothing)
-                    {
-                        // No change, keep moving
-                        continue;
-                    }
-
-                    if (!appearance.TryGetAppearanceComponent(composingPart, Chirality.Left, out var component))
-                    {
-                        throw new InvalidOperationException("Couldn't retrieve a component to base off of.");
-                    }
-
-                    if (leftShift.Action == ShiftBodypartAction.Shift && rightShift.Action == ShiftBodypartAction.Shift)
-                    {
-                        var uniformShiftMessage = _descriptionBuilder.BuildUniformShiftMessage(appearance, component);
-                        InsertShiftMessage(uniformShiftMessage);
-                        continue;
-                    }
-
-                    if (leftShift.Action == ShiftBodypartAction.Add && rightShift.Action == ShiftBodypartAction.Add)
-                    {
-                        var uniformGrowMessage = _descriptionBuilder.BuildUniformGrowMessage(appearance, component);
-                        InsertShiftMessage(uniformGrowMessage);
-                        continue;
-                    }
-
-                    if (leftShift.Action != ShiftBodypartAction.Nothing)
-                    {
-                        InsertShiftMessage(BuildMessageFromResult(leftShift, appearance, component));
-                    }
-
-                    if (rightShift.Action != ShiftBodypartAction.Nothing)
-                    {
-                        InsertShiftMessage(BuildMessageFromResult(rightShift, appearance, component));
-                    }
-                }
-                else
-                {
-                    var simpleShiftResult = await ShiftBodypartAsync
-                    (
-                        character,
-                        transformation,
-                        composingPart,
-                        Chirality.Center
-                    );
-
-                    if (!appearance.TryGetAppearanceComponent(composingPart, Chirality.Center, out var component))
-                    {
-                        throw new InvalidOperationException("Couldn't retrieve a component to base off of.");
-                    }
-
-                    if (simpleShiftResult.Action != ShiftBodypartAction.Nothing)
-                    {
-                        InsertShiftMessage(BuildMessageFromResult(simpleShiftResult, appearance, component));
-                    }
-                }
+                return ShiftBodypartResult.FromError(getCurrentAppearance);
             }
 
-            if (messageBuilder.Length == 0)
-            {
-                // We took no actions
-                var message = BuildNoChangeMessage(character, species, bodyPart);
+            var appearance = getCurrentAppearance.Entity;
 
-                return ShiftBodypartResult.FromSuccess(message, ShiftBodypartAction.Nothing);
+            var speciesShifter = new SpeciesShifter(appearance, species, this, _descriptionBuilder);
+            var shiftResult = await speciesShifter.ShiftAsync(bodyPart, chirality);
+
+            if (shiftResult.IsSuccess)
+            {
+                await _database.SaveChangesAsync();
             }
 
-            return ShiftBodypartResult.FromSuccess(messageBuilder.ToString(), ShiftBodypartAction.Shift);
-        }
-
-        private static string BuildNoChangeMessage(Character character, Species species, Bodypart bodyPart)
-        {
-            var bodypartHumanized = bodyPart.Humanize();
-            if (bodyPart == Bodypart.Full)
-            {
-                var fullMessage = $"{character.Nickname} is already a {species.Name.Humanize()}.";
-                fullMessage = fullMessage.Transform(To.LowerCase, To.SentenceCase);
-
-                return fullMessage;
-            }
-
-            var message =
-                $"{character.Name}'s {bodypartHumanized} " +
-                $"{(bodypartHumanized.EndsWith("s") ? "are" : "is")} already a {species.Name.Humanize()}'s.";
-
-            message = message.Transform(To.LowerCase, To.SentenceCase);
-            return message;
+            return shiftResult;
         }
 
         /// <summary>
@@ -573,31 +369,31 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 return ShiftBodypartResult.FromError(canTransformResult);
             }
 
-            var getAppearanceResult = await GetOrCreateCurrentAppearanceAsync(character);
-            if (!getAppearanceResult.IsSuccess)
+            if (bodyPart.IsChiral() && chirality == Chirality.Center)
             {
-                return ShiftBodypartResult.FromError(getAppearanceResult);
+                return ShiftBodypartResult.FromError
+                (
+                    $"Please specify if it's the left or right {bodyPart.Humanize().ToLower()}."
+                );
             }
 
-            var appearance = getAppearanceResult.Entity;
-
-            if (!appearance.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
+            var getCurrentAppearance = await GetOrCreateCurrentAppearanceAsync(character);
+            if (!getCurrentAppearance.IsSuccess)
             {
-                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
+                return ShiftBodypartResult.FromError(getCurrentAppearance);
             }
 
-            if (currentComponent.BaseColour.IsSameColourAs(colour))
+            var appearance = getCurrentAppearance.Entity;
+
+            var colourShifter = new ColourShifter(appearance, colour, this, _descriptionBuilder);
+            var shiftResult = await colourShifter.ShiftAsync(bodyPart, chirality);
+
+            if (shiftResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError("The bodypart is already that colour.");
+                await _database.SaveChangesAsync();
             }
 
-            var originalColour = currentComponent.BaseColour;
-            currentComponent.BaseColour = colour;
-
-            await _database.SaveChangesAsync();
-
-            string shiftMessage = _descriptionBuilder.BuildColourShiftMessage(appearance, originalColour, currentComponent);
-            return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
+            return shiftResult;
         }
 
         /// <summary>
@@ -635,26 +431,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var appearance = getAppearanceResult.Entity;
 
-            if (!appearance.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
+            var patternShifter = new PatternShifter(appearance, pattern, patternColour, this, _descriptionBuilder);
+            var shiftResult = await patternShifter.ShiftAsync(bodyPart, chirality);
+
+            if (shiftResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
+                await _database.SaveChangesAsync();
             }
 
-            if (currentComponent.Pattern == pattern)
-            {
-                return ShiftBodypartResult.FromError("The character already has that pattern.");
-            }
-
-            var originalPattern = currentComponent.Pattern;
-            var originalColour = currentComponent.BaseColour;
-
-            currentComponent.Pattern = pattern;
-            currentComponent.PatternColour = patternColour;
-
-            await _database.SaveChangesAsync();
-
-            string shiftMessage = _descriptionBuilder.BuildPatternShiftMessage(appearance, originalPattern, originalColour, currentComponent);
-            return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
+            return shiftResult;
         }
 
         /// <summary>
@@ -690,29 +475,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var appearance = getAppearanceResult.Entity;
 
-            if (!appearance.TryGetAppearanceComponent(bodyPart, chirality, out var currentComponent))
+            var patternColourShifter = new PatternColourShifter(appearance, patternColour, this, _descriptionBuilder);
+            var shiftResult = await patternColourShifter.ShiftAsync(bodyPart, chirality);
+
+            if (shiftResult.IsSuccess)
             {
-                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
+                await _database.SaveChangesAsync();
             }
 
-            if (!currentComponent.Pattern.HasValue)
-            {
-                return ShiftBodypartResult.FromError("The bodypart doesn't have a pattern.");
-            }
-
-            if (!(currentComponent.PatternColour is null) && currentComponent.PatternColour.IsSameColourAs(patternColour))
-            {
-                return ShiftBodypartResult.FromError("The pattern is already that colour.");
-            }
-
-            var originalColour = currentComponent.PatternColour;
-            currentComponent.PatternColour = patternColour;
-
-            await _database.SaveChangesAsync();
-
-            // ReSharper disable once AssignNullToNotNullAttribute - Having a pattern implies having a pattern colour
-            string shiftMessage = _descriptionBuilder.BuildPatternColourShiftMessage(appearance, originalColour, currentComponent);
-            return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
+            return shiftResult;
         }
 
         /// <summary>
