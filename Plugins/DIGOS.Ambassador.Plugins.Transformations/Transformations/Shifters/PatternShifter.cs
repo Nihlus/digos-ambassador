@@ -178,14 +178,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <inheritdoc />
         protected override Task<string> GetAddMessageAsync(Bodypart bodypart, Chirality chirality)
         {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
+            var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
             return Task.FromResult(_descriptionBuilder.BuildPatternAddMessage(this.Appearance, component));
         }
 
         /// <inheritdoc />
         protected override Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality)
         {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
+            var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
             return Task.FromResult(_descriptionBuilder.BuildPatternRemoveMessage(this.Appearance, component));
         }
 
