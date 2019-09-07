@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Tools
 
                 var deser = deserB.Build();
 
-                string content = sr.ReadToEnd();
+                var content = sr.ReadToEnd();
 
                 try
                 {

@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
             if (!input.IsNullOrWhitespace() && input.Any(c => c == ':'))
             {
                 // We have a mentioned owner and a name. Owners may have colons in the name, so let's check from the back.
-                int splitIndex = input.LastIndexOf(':');
+                var splitIndex = input.LastIndexOf(':');
                 var rawUser = input.Substring(0, splitIndex);
                 entityName = input.Substring(splitIndex + 1);
 
@@ -195,7 +195,7 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
         private async Task<RetrieveEntityResult<IUser>> ReadUserAsync([NotNull] ICommandContext context, string input)
         {
             // By Mention
-            if (!MentionUtils.TryParseUser(input, out ulong id))
+            if (!MentionUtils.TryParseUser(input, out var id))
             {
                 var getUserResult = await GetUserByIdAsync(context, id);
                 if (getUserResult.IsSuccess)
@@ -235,11 +235,11 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
             }
 
             // By Username + Discriminator
-            int index = input.LastIndexOf('#');
+            var index = input.LastIndexOf('#');
             if (index >= 0)
             {
-                string username = input.Substring(0, index);
-                if (ushort.TryParse(input.Substring(index + 1), out ushort discriminator))
+                var username = input.Substring(0, index);
+                if (ushort.TryParse(input.Substring(index + 1), out var discriminator))
                 {
                     var bestUser = FindBestMatchingUserBy
                     (

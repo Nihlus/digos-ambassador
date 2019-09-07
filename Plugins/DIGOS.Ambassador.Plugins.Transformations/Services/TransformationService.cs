@@ -562,7 +562,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var currentAppearance = getCurrentAppearance.Entity;
 
-            string visualDescription = _descriptionBuilder.BuildVisualDescription(currentAppearance);
+            var visualDescription = _descriptionBuilder.BuildVisualDescription(currentAppearance);
             return CreateEntityResult<string>.FromSuccess(visualDescription);
         }
 

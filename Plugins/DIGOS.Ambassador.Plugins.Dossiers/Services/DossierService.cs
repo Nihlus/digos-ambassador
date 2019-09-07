@@ -228,7 +228,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             // If the only thing that has changed is casing, let it through
             if (!isNewNameUnique)
             {
-                bool isOnlyCaseChange = false;
+                var isOnlyCaseChange = false;
                 if (!(dossier.Title is null))
                 {
                     isOnlyCaseChange = string.Equals(dossier.Title, newTitle, StringComparison.OrdinalIgnoreCase);

@@ -861,7 +861,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             bool isNSFW = false
         )
         {
-            bool isImageNameUnique = !character.Images.Any(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
+            var isImageNameUnique = !character.Images.Any(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
             if (!isImageNameUnique)
             {
                 return ModifyEntityResult.FromError("The character already has an image with that name.");
@@ -911,7 +911,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             [NotNull] string imageName
         )
         {
-            bool hasNamedImage = character.Images.Any(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
+            var hasNamedImage = character.Images.Any(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
             if (!hasNamedImage)
             {
                 return ModifyEntityResult.FromError("The character has no image with that name.");

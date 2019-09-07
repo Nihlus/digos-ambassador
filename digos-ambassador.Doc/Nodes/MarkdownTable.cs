@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
             {
                 sb.AppendLine();
                 sb.Append("|");
-                for (int i = 0; i < this.Columns.Count; ++i)
+                for (var i = 0; i < this.Columns.Count; ++i)
                 {
                     if (i < row.Cells.Count)
                     {

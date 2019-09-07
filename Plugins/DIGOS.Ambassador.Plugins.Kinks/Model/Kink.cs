@@ -102,7 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         {
             unchecked
             {
-                int hashCode = (int)this.Category;
+                var hashCode = (int)this.Category;
                 hashCode = (hashCode * 397) ^ (int)this.FListID;
                 hashCode = (hashCode * 397) ^ (this.Name != null ? this.Name.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (this.Description != null ? this.Description.GetHashCode() : 0);

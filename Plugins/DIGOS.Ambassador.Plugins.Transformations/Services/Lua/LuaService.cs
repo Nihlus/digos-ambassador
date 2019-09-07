@@ -218,8 +218,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
                         lua.DoString($"status, result = run [[{snippet}]]");
                         lua.DoString("output = tostring(result)");
 
-                        string result = lua["output"] as string;
-                        bool ranSuccessfully = lua["status"] is bool b && b;
+                        var result = lua["output"] as string;
+                        var ranSuccessfully = lua["status"] is bool b && b;
                         if (!(result is null) && ranSuccessfully)
                         {
                             return RetrieveEntityResult<string>.FromSuccess(result);
@@ -233,7 +233,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
                             );
                         }
 
-                        string erroringFunction = _getErroringFunctionRegex.Match(result ?? string.Empty).Value;
+                        var erroringFunction = _getErroringFunctionRegex.Match(result ?? string.Empty).Value;
                         if (!_functionWhitelist.Contains(erroringFunction))
                         {
                             return RetrieveEntityResult<string>.FromError

@@ -776,7 +776,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 return;
             }
 
-            int addedOrUpdatedMessageCount = 0;
+            var addedOrUpdatedMessageCount = 0;
 
             var latestMessage = startMessage;
             while (latestMessage.Timestamp < finalMessage.Timestamp)

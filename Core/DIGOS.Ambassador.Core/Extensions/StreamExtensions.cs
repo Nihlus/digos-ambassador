@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Core.Extensions
                 throw new ArgumentOutOfRangeException(nameof(offset), "Reading the signature at the given offset would fall outside of the stream.");
             }
 
-            long originalPosition = @this.Position;
+            var originalPosition = @this.Position;
             var signatureBuffer = new byte[signature.Length];
 
             @this.Seek(offset, SeekOrigin.Begin);

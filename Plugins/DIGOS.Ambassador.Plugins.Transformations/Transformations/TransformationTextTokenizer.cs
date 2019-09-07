@@ -119,7 +119,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         public IReadOnlyList<IReplaceableTextToken> GetTokens([NotNull] string text)
         {
             var tokens = new List<IReplaceableTextToken>();
-            int position = 0;
+            var position = 0;
             while (position < text.Length - 1)
             {
                 // Scan ahead to the next token
@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
 
                 var sb = new StringBuilder();
 
-                int start = position;
+                var start = position;
 
                 // Read the token text
                 while (position + 1 < text.Length - 1 && text[position + 1] != '}')
@@ -179,7 +179,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             string data = null;
             if (tokenText.Contains('|'))
             {
-                int splitter = tokenText.LastIndexOf('|');
+                var splitter = tokenText.LastIndexOf('|');
                 identifier = tokenText.Substring(0, splitter);
                 data = tokenText.Substring(splitter + 1);
             }

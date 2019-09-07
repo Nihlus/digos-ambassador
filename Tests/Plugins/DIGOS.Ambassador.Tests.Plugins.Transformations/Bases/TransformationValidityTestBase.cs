@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 var deser = deserB.Build();
 
-                string content = sr.ReadToEnd();
+                var content = sr.ReadToEnd();
 
                 return deser.Deserialize<T>(content);
             }

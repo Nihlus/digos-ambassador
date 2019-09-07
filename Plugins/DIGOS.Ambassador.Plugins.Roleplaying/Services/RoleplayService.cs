@@ -270,7 +270,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return ModifyEntityResult.FromError("The given message was not authored by a participant of the roleplay.");
             }
 
-            string userNick = message.Author.Username;
+            var userNick = message.Author.Username;
             if (message.Author is SocketGuildUser guildUser && !string.IsNullOrEmpty(guildUser.Nickname))
             {
                 userNick = guildUser.Nickname;

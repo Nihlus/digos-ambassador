@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 [UsedImplicitly]
                 get
                 {
-                    for (int i = -12; i < 14; i++)
+                    for (var i = -12; i < 14; i++)
                     {
                         yield return new object[] { i };
                     }

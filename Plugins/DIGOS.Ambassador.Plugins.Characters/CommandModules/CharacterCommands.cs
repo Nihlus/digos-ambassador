@@ -929,7 +929,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             bool isNSFW = false
         )
         {
-            bool hasAtLeastOneAttachment = this.Context.Message.Attachments.Any();
+            var hasAtLeastOneAttachment = this.Context.Message.Attachments.Any();
             if (!hasAtLeastOneAttachment)
             {
                 await _feedback.SendErrorAsync(this.Context, "You need to attach an image.");
@@ -938,14 +938,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             // Check that it's an image
             var firstAttachment = this.Context.Message.Attachments.First();
-            bool firstAttachmentIsImage = firstAttachment.Width.HasValue && firstAttachment.Height.HasValue;
+            var firstAttachmentIsImage = firstAttachment.Width.HasValue && firstAttachment.Height.HasValue;
 
             if (!firstAttachmentIsImage)
             {
                 await _feedback.SendErrorAsync(this.Context, "You need to attach an image.");
                 return;
             }
-            string imageUrl = firstAttachment.Url;
+            var imageUrl = firstAttachment.Url;
 
             imageName = (imageName ?? Path.GetFileNameWithoutExtension(firstAttachment.Filename))
                         ?? firstAttachment.Url.GetHashCode().ToString();

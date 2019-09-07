@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
         /// <inheritdoc />
         public override async Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
-            if (ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out ulong id))
+            if (ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out var id))
             {
                 if (await context.Channel.GetMessageAsync(id) is T message)
                 {

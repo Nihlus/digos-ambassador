@@ -287,7 +287,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         {
             await _feedback.SendConfirmationAsync(this.Context, "Updating kinks...");
 
-            int updatedKinkCount = 0;
+            var updatedKinkCount = 0;
 
             // Get the latest JSON from F-list
             string json;

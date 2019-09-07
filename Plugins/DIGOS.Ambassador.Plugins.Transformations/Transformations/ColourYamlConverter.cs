@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 return null;
             }
 
-            if (!Colour.TryParse(rawColour, out Colour value))
+            if (!Colour.TryParse(rawColour, out var value))
             {
                 throw new ArgumentException("Failed to parse a valid colour.");
             }

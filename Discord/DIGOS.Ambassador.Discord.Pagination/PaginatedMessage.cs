@@ -208,7 +208,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
 
                 var response = responseResult.Entity;
 
-                if (!int.TryParse(response.Content, out int request) || request < 1 || request > this.Pages.Count)
+                if (!int.TryParse(response.Content, out var request) || request < 1 || request > this.Pages.Count)
                 {
                     await response.DeleteAsync();
 

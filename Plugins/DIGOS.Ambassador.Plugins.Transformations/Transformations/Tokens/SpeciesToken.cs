@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 return "person";
             }
 
-            int totalPoints = speciesShares.Values.Sum();
+            var totalPoints = speciesShares.Values.Sum();
 
             // pick the species with the largest share
             var largestSpecies = speciesShares.OrderByDescending(kvp => kvp.Value).FirstOrDefault();

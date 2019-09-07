@@ -83,7 +83,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             [Fact]
             public async Task CanAccessPassedVariables()
             {
-                int variable = 10;
+                var variable = 10;
                 const string code = "return variable";
 
                 var result = await _lua.ExecuteSnippetAsync(code, (nameof(variable), variable));

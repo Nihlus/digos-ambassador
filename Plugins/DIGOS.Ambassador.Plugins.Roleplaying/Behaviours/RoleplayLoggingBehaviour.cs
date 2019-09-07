@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 return;
             }
 
-            int discard = 0;
+            var discard = 0;
 
             if (message.HasCharPrefix('!', ref discard))
             {
@@ -96,7 +96,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             }
 
             // Ignore all changes except text changes
-            bool isTextUpdate = updatedMessage.EditedTimestamp.HasValue &&
+            var isTextUpdate = updatedMessage.EditedTimestamp.HasValue &&
                                 updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
 
             if (!isTextUpdate)

@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         {
             unchecked
             {
-                int hash = 17;
+                var hash = 17;
 
                 hash *= 23 + obj.Kink.FListID.GetHashCode();
                 hash *= 23 + obj.Preference.GetHashCode();

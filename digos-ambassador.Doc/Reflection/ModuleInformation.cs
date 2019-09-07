@@ -111,7 +111,7 @@ namespace DIGOS.Ambassador.Doc.Reflection
                 return false;
             }
 
-            bool hasPrefix = moduleType.TryGetGroup(out _);
+            var hasPrefix = moduleType.TryGetGroup(out _);
 
             if (!moduleType.TryGetSummary(out var summary))
             {
