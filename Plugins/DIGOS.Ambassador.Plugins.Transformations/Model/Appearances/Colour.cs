@@ -21,14 +21,11 @@
 //
 
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Core.Extensions;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using YamlDotNet.Serialization;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
 {

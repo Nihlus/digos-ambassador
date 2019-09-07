@@ -23,12 +23,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;

@@ -32,7 +32,6 @@ using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
