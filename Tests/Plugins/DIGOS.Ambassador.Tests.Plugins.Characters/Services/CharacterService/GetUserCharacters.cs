@@ -91,7 +91,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsCorrectCharacterFromDatabase()
             {
-                var character = new Character((long)_guild.Id, _user, "Dummy");;
+                var character = new Character((long)_guild.Id, _user, "Dummy");
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();

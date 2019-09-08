@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Plugins.Abstractions
         /// <inheritdoc/>
         public sealed override string ToString()
         {
-            return Name;
+            return this.Name;
         }
     }
 }

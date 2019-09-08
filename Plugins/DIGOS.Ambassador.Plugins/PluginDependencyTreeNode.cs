@@ -98,7 +98,7 @@ namespace DIGOS.Ambassador.Plugins
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{Plugin} => ({string.Join(", ", _dependants.Select(d => d.Plugin))})";
+            return $"{this.Plugin} => ({string.Join(", ", _dependants.Select(d => d.Plugin))})";
         }
     }
 }

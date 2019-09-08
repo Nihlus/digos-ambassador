@@ -23,7 +23,6 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord.Commands;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
 {
@@ -47,7 +46,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
         }
 
         /// <inheritdoc />
-        [ItemNotNull]
         public abstract Task<ExportedRoleplay> ExportAsync(Roleplay roleplay);
     }
 }
