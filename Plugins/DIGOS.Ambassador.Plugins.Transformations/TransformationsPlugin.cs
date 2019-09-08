@@ -58,13 +58,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations
         public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
         {
             serviceCollection
+                .AddSingleton<TransformationDescriptionBuilder>()
                 .AddScoped<LuaService>()
-                .AddScoped
-                (
-                    provider =>
-                        ActivatorUtilities.CreateInstance<TransformationService>(provider)
-                            .WithDescriptionBuilder(new TransformationDescriptionBuilder(provider))
-                )
+                .AddScoped<TransformationService>()
                 .AddSchemaAwareDbContextPool<TransformationsDatabaseContext>();
 
             return Task.FromResult(true);
