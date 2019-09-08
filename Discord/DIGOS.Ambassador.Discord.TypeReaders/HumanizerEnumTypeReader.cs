@@ -49,7 +49,9 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
             }
             catch (NoMatchFoundException)
             {
-                var message = $"Couldn't parse \"{input}\" as an enum of type \"{typeof(T).Name}\"";
+                var message = $"\"{input}\" isn't something I recognize as a " +
+                              $"{typeof(T).Name.Humanize().Transform(To.LowerCase)}.";
+
                 return Task.FromResult(TypeReaderResult.FromError(CommandError.Unsuccessful, message));
             }
             finally

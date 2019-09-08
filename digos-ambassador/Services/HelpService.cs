@@ -147,13 +147,27 @@ namespace DIGOS.Ambassador.Services
         {
             var eb = _feedback.CreateEmbedBase();
             eb.WithTitle("Perhaps you meant one of the following?");
+            eb.WithDescription("It's also possible you forgot to enclose something with a space inside it in quotes.");
 
-            foreach (var matchingCommand in matchingCommands)
+            var commands = matchingCommands.ToList();
+
+            const int maxCommands = 3;
+
+            foreach (var matchingCommand in commands.Take(maxCommands))
             {
                 eb.AddField
                 (
                     $"{matchingCommand.Alias} {BuildParameterList(matchingCommand.Command)}",
                     matchingCommand.Command.Summary
+                );
+            }
+
+            if (commands.Count > maxCommands)
+            {
+                var remainingCommands = commands.Count - maxCommands;
+                eb.WithFooter
+                (
+                    $"+ {remainingCommands} more {(remainingCommands > 1 ? "command".Pluralize() : "command")}."
                 );
             }
 
