@@ -28,7 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
     /// <summary>
     /// Determines overlap equality for two user kinks.
     /// </summary>
-    public class UserKinkOverlapEqualityComparer : IEqualityComparer<UserKink>
+    internal sealed class UserKinkOverlapEqualityComparer : IEqualityComparer<UserKink>
     {
         /// <inheritdoc />
         public bool Equals(UserKink x, UserKink y)

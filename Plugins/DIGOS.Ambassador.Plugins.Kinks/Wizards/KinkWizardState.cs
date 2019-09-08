@@ -25,7 +25,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
     /// <summary>
     /// Represents the state that the kink wizard is in.
     /// </summary>
-    public enum KinkWizardState
+    internal enum KinkWizardState
     {
         /// <summary>
         /// The category selection page.

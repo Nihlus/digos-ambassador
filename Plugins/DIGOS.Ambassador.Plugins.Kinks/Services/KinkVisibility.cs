@@ -20,11 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Plugins.Kinks.Services
 {
     /// <summary>
     /// Holds options for the visibility of a user's kink list.
     /// </summary>
+    [PublicAPI]
     public enum KinkVisibility
     {
         /// <summary>

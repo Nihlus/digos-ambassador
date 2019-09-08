@@ -29,6 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
+    [PublicAPI]
     public class KinksDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "KinkModule";

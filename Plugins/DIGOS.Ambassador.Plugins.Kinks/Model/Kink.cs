@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
@@ -31,6 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
     /// <summary>
     /// Represents a sexual kink or fetish.
     /// </summary>
+    [PublicAPI]
     [Table("Kinks", Schema = "KinkModule")]
     public class Kink : IEquatable<Kink>, IEFEntity
     {
@@ -45,17 +47,42 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         /// <summary>
         /// Gets or sets the F-List ID of the kink.
         /// </summary>
-        public uint FListID { get; set; }
+        public long FListID { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the kink.
         /// </summary>
+        [Required, NotNull]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the full description of the kink.
         /// </summary>
+        [Required, NotNull]
         public string Description { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Kink"/> class.
+        /// </summary>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+        protected Kink()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Kink"/> class.
+        /// </summary>
+        /// <param name="name">The name of the kink.</param>
+        /// <param name="description">The kink's description.</param>
+        /// <param name="flistID">The F-List ID of the kink.</param>
+        /// <param name="category">The kink's category.</param>
+        public Kink(string name, string description, uint flistID, KinkCategory category)
+        {
+            this.Name = name;
+            this.Description = description;
+            this.FListID = flistID;
+            this.Category = category;
+        }
 
         /// <inheritdoc />
         [Pure]
@@ -104,8 +131,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
             {
                 var hashCode = (int)this.Category;
                 hashCode = (hashCode * 397) ^ (int)this.FListID;
-                hashCode = (hashCode * 397) ^ (this.Name != null ? this.Name.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (this.Description != null ? this.Description.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ this.Name.GetHashCode();
+                hashCode = (hashCode * 397) ^ this.Description.GetHashCode();
                 return hashCode;
             }
         }

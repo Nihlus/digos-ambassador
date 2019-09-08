@@ -42,48 +42,49 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
     /// <summary>
     /// Acts as an interactive wizard for interactively setting the kink preferences of users.
     /// </summary>
-    public class KinkWizard : InteractiveMessage, IWizard
+    internal sealed class KinkWizard : InteractiveMessage, IWizard
     {
-        private readonly UserFeedbackService _feedback;
-        private readonly KinkService _kinks;
+        [NotNull] private readonly UserFeedbackService _feedback;
+        [NotNull] private readonly KinkService _kinks;
 
-        private readonly IUser _targetUser;
+        [NotNull] private readonly IUser _targetUser;
 
-        private static readonly Emoji Next = new Emoji("\x25B6");
-        private static readonly Emoji Previous = new Emoji("\x25C0");
-        private static readonly Emoji First = new Emoji("\x23EE");
-        private static readonly Emoji Last = new Emoji("\x23ED");
-        private static readonly Emoji EnterCategory = new Emoji("\xD83D\xDD22");
+        [NotNull] private static readonly Emoji Next = new Emoji("\x25B6");
+        [NotNull] private static readonly Emoji Previous = new Emoji("\x25C0");
+        [NotNull] private static readonly Emoji First = new Emoji("\x23EE");
+        [NotNull] private static readonly Emoji Last = new Emoji("\x23ED");
+        [NotNull] private static readonly Emoji EnterCategory = new Emoji("\xD83D\xDD22");
 
-        private static readonly Emoji Fave = new Emoji("\x2764");
-        private static readonly Emoji Like = new Emoji("\x2705");
-        private static readonly Emoji Maybe = new Emoji("\x26A0");
-        private static readonly Emoji Never = new Emoji("\x26D4");
-        private static readonly Emoji NoPreference = new Emoji("🤷");
+        [NotNull] private static readonly Emoji Fave = new Emoji("\x2764");
+        [NotNull] private static readonly Emoji Like = new Emoji("\x2705");
+        [NotNull] private static readonly Emoji Maybe = new Emoji("\x26A0");
+        [NotNull] private static readonly Emoji Never = new Emoji("\x26D4");
+        [NotNull] private static readonly Emoji NoPreference = new Emoji("🤷");
 
-        private static readonly Emoji Back = new Emoji("\x23EB");
-        private static readonly Emoji Exit = new Emoji("\x23F9");
-        private static readonly Emoji Info = new Emoji("\x2139");
+        [NotNull] private static readonly Emoji Back = new Emoji("\x23EB");
+        [NotNull] private static readonly Emoji Exit = new Emoji("\x23F9");
+        [NotNull] private static readonly Emoji Info = new Emoji("\x2139");
 
         /// <summary>
         /// Gets the currently accepted emotes.
         /// </summary>
-        [NotNull]
+        [NotNull, ItemNotNull]
         private IReadOnlyCollection<IEmote> AcceptedEmotes => GetCurrentPageEmotes().ToList();
 
         /// <summary>
         /// Gets the emotes that are currently rejected by the wizard.
         /// </summary>
-        [NotNull]
+        [NotNull, ItemNotNull]
         private IReadOnlyCollection<IEmote> CurrrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
 
-        private readonly Embed _loadingEmbed;
+        [NotNull] private readonly Embed _loadingEmbed;
 
         private int _currentFListKinkID;
 
         private KinkWizardState _state;
 
-        private IReadOnlyList<KinkCategory> _categories;
+        [NotNull]
+        private IReadOnlyList<KinkCategory> _categories = new List<KinkCategory>();
 
         private int _currentCategoryOffset;
 
@@ -95,9 +96,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// <param name="targetUser">The target user.</param>
         public KinkWizard
         (
-            UserFeedbackService feedback,
-            KinkService kinkService,
-            IUser targetUser
+            [NotNull] UserFeedbackService feedback,
+            [NotNull] KinkService kinkService,
+            [NotNull] IUser targetUser
         )
             : base(targetUser)
         {
@@ -264,6 +265,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             }
         }
 
+        [NotNull]
         private async Task ConsumeCategoryInteractionAsync([NotNull] SocketReaction reaction)
         {
             var emote = reaction.Emote;
@@ -365,7 +367,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             await UpdateAsync();
         }
 
-        private async Task<ModifyEntityResult> OpenCategory(string categoryName)
+        [NotNull, ItemNotNull]
+        private async Task<ModifyEntityResult> OpenCategory([NotNull] string categoryName)
         {
             var getCategoryResult = _categories.Select(c => c.ToString()).BestLevenshteinMatch(categoryName, 0.75);
             if (!getCategoryResult.IsSuccess)
@@ -397,6 +400,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             return ModifyEntityResult.FromSuccess();
         }
 
+        [NotNull]
         [SuppressMessage("Style", "SA1118", Justification = "Large text blocks.")]
         private async Task DisplayHelpTextAsync()
         {
@@ -446,6 +450,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             await _feedback.SendEmbedAndDeleteAsync(this.Channel, eb.Build(), TimeSpan.FromSeconds(30));
         }
 
+        [NotNull]
         private async Task SetCurrentKinkPreference(KinkPreference preference)
         {
             var getUserKinkResult = await _kinks.GetUserKinkByFListIDAsync(_targetUser, _currentFListKinkID);
@@ -486,7 +491,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             }
         }
 
-        [NotNull]
+        [NotNull, ItemNotNull]
         private IEnumerable<IEmote> GetCurrentPageRejectedEmotes()
         {
             switch (_state)

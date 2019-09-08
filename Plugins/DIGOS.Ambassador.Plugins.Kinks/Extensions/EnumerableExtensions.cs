@@ -36,6 +36,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
     /// <summary>
     /// Extensions for enumerables.
     /// </summary>
+    [PublicAPI]
     public static class EnumerableExtensions
     {
         /// <summary>
@@ -45,16 +46,19 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
         /// <param name="selector">A function which selects the object to return.</param>
         /// <param name="stringSelector">A function which selects the string field to search.</param>
         /// <param name="search">The pattern to search for.</param>
-        /// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
+        /// <param name="tolerance">
+        /// The percentile distance tolerance for results. The distance must be below this value.
+        /// </param>
         /// <typeparam name="TSource">The source type of the enumerable.</typeparam>
         /// <typeparam name="TResult">The resulting type.</typeparam>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        [Pure, NotNull, ItemNotNull]
         public static async Task<RetrieveEntityResult<TResult>> SelectFromBestLevenshteinMatchAsync<TSource, TResult>
         (
             [NotNull] this IQueryable<TSource> @this,
-            Func<TSource, TResult> selector,
+            [NotNull] Func<TSource, TResult> selector,
             [NotNull] Expression<Func<TSource, string>> stringSelector,
-            string search,
+            [NotNull] string search,
             double tolerance = 0.25
         )
             where TResult : class
@@ -92,16 +96,17 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
         /// <typeparam name="TSource">The source type of the enumerable.</typeparam>
         /// <typeparam name="TResult">The resulting type.</typeparam>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        [Pure, NotNull]
         public static RetrieveEntityResult<TResult> SelectFromBestLevenshteinMatch<TSource, TResult>
         (
-            [NotNull] this IEnumerable<TSource> @this,
-            Func<TSource, TResult> selector,
+            [NotNull, ItemNotNull] this IEnumerable<TSource> @this,
+            [NotNull] Func<TSource, TResult> selector,
             [NotNull] Func<TSource, string> stringSelector,
-            string search,
+            [NotNull] string search,
             double tolerance = 0.25
         )
-        where TResult : class
-        where TSource : class
+            where TResult : class
+            where TSource : class
         {
             var enumerable = @this as IList<TSource> ?? @this.ToList();
 
@@ -131,7 +136,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
         /// <param name="search">The value to search for.</param>
         /// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public static async Task<RetrieveEntityResult<string>> BestLevenshteinMatchAsync(this IQueryable<string> @this, string search, double tolerance = 0.25)
+        [Pure, NotNull, ItemNotNull]
+        public static async Task<RetrieveEntityResult<string>> BestLevenshteinMatchAsync
+        (
+            [NotNull, ItemNotNull] this IQueryable<string> @this,
+            [NotNull] string search,
+            double tolerance = 0.25
+        )
         {
             var candidates =
                 from candidate in @this
@@ -161,7 +172,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
         /// <param name="search">The value to search for.</param>
         /// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public static RetrieveEntityResult<string> BestLevenshteinMatch([NotNull] this IEnumerable<string> @this, string search, double tolerance = 0.25)
+        [Pure, NotNull]
+        public static RetrieveEntityResult<string> BestLevenshteinMatch
+        (
+            [NotNull, ItemNotNull] this IEnumerable<string> @this,
+            [NotNull] string search,
+            double tolerance = 0.25
+        )
         {
             var candidates = @this.Select
             (

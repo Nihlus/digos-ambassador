@@ -323,13 +323,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
 
                 updatedKinkCount += await _kinks.UpdateKinksAsync(kinkSection.Value.Kinks.Select
                 (
-                    k => new Kink
-                    {
-                        Category = kinkCategory,
-                        Name = k.Name,
-                        Description = k.Description,
-                        FListID = k.KinkId
-                    }
+                    k => new Kink(k.Name, k.Description, k.KinkId, kinkCategory)
                 ));
             }
 

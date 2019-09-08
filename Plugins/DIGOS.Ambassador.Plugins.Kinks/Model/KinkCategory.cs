@@ -28,6 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
     /// <summary>
     /// Represents kink categories. Values are taken from the F-list API.
     /// </summary>
+    [PublicAPI]
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public enum KinkCategory
     {

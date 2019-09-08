@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Kinks.CommandModules;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
 using DIGOS.Ambassador.Plugins.Kinks.Services;
 using Discord.Commands;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,7 +43,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks
     /// <summary>
     /// Describes the kink plugin.
     /// </summary>
-    public class KinksPlugin : PluginDescriptor, IMigratablePlugin
+    [PublicAPI]
+    public sealed class KinksPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Kinks";

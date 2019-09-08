@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
     /// <summary>
     /// Represents a JSON kink collection from the F-list API, organized into categories.
     /// </summary>
-    public class KinkCollection
+    internal class KinkCollection
     {
         /// <summary>
         /// Gets or sets the error that the API returned, if any.

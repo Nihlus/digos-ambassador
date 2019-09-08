@@ -31,6 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
     /// <summary>
     /// Represents a user's kink, along with their preference for it.
     /// </summary>
+    [PublicAPI]
     [Table("UserKinks", Schema = "KinkModule")]
     public class UserKink : IEFEntity
     {
@@ -40,13 +41,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         /// <summary>
         /// Gets or sets the user the kink belongs to.
         /// </summary>
-        [Required]
+        [Required, NotNull]
         public virtual User User { get; set; }
 
         /// <summary>
         /// Gets or sets the kink.
         /// </summary>
-        [Required]
+        [Required, NotNull]
         public virtual Kink Kink { get; set; }
 
         /// <summary>

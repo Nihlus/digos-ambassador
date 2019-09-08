@@ -27,7 +27,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
     /// <summary>
     /// Represents a JSON kink category from the F-list API.
     /// </summary>
-    public class FListKinkCategory
+    internal class FListKinkCategory
     {
         /// <summary>
         /// Gets or sets the category name.

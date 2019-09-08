@@ -20,11 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Plugins.Kinks.Model
 {
     /// <summary>
     /// Represents a user's preference for a certain sexual kink or fetish.
     /// </summary>
+    [PublicAPI]
     public enum KinkPreference
     {
         /// <summary>
