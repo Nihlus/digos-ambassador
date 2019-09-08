@@ -35,7 +35,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     /// <summary>
     /// Handles execution of lua code.
     /// </summary>
-    public class LuaService
+    [PublicAPI]
+    public sealed class LuaService
     {
         [NotNull, ItemNotNull]
         private readonly IReadOnlyList<string> _functionWhitelist = new[]

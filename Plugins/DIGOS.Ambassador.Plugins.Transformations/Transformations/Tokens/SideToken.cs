@@ -22,14 +22,16 @@
 
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
 {
     /// <summary>
     /// A token that gets replaced with the transformation's chirality.
     /// </summary>
+    [PublicAPI]
     [TokenIdentifier("side", "chirality")]
-    public class SideToken : ReplacableTextToken<SideToken>
+    public sealed class SideToken : ReplacableTextToken<SideToken>
     {
         /// <inheritdoc />
         public override string GetText(Appearance appearance, AppearanceComponent component)

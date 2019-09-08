@@ -27,7 +27,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     /// <summary>
     /// Represents a node in a lua table tree structure.
     /// </summary>
-    public interface INode
+    internal interface INode
     {
         /// <summary>
         /// Gets or sets the name of the node.

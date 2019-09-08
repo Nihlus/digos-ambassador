@@ -30,8 +30,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// <summary>
     /// Represents a token which executes an inline snippet of lua code and gets replaced with the result.
     /// </summary>
+    [PublicAPI]
     [TokenIdentifier("snippet", "lua", "sn")]
-    public class LuaSnippetToken : ReplacableTextToken<LuaSnippetToken>
+    public sealed class LuaSnippetToken : ReplacableTextToken<LuaSnippetToken>
     {
         [NotNull]
         private readonly LuaService _lua;

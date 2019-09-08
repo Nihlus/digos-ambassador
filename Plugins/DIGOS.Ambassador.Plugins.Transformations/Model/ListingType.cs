@@ -20,11 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Plugins.Transformations.Model
 {
     /// <summary>
     /// Represents a value indicating whether a user is on another user's blacklist or whitelist.
     /// </summary>
+    [PublicAPI]
     public enum ListingType
     {
         /// <summary>

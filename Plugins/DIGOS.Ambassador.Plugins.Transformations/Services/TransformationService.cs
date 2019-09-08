@@ -47,7 +47,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
     /// <summary>
     /// Handles transformations of users and their characters.
     /// </summary>
-    public class TransformationService
+    [PublicAPI]
+    public sealed class TransformationService
     {
         [NotNull]
         private readonly TransformationsDatabaseContext _database;
@@ -74,11 +75,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="descriptionBuilder">The description builder.</param>
         public TransformationService
         (
-            ContentService content,
-            UserService users,
-            ServerService servers,
-            TransformationsDatabaseContext database,
-            TransformationDescriptionBuilder descriptionBuilder
+            [NotNull] ContentService content,
+            [NotNull] UserService users,
+            [NotNull] ServerService servers,
+            [NotNull] TransformationsDatabaseContext database,
+            [NotNull] TransformationDescriptionBuilder descriptionBuilder
         )
         {
             _content = content;
@@ -1043,9 +1044,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                         existingEntry.CurrentValues.SetValues(transformation);
 
                         // Workarounds for some broken EF core behaviour
-                        var baseColourNeedsUpdate = existingTransformation.DefaultBaseColour is null ||
-                                                    !existingTransformation.DefaultBaseColour
-                                                        .IsSameColourAs(transformation.DefaultBaseColour);
+                        var baseColourNeedsUpdate = !existingTransformation.DefaultBaseColour
+                            .IsSameColourAs(transformation.DefaultBaseColour);
 
                         if (baseColourNeedsUpdate)
                         {

@@ -28,6 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     /// <summary>
     /// Modifying adjectives for shades.
     /// </summary>
+    [PublicAPI]
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public enum ShadeModifier
     {

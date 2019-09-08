@@ -28,7 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     /// <summary>
     /// Represents a named table, which holds a list of nodes.
     /// </summary>
-    public class TableNode : NamedNode<List<INode>>
+    internal sealed class TableNode : NamedNode<List<INode>>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TableNode"/> class.

@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// <summary>
     /// Abstract base class for appearance shifter.
     /// </summary>
-    public abstract class AppearanceShifter : IAppearanceShifter
+    internal abstract class AppearanceShifter : IAppearanceShifter
     {
         /// <summary>
         /// Gets the appearance that is being shifted.

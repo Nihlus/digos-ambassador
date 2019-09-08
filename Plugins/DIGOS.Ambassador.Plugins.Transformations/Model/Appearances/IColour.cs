@@ -27,6 +27,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     /// <summary>
     /// Represents a transformation colour.
     /// </summary>
+    [PublicAPI]
     public interface IColour
     {
         /// <summary>

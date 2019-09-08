@@ -33,6 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
     /// <summary>
     /// Represents a single species (i.e, associated transformations).
     /// </summary>
+    [PublicAPI]
     [Table("Species", Schema = "TransformationModule")]
     public class Species : IEFEntity
     {

@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// <summary>
     /// Abstract base class for appearance remover. This class is responsible for removing things from an appearance.
     /// </summary>
-    public abstract class AppearanceRemover : IAppearanceRemover
+    internal abstract class AppearanceRemover : IAppearanceRemover
     {
         /// <summary>
         /// Gets the appearance that is being shifted.

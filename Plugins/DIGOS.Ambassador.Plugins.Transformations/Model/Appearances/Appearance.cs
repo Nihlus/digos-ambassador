@@ -42,6 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     /// <summary>
     /// Represents the physical appearance of a character.
     /// </summary>
+    [PublicAPI]
     [Table("Appearances", Schema = "TransformationModule")]
     public class Appearance : IEFEntity
     {

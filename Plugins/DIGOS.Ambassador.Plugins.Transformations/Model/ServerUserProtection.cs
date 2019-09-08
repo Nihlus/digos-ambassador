@@ -33,6 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
     /// <summary>
     /// Holds protection data for a specific user on a specific server.
     /// </summary>
+    [PublicAPI]
     [Table("ServerUserProtections", Schema = "TransformationModule")]
     public class ServerUserProtection : IEFEntity
     {

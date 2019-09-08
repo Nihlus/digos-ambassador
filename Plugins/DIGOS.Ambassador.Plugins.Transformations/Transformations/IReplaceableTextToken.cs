@@ -29,6 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// <summary>
     /// Represents a replaceable token in text.
     /// </summary>
+    [PublicAPI]
     public interface IReplaceableTextToken
     {
         /// <summary>

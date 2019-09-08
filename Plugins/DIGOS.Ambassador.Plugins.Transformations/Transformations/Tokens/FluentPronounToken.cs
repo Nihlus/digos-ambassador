@@ -30,8 +30,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// <summary>
     /// A token that gets replaced with the correct pronoun based on a fluent parsing method.
     /// </summary>
+    [PublicAPI]
     [TokenIdentifier("fluent", "f")]
-    public class FluentPronounToken : ReplacableTextToken<FluentPronounToken>
+    public sealed class FluentPronounToken : ReplacableTextToken<FluentPronounToken>
     {
         [NotNull]
         private readonly PronounService _pronouns;

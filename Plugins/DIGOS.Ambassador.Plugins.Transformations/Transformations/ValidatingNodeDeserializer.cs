@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// <summary>
     /// A node deserializer which validates its input as it goes.
     /// </summary>
-    public class ValidatingNodeDeserializer : INodeDeserializer
+    public sealed class ValidatingNodeDeserializer : INodeDeserializer
     {
         [NotNull]
         private readonly INodeDeserializer _nodeDeserializer;

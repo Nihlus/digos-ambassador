@@ -23,14 +23,16 @@
 using System;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
 {
     /// <summary>
     /// A token that gets replaced with a pattern name.
     /// </summary>
+    [PublicAPI]
     [TokenIdentifier("pattern", "p")]
-    public class PatternToken : ReplacableTextToken<PatternToken>
+    public sealed class PatternToken : ReplacableTextToken<PatternToken>
     {
         /// <inheritdoc />
         public override string GetText(Appearance appearance, AppearanceComponent component)

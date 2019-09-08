@@ -31,6 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
+    [PublicAPI]
     public class TransformationsDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "TransformationModule";

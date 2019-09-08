@@ -20,11 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
 {
     /// <summary>
     /// Represents the chirality of a component.
     /// </summary>
+    [PublicAPI]
     public enum Chirality
     {
         /// <summary>

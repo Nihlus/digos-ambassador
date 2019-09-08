@@ -28,9 +28,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// <summary>
     /// Decorates a text token class with its in-text identifier.
     /// </summary>
+    [PublicAPI]
     [MeansImplicitUse]
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-    public class TokenIdentifierAttribute : Attribute
+    public sealed class TokenIdentifierAttribute : Attribute
     {
         /// <summary>
         /// Gets or sets the in-text identifier of the token.

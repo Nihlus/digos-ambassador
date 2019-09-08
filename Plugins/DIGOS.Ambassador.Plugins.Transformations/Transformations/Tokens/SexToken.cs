@@ -23,6 +23,7 @@
 using System.Linq;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+using JetBrains.Annotations;
 using static DIGOS.Ambassador.Plugins.Transformations.Transformations.Bodypart;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
@@ -30,8 +31,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// <summary>
     /// A token that gets replaced with a character's physical sex.
     /// </summary>
+    [PublicAPI]
     [TokenIdentifier("sex")]
-    public class SexToken : ReplacableTextToken<SexToken>
+    public sealed class SexToken : ReplacableTextToken<SexToken>
     {
         /// <inheritdoc />
         public override string GetText(Appearance appearance, AppearanceComponent component)

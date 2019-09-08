@@ -34,6 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
     /// <summary>
     /// Holds global protection data for a specific user.
     /// </summary>
+    [PublicAPI]
     [Table("GlobalUserProtections", Schema = "TransformationModule")]
     public class GlobalUserProtection : IEFEntity
     {

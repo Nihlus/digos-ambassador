@@ -28,6 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     /// <summary>
     /// Represents the physical feeling of something.
     /// </summary>
+    [PublicAPI]
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public enum Texture
     {

@@ -32,6 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
     /// Represents a protection entry, that is, a user that has been whitelisted or blacklisted by another user in the
     /// TF module.
     /// </summary>
+    [PublicAPI]
     [Table("UserProtectionEntries", Schema = "TransformationModule")]
     public class UserProtectionEntry : IEFEntity
     {

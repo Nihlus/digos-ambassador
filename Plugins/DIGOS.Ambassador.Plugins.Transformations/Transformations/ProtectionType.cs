@@ -20,11 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
 {
     /// <summary>
     /// Represents protection types for interactions between users.
     /// </summary>
+    [PublicAPI]
     public enum ProtectionType
     {
         /// <summary>

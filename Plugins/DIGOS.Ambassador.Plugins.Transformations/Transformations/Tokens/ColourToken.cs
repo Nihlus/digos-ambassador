@@ -30,8 +30,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// <summary>
     /// A token that gets replaced with a colour.
     /// </summary>
+    [PublicAPI]
     [TokenIdentifier("colour", "c")]
-    public class ColourToken : ReplacableTextToken<ColourToken>
+    public sealed class ColourToken : ReplacableTextToken<ColourToken>
     {
         /// <summary>
         /// Gets the form of the pronoun.

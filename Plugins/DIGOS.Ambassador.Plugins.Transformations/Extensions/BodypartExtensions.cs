@@ -33,6 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
     /// <summary>
     /// Extensions for the <see cref="Bodypart"/> enum.
     /// </summary>
+    [PublicAPI]
     public static class BodypartExtensions
     {
         /// <summary>

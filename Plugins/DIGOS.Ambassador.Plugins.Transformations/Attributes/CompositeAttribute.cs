@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Attributes
     /// An attribute which marks a bodypart as a composite part.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class CompositeAttribute : Attribute
+    internal sealed class CompositeAttribute : Attribute
     {
         /// <summary>
         /// Gets the list of parts that compose this part.

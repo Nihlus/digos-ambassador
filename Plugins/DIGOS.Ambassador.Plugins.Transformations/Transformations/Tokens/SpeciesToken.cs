@@ -23,14 +23,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
 {
     /// <summary>
     /// A token that gets replaced with a species.
     /// </summary>
+    [PublicAPI]
     [TokenIdentifier("species", "s")]
-    public class SpeciesToken : ReplacableTextToken<SpeciesToken>
+    public sealed class SpeciesToken : ReplacableTextToken<SpeciesToken>
     {
         /// <inheritdoc />
         public override string GetText(Appearance appearance, AppearanceComponent component)

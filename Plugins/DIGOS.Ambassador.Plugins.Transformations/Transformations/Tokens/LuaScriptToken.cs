@@ -31,8 +31,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// <summary>
     /// Represents a token which executes a named lua code script and gets replaced with the result.
     /// </summary>
+    [PublicAPI]
     [TokenIdentifier("script", "sc")]
-    public class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
+    public sealed class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
     {
         [NotNull]
         private readonly LuaService _lua;

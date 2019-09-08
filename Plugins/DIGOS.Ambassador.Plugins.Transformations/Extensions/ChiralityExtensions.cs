@@ -29,6 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
     /// <summary>
     /// Extension methods for the <see cref="Chirality"/> enum.
     /// </summary>
+    [PublicAPI]
     public static class ChiralityExtensions
     {
         /// <summary>

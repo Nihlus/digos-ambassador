@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// <summary>
     /// Shifts the colour of components.
     /// </summary>
-    public class ColourShifter : AppearanceShifter
+    internal sealed class ColourShifter : AppearanceShifter
     {
         [NotNull]
         private readonly TransformationService _transformations;

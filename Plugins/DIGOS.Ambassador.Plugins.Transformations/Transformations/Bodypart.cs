@@ -21,12 +21,14 @@
 //
 
 using DIGOS.Ambassador.Plugins.Transformations.Attributes;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
 {
     /// <summary>
     /// Represents a single transformable body part.
     /// </summary>
+    [PublicAPI]
     public enum Bodypart
     {
         /// <summary>

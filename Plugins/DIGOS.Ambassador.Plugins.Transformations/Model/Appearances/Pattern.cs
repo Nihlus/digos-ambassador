@@ -28,6 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     /// <summary>
     /// Patterns that components can have.
     /// </summary>
+    [PublicAPI]
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public enum Pattern
     {

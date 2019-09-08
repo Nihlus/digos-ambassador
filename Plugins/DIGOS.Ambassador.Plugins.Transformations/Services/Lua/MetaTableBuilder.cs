@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     /// <summary>
     /// Builds a lua metatable from a list of values and functions names.
     /// </summary>
-    public class MetaTableBuilder
+    public sealed class MetaTableBuilder
     {
         [NotNull, ItemNotNull]
         private readonly List<string> _entries = new List<string>();

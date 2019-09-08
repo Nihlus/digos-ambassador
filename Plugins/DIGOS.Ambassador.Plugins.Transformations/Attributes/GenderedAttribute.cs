@@ -28,7 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Attributes
     /// An attribute which marks a bodypart as gendered.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class GenderedAttribute : Attribute
+    internal sealed class GenderedAttribute : Attribute
     {
     }
 }

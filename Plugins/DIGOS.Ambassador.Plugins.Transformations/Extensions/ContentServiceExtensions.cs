@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
     /// <summary>
     /// Extension methods for the <see cref="ContentService"/> class.
     /// </summary>
-    public static class ContentServiceExtensions
+    internal static class ContentServiceExtensions
     {
         /// <summary>
         /// Gets the base dossier path.

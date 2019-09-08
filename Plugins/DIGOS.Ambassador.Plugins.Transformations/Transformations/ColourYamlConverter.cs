@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// <summary>
     /// YAML deserialization converter for colour objects.
     /// </summary>
-    public class ColourYamlConverter : IYamlTypeConverter
+    public sealed class ColourYamlConverter : IYamlTypeConverter
     {
         /// <inheritdoc />
         public bool Accepts([NotNull] Type type)

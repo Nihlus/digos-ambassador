@@ -35,7 +35,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// <summary>
     /// Shifts the species of appearances.
     /// </summary>
-    public sealed class SpeciesShifter : AppearanceShifter
+    internal sealed class SpeciesShifter : AppearanceShifter
     {
         [NotNull]
         private readonly Species _species;

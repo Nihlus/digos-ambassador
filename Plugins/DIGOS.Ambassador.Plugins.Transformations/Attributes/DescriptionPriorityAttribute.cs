@@ -28,7 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Attributes
     /// An attribute which marks a bodypart as chiral.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field)]
-    public class DescriptionPriorityAttribute : Attribute
+    internal sealed class DescriptionPriorityAttribute : Attribute
     {
         /// <summary>
         /// Gets the priority of the description.

@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// <summary>
     /// Defines the public interface of a type that can perform a removal operation on an appearance.
     /// </summary>
-    public interface IAppearanceRemover
+    internal interface IAppearanceRemover
     {
         /// <summary>
         /// Removes the given bodypart.

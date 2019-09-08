@@ -22,14 +22,16 @@
 
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
 {
     /// <summary>
     /// A token that gets replaced with the target's name or nickname.
     /// </summary>
+    [PublicAPI]
     [TokenIdentifier("target", "t")]
-    public class TargetToken : ReplacableTextToken<TargetToken>
+    public sealed class TargetToken : ReplacableTextToken<TargetToken>
     {
         /// <inheritdoc />
         public override string GetText(Appearance appearance, AppearanceComponent component)

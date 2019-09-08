@@ -37,6 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     /// Represents a distinct part of a character's appearance.
     /// </summary>
     [Owned]
+    [PublicAPI]
     public class AppearanceComponent
     {
         /// <summary>

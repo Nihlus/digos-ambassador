@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// <summary>
     /// Defines the public interface of a type that can perform a shifting operation on an appearance.
     /// </summary>
-    public interface IAppearanceShifter
+    internal interface IAppearanceShifter
     {
         /// <summary>
         /// Shifts the given bodypart.

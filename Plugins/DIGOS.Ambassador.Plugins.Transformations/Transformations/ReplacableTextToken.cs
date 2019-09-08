@@ -32,6 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// Base implementation of replacable text tokens, allowing static initialization.
     /// </summary>
     /// <typeparam name="T">A class inheriting from this class.</typeparam>
+    [PublicAPI]
     public abstract class ReplacableTextToken<T> : IReplaceableTextToken where T : ReplacableTextToken<T>
     {
         /// <inheritdoc />

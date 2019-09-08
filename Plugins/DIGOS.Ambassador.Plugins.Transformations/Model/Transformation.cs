@@ -34,6 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
     /// <summary>
     /// Represents an individual partial transformation.
     /// </summary>
+    [PublicAPI]
     [Table("Transformations", Schema = "TransformationModule")]
     public class Transformation : IEFEntity
     {

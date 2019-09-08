@@ -28,6 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     /// <summary>
     /// Holds a non-exhaustive list of available colour options for body parts.
     /// </summary>
+    [PublicAPI]
     [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
     public enum Shade
     {

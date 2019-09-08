@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// <summary>
     /// YAML deserialization converter for species objects.
     /// </summary>
-    public class SpeciesYamlConverter : IYamlTypeConverter
+    internal class SpeciesYamlConverter : IYamlTypeConverter
     {
         [NotNull]
         private TransformationService Transformation { get; }

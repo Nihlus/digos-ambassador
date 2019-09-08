@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// <summary>
     /// Service class for building user-visible descriptions of characters based on their appearances.
     /// </summary>
-    public class TransformationDescriptionBuilder
+    public sealed class TransformationDescriptionBuilder
     {
         [NotNull]
         private readonly TransformationTextTokenizer _tokenizer;

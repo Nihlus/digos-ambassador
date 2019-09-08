@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// <summary>
     /// Shifts the species of appearances.
     /// </summary>
-    public sealed class BodypartRemover : AppearanceRemover
+    internal sealed class BodypartRemover : AppearanceRemover
     {
         [NotNull]
         private readonly TransformationService _transformations;

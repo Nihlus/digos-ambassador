@@ -26,7 +26,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     /// Represents a named node.
     /// </summary>
     /// <typeparam name="T">The type of value the node holds.</typeparam>
-    public abstract class NamedNode<T> : INode
+    internal abstract class NamedNode<T> : INode
     {
         /// <inheritdoc />
         public string Name { get; set; }

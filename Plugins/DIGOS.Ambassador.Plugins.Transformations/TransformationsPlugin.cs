@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations
     /// <summary>
     /// Describes the transformation plugin.
     /// </summary>
-    public class TransformationsPlugin : PluginDescriptor, IMigratablePlugin
+    public sealed class TransformationsPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Transformations";

@@ -33,6 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     /// Represents a colour shade with an optional modifier.
     /// </summary>
     [Owned]
+    [PublicAPI]
     public class Colour : IColour
     {
         /// <inheritdoc />
