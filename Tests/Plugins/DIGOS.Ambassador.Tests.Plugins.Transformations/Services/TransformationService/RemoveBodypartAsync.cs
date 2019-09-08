@@ -76,13 +76,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 mockedContext.Setup(c => c.User).Returns(_invoker);
 
                 _context = mockedContext.Object;
-
-                var services = new ServiceCollection()
-                    .AddSingleton(this.Transformations)
-                    .AddSingleton<CharacterService>()
-                    .BuildServiceProvider();
-
-                this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
             }
 
             protected override async Task InitializeTestAsync()

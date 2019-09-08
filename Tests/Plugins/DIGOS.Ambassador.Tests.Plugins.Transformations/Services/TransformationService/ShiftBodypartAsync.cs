@@ -89,8 +89,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 var pronounService = this.Services.GetRequiredService<PronounService>();
                 pronounService.WithPronounProvider(new FemininePronounProvider());
-
-                this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(this.Services));
             }
 
             protected override async Task InitializeTestAsync()

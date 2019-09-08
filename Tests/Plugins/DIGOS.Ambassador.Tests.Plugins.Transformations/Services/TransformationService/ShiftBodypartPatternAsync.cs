@@ -97,8 +97,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     .AddSingleton<CharacterService>()
                     .BuildServiceProvider();
 
-                this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(services));
-
                 _newPattern = Pattern.Swirly;
                 Colour.TryParse("bright purple", out _newPatternColour);
             }

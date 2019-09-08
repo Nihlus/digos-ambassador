@@ -78,12 +78,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations
 
             await commands.AddModuleAsync<TransformationCommands>(serviceProvider);
 
-            var transformationService = serviceProvider.GetRequiredService<TransformationService>();
-            transformationService.WithDescriptionBuilder
-            (
-                ActivatorUtilities.CreateInstance<TransformationDescriptionBuilder>(serviceProvider)
-            );
-
             return true;
         }
 

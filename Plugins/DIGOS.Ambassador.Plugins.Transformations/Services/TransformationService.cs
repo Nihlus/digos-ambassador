@@ -90,21 +90,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         }
 
         /// <summary>
-        /// Sets the description builder to use with the service.
-        /// </summary>
-        /// <param name="descriptionBuilder">The builder.</param>
-        /// <returns>The transformation service with the given builder.</returns>
-        [NotNull]
-        public TransformationService WithDescriptionBuilder
-        (
-            [NotNull] TransformationDescriptionBuilder descriptionBuilder
-        )
-        {
-            _descriptionBuilder = descriptionBuilder;
-            return this;
-        }
-
-        /// <summary>
         /// Gets the default appearance for the given character, or creates one if one does not exist.
         /// </summary>
         /// <param name="character">The character.</param>

@@ -98,7 +98,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             protected override async Task InitializeTestAsync()
             {
                 this.Services.GetRequiredService<PronounService>().WithPronounProvider(new TheyPronounProvider());
-                this.Transformations.WithDescriptionBuilder(new TransformationDescriptionBuilder(this.Services));
 
                 // Ensure owner is opted into transformations
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
