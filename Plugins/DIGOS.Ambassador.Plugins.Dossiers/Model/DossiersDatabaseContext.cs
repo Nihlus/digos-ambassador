@@ -29,6 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
+    [PublicAPI]
     public class DossiersDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "DossierModule";

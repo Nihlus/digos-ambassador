@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Dossiers.CommandModules;
 using DIGOS.Ambassador.Plugins.Dossiers.Model;
 using DIGOS.Ambassador.Plugins.Dossiers.Services;
 using Discord.Commands;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +42,8 @@ namespace DIGOS.Ambassador.Plugins.Dossiers
     /// <summary>
     /// Describes the Dossiers plugin.
     /// </summary>
-    public class DossiersPlugin : PluginDescriptor, IMigratablePlugin
+    [PublicAPI]
+    public sealed class DossiersPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Dossiers";

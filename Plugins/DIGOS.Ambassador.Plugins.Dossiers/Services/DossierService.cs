@@ -40,11 +40,14 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
     /// <summary>
     /// Handles dossier management.
     /// </summary>
-    public class DossierService
+    [PublicAPI]
+    public sealed class DossierService
     {
         [ProvidesContext]
+        [NotNull]
         private readonly DossiersDatabaseContext _database;
 
+        [NotNull]
         private readonly ContentService _content;
 
         /// <summary>
@@ -57,7 +60,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// </summary>
         /// <param name="content">The content service.</param>
         /// <param name="database">The dossier database context.</param>
-        public DossierService(ContentService content, DossiersDatabaseContext database)
+        public DossierService([NotNull] ContentService content, [NotNull] DossiersDatabaseContext database)
         {
             _content = content;
             _database = database;
@@ -67,6 +70,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// Gets the available dossiers.
         /// </summary>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        [Pure, NotNull]
         public RetrieveEntityResult<IQueryable<Dossier>> GetDossiers()
         {
             return RetrieveEntityResult<IQueryable<Dossier>>.FromSuccess(_database.Dossiers);
@@ -77,17 +81,17 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// </summary>
         /// <param name="dossier">The dossier to get the data for.</param>
         /// <returns>A <see cref="FileStream"/> containing the dossier data.</returns>
-        [Pure]
+        [Pure, NotNull]
         public RetrieveEntityResult<Stream> GetDossierStream([NotNull] Dossier dossier)
         {
-            var dossierContentPath = UPath.Combine(this.BaseDossierPath, dossier.Path);
+            var dataPath = GetDossierDataPath(dossier);
 
-            if (!_content.FileSystem.FileExists(dossierContentPath) || dossier.Path.IsNullOrWhitespace())
+            if (!_content.FileSystem.FileExists(dataPath))
             {
                 return RetrieveEntityResult<Stream>.FromError("No file data set.");
             }
 
-            return _content.OpenLocalStream(dossierContentPath);
+            return _content.OpenLocalStream(dataPath);
         }
 
         /// <summary>
@@ -95,7 +99,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// </summary>
         /// <param name="dossier">The dossier.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        [NotNull]
+        [NotNull, ItemNotNull]
         public Task<DeleteEntityResult> DeleteDossierDataAsync([NotNull] Dossier dossier)
         {
             var dataPath = GetDossierDataPath(dossier);
@@ -133,13 +137,14 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <param name="title">The title of the dossier.</param>
         /// <param name="summary">The summary of the dossier.</param>
         /// <returns>A creation task which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<CreateEntityResult<Dossier>> CreateDossierAsync
         (
             [NotNull] string title,
             [NotNull] string summary
         )
         {
-            var dossier = new Dossier();
+            var dossier = new Dossier(title, summary);
             var setTitleResult = await SetDossierTitleAsync(dossier, title);
             if (!setTitleResult.IsSuccess)
             {
@@ -162,6 +167,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// </summary>
         /// <param name="dossier">The dossier to delete.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<DeleteEntityResult> DeleteDossierAsync([NotNull] Dossier dossier)
         {
             var deleteContentResult = await DeleteDossierDataAsync(dossier);
@@ -181,7 +187,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// </summary>
         /// <param name="dossierTitle">The title of the dossier.</param>
         /// <returns><value>true</value> if the title is unique; otherwise,<value>false</value>.</returns>
-        [Pure]
+        [Pure, NotNull]
         public async Task<bool> IsDossierTitleUniqueAsync([NotNull] string dossierTitle)
         {
             return await _database.Dossiers.Select(d => d.Title)
@@ -196,11 +202,8 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// </summary>
         /// <param name="title">The title of the dossier.</param>
         /// <returns>A retrieval task that may or may not have succeeded.</returns>
-        [Pure]
-        public async Task<RetrieveEntityResult<Dossier>> GetDossierByTitleAsync
-        (
-            [NotNull] string title
-        )
+        [Pure, NotNull]
+        public async Task<RetrieveEntityResult<Dossier>> GetDossierByTitleAsync([NotNull] string title)
         {
             var dossier = await _database.Dossiers.FirstOrDefaultAsync
             (
@@ -221,6 +224,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <param name="dossier">The dossier to modify.</param>
         /// <param name="newTitle">The new title.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetDossierTitleAsync([NotNull] Dossier dossier, [NotNull] string newTitle)
         {
             var isNewNameUnique = await IsDossierTitleUniqueAsync(newTitle);
@@ -228,11 +232,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             // If the only thing that has changed is casing, let it through
             if (!isNewNameUnique)
             {
-                var isOnlyCaseChange = false;
-                if (!(dossier.Title is null))
-                {
-                    isOnlyCaseChange = string.Equals(dossier.Title, newTitle, StringComparison.OrdinalIgnoreCase);
-                }
+                var isOnlyCaseChange = string.Equals(dossier.Title, newTitle, StringComparison.OrdinalIgnoreCase);
 
                 if (!isOnlyCaseChange)
                 {
@@ -247,16 +247,20 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
 
             if (newTitle.IndexOfAny(Path.GetInvalidPathChars()) > -1)
             {
-                return ModifyEntityResult.FromError($"The title contains one or more of invalid characters ({Path.GetInvalidPathChars().Humanize("or")})");
+                return ModifyEntityResult.FromError
+                (
+                    "The title contains one or more of invalid characters " +
+                    $"({Path.GetInvalidPathChars().Humanize("or")})"
+                );
             }
 
-            dossier.Title = newTitle;
-
-            var updateDataResult = await UpdateDossierDataLocationAsync(dossier);
+            var updateDataResult = await UpdateDossierDataLocationAsync(dossier, newTitle);
             if (!updateDataResult.IsSuccess)
             {
                 return updateDataResult;
             }
+
+            dossier.Title = newTitle;
 
             await _database.SaveChangesAsync();
 
@@ -269,6 +273,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <param name="dossier">The dossier to modify.</param>
         /// /// <param name="newSummary">The new summary.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetDossierSummaryAsync
         (
             [NotNull] Dossier dossier,
@@ -290,12 +295,18 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// Updates the location of the dossier data, matching it to the dossier's name.
         /// </summary>
         /// <param name="dossier">The dossier to update.</param>
+        /// <param name="newTitle">The new dossier title.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> UpdateDossierDataLocationAsync([NotNull] Dossier dossier)
+        [NotNull, ItemNotNull]
+        public async Task<ModifyEntityResult> UpdateDossierDataLocationAsync
+        (
+            [NotNull] Dossier dossier,
+            [NotNull] string newTitle
+        )
         {
             var originalDossierPath = GetDossierDataPath(dossier);
 
-            var newDossierPath = UPath.Combine(this.BaseDossierPath, $"{dossier.Title}.pdf");
+            var newDossierPath = UPath.Combine(this.BaseDossierPath, $"{newTitle}.pdf");
 
             if (!_content.FileSystem.FileExists(originalDossierPath) || originalDossierPath == newDossierPath)
             {
@@ -311,7 +322,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
                 return ModifyEntityResult.FromError(e.Message);
             }
 
-            dossier.Path = newDossierPath.ToString();
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -323,6 +333,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <param name="dossier">The dosser for which to set the data.</param>
         /// <param name="context">The stream containing the PDF data.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetDossierDataAsync
         (
             [NotNull] Dossier dossier,
@@ -368,8 +379,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
                         {
                             return ModifyEntityResult.FromError(e);
                         }
-
-                        dossier.Path = dossierPath.ToString();
 
                         await _database.SaveChangesAsync();
                     }

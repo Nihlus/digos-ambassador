@@ -20,30 +20,51 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Dossiers.Model
 {
     /// <summary>
     /// Represents a dossier entry.
     /// </summary>
+    [PublicAPI]
     [Table("Dossiers", Schema = "DossierModule")]
     public class Dossier : EFEntity
     {
         /// <summary>
         /// Gets or sets the title of the dossier.
         /// </summary>
+        [Required, NotNull]
         public string Title { get; set; }
 
         /// <summary>
         /// Gets or sets the summary of the dossier.
         /// </summary>
+        [Required, NotNull]
         public string Summary { get; set; }
 
         /// <summary>
-        /// Gets or sets the absolute file path to the dossier.
+        /// Initializes a new instance of the <see cref="Dossier"/> class.
         /// </summary>
-        public string Path { get; set; }
+        [UsedImplicitly]
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+        protected Dossier()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Dossier"/> class.
+        /// </summary>
+        /// <param name="title">The title of the dossier.</param>
+        /// <param name="summary">The dossier's summary.</param>
+        public Dossier(string title, string summary = "No summary set.")
+        {
+            this.Title = title;
+            this.Summary = summary;
+        }
     }
 }

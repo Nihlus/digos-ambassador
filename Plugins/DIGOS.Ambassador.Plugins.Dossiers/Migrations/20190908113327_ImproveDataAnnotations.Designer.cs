@@ -7,14 +7,16 @@ using DIGOS.Ambassador.Plugins.Dossiers.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Plugins.Dossiers.Migrations
 {
     [DbContext(typeof(DossiersDatabaseContext))]
-    partial class DossiersDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190908113327_ImproveDataAnnotations")]
+    partial class ImproveDataAnnotations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
