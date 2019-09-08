@@ -37,10 +37,21 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     public class Colour : IColour
     {
         /// <inheritdoc />
-        public Shade Shade { get; set; }
+        public Shade Shade { get; internal set; }
 
         /// <inheritdoc />
-        public ShadeModifier? Modifier { get; set; }
+        public ShadeModifier? Modifier { get; internal set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Colour"/> class.
+        /// </summary>
+        /// <param name="shade">The colour's shade.</param>
+        /// <param name="modifier">The shade modifier.</param>
+        public Colour(Shade shade, ShadeModifier? modifier)
+        {
+            this.Shade = shade;
+            this.Modifier = modifier;
+        }
 
         /// <summary>
         /// Determines whether this colour is the same colour as the given one.
@@ -68,11 +79,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         [ContractAnnotation("input : null => false, colour : null; => false, colour : null; => true, colour : notnull")]
         public static bool TryParse([CanBeNull] string input, [CanBeNull] out Colour colour)
         {
-            colour = new Colour();
+            colour = null;
 
             if (input.IsNullOrWhitespace())
             {
-                colour = null;
                 return false;
             }
 
@@ -80,9 +90,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
             var parts = input.Split(' ');
 
             // Check for a modifier
-            if (Enum.TryParse(parts[0], true, out ShadeModifier modifier))
+            ShadeModifier? modifier = null;
+            if (Enum.TryParse(parts[0], true, out ShadeModifier realModifier))
             {
-                colour.Modifier = modifier;
+                modifier = realModifier;
                 parts = parts.Skip(1).ToArray();
             }
 
@@ -93,7 +104,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
                 return false;
             }
 
-            colour.Shade = shade;
+            colour = new Colour(shade, modifier);
             return true;
         }
 
@@ -110,7 +121,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         [Pure, NotNull]
         public Colour Clone()
         {
-            return new Colour { Shade = this.Shade, Modifier = this.Modifier };
+            return new Colour(this.Shade, this.Modifier);
         }
 
         /// <summary>

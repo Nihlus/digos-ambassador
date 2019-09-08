@@ -44,51 +44,70 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     /// </summary>
     [PublicAPI]
     [Table("Appearances", Schema = "TransformationModule")]
-    public class Appearance : IEFEntity
+    public class Appearance : EFEntity
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
-
         /// <summary>
-        /// Gets or sets the character that the appearance belongs to.
+        /// Gets the character that the appearance belongs to.
         /// </summary>
         [Required, NotNull]
-        public virtual Character Character { get; set; }
+        public virtual Character Character { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this appearance is the character's default one.
+        /// Gets a value indicating whether this appearance is the character's default one.
         /// </summary>
-        public bool IsDefault { get; set; }
+        public bool IsDefault { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this appearance is the character's current one.
+        /// Gets a value indicating whether this appearance is the character's current one.
         /// </summary>
-        public bool IsCurrent { get; set; }
+        public bool IsCurrent { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the parts that compose this appearance.
+        /// Gets the parts that compose this appearance.
         /// </summary>
         [NotNull, ItemNotNull]
-        public virtual List<AppearanceComponent> Components { get; set; } = new List<AppearanceComponent>();
+        public virtual List<AppearanceComponent> Components { get; private set; } = new List<AppearanceComponent>();
 
         /// <summary>
-        /// Gets or sets a character's height (in meters).
+        /// Gets a character's height (in meters).
         /// </summary>
-        public double Height { get; set; }
+        public double Height { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a character's weight (in kilograms).
+        /// Gets a character's weight (in kilograms).
         /// </summary>
-        public double Weight { get; set; }
+        public double Weight { get; internal set; }
 
         /// <summary>
-        /// Gets or sets how muscular a character appears to be, on a 0 to 1 scale.
+        /// Gets how muscular a character appears to be, on a 0 to 1 scale.
         /// </summary>
-        public double Muscularity { get; set; }
+        public double Muscularity { get; internal set; }
 
         /// <summary>
-        /// Creates a new appearance from a source appearance. This method does not copy the linked character or any
-        /// status flags.
+        /// Initializes a new instance of the <see cref="Appearance"/> class.
+        /// </summary>
+        /// <remarks>
+        /// Required by EF Core.
+        /// </remarks>
+        protected Appearance()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Appearance"/> class.
+        /// </summary>
+        /// <param name="character">The character the appearance belongs to.</param>
+        public Appearance(Character character)
+        {
+            this.Character = character;
+
+            this.Height = 1.8;
+            this.Weight = 80;
+            this.Muscularity = 0.5;
+        }
+
+        /// <summary>
+        /// Creates a new appearance from a source appearance. This method does not copy any status flags.
         /// </summary>
         /// <param name="sourceAppearance">The source appearance.</param>
         /// <returns>The new appearance.</returns>
@@ -97,13 +116,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         {
             var componentCopies = sourceAppearance.Components.Select(AppearanceComponent.CopyFrom).ToList();
 
-            var newAppearance = new Appearance
-            {
-                Components = componentCopies,
-                Height = sourceAppearance.Height,
-                Weight = sourceAppearance.Weight,
-                Muscularity = sourceAppearance.Muscularity
-            };
+            var newAppearance = new Appearance(sourceAppearance.Character);
+            newAppearance.Components.AddRange(componentCopies);
 
             return newAppearance;
         }
@@ -164,14 +178,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
                 }
             }
 
-            var appearance = new Appearance
-            {
-                Character = character,
-                Components = templateComponents,
-                Height = 1.8,
-                Weight = 80,
-                Muscularity = 0.5
-            };
+            var appearance = new Appearance(character);
+            appearance.Components.AddRange(templateComponents);
 
             return CreateEntityResult<Appearance>.FromSuccess(appearance);
         }

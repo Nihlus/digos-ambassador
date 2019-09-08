@@ -172,8 +172,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var defaultAppearance = getDefaultAppearance.Entity;
 
             var currentAppearance = Appearance.CopyFrom(defaultAppearance);
-
-            currentAppearance.Character = character;
             currentAppearance.IsCurrent = true;
 
             _database.Appearances.Update(currentAppearance);
@@ -778,10 +776,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
                 var user = getUserResult.Entity;
 
-                protectionEntry = new UserProtectionEntry
+                protectionEntry = new UserProtectionEntry(protection, user)
                 {
-                    GlobalProtection = protection,
-                    User = user,
                     Type = ListingType.Whitelist
                 };
 
@@ -841,10 +837,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
                 var user = getUserResult.Entity;
 
-                protectionEntry = new UserProtectionEntry
+                protectionEntry = new UserProtectionEntry(protection, user)
                 {
-                    GlobalProtection = protection,
-                    User = user,
                     Type = ListingType.Blacklist
                 };
 
@@ -889,7 +883,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var user = getUserResult.Entity;
 
-            protection = GlobalUserProtection.CreateDefault(user);
+            protection = new GlobalUserProtection(user);
 
             _database.GlobalUserProtections.Update(protection);
 

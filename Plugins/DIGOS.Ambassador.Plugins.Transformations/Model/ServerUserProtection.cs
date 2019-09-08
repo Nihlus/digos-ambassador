@@ -35,32 +35,52 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
     /// </summary>
     [PublicAPI]
     [Table("ServerUserProtections", Schema = "TransformationModule")]
-    public class ServerUserProtection : IEFEntity
+    public class ServerUserProtection : EFEntity
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
-
         /// <summary>
-        /// Gets or sets the user that owns this protection data.
+        /// Gets the user that owns this protection data.
         /// </summary>
         [Required]
-        public virtual User User { get; set; }
+        public virtual User User { get; private set; }
 
         /// <summary>
-        /// Gets or sets the server that this protection data is valid on.
+        /// Gets the server that this protection data is valid on.
         /// </summary>
         [Required]
-        public virtual Server Server { get; set; }
+        public virtual Server Server { get; private set; }
 
         /// <summary>
-        /// Gets or sets the active protection type on this server.
+        /// Gets the active protection type on this server.
         /// </summary>
-        public ProtectionType Type { get; set; }
+        public ProtectionType Type { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether or not the user has opted in to transformations.
+        /// Gets a value indicating whether or not the user has opted in to transformations.
         /// </summary>
-        public bool HasOptedIn { get; set; }
+        public bool HasOptedIn { get; internal set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServerUserProtection"/> class.
+        /// </summary>
+        /// <remarks>
+        /// Required by EF Core.
+        /// </remarks>
+        protected ServerUserProtection()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServerUserProtection"/> class.
+        /// </summary>
+        /// <param name="server">The server the user is protected on.</param>
+        /// <param name="user">The user that is protected.</param>
+        public ServerUserProtection(Server server, User user)
+        {
+            this.Server = server;
+            this.User = user;
+
+            this.Type = ProtectionType.Blacklist;
+        }
 
         /// <summary>
         /// Creates a default server-specific protection object based on the given global protection data.
@@ -75,10 +95,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
             [NotNull] Server server
         )
         {
-            return new ServerUserProtection
+            return new ServerUserProtection(server, globalProtection.User)
             {
-                User = globalProtection.User,
-                Server = server,
                 Type = globalProtection.DefaultType,
                 HasOptedIn = globalProtection.DefaultOptIn
             };

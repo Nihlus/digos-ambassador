@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Extensions;
@@ -39,6 +40,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
+[assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Transformations")]
 [assembly: AmbassadorPlugin(typeof(TransformationsPlugin))]
 
 namespace DIGOS.Ambassador.Plugins.Transformations

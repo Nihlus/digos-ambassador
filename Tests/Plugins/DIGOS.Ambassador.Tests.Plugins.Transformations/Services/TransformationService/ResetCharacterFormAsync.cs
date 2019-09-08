@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             [Fact]
             public async Task CanResetForm()
             {
-                var defaultAppearance = new Appearance
+                var defaultAppearance = new Appearance(_character)
                 {
                     Height = 256
                 };

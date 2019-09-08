@@ -36,32 +36,29 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
     /// </summary>
     [PublicAPI]
     [Table("GlobalUserProtections", Schema = "TransformationModule")]
-    public class GlobalUserProtection : IEFEntity
+    public class GlobalUserProtection : EFEntity
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
-
         /// <summary>
-        /// Gets or sets the user that owns this protection data.
+        /// Gets the user that owns this protection data.
         /// </summary>
         [Required]
-        public virtual User User { get; set; }
+        public virtual User User { get; private set; }
 
         /// <summary>
-        /// Gets or sets the default protection type to use on new servers.
+        /// Gets the default protection type to use on new servers.
         /// </summary>
-        public ProtectionType DefaultType { get; set; }
+        public ProtectionType DefaultType { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether or not the user should be opted in by default.
+        /// Gets a value indicating whether or not the user should be opted in by default.
         /// </summary>
-        public bool DefaultOptIn { get; set; }
+        public bool DefaultOptIn { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the list of users that are listed in this protection entry.
+        /// Gets the list of users that are listed in this protection entry.
         /// </summary>
         [NotNull, ItemNotNull]
-        public virtual List<UserProtectionEntry> UserListing { get; set; } = new List<UserProtectionEntry>();
+        public virtual List<UserProtectionEntry> UserListing { get; private set; } = new List<UserProtectionEntry>();
 
         /// <summary>
         /// Gets the list of users that are allowed to transform the owner.
@@ -78,20 +75,23 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
                 this.UserListing.Where(u => u.Type == ListingType.Blacklist).Select(u => u.User);
 
         /// <summary>
-        /// Creates a default global protection object for the given user.
+        /// Initializes a new instance of the <see cref="GlobalUserProtection"/> class.
         /// </summary>
-        /// <param name="user">The user.</param>
-        /// <returns>A default user protection object.</returns>
-        [Pure, NotNull]
-        public static GlobalUserProtection CreateDefault([NotNull] User user)
+        /// <remarks>
+        /// Required by EF Core.
+        /// </remarks>
+        protected GlobalUserProtection()
         {
-            return new GlobalUserProtection
-            {
-                User = user,
-                DefaultType = ProtectionType.Blacklist,
-                DefaultOptIn = false,
-                UserListing = new List<UserProtectionEntry>()
-            };
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GlobalUserProtection"/> class.
+        /// </summary>
+        /// <param name="user">The protected user.</param>
+        public GlobalUserProtection(User user)
+        {
+            this.User = user;
+            this.DefaultType = ProtectionType.Blacklist;
         }
     }
 }

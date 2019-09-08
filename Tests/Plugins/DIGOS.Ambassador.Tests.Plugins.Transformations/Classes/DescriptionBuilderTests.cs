@@ -46,11 +46,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         {
             var character = new Character(0, new User(0), "Amby", pronounProviderFamily: "Feminine");
 
-            var hairColour = new Colour
-            {
-                Shade = Shade.White,
-                Modifier = ShadeModifier.Fluorescent
-            };
+            var hairColour = new Colour(Shade.White, ShadeModifier.Fluorescent);
 
             var hairTransformation = new Transformation
             (
@@ -67,11 +63,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             var hairComponent = AppearanceComponent.CreateFrom(hairTransformation);
 
-            var appearance = new Appearance
-            {
-                Components = new List<AppearanceComponent> { hairComponent },
-                Character = character
-            };
+            var appearance = new Appearance(character);
+            appearance.Components.Add(hairComponent);
 
             var pronounService = new PronounService();
             pronounService.WithPronounProvider(new FemininePronounProvider());

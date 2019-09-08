@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             [Fact]
             public async Task CanSetDefaultAppearance()
             {
-                var alteredAppearance = new Appearance
+                var alteredAppearance = new Appearance(_character)
                 {
                     Height = 10
                 };

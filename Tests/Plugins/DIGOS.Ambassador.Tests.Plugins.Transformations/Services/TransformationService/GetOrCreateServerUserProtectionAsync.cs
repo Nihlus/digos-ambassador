@@ -105,11 +105,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             {
                 var user = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
 
-                var globalSetting = new GlobalUserProtection
+                var globalSetting = new GlobalUserProtection(user)
                 {
                     DefaultOptIn = true,
-                    DefaultType = ProtectionType.Whitelist,
-                    User = user
+                    DefaultType = ProtectionType.Whitelist
                 };
 
                 this.Database.GlobalUserProtections.Update(globalSetting);

@@ -34,26 +34,41 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
     /// </summary>
     [PublicAPI]
     [Table("UserProtectionEntries", Schema = "TransformationModule")]
-    public class UserProtectionEntry : IEFEntity
+    public class UserProtectionEntry : EFEntity
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
-
         /// <summary>
-        /// Gets or sets the global protection entry that the user has been listed in.
+        /// Gets the global protection entry that the user has been listed in.
         /// </summary>
         [Required, NotNull]
-        public virtual GlobalUserProtection GlobalProtection { get; set; }
+        public virtual GlobalUserProtection GlobalProtection { get; private set; }
 
         /// <summary>
-        /// Gets or sets the user that's listed in the global protection entry.
+        /// Gets the user that's listed in the global protection entry.
         /// </summary>
         [Required, NotNull]
-        public virtual User User { get; set; }
+        public virtual User User { get; private set; }
 
         /// <summary>
-        /// Gets or sets the type of listing.
+        /// Gets the type of listing.
         /// </summary>
-        public ListingType Type { get; set; }
+        public ListingType Type { get; internal set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserProtectionEntry"/> class.
+        /// </summary>
+        protected UserProtectionEntry()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserProtectionEntry"/> class.
+        /// </summary>
+        /// <param name="globalProtection">The global protection entry.</param>
+        /// <param name="user">The target user.</param>
+        public UserProtectionEntry(GlobalUserProtection globalProtection, User user)
+        {
+            this.GlobalProtection = globalProtection;
+            this.User = user;
+        }
     }
 }

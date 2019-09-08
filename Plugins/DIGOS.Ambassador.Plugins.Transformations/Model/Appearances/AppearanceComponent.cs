@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Humanizer;
@@ -41,39 +42,63 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
     public class AppearanceComponent
     {
         /// <summary>
+        /// Gets the component's current transformation.
+        /// </summary>
+        [Required]
+        public virtual Transformation Transformation { get; internal set; }
+
+        /// <summary>
+        /// Gets the chirality of the component.
+        /// </summary>
+        public Chirality Chirality { get; private set; }
+
+        /// <summary>
+        /// Gets the base colour of the component.
+        /// </summary>
+        [NotNull, Required]
+        public virtual Colour BaseColour { get; internal set; }
+
+        /// <summary>
+        /// Gets the pattern of the component's secondary colour (if any).
+        /// </summary>
+        [CanBeNull]
+        public Pattern? Pattern { get; internal set; }
+
+        /// <summary>
+        /// Gets the component's pattern colour.
+        /// </summary>
+        [CanBeNull]
+        public virtual Colour PatternColour { get; internal set; }
+
+        /// <summary>
         /// Gets the bodypart that the component is.
         /// </summary>
         [NotMapped]
         public Bodypart Bodypart => this.Transformation.Part;
 
         /// <summary>
-        /// Gets or sets the component's current transformation.
+        /// Initializes a new instance of the <see cref="AppearanceComponent"/> class.
         /// </summary>
-        [Required]
-        public virtual Transformation Transformation { get; set; }
+        /// <remarks>
+        /// Required by EF Core.
+        /// </remarks>
+        protected AppearanceComponent()
+        {
+        }
 
         /// <summary>
-        /// Gets or sets the chirality of the component.
+        /// Initializes a new instance of the <see cref="AppearanceComponent"/> class.
         /// </summary>
-        public Chirality Chirality { get; set; }
+        /// <param name="transformation">The transformation that the component has.</param>
+        /// <param name="chirality">The chirality of the component.</param>
+        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
+        public AppearanceComponent(Transformation transformation, Chirality chirality)
+        {
+            this.Transformation = transformation;
+            this.Chirality = chirality;
 
-        /// <summary>
-        /// Gets or sets the base colour of the component.
-        /// </summary>
-        [NotNull, Required]
-        public virtual Colour BaseColour { get; set; } = new Colour();
-
-        /// <summary>
-        /// Gets or sets the pattern of the component's secondary colour (if any).
-        /// </summary>
-        [CanBeNull]
-        public Pattern? Pattern { get; set; }
-
-        /// <summary>
-        /// Gets or sets the component's pattern colour.
-        /// </summary>
-        [CanBeNull]
-        public virtual Colour PatternColour { get; set; }
+            this.BaseColour = transformation.DefaultBaseColour.Clone();
+        }
 
         /// <inheritdoc />
         public override string ToString()
@@ -90,10 +115,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         [Pure, NotNull]
         public static AppearanceComponent CopyFrom([NotNull] AppearanceComponent other)
         {
-            return new AppearanceComponent
+            return new AppearanceComponent(other.Transformation, other.Chirality)
             {
-                Transformation = other.Transformation,
-                Chirality = other.Chirality,
                 BaseColour = Colour.CopyFrom(other.BaseColour),
                 Pattern = other.Pattern,
                 PatternColour = other.PatternColour is null ? null : Colour.CopyFrom(other.PatternColour),
@@ -119,11 +142,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
                 throw new ArgumentException("A nonchiral transformation cannot have chirality.", nameof(transformation));
             }
 
-            return new AppearanceComponent
+            return new AppearanceComponent(transformation, chirality)
             {
-                Transformation = transformation,
-                Chirality = chirality,
-                BaseColour = transformation.DefaultBaseColour.Clone(),
                 Pattern = transformation.DefaultPattern,
                 PatternColour = transformation.DefaultPatternColour?.Clone()
             };
@@ -146,11 +166,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
 
             foreach (var chirality in chiralities)
             {
-                yield return new AppearanceComponent
+                yield return new AppearanceComponent(transformation, chirality)
                 {
-                    Transformation = transformation,
-                    Chirality = chirality,
-                    BaseColour = transformation.DefaultBaseColour.Clone(),
                     Pattern = transformation.DefaultPattern,
                     PatternColour = transformation.DefaultPatternColour?.Clone()
                 };
