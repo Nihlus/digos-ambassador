@@ -35,13 +35,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// </summary>
     public class SpeciesYamlConverter : IYamlTypeConverter
     {
+        [NotNull]
         private TransformationService Transformation { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SpeciesYamlConverter"/> class.
         /// </summary>
         /// <param name="transformation">The transformation service.</param>
-        public SpeciesYamlConverter(TransformationService transformation)
+        public SpeciesYamlConverter([NotNull] TransformationService transformation)
         {
             this.Transformation = transformation;
         }

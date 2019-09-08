@@ -39,7 +39,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         public Shade Shade { get; set; }
 
         /// <inheritdoc />
-        [CanBeNull]
         public ShadeModifier? Modifier { get; set; }
 
         /// <summary>
@@ -65,7 +64,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="colour">The output colour.</param>
         /// <returns>true if the parsing was successful; otherwise, false.</returns>
         [Pure]
-        [ContractAnnotation("input:null => false")]
+        [ContractAnnotation("input : null => false, colour : null; => false, colour : null; => true, colour : notnull")]
         public static bool TryParse([CanBeNull] string input, [CanBeNull] out Colour colour)
         {
             colour = new Colour();
@@ -107,6 +106,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// Clones this colour, creating a new unbound colour with the same settings.
         /// </summary>
         /// <returns>The cloned colour.</returns>
+        [Pure, NotNull]
         public Colour Clone()
         {
             return new Colour { Shade = this.Shade, Modifier = this.Modifier };
@@ -117,6 +117,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// </summary>
         /// <param name="other">The other colour.</param>
         /// <returns>The copied colour.</returns>
+        [Pure, NotNull]
         public static Colour CopyFrom([NotNull] Colour other)
         {
             return other.Clone();

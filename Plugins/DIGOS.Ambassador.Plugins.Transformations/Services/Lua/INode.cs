@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
 {
     /// <summary>
@@ -30,6 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// <summary>
         /// Gets or sets the name of the node.
         /// </summary>
+        [NotNull]
         string Name { get; set; }
 
         /// <summary>
@@ -37,6 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// </summary>
         /// <param name="pretty">Whether or not the format should be in a pretty format.</param>
         /// <returns>A lua string.</returns>
+        [Pure, NotNull]
         string Format(bool pretty = false);
     }
 }

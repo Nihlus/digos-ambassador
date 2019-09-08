@@ -25,6 +25,7 @@ using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
@@ -33,7 +34,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// </summary>
     public class PatternRemover : AppearanceRemover
     {
+        [NotNull]
         private readonly TransformationService _transformations;
+
+        [NotNull]
         private readonly TransformationDescriptionBuilder _descriptionBuilder;
 
         /// <summary>
@@ -44,9 +48,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="descriptionBuilder">The description builder.</param>
         public PatternRemover
         (
-            Appearance appearance,
-            TransformationService transformations,
-            TransformationDescriptionBuilder descriptionBuilder
+            [NotNull] Appearance appearance,
+            [NotNull] TransformationService transformations,
+            [NotNull] TransformationDescriptionBuilder descriptionBuilder
         )
             : base(appearance)
         {

@@ -41,7 +41,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         private readonly TransformationDescriptionBuilder _descriptionBuilder;
 
         private readonly Pattern _pattern;
-        [NotNull] private readonly Colour _patternColour;
+
+        [NotNull]
+        private readonly Colour _patternColour;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PatternShifter"/> class.

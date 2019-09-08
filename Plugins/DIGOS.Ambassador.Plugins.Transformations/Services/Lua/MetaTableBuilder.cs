@@ -31,6 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     /// </summary>
     public class MetaTableBuilder
     {
+        [NotNull, ItemNotNull]
         private readonly List<string> _entries = new List<string>();
 
         /// <summary>
@@ -39,7 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// <param name="entry">The entry.</param>
         /// <returns>The builder with the entry.</returns>
         [NotNull]
-        public MetaTableBuilder WithEntry(string entry)
+        public MetaTableBuilder WithEntry([NotNull] string entry)
         {
             if (!_entries.Contains(entry))
             {
@@ -57,10 +58,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         [NotNull]
         public string Build(bool pretty = false)
         {
-            var metatable = new TableNode
-            {
-                Name = "env"
-            };
+            var metatable = new TableNode("env");
 
             foreach (var entry in _entries)
             {
@@ -70,14 +68,18 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
             return metatable.Format(pretty);
         }
 
-        private void PopulateSubNodes([NotNull] TableNode parent, [NotNull] string value, string originalValue)
+        private void PopulateSubNodes
+        (
+            [NotNull] TableNode parent,
+            [NotNull] string value,
+            [NotNull] string originalValue
+        )
         {
             var components = value.Split('.');
             if (components.Length == 1)
             {
-                var valueNode = new ValueNode<string>
+                var valueNode = new ValueNode<string>(value)
                 {
-                    Name = value,
                     Value = originalValue
                 };
 
@@ -88,11 +90,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
             var subnode = parent.Value.FirstOrDefault(t => t.Name == components.First());
             if (subnode is null)
             {
-                subnode = new TableNode
-                {
-                    Name = components.First()
-                };
-
+                subnode = new TableNode(components.First());
                 parent.Value.Add(subnode);
             }
 

@@ -20,8 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using JetBrains.Annotations;
-
 namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
 {
     /// <summary>
@@ -38,8 +36,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// </summary>
         public T Value { get; set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NamedNode{T}"/> class.
+        /// </summary>
+        /// <param name="name">The name of the node.</param>
+        protected NamedNode(string name)
+        {
+            this.Name = name;
+        }
+
         /// <inheritdoc />
-        [NotNull]
         public virtual string Format(bool pretty = false)
         {
             return this.Value.ToString();

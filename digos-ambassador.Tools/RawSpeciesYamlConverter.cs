@@ -51,10 +51,7 @@ namespace DIGOS.Ambassador.Tools
                 return null;
             }
 
-            return new Species
-            {
-                Name = speciesName
-            };
+            return new Species(speciesName, "Dummy");
         }
 
         /// <inheritdoc />

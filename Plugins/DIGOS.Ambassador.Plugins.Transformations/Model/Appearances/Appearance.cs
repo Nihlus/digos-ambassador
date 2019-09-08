@@ -35,6 +35,8 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using JetBrains.Annotations;
 using static DIGOS.Ambassador.Plugins.Transformations.Transformations.Bodypart;
 
+using PureAttribute = JetBrains.Annotations.PureAttribute;
+
 namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
 {
     /// <summary>
@@ -111,6 +113,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="character">The character that the appearance is linked to.</param>
         /// <param name="transformations">The transformation service.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
+        [Pure, NotNull, ItemNotNull]
         public static async Task<CreateEntityResult<Appearance>> CreateDefaultAsync
         (
             [NotNull] Character character,
@@ -205,7 +208,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="bodypart">The bodypart to get.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>The appearance component of the bodypart.</returns>
-        [NotNull]
+        [Pure, NotNull]
         public AppearanceComponent GetAppearanceComponent(Bodypart bodypart, Chirality chirality)
         {
             if (bodypart.IsChiral() && chirality == Chirality.Center)
@@ -233,6 +236,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <param name="component">The component, or null.</param>
         /// <returns>True if a component could be retrieved, otherwise, false.</returns>
+        [Pure]
         [ContractAnnotation("=> true, component:notnull; => false, component:null")]
         public bool TryGetAppearanceComponent(Bodypart bodypart, Chirality chirality, [CanBeNull] out AppearanceComponent component)
         {

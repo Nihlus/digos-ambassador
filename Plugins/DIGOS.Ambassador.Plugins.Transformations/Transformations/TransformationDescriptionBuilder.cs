@@ -39,15 +39,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// </summary>
     public class TransformationDescriptionBuilder
     {
+        [NotNull]
         private readonly TransformationTextTokenizer _tokenizer;
 
-        private readonly Regex _sentenceSpacingRegex = new Regex("(?<=\\w)\\.(?=\\w)", RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase);
+        [NotNull] private readonly Regex _sentenceSpacingRegex = new Regex
+        (
+            "(?<=\\w)\\.(?=\\w)",
+            RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase
+        );
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformationDescriptionBuilder"/> class.
         /// </summary>
         /// <param name="services">The available services.</param>
-        public TransformationDescriptionBuilder(IServiceProvider services)
+        public TransformationDescriptionBuilder([NotNull] IServiceProvider services)
         {
             _tokenizer = new TransformationTextTokenizer(services);
 
@@ -83,7 +88,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 relativeOffset += content.Length - token.Length;
             }
 
-            var result = string.Join(". ", sb.ToString().Split('.').Select(s => s.Trim().Transform(To.SentenceCase))).Trim();
+            var result = string.Join
+            (
+                ". ",
+                sb.ToString().Split('.').Select(s => s.Trim().Transform(To.SentenceCase))
+            ).Trim();
+
             return result;
         }
 
@@ -92,8 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// </summary>
         /// <param name="appearance">The appearance to describe.</param>
         /// <returns>A visual description of the character.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildVisualDescription([NotNull] Appearance appearance)
         {
             var sb = new StringBuilder();
@@ -144,7 +153,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
 
                     if (sameSpecies)
                     {
-                        if (appearance.TryGetAppearanceComponent(component.Bodypart, component.Chirality.Opposite(), out var partToSkip))
+                        if
+                        (
+                            appearance.TryGetAppearanceComponent
+                            (
+                                component.Bodypart,
+                                component.Chirality.Opposite(),
+                                out var partToSkip
+                            )
+                        )
                         {
                             partsToSkip.Add(partToSkip);
                         }
@@ -184,7 +201,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             [NotNull] AppearanceComponent component
         )
         {
-            if (!appearanceConfiguration.TryGetAppearanceComponent(component.Bodypart, component.Chirality.Opposite(), out var opposingComponent))
+            if
+            (
+                !appearanceConfiguration.TryGetAppearanceComponent
+                (
+                    component.Bodypart,
+                    component.Chirality.Opposite(),
+                    out var opposingComponent
+                )
+            )
             {
                 return false;
             }
@@ -198,9 +223,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The shift message.</returns>
-        [NotNull]
-        [Pure]
-        public string BuildShiftMessage([NotNull]Appearance appearanceConfiguration, [NotNull] AppearanceComponent component)
+        [Pure, NotNull]
+        public string BuildShiftMessage
+        (
+            [NotNull] Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent component
+        )
         {
             var transformation = component.Transformation;
 
@@ -214,9 +242,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The uniform shift message.</returns>
-        [NotNull]
-        [Pure]
-        public string BuildUniformShiftMessage([NotNull]Appearance appearanceConfiguration, [NotNull] AppearanceComponent component)
+        [Pure, NotNull]
+        public string BuildUniformShiftMessage
+        (
+            [NotNull] Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent component
+        )
         {
             var transformation = component.Transformation;
 
@@ -234,9 +265,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The grow message.</returns>
-        [NotNull]
-        [Pure]
-        public string BuildGrowMessage([NotNull]Appearance appearanceConfiguration, [NotNull] AppearanceComponent component)
+        [Pure, NotNull]
+        public string BuildGrowMessage
+        (
+            [NotNull] Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent component
+        )
         {
             var transformation = component.Transformation;
 
@@ -250,9 +284,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The uniform grow message.</returns>
-        [NotNull]
-        [Pure]
-        public string BuildUniformGrowMessage([NotNull]Appearance appearanceConfiguration, [NotNull] AppearanceComponent component)
+        [Pure, NotNull]
+        public string BuildUniformGrowMessage
+        (
+            [NotNull] Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent component
+        )
         {
             var transformation = component.Transformation;
 
@@ -270,8 +307,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="bodypart">The bodypart to build the message from.</param>
         /// <returns>The removal message.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildRemoveMessage([NotNull]Appearance appearanceConfiguration, Bodypart bodypart)
         {
             string removalText;
@@ -279,22 +315,26 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             {
                 case Bodypart.Hair:
                 {
-                    removalText = "{@target}'s hair becomes dull and colourless. Strand by strand, tuft by tuft, it falls out, leaving an empty scalp.";
+                    removalText = "{@target}'s hair becomes dull and colourless. Strand by strand, tuft by tuft, " +
+                                  "it falls out, leaving an empty scalp.";
                     break;
                 }
                 case Bodypart.Face:
                 {
-                    removalText = "{@target}'s face begins to warp strangely. Slowly, their features smooth and vanish, leaving a blank surface.";
+                    removalText = "{@target}'s face begins to warp strangely. Slowly, their features smooth and " +
+                                  "vanish, leaving a blank surface.";
                     break;
                 }
                 case Bodypart.Ear:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} shrivels and vanishes.";
+                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} shrivels " +
+                                  $"and vanishes.";
                     break;
                 }
                 case Bodypart.Eye:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} deflates as their eye socket closes, leaving nothing behind.";
+                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} deflates " +
+                                  $"as their eye socket closes, leaving nothing behind.";
                     break;
                 }
                 case Bodypart.Teeth:
@@ -305,27 +345,32 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 case Bodypart.Leg:
                 case Bodypart.Arm:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} shrivels and retracts, vanishing.";
+                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} shrivels " +
+                                  $"and retracts, vanishing.";
                     break;
                 }
                 case Bodypart.Tail:
                 {
-                    removalText = "{@target}'s tail flicks and thrashes for a moment, before it thins out and disappears into nothing.";
+                    removalText = "{@target}'s tail flicks and thrashes for a moment, before it thins out and " +
+                                  "disappears into nothing.";
                     break;
                 }
                 case Bodypart.Wing:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} stiffens and shudders, before losing cohesion and disappearing into their body.";
+                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} stiffens " +
+                                  $"and shudders, before losing cohesion and disappearing into their body.";
                     break;
                 }
                 case Bodypart.Penis:
                 {
-                    removalText = "{@target}'s shaft twitches and shudders, as it begins to shrink and retract. In mere moments, it's gone, leaving nothing.";
+                    removalText = "{@target}'s shaft twitches and shudders, as it begins to shrink and retract. In " +
+                                  "mere moments, it's gone, leaving nothing.";
                     break;
                 }
                 case Bodypart.Vagina:
                 {
-                    removalText = "{@target}'s slit contracts and twitches. A strange sensation rushes through {@f|them} as the opening zips up and fills out, leaving nothing.";
+                    removalText = "{@target}'s slit contracts and twitches. A strange sensation rushes through " +
+                                  "{@f|them} as the opening zips up and fills out, leaving nothing.";
                     break;
                 }
                 case Bodypart.Head:
@@ -336,17 +381,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 case Bodypart.Legs:
                 case Bodypart.Arms:
                 {
-                    removalText = $"{{@target}}'s {bodypart.Humanize().Transform(To.LowerCase)} shrivel and retract, vanishing.";
+                    removalText = $"{{@target}}'s {bodypart.Humanize().Transform(To.LowerCase)} shrivel and " +
+                                  $"retract, vanishing.";
                     break;
                 }
                 case Bodypart.Body:
                 {
-                    removalText = "{@target}'s torso crumples into itself as their main body collapses, shifting and vanishing.";
+                    removalText = "{@target}'s torso crumples into itself as their main body collapses, shifting " +
+                                  "and vanishing.";
                     break;
                 }
                 case Bodypart.Wings:
                 {
-                    removalText = $"{{@target}}'s {bodypart.Humanize().Transform(To.LowerCase)} stiffen and shudder, before losing cohesion and disappearing into their body.";
+                    removalText = $"{{@target}}'s {bodypart.Humanize().Transform(To.LowerCase)} stiffen and shudder, " +
+                                  $"before losing cohesion and disappearing into their body.";
                     break;
                 }
                 default:
@@ -364,11 +412,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildPatternColourShiftMessage
         (
-            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] Appearance appearanceConfiguration,
             [NotNull] AppearanceComponent currentComponent
         )
         {
@@ -385,11 +432,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildUniformPatternColourShiftMessage
         (
-            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] Appearance appearanceConfiguration,
             [NotNull] AppearanceComponent currentComponent
         )
         {
@@ -408,11 +454,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildUniformPatternShiftMessage
         (
-            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] Appearance appearanceConfiguration,
             [NotNull] AppearanceComponent currentComponent
         )
         {
@@ -431,11 +476,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildUniformPatternAddMessage
         (
-            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] Appearance appearanceConfiguration,
             [NotNull] AppearanceComponent currentComponent
         )
         {
@@ -454,8 +498,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildUniformPatternRemoveMessage
         (
             [NotNull]Appearance appearanceConfiguration,
@@ -476,11 +519,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildPatternShiftMessage
         (
-            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] Appearance appearanceConfiguration,
             [NotNull] AppearanceComponent currentComponent
         )
         {
@@ -497,11 +539,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildPatternAddMessage
         (
-            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] Appearance appearanceConfiguration,
             [NotNull] AppearanceComponent currentComponent
         )
         {
@@ -520,11 +561,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildPatternRemoveMessage
         (
-            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] Appearance appearanceConfiguration,
             [NotNull] AppearanceComponent currentComponent
         )
         {
@@ -542,11 +582,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildColourShiftMessage
         (
-            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] Appearance appearanceConfiguration,
             [NotNull] AppearanceComponent currentComponent
         )
         {
@@ -563,11 +602,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [NotNull]
-        [Pure]
+        [Pure, NotNull]
         public string BuildUniformColourShiftMessage
         (
-            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] Appearance appearanceConfiguration,
             [NotNull] AppearanceComponent currentComponent
         )
         {

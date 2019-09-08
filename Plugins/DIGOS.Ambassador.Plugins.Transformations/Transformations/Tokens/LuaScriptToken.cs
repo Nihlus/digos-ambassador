@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
 {
@@ -33,6 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     [TokenIdentifier("script", "sc")]
     public class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
     {
+        [NotNull]
         private readonly LuaService _lua;
 
         /// <summary>
@@ -44,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// Initializes a new instance of the <see cref="LuaScriptToken"/> class.
         /// </summary>
         /// <param name="luaService">The lua execution service.</param>
-        public LuaScriptToken(LuaService luaService)
+        public LuaScriptToken([NotNull] LuaService luaService)
         {
             _lua = luaService;
         }

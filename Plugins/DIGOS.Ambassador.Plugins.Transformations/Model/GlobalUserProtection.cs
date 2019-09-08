@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the list of users that are listed in this protection entry.
         /// </summary>
-        [NotNull]
+        [NotNull, ItemNotNull]
         public virtual List<UserProtectionEntry> UserListing { get; set; } = new List<UserProtectionEntry>();
 
         /// <summary>
@@ -81,8 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// </summary>
         /// <param name="user">The user.</param>
         /// <returns>A default user protection object.</returns>
-        [Pure]
-        [NotNull]
+        [Pure, NotNull]
         public static GlobalUserProtection CreateDefault([NotNull] User user)
         {
             return new GlobalUserProtection

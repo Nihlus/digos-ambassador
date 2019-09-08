@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
@@ -37,6 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the table where transformation species are stored.
         /// </summary>
+        [NotNull, ItemNotNull]
         public DbSet<Species> Species
         {
             get;
@@ -48,6 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the table where transformations are stored.
         /// </summary>
+        [NotNull, ItemNotNull]
         public DbSet<Transformation> Transformations
         {
             get;
@@ -59,6 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the table where global transformation protections are stored.
         /// </summary>
+        [NotNull, ItemNotNull]
         public DbSet<GlobalUserProtection> GlobalUserProtections
         {
             get;
@@ -70,6 +74,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the table where server-specific transformation protections are stored.
         /// </summary>
+        [NotNull, ItemNotNull]
         public DbSet<ServerUserProtection> ServerUserProtections
         {
             get;
@@ -81,6 +86,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the table where appearance configurations are stored.
         /// </summary>
+        [NotNull, ItemNotNull]
         public DbSet<Appearance> Appearances
         {
             get;
@@ -93,6 +99,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// Initializes a new instance of the <see cref="TransformationsDatabaseContext"/> class.
         /// </summary>
         /// <param name="contextOptions">The context options.</param>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
         public TransformationsDatabaseContext(DbContextOptions<TransformationsDatabaseContext> contextOptions)
             : base(SchemaName, contextOptions)
         {

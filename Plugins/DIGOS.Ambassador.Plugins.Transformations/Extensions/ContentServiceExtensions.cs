@@ -60,10 +60,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// </summary>
         /// <param name="this">The content service.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
+        [Pure, NotNull, ItemNotNull]
         public static async Task<RetrieveEntityResult<IReadOnlyList<Species>>> DiscoverBundledSpeciesAsync
         (
-            this ContentService @this
+            [NotNull] this ContentService @this
         )
         {
             const string speciesFilename = "Species.yml";
@@ -124,7 +124,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <param name="transformation">The transformation service.</param>
         /// <param name="species">The species to discover transformations for.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
+        [Pure, NotNull, ItemNotNull]
         public static async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync
         (
             [NotNull] this ContentService @this,

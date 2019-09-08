@@ -23,6 +23,7 @@
 using System;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
 {
@@ -32,6 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     [TokenIdentifier("pronoun", "pr")]
     public class PronounToken : ReplacableTextToken<PronounToken>
     {
+        [NotNull]
         private readonly PronounService _pronouns;
 
         /// <summary>
@@ -43,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// Initializes a new instance of the <see cref="PronounToken"/> class.
         /// </summary>
         /// <param name="pronouns">The character service.</param>
-        public PronounToken(PronounService pronouns)
+        public PronounToken([NotNull] PronounService pronouns)
         {
             _pronouns = pronouns;
         }

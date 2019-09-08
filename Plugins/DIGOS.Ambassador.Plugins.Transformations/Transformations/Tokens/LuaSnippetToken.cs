@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
 {
@@ -32,18 +33,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     [TokenIdentifier("snippet", "lua", "sn")]
     public class LuaSnippetToken : ReplacableTextToken<LuaSnippetToken>
     {
+        [NotNull]
         private readonly LuaService _lua;
 
         /// <summary>
         /// Gets the snippet of lua code to execute.
         /// </summary>
+        [NotNull]
         public string Snippet { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LuaSnippetToken"/> class.
         /// </summary>
         /// <param name="luaService">The lua execution service.</param>
-        public LuaSnippetToken(LuaService luaService)
+        public LuaSnippetToken([NotNull] LuaService luaService)
         {
             _lua = luaService;
         }

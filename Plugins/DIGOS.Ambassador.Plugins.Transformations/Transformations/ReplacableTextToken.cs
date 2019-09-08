@@ -41,11 +41,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         public int Length { get; set; }
 
         /// <inheritdoc />
-        [NotNull]
         public abstract string GetText(Appearance appearance, AppearanceComponent component);
 
         /// <inheritdoc />
-        [NotNull]
         public virtual Task<string> GetTextAsync(Appearance appearance, AppearanceComponent component)
         {
             return Task.Run(() => GetText(appearance, component));
@@ -68,7 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="services">The application's service collection.</param>
         /// <returns>An initialized instance of a token.</returns>
         [NotNull]
-        public static T CreateFrom(int start, int length, [CanBeNull] string data, IServiceProvider services)
+        public static T CreateFrom(int start, int length, [CanBeNull] string data, [NotNull] IServiceProvider services)
         {
             var token = (ReplacableTextToken<T>)ActivatorUtilities.CreateInstance(services, typeof(T));
             token.Start = start;

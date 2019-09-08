@@ -56,14 +56,22 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
     [Summary("Transformation-related commands, such as transforming certain body parts or saving transforms as characters.")]
     public class TransformationCommands : ModuleBase
     {
+        [NotNull]
         private readonly UserService _users;
+
+        [NotNull]
         private readonly UserFeedbackService _feedback;
 
+        [NotNull]
         private readonly ContentService _content;
 
+        [NotNull]
         private readonly CharacterService _characters;
 
+        [NotNull]
         private readonly TransformationService _transformation;
+
+        [NotNull]
         private readonly InteractivityService _interactivity;
 
         /// <summary>
@@ -77,12 +85,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <param name="content">The content service.</param>
         public TransformationCommands
         (
-            UserFeedbackService feedback,
-            CharacterService characters,
-            TransformationService transformation,
-            InteractivityService interactivity,
-            UserService users,
-            ContentService content
+            [NotNull] UserFeedbackService feedback,
+            [NotNull] CharacterService characters,
+            [NotNull] TransformationService transformation,
+            [NotNull] InteractivityService interactivity,
+            [NotNull] UserService users,
+            [NotNull] ContentService content
         )
         {
             _feedback = feedback;

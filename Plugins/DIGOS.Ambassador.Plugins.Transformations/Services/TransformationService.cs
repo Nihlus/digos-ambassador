@@ -40,6 +40,8 @@ using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 
+using PureAttribute = JetBrains.Annotations.PureAttribute;
+
 namespace DIGOS.Ambassador.Plugins.Transformations.Services
 {
     /// <summary>
@@ -47,11 +49,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
     /// </summary>
     public class TransformationService
     {
+        [NotNull]
         private readonly TransformationsDatabaseContext _database;
+
+        [NotNull]
         private readonly UserService _users;
+
+        [NotNull]
         private readonly ServerService _servers;
+
+        [NotNull]
         private readonly ContentService _content;
 
+        [NotNull]
         private TransformationDescriptionBuilder _descriptionBuilder;
 
         /// <summary>
@@ -61,18 +71,21 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
         /// <param name="database">The database.</param>
+        /// <param name="descriptionBuilder">The description builder.</param>
         public TransformationService
         (
             ContentService content,
             UserService users,
             ServerService servers,
-            TransformationsDatabaseContext database
+            TransformationsDatabaseContext database,
+            TransformationDescriptionBuilder descriptionBuilder
         )
         {
             _content = content;
             _users = users;
             _servers = servers;
             _database = database;
+            _descriptionBuilder = descriptionBuilder;
         }
 
         /// <summary>
@@ -81,7 +94,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="descriptionBuilder">The builder.</param>
         /// <returns>The transformation service with the given builder.</returns>
         [NotNull]
-        public TransformationService WithDescriptionBuilder(TransformationDescriptionBuilder descriptionBuilder)
+        public TransformationService WithDescriptionBuilder
+        (
+            [NotNull] TransformationDescriptionBuilder descriptionBuilder
+        )
         {
             _descriptionBuilder = descriptionBuilder;
             return this;
@@ -92,6 +108,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="character">The character.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<Appearance>> GetOrCreateDefaultAppearanceAsync
         (
             [NotNull] Character character
@@ -125,7 +142,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="character">The character.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        private async Task<RetrieveEntityResult<Appearance>> GetDefaultAppearanceAsync(Character character)
+        [Pure, NotNull, ItemNotNull]
+        private async Task<RetrieveEntityResult<Appearance>> GetDefaultAppearanceAsync([NotNull] Character character)
         {
             var defaultAppearance = await _database.Appearances.FirstOrDefaultAsync
             (
@@ -146,6 +164,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="character">The character.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<Appearance>> GetOrCreateCurrentAppearanceAsync
         (
             [NotNull] Character character
@@ -184,6 +203,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="character">The character.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        [Pure, NotNull, ItemNotNull]
         private async Task<RetrieveEntityResult<Appearance>> GetCurrentAppearanceAsync([NotNull] Character character)
         {
             var currentAppearance = await _database.Appearances.FirstOrDefaultAsync
@@ -207,6 +227,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="bodyPart">The bodypart to remove.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ShiftBodypartResult> RemoveBodypartAsync
         (
             [NotNull] ICommandContext context,
@@ -255,6 +276,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="bodyPart">The bodypart to remove.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ShiftBodypartResult> RemoveBodypartPatternAsync
         (
             [NotNull] ICommandContext context,
@@ -298,6 +320,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="speciesName">The species to shift the bodypart into.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ShiftBodypartResult> ShiftBodypartAsync
         (
             [NotNull] ICommandContext context,
@@ -350,6 +373,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="colour">The colour to shift it into.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ShiftBodypartResult> ShiftBodypartColourAsync
         (
             [NotNull] ICommandContext context,
@@ -403,6 +427,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="patternColour">The colour to shift it into.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ShiftBodypartResult> ShiftBodypartPatternAsync
         (
             [NotNull] ICommandContext context,
@@ -448,6 +473,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="patternColour">The colour to shift it into.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ShiftBodypartResult> ShiftPatternColourAsync
         (
             [NotNull] ICommandContext context,
@@ -490,7 +516,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="invokingUser">The user trying to transform.</param>
         /// <param name="targetUser">The user being transformed.</param>
         /// <returns>A conditional determination with an attached reason if it failed.</returns>
-        [Pure]
+        [Pure, NotNull, ItemNotNull]
         public async Task<DetermineConditionResult> CanUserTransformUserAsync
         (
             [NotNull] IGuild discordServer,
@@ -544,11 +570,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="character">The character to generate the description for.</param>
         /// <returns>An embed with a formatted description.</returns>
-        [Pure]
-        public async Task<CreateEntityResult<string>> GenerateCharacterDescriptionAsync
-        (
-            [NotNull] Character character
-        )
+        [Pure, NotNull, ItemNotNull]
+        public async Task<CreateEntityResult<string>> GenerateCharacterDescriptionAsync([NotNull] Character character)
         {
             var getCurrentAppearance = await GetOrCreateCurrentAppearanceAsync
             (
@@ -570,7 +593,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// Gets the available species in transformations.
         /// </summary>
         /// <returns>A list of the available species.</returns>
-        [Pure]
+        [Pure, NotNull, ItemNotNull]
         public async Task<IReadOnlyList<Species>> GetAvailableSpeciesAsync()
         {
             return await _database.Species
@@ -582,11 +605,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="bodyPart">The bodypart to get the transformations for.</param>
         /// <returns>A list of the available transformations..</returns>
-        [Pure]
-        public async Task<IReadOnlyList<Transformation>> GetAvailableTransformationsAsync
-        (
-            Bodypart bodyPart
-        )
+        [Pure, NotNull, ItemNotNull]
+        public async Task<IReadOnlyList<Transformation>> GetAvailableTransformationsAsync(Bodypart bodyPart)
         {
             return await _database.Transformations
                 .Where(tf => tf.Part == bodyPart).ToListAsync();
@@ -597,10 +617,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="character">The character to reset.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ResetCharacterFormAsync
-        (
-            [NotNull] Character character
-        )
+        [NotNull, ItemNotNull]
+        public async Task<ModifyEntityResult> ResetCharacterFormAsync([NotNull] Character character)
         {
             var getDefaultAppearanceResult = await GetOrCreateDefaultAppearanceAsync(character);
             if (!getDefaultAppearanceResult.IsSuccess)
@@ -632,6 +650,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="character">The character to set the default appearance of.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetCurrentAppearanceAsDefaultForCharacterAsync
         (
             [NotNull] Character character
@@ -671,6 +690,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="discordUser">The user to set the protection for.</param>
         /// <param name="protectionType">The protection type to set.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetDefaultProtectionTypeAsync
         (
             [NotNull] IUser discordUser,
@@ -703,6 +723,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="discordServer">The server to set the protection on.</param>
         /// <param name="protectionType">The protection type to set.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetServerProtectionTypeAsync
         (
             [NotNull] IUser discordUser,
@@ -735,6 +756,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="discordUser">The user to modify.</param>
         /// <param name="whitelistedUser">The user to add to the whitelist.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> WhitelistUserAsync
         (
             [NotNull] IUser discordUser,
@@ -797,6 +819,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="discordUser">The user to modify.</param>
         /// <param name="blacklistedUser">The user to add to the blacklist.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> BlacklistUserAsync
         (
             [NotNull] IUser discordUser,
@@ -858,6 +881,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="discordUser">The user.</param>
         /// <returns>Global protection data for the given user.</returns>
+        [NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<GlobalUserProtection>> GetOrCreateGlobalUserProtectionAsync
         (
             [NotNull] IUser discordUser
@@ -894,6 +918,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="discordUser">The user.</param>
         /// <param name="guild">The server.</param>
         /// <returns>Server-specific protection data for the given user.</returns>
+        [NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<ServerUserProtection>> GetOrCreateServerUserProtectionAsync
         (
             [NotNull] IUser discordUser,
@@ -940,6 +965,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// Updates the database with new or changed transformations.
         /// </summary>
         /// <returns>An update result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<UpdateTransformationsResult> UpdateTransformationDatabaseAsync()
         {
             uint addedSpecies = 0;
@@ -1059,7 +1085,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 }
             }
 
-            return UpdateTransformationsResult.FromSuccess(addedSpecies, addedTransformations, updatedSpecies, updatedTransformations);
+            return UpdateTransformationsResult.FromSuccess
+            (
+                addedSpecies,
+                addedTransformations,
+                updatedSpecies,
+                updatedTransformations
+            );
         }
 
         /// <summary>
@@ -1069,7 +1101,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="bodypart">The part.</param>
         /// <param name="species">The species.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
+        [Pure, NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> GetTransformationsByPartAndSpeciesAsync
         (
             Bodypart bodypart,
@@ -1092,7 +1124,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             if (!transformations.Any())
             {
-                return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError("No transformation found for that combination.");
+                return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError
+                (
+                    "No transformation found for that combination."
+                );
             }
 
             return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromSuccess(transformations);
@@ -1104,14 +1139,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="bodypart">The bodypart that is transformed.</param>
         /// <param name="species">The species to transform into.</param>
         /// <returns>true if the combination is unique; otherwise, false.</returns>
-        [Pure]
+        [Pure, NotNull]
         public async Task<bool> IsPartAndSpeciesCombinationUniqueAsync
         (
             Bodypart bodypart,
             [NotNull] Species species
         )
         {
-            return !await _database.Transformations.AnyAsync(tf => tf.Part == bodypart && tf.Species.IsSameSpeciesAs(species));
+            return !await _database.Transformations.AnyAsync
+            (
+                tf => tf.Part == bodypart && tf.Species.IsSameSpeciesAs(species)
+            );
         }
 
         /// <summary>
@@ -1119,7 +1157,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="speciesName">The name of the species.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
+        [Pure, NotNull]
         public RetrieveEntityResult<Species> GetSpeciesByName
         (
             [NotNull] string speciesName
@@ -1133,13 +1171,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="speciesName">The name of the species.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
+        [Pure, NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<Species>> GetSpeciesByNameAsync
         (
             [NotNull] string speciesName
         )
         {
-            var species = await _database.Species.FirstOrDefaultAsync(s => string.Equals(s.Name, speciesName, StringComparison.OrdinalIgnoreCase));
+            var species = await _database.Species.FirstOrDefaultAsync
+            (
+                s => string.Equals(s.Name, speciesName, StringComparison.OrdinalIgnoreCase)
+            );
+
             if (species is null)
             {
                 return RetrieveEntityResult<Species>.FromError("There is no species with that name in the database.");
@@ -1153,13 +1195,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// </summary>
         /// <param name="speciesName">The name of the species.</param>
         /// <returns>true if the name is unique; otherwise, false.</returns>
-        [Pure]
+        [Pure, NotNull]
         public async Task<bool> IsSpeciesNameUniqueAsync
         (
             [NotNull] string speciesName
         )
         {
-            return !await _database.Species.AnyAsync(s => string.Equals(s.Name, speciesName, StringComparison.OrdinalIgnoreCase));
+            return !await _database.Species.AnyAsync
+            (
+                s => string.Equals(s.Name, speciesName, StringComparison.OrdinalIgnoreCase)
+            );
         }
 
         /// <summary>
@@ -1168,7 +1213,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="user">The user.</param>
         /// <param name="guild">The guild.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> OptInUserAsync(IUser user, IGuild guild)
+        [NotNull, ItemNotNull]
+        public async Task<ModifyEntityResult> OptInUserAsync([NotNull] IUser user, [NotNull] IGuild guild)
         {
             var getProtectionResult = await GetOrCreateServerUserProtectionAsync(user, guild);
             if (!getProtectionResult.IsSuccess)
@@ -1196,7 +1242,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="user">The user.</param>
         /// <param name="guild">The guild.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> OptOutUserAsync(IUser user, IGuild guild)
+        [NotNull, ItemNotNull]
+        public async Task<ModifyEntityResult> OptOutUserAsync([NotNull] IUser user, [NotNull] IGuild guild)
         {
             var getProtectionResult = await GetOrCreateServerUserProtectionAsync(user, guild);
             if (!getProtectionResult.IsSuccess)
@@ -1224,7 +1271,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="user">The user.</param>
         /// <param name="shouldOptIn">Whether the user should be opted by default on new servers.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetDefaultOptInAsync(IUser user, bool shouldOptIn)
+        [NotNull, ItemNotNull]
+        public async Task<ModifyEntityResult> SetDefaultOptInAsync([NotNull] IUser user, bool shouldOptIn)
         {
             var getProtectionResult = await GetOrCreateGlobalUserProtectionAsync(user);
             if (!getProtectionResult.IsSuccess)

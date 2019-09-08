@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
@@ -73,6 +74,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             serviceCollection
                 .AddSingleton(FileSystemFactory.CreateContentFileSystem())
                 .AddSingleton<PronounService>()
+                .AddSingleton<TransformationDescriptionBuilder>()
                 .AddScoped<TransformationService>()
                 .AddScoped<ContentService>()
                 .AddScoped<UserService>()

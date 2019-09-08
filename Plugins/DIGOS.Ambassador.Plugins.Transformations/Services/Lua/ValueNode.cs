@@ -28,6 +28,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     /// <typeparam name="T">The type of value.</typeparam>
     public class ValueNode<T> : NamedNode<T>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ValueNode{T}"/> class.
+        /// </summary>
+        /// <param name="value">The node's value.</param>
+        public ValueNode(string value)
+            : base(value)
+        {
+        }
+
         /// <inheritdoc />
         public override string Format(bool pretty = false)
         {

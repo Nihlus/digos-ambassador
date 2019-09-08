@@ -23,6 +23,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
@@ -48,14 +49,39 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the name of the species.
         /// </summary>
-        [Required]
+        [Required, NotNull]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the description of the species.
         /// </summary>
-        [Required]
+        [Required, NotNull]
         public string Description { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Species"/> class.
+        /// </summary>
+        [UsedImplicitly]
+        [SuppressMessage
+        (
+            "ReSharper",
+            "NotNullMemberIsNotInitialized",
+            Justification = "Initialized by EF Core or YML."
+        )]
+        public Species()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Species"/> class.
+        /// </summary>
+        /// <param name="name">The species name.</param>
+        /// <param name="description">The description of the species..</param>
+        public Species(string name, string description)
+        {
+            this.Name = name;
+            this.Description = description;
+        }
 
         /// <summary>
         /// Gets the depth of this species in the parent chain.

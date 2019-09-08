@@ -22,6 +22,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
@@ -49,33 +50,34 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the species that this transformation belongs to.
         /// </summary>
-        [Required]
+        [Required, NotNull]
         public virtual Species Species { get; set; }
 
         /// <summary>
         /// Gets or sets a short description of the transformation.
         /// </summary>
-        [Required]
+        [Required, NotNull]
         public string Description { get; set; }
 
         /// <summary>
         /// Gets or sets the default base colour of the transformation.
         /// </summary>
-        [Required]
+        [Required, NotNull]
         [YamlMember(Alias = "default_base_colour")]
         public virtual Colour DefaultBaseColour { get; set; }
 
         /// <summary>
         /// Gets or sets the default pattern of the transformation (if any).
         /// </summary>
+        [CanBeNull]
         [YamlMember(Alias = "default_pattern")]
         public Pattern? DefaultPattern { get; set; }
 
         /// <summary>
         /// Gets or sets the default colour of the pattern (if any).
         /// </summary>
-        [YamlMember(Alias = "default_pattern_colour")]
         [CanBeNull]
+        [YamlMember(Alias = "default_pattern_colour")]
         public virtual Colour DefaultPatternColour { get; set; }
 
         /// <summary>
@@ -88,14 +90,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the text of the message when an existing bodypart shifts into this one.
         /// </summary>
-        [Required]
+        [Required, NotNull]
         [YamlMember(Alias = "shift_message")]
         public string ShiftMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the text of the message when this bodypart is added where none existed before.
         /// </summary>
-        [Required]
+        [Required, NotNull]
         [YamlMember(Alias = "grow_message")]
         public string GrowMessage { get; set; }
 
@@ -103,27 +105,71 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// Gets or sets the uniform shift message, used when two chiral parts shift together.
         /// </summary>
         [CanBeNull]
+        [YamlMember(Alias = "uniform_shift_message")]
         public string UniformShiftMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the uniform grow message, used when two chiral parts grow together.
         /// </summary>
         [CanBeNull]
+        [YamlMember(Alias = "uniform_grow_message")]
         public string UniformGrowMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the text of the description when the species of the complementary bodyparts don't match.
         /// </summary>
-        [Required]
+        [Required, NotNull]
         [YamlMember(Alias = "single_description")]
         public string SingleDescription { get; set; }
 
         /// <summary>
         /// Gets or sets the text of the description when the species of the complementary bodyparts match.
         /// </summary>
-        [YamlMember(Alias = "uniform_description")]
         [CanBeNull]
+        [YamlMember(Alias = "uniform_description")]
         public string UniformDescription { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Transformation"/> class.
+        /// </summary>
+        [UsedImplicitly]
+        [SuppressMessage
+        (
+            "ReSharper",
+            "NotNullMemberIsNotInitialized",
+            Justification = "Initialized by EF Core or YML."
+        )]
+        public Transformation()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Transformation"/> class.
+        /// </summary>
+        /// <param name="species">The species the transformation belongs to.</param>
+        /// <param name="description">The description of the transformation.</param>
+        /// <param name="defaultBaseColour">The transformation's default base colour.</param>
+        /// <param name="shiftMessage">The transformation's shift message.</param>
+        /// <param name="growMessage">The transformation's grow message.</param>
+        /// <param name="singleDescription">The description of a single bodypart.</param>
+        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
+        public Transformation
+        (
+            [NotNull] Species species,
+            [NotNull] string description,
+            [NotNull] Colour defaultBaseColour,
+            [NotNull] string shiftMessage,
+            [NotNull] string growMessage,
+            [NotNull] string singleDescription
+        )
+        {
+            this.Species = species;
+            this.Description = description;
+            this.DefaultBaseColour = defaultBaseColour;
+            this.ShiftMessage = shiftMessage;
+            this.GrowMessage = growMessage;
+            this.SingleDescription = singleDescription;
+        }
 
         /// <inheritdoc />
         public override string ToString()

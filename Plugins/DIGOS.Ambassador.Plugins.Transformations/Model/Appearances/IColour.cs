@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
 {
     /// <summary>
@@ -35,6 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the colour modifier.
         /// </summary>
+        [CanBeNull]
         ShadeModifier? Modifier { get; }
     }
 }

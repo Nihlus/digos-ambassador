@@ -22,6 +22,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 
@@ -32,13 +33,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// </summary>
     public class ValidatingNodeDeserializer : INodeDeserializer
     {
+        [NotNull]
         private readonly INodeDeserializer _nodeDeserializer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatingNodeDeserializer"/> class.
         /// </summary>
         /// <param name="nodeDeserializer">The node deserializer.</param>
-        public ValidatingNodeDeserializer(INodeDeserializer nodeDeserializer)
+        public ValidatingNodeDeserializer([NotNull] INodeDeserializer nodeDeserializer)
         {
             _nodeDeserializer = nodeDeserializer;
         }

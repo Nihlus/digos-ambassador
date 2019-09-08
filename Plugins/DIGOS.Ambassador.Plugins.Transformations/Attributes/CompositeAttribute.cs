@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Attributes
 {
@@ -35,13 +36,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Attributes
         /// <summary>
         /// Gets the list of parts that compose this part.
         /// </summary>
+        [NotNull]
         public IReadOnlyList<Bodypart> ComposingParts { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompositeAttribute"/> class.
         /// </summary>
         /// <param name="composingParts">The parts that compose this part.</param>
-        public CompositeAttribute(params Bodypart[] composingParts)
+        public CompositeAttribute([NotNull] params Bodypart[] composingParts)
         {
             this.ComposingParts = composingParts;
         }

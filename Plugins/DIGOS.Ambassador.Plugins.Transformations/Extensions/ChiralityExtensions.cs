@@ -22,6 +22,7 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
 {
@@ -35,6 +36,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// </summary>
         /// <param name="this">The chirality.</param>
         /// <returns>The inverse chirality.</returns>
+        [Pure]
         public static Chirality Opposite(this Chirality @this)
         {
             switch (@this)

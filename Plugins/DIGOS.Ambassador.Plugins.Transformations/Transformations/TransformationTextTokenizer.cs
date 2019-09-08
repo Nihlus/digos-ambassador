@@ -35,15 +35,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// </summary>
     public sealed class TransformationTextTokenizer
     {
+        [NotNull]
         private readonly Dictionary<string, Type> _availableTokens = new Dictionary<string, Type>();
 
+        [NotNull]
         private readonly IServiceProvider _services;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformationTextTokenizer"/> class.
         /// </summary>
         /// <param name="services">The services to make available to tokens via dependency injection.</param>
-        public TransformationTextTokenizer(IServiceProvider services)
+        public TransformationTextTokenizer([NotNull] IServiceProvider services)
         {
             _services = services;
         }
@@ -52,7 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// Discovers available tokens in the given assembly, adding them to the tokenizer.
         /// </summary>
         /// <param name="assembly">The assembly to scan. Defaults to the executing assembly.</param>
-        public void DiscoverAvailableTokens(Assembly assembly = null)
+        public void DiscoverAvailableTokens([CanBeNull] Assembly assembly = null)
         {
             assembly = assembly ?? Assembly.GetExecutingAssembly();
             var tokenTypes = assembly.DefinedTypes.Where
@@ -114,8 +116,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// </summary>
         /// <param name="text">The text to tokenize.</param>
         /// <returns>A list of recognized tokens in the text.</returns>
-        [NotNull]
-        [ItemNotNull]
+        [NotNull, ItemNotNull]
         public IReadOnlyList<IReplaceableTextToken> GetTokens([NotNull] string text)
         {
             var tokens = new List<IReplaceableTextToken>();
@@ -160,7 +161,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="tokenText">The raw text of the token.</param>
         /// <returns>A token object.</returns>
         [CanBeNull]
-        public IReplaceableTextToken ParseToken(int start, string tokenText)
+        public IReplaceableTextToken ParseToken(int start, [NotNull] string tokenText)
         {
             // Tokens are of the format @<tag>|<data>
             if (tokenText.Length <= 1)

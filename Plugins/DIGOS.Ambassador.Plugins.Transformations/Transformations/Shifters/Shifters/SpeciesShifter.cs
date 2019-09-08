@@ -55,10 +55,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="descriptionBuilder">The description builder.</param>
         public SpeciesShifter
         (
-            Appearance appearance,
-            Species species,
-            TransformationService transformations,
-            TransformationDescriptionBuilder descriptionBuilder
+            [NotNull] Appearance appearance,
+            [NotNull] Species species,
+            [NotNull] TransformationService transformations,
+            [NotNull] TransformationDescriptionBuilder descriptionBuilder
         )
             : base(appearance)
         {

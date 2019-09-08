@@ -56,10 +56,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             };
 
             var hairTransformation = new Transformation
+            (
+                new Species("dummy", "dummy"),
+                "dummy",
+                hairColour,
+                "dummy",
+                "dummy",
+                SampleFluentText
+            )
             {
-                DefaultBaseColour = hairColour,
                 Part = Bodypart.Hair,
-                SingleDescription = SampleFluentText
             };
 
             var hairComponent = AppearanceComponent.CreateFrom(hairTransformation);

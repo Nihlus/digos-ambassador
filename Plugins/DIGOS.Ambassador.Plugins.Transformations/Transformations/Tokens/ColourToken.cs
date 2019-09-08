@@ -21,7 +21,9 @@
 //
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
 {
@@ -34,7 +36,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// <summary>
         /// Gets the form of the pronoun.
         /// </summary>
+        [NotNull]
         public string Part { get; private set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ColourToken"/> class.
+        /// </summary>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by convention.")]
+        public ColourToken()
+        {
+        }
 
         /// <inheritdoc />
         public override string GetText(Appearance appearance, AppearanceComponent component)

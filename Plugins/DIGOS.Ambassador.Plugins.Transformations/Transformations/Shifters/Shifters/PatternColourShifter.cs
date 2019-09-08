@@ -26,6 +26,7 @@ using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
@@ -34,9 +35,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// </summary>
     public class PatternColourShifter : AppearanceShifter
     {
+        [NotNull]
         private readonly TransformationService _transformations;
+
+        [NotNull]
         private readonly TransformationDescriptionBuilder _descriptionBuilder;
 
+        [NotNull]
         private readonly Colour _colour;
 
         /// <summary>
@@ -48,10 +53,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="descriptionBuilder">The description builder.</param>
         public PatternColourShifter
         (
-            Appearance appearance,
-            Colour colour,
-            TransformationService transformations,
-            TransformationDescriptionBuilder descriptionBuilder
+            [NotNull] Appearance appearance,
+            [NotNull] Colour colour,
+            [NotNull] TransformationService transformations,
+            [NotNull] TransformationDescriptionBuilder descriptionBuilder
         )
             : base(appearance)
         {
