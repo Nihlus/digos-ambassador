@@ -105,7 +105,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 eb.WithDescription("The server doesn't have a description set.");
             }
 
-            eb.AddField("Permission Warnings", server.SuppressPermissonWarnings ? "On" : "Off", true);
+            eb.AddField("Permission Warnings", server.SuppressPermissionWarnings ? "On" : "Off", true);
             eb.AddField("NSFW", server.IsNSFW ? "Yes" : "No");
 
             string content;

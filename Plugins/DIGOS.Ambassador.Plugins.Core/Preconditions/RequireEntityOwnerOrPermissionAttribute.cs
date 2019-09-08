@@ -27,6 +27,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
 using Discord.WebSocket;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Plugins.Core.Preconditions
@@ -34,6 +35,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Preconditions
     /// <summary>
     /// Acts as a precondition for owned entities, limiting their use to their owners or users with explicit permission.
     /// </summary>
+    [PublicAPI]
     public class RequireEntityOwnerOrPermissionAttribute : ParameterPreconditionAttribute
     {
         private readonly Type _permissionType;

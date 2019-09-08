@@ -22,12 +22,14 @@
 
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Users
 {
     /// <summary>
     /// Holds information about whether or not a user has granted consent to store user data.
     /// </summary>
+    [PublicAPI]
     [Table("UserConsents", Schema = "Core")]
     public class UserConsent : IEFEntity
     {

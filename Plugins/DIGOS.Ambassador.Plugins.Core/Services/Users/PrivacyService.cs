@@ -38,10 +38,16 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
     /// <summary>
     /// Handles privacy-related logic.
     /// </summary>
-    public class PrivacyService
+    [PublicAPI]
+    public sealed class PrivacyService
     {
+        [NotNull]
         private readonly CoreDatabaseContext _database;
+
+        [NotNull]
         private readonly UserFeedbackService _feedback;
+
+        [NotNull]
         private readonly ContentService _content;
 
         /// <summary>
@@ -50,7 +56,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="database">The core database.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="content">The content service.</param>
-        public PrivacyService(CoreDatabaseContext database, UserFeedbackService feedback, ContentService content)
+        public PrivacyService
+        (
+            [NotNull] CoreDatabaseContext database,
+            [NotNull] UserFeedbackService feedback,
+            [NotNull] ContentService content
+        )
         {
             _database = database;
             _feedback = feedback;
@@ -62,6 +73,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="channel">The channel.</param>
         /// <returns>An execution result.</returns>
+        [NotNull, ItemNotNull]
         public async Task<DetermineConditionResult> RequestConsentAsync([NotNull] IDMChannel channel)
         {
             try
@@ -102,6 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="channel">The channel.</param>
         /// <returns>A task that must be awaited.</returns>
+        [NotNull]
         public async Task SendPrivacyPolicyAsync([NotNull] IMessageChannel channel)
         {
             var result = _content.OpenLocalStream(UPath.Combine(UPath.Root, "Privacy", "PrivacyPolicy.pdf"));
@@ -130,6 +143,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The user.</param>
         /// <returns>true if the user has granted consent; Otherwise, false.</returns>
+        [Pure, NotNull]
         public async Task<bool> HasUserConsentedAsync([NotNull] IUser discordUser)
         {
             var userConsent = await _database.UserConsents.FirstOrDefaultAsync(uc => uc.DiscordID == (long)discordUser.Id);
@@ -142,6 +156,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The user that has granted consent.</param>
         /// <returns>A task that must be awaited.</returns>
+        [NotNull]
         public async Task GrantUserConsentAsync([NotNull] IUser discordUser)
         {
             var userConsent = await _database.UserConsents.FirstOrDefaultAsync(uc => uc.DiscordID == (long)discordUser.Id);
@@ -169,6 +184,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The user that has revoked consent.</param>
         /// <returns>A task that must be awaited.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> RevokeUserConsentAsync([NotNull] IUser discordUser)
         {
             var userConsent = await _database.UserConsents.FirstOrDefaultAsync

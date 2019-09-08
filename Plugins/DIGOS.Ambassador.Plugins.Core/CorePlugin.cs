@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,7 +46,8 @@ namespace DIGOS.Ambassador.Plugins.Core
     /// <summary>
     /// Describes the plugin containing core functionality.
     /// </summary>
-    public class CorePlugin : PluginDescriptor, IMigratablePlugin
+    [PublicAPI]
+    public sealed class CorePlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Core";

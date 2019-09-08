@@ -22,13 +22,15 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Core.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to edit server information.
     /// </summary>
-    public class EditServerInfo : Permission
+    [PublicAPI]
+    public sealed class EditServerInfo : Permission
     {
         /// <inheritdoc />
         public override Guid UniqueIdentifier { get; } = new Guid("A6357073-AD32-4225-A103-2A4358527A18");

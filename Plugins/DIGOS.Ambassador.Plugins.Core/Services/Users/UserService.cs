@@ -35,15 +35,17 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
     /// <summary>
     /// Handles user-related logic.
     /// </summary>
-    public class UserService
+    [PublicAPI]
+    public sealed class UserService
     {
+        [NotNull]
         private readonly CoreDatabaseContext _database;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class.
         /// </summary>
         /// <param name="database">The core database.</param>
-        public UserService(CoreDatabaseContext database)
+        public UserService([NotNull] CoreDatabaseContext database)
         {
             _database = database;
         }
@@ -66,7 +68,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <returns>Stored information about the user.</returns>
         [NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<User>> GetOrRegisterUserAsync
-        ([NotNull] IUser discordUser
+        (
+            [NotNull] IUser discordUser
         )
         {
             if (!await IsUserKnownAsync(discordUser))
@@ -82,7 +85,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>Stored information about the user.</returns>
-        [Pure, ItemNotNull]
+        [Pure, NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<User>> GetUserAsync([NotNull] IUser discordUser)
         {
             var user = await _database.Users.FirstOrDefaultAsync
@@ -145,6 +148,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="user">The user.</param>
         /// <param name="timezoneOffset">The timezone.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetUserTimezoneAsync([NotNull] User user, int timezoneOffset)
         {
             if (timezoneOffset < -12 || timezoneOffset > 14)
@@ -170,6 +174,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="user">The user.</param>
         /// <param name="bio">The bio.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetUserBioAsync([NotNull] User user, [NotNull] string bio)
         {
             if (bio.IsNullOrWhitespace())

@@ -36,16 +36,19 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
     /// <summary>
     /// Acts as an interface for accessing and modifying named entities owned by users.
     /// </summary>
-    public class OwnedEntityService
+    [PublicAPI]
+    public sealed class OwnedEntityService
     {
         /// <summary>
         /// Holds reserved characters which may not appear in names.
         /// </summary>
+        [NotNull]
         private readonly char[] _reservedNameCharacters = { ':' };
 
         /// <summary>
         /// Holds reserved names which entities may not have.
         /// </summary>
+        [NotNull, ItemNotNull]
         private readonly string[] _reservedNames = { "current" };
 
         /// <summary>
@@ -54,7 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="userEntities">The entities to check.</param>
         /// <param name="entityName">The entity name to check.</param>
         /// <returns>true if the name is unique; otherwise, false.</returns>
-        [Pure]
+        [Pure, NotNull]
         public async Task<bool> IsEntityNameUniqueForUserAsync
         (
             [NotNull] IQueryable<IOwnedNamedEntity> userEntities,
@@ -78,6 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="entity">The entity to transfer.</param>
         /// <typeparam name="TContext">The database context to use.</typeparam>
         /// <returns>An entity modification result, which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> TransferEntityOwnershipAsync<TContext>
         (
             [NotNull] TContext db,
@@ -118,7 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="commandNames">The command names.</param>
         /// <param name="entityName">The name of the entity.</param>
         /// <returns>true if the name is valid; otherwise, false.</returns>
-        [Pure]
+        [Pure, NotNull]
         [ContractAnnotation("entityName:null => false")]
         public DetermineConditionResult IsEntityNameValid
         (

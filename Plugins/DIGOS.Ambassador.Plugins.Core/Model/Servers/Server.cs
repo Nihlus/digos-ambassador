@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DIGOS.Ambassador.Core.Database.Entities;
@@ -33,6 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
     /// <summary>
     /// Represents stored settings for a Discord server.
     /// </summary>
+    [PublicAPI]
     [Table("Servers", Schema = "Core")]
     public class Server : IEFEntity
     {
@@ -52,12 +54,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// <summary>
         /// Gets or sets a value indicating whether or not the server should suppress permission warnings.
         /// </summary>
-        public bool SuppressPermissonWarnings { get; set; }
+        public bool SuppressPermissionWarnings { get; set; }
 
         /// <summary>
         /// Gets or sets the users known to the bot on this server.
         /// </summary>
-        [NotNull]
+        [Required, NotNull]
         public virtual List<ServerUser> KnownUsers { get; set; } = new List<ServerUser>();
 
         /// <summary>

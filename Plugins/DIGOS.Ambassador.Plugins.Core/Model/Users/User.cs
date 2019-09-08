@@ -29,6 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
     /// <summary>
     /// Represents globally accessible information about a user.
     /// </summary>
+    [PublicAPI]
     [Table("Users", Schema = "Core")]
     public class User : IEFEntity
     {

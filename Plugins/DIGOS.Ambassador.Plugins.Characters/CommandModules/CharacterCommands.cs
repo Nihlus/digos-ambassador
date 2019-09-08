@@ -655,7 +655,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             if (!character.Nickname.IsNullOrWhitespace())
             {
                 var modifyNickResult = await _discord.SetUserNicknameAsync(this.Context, guildUser, character.Nickname);
-                if (!modifyNickResult.IsSuccess && !server.SuppressPermissonWarnings)
+                if (!modifyNickResult.IsSuccess && !server.SuppressPermissionWarnings)
                 {
                     await _feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
                 }
@@ -806,7 +806,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     modifyNickResult = await _discord.SetUserNicknameAsync(this.Context, guildUser, guildUser.Username);
                 }
 
-                if (!modifyNickResult.IsSuccess && !server.SuppressPermissonWarnings)
+                if (!modifyNickResult.IsSuccess && !server.SuppressPermissionWarnings)
                 {
                     await _feedback.SendWarningAsync(this.Context, modifyNickResult.ErrorReason);
                 }

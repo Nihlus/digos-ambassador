@@ -35,15 +35,17 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
     /// <summary>
     /// Handles modification of server settings.
     /// </summary>
-    public class ServerService
+    [PublicAPI]
+    public sealed class ServerService
     {
+        [NotNull]
         private readonly CoreDatabaseContext _database;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerService"/> class.
         /// </summary>
         /// <param name="database">The core database.</param>
-        public ServerService(CoreDatabaseContext database)
+        public ServerService([NotNull] CoreDatabaseContext database)
         {
             _database = database;
         }
@@ -53,7 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// </summary>
         /// <param name="discordServer">The Discord server.</param>
         /// <returns><value>true</value> if the server is stored; otherwise, <value>false</value>.</returns>
-        [Pure]
+        [Pure, NotNull]
         public async Task<bool> IsServerKnownAsync([NotNull] IGuild discordServer)
         {
             return await _database.Servers.AnyAsync(u => u.DiscordID == (long)discordServer.Id);
@@ -64,7 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// </summary>
         /// <param name="discordServer">The Discord server.</param>
         /// <returns>Stored information about the server.</returns>
-        [ItemNotNull]
+        [NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<Server>> GetOrRegisterServerAsync([NotNull] IGuild discordServer)
         {
             if (!await IsServerKnownAsync(discordServer))
@@ -80,8 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// </summary>
         /// <param name="discordServer">The Discord server.</param>
         /// <returns>Stored information about the server.</returns>
-        [Pure]
-        [ItemNotNull]
+        [Pure, NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<Server>> GetServerAsync([NotNull] IGuild discordServer)
         {
             var server = await _database.Servers.FirstOrDefaultAsync(u => u.DiscordID == (long)discordServer.Id);
@@ -99,7 +100,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// <param name="discordServer">The Discord server.</param>
         /// <returns>The freshly created information about the server.</returns>
         /// <exception cref="ArgumentException">Thrown if the server already exists in the database.</exception>
-        [ItemNotNull]
+        [NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<Server>> AddServerAsync([NotNull] IGuild discordServer)
         {
             if (await IsServerKnownAsync(discordServer))
@@ -123,6 +124,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// </summary>
         /// <param name="server">The server.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        [Pure, NotNull]
         public RetrieveEntityResult<string> GetDescription([NotNull] Server server)
         {
             if (server.Description.IsNullOrWhitespace())
@@ -139,6 +141,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// <param name="server">The server.</param>
         /// <param name="description">The new description.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetDescriptionAsync
         (
             [NotNull] Server server,
@@ -181,6 +184,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// </summary>
         /// <param name="server">The server.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        [Pure, NotNull]
         public RetrieveEntityResult<string> GetJoinMessage([NotNull] Server server)
         {
             if (server.JoinMessage.IsNullOrWhitespace())
@@ -197,6 +201,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// <param name="server">The server.</param>
         /// <param name="joinMessage">The new join message.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetJoinMessageAsync
         (
             [NotNull] Server server,
@@ -240,6 +245,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// <param name="server">The server.</param>
         /// <param name="isNsfw">Whether or not the server is NSFW.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetIsNSFWAsync
         (
             [NotNull] Server server,
@@ -266,6 +272,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// <param name="server">The server.</param>
         /// <param name="sendJoinMessage">Whether or not the server should send join messages.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetSendJoinMessageAsync
         (
             [NotNull] Server server,

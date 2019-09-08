@@ -32,6 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
     /// <summary>
     /// Represents a join table entry for a server-user mapping.
     /// </summary>
+    [PublicAPI]
     [Table("ServerUser", Schema = "Core")]
     public class ServerUser : EFEntity
     {
@@ -60,7 +61,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         /// </summary>
         /// <param name="server">The server.</param>
         /// <param name="user">The user.</param>
-        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF proxies.")]
+        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
         public ServerUser([NotNull] Server server, [NotNull] User user)
         {
             this.Server = server;

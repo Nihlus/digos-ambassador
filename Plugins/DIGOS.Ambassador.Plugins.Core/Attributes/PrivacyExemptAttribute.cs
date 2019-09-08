@@ -21,6 +21,7 @@
 //
 
 using System;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Core.Attributes
 {
@@ -28,8 +29,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Attributes
     /// If a method is decorated with this attribute, it is exempt from privacy consent. The method must not store or
     /// access any user data.
     /// </summary>
+    [PublicAPI]
     [AttributeUsage(AttributeTargets.Method)]
-    public class PrivacyExemptAttribute : Attribute
+    public sealed class PrivacyExemptAttribute : Attribute
     {
     }
 }

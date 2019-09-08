@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         public long? DedicatedChannelID { get; set; }
 
         /// <inheritdoc />
-        [NotNull, Required]
+        [Required]
         public virtual User Owner { get; set; }
 
         /// <summary>

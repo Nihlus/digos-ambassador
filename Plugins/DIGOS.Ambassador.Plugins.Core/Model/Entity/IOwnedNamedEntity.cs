@@ -30,21 +30,25 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
     /// Represents an entity that is owned by a user, and has a unique name within the context of that user. The name
     /// is case-insensitive.
     /// </summary>
+    [PublicAPI]
     public interface IOwnedNamedEntity
     {
         /// <summary>
         /// Gets or sets the user that owns this entity.
         /// </summary>
+        [NotNull]
         User Owner { get; set; }
 
         /// <summary>
         /// Gets the user-unique name of the entity.
         /// </summary>
+        [NotNull]
         string Name { get; }
 
         /// <summary>
         /// Gets the display name of the type that the entity is (e.g, character, roleplay, etc).
         /// </summary>
+        [NotNull]
         string EntityTypeDisplayName { get; }
 
         /// <summary>

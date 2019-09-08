@@ -31,6 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Preconditions
     /// <summary>
     /// Acts as a precondition for owned entities, limiting their use to their owners.
     /// </summary>
+    [PublicAPI]
     public class RequireEntityOwnerAttribute : ParameterPreconditionAttribute
     {
         /// <inheritdoc />
