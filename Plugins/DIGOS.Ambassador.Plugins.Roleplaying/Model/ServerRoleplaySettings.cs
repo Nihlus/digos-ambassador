@@ -22,6 +22,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using JetBrains.Annotations;
@@ -36,14 +37,34 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     public class ServerRoleplaySettings : EFEntity
     {
         /// <summary>
-        /// Gets or sets the server the settings are relevant for.
+        /// Gets the server the settings are relevant for.
         /// </summary>
         [NotNull, Required]
-        public virtual Server Server { get; set; }
+        public virtual Server Server { get; private set; }
 
         /// <summary>
-        /// Gets or sets the channel category generated roleplay channels should be created under.
+        /// Gets the channel category generated roleplay channels should be created under.
         /// </summary>
-        public long? DedicatedRoleplayChannelsCategory { get; set; }
+        public long? DedicatedRoleplayChannelsCategory { get; internal set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServerRoleplaySettings"/> class.
+        /// </summary>
+        /// <remarks>
+        /// Required by EF Core.
+        /// </remarks>
+        protected ServerRoleplaySettings()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ServerRoleplaySettings"/> class.
+        /// </summary>
+        /// <param name="server">The server that the settings are bound to.</param>
+        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
+        public ServerRoleplaySettings(Server server)
+        {
+            this.Server = server;
+        }
     }
 }

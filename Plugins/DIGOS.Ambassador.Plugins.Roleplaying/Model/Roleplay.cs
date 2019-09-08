@@ -24,7 +24,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -38,48 +40,66 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// </summary>
     [PublicAPI]
     [Table("Roleplays", Schema = "RoleplayModule")]
-    public class Roleplay : IOwnedNamedEntity, IServerEntity
+    public class Roleplay : EFEntity, IOwnedNamedEntity, IServerEntity
     {
         /// <inheritdoc />
-        public long ID { get; set; }
-
-        /// <inheritdoc />
-        public long ServerID { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether or not the roleplay is currently active in a channel.
-        /// </summary>
-        public bool IsActive { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether or not the roleplay can be viewed or replayed by anyone.
-        /// </summary>
-        public bool IsPublic { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether or not the roleplay is NSFW.
-        /// </summary>
-        public bool IsNSFW { get; set; }
-
-        /// <summary>
-        /// Gets or sets the ID of the channel that the roleplay is active in.
-        /// </summary>
-        public long? ActiveChannelID { get; set; }
-
-        /// <summary>
-        /// Gets or sets the ID of the roleplay's dedicated channel.
-        /// </summary>
-        public long? DedicatedChannelID { get; set; }
+        public long ServerID { get; private set; }
 
         /// <inheritdoc />
         [Required]
         public virtual User Owner { get; set; }
 
         /// <summary>
-        /// Gets or sets the users that are participating in the roleplay in any way.
+        /// Gets a value indicating whether or not the roleplay is currently active in a channel.
+        /// </summary>
+        public bool IsActive { get; internal set; }
+
+        /// <summary>
+        /// Gets a value indicating whether or not the roleplay can be viewed or replayed by anyone.
+        /// </summary>
+        public bool IsPublic { get; internal set; }
+
+        /// <summary>
+        /// Gets a value indicating whether or not the roleplay is NSFW.
+        /// </summary>
+        public bool IsNSFW { get; internal set; }
+
+        /// <summary>
+        /// Gets the ID of the channel that the roleplay is active in.
+        /// </summary>
+        public long? ActiveChannelID { get; internal set; }
+
+        /// <summary>
+        /// Gets the ID of the roleplay's dedicated channel.
+        /// </summary>
+        public long? DedicatedChannelID { get; internal set; }
+
+        /// <summary>
+        /// Gets the users that are participating in the roleplay in any way.
         /// </summary>
         [NotNull]
-        public virtual List<RoleplayParticipant> ParticipatingUsers { get; set; } = new List<RoleplayParticipant>();
+        public virtual List<RoleplayParticipant> ParticipatingUsers { get; private set; }
+            = new List<RoleplayParticipant>();
+
+        /// <inheritdoc />
+        public string Name { get; internal set; }
+
+        /// <summary>
+        /// Gets the summary of the roleplay.
+        /// </summary>
+        public string Summary { get; internal set; }
+
+        /// <summary>
+        /// Gets the saved messages in the roleplay.
+        /// </summary>
+        [NotNull]
+        public virtual List<UserMessage> Messages { get; private set; } = new List<UserMessage>();
+
+        /// <summary>
+        /// Gets the last time the roleplay was updated.
+        /// </summary>
+        [CanBeNull]
+        public DateTime? LastUpdated { get; internal set; }
 
         /// <summary>
         /// Gets the users that have joined the roleplay.
@@ -93,7 +113,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// </summary>
         [NotNull, NotMapped]
         public IEnumerable<RoleplayParticipant> KickedUsers =>
-                this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Kicked);
+            this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Kicked);
 
         /// <summary>
         /// Gets the users that have been invited to the roleplay.
@@ -103,27 +123,29 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
             this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Invited);
 
         /// <inheritdoc />
-        public string Name { get; set; }
-
-        /// <inheritdoc />
         public string EntityTypeDisplayName => nameof(Roleplay);
 
         /// <summary>
-        /// Gets or sets the summary of the roleplay.
+        /// Initializes a new instance of the <see cref="Roleplay"/> class.
         /// </summary>
-        public string Summary { get; set; }
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Required by EF Core.")]
+        protected Roleplay()
+        {
+        }
 
         /// <summary>
-        /// Gets or sets the saved messages in the roleplay.
+        /// Initializes a new instance of the <see cref="Roleplay"/> class.
         /// </summary>
-        [NotNull]
-        public virtual List<UserMessage> Messages { get; set; } = new List<UserMessage>();
-
-        /// <summary>
-        /// Gets or sets the last time the roleplay was updated.
-        /// </summary>
-        [CanBeNull]
-        public DateTime? LastUpdated { get; set; }
+        /// <param name="serverID">The ID of the server the roleplay is created on.</param>
+        /// <param name="owner">The owner of the roleplay.</param>
+        /// <param name="name">The name of the roleplay.</param>
+        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
+        public Roleplay(long serverID, User owner, string name)
+        {
+            this.ServerID = serverID;
+            this.Owner = owner;
+            this.Name = name;
+        }
 
         /// <inheritdoc />
         public bool IsOwner(User user)

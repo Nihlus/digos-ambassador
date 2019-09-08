@@ -125,17 +125,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var owner = getOwnerResult.Entity;
             _database.Attach(owner);
 
-            var roleplay = new Roleplay
+            // Use a dummy name, since we'll be setting it useng the service.
+            var roleplay = new Roleplay((long)context.Guild.Id, owner, string.Empty);
+
+            var ownerParticipant = new RoleplayParticipant(roleplay, owner)
             {
-                Owner = owner,
-                ServerID = (long)context.Guild.Id,
-                IsActive = false,
-                ActiveChannelID = null,
-                ParticipatingUsers = new List<RoleplayParticipant>(),
-                Messages = new List<UserMessage>()
+                Status = ParticipantStatus.Joined
             };
 
-            roleplay.ParticipatingUsers.Add(new RoleplayParticipant(roleplay, owner, ParticipantStatus.Joined));
+            roleplay.ParticipatingUsers.Add(ownerParticipant);
 
             var setNameResult = await SetRoleplayNameAsync(context, roleplay, roleplayName);
             if (!setNameResult.IsSuccess)
@@ -639,7 +637,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
                 // Ensure the user is attached, so we don't create any conflicts.
                 _database.Attach(user);
-                participantEntry = new RoleplayParticipant(roleplay, user, ParticipantStatus.Joined);
+                participantEntry = new RoleplayParticipant(roleplay, user)
+                {
+                    Status = ParticipantStatus.Joined
+                };
+
                 roleplay.ParticipatingUsers.Add(participantEntry);
             }
             else
@@ -689,7 +691,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
                 // Ensure the user is attached, so we don't create any conflicts.
                 _database.Attach(user);
-                participantEntry = new RoleplayParticipant(roleplay, user, ParticipantStatus.Invited);
+                participantEntry = new RoleplayParticipant(roleplay, user)
+                {
+                    Status = ParticipantStatus.Invited
+                };
+
                 roleplay.ParticipatingUsers.Add(participantEntry);
             }
             else
@@ -1167,10 +1173,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return RetrieveEntityResult<ServerRoleplaySettings>.FromSuccess(existingSettings);
             }
 
-            existingSettings = new ServerRoleplaySettings
-            {
-                Server = server
-            };
+            existingSettings = new ServerRoleplaySettings(server);
 
             _database.ServerSettings.Update(existingSettings);
             await _database.SaveChangesAsync();

@@ -34,27 +34,24 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// </summary>
     [PublicAPI]
     [Table("RoleplayParticipants", Schema = "RoleplayModule")]
-    public class RoleplayParticipant : IEFEntity
+    public class RoleplayParticipant : EFEntity
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
-
         /// <summary>
-        /// Gets or sets the roleplay that the user is a part of.
+        /// Gets the roleplay that the user is a part of.
         /// </summary>
         [NotNull, Required]
-        public virtual Roleplay Roleplay { get; set; }
+        public virtual Roleplay Roleplay { get; private set; }
 
         /// <summary>
-        /// Gets or sets the user that is part of the roleplay.
+        /// Gets the user that is part of the roleplay.
         /// </summary>
         [NotNull, Required]
-        public virtual User User { get; set; }
+        public virtual User User { get; private set; }
 
         /// <summary>
-        /// Gets or sets the current status of the user in the roleplay.
+        /// Gets the current status of the user in the roleplay.
         /// </summary>
-        public ParticipantStatus Status { get; set; }
+        public ParticipantStatus Status { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayParticipant"/> class.
@@ -69,18 +66,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// </summary>
         /// <param name="roleplay">The roleplay that the user is participating in.</param>
         /// <param name="user">The user that is participating in the roleplay.</param>
-        /// <param name="status">The status of the user.</param>
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Used by EF Core proxies.")]
         public RoleplayParticipant
         (
             [NotNull] Roleplay roleplay,
-            [NotNull] User user,
-            ParticipantStatus status = ParticipantStatus.None
+            [NotNull] User user
         )
         {
             this.Roleplay = roleplay;
             this.User = user;
-            this.Status = status;
+
+            this.Status = ParticipantStatus.None;
         }
     }
 }

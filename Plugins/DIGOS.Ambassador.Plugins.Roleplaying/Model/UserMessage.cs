@@ -33,35 +33,32 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// </summary>
     [PublicAPI]
     [Table("UserMessages", Schema = "RoleplayModule")]
-    public class UserMessage : IEFEntity
+    public class UserMessage : EFEntity
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
+        /// <summary>
+        /// Gets the unique Discord message ID.
+        /// </summary>
+        public long DiscordMessageID { get; private set; }
 
         /// <summary>
-        /// Gets or sets the unique Discord message ID.
+        /// Gets the author of the message.
         /// </summary>
-        public long DiscordMessageID { get; set; }
+        public long AuthorDiscordID { get; private set; }
 
         /// <summary>
-        /// Gets or sets the author of the message.
+        /// Gets the timestamp of the message.
         /// </summary>
-        public long AuthorDiscordID { get; set; }
+        public DateTimeOffset Timestamp { get; private set; }
 
         /// <summary>
-        /// Gets or sets the timestamp of the message.
+        /// Gets the author's nickname at the time of sending.
         /// </summary>
-        public DateTimeOffset Timestamp { get; set; }
+        public string AuthorNickname { get; private set; }
 
         /// <summary>
-        /// Gets or sets the author's nickname at the time of sending.
+        /// Gets the contents of the message.
         /// </summary>
-        public string AuthorNickname { get; set; }
-
-        /// <summary>
-        /// Gets or sets the contents of the message.
-        /// </summary>
-        public string Contents { get; set; }
+        public string Contents { get; internal set; }
 
         /// <summary>
         /// Creates a new <see cref="UserMessage"/> from the specified Discord message.
