@@ -33,41 +33,46 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
     /// </summary>
     [PublicAPI]
     [Table("UserKinks", Schema = "KinkModule")]
-    public class UserKink : IEFEntity
+    public class UserKink : EFEntity
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
-
         /// <summary>
-        /// Gets or sets the user the kink belongs to.
+        /// Gets the user the kink belongs to.
         /// </summary>
         [Required, NotNull]
-        public virtual User User { get; set; }
+        public virtual User User { get; private set; }
 
         /// <summary>
-        /// Gets or sets the kink.
+        /// Gets the kink.
         /// </summary>
         [Required, NotNull]
-        public virtual Kink Kink { get; set; }
+        public virtual Kink Kink { get; private set; }
 
         /// <summary>
-        /// Gets or sets the user's preference for the kink.
+        /// Gets the user's preference for the kink.
         /// </summary>
-        public KinkPreference Preference { get; set; }
+        public KinkPreference Preference { get; internal set; }
 
         /// <summary>
-        /// Creates a new <see cref="UserKink"/> from the given <see cref="Kink"/>.
+        /// Initializes a new instance of the <see cref="UserKink"/> class.
         /// </summary>
-        /// <param name="kink">The kink.</param>
-        /// <returns>The user kink.</returns>
-        [NotNull]
-        public static UserKink CreateFrom(Kink kink)
+        /// <remarks>
+        /// Required by EF Core.
+        /// </remarks>
+        protected UserKink()
         {
-            return new UserKink
-            {
-                Kink = kink,
-                Preference = KinkPreference.NoPreference
-            };
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserKink"/> class.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <param name="kink">The user's kink.</param>
+        public UserKink([NotNull] User user, [NotNull] Kink kink)
+        {
+            this.User = user;
+            this.Kink = kink;
+
+            this.Preference = KinkPreference.NoPreference;
         }
     }
 }

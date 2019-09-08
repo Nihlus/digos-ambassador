@@ -303,8 +303,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
 
             var user = getUserResult.Entity;
 
-            var userKink = UserKink.CreateFrom(kink);
-            userKink.User = user;
+            var userKink = new UserKink(user, kink);
 
             _database.UserKinks.Update(userKink);
 

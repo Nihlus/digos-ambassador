@@ -34,40 +34,29 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
     /// </summary>
     [PublicAPI]
     [Table("Kinks", Schema = "KinkModule")]
-    public class Kink : IEquatable<Kink>, IEFEntity
+    public class Kink : EFEntity, IEquatable<Kink>
     {
-        /// <inheritdoc/>
-        public long ID { get; set; }
-
         /// <summary>
-        /// Gets or sets the category the kink belongs to.
+        /// Gets the category the kink belongs to.
         /// </summary>
-        public KinkCategory Category { get; set; }
+        public KinkCategory Category { get; private set; }
 
         /// <summary>
-        /// Gets or sets the F-List ID of the kink.
+        /// Gets the F-List ID of the kink.
         /// </summary>
-        public long FListID { get; set; }
+        public long FListID { get; private set; }
 
         /// <summary>
-        /// Gets or sets the name of the kink.
+        /// Gets the name of the kink.
         /// </summary>
         [Required, NotNull]
-        public string Name { get; set; }
+        public string Name { get; private set; }
 
         /// <summary>
-        /// Gets or sets the full description of the kink.
+        /// Gets the full description of the kink.
         /// </summary>
         [Required, NotNull]
-        public string Description { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Kink"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        protected Kink()
-        {
-        }
+        public string Description { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Kink"/> class.
