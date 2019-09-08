@@ -79,11 +79,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 _context = mockedContext.Object;
 
-                _character = new Character
+                _character = new Character(_dbOwner, CharacterName, string.Empty)
                 {
-                    Name = CharacterName,
-                    ServerID = (long)guild.Id,
-                    Owner = _dbOwner
+                    ServerID = (long)guild.Id
                 };
 
                 this.Database.Characters.Update(_character);

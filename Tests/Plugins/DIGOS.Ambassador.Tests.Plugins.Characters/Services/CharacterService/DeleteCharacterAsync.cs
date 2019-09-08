@@ -47,10 +47,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 var user = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
 
-                _character = new Character
+                _character = new Character(user, CharacterName, string.Empty)
                 {
-                    Name = CharacterName,
-                    Owner = user,
                     ServerID = (long)_guild.Id
                 };
 

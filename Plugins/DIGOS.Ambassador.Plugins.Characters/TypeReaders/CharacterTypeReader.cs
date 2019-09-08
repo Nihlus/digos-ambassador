@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Core.TypeReaders;
 using Discord;
 using Discord.Commands;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Plugins.Characters.TypeReaders
@@ -37,6 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.TypeReaders
     /// <summary>
     /// Reads owned characters as command arguments.
     /// </summary>
+    [PublicAPI]
     public sealed class CharacterTypeReader : OwnedEntityTypeReader<Character>
     {
         /// <inheritdoc />

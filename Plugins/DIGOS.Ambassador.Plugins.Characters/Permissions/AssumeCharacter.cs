@@ -22,13 +22,15 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to assume characters.
     /// </summary>
-    public class AssumeCharacter : Permission
+    [PublicAPI]
+    public sealed class AssumeCharacter : Permission
     {
         /// <inheritdoc />
         public override Guid UniqueIdentifier { get; } = new Guid("01051A8C-A038-4F15-ABFB-368FC1564BDA");

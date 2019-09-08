@@ -23,6 +23,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -35,6 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
     /// <summary>
     /// Represents a user's character.
     /// </summary>
+    [PublicAPI]
     [Table("Characters", Schema = "CharacterModule")]
     public class Character : IOwnedNamedEntity, IServerEntity
     {
@@ -45,15 +48,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         public long ServerID { get; set; }
 
         /// <inheritdoc />
-        [Required]
+        [Required, NotNull]
         public virtual User Owner { get; set; }
 
         /// <inheritdoc />
+        [Required, NotNull]
         public string Name { get; set; }
-
-        /// <inheritdoc />
-        [NotNull]
-        public string EntityTypeDisplayName => nameof(Character);
 
         /// <summary>
         /// Gets or sets a value indicating whether the character is the user's default character.
@@ -68,21 +68,25 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets or sets a URL pointing to the character's avatar.
         /// </summary>
+        [Required, NotNull]
         public string AvatarUrl { get; set; }
 
         /// <summary>
         /// Gets or sets the nickname that a user should have when playing as the character.
         /// </summary>
+        [CanBeNull]
         public string Nickname { get; set; }
 
         /// <summary>
         /// Gets or sets the character summary.
         /// </summary>
+        [Required, NotNull]
         public string Summary { get; set; }
 
         /// <summary>
         /// Gets or sets the full description of the character.
         /// </summary>
+        [Required, NotNull]
         public string Description { get; set; }
 
         /// <summary>
@@ -93,12 +97,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets or sets the images associated with the character.
         /// </summary>
-        [NotNull]
+        [Required, NotNull, ItemNotNull]
         public virtual List<Image> Images { get; set; } = new List<Image>();
 
         /// <summary>
         /// Gets or sets the preferred pronoun family of the character.
         /// </summary>
+        [Required, NotNull]
         public string PronounProviderFamily { get; set; }
 
         /// <summary>
@@ -106,6 +111,49 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// </summary>
         [CanBeNull]
         public virtual CharacterRole Role { get; set; }
+
+        /// <inheritdoc />
+        [NotMapped, NotNull]
+        public string EntityTypeDisplayName => nameof(Character);
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Character"/> class.
+        /// </summary>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+        protected Character()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Character"/> class.
+        /// </summary>
+        /// <param name="owner">The owner of the character.</param>
+        /// <param name="name">The character's name.</param>
+        /// <param name="avatarUrl">The avatar URL for the character.</param>
+        /// <param name="nickname">The character's nickname. Defaults to the character's name.</param>
+        /// <param name="summary">The character's summary.</param>
+        /// <param name="description">The character's description.</param>
+        /// <param name="pronounProviderFamily">The character's pronoun provider family.</param>
+        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
+        public Character
+        (
+            [NotNull] User owner,
+            [NotNull] string name,
+            [NotNull] string avatarUrl,
+            [CanBeNull] string nickname = null,
+            [NotNull] string summary = "No summary set.",
+            [NotNull] string description = "No description set.",
+            [NotNull] string pronounProviderFamily = "They"
+        )
+        {
+            this.Owner = owner;
+            this.Name = name;
+            this.AvatarUrl = avatarUrl;
+            this.Summary = summary;
+            this.Description = description;
+            this.PronounProviderFamily = pronounProviderFamily;
+            this.Nickname = nickname ?? name;
+        }
 
         /// <inheritdoc />
         public bool IsOwner(User user)

@@ -28,18 +28,21 @@ using System.Reflection;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Services
 {
     /// <summary>
     /// Serves functionality related to plugins.
     /// </summary>
-    public class PluginService
+    [PublicAPI]
+    public sealed class PluginService
     {
         /// <summary>
         /// Loads the available plugins into a dependency tree.
         /// </summary>
         /// <returns>The dependency tree.</returns>
+        [NotNull, Pure]
         public PluginDependencyTree LoadPluginDescriptors()
         {
             var pluginAssemblies = LoadAvailablePluginAssemblies().ToList();
@@ -120,7 +123,8 @@ namespace DIGOS.Ambassador.Plugins.Services
         /// </summary>
         /// <param name="assembly">The assembly.</param>
         /// <returns>The plugin descriptor.</returns>
-        public IPluginDescriptor LoadPluginDescriptor(Assembly assembly)
+        [NotNull, Pure]
+        public IPluginDescriptor LoadPluginDescriptor([NotNull] Assembly assembly)
         {
             var pluginAttribute = assembly.GetCustomAttribute<AmbassadorPlugin>();
             var descriptor = (IPluginDescriptor)Activator.CreateInstance(pluginAttribute.PluginDescriptor);
@@ -131,6 +135,7 @@ namespace DIGOS.Ambassador.Plugins.Services
         /// Loads the available plugin assemblies.
         /// </summary>
         /// <returns>The available assemblies.</returns>
+        [Pure, NotNull, ItemNotNull]
         public IEnumerable<Assembly> LoadAvailablePluginAssemblies()
         {
             var entryAssemblyPath = Assembly.GetEntryAssembly()?.Location;
@@ -174,6 +179,7 @@ namespace DIGOS.Ambassador.Plugins.Services
         /// Loads the available plugins.
         /// </summary>
         /// <returns>The descriptors of the available plugins.</returns>
+        [Pure, NotNull, ItemNotNull]
         public IEnumerable<IPluginDescriptor> LoadAvailablePlugins()
         {
             var pluginAssemblies = LoadAvailablePluginAssemblies().ToList();

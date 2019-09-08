@@ -30,6 +30,7 @@ namespace DIGOS.Ambassador.Plugins.Results
     /// <summary>
     /// Represents an attempt to retrieve a roleplay from the database.
     /// </summary>
+    [PublicAPI]
     public class InitializePluginResult : ResultBase<InitializePluginResult>
     {
         /// <summary>
@@ -41,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Results
         /// <summary>
         /// Initializes a new instance of the <see cref="InitializePluginResult"/> class.
         /// </summary>
-        private InitializePluginResult(IPluginDescriptor plugin)
+        private InitializePluginResult([NotNull] IPluginDescriptor plugin)
         {
             this.Plugin = plugin;
         }
@@ -79,7 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Results
         /// </summary>
         /// <param name="plugin">The plugin that was initialized.</param>
         /// <returns>A successful result.</returns>
-        [Pure]
+        [Pure, NotNull]
         public static InitializePluginResult FromSuccess([NotNull] IPluginDescriptor plugin)
         {
             return new InitializePluginResult(plugin);
@@ -92,6 +93,7 @@ namespace DIGOS.Ambassador.Plugins.Results
         /// <param name="errorReason">The reason the plugin failed to initialize.</param>
         /// <param name="exception">The exception that caused the failure, if any.</param>
         /// <returns>A failed result.</returns>
+        [Pure, NotNull]
         public static InitializePluginResult FromError
         (
             [NotNull] IPluginDescriptor plugin,

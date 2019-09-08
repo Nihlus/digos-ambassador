@@ -30,6 +30,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
+    [PublicAPI]
     public class CharactersDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "CharacterModule";

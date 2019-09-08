@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
@@ -55,9 +56,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsEmptySetFromDatabaseWithCharactersWithNoMatchingOwner()
             {
-                var character = new Character
+                var character = new Character(new User { DiscordID = 1 }, "Dummy", string.Empty)
                 {
-                    Owner = new User { DiscordID = 1 },
                     ServerID = (long)_guild.Id
                 };
 
@@ -71,10 +71,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsNEmptySetFromDatabaseWithCharactersWithMatchingOwnerButNoMatchingServer()
             {
-                var character = new Character
-                {
-                    Owner = _dbOwner
-                };
+                var character = new Character(_dbOwner, "Dummy", string.Empty);
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();
@@ -86,9 +83,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsNonEmptySetFromDatabaseWithCharactersWithMatchingOwner()
             {
-                var character = new Character
+                var character = new Character(_dbOwner, "Dummy", string.Empty)
                 {
-                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id
                 };
 
@@ -102,9 +98,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsCorrectCharacterFromDatabase()
             {
-                var character = new Character
+                var character = new Character(_dbOwner, "Dummy", string.Empty)
                 {
-                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id
                 };
 
@@ -118,15 +113,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsCorrectMultipleCharactersFromDatabase()
             {
-                var character1 = new Character
+                var character1 = new Character(_dbOwner, "Dummy1", string.Empty)
                 {
-                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id
-                };
+                };;
 
-                var character2 = new Character
+                var character2 = new Character(_dbOwner, "Dummy2", string.Empty)
                 {
-                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id
                 };
 

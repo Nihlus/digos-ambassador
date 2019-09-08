@@ -35,6 +35,7 @@ namespace DIGOS.Ambassador.Plugins
     [PublicAPI]
     public class PluginDependencyTree
     {
+        [NotNull, ItemNotNull]
         private readonly List<PluginDependencyTreeNode> _branches;
 
         /// <summary>
@@ -62,6 +63,7 @@ namespace DIGOS.Ambassador.Plugins
         /// <param name="postOperation">The operation to perform while walking up into the tree.</param>
         /// <typeparam name="TResult">The result type.</typeparam>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [NotNull, ItemNotNull]
         public async Task<IEnumerable<TResult>> WalkAsync<TResult>
         (
             [NotNull] Func<PluginDependencyTreeNode, Exception, TResult> errorFactory,
@@ -79,6 +81,7 @@ namespace DIGOS.Ambassador.Plugins
             return results;
         }
 
+        [NotNull, ItemNotNull]
         private async Task<IEnumerable<TResult>> WalkNodeAsync<TResult>
         (
             [NotNull] PluginDependencyTreeNode node,
@@ -141,7 +144,7 @@ namespace DIGOS.Ambassador.Plugins
         /// Adds a dependency branch to the tree.
         /// </summary>
         /// <param name="branch">The branch.</param>
-        public void AddBranch(PluginDependencyTreeNode branch)
+        internal void AddBranch([NotNull] PluginDependencyTreeNode branch)
         {
             if (_branches.Contains(branch))
             {

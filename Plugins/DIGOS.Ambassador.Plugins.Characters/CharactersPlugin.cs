@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Characters
     /// <summary>
     /// Describes the character plugin.
     /// </summary>
-    public class CharactersPlugin : PluginDescriptor, IMigratablePlugin
+    public sealed class CharactersPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Characters";

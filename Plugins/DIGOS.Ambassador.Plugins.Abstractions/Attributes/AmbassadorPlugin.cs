@@ -29,9 +29,9 @@ namespace DIGOS.Ambassador.Plugins.Abstractions.Attributes
     /// Represents an attribute that can be applied to an assembly in order to mark it as an assembly containing a
     /// plugin.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Assembly)]
     [PublicAPI]
-    public class AmbassadorPlugin : Attribute
+    [AttributeUsage(AttributeTargets.Assembly)]
+    public sealed class AmbassadorPlugin : Attribute
     {
         /// <summary>
         /// Gets the plugin descriptor that the assembly exports.

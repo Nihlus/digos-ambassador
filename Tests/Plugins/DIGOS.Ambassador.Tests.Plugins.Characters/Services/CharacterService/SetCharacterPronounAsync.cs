@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     {
         public class SetCharacterPronounAsync : CharacterServiceTestBase
         {
-            private const string PronounFamily = "They";
+            private const string PronounFamily = "Feminine";
             private readonly IUser _user = MockHelper.CreateDiscordUser(0);
 
             private User _owner;
@@ -48,14 +48,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public override async Task InitializeAsync()
             {
-                this.Services.GetRequiredService<PronounService>().WithPronounProvider(new TheyPronounProvider());
+                this.Services.GetRequiredService<PronounService>().WithPronounProvider(new FemininePronounProvider());
                 this.Services.GetRequiredService<PronounService>().WithPronounProvider(new ZeHirPronounProvider());
 
                 _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
-                _character = new Character
+                _character = new Character(_owner, "Dummy", string.Empty, pronounProviderFamily: PronounFamily)
                 {
-                    PronounProviderFamily = PronounFamily,
-                    Owner = _owner
+                    ServerID = 0,
                 };
 
                 this.Database.Characters.Update(_character);

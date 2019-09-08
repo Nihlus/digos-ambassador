@@ -97,11 +97,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                var character = new Character
-                {
-                    Name = "Test",
-                    Owner = owner
-                };
+                var character = new Character(owner, "Test", string.Empty);
 
                 this.CharacterDatabase.Characters.Update(character);
                 await this.CharacterDatabase.SaveChangesAsync();

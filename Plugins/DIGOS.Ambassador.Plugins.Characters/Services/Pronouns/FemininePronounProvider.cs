@@ -27,31 +27,25 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides feminine pronouns.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public class FemininePronounProvider : PronounProvider
     {
         /// <inheritdoc />
-        [NotNull]
         public override string Family => "Feminine";
 
         /// <inheritdoc />
-        [NotNull]
         public override string GetSubjectForm(bool withVerb = false) => withVerb ? "she is" : "she";
 
         /// <inheritdoc />
-        [NotNull]
         public override string GetObjectForm() => "her";
 
         /// <inheritdoc />
-        [NotNull]
         public override string GetPossessiveAdjectiveForm() => "her";
 
         /// <inheritdoc />
-        [NotNull]
         public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "she has" : "hers";
 
         /// <inheritdoc />
-        [NotNull]
         public override string GetReflexiveForm() => "herself";
     }
 }

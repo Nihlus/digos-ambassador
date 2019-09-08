@@ -47,10 +47,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public override async Task InitializeAsync()
             {
                 _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
-                _character = new Character
+
+                _character = new Character(_owner, "Dummy", AvatarURL)
                 {
-                    AvatarUrl = AvatarURL,
-                    Owner = _owner
+                    ServerID = 0,
                 };
 
                 this.Database.Characters.Update(_character);

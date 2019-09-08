@@ -27,31 +27,25 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides shi and hir pronouns.
     /// </summary>
-    [UsedImplicitly]
+    [PublicAPI]
     public class ShiHirPronounProvider : PronounProvider
     {
         /// <inheritdoc />
-        [NotNull]
         public override string Family => "Shi and hir";
 
         /// <inheritdoc />
-        [NotNull]
         public override string GetSubjectForm(bool withVerb = false) => withVerb ? "shi is" : "shi";
 
         /// <inheritdoc />
-        [NotNull]
         public override string GetObjectForm() => "hir";
 
         /// <inheritdoc />
-        [NotNull]
         public override string GetPossessiveAdjectiveForm() => "hir";
 
         /// <inheritdoc />
-        [NotNull]
         public override string GetPossessiveForm(bool withVerb = false) => withVerb ? "shi has" : "hirs";
 
         /// <inheritdoc />
-        [NotNull]
         public override string GetReflexiveForm() => "hirself";
     }
 }

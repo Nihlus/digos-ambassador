@@ -22,13 +22,15 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to edit characters.
     /// </summary>
-    public class EditCharacter : Permission
+    [PublicAPI]
+    public sealed class EditCharacter : Permission
     {
         /// <inheritdoc />
         public override Guid UniqueIdentifier { get; } = new Guid("47AB9A74-56AA-419B-A97E-992C15EF3320");

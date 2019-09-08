@@ -33,6 +33,7 @@ namespace DIGOS.Ambassador.Plugins
     [PublicAPI]
     public class PluginDependencyTreeNode
     {
+        [NotNull, ItemNotNull]
         private readonly List<PluginDependencyTreeNode> _dependants;
 
         /// <summary>
@@ -66,7 +67,7 @@ namespace DIGOS.Ambassador.Plugins
         /// Adds a dependant to this node.
         /// </summary>
         /// <param name="node">The node.</param>
-        public void AddDependant(PluginDependencyTreeNode node)
+        internal void AddDependant([NotNull] PluginDependencyTreeNode node)
         {
             if (_dependants.Contains(node))
             {
@@ -80,6 +81,7 @@ namespace DIGOS.Ambassador.Plugins
         /// Gets all the dependant plugins in this branch.
         /// </summary>
         /// <returns>The dependant plugins.</returns>
+        [NotNull, ItemNotNull]
         public IEnumerable<PluginDependencyTreeNode> GetAllDependants()
         {
             foreach (var dependant in this.Dependants)

@@ -20,16 +20,20 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
 {
     /// <summary>
     /// Represents a pronoun in its different forms.
     /// </summary>
+    [PublicAPI]
     public interface IPronounProvider
     {
         /// <summary>
         /// Gets the family of the pronoun, that is, "I", "He", or "She".
         /// </summary>
+        [NotNull]
         string Family { get; }
 
         /// <summary>
@@ -38,18 +42,21 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// </summary>
         /// <param name="withVerb">Whether or not to include the connective verb.</param>
         /// <returns>The pronoun.</returns>
+        [NotNull]
         string GetSubjectForm(bool withVerb = false);
 
         /// <summary>
         /// Gets the pronoun in object form, that is, "me" or "you".
         /// </summary>
         /// <returns>The pronoun.</returns>
+        [NotNull]
         string GetObjectForm();
 
         /// <summary>
         /// Gets the pronoun in possessive adjective form, that is, "my" or "yours".
         /// </summary>
         /// <returns>The pronoun.</returns>
+        [NotNull]
         string GetPossessiveAdjectiveForm();
 
         /// <summary>
@@ -58,12 +65,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// </summary>
         /// <param name="withVerb">Whether or not to include the connective verb.</param>
         /// <returns>The pronoun.</returns>
+        [NotNull]
         string GetPossessiveForm(bool withVerb = false);
 
         /// <summary>
         /// Gets the pronoun in reflexive form, that is, "myself" or "yourself.
         /// </summary>
         /// <returns>The pronoun.</returns>
+        [NotNull]
         string GetReflexiveForm();
 
         /// <summary>
@@ -71,6 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// </summary>
         /// <param name="form">The form to get.</param>
         /// <returns>The pronoun.</returns>
+        [NotNull]
         string GetForm(PronounForm form);
     }
 }

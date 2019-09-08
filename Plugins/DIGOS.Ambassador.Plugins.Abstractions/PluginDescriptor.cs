@@ -23,6 +23,7 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Plugins.Abstractions
@@ -30,6 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Abstractions
     /// <summary>
     /// Acts as a base class for plugin descriptors.
     /// </summary>
+    [PublicAPI]
     public abstract class PluginDescriptor : IPluginDescriptor
     {
         /// <inheritdoc />

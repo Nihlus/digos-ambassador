@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
@@ -29,6 +30,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
     /// <summary>
     /// Represents an image.
     /// </summary>
+    [PublicAPI]
     [Table("Images", Schema = "CharacterModule")]
     public class Image : IEFEntity
     {
@@ -38,11 +40,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
         /// <summary>
         /// Gets or sets the name of the image.
         /// </summary>
+        [Required, NotNull]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the caption of the image.
         /// </summary>
+        [Required, NotNull]
         public string Caption { get; set; }
 
         /// <summary>
@@ -53,7 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
         /// <summary>
         /// Gets or sets the online URL of the image.
         /// </summary>
-        [CanBeNull]
+        [Required, NotNull]
         public string Url { get; set; }
     }
 }

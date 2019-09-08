@@ -48,10 +48,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 _dbOwner = new User { DiscordID = (long)_owner.Id };
 
-                var character = new Character
+                var character = new Character(_dbOwner, CharacterName, string.Empty)
                 {
-                    Name = CharacterName,
-                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id
                 };
 

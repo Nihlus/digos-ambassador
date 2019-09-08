@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Pagination
     /// <summary>
     /// Represents a paginated gallery of images.
     /// </summary>
-    public class PaginatedGallery : PaginatedMessage<Model.Data.Image, PaginatedGallery>
+    internal sealed class PaginatedGallery : PaginatedMessage<Model.Data.Image, PaginatedGallery>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PaginatedGallery"/> class.

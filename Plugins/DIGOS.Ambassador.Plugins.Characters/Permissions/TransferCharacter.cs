@@ -22,13 +22,15 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to transfer characters to other users.
     /// </summary>
-    public class TransferCharacter : Permission
+    [PublicAPI]
+    public sealed class TransferCharacter : Permission
     {
         /// <inheritdoc />
         public override Guid UniqueIdentifier { get; } = new Guid("8299FDCB-8DA1-44E1-BFC0-310FDCC76121");

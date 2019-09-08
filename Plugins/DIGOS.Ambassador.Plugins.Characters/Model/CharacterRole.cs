@@ -24,12 +24,14 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Model
 {
     /// <summary>
     /// Represents a role associated with a character, similar to a nickname.
     /// </summary>
+    [PublicAPI]
     [Table("CharacterRoles", Schema = "CharacterModule")]
     public class CharacterRole : IEFEntity
     {
@@ -39,7 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets or sets the server that the role is on.
         /// </summary>
-        [Required]
+        [Required, NotNull]
         public virtual Server Server { get; set; }
 
         /// <summary>

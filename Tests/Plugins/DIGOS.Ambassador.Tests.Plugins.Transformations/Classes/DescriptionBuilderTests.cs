@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
@@ -43,11 +44,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         [Fact]
         public void ReplacesFluentTokensCorrectly()
         {
-            var character = new Character
-            {
-                Name = "Amby",
-                PronounProviderFamily = "Feminine"
-            };
+            var character = new Character(new User(), "Amby", string.Empty, pronounProviderFamily: "Feminine");
 
             var hairColour = new Colour
             {

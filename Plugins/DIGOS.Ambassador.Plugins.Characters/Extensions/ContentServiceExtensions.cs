@@ -22,12 +22,14 @@
 
 using System;
 using DIGOS.Ambassador.Core.Services;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Extensions
 {
     /// <summary>
     /// Extension methods for the <see cref="ContentService"/> class.
     /// </summary>
+    [PublicAPI]
     public static class ContentServiceExtensions
     {
         private static string DefaultAvatar { get; } = "Avatars/Default/Discord_DIGOS.png";

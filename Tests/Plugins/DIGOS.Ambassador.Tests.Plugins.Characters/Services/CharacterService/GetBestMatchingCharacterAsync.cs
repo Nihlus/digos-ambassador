@@ -79,11 +79,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 _context = mockedContext.Object;
 
-                _character = new Character
+                _character = new Character(_dbOwner, CharacterName, string.Empty)
                 {
-                    Name = CharacterName,
-                    ServerID = (long)_guild.Id,
-                    Owner = _dbOwner
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Update(_character);
@@ -113,11 +111,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsInvokersCharacterIfOwnerIsNullAndMoreThanOneCharacterWithThatNameExists()
             {
-                var anotherCharacter = new Character
+                var anotherCharacter = new Character(new User { DiscordID = 2 }, CharacterName, string.Empty)
                 {
-                    Name = CharacterName,
-                    ServerID = (long)_guild.Id,
-                    Owner = new User { DiscordID = 2 }
+                    ServerID = (long)_guild.Id
                 };
 
                 this.Database.Characters.Update(anotherCharacter);

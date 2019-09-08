@@ -48,15 +48,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             }
 
             [Fact]
-            public async Task ReturnsFalseIfServerIsNull()
-            {
-                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                var result = await this.Characters.HasActiveCharacterOnServerAsync(_dbOwner, null);
-
-                Assert.False(result);
-            }
-
-            [Fact]
             public async Task ReturnsFalseIfUserHasNoCharacters()
             {
                 var result = await this.Characters.HasActiveCharacterOnServerAsync(_dbOwner, _guild);
@@ -67,9 +58,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsFalseIfUserHasNoActiveCharacter()
             {
-                var character = new Character
+                var character = new Character(_dbOwner, "Dummy", string.Empty)
                 {
-                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id
                 };
 
@@ -84,9 +74,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsTrueIfUserHasAnActiveCharacter()
             {
-                var character = new Character
+                var character = new Character(_dbOwner, "Dummy", string.Empty)
                 {
-                    Owner = _dbOwner,
                     ServerID = (long)_guild.Id,
                     IsCurrent = true
                 };

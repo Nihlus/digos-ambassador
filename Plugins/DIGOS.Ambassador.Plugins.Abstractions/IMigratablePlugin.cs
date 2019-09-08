@@ -22,12 +22,14 @@
 
 using System;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Abstractions
 {
     /// <summary>
     /// Represents the public API of a plugin supporting migrations.
     /// </summary>
+    [PublicAPI]
     public interface IMigratablePlugin
     {
         /// <summary>
@@ -35,13 +37,15 @@ namespace DIGOS.Ambassador.Plugins.Abstractions
         /// </summary>
         /// <param name="serviceProvider">The available services.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<bool> MigratePluginAsync(IServiceProvider serviceProvider);
+        [NotNull]
+        Task<bool> MigratePluginAsync([NotNull] IServiceProvider serviceProvider);
 
         /// <summary>
         /// Determines whether the database has been created.
         /// </summary>
         /// <param name="serviceProvider">The available services.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider);
+        [NotNull]
+        Task<bool> IsDatabaseCreatedAsync([NotNull] IServiceProvider serviceProvider);
     }
 }

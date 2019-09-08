@@ -34,9 +34,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides access to pronouns.
     /// </summary>
-    public class PronounService
+    [PublicAPI]
+    public sealed class PronounService
     {
-        private readonly Dictionary<string, IPronounProvider> _pronounProviders;
+        [NotNull] private readonly Dictionary<string, IPronounProvider> _pronounProviders;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PronounService"/> class.
@@ -92,7 +93,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// <returns>A pronoun provider.</returns>
         /// <exception cref="ArgumentException">Thrown if no pronoun provider exists for the character's preference.</exception>
         [NotNull]
-        public virtual IPronounProvider GetPronounProvider([NotNull] Character character)
+        public IPronounProvider GetPronounProvider([NotNull] Character character)
         {
             if (_pronounProviders.ContainsKey(character.PronounProviderFamily))
             {
@@ -106,8 +107,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// Gets the available pronoun providers.
         /// </summary>
         /// <returns>An enumerator over the available pronouns.</returns>
-        [NotNull]
-        [ItemNotNull]
+        [NotNull, ItemNotNull]
         public IEnumerable<IPronounProvider> GetAvailablePronounProviders()
         {
             return _pronounProviders.Values;
@@ -118,7 +118,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// </summary>
         /// <param name="pronounFamily">The family.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public RetrieveEntityResult<IPronounProvider> GetPronounProvider(string pronounFamily)
+        [NotNull]
+        public RetrieveEntityResult<IPronounProvider> GetPronounProvider([NotNull] string pronounFamily)
         {
             if (!_pronounProviders.TryGetValue(pronounFamily, out var provider))
             {

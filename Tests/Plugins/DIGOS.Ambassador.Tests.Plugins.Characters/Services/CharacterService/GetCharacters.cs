@@ -61,10 +61,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 this.Database.Characters.Update
                 (
-                    new Character
+                    new Character(_owner, "dummy", string.Empty)
                     {
-                        ServerID = (long)_guild.Id,
-                        Owner = _owner
+                        ServerID = (long)_guild.Id
                     }
                 );
 
@@ -81,10 +80,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 this.Database.Characters.Update
                 (
-                    new Character
+                    new Character(_owner, "dummy", string.Empty)
                     {
-                        ServerID = 1,
-                        Owner = _owner
+                        ServerID = 1
                     }
                 );
 
@@ -100,28 +98,25 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 this.Database.Characters.Update
                 (
-                    new Character
+                    new Character(_owner, "dummy", string.Empty)
                     {
-                        ServerID = 1,
-                        Owner = _owner
+                        ServerID = 1
                     }
                 );
 
                 this.Database.Characters.Update
                 (
-                    new Character
+                    new Character(_owner, "dummy", string.Empty)
                     {
-                        ServerID = (long)_guild.Id,
-                        Owner = _owner
+                        ServerID = (long)_guild.Id
                     }
                 );
 
                 this.Database.Characters.Update
                 (
-                    new Character
+                    new Character(_owner, "dummy", string.Empty)
                     {
-                        ServerID = (long)_guild.Id,
-                        Owner = _owner
+                        ServerID = (long)_guild.Id
                     }
                 );
 
