@@ -37,22 +37,22 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// <summary>
         /// Gets the role's Discord ID.
         /// </summary>
-        public long RoleID { get; [UsedImplicitly] private set; }
+        public long RoleID { get; private set; }
 
         /// <summary>
         /// Gets the permission's unique identifier.
         /// </summary>
-        public Guid Permission { get; [UsedImplicitly] private set; }
+        public Guid Permission { get; private set; }
 
         /// <summary>
         /// Gets the allowed targets for the permission.
         /// </summary>
-        public PermissionTarget Target { get; [UsedImplicitly] private set; }
+        public PermissionTarget Target { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the permission has been granted.
+        /// Gets a value indicating whether the permission has been granted.
         /// </summary>
-        public bool IsGranted { get; set; }
+        public bool IsGranted { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RolePermission"/> class.

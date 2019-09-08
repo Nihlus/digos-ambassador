@@ -37,27 +37,27 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// <summary>
         /// Gets the Discord ID of the server that the permission is associated with.
         /// </summary>
-        public long ServerID { get; [UsedImplicitly] private set; }
+        public long ServerID { get; private set; }
 
         /// <summary>
         /// Gets the user's Discord ID.
         /// </summary>
-        public long UserID { get; [UsedImplicitly] private set; }
+        public long UserID { get; private set; }
 
         /// <summary>
         /// Gets the permission's unique identifier.
         /// </summary>
-        public Guid Permission { get; [UsedImplicitly] private set; }
+        public Guid Permission { get; private set; }
 
         /// <summary>
         /// Gets the allowed targets for the permission.
         /// </summary>
-        public PermissionTarget Target { get; [UsedImplicitly] private set; }
+        public PermissionTarget Target { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the permission has been granted.
+        /// Gets a value indicating whether the permission has been granted.
         /// </summary>
-        public bool IsGranted { get; set; }
+        public bool IsGranted { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserPermission"/> class.
