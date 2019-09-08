@@ -47,11 +47,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         public long ServerID { get; set; }
 
         /// <inheritdoc />
-        [Required, NotNull]
+        [Required]
         public virtual User Owner { get; set; }
 
         /// <inheritdoc />
-        [Required, NotNull]
+        [Required]
         public string Name { get; set; }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         public virtual CharacterRole Role { get; set; }
 
         /// <inheritdoc />
-        [NotMapped, NotNull]
+        [NotMapped]
         public string EntityTypeDisplayName => nameof(Character);
 
         /// <summary>

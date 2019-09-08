@@ -105,7 +105,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         public string Name { get; set; }
 
         /// <inheritdoc />
-        [NotNull]
         public string EntityTypeDisplayName => nameof(Roleplay);
 
         /// <summary>

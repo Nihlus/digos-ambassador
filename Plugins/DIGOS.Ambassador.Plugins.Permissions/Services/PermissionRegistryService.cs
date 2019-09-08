@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
     /// Handles runtime registration of available permissions.
     /// </summary>
     [PublicAPI]
-    public class PermissionRegistryService
+    public sealed class PermissionRegistryService
     {
         [NotNull]
         private readonly Dictionary<Type, IPermission> _registeredPermissions = new Dictionary<Type, IPermission>();

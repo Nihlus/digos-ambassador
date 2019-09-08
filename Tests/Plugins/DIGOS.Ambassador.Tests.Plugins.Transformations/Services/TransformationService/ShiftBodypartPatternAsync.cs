@@ -26,17 +26,12 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Characters.Model;
-using DIGOS.Ambassador.Plugins.Characters.Services;
-using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
-using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
 using Discord.Commands;
-using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
@@ -80,22 +75,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 mockedContext.Setup(c => c.User).Returns(_invoker);
 
                 _context = mockedContext.Object;
-
-                var services = new ServiceCollection()
-                    .AddSingleton<ContentService>()
-                    .AddSingleton<CommandService>()
-                    .AddSingleton<OwnedEntityService>()
-                    .AddSingleton(this.Transformations)
-                    .AddSingleton
-                    (
-                        s =>
-                            ActivatorUtilities.CreateInstance<PronounService>(s).WithPronounProvider
-                            (
-                                new TheyPronounProvider()
-                            )
-                    )
-                    .AddSingleton<CharacterService>()
-                    .BuildServiceProvider();
 
                 _newPattern = Pattern.Swirly;
                 Colour.TryParse("bright purple", out _newPatternColour);
