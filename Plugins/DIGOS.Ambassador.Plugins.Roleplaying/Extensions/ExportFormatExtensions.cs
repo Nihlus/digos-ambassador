@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Extensions
     /// <summary>
     /// Holds extension methods for <see cref="ExportFormat"/>.
     /// </summary>
-    public static class ExportFormatExtensions
+    internal static class ExportFormatExtensions
     {
         /// <summary>
         /// Gets the file extension for the given export format.

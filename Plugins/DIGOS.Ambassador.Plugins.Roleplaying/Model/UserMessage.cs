@@ -31,6 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// <summary>
     /// Represents a saved user message.
     /// </summary>
+    [PublicAPI]
     [Table("UserMessages", Schema = "RoleplayModule")]
     public class UserMessage : IEFEntity
     {

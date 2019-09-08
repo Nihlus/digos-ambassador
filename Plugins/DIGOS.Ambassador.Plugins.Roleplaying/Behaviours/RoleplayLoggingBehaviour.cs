@@ -35,8 +35,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     /// <summary>
     /// Acts on user messages, logging them into an active roleplay if relevant.
     /// </summary>
-    public class RoleplayLoggingBehaviour : ClientEventBehaviour
+    [UsedImplicitly]
+    internal sealed class RoleplayLoggingBehaviour : ClientEventBehaviour
     {
+        [NotNull]
         private readonly RoleplayService _roleplays;
 
         /// <summary>
@@ -46,8 +48,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <param name="roleplays">The roleplay service.</param>
         public RoleplayLoggingBehaviour
         (
-            DiscordSocketClient client,
-            RoleplayService roleplays
+            [NotNull] DiscordSocketClient client,
+            [NotNull] RoleplayService roleplays
         )
             : base(client)
         {

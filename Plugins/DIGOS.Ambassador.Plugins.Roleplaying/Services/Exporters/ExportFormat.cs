@@ -20,11 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using JetBrains.Annotations;
+
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
 {
     /// <summary>
     /// A format that roleplays can be exported to.
     /// </summary>
+    [PublicAPI]
     public enum ExportFormat
     {
         /// <summary>

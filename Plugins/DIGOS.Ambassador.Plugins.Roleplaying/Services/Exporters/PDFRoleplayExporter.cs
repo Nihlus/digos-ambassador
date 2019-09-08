@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
     /// <summary>
     /// Exports roleplays in PDF format.
     /// </summary>
-    public class PDFRoleplayExporter : RoleplayExporterBase
+    internal sealed class PDFRoleplayExporter : RoleplayExporterBase
     {
         private const float DefaultParagraphSpacing = 8.0f;
         private static readonly Font StandardFont = new Font(Font.HELVETICA, 11.0f);

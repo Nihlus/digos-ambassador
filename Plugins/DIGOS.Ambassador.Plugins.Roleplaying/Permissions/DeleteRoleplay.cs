@@ -22,13 +22,15 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to delete roleplays.
     /// </summary>
-    public class DeleteRoleplay : Permission
+    [PublicAPI]
+    public sealed class DeleteRoleplay : Permission
     {
         /// <inheritdoc />
         public override Guid UniqueIdentifier { get; } = new Guid("CDB2DF83-4149-4C2F-9F10-654A1ABDAF48");

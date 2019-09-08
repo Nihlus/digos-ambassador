@@ -33,6 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
     /// Restricts the usage of a command to the owner of the currently active roleplay. Furthermore, it also requires a
     /// roleplay to be current.
     /// </summary>
+    [PublicAPI]
     public class RequireActiveRoleplayAttribute : PreconditionAttribute
     {
         private readonly bool _requireOwner;

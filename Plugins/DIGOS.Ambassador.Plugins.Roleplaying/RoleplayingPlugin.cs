@@ -37,6 +37,7 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders;
 using Discord;
 using Discord.Commands;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -47,7 +48,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
     /// <summary>
     /// Describes the roleplay plugin.
     /// </summary>
-    public class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
+    [PublicAPI]
+    public sealed class RoleplayingPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />
         public override string Name => "Roleplays";

@@ -22,13 +22,15 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to edit the roleplay-related server settings.
     /// </summary>
-    public class EditRoleplayServerSettings : Permission
+    [PublicAPI]
+    public sealed class EditRoleplayServerSettings : Permission
     {
         /// <inheritdoc />
         public override Guid UniqueIdentifier { get; } = new Guid("32A5E432-DC7F-453D-8C26-9F5E9137E868");

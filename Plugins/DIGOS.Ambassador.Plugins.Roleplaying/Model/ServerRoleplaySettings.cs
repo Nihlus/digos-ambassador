@@ -31,6 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// <summary>
     /// Represents server-specific settings related to the roleplaying module.
     /// </summary>
+    [PublicAPI]
     [Table("ServerSettings", Schema = "RoleplayModule")]
     public class ServerRoleplaySettings : EFEntity
     {

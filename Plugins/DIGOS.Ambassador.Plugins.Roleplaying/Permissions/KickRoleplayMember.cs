@@ -22,13 +22,15 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to kick roleplay members.
     /// </summary>
-    public class KickRoleplayMember : Permission
+    [PublicAPI]
+    public sealed class KickRoleplayMember : Permission
     {
         /// <inheritdoc />
         public override Guid UniqueIdentifier { get; } = new Guid("DB14E9B1-DE8B-4B3D-BE25-A117191073C3");

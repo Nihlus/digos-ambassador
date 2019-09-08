@@ -30,7 +30,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
     /// <summary>
     /// Base class for roleplay exporters.
     /// </summary>
-    public abstract class RoleplayExporterBase : IRoleplayExporter
+    internal abstract class RoleplayExporterBase : IRoleplayExporter
     {
         /// <summary>
         /// Gets the context of the export operation.

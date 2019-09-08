@@ -44,13 +44,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// <summary>
     /// Acts as an interface for accessing, enabling, and disabling ongoing roleplays.
     /// </summary>
-    public class RoleplayService
+    [PublicAPI]
+    public sealed class RoleplayService
     {
-        private readonly RoleplayingDatabaseContext _database;
-        private readonly ServerService _servers;
-        private readonly UserService _users;
-        private readonly CommandService _commands;
-        private readonly OwnedEntityService _ownedEntities;
+        [NotNull] private readonly RoleplayingDatabaseContext _database;
+        [NotNull] private readonly ServerService _servers;
+        [NotNull] private readonly UserService _users;
+        [NotNull] private readonly CommandService _commands;
+        [NotNull] private readonly OwnedEntityService _ownedEntities;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayService"/> class.
@@ -62,11 +63,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="database">The database.</param>
         public RoleplayService
         (
-            CommandService commands,
-            OwnedEntityService entityService,
-            UserService users,
-            ServerService servers,
-            RoleplayingDatabaseContext database
+            [NotNull] CommandService commands,
+            [NotNull] OwnedEntityService entityService,
+            [NotNull] UserService users,
+            [NotNull] ServerService servers,
+            [NotNull] RoleplayingDatabaseContext database
         )
         {
             _commands = commands;
@@ -81,6 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="context">The message to consume.</param>
         /// <returns>A task that must be awaited.</returns>
+        [NotNull]
         public async Task ConsumeMessageAsync([NotNull] ICommandContext context)
         {
             var result = await GetActiveRoleplayAsync(context.Channel);
@@ -103,6 +105,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="isNSFW">Whether or not the roleplay is NSFW.</param>
         /// <param name="isPublic">Whether or not the roleplay is public.</param>
         /// <returns>A creation result which may or may not have been successful.</returns>
+        [NotNull, ItemNotNull]
         public async Task<CreateEntityResult<Roleplay>> CreateRoleplayAsync
         (
             [NotNull] ICommandContext context,
@@ -176,6 +179,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<DeleteEntityResult> DeleteRoleplayAsync(Roleplay roleplay)
         {
             _database.Roleplays.Remove(roleplay);
@@ -190,6 +194,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="context">The context in which to start the roleplay.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> StartRoleplayAsync(ICommandContext context, Roleplay roleplay)
         {
             var getDedicatedChannelResult = await GetDedicatedRoleplayChannelAsync
@@ -259,6 +264,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to modify.</param>
         /// <param name="message">The message to add or update.</param>
         /// <returns>A task wrapping the update action.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> AddToOrUpdateMessageInRoleplayAsync
         (
             [NotNull] Roleplay roleplay,
@@ -314,7 +320,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplayOwner">The owner of the roleplay, if any.</param>
         /// <param name="roleplayName">The name of the roleplay, if any.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
+        [Pure, NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync
         (
             [NotNull] ICommandContext context,
@@ -346,7 +352,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplayName">The name of the roleplay.</param>
         /// <param name="guild">The guild that the search is scoped to.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
+        [Pure, NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync
         (
             [NotNull] string roleplayName,
@@ -377,7 +383,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="channel">The channel to get the roleplay from.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
+        [Pure, NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<Roleplay>> GetActiveRoleplayAsync
         (
             [NotNull] IMessageChannel channel
@@ -404,7 +410,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="channel">The channel to check.</param>
         /// <returns>true if there is an active roleplay; otherwise, false.</returns>
-        [Pure]
+        [Pure, NotNull]
         public async Task<bool> HasActiveRoleplayAsync([NotNull] IChannel channel)
         {
             return await _database.Roleplays.AnyAsync(rp => rp.IsActive && rp.ActiveChannelID == (long)channel.Id);
@@ -417,7 +423,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplayName">The roleplay name to check.</param>
         /// <param name="guild">The guild to scope the roleplays to.</param>
         /// <returns>true if the name is unique; otherwise, false.</returns>
-        [Pure]
+        [Pure, NotNull]
         public async Task<bool> IsRoleplayNameUniqueForUserAsync
         (
             [NotNull] User user,
@@ -434,9 +440,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="guild">The guild to scope the search to.</param>
         /// <returns>A queryable list of roleplays belonging to the user.</returns>
-        [Pure]
-        [NotNull]
-        [ItemNotNull]
+        [Pure, NotNull, ItemNotNull]
         public IQueryable<Roleplay> GetRoleplays([NotNull] IGuild guild)
         {
             return _database.Roleplays
@@ -453,9 +457,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="user">The user to get the roleplays of.</param>
         /// <param name="guild">The guild that the search is scoped to.</param>
         /// <returns>A queryable list of roleplays belonging to the user.</returns>
-        [Pure]
-        [NotNull]
-        [ItemNotNull]
+        [Pure, NotNull, ItemNotNull]
         public IQueryable<Roleplay> GetUserRoleplays([NotNull] User user, [NotNull] IGuild guild)
         {
             return GetRoleplays(guild).Where
@@ -472,7 +474,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplayOwner">The user to get the roleplay from.</param>
         /// <param name="roleplayName">The name of the roleplay.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure]
+        [Pure, NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync
         (
             [NotNull] ICommandContext context,
@@ -508,6 +510,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to remove the user from.</param>
         /// <param name="kickedUser">The user to remove from the roleplay.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> KickUserFromRoleplayAsync
         (
             [NotNull] ICommandContext context,
@@ -544,6 +547,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to remove the user from.</param>
         /// <param name="removedUser">The user to remove from the roleplay.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> RemoveUserFromRoleplayAsync
         (
             [NotNull] ICommandContext context,
@@ -585,6 +589,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to add the user to.</param>
         /// <param name="newUser">The user to add to the roleplay.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<CreateEntityResult<RoleplayParticipant>> AddUserToRoleplayAsync
         (
             [NotNull] ICommandContext context,
@@ -653,6 +658,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to invite the user to.</param>
         /// <param name="invitedUser">The user to invite.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> InviteUserAsync
         (
             [NotNull] Roleplay roleplay,
@@ -703,6 +709,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to transfer.</param>
         /// <param name="guild">The guild to scope the roleplays to.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> TransferRoleplayOwnershipAsync
         (
             [NotNull] User newOwner,
@@ -727,6 +734,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to set the name of.</param>
         /// <param name="newRoleplayName">The new name.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetRoleplayNameAsync
         (
             [NotNull] ICommandContext context,
@@ -773,6 +781,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to set the summary of.</param>
         /// <param name="newRoleplaySummary">The new summary.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetRoleplaySummaryAsync
         (
             [NotNull] Roleplay roleplay,
@@ -796,6 +805,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to set the value in.</param>
         /// <param name="isNSFW">The new value.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetRoleplayIsNSFWAsync
         (
             [NotNull] Roleplay roleplay,
@@ -819,6 +829,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to set the value in.</param>
         /// <param name="isPublic">The new value.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetRoleplayIsPublicAsync
         (
             [NotNull] Roleplay roleplay,
@@ -837,6 +848,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="context">The context in which the request was made.</param>
         /// <param name="roleplay">The roleplay to create the channel for.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<CreateEntityResult<IGuildChannel>> CreateDedicatedRoleplayChannelAsync
         (
             [NotNull] ICommandContext context,
@@ -926,6 +938,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="context">The context in which the request was made.</param>
         /// <param name="roleplay">The roleplay to delete the channel of.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> DeleteDedicatedRoleplayChannelAsync
         (
             [NotNull] ICommandContext context,
@@ -965,6 +978,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="guild">The guild that contains the channel.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<IGuildChannel>> GetDedicatedRoleplayChannelAsync
         (
             [NotNull] IGuild guild,
@@ -998,6 +1012,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="participant">The participant to grant access to.</param>
         /// <param name="isVisible">Whether or not the channel should be writable.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetDedicatedChannelWritabilityForUserAsync
         (
             [NotNull] IGuildChannel dedicatedChannel,
@@ -1036,6 +1051,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="participant">The participant to grant access to.</param>
         /// <param name="isVisible">Whether or not the channel should be visible.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetDedicatedChannelVisibilityForUserAsync
         (
             [NotNull] IGuildChannel dedicatedChannel,
@@ -1071,6 +1087,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="role">The role to grant access to.</param>
         /// <param name="isVisible">Whether or not the channel should be visible.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetDedicatedChannelVisibilityForRoleAsync
         (
             [NotNull] IGuildChannel dedicatedChannel,
@@ -1106,6 +1123,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="dedicatedChannel">The roleplay's dedicated channel.</param>
         /// <param name="participant">The participant to grant access to.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> RevokeUserDedicatedChannelAccessAsync
         (
             [NotNull] ICommandContext context,
@@ -1136,6 +1154,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="server">The server.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<ServerRoleplaySettings>> GetOrCreateServerRoleplaySettingsAsync
         (
             [NotNull] Server server
@@ -1166,6 +1185,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="server">The server.</param>
         /// <param name="category">The category to use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> SetDedicatedRoleplayChannelCategoryAsync
         (
             [NotNull] Server server,

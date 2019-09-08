@@ -29,6 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
+    [PublicAPI]
     public class RoleplayingDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "RoleplayModule";

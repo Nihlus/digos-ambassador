@@ -32,6 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// <summary>
     /// Represents a join entry for a user that has participated in a roleplay in any way.
     /// </summary>
+    [PublicAPI]
     [Table("RoleplayParticipants", Schema = "RoleplayModule")]
     public class RoleplayParticipant : IEFEntity
     {

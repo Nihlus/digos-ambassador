@@ -22,13 +22,15 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to join roleplays.
     /// </summary>
-    public class JoinRoleplay : Permission
+    [PublicAPI]
+    public sealed class JoinRoleplay : Permission
     {
         /// <inheritdoc />
         public override Guid UniqueIdentifier { get; } = new Guid("BD392170-B566-4D34-8A91-4794D374D1A7");

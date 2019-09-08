@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
     /// <summary>
     /// Exports roleplays in plaintext format.
     /// </summary>
-    public class PlaintextRoleplayExporter : RoleplayExporterBase
+    internal sealed class PlaintextRoleplayExporter : RoleplayExporterBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaintextRoleplayExporter"/> class.

@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Discord;
 using Discord.Commands;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
@@ -37,6 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
     /// Reads owned roleplays as command arguments. The name "current" is reserved, and will retrieve the current
     /// roleplay.
     /// </summary>
+    [PublicAPI]
     public sealed class RoleplayTypeReader : OwnedEntityTypeReader<Roleplay>
     {
         /// <inheritdoc />

@@ -22,13 +22,15 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Permissions;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
 {
     /// <summary>
     /// Represents a permission that allows a user to export roleplays.
     /// </summary>
-    public class ExportRoleplay : Permission
+    [PublicAPI]
+    public sealed class ExportRoleplay : Permission
     {
         /// <inheritdoc />
         public override Guid UniqueIdentifier { get; } = new Guid("B563E204-1715-488A-8CEB-5CBD6514D819");

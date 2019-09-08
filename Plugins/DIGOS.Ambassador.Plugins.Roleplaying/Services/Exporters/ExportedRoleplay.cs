@@ -28,7 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
     /// <summary>
     /// Wraps the exported data from a roleplay.
     /// </summary>
-    public class ExportedRoleplay : IDisposable
+    internal sealed class ExportedRoleplay : IDisposable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ExportedRoleplay"/> class.

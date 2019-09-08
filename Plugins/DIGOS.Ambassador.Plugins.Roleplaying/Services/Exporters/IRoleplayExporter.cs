@@ -29,14 +29,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
     /// <summary>
     /// Public interface for a class that can export a roleplay to a file.
     /// </summary>
-    public interface IRoleplayExporter
+    internal interface IRoleplayExporter
     {
         /// <summary>
         /// Exports the given roleplay, handing back an object that wraps the exported data.
         /// </summary>
         /// <param name="roleplay">The roleplay to export.</param>
         /// <returns>An exported roleplay.</returns>
-        [NotNull, Pure]
+        [Pure, NotNull, ItemNotNull]
         Task<ExportedRoleplay> ExportAsync([NotNull] Roleplay roleplay);
     }
 }

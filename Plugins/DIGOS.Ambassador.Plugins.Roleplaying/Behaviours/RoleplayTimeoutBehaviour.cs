@@ -40,7 +40,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     /// <summary>
     /// Times out roleplays, stopping them if they've been inactive for more than a set time.
     /// </summary>
-    public class RoleplayTimeoutBehaviour : ContinuousBehaviour
+    [UsedImplicitly]
+    internal sealed class RoleplayTimeoutBehaviour : ContinuousBehaviour
     {
         /// <summary>
         /// Gets the database context.
