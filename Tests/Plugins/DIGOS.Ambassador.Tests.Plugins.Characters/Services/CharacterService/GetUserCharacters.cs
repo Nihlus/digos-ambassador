@@ -39,94 +39,79 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             private readonly IUser _owner = MockHelper.CreateDiscordUser(0);
             private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
 
-            private readonly User _dbOwner;
+            private readonly User _user;
 
             public GetUserCharacters()
             {
-                _dbOwner = new User((long)_owner.Id);
+                _user = new User((long)_owner.Id);
             }
 
             [Fact]
             public void ReturnsEmptySetFromEmptyDatabase()
             {
-                Assert.Empty(this.Characters.GetUserCharacters(_dbOwner, _guild));
+                Assert.Empty(this.Characters.GetUserCharacters(_user, _guild));
             }
 
             [Fact]
             public void ReturnsEmptySetFromDatabaseWithCharactersWithNoMatchingOwner()
             {
-                var character = new Character(new User(1), "Dummy", string.Empty)
-                {
-                    ServerID = (long)_guild.Id
-                };
+                var character = new Character((long)_guild.Id, new User(1), "Dummy");
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(_dbOwner, _guild);
+                var result = this.Characters.GetUserCharacters(_user, _guild);
                 Assert.Empty(result);
             }
 
             [Fact]
             public void ReturnsNEmptySetFromDatabaseWithCharactersWithMatchingOwnerButNoMatchingServer()
             {
-                var character = new Character(_dbOwner, "Dummy", string.Empty);
+                var character = new Character(0, _user, "Dummy");
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(_dbOwner, _guild);
+                var result = this.Characters.GetUserCharacters(_user, _guild);
                 Assert.Empty(result);
             }
 
             [Fact]
             public void ReturnsNonEmptySetFromDatabaseWithCharactersWithMatchingOwner()
             {
-                var character = new Character(_dbOwner, "Dummy", string.Empty)
-                {
-                    ServerID = (long)_guild.Id
-                };
+                var character = new Character((long)_guild.Id, _user, "Dummy");
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(_dbOwner, _guild);
+                var result = this.Characters.GetUserCharacters(_user, _guild);
                 Assert.NotEmpty(result);
             }
 
             [Fact]
             public void ReturnsCorrectCharacterFromDatabase()
             {
-                var character = new Character(_dbOwner, "Dummy", string.Empty)
-                {
-                    ServerID = (long)_guild.Id
-                };
+                var character = new Character((long)_guild.Id, _user, "Dummy");;
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(_dbOwner, _guild);
+                var result = this.Characters.GetUserCharacters(_user, _guild);
                 Assert.Collection(result, c => Assert.Same(character, c));
             }
 
             [Fact]
             public void ReturnsCorrectMultipleCharactersFromDatabase()
             {
-                var character1 = new Character(_dbOwner, "Dummy1", string.Empty)
-                {
-                    ServerID = (long)_guild.Id
-                };
+                var character1 = new Character((long)_guild.Id, _user, "Dummy1");
 
-                var character2 = new Character(_dbOwner, "Dummy2", string.Empty)
-                {
-                    ServerID = (long)_guild.Id
-                };
+                var character2 = new Character((long)_guild.Id, _user, "Dummy2");
 
                 this.Database.Characters.Update(character1);
                 this.Database.Characters.Update(character2);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(_dbOwner, _guild);
+                var result = this.Characters.GetUserCharacters(_user, _guild);
                 Assert.Collection
                 (
                     result,

@@ -40,17 +40,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             private readonly IUser _owner = MockHelper.CreateDiscordUser(0);
             private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
 
-            private readonly User _dbOwner;
+            private readonly User _user;
 
             public HasActiveCharacterOnServerAsync()
             {
-                _dbOwner = new User((long)_owner.Id);
+                _user = new User((long)_owner.Id);
             }
 
             [Fact]
             public async Task ReturnsFalseIfUserHasNoCharacters()
             {
-                var result = await this.Characters.HasActiveCharacterOnServerAsync(_dbOwner, _guild);
+                var result = await this.Characters.HasActiveCharacterOnServerAsync(_user, _guild);
 
                 Assert.False(result);
             }
@@ -58,15 +58,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsFalseIfUserHasNoActiveCharacter()
             {
-                var character = new Character(_dbOwner, "Dummy", string.Empty)
-                {
-                    ServerID = (long)_guild.Id
-                };
+                var character = new Character((long)_guild.Id, _user, "Dummy");
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();
 
-                var result = await this.Characters.HasActiveCharacterOnServerAsync(_dbOwner, _guild);
+                var result = await this.Characters.HasActiveCharacterOnServerAsync(_user, _guild);
 
                 Assert.False(result);
             }
@@ -74,16 +71,15 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsTrueIfUserHasAnActiveCharacter()
             {
-                var character = new Character(_dbOwner, "Dummy", string.Empty)
+                var character = new Character((long)_guild.Id, _user, "Dummy")
                 {
-                    ServerID = (long)_guild.Id,
                     IsCurrent = true
                 };
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();
 
-                var result = await this.Characters.HasActiveCharacterOnServerAsync(_dbOwner, _guild);
+                var result = await this.Characters.HasActiveCharacterOnServerAsync(_user, _guild);
 
                 Assert.True(result);
             }

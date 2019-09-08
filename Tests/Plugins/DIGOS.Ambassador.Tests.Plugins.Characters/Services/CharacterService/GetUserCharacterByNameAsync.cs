@@ -46,11 +46,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             private readonly Character _character;
 
-            private readonly User _dbOwner;
+            private readonly User _user;
 
             public GetUserCharacterByNameAsync()
             {
-                _dbOwner = new User((long)_owner.Id);
+                _user = new User((long)_owner.Id);
 
                 var mockedGuild = new Mock<IGuild>();
                 mockedGuild.Setup(g => g.Id).Returns(1);
@@ -79,10 +79,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 _context = mockedContext.Object;
 
-                _character = new Character(_dbOwner, CharacterName, string.Empty)
-                {
-                    ServerID = (long)guild.Id
-                };
+                _character = new Character((long)guild.Id, _user, CharacterName);
 
                 this.Database.Characters.Update(_character);
                 this.Database.SaveChanges();
@@ -91,7 +88,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfOwnerDoesNotHaveACharacterWithThatName()
             {
-                var result = await this.Characters.GetUserCharacterByNameAsync(_context, _dbOwner, "NonExistant");
+                var result = await this.Characters.GetUserCharacterByNameAsync(_context, _user, "NonExistant");
 
                 Assert.False(result.IsSuccess);
             }
@@ -99,7 +96,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfOwnerHasACharacterWithThatName()
             {
-                var result = await this.Characters.GetUserCharacterByNameAsync(_context, _dbOwner, CharacterName);
+                var result = await this.Characters.GetUserCharacterByNameAsync(_context, _user, CharacterName);
 
                 Assert.True(result.IsSuccess);
             }
@@ -107,7 +104,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsCorrectCharacter()
             {
-                var result = await this.Characters.GetUserCharacterByNameAsync(_context, _dbOwner, CharacterName);
+                var result = await this.Characters.GetUserCharacterByNameAsync(_context, _user, CharacterName);
 
                 Assert.Same(_character, result.Entity);
             }

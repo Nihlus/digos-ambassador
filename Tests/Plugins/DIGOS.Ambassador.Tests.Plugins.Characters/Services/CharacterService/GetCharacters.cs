@@ -61,10 +61,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 this.Database.Characters.Update
                 (
-                    new Character(_owner, "dummy", string.Empty)
-                    {
-                        ServerID = (long)_guild.Id
-                    }
+                    new Character((long)_guild.Id, _owner, "dummy")
                 );
 
                 this.Database.SaveChanges();
@@ -80,10 +77,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 this.Database.Characters.Update
                 (
-                    new Character(_owner, "dummy", string.Empty)
-                    {
-                        ServerID = 1
-                    }
+                    new Character(1, _owner, "dummy")
                 );
 
                 this.Database.SaveChanges();
@@ -98,26 +92,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 this.Database.Characters.Update
                 (
-                    new Character(_owner, "dummy", string.Empty)
-                    {
-                        ServerID = 1
-                    }
+                    new Character(1, _owner, "dummy")
                 );
 
                 this.Database.Characters.Update
                 (
-                    new Character(_owner, "dummy", string.Empty)
-                    {
-                        ServerID = (long)_guild.Id
-                    }
+                    new Character((long)_guild.Id, _owner, "dummy1")
                 );
 
                 this.Database.Characters.Update
                 (
-                    new Character(_owner, "dummy", string.Empty)
-                    {
-                        ServerID = (long)_guild.Id
-                    }
+                    new Character((long)_guild.Id, _owner, "dummy2")
                 );
 
                 this.Database.SaveChanges();

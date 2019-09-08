@@ -45,11 +45,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             private readonly Character _character;
 
-            private readonly User _dbOwner;
+            private readonly User _user;
 
             public GetCurrentCharacterAsync()
             {
-                _dbOwner = new User((long)_owner.Id);
+                _user = new User((long)_owner.Id);
 
                 var mockedGuild = new Mock<IGuild>();
                 mockedGuild.Setup(g => g.Id).Returns(1);
@@ -78,10 +78,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 _context = mockedContext.Object;
 
-                _character = new Character(_dbOwner, "Dummy", string.Empty)
-                {
-                    ServerID = (long)_guild.Id
-                };
+                _character = new Character((long)_guild.Id, _user, "Dummy");
 
                 this.Database.Characters.Update(_character);
                 this.Database.SaveChanges();
@@ -90,7 +87,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfUserDoesNotHaveAnActiveCharacter()
             {
-                var result = await this.Characters.GetCurrentCharacterAsync(_context, _dbOwner);
+                var result = await this.Characters.GetCurrentCharacterAsync(_context, _user);
 
                 Assert.False(result.IsSuccess);
             }
@@ -100,7 +97,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 await this.Characters.MakeCharacterCurrentOnServerAsync(_context, _guild, _character);
 
-                var result = await this.Characters.GetCurrentCharacterAsync(_context, _dbOwner);
+                var result = await this.Characters.GetCurrentCharacterAsync(_context, _user);
 
                 Assert.True(result.IsSuccess);
             }
@@ -110,7 +107,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 await this.Characters.MakeCharacterCurrentOnServerAsync(_context, _guild, _character);
 
-                var result = await this.Characters.GetCurrentCharacterAsync(_context, _dbOwner);
+                var result = await this.Characters.GetCurrentCharacterAsync(_context, _user);
 
                 Assert.Same(_character, result.Entity);
             }

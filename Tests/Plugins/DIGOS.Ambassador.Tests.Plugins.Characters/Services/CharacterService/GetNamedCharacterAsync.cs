@@ -48,10 +48,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
 
-                _character = new Character(_owner, CharacterName, string.Empty)
-                {
-                    ServerID = (long)_guild.Id
-                };
+                _character = new Character((long)_guild.Id, _owner, CharacterName);
 
                 this.Database.Characters.Update(_character);
                 this.Database.SaveChanges();
@@ -68,10 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfMoreThanOneCharacterWithThatNameExists()
             {
-                var anotherCharacter = new Character(_owner, CharacterName, string.Empty)
-                {
-                    ServerID = (long)_guild.Id
-                };
+                var anotherCharacter = _character = new Character((long)_guild.Id, _owner, CharacterName);
 
                 this.Database.Characters.Update(anotherCharacter);
                 await this.Database.SaveChangesAsync();

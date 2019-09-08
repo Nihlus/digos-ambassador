@@ -41,16 +41,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
             private readonly Character _character;
 
-            private readonly User _dbOwner;
+            private readonly User _user;
 
             public ClearCurrentCharacterOnServerAsync()
             {
-                _dbOwner = new User((long)_owner.Id);
+                _user = new User((long)_owner.Id);
 
-                _character = new Character(_dbOwner, "Dummy", string.Empty)
-                {
-                    ServerID = (long)_guild.Id
-                };
+                _character = new Character((long)_guild.Id, _user, "Dummy");
 
                 this.Database.Characters.Update(_character);
                 this.Database.SaveChangesAsync();
@@ -59,7 +56,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfCharacterIsNotCurrentOnServer()
             {
-                var result = await this.Characters.ClearCurrentCharacterOnServerAsync(_dbOwner, _guild);
+                var result = await this.Characters.ClearCurrentCharacterOnServerAsync(_user, _guild);
 
                 Assert.False(result.IsSuccess);
             }
@@ -70,7 +67,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 _character.IsCurrent = true;
                 await this.Database.SaveChangesAsync();
 
-                var result = await this.Characters.ClearCurrentCharacterOnServerAsync(_dbOwner, _guild);
+                var result = await this.Characters.ClearCurrentCharacterOnServerAsync(_user, _guild);
 
                 Assert.True(result.IsSuccess);
             }
@@ -81,7 +78,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 _character.IsCurrent = true;
                 await this.Database.SaveChangesAsync();
 
-                await this.Characters.ClearCurrentCharacterOnServerAsync(_dbOwner, _guild);
+                await this.Characters.ClearCurrentCharacterOnServerAsync(_user, _guild);
 
                 Assert.False(_character.IsCurrent);
             }

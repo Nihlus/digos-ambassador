@@ -22,7 +22,6 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 
@@ -33,41 +32,30 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
     /// </summary>
     [PublicAPI]
     [Table("Images", Schema = "CharacterModule")]
-    public class Image : IEFEntity
+    public class Image : EFEntity
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
-
         /// <summary>
-        /// Gets or sets the name of the image.
+        /// Gets the name of the image.
         /// </summary>
         [Required, NotNull]
-        public string Name { get; set; }
+        public string Name { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the caption of the image.
+        /// Gets the caption of the image.
         /// </summary>
         [Required, NotNull]
-        public string Caption { get; set; }
+        public string Caption { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether or not the image is NSFW.
+        /// Gets a value indicating whether or not the image is NSFW.
         /// </summary>
-        public bool IsNSFW { get; set; }
+        public bool IsNSFW { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the online URL of the image.
+        /// Gets the online URL of the image.
         /// </summary>
         [Required, NotNull]
-        public string Url { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Image"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        protected Image()
-        {
-        }
+        public string Url { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Image"/> class.

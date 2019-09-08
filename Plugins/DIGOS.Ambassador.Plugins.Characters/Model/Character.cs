@@ -24,6 +24,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -38,13 +39,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
     /// </summary>
     [PublicAPI]
     [Table("Characters", Schema = "CharacterModule")]
-    public class Character : IOwnedNamedEntity, IServerEntity
+    public class Character : EFEntity, IOwnedNamedEntity, IServerEntity
     {
         /// <inheritdoc />
-        public long ID { get; set; }
-
-        /// <inheritdoc />
-        public long ServerID { get; set; }
+        public long ServerID { get; private set; }
 
         /// <inheritdoc />
         [Required]
@@ -52,64 +50,64 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
 
         /// <inheritdoc />
         [Required]
-        public string Name { get; set; }
+        public string Name { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the character is the user's default character.
+        /// Gets a value indicating whether the character is the user's default character.
         /// </summary>
-        public bool IsDefault { get; set; }
+        public bool IsDefault { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the character is currently in use on the server.
+        /// Gets a value indicating whether the character is currently in use on the server.
         /// </summary>
-        public bool IsCurrent { get; set; }
+        public bool IsCurrent { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a URL pointing to the character's avatar.
-        /// </summary>
-        [Required, NotNull]
-        public string AvatarUrl { get; set; }
-
-        /// <summary>
-        /// Gets or sets the nickname that a user should have when playing as the character.
+        /// Gets a URL pointing to the character's avatar.
         /// </summary>
         [Required, NotNull]
-        public string Nickname { get; set; }
+        public string AvatarUrl { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the character summary.
+        /// Gets the nickname that a user should have when playing as the character.
         /// </summary>
         [Required, NotNull]
-        public string Summary { get; set; }
+        public string Nickname { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the full description of the character.
+        /// Gets the character summary.
         /// </summary>
         [Required, NotNull]
-        public string Description { get; set; }
+        public string Summary { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the character is NSFW.
+        /// Gets the full description of the character.
         /// </summary>
-        public bool IsNSFW { get; set; }
+        [Required, NotNull]
+        public string Description { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the images associated with the character.
+        /// Gets a value indicating whether the character is NSFW.
+        /// </summary>
+        public bool IsNSFW { get; internal set; }
+
+        /// <summary>
+        /// Gets the images associated with the character.
         /// </summary>
         [Required, NotNull, ItemNotNull]
-        public virtual List<Image> Images { get; set; } = new List<Image>();
+        public virtual List<Image> Images { get; internal set; } = new List<Image>();
 
         /// <summary>
-        /// Gets or sets the preferred pronoun family of the character.
+        /// Gets the preferred pronoun family of the character.
         /// </summary>
         [Required, NotNull]
-        public string PronounProviderFamily { get; set; }
+        public string PronounProviderFamily { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a custom role that gets applied along with the character, similar to a nickname.
+        /// Gets a custom role that gets applied along with the character, similar to a nickname.
         /// </summary>
         [CanBeNull]
-        public virtual CharacterRole Role { get; set; }
+        public virtual CharacterRole Role { get; internal set; }
 
         /// <inheritdoc />
         [NotMapped]
@@ -126,6 +124,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="Character"/> class.
         /// </summary>
+        /// <param name="serverID">The server ID that the character resides on.</param>
         /// <param name="owner">The owner of the character.</param>
         /// <param name="name">The character's name.</param>
         /// <param name="avatarUrl">The avatar URL for the character.</param>
@@ -136,15 +135,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
         public Character
         (
+            long serverID,
             [NotNull] User owner,
             [NotNull] string name,
-            [NotNull] string avatarUrl,
+            [NotNull] string avatarUrl = "https://www.example.com/avatar.png",
             [CanBeNull] string nickname = null,
             [NotNull] string summary = "No summary set.",
             [NotNull] string description = "No description set.",
             [NotNull] string pronounProviderFamily = "They"
         )
         {
+            this.ServerID = serverID;
             this.Owner = owner;
             this.Name = name;
             this.AvatarUrl = avatarUrl;

@@ -51,10 +51,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 _user = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
 
-                _character = new Character(_user, CharacterName, string.Empty)
-                {
-                    ServerID = (long)_guild.Id
-                };
+                _character = new Character((long)_guild.Id, _user, CharacterName);
 
                 this.Database.Characters.Update(_character);
                 await this.Database.SaveChangesAsync();

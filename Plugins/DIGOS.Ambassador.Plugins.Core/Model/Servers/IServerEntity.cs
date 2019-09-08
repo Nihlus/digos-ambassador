@@ -32,8 +32,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
     public interface IServerEntity : IEFEntity
     {
         /// <summary>
-        /// Gets or sets the Discord server ID.
+        /// Gets the Discord server ID.
         /// </summary>
-        long ServerID { get; set; }
+        long ServerID { get; }
     }
 }

@@ -52,10 +52,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 _dbOldOwner = new User((long)_originalOwner.Id);
                 _dbNewOwner = new User((long)_newOwner.Id);
 
-                _character = new Character(_dbOldOwner, "Dummy", string.Empty)
-                {
-                    ServerID = (long)_guild.Id,
-                };
+                _character = new Character((long)_guild.Id, _dbOldOwner, "Dummy");
 
                 this.Database.Characters.Update(_character);
                 this.Database.SaveChanges();

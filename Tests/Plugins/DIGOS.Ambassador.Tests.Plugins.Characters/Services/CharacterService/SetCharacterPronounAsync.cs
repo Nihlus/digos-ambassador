@@ -52,9 +52,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 this.Services.GetRequiredService<PronounService>().WithPronounProvider(new ZeHirPronounProvider());
 
                 _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
-                _character = new Character(_owner, "Dummy", string.Empty, pronounProviderFamily: PronounFamily)
+                _character = new Character(0, _owner, "Dummy")
                 {
-                    ServerID = 0,
+                    PronounProviderFamily = PronounFamily
                 };
 
                 this.Database.Characters.Update(_character);

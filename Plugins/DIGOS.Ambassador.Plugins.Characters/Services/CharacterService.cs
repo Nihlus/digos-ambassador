@@ -431,9 +431,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var owner = getOwnerResult.Entity;
 
-            var character = _database.CreateProxy<Character>();
-            character.Owner = owner;
-            character.ServerID = (long)context.Guild.Id;
+            // Use a dummy name here, because we'll set it using the service afterwards
+            var character = new Character((long)context.Guild.Id, owner, string.Empty);
 
             var modifyEntityResult = await SetCharacterNameAsync(context, character, characterName);
             if (!modifyEntityResult.IsSuccess)
@@ -453,25 +452,22 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return CreateEntityResult<Character>.FromError(modifyEntityResult);
             }
 
-            characterSummary = characterSummary ?? "No summary set.";
-            modifyEntityResult = await SetCharacterSummaryAsync(character, characterSummary);
-            if (!modifyEntityResult.IsSuccess)
+            if (!(characterSummary is null))
             {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+                modifyEntityResult = await SetCharacterSummaryAsync(character, characterSummary);
+                if (!modifyEntityResult.IsSuccess)
+                {
+                    return CreateEntityResult<Character>.FromError(modifyEntityResult);
+                }
             }
 
-            characterDescription = characterDescription ?? "No description set.";
-            modifyEntityResult = await SetCharacterDescriptionAsync(character, characterDescription);
-            if (!modifyEntityResult.IsSuccess)
+            if (!(characterDescription is null))
             {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
-            }
-
-            var defaultPronounFamilyName = new TheyPronounProvider().Family;
-            modifyEntityResult = await SetCharacterPronounAsync(character, defaultPronounFamilyName);
-            if (!modifyEntityResult.IsSuccess)
-            {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+                modifyEntityResult = await SetCharacterDescriptionAsync(character, characterDescription);
+                if (!modifyEntityResult.IsSuccess)
+                {
+                    return CreateEntityResult<Character>.FromError(modifyEntityResult);
+                }
             }
 
             _database.Characters.Update(character);
