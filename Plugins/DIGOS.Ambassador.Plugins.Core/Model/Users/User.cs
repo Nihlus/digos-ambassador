@@ -31,25 +31,31 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
     /// </summary>
     [PublicAPI]
     [Table("Users", Schema = "Core")]
-    public class User : IEFEntity
+    public class User : EFEntity
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
-
         /// <summary>
-        /// Gets or sets the Discord ID of the user.
+        /// Gets the Discord ID of the user.
         /// </summary>
-        public long DiscordID { get; set; }
+        public long DiscordID { get; private set; }
 
         /// <summary>
-        /// Gets or sets the biography of the user. This contains useful information that the users provide themselves.
+        /// Gets  the biography of the user. This contains useful information that the users provide themselves.
         /// </summary>
-        public string Bio { get; set; }
+        public string Bio { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the current timezone of the user. This is an hour offset ( + or - ) to UTC/GMT.
+        /// Gets the current timezone of the user. This is an hour offset ( + or - ) to UTC/GMT.
         /// </summary>
         [CanBeNull]
-        public int? Timezone { get; set; }
+        public int? Timezone { get; internal set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="User"/> class.
+        /// </summary>
+        /// <param name="discordID">The Discord ID of the user.</param>
+        public User(long discordID)
+        {
+            this.DiscordID = discordID;
+        }
     }
 }

@@ -40,7 +40,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public GetPronounProvider()
             {
-                _character = new Character(new User(), "Dummy", string.Empty)
+                _character = new Character(new User(0), "Dummy", string.Empty)
                 {
                     ServerID = 0,
                 };

@@ -70,8 +70,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             [Fact]
             public async Task ReturnsErrorIfNewDescriptionIsSameAsOldDescription()
             {
-                var old = "oogabooga";
-                _server.Description = old;
+                const string old = "oogabooga";
+                await this.Servers.SetDescriptionAsync(_server, old);
 
                 var result = await this.Servers.SetDescriptionAsync(_server, old);
 

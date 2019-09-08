@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public GetBestMatchingCharacterAsync()
             {
-                _dbOwner = new User { DiscordID = (long)_owner.Id };
+                _dbOwner = new User((long)_owner.Id);
 
                 var mockedGuild = new Mock<IGuild>();
                 mockedGuild.Setup(g => g.Id).Returns(1);
@@ -111,7 +111,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsInvokersCharacterIfOwnerIsNullAndMoreThanOneCharacterWithThatNameExists()
             {
-                var anotherCharacter = new Character(new User { DiscordID = 2 }, CharacterName, string.Empty)
+                var anotherCharacter = new Character(new User(2), CharacterName, string.Empty)
                 {
                     ServerID = (long)_guild.Id
                 };

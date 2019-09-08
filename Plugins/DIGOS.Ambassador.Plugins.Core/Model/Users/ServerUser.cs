@@ -37,21 +37,23 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
     public class ServerUser : EFEntity
     {
         /// <summary>
-        /// Gets or sets the server the user has joined.
+        /// Gets the server the user has joined.
         /// </summary>
         [Required, NotNull]
-        public virtual Server Server { get; set; }
+        public virtual Server Server { get; private set; }
 
         /// <summary>
-        /// Gets or sets the user that has joined the server.
+        /// Gets the user that has joined the server.
         /// </summary>
         [Required, NotNull]
-        public virtual User User { get; set; }
+        public virtual User User { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerUser"/> class.
         /// </summary>
-        [UsedImplicitly]
+        /// <remarks>
+        /// Required by EF Core.
+        /// </remarks>
         protected ServerUser()
         {
         }
@@ -61,7 +63,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         /// </summary>
         /// <param name="server">The server.</param>
         /// <param name="user">The user.</param>
-        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
         public ServerUser([NotNull] Server server, [NotNull] User user)
         {
             this.Server = server;

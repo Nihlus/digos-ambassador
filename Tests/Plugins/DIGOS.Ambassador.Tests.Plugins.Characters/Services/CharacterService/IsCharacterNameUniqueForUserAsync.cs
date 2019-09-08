@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public IsCharacterNameUniqueForUserAsync()
             {
-                _dbOwner = new User { DiscordID = (long)_owner.Id };
+                _dbOwner = new User((long)_owner.Id);
 
                 var character = new Character(_dbOwner, CharacterName, string.Empty)
                 {

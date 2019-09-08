@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public HasActiveCharacterOnServerAsync()
             {
-                _dbOwner = new User { DiscordID = (long)_owner.Id };
+                _dbOwner = new User((long)_owner.Id);
             }
 
             [Fact]

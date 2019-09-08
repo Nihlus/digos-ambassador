@@ -31,19 +31,25 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
     /// </summary>
     [PublicAPI]
     [Table("UserConsents", Schema = "Core")]
-    public class UserConsent : IEFEntity
+    public class UserConsent : EFEntity
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
+        /// <summary>
+        /// Gets the Discord ID of the user.
+        /// </summary>
+        public long DiscordID { get; private set; }
 
         /// <summary>
-        /// Gets or sets the Discord ID of the user.
+        /// Gets a value indicating whether or not the user has consented.
         /// </summary>
-        public long DiscordID { get; set; }
+        public bool HasConsented { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether or not the user has consented.
+        /// Initializes a new instance of the <see cref="UserConsent"/> class.
         /// </summary>
-        public bool HasConsented { get; set; }
+        /// <param name="discordID">The Discord ID of the user.</param>
+        public UserConsent(long discordID)
+        {
+            this.DiscordID = discordID;
+        }
     }
 }

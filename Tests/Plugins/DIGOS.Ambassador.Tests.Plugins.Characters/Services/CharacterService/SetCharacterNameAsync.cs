@@ -86,12 +86,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 _context = mockedContext.Object;
 
-                _character = new Character(new User { DiscordID = (long)mockedUserObject.Id }, CharacterName, string.Empty)
+                _character = new Character(new User((long)mockedUserObject.Id), CharacterName, string.Empty)
                 {
                     ServerID = (long)mockedGuildObject.Id,
                 };
 
-                var anotherCharacter = new Character(new User { DiscordID = (long)mockedUserObject.Id }, AnotherCharacterName, string.Empty)
+                var anotherCharacter = new Character(new User((long)mockedUserObject.Id), AnotherCharacterName, string.Empty)
                 {
                     ServerID = (long)mockedGuildObject.Id,
                 };

@@ -36,49 +36,55 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
     /// </summary>
     [PublicAPI]
     [Table("Servers", Schema = "Core")]
-    public class Server : IEFEntity
+    public class Server : EFEntity
     {
-        /// <inheritdoc />
-        public long ID { get; set; }
-
         /// <summary>
-        /// Gets or sets the globally unique guild ID of the server.
+        /// Gets the globally unique guild ID of the server.
         /// </summary>
-        public virtual long DiscordID { get; set; }
+        public virtual long DiscordID { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether or not the server allows NSFW content globally.
+        /// Gets a value indicating whether or not the server allows NSFW content globally.
         /// </summary>
-        public bool IsNSFW { get; set; }
+        public bool IsNSFW { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether or not the server should suppress permission warnings.
+        /// Gets a value indicating whether or not the server should suppress permission warnings.
         /// </summary>
-        public bool SuppressPermissionWarnings { get; set; }
+        public bool SuppressPermissionWarnings { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the users known to the bot on this server.
+        /// Gets the users known to the bot on this server.
         /// </summary>
         [Required, NotNull]
-        public virtual List<ServerUser> KnownUsers { get; set; } = new List<ServerUser>();
+        public virtual List<ServerUser> KnownUsers { get; internal set; } = new List<ServerUser>();
 
         /// <summary>
-        /// Gets or sets the server's description.
+        /// Gets the server's description.
         /// </summary>
         [CanBeNull]
-        public string Description { get; set; }
+        public string Description { get; internal set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the first-join message should be sent to users when they first join
-        /// the server.
+        /// Gets a value indicating whether the first-join message should be sent to users when they first join the
+        /// server.
         /// </summary>
-        public bool SendJoinMessage { get; set; }
+        public bool SendJoinMessage { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the server's first-join message.
+        /// Gets the server's first-join message.
         /// </summary>
         [CanBeNull]
-        public string JoinMessage { get; set; }
+        public string JoinMessage { get; internal set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Server"/> class.
+        /// </summary>
+        /// <param name="discordID">The server's Discord ID.</param>
+        public Server(long discordID)
+        {
+            this.DiscordID = discordID;
+        }
 
         /// <summary>
         /// Determines whether or not a given user is known to this server.
@@ -99,9 +105,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         [NotNull]
         public static Server CreateDefault([NotNull] IGuild discordServer)
         {
-            return new Server
+            return new Server((long)discordServer.Id)
             {
-                DiscordID = (long)discordServer.Id,
                 IsNSFW = true,
             };
         }

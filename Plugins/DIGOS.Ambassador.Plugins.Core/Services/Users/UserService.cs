@@ -127,12 +127,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                 );
             }
 
-            var newUser = new User
-            {
-                DiscordID = (long)discordUser.Id,
-                Bio = null,
-                Timezone = null
-            };
+            var newUser = new User((long)discordUser.Id);
 
             _database.Users.Update(newUser);
 

@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public GetUserCharacters()
             {
-                _dbOwner = new User { DiscordID = (long)_owner.Id };
+                _dbOwner = new User((long)_owner.Id);
             }
 
             [Fact]
@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsEmptySetFromDatabaseWithCharactersWithNoMatchingOwner()
             {
-                var character = new Character(new User { DiscordID = 1 }, "Dummy", string.Empty)
+                var character = new Character(new User(1), "Dummy", string.Empty)
                 {
                     ServerID = (long)_guild.Id
                 };

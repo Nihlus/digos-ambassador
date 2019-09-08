@@ -49,8 +49,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public TransferCharacterOwnershipAsync()
             {
-                _dbOldOwner = new User { DiscordID = (long)_originalOwner.Id };
-                _dbNewOwner = new User { DiscordID = (long)_newOwner.Id };
+                _dbOldOwner = new User((long)_originalOwner.Id);
+                _dbNewOwner = new User((long)_newOwner.Id);
 
                 _character = new Character(_dbOldOwner, "Dummy", string.Empty)
                 {

@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public ClearCurrentCharacterOnServerAsync()
             {
-                _dbOwner = new User { DiscordID = (long)_owner.Id };
+                _dbOwner = new User((long)_owner.Id);
 
                 _character = new Character(_dbOwner, "Dummy", string.Empty)
                 {

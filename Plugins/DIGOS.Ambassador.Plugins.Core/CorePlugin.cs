@@ -22,6 +22,7 @@
 
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
@@ -39,6 +40,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
+[assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Core")]
 [assembly: AmbassadorPlugin(typeof(CorePlugin))]
 
 namespace DIGOS.Ambassador.Plugins.Core

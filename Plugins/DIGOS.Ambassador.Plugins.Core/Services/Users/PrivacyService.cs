@@ -163,9 +163,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
 
             if (userConsent is null)
             {
-                userConsent = new UserConsent
+                userConsent = new UserConsent((long)discordUser.Id)
                 {
-                    DiscordID = (long)discordUser.Id,
                     HasConsented = true
                 };
 

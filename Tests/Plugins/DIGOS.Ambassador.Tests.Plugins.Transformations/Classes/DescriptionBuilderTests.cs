@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         [Fact]
         public void ReplacesFluentTokensCorrectly()
         {
-            var character = new Character(new User(), "Amby", string.Empty, pronounProviderFamily: "Feminine");
+            var character = new Character(new User(0), "Amby", string.Empty, pronounProviderFamily: "Feminine");
 
             var hairColour = new Colour
             {

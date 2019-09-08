@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 _context = mockedContext.Object;
 
-                _character = new Character(new User { DiscordID = (long)_owner.Id }, "Dummy", string.Empty)
+                _character = new Character(new User((long)_owner.Id), "Dummy", string.Empty)
                 {
                     ServerID = (long)_guild.Id
                 };

@@ -70,8 +70,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             [Fact]
             public async Task ReturnsErrorIfNewJoinMessageIsSameAsOldJoinMessage()
             {
-                var old = "oogabooga";
-                _server.JoinMessage = old;
+                const string old = "oogabooga";
+                await this.Servers.SetJoinMessageAsync(_server, old);
 
                 var result = await this.Servers.SetJoinMessageAsync(_server, old);
 
