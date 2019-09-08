@@ -8,14 +8,16 @@ using DIGOS.Ambassador.Plugins.Characters.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Migrations
 {
     [DbContext(typeof(CharactersDatabaseContext))]
-    partial class CharactersDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20190908110509_EnsureNicknamesAreNotNull")]
+    partial class EnsureNicknamesAreNotNull
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,8 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Migrations
                     b.Property<string>("Name")
                         .IsRequired();
 
-                    b.Property<string>("Nickname")
-                        .IsRequired();
+                    b.Property<string>("Nickname");
 
                     b.Property<long>("OwnerID");
 

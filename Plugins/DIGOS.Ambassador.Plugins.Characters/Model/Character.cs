@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets or sets the nickname that a user should have when playing as the character.
         /// </summary>
-        [CanBeNull]
+        [Required, NotNull]
         public string Nickname { get; set; }
 
         /// <summary>
