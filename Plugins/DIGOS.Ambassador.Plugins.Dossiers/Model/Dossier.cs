@@ -22,7 +22,6 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 
@@ -36,25 +35,16 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Model
     public class Dossier : EFEntity
     {
         /// <summary>
-        /// Gets or sets the title of the dossier.
+        /// Gets the title of the dossier.
         /// </summary>
         [Required, NotNull]
-        public string Title { get; set; }
+        public string Title { get; internal set; }
 
         /// <summary>
-        /// Gets or sets the summary of the dossier.
+        /// Gets the summary of the dossier.
         /// </summary>
         [Required, NotNull]
-        public string Summary { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Dossier"/> class.
-        /// </summary>
-        [UsedImplicitly]
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        protected Dossier()
-        {
-        }
+        public string Summary { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Dossier"/> class.
