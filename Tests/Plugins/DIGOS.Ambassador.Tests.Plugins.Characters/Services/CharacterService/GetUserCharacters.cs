@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
@@ -116,7 +115,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 var character1 = new Character(_dbOwner, "Dummy1", string.Empty)
                 {
                     ServerID = (long)_guild.Id
-                };;
+                };
 
                 var character2 = new Character(_dbOwner, "Dummy2", string.Empty)
                 {

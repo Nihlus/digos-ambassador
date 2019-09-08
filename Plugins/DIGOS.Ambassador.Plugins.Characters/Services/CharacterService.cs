@@ -908,11 +908,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 );
             }
 
-            var image = new Image
+            var image = new Image(imageName, imageUrl, imageCaption)
             {
-                Name = imageName,
-                Caption = imageCaption,
-                Url = imageUrl,
                 IsNSFW = isNSFW
             };
 
@@ -977,12 +974,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var server = getServerResult.Entity;
 
-            var characterRole = new CharacterRole
-            {
-                Server = server,
-                DiscordID = (long)role.Id,
-                Access = access
-            };
+            var characterRole = new CharacterRole(server, (long)role.Id, access);
 
             _database.CharacterRoles.Update(characterRole);
             await _database.SaveChangesAsync();

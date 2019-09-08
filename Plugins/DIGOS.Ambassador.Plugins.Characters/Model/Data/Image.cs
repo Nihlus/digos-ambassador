@@ -22,6 +22,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 
@@ -59,5 +60,26 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
         /// </summary>
         [Required, NotNull]
         public string Url { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Image"/> class.
+        /// </summary>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+        protected Image()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Image"/> class.
+        /// </summary>
+        /// <param name="name">The name of the image.</param>
+        /// <param name="url">The URL to the image.</param>
+        /// <param name="caption">The caption of the image.</param>
+        public Image([NotNull] string name, [NotNull] string url, [NotNull] string caption = "No caption set.")
+        {
+            this.Name = name;
+            this.Url = url;
+            this.Caption = caption;
+        }
     }
 }

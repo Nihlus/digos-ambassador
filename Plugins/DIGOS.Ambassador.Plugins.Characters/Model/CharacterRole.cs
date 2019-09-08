@@ -22,6 +22,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using JetBrains.Annotations;
@@ -53,5 +54,27 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// Gets or sets the access conditions of the role.
         /// </summary>
         public RoleAccess Access { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CharacterRole"/> class.
+        /// </summary>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+        protected CharacterRole()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CharacterRole"/> class.
+        /// </summary>
+        /// <param name="server">The server the role is on.</param>
+        /// <param name="discordID">The ID of the role.</param>
+        /// <param name="access">The role's access settings.</param>
+        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
+        public CharacterRole(Server server, long discordID, RoleAccess access)
+        {
+            this.Server = server;
+            this.DiscordID = discordID;
+            this.Access = access;
+        }
     }
 }

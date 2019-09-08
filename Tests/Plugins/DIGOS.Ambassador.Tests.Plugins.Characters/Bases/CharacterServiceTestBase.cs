@@ -33,7 +33,6 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Discord.Commands;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -89,7 +88,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             coreDatabase.Database.Create();
 
             var charactersDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
-            charactersDatabase.Database.Migrate();
+            charactersDatabase.Database.Create();
 
             this.Database = charactersDatabase;
 
