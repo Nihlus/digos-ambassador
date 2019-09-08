@@ -57,8 +57,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             private readonly ICommandContext _context;
             private Character _character;
 
-            private Appearance _appearance;
-
             public ShiftBodypartPatternAsync()
             {
                 var mockedGuild = new Mock<IGuild>();
@@ -131,12 +129,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 _character = this.CharacterDatabase.Characters.First();
 
                 // Set up the default appearance
-                var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateCurrentAppearanceAsync
+                await this.Transformations.GetOrCreateCurrentAppearanceAsync
                 (
                     _character
                 );
-
-                _appearance = getAppearanceConfigurationResult.Entity;
 
                 await this.CharacterDatabase.SaveChangesAsync();
             }
@@ -225,7 +221,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _newPatternColour
                 );
 
-                var face = _appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
+                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
+
+                var face = appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
                 Assert.Equal(_newPattern, face.Pattern);
             }
 
@@ -241,8 +239,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _newPatternColour
                 );
 
-                var face = _appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
-                Assert.Equal(_newPatternColour, face.PatternColour);
+                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
+
+                var face = appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center);
+                Assert.True(_newPatternColour.IsSameColourAs(face.PatternColour));
             }
 
             [Fact]

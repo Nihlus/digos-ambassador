@@ -230,14 +230,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var appearance = getAppearanceResult.Entity;
 
-            var speciesShifter = new SpeciesShifter
+            var bodypartRemover = new BodypartRemover
             (
                 appearance,
                 this,
                 _descriptionBuilder
             );
 
-            var shiftResult = await speciesShifter.RemoveAsync(bodyPart, chirality);
+            var shiftResult = await bodypartRemover.RemoveAsync(bodyPart, chirality);
 
             if (shiftResult.IsSuccess)
             {
@@ -278,8 +278,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var appearance = getAppearanceResult.Entity;
 
-            var patternShifter = new PatternShifter(appearance, this, _descriptionBuilder);
-            var shiftResult = await patternShifter.RemoveAsync(bodyPart, chirality);
+            var patternRemover = new PatternRemover(appearance, this, _descriptionBuilder);
+            var shiftResult = await patternRemover.RemoveAsync(bodyPart, chirality);
 
             if (shiftResult.IsSuccess)
             {

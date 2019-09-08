@@ -1,5 +1,5 @@
 //
-//  AppearanceShifter.cs
+//  AppearanceRemover.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -31,9 +31,9 @@ using JetBrains.Annotations;
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
     /// <summary>
-    /// Abstract base class for appearance shifter.
+    /// Abstract base class for appearance remover. This class is responsible for removing things from an appearance.
     /// </summary>
-    public abstract class AppearanceShifter : IAppearanceShifter
+    public abstract class AppearanceRemover : IAppearanceRemover
     {
         /// <summary>
         /// Gets the appearance that is being shifted.
@@ -41,51 +41,36 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         protected Appearance Appearance { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AppearanceShifter"/> class.
+        /// Initializes a new instance of the <see cref="AppearanceRemover"/> class.
         /// </summary>
         /// <param name="appearance">The appearance that is being shifted.</param>
-        protected AppearanceShifter(Appearance appearance)
+        protected AppearanceRemover(Appearance appearance)
         {
             this.Appearance = appearance;
         }
 
         /// <summary>
-        /// Shifts the given bodypart.
+        /// Removes the given bodypart.
         /// </summary>
         /// <param name="bodypart">The bodypart.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        protected abstract Task<ShiftBodypartResult> ShiftBodypartAsync(Bodypart bodypart, Chirality chirality);
+        protected abstract Task<ShiftBodypartResult> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality);
 
         /// <summary>
-        /// Gets a uniform shift message for the given bodypart.
+        /// Gets a uniform removal message for the given bodypart.
         /// </summary>
         /// <param name="bodypart">The bodypart.</param>
-        /// <returns>The uniform shift message.</returns>
-        protected abstract Task<string> GetUniformShiftMessageAsync(Bodypart bodypart);
+        /// <returns>The removal message.</returns>
+        protected abstract Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart);
 
         /// <summary>
-        /// Gets a uniform add message for the given bodypart.
-        /// </summary>
-        /// <param name="bodypart">The bodypart.</param>
-        /// <returns>The uniform addition message.</returns>
-        protected abstract Task<string> GetUniformAddMessageAsync(Bodypart bodypart);
-
-        /// <summary>
-        /// Gets a shift message for the given bodypart.
+        /// Gets a removal message for the given bodypart.
         /// </summary>
         /// <param name="bodypart">The bodypart.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
-        /// <returns>The shift message.</returns>
-        protected abstract Task<string> GetShiftMessageAsync(Bodypart bodypart, Chirality chirality);
-
-        /// <summary>
-        /// Gets an add message for the given bodypart.
-        /// </summary>
-        /// <param name="bodypart">The bodypart.</param>
-        /// <param name="chirality">The chirality of the bodypart.</param>
-        /// <returns>The addition message.</returns>
-        protected abstract Task<string> GetAddMessageAsync(Bodypart bodypart, Chirality chirality);
+        /// <returns>The removal message.</returns>
+        protected abstract Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality);
 
         /// <summary>
         /// Gets a message that signifies that no changes were made.
@@ -95,28 +80,28 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         protected abstract Task<string> GetNoChangeMessageAsync(Bodypart bodypart);
 
         /// <inheritdoc />
-        public async Task<ShiftBodypartResult> ShiftAsync(Bodypart bodypart, Chirality chirality)
+        public async Task<ShiftBodypartResult> RemoveAsync(Bodypart bodypart, Chirality chirality)
         {
             if (bodypart.IsComposite())
             {
-                return await ShiftCompositeBodypartAsync(bodypart);
+                return await RemoveCompositeBodypartAsync(bodypart);
             }
 
-            return await ShiftBodypartAsync(bodypart, chirality);
+            return await RemoveBodypartAsync(bodypart, chirality);
         }
 
         /// <summary>
-        /// Decomposes and shifts the given composite bodypart.
+        /// Decomposes and removes the given composite bodypart.
         /// </summary>
         /// <param name="bodypart">The bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        private async Task<ShiftBodypartResult> ShiftCompositeBodypartAsync(Bodypart bodypart)
+        private async Task<ShiftBodypartResult> RemoveCompositeBodypartAsync(Bodypart bodypart)
         {
             var composingParts = bodypart.GetComposingParts();
 
             var currentParagraphLength = 0;
             var messageBuilder = new StringBuilder();
-            void InsertShiftMessage(string message)
+            void InsertRemovalMessage(string message)
             {
                 messageBuilder.Append(message);
 
@@ -140,50 +125,41 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
             {
                 if (composingPart.IsComposite())
                 {
-                    var shiftResult = await ShiftCompositeBodypartAsync(composingPart);
+                    var shiftResult = await RemoveCompositeBodypartAsync(composingPart);
                     if (!shiftResult.IsSuccess || shiftResult.Action == ShiftBodypartAction.Nothing)
                     {
                         continue;
                     }
 
-                    InsertShiftMessage(shiftResult.ShiftMessage);
+                    InsertRemovalMessage(shiftResult.ShiftMessage);
                     continue;
                 }
 
                 if (composingPart.IsChiral())
                 {
-                    var leftShift = await ShiftBodypartAsync(composingPart, Chirality.Left);
-                    var rightShift = await ShiftBodypartAsync(composingPart, Chirality.Right);
+                    var leftShift = await RemoveBodypartAsync(composingPart, Chirality.Left);
+                    var rightShift = await RemoveBodypartAsync(composingPart, Chirality.Right);
 
                     // There's a couple of cases here for us to deal with.
-                    // 1: both parts were shifted
-                    // 2: one part was shifted
-                    // 3: one part was shifted and one was added
-                    // 4: both parts were added
-                    // 5: no changes were made
+                    // 1: both parts were removed
+                    // 2: one part was removed
+                    // 3: no changes were made
                     if (leftShift.Action == ShiftBodypartAction.Nothing && rightShift.Action == ShiftBodypartAction.Nothing)
                     {
                         // No change, keep moving
                         continue;
                     }
 
-                    if (leftShift.Action == ShiftBodypartAction.Shift && rightShift.Action == ShiftBodypartAction.Shift)
+                    if (leftShift.Action == ShiftBodypartAction.Remove && rightShift.Action == ShiftBodypartAction.Remove)
                     {
-                        var uniformShiftMessage = await GetUniformShiftMessageAsync(composingPart);
-                        InsertShiftMessage(uniformShiftMessage);
-                        continue;
-                    }
-
-                    if (leftShift.Action == ShiftBodypartAction.Add && rightShift.Action == ShiftBodypartAction.Add)
-                    {
-                        var uniformGrowMessage = await GetUniformAddMessageAsync(composingPart);
-                        InsertShiftMessage(uniformGrowMessage);
+                        var uniformShiftMessage = await GetUniformRemoveMessageAsync(composingPart);
+                        InsertRemovalMessage(uniformShiftMessage);
                         continue;
                     }
 
                     if (leftShift.Action != ShiftBodypartAction.Nothing)
                     {
-                        InsertShiftMessage
+                        InsertRemovalMessage
                         (
                             await BuildMessageFromResultAsync(leftShift, composingPart, Chirality.Left)
                         );
@@ -191,7 +167,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
                     if (rightShift.Action != ShiftBodypartAction.Nothing)
                     {
-                        InsertShiftMessage
+                        InsertRemovalMessage
                         (
                             await BuildMessageFromResultAsync(rightShift, composingPart, Chirality.Right)
                         );
@@ -199,7 +175,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
                 }
                 else
                 {
-                    var simpleShiftResult = await ShiftBodypartAsync
+                    var simpleShiftResult = await RemoveBodypartAsync
                     (
                         composingPart,
                         Chirality.Center
@@ -207,7 +183,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
                     if (simpleShiftResult.Action != ShiftBodypartAction.Nothing)
                     {
-                        InsertShiftMessage
+                        InsertRemovalMessage
                         (
                             await BuildMessageFromResultAsync(simpleShiftResult, composingPart, Chirality.Center)
                         );
@@ -236,13 +212,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         {
             switch (result.Action)
             {
-                case ShiftBodypartAction.Add:
+                case ShiftBodypartAction.Remove:
                 {
-                    return GetAddMessageAsync(bodypart, chirality);
-                }
-                case ShiftBodypartAction.Shift:
-                {
-                    return GetShiftMessageAsync(bodypart, chirality);
+                    return GetRemoveMessageAsync(bodypart, chirality);
                 }
                 case ShiftBodypartAction.Nothing:
                 {

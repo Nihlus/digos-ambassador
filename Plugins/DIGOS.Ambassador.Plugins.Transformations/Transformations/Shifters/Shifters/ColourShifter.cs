@@ -90,12 +90,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         }
 
         /// <inheritdoc />
-        protected override Task<ShiftBodypartResult> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
-        {
-            throw new InvalidOperationException("Colours can't be removed.");
-        }
-
-        /// <inheritdoc />
         protected override Task<string> GetUniformShiftMessageAsync(Bodypart bodypart)
         {
             var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
@@ -109,12 +103,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         }
 
         /// <inheritdoc />
-        protected override Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart)
-        {
-            throw new InvalidOperationException("Colours can't be removed.");
-        }
-
-        /// <inheritdoc />
         protected override Task<string> GetShiftMessageAsync(Bodypart bodypart, Chirality chirality)
         {
             var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
@@ -125,12 +113,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         protected override Task<string> GetAddMessageAsync(Bodypart bodypart, Chirality chirality)
         {
             throw new InvalidOperationException("Colours can't be added.");
-        }
-
-        /// <inheritdoc />
-        protected override Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality)
-        {
-            throw new InvalidOperationException("Colours can't be removed.");
         }
 
         /// <inheritdoc />

@@ -1,5 +1,5 @@
 //
-//  IAppearanceShifter.cs
+//  IAppearanceRemover.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -26,16 +26,16 @@ using DIGOS.Ambassador.Core.Results;
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
     /// <summary>
-    /// Defines the public interface of a type that can perform a shifting operation on an appearance.
+    /// Defines the public interface of a type that can perform a removal operation on an appearance.
     /// </summary>
-    public interface IAppearanceShifter
+    public interface IAppearanceRemover
     {
         /// <summary>
-        /// Shifts the given bodypart.
+        /// Removes the given bodypart.
         /// </summary>
-        /// <param name="bodypart">The bodypart to shift.</param>
+        /// <param name="bodypart">The bodypart to remove.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        Task<ShiftBodypartResult> ShiftAsync(Bodypart bodypart, Chirality chirality);
+        Task<ShiftBodypartResult> RemoveAsync(Bodypart bodypart, Chirality chirality);
     }
 }

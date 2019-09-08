@@ -78,7 +78,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
                 return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
             }
 
-            if (currentComponent.BaseColour.IsSameColourAs(_colour))
+            if (currentComponent.Pattern is null)
+            {
+                return ShiftBodypartResult.FromError("That bodypart doesn't have a pattern.");
+            }
+
+            // ReSharper disable once PossibleNullReferenceException
+            // Having a pattern implies having a pattern colour
+            if (currentComponent.PatternColour.IsSameColourAs(_colour))
             {
                 return ShiftBodypartResult.FromError("The pattern is already that colour.");
             }
@@ -87,12 +94,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
             var shiftMessage = await GetShiftMessageAsync(bodypart, chirality);
             return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
-        }
-
-        /// <inheritdoc />
-        protected override Task<ShiftBodypartResult> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
-        {
-            throw new InvalidOperationException("Colours can't be removed.");
         }
 
         /// <inheritdoc />
@@ -112,12 +113,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         }
 
         /// <inheritdoc />
-        protected override Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart)
-        {
-            throw new InvalidOperationException("Colours can't be removed.");
-        }
-
-        /// <inheritdoc />
         protected override Task<string> GetShiftMessageAsync(Bodypart bodypart, Chirality chirality)
         {
             var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
@@ -128,12 +123,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         protected override Task<string> GetAddMessageAsync(Bodypart bodypart, Chirality chirality)
         {
             throw new InvalidOperationException("Colours can't be added.");
-        }
-
-        /// <inheritdoc />
-        protected override Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality)
-        {
-            throw new InvalidOperationException("Colours can't be removed.");
         }
 
         /// <inheritdoc />

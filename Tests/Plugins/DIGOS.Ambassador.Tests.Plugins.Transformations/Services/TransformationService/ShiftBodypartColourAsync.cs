@@ -57,8 +57,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             private Colour _originalColour;
 
-            private Appearance _appearance;
-
             public ShiftBodypartColourAsync()
             {
                 var mockedGuild = new Mock<IGuild>();
@@ -131,8 +129,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _character
                 );
 
-                _appearance = getAppearanceConfigurationResult.Entity;
-                _originalColour = _appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center).BaseColour;
+                var appearance = getAppearanceConfigurationResult.Entity;
+                _originalColour = appearance.GetAppearanceComponent(Bodypart.Face, Chirality.Center).BaseColour;
             }
 
             [Fact]
@@ -205,8 +203,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _newColour
                 );
 
-                var face = _appearance.Components.First(c => c.Bodypart == Bodypart.Face);
-                Assert.Same(_newColour, face.BaseColour);
+                var appearance = (await this.Transformations.GetOrCreateCurrentAppearanceAsync(_character)).Entity;
+
+                var face = appearance.Components.First(c => c.Bodypart == Bodypart.Face);
+                Assert.True(_newColour.IsSameColourAs(face.BaseColour));
             }
 
             [Fact]

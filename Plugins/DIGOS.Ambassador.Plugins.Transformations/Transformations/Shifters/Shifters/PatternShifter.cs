@@ -25,6 +25,7 @@ using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using Humanizer;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
@@ -33,11 +34,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// </summary>
     public class PatternShifter : AppearanceShifter
     {
+        [NotNull]
         private readonly TransformationService _transformations;
+
+        [NotNull]
         private readonly TransformationDescriptionBuilder _descriptionBuilder;
 
         private readonly Pattern _pattern;
-        private readonly Colour _patternColour;
+        [NotNull] private readonly Colour _patternColour;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PatternShifter"/> class.
@@ -49,34 +53,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="descriptionBuilder">The description builder.</param>
         public PatternShifter
         (
-            Appearance appearance,
+            [NotNull] Appearance appearance,
             Pattern pattern,
-            Colour patternColour,
-            TransformationService transformations,
-            TransformationDescriptionBuilder descriptionBuilder
+            [NotNull] Colour patternColour,
+            [NotNull] TransformationService transformations,
+            [NotNull] TransformationDescriptionBuilder descriptionBuilder
         )
             : base(appearance)
         {
             _pattern = pattern;
             _patternColour = patternColour;
-            _transformations = transformations;
-            _descriptionBuilder = descriptionBuilder;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PatternShifter"/> class.
-        /// </summary>
-        /// <param name="appearance">The appearance to shift.</param>
-        /// <param name="transformations">The transformation service.</param>
-        /// <param name="descriptionBuilder">The description builder.</param>
-        public PatternShifter
-        (
-            Appearance appearance,
-            TransformationService transformations,
-            TransformationDescriptionBuilder descriptionBuilder
-        )
-            : base(appearance)
-        {
             _transformations = transformations;
             _descriptionBuilder = descriptionBuilder;
         }
@@ -118,36 +104,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         }
 
         /// <inheritdoc />
-        protected override async Task<ShiftBodypartResult> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
-        {
-            var character = this.Appearance.Character;
-
-            var getAppearanceResult = await _transformations.GetOrCreateCurrentAppearanceAsync(character);
-            if (!getAppearanceResult.IsSuccess)
-            {
-                return ShiftBodypartResult.FromError(getAppearanceResult);
-            }
-
-            var appearance = getAppearanceResult.Entity;
-
-            if (!appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
-            {
-                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
-            }
-
-            if (currentComponent.Pattern is null)
-            {
-                return ShiftBodypartResult.FromError("The character doesn't have a pattern on that part.");
-            }
-
-            currentComponent.Pattern = null;
-            currentComponent.PatternColour = null;
-
-            var shiftMessage = await GetRemoveMessageAsync(bodypart, chirality);
-            return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Remove);
-        }
-
-        /// <inheritdoc />
         protected override Task<string> GetUniformShiftMessageAsync(Bodypart bodypart)
         {
             var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
@@ -162,13 +118,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         }
 
         /// <inheritdoc />
-        protected override Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart)
-        {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, Chirality.Left);
-            return Task.FromResult(_descriptionBuilder.BuildUniformPatternRemoveMessage(this.Appearance, component));
-        }
-
-        /// <inheritdoc />
         protected override Task<string> GetShiftMessageAsync(Bodypart bodypart, Chirality chirality)
         {
             var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
@@ -180,13 +129,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         {
             var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
             return Task.FromResult(_descriptionBuilder.BuildPatternAddMessage(this.Appearance, component));
-        }
-
-        /// <inheritdoc />
-        protected override Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality)
-        {
-            var component = this.Appearance.GetAppearanceComponent(bodypart, chirality);
-            return Task.FromResult(_descriptionBuilder.BuildPatternRemoveMessage(this.Appearance, component));
         }
 
         /// <inheritdoc />
