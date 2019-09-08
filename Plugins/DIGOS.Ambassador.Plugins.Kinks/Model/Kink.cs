@@ -63,13 +63,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         /// </summary>
         /// <param name="name">The name of the kink.</param>
         /// <param name="description">The kink's description.</param>
-        /// <param name="flistID">The F-List ID of the kink.</param>
+        /// <param name="fListID">The F-List ID of the kink.</param>
         /// <param name="category">The kink's category.</param>
-        public Kink(string name, string description, uint flistID, KinkCategory category)
+        public Kink(string name, string description, long fListID, KinkCategory category)
         {
             this.Name = name;
             this.Description = description;
-            this.FListID = flistID;
+            this.FListID = fListID;
             this.Category = category;
         }
 
