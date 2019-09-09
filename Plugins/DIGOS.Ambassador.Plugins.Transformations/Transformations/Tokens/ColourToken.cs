@@ -35,10 +35,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     public sealed class ColourToken : ReplacableTextToken<ColourToken>
     {
         /// <summary>
-        /// Gets the form of the pronoun.
+        /// Gets a value indicating whether the pattern colour should be retrieved instead of the base colour.
         /// </summary>
-        [NotNull]
-        public string Part { get; private set; }
+        public bool UsePattern { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ColourToken"/> class.
@@ -56,21 +55,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 throw new ArgumentNullException(nameof(component));
             }
 
-            switch (this.Part)
+            if (this.UsePattern)
             {
-                case "base":
-                {
-                    return component.BaseColour.ToString();
-                }
-                case "pattern":
-                {
-                    return component.PatternColour?.ToString() ?? string.Empty;
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
+                return component.PatternColour?.ToString() ?? string.Empty;
             }
+
+            return component.BaseColour.ToString();
         }
 
         /// <inheritdoc />
@@ -78,13 +68,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         {
             if (data is null)
             {
-                this.Part = "base";
                 return this;
             }
 
-            if (data.Equals("base") | string.Equals(data, "pattern"))
+            if (data == "pattern")
             {
-                this.Part = data;
+                this.UsePattern = true;
+                return this;
             }
 
             return this;
