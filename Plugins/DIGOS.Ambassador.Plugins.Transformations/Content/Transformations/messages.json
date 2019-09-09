@@ -1,0 +1,151 @@
+{
+    "descriptions":
+    {
+        "sexSpecies":
+        [
+            "{@target} is a {@sex} {@species}."
+        ],
+        "pattern":
+        [
+            "A {@pattern}, {@colour|pattern} covers it."
+        ]
+    },
+    "messages":
+    {
+        "adding":
+        {
+            "single":
+            {
+                "pattern":
+                [
+                    "The surface of {@target}'s {@bodypart} morphs, as {@colour|pattern} {@pattern} patterns spreads across it."
+                ]
+            },
+            "uniform":
+            {
+                "pattern":
+                [
+                    "The surface of {@target}'s {@bodypart|pluralize} morph, as {@colour|pattern} {@pattern} patterns spread across them."
+                ]
+            }
+        },
+        "removal":
+        {
+            "single":
+            {
+                "hair":
+                [
+                    "{@target}'s hair becomes dull and colourless. Strand by strand, tuft by tuft, it falls out, leaving an empty scalp."
+                ],
+                "face":
+                [
+                    "{@target}'s face begins to warp strangely. Slowly, their features smooth and vanish, leaving a blank surface."
+                ],
+                "ear":
+                [
+                    "{@target}'s {@side} ear shrivels and vanishes."
+                ],
+                "eye":
+                [
+                    "{@target}'s {@side} eye deflates as their eye socket closes, leaving nothing behind."
+                ],
+                "leg":
+                [
+                    "{@target}'s {@side} leg shrivels and retracts, vanishing."
+                ],
+                "arm":
+                [
+                    "{@target}'s {@side} arm shrivels and retracts, vanishing."
+                ],
+                "tail":
+                [
+                    "{@target}'s tail flicks and thrashes for a moment, before it thins out and disappears into nothing."
+                ],
+                "wing":
+                [
+                    "{@target}'s {@side} wing stiffens and shudders, before losing cohesion and disappearing into their body."
+                ],
+                "penis":
+                [
+                    "{@target}'s shaft twitches and shudders, as it begins to shrink and retract. In mere moments, it's gone, leaving nothing."
+                ],
+                "vagina":
+                [
+                    "{@target}'s slit contracts and twitches. A strange sensation rushes through {@f|them} as the opening zips up and fills out, leaving nothing."
+                ],
+                "head":
+                [
+                    "{@target}'s head warps strangely before it deflates like a balloon, disappearing."
+                ],
+                "body":
+                [
+                    "{@target}'s torso crumples into itself as their main body collapses, shifting and vanishing."
+                ],
+                "pattern":
+                [
+                    "The surface of {@target}'s {@bodypart} shimmers, as the pattern on it fades and vanishes."
+                ]
+            },
+            "uniform":
+            {
+                "ears":
+                [
+                    "{@target}'s ears shrivel and vanish."
+                ],
+                "eyes":
+                [
+                    "{@target}'s eyes deflate as their eye sockets close, leaving nothing behind."
+                ],
+                "legs":
+                [
+                    "{@target}'s legs shrivel and retract, vanishing."
+                ],
+                "arms":
+                [
+                    "{@target}'s arms shrivel and retract, vanishing."
+                ],
+                "wings":
+                [
+                    "{@target}'s wings stiffen and shudder, before losing cohesion and disappearing into their body."
+                ],
+                "pattern":
+                [
+                    "The surface of {@target}'s {@bodypart|pluralize} shimmer, as the patterns on them fade and vanish."
+                ]
+            }
+        },
+        "shifting":
+        {
+            "single":
+            {
+                "colour":
+                [
+                    "{@target}'s {@bodypart} morphs, as {@f|their} existing hues turn into {@colour|pattern}."
+                ],
+                "pattern":
+                [
+                    "The surface of {@target}'s {@bodypart} morphs, as {@colour|pattern} {@pattern} patterns spread across it, replacing their existing ones."
+                ],
+                "patternColour":
+                [
+                    "{@target}'s {@bodypart} morphs, as {@f|their} {@pattern} hues turn into {@colour|pattern}."
+                ]
+            },
+            "uniform":
+            {
+                "colour":
+                [
+                    "{@target}'s {@bodypart|pluralize} morph, as {@f|their} existing hues turn into {@colour|pattern}."
+                ],
+                "pattern":
+                [
+                    "The surface of {@target}'s {@bodypart|pluralize} morph, as {@colour|pattern} {@pattern} patterns spread across them, replacing their existing ones."
+                ],
+                "patternColour":
+                [
+                    "{@target}'s {@bodypart|pluralize} morphs, as {@f|their} {@pattern} hues turn into {@colour|pattern}."
+                ]
+            }
+        }
+    }
+}
