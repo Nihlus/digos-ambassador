@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         private const string TokenWithoutData = "@target";
         private const string TokenWithoutOptionalData = "@colour";
-        private const string TokenWithOptionalData = "@colour|base";
+        private const string TokenWithOptionalData = "@colour|pattern";
 
         private const string SampleText = "lorem ipsum {@target} dolor {@colour} sit amet {@colour|base}";
 
@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             var token = tokenizer.ParseToken(0, TokenWithoutOptionalData) as ColourToken;
 
             Assert.NotNull(token);
-            Assert.Equal("base", token.Part);
+            Assert.False(token.UsePattern);
         }
 
         [Fact]
@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             var token = tokenizer.ParseToken(0, TokenWithOptionalData) as ColourToken;
 
             Assert.NotNull(token);
-            Assert.Equal("base", token.Part);
+            Assert.True(token.UsePattern);
         }
 
         [Fact]
