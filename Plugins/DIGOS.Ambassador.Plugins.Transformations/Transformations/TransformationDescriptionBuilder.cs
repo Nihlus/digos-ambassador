@@ -182,27 +182,30 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
 
                     if (!patternPartsToSkip.Contains(component))
                     {
-                        var samePattern = DoChiralPartsHaveTheSamePattern(appearance, component);
-                        csb.Append
-                        (
-                            samePattern
-                                ? _transformationText.Descriptions.Uniform.Pattern.PickRandom()
-                                : _transformationText.Descriptions.Single.Pattern.PickRandom()
-                        );
-
-                        if (samePattern)
+                        if (component.Pattern.HasValue)
                         {
-                            if
+                            var samePattern = DoChiralPartsHaveTheSamePattern(appearance, component);
+                            csb.Append
                             (
-                                appearance.TryGetAppearanceComponent
-                                (
-                                    component.Bodypart,
-                                    component.Chirality.Opposite(),
-                                    out var partToSkip
-                                )
-                            )
+                                samePattern
+                                    ? _transformationText.Descriptions.Uniform.Pattern.PickRandom()
+                                    : _transformationText.Descriptions.Single.Pattern.PickRandom()
+                            );
+
+                            if (samePattern)
                             {
-                                patternPartsToSkip.Add(partToSkip);
+                                if
+                                (
+                                    appearance.TryGetAppearanceComponent
+                                    (
+                                        component.Bodypart,
+                                        component.Chirality.Opposite(),
+                                        out var partToSkip
+                                    )
+                                )
+                                {
+                                    patternPartsToSkip.Add(partToSkip);
+                                }
                             }
                         }
                     }
