@@ -66,6 +66,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// <inheritdoc />
         protected override ColourToken Initialize(string data)
         {
+            this.UsePattern = false;
+
             if (data is null)
             {
                 return this;
