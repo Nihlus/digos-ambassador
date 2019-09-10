@@ -24,16 +24,19 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.CommandModules;
+using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
 using DIGOS.Ambassador.Plugins.Transformations.TypeReaders;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +64,18 @@ namespace DIGOS.Ambassador.Plugins.Transformations
         {
             serviceCollection
                 .AddSingleton<TransformationDescriptionBuilder>()
+                .AddSingleton(services =>
+                {
+                    var contentService = services.GetRequiredService<ContentService>();
+                    var getTransformationText = contentService.GetTransformationMessages();
+
+                    if (!getTransformationText.IsSuccess)
+                    {
+                        throw new InvalidOperationException("Failed to load the transformation messages.");
+                    }
+
+                    return getTransformationText.Entity;
+                })
                 .AddScoped<LuaService>()
                 .AddScoped<TransformationService>()
                 .AddSchemaAwareDbContextPool<TransformationsDatabaseContext>();

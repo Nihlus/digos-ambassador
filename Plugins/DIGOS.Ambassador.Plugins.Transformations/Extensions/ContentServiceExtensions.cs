@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -31,6 +32,7 @@ using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
 using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
@@ -54,6 +56,55 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
             "Transformations",
             "Species"
         );
+
+        /// <summary>
+        /// Gets the path to the transformation messages.
+        /// </summary>
+        private static UPath TransformationMessagesPath { get; } = UPath.Combine
+        (
+            UPath.Root,
+            "Transformations",
+            "messages.json"
+        );
+
+        /// <summary>
+        /// Loads and retrieves the bundled transformation messages.
+        /// </summary>
+        /// <param name="this">The content service.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public static RetrieveEntityResult<TransformationText> GetTransformationMessages
+        (
+            [NotNull] this ContentService @this
+        )
+        {
+            if (!@this.FileSystem.FileExists(TransformationMessagesPath))
+            {
+                return RetrieveEntityResult<TransformationText>.FromError("Transformation messages not found.");
+            }
+
+            using
+            (
+                var reader = new StreamReader
+                (
+                    @this.FileSystem.OpenFile
+                    (
+                        TransformationMessagesPath,
+                        FileMode.Open,
+                        FileAccess.Read,
+                        FileShare.Read
+                    )
+                )
+            )
+            {
+                var content = reader.ReadToEnd();
+                if (!TransformationText.TryDeserialize(content, out var text))
+                {
+                    return RetrieveEntityResult<TransformationText>.FromError("Failed to parse the messages.");
+                }
+
+                return RetrieveEntityResult<TransformationText>.FromSuccess(text);
+            }
+        }
 
         /// <summary>
         /// Discovers the species that have been bundled with the program.

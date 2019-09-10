@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <inheritdoc />
         protected override Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart)
         {
-            return Task.FromResult(_descriptionBuilder.BuildRemoveMessage(this.Appearance, bodypart));
+            return Task.FromResult(_descriptionBuilder.BuildUniformRemoveMessage(this.Appearance, bodypart));
         }
 
         /// <inheritdoc />

@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Attributes;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
 using Humanizer;
 using JetBrains.Annotations;
 
@@ -48,15 +49,24 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase
         );
 
+        [NotNull]
+        private readonly TransformationText _transformationText;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformationDescriptionBuilder"/> class.
         /// </summary>
         /// <param name="services">The available services.</param>
-        public TransformationDescriptionBuilder([NotNull] IServiceProvider services)
+        /// <param name="transformationText">The content service.</param>
+        public TransformationDescriptionBuilder
+        (
+            [NotNull] IServiceProvider services,
+            [NotNull] TransformationText transformationText
+        )
         {
             _tokenizer = new TransformationTextTokenizer(services);
-
             _tokenizer.DiscoverAvailableTokens();
+
+            _transformationText = transformationText;
         }
 
         /// <summary>
@@ -106,11 +116,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         public string BuildVisualDescription([NotNull] Appearance appearance)
         {
             var sb = new StringBuilder();
-            sb.Append(ReplaceTokensWithContent("{@target} is a {@sex} {@species}.", appearance, null));
+
+            var sexSpecies = _transformationText.Descriptions.SexSpecies.PickRandom();
+
+            sb.Append(ReplaceTokensWithContent(sexSpecies, appearance, null));
             sb.AppendLine();
             sb.AppendLine();
 
-            var partsToSkip = new List<AppearanceComponent>();
+            var speciesPartsToSkip = new List<AppearanceComponent>();
+            var patternPartsToSkip = new List<AppearanceComponent>();
             var componentCount = 0;
 
             var orderedComponents = appearance.Components.OrderByDescending
@@ -128,14 +142,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 ++componentCount;
 
                 // Break the description into paragraphs every third component
+                // TODO: Improve this with a true paragrapher
                 if (componentCount % 3 == 0)
                 {
                     sb.Append("\n\n");
-                }
-
-                if (partsToSkip.Contains(component))
-                {
-                    continue;
                 }
 
                 var csb = new StringBuilder();
@@ -143,38 +153,69 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 var transformation = component.Transformation;
                 if (component.Bodypart.IsChiral())
                 {
-                    var sameSpecies = AreChiralPartsTheSameSpecies(appearance, component);
-                    csb.Append
-                    (
-                        sameSpecies
-                            ? transformation.UniformDescription
-                            : transformation.SingleDescription
-                    );
-
-                    if (sameSpecies)
+                    if (!speciesPartsToSkip.Contains(component))
                     {
-                        if
+                        var sameSpecies = AreChiralPartsTheSameSpecies(appearance, component);
+                        csb.Append
                         (
-                            appearance.TryGetAppearanceComponent
-                            (
-                                component.Bodypart,
-                                component.Chirality.Opposite(),
-                                out var partToSkip
-                            )
-                        )
+                            sameSpecies
+                                ? transformation.UniformDescription
+                                : transformation.SingleDescription
+                        );
+
+                        if (sameSpecies)
                         {
-                            partsToSkip.Add(partToSkip);
+                            if
+                            (
+                                appearance.TryGetAppearanceComponent
+                                (
+                                    component.Bodypart,
+                                    component.Chirality.Opposite(),
+                                    out var partToSkip
+                                )
+                            )
+                            {
+                                speciesPartsToSkip.Add(partToSkip);
+                            }
+                        }
+                    }
+
+                    if (!patternPartsToSkip.Contains(component))
+                    {
+                        var samePattern = DoChiralPartsHaveTheSamePattern(appearance, component);
+                        csb.Append
+                        (
+                            samePattern
+                                ? _transformationText.Descriptions.Uniform.Pattern.PickRandom()
+                                : _transformationText.Descriptions.Single.Pattern.PickRandom()
+                        );
+
+                        if (samePattern)
+                        {
+                            if
+                            (
+                                appearance.TryGetAppearanceComponent
+                                (
+                                    component.Bodypart,
+                                    component.Chirality.Opposite(),
+                                    out var partToSkip
+                                )
+                            )
+                            {
+                                patternPartsToSkip.Add(partToSkip);
+                            }
                         }
                     }
                 }
                 else
                 {
                     csb.Append(transformation.SingleDescription);
-                }
 
-                if (component.Pattern.HasValue)
-                {
-                    csb.Append("A {@pattern}, {@colour|pattern} pattern covers it.");
+                    if (component.Pattern.HasValue)
+                    {
+                        var patternDescription = _transformationText.Descriptions.Single.Pattern.PickRandom();
+                        csb.Append(patternDescription);
+                    }
                 }
 
                 var tokenizedDesc = csb.ToString();
@@ -215,6 +256,54 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             }
 
             return string.Equals(component.Transformation.Species.Name, opposingComponent.Transformation.Species.Name);
+        }
+
+        /// <summary>
+        /// Determines if the chiral parts on the character have the same pattern.
+        /// </summary>
+        /// <param name="appearance">The appearance.</param>
+        /// <param name="component">The chiral component.</param>
+        /// <returns>true if the parts have the same pattern; otherwise, false.</returns>
+        private bool DoChiralPartsHaveTheSamePattern
+        (
+            [NotNull] Appearance appearance,
+            [NotNull] AppearanceComponent component
+        )
+        {
+            if
+            (
+                !appearance.TryGetAppearanceComponent
+                (
+                    component.Bodypart,
+                    component.Chirality.Opposite(),
+                    out var opposingComponent
+                )
+            )
+            {
+                return false;
+            }
+
+            if (component.Pattern != opposingComponent.Pattern)
+            {
+                return false;
+            }
+
+            if (component.PatternColour is null ^ component.PatternColour is null)
+            {
+                return false;
+            }
+
+            if (component.PatternColour is null && opposingComponent.PatternColour is null)
+            {
+                return true;
+            }
+
+            if (component.PatternColour is null ^ opposingComponent.PatternColour is null)
+            {
+                return false;
+            }
+
+            return component.PatternColour.IsSameColourAs(opposingComponent.PatternColour);
         }
 
         /// <summary>
@@ -315,86 +404,113 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             {
                 case Bodypart.Hair:
                 {
-                    removalText = "{@target}'s hair becomes dull and colourless. Strand by strand, tuft by tuft, " +
-                                  "it falls out, leaving an empty scalp.";
+                    removalText = _transformationText.Messages.Removal.Single.Hair.PickRandom();
                     break;
                 }
                 case Bodypart.Face:
                 {
-                    removalText = "{@target}'s face begins to warp strangely. Slowly, their features smooth and " +
-                                  "vanish, leaving a blank surface.";
+                    removalText = _transformationText.Messages.Removal.Single.Face.PickRandom();
                     break;
                 }
                 case Bodypart.Ear:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} shrivels " +
-                                  $"and vanishes.";
+                    removalText = _transformationText.Messages.Removal.Single.Ear.PickRandom();
                     break;
                 }
                 case Bodypart.Eye:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} deflates " +
-                                  $"as their eye socket closes, leaving nothing behind.";
+                    removalText = _transformationText.Messages.Removal.Single.Eye.PickRandom();
                     break;
                 }
                 case Bodypart.Teeth:
                 {
-                    removalText = "With a strange popping sound, {@target}'s teeth retract and disappear.";
+                    removalText = _transformationText.Messages.Removal.Single.Teeth.PickRandom();
                     break;
                 }
                 case Bodypart.Leg:
+                {
+                    removalText = _transformationText.Messages.Removal.Single.Leg.PickRandom();
+                    break;
+                }
                 case Bodypart.Arm:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} shrivels " +
-                                  $"and retracts, vanishing.";
+                    removalText = _transformationText.Messages.Removal.Single.Arm.PickRandom();
                     break;
                 }
                 case Bodypart.Tail:
                 {
-                    removalText = "{@target}'s tail flicks and thrashes for a moment, before it thins out and " +
-                                  "disappears into nothing.";
+                    removalText = _transformationText.Messages.Removal.Single.Tail.PickRandom();
                     break;
                 }
                 case Bodypart.Wing:
                 {
-                    removalText = $"{{@target}}'s {{@side}} {bodypart.Humanize().Transform(To.LowerCase)} stiffens " +
-                                  $"and shudders, before losing cohesion and disappearing into their body.";
+                    removalText = _transformationText.Messages.Removal.Single.Wing.PickRandom();
                     break;
                 }
                 case Bodypart.Penis:
                 {
-                    removalText = "{@target}'s shaft twitches and shudders, as it begins to shrink and retract. In " +
-                                  "mere moments, it's gone, leaving nothing.";
+                    removalText = _transformationText.Messages.Removal.Single.Penis.PickRandom();
                     break;
                 }
                 case Bodypart.Vagina:
                 {
-                    removalText = "{@target}'s slit contracts and twitches. A strange sensation rushes through " +
-                                  "{@f|them} as the opening zips up and fills out, leaving nothing.";
+                    removalText = _transformationText.Messages.Removal.Single.Vagina.PickRandom();
                     break;
                 }
                 case Bodypart.Head:
                 {
-                    removalText = "{@target}'s head warps strangely before it deflates like a balloon, disappearing.";
-                    break;
-                }
-                case Bodypart.Legs:
-                case Bodypart.Arms:
-                {
-                    removalText = $"{{@target}}'s {bodypart.Humanize().Transform(To.LowerCase)} shrivel and " +
-                                  $"retract, vanishing.";
+                    removalText = _transformationText.Messages.Removal.Single.Head.PickRandom();
                     break;
                 }
                 case Bodypart.Body:
                 {
-                    removalText = "{@target}'s torso crumples into itself as their main body collapses, shifting " +
-                                  "and vanishing.";
+                    removalText = _transformationText.Messages.Removal.Single.Body.PickRandom();
                     break;
                 }
-                case Bodypart.Wings:
+                default:
                 {
-                    removalText = $"{{@target}}'s {bodypart.Humanize().Transform(To.LowerCase)} stiffen and shudder, " +
-                                  $"before losing cohesion and disappearing into their body.";
+                    throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            return ReplaceTokensWithContent(removalText, appearanceConfiguration, null);
+        }
+
+        /// <summary>
+        /// Builds a removal message for the given character if the given transformation were to be applied.
+        /// </summary>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
+        /// <param name="bodypart">The bodypart to build the message from.</param>
+        /// <returns>The removal message.</returns>
+        [Pure, NotNull]
+        public string BuildUniformRemoveMessage([NotNull]Appearance appearanceConfiguration, Bodypart bodypart)
+        {
+            string removalText;
+            switch (bodypart)
+            {
+                case Bodypart.Leg:
+                {
+                    removalText = _transformationText.Messages.Removal.Uniform.Legs.PickRandom();
+                    break;
+                }
+                case Bodypart.Arm:
+                {
+                    removalText = _transformationText.Messages.Removal.Uniform.Arms.PickRandom();
+                    break;
+                }
+                case Bodypart.Wing:
+                {
+                    removalText = _transformationText.Messages.Removal.Uniform.Wings.PickRandom();
+                    break;
+                }
+                case Bodypart.Ear:
+                {
+                    removalText = _transformationText.Messages.Removal.Uniform.Ears.PickRandom();
+                    break;
+                }
+                case Bodypart.Eye:
+                {
+                    removalText = _transformationText.Messages.Removal.Uniform.Eyes.PickRandom();
                     break;
                 }
                 default:
@@ -419,10 +535,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             [NotNull] AppearanceComponent currentComponent
         )
         {
-            var shiftMessage =
-                $"{{@target}}'s {currentComponent.Bodypart.Humanize()} morphs, as" +
-                $" {{@f|their}} {{@pattern}} hues turn into {currentComponent.PatternColour}.";
-
+            var shiftMessage = _transformationText.Messages.Shifting.Single.PatternColour.PickRandom();
             return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
 
@@ -439,77 +552,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             [NotNull] AppearanceComponent currentComponent
         )
         {
-            var bodypartName = currentComponent.Bodypart.Humanize().Pluralize().ToLower();
-
-            var shiftMessage =
-                $"{{@target}}'s {bodypartName} morph, as" +
-                $" {{@f|their}} {{@pattern}} hues turn into {currentComponent.PatternColour}.";
-
-            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
-        }
-
-        /// <summary>
-        /// Builds a pattern shifting message for the given character and component.
-        /// </summary>
-        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
-        /// <param name="currentComponent">The current component.</param>
-        /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
-        public string BuildUniformPatternShiftMessage
-        (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
-        )
-        {
-            var bodypartName = currentComponent.Bodypart.Humanize().Pluralize().ToLower();
-
-            var shiftMessage =
-                $"The surface of {{@target}}'s {bodypartName} morph, as" +
-                " {@colour|pattern} {@pattern} patterns spread across them, replacing their existing ones.";
-
-            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
-        }
-
-        /// <summary>
-        /// Builds a pattern addition message for the given character and component.
-        /// </summary>
-        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
-        /// <param name="currentComponent">The current component.</param>
-        /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
-        public string BuildUniformPatternAddMessage
-        (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
-        )
-        {
-            var bodypartName = currentComponent.Bodypart.Humanize().Pluralize().ToLower();
-
-            var shiftMessage =
-                $"The surface of {{@target}}'s {bodypartName} morph, as" +
-                " {@colour|pattern} {@pattern} patterns spread across them.";
-
-            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
-        }
-
-        /// <summary>
-        /// Builds a pattern removal message for the given character and component.
-        /// </summary>
-        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
-        /// <param name="currentComponent">The current component.</param>
-        /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
-        public string BuildUniformPatternRemoveMessage
-        (
-            [NotNull]Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
-        )
-        {
-            var bodypartName = currentComponent.Bodypart.Humanize().Pluralize().ToLower();
-
-            var shiftMessage =
-                $"The surface of {{@target}}'s {bodypartName} shimmer, as the patterns on them fade and vanish.";
-
+            var shiftMessage = _transformationText.Messages.Shifting.Uniform.PatternColour.PickRandom();
             return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
 
@@ -526,10 +569,24 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             [NotNull] AppearanceComponent currentComponent
         )
         {
-            var shiftMessage =
-                $"The surface of {{@target}}'s {currentComponent.Bodypart.Humanize().Transform(To.LowerCase)} " +
-                "morphs, as {@colour|pattern} {@pattern} patterns spread across it, replacing their existing ones.";
+            var shiftMessage = _transformationText.Messages.Shifting.Single.Pattern.PickRandom();
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
+        }
 
+        /// <summary>
+        /// Builds a pattern shifting message for the given character and component.
+        /// </summary>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
+        /// <param name="currentComponent">The current component.</param>
+        /// <returns>The shifting message.</returns>
+        [Pure, NotNull]
+        public string BuildUniformPatternShiftMessage
+        (
+            [NotNull] Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent currentComponent
+        )
+        {
+            var shiftMessage = _transformationText.Messages.Shifting.Uniform.Pattern.PickRandom();
             return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
 
@@ -546,12 +603,24 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             [NotNull] AppearanceComponent currentComponent
         )
         {
-            var bodypartName = currentComponent.Bodypart.Humanize().ToLower();
+            var shiftMessage = _transformationText.Messages.Adding.Single.Pattern.PickRandom();
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
+        }
 
-            var shiftMessage =
-                $"The surface of {{@target}}'s {bodypartName} morphs, as" +
-                " {@colour|pattern} {@pattern} patterns spreads across it.";
-
+        /// <summary>
+        /// Builds a pattern addition message for the given character and component.
+        /// </summary>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
+        /// <param name="currentComponent">The current component.</param>
+        /// <returns>The shifting message.</returns>
+        [Pure, NotNull]
+        public string BuildUniformPatternAddMessage
+        (
+            [NotNull] Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent currentComponent
+        )
+        {
+            var shiftMessage = _transformationText.Messages.Adding.Uniform.Pattern.PickRandom();
             return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
 
@@ -568,11 +637,24 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             [NotNull] AppearanceComponent currentComponent
         )
         {
-            var bodypartName = currentComponent.Bodypart.Humanize().ToLower();
+            var shiftMessage = _transformationText.Messages.Removal.Single.Pattern.PickRandom();
+            return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
+        }
 
-            var shiftMessage =
-                $"The surface of {{@target}}'s {bodypartName} shimmers, as the pattern on it fades and vanishes.";
-
+        /// <summary>
+        /// Builds a pattern removal message for the given character and component.
+        /// </summary>
+        /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
+        /// <param name="currentComponent">The current component.</param>
+        /// <returns>The shifting message.</returns>
+        [Pure, NotNull]
+        public string BuildUniformPatternRemoveMessage
+        (
+            [NotNull]Appearance appearanceConfiguration,
+            [NotNull] AppearanceComponent currentComponent
+        )
+        {
+            var shiftMessage = _transformationText.Messages.Removal.Uniform.Pattern.PickRandom();
             return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
 
@@ -589,10 +671,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             [NotNull] AppearanceComponent currentComponent
         )
         {
-            var shiftMessage =
-                $"{{@target}}'s {currentComponent.Bodypart.Humanize().Transform(To.LowerCase)} morphs, as" +
-                $" {{@f|their}} existing hues turn into {currentComponent.BaseColour}.";
-
+            var shiftMessage = _transformationText.Messages.Shifting.Single.Colour.PickRandom();
             return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
 
@@ -609,12 +688,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             [NotNull] AppearanceComponent currentComponent
         )
         {
-            var bodypartName = currentComponent.Bodypart.Humanize().Pluralize().ToLower();
-
-            var shiftMessage =
-                $"{{@target}}'s {bodypartName} morph, as" +
-                $" {{@f|their}} existing hues turn into {currentComponent.BaseColour}.";
-
+            var shiftMessage = _transformationText.Messages.Shifting.Uniform.Colour.PickRandom();
             return ReplaceTokensWithContent(shiftMessage, appearanceConfiguration, currentComponent);
         }
     }

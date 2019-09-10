@@ -5,10 +5,21 @@
         [
             "{@target} is a {@sex} {@species}."
         ],
-        "pattern":
-        [
-            "A {@pattern}, {@colour|pattern} covers it."
-        ]
+        "single":
+        {
+            "pattern":
+            [
+                "A {@pattern}, {@colour|pattern} pattern covers {@f|their} {@side} {@bodypart}.",
+                "{@f|Their} {@side} {@bodypart} is {@pattern}, {@colour|pattern} hues breaking up the monotony."
+            ]
+        },
+        "uniform":
+        {
+            "pattern":
+            [
+                "A {@pattern}, {@colour|pattern} pattern covers them."
+            ]
+        }
     },
     "messages":
     {
@@ -48,6 +59,10 @@
                 "eye":
                 [
                     "{@target}'s {@side} eye deflates as their eye socket closes, leaving nothing behind."
+                ],
+                "teeth":
+                [
+                    "With a strange popping sound, {@target}'s teeth retract and disappear."
                 ],
                 "leg":
                 [

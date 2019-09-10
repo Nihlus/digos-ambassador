@@ -32,16 +32,28 @@ namespace DIGOS.Ambassador.Core.Extensions
     public static class ListExtensions
     {
         /// <summary>
+        /// Holds an entropy source for this extension set.
+        /// </summary>
+        private static readonly Random Random = new Random();
+
+        /// <summary>
+        /// Holds a locking object for the entropy source.
+        /// </summary>
+        private static readonly object RandomLock = new object();
+
+        /// <summary>
         /// Picks a random value from the list.
         /// </summary>
         /// <param name="list">The list to pick from.</param>
         /// <typeparam name="T">The type contained in the list.</typeparam>
         /// <returns>A random value.</returns>
         [Pure]
-        public static T PickRandom<T>([NotNull] this IList<T> list)
+        public static T PickRandom<T>([NotNull] this IReadOnlyList<T> list)
         {
-            var random = new Random();
-            return list[random.Next(0, list.Count)];
+            lock (RandomLock)
+            {
+                return list[Random.Next(0, list.Count)];
+            }
         }
     }
 }

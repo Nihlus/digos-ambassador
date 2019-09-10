@@ -27,6 +27,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
+using DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -75,7 +76,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 .AddSingleton(characterService)
                 .BuildServiceProvider();
 
-            var descriptionBuilder = new TransformationDescriptionBuilder(serviceProvider);
+            var descriptionBuilder = new TransformationDescriptionBuilder(serviceProvider, new TransformationText());
 
             var result = descriptionBuilder.ReplaceTokensWithContent(SampleFluentText, appearance, hairComponent);
 
