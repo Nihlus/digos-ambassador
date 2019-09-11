@@ -591,7 +591,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 this.Context.User,
                 availableSpecies,
                 s => $"{s.Name.Humanize(LetterCasing.Title)} ({s.Name})",
-                s => s.Description ?? "No description set.",
+                s => $"{s.Description}\nWritten by {s.Author}.",
                 "There are no species available.",
                 appearance
             );

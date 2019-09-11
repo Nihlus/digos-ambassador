@@ -973,7 +973,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                     species.ID = existingSpecies.ID;
 
                     var existingEntry = _database.Entry(existingSpecies);
-                    existingEntry.CurrentValues.SetValues(existingSpecies);
+                    existingEntry.CurrentValues.SetValues(species);
 
                     if (existingEntry.State == EntityState.Modified)
                     {

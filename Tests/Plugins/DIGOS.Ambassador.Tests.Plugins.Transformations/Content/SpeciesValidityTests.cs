@@ -21,6 +21,7 @@
 //
 
 using System.IO;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using Xunit;
 
@@ -46,6 +47,15 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             var species = Deserialize<Species>(speciesFile);
 
             Assert.Equal(species.Name, folderName);
+        }
+
+        [Theory]
+        [ClassData(typeof(SpeciesDataProvider))]
+        public void SpeciesFileHasAuthor(string speciesFile)
+        {
+            var species = Deserialize<Species>(speciesFile);
+
+            Assert.False(species.Author.IsNullOrWhitespace());
         }
 
         [Theory]

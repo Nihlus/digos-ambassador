@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
@@ -58,6 +59,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// </summary>
         [Required, NotNull]
         public string Description { get; set; }
+
+        /// <summary>
+        /// Gets or sets the author of the species.
+        /// </summary>
+        [Required, NotNull]
+        public string Author { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Species"/> class.
