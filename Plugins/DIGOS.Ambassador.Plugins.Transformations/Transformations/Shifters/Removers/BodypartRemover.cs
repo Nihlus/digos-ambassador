@@ -60,24 +60,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <inheritdoc />
         protected override async Task<ShiftBodypartResult> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
         {
-            var character = this.Appearance.Character;
-
-            var getAppearanceResult = await _transformations.GetOrCreateCurrentAppearanceAsync(character);
-            if (!getAppearanceResult.IsSuccess)
-            {
-                return ShiftBodypartResult.FromError(getAppearanceResult);
-            }
-
-            var appearance = getAppearanceResult.Entity;
-
-            if (!appearance.TryGetAppearanceComponent(bodypart, chirality, out var component))
+            if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var component))
             {
                 return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
             }
 
-            appearance.Components.Remove(component);
+            this.Appearance.Components.Remove(component);
 
-            var removeMessage = _descriptionBuilder.BuildRemoveMessage(appearance, bodypart);
+            var removeMessage = _descriptionBuilder.BuildRemoveMessage(this.Appearance, bodypart);
             return ShiftBodypartResult.FromSuccess(removeMessage, ShiftBodypartAction.Remove);
         }
 

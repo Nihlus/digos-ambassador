@@ -135,7 +135,7 @@
             {
                 "colour":
                 [
-                    "{@target}'s {@bodypart} morphs, as {@f|their} existing hues turn into {@colour|pattern}."
+                    "{@target}'s {@bodypart} morphs, as {@f|their} existing hues turn into {@colour}."
                 ],
                 "pattern":
                 [
@@ -150,7 +150,7 @@
             {
                 "colour":
                 [
-                    "{@target}'s {@bodypart|pluralize} morph, as {@f|their} existing hues turn into {@colour|pattern}."
+                    "{@target}'s {@bodypart|pluralize} morph, as {@f|their} existing hues turn into {@colour}."
                 ],
                 "pattern":
                 [

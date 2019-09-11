@@ -78,8 +78,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
                 );
             }
 
-            var character = this.Appearance.Character;
-
             var getTFResult = await _transformations.GetTransformationsByPartAndSpeciesAsync(bodypart, _species);
             if (!getTFResult.IsSuccess)
             {
@@ -88,15 +86,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
             var transformation = getTFResult.Entity.First();
 
-            var getAppearanceResult = await _transformations.GetOrCreateCurrentAppearanceAsync(character);
-            if (!getAppearanceResult.IsSuccess)
-            {
-                return ShiftBodypartResult.FromError(getAppearanceResult);
-            }
-
-            var appearance = getAppearanceResult.Entity;
-
-            if (appearance.TryGetAppearanceComponent(bodypart, chirality, out var existingComponent))
+            if (this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var existingComponent))
             {
                 if (existingComponent.Transformation.Species.Name.Equals(transformation.Species.Name))
                 {
@@ -111,11 +101,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
             string shiftMessage;
 
-            if (!appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
+            if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
             {
                 currentComponent = AppearanceComponent.CreateFrom(transformation, chirality);
 
-                appearance.Components.Add(currentComponent);
+                this.Appearance.Components.Add(currentComponent);
 
                 shiftMessage = await GetAddMessageAsync(bodypart, chirality);
                 return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Add);
