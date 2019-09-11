@@ -104,6 +104,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <inheritdoc />
         public async Task<ShiftBodypartResult> ShiftAsync(Bodypart bodypart, Chirality chirality)
         {
+            if (bodypart.IsChiral() && chirality == Chirality.Center)
+            {
+                return ShiftBodypartResult.FromError("Please specify left or right when shifting one-sided bodyparts.");
+            }
+
             if (bodypart.IsComposite())
             {
                 return await ShiftCompositeBodypartAsync(bodypart);
