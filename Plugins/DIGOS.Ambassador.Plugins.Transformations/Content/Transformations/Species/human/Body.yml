@@ -1,0 +1,10 @@
+part: Body
+species: Human
+description: "Transforms the target's body into that of a huumans'."
+default_base_colour: "Peach"
+is_nsfw: false
+
+shift_message: "Smooth, human skin begins to spread over{@target}'s body before completely covering it." 
+grow_message: "{@target} begins to grow out as they form a human body. It has smooth skin covering the entirety of it."
+
+single_description: "{@f|They have} a normal human body."
