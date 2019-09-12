@@ -4,7 +4,7 @@ description: "Transforms the target's ear into that of a shark dronie."
 default_base_colour: "deep purple"
 is_nsfw: false
 
-shift_message: "{@target}'s ear twitches and folds as latex covers it, shaping it into a long, pointy, and fin-like form. A small nub of technology pushes into the ear canal, beginning to fill {@f|their} ear with hypnotic thrums and whispers."
+shift_message: "{@target}'s {@side} ear twitches and folds as latex covers it, shaping it into a long, pointy, and fin-like form. A small nub of technology pushes into the ear canal, beginning to fill {@f|their} ear with hypnotic thrums and whispers."
 grow_message: "The {@side} side of {@target}'s head shifts as a {@colour} latex ear begins to grow out of it. It rapidly turns long, pointy, and fin-like. A small nub of technology pops out and fills the ear canal, beginning to fill {@f|their} ear with hypnotic thrums and whispers."
 
 uniform_shift_message: "{@target}'s ears twitch and fold as latex covers them, shaping them into long, pointy, fin-like forms. Small nubs of technology push into {@f|their} ear canals, beginning to fill them with hypnotic thrums and whispers."
