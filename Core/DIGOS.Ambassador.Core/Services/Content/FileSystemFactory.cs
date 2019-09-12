@@ -45,6 +45,11 @@ namespace DIGOS.Ambassador.Core.Services
 
             var realContentPath = Path.GetFullPath(Path.Combine(executingAssemblyDirectory, "Content"));
 
+            if (!Directory.Exists(realContentPath))
+            {
+                Directory.CreateDirectory(realContentPath);
+            }
+
             return new SubFileSystem(realFileSystem, new UPath(realContentPath));
         }
     }
