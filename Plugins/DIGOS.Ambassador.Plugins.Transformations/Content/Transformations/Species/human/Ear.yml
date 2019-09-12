@@ -10,5 +10,5 @@ grow_message: "The {@side} side of {@target}'s head begins to grow outwards as a
 uniform_shift_message: "{@target}'s ears quickly round out as human flesh spreads over the entirety of them."
 uniform_grow_message: "Both sides of {@target}'s head begins to grow outwards as human ears quickly form, human flesh spreading over them quickly."
 
-single_description: "{@f|Their} {@side} ear is that of a humans', taking on a {@colour} coloration."
-uniform_description: "{@f|Their} ears are those of a humans, taking on a {@colour} coloration."
+single_description: "{@f|Their} {@side} ear is that of a human's, taking on a {@colour} coloration."
+uniform_description: "{@f|Their} ears are those of a human's, taking on a {@colour} coloration."
