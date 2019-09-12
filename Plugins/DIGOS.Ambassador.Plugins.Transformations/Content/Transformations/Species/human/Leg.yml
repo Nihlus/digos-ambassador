@@ -1,6 +1,6 @@
 part: Leg
 species: human
-description: "Transforms the target's leg into that of a humans'."
+description: "Transforms the target's leg into that of a human's."
 default_base_colour: "Peach"
 is_nsfw: false
 
@@ -10,5 +10,5 @@ grow_message: "The {@side} side of {@target}'s pelvis ripples and bulges, growin
 uniform_shift_message: "{@target}'s legs are covered with human flesh from thighs to toes."
 uniform_grow_message: "The sides of {@target}'s pelvis ripple and bulge, growing outward into human legs with {@colour} flesh covering them from thighs to toe."
 
-single_description: "{@f|They have} a human {@side} leg."
-uniform_description: "{@f|They have} human legs."
+single_description: "{@f|They have} a human {@side} leg with {@colour} skin."
+uniform_description: "{@f|They have} human legs with {@colour} skin."
