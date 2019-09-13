@@ -1,0 +1,27 @@
+part: Wing
+species: dragon
+description: "Transforms the target's wings into that of an anthro dragon."
+default_base_colour: "black"
+is_nsfw: false
+
+shift_message: "{@target}'s wing shimmers and unfurls further, softening into a large leathery wings that encircles
+                the {@side} side of their body with a {@colour} membrane. The edges of the wing ends in a claw-like
+                shape."
+
+grow_message: "{@target}'s back stiffens and erupts an additional limb that further grows, contorts and then stretches
+               into a wide leathery wing that encircles the {@side} side of their body. The wing holds a {@colour}
+               membrane, and the edges end in a claw-like shape."
+
+uniform_shift_message: "{@target}'s wings shimmer and unfurl further, softening into a large leathery pair of wings
+                        that encircle {@f|their} body with a {@colour} membrane. The edges of the wings end in a
+                        claw-like shape."
+
+uniform_grow_message: "{@target}'s back stiffens and erupts two additional limbs that further grow, contort and then
+                       stretch into wide leathery wings that encircle the rest of their body. The wings hold a {@colour}
+                       membrane and the edges end in a claw-like shape."
+
+single_description: "{@f|They have} a large draconic {@side} wing, with a leathery {@colour} membrane controlled by
+                     dexterous and powerful muscles. {@f|Their} wing ends with a claw-like shape."
+
+uniform_description: "{@f|They have} large draconic wings, with leathery {@colour} membranes controlled by dexterous and
+                      powerful muscles. {@f|Their} wings end with a claw-like shapes."

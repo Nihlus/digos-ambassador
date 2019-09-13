@@ -1,0 +1,15 @@
+part: Penis
+species: dragon
+description: "Transforms the target's penis into that of an anthro dragon."
+default_base_colour: "crimson"
+is_nsfw: true
+
+shift_message: "A strong ripple goes up {@target}'s shaft as it starts to morph. The entire member turns {@colour} and
+                grows slightly with the tip becoming pointy, and the surface bulging into a row of soft yet smooth
+                ridges. A tiny drop of pre seeps out of the end."
+
+grow_message: "{@target}'s groin ripples and bulges as a {@colour} shaft begins to grow. The tip is pointy, and the
+               surface is row of soft yet smooth ridges. A tiny drop of pre seeps out of the end as it finishes
+               forming."
+
+single_description: "{@f|Their} {@colour} shaft is a pointy, ridged rod that nestles between their legs."

@@ -256,6 +256,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         MidnightGreen,
         DartmouthGreen,
         Emerald,
+        EmeraldGreen,
         FernGreen,
         ForestGreen,
         Harlequin,
