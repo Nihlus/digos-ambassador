@@ -40,6 +40,7 @@ using Discord.WebSocket;
 
 using Humanizer;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Behaviours
@@ -127,6 +128,16 @@ namespace DIGOS.Ambassador.Behaviours
 
             var argumentPos = 0;
             if (!(message.HasCharPrefix('!', ref argumentPos) || message.HasMentionPrefix(this.Client.CurrentUser, ref argumentPos)))
+            {
+                return;
+            }
+
+            if (message.Content.Length < 2)
+            {
+                return;
+            }
+
+            if (!message.Content.Any(char.IsLetterOrDigit))
             {
                 return;
             }
