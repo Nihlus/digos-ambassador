@@ -893,6 +893,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             var settings = getSettingsResult.Entity;
 
+            if (!(settings.DedicatedRoleplayChannelsCategory is null))
+            {
+                var categoryChannelCount = (await context.Guild.GetTextChannelsAsync())
+                    .Count(c => c.CategoryId == (ulong)settings.DedicatedRoleplayChannelsCategory);
+
+                if (categoryChannelCount >= 50)
+                {
+                    return CreateEntityResult<IGuildChannel>.FromError
+                    (
+                        "The server's roleplaying category has reached its maximum number of channels. Try " +
+                        "contacting the server's owners and either removing some old roleplays or setting up " +
+                        "a new category."
+                    );
+                }
+            }
+
             var dedicatedChannel = await context.Guild.CreateTextChannelAsync
             (
                 $"{roleplay.Name}-rp",
