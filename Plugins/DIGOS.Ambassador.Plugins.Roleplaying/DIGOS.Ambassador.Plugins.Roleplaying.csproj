@@ -12,7 +12,7 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <RunCodeAnalysis>true</RunCodeAnalysis>
         <CodeAnalysisRuleSet>..\..\stylecop.ruleset</CodeAnalysisRuleSet>
-        <LangVersion>7.3</LangVersion>
+        <LangVersion>8</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

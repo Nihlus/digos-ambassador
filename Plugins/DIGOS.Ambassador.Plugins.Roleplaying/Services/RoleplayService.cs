@@ -438,8 +438,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="guild">The guild to scope the search to.</param>
         /// <returns>A queryable list of roleplays belonging to the user.</returns>
         [Pure, NotNull, ItemNotNull]
-        public IQueryable<Roleplay> GetRoleplays([NotNull] IGuild guild)
+        public IQueryable<Roleplay> GetRoleplays([CanBeNull] IGuild guild = null)
         {
+            if (guild is null)
+            {
+                return _database.Roleplays;
+            }
+
             return _database.Roleplays
                 .Where
                 (

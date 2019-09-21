@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Behaviours;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
@@ -54,6 +55,31 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             : base(client)
         {
             _roleplays = roleplays;
+        }
+
+        /// <summary>
+        /// Ensures active roleplays are rescanned on startup in order to catch missed messages.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        protected override async Task Connected()
+        {
+            var activeRoleplays = _roleplays.GetRoleplays()
+                .Where(r => r.IsActive)
+                .Where(r => r.DedicatedChannelID.HasValue);
+
+            foreach (var activeRoleplay in activeRoleplays)
+            {
+                var guild = this.Client.GetGuild((ulong)activeRoleplay.ServerID);
+
+                // ReSharper disable once PossibleInvalidOperationException
+                var channel = guild.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID.Value);
+
+                foreach (var message in await channel.GetMessagesAsync().FlattenAsync())
+                {
+                    // We don't care about the results here.
+                    await _roleplays.AddToOrUpdateMessageInRoleplayAsync(activeRoleplay, message);
+                }
+            }
         }
 
         /// <inheritdoc />
