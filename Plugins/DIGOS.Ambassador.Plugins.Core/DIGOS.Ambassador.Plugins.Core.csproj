@@ -31,7 +31,7 @@
 
     <ItemGroup>
         <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
-        <PackageReference Include="Humanizer" Version="2.6.2" />
+        <PackageReference Include="Humanizer" Version="2.7.2" />
     </ItemGroup>
 
     <ItemGroup>

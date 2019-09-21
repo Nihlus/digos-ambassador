@@ -27,7 +27,7 @@
     <ItemGroup>
         <PackageReference Include="Discord.Net" Version="2.1.1" />
         <PackageReference Include="YamlDotNet" Version="6.1.2" />
-        <PackageReference Include="NLua" Version="1.4.20" />
+        <PackageReference Include="NLua" Version="1.4.24" />
     </ItemGroup>
 
     <ItemGroup>
