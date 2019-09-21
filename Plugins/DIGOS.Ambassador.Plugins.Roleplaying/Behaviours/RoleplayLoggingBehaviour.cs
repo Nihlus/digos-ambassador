@@ -30,6 +30,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
+using log4net;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 {
@@ -39,6 +40,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     [UsedImplicitly]
     internal sealed class RoleplayLoggingBehaviour : ClientEventBehaviour
     {
+        /// <summary>
+        /// Holds the logging instance for this type.
+        /// </summary>
+        private static readonly ILog Log = LogManager.GetLogger(typeof(RoleplayLoggingBehaviour));
+
         [NotNull]
         private readonly RoleplayService _roleplays;
 
@@ -73,10 +79,24 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 // ReSharper disable once PossibleInvalidOperationException
                 var channel = guild.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID.Value);
 
+                var updatedMessages = 0;
                 foreach (var message in await channel.GetMessagesAsync().FlattenAsync())
                 {
                     // We don't care about the results here.
-                    await _roleplays.AddToOrUpdateMessageInRoleplayAsync(activeRoleplay, message);
+                    var updateResult = await _roleplays.AddToOrUpdateMessageInRoleplayAsync(activeRoleplay, message);
+                    if (updateResult.IsSuccess)
+                    {
+                        ++updatedMessages;
+                    }
+                }
+
+                if (updatedMessages > 0)
+                {
+                    Log.Info
+                    (
+                        $"Added or updated {updatedMessages} missed {(updatedMessages > 1 ? "messages" : "message")} " +
+                        $"in \"{activeRoleplay.Name}\"."
+                    );
                 }
             }
         }
