@@ -64,7 +64,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         protected override async Task Connected()
         {
             var activeRoleplays = _roleplays.GetRoleplays()
-                .Where(r => r.IsActive)
                 .Where(r => r.DedicatedChannelID.HasValue);
 
             foreach (var activeRoleplay in activeRoleplays)
