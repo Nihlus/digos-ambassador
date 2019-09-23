@@ -85,5 +85,15 @@ namespace DIGOS.Ambassador.Core.Results
         {
             return new CreateEntityResult<TEntity>(entity);
         }
+
+        /// <summary>
+        /// Implicitly converts a compatible value to a successful result.
+        /// </summary>
+        /// <param name="entity">The entity.</param>
+        /// <returns>The successful result.</returns>
+        public static implicit operator CreateEntityResult<TEntity>([NotNull] TEntity entity)
+        {
+            return FromSuccess(entity);
+        }
     }
 }
