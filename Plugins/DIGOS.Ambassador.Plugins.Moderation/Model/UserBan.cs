@@ -79,7 +79,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <param name="reason">The content of the note.</param>
         /// <param name="expiresOn">The time at which the ban expires.</param>
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
-        public UserBan(User user, User author, string reason, DateTime? expiresOn = null)
+        public UserBan
+        (
+            [NotNull] User user,
+            [NotNull] User author,
+            [NotNull] string reason,
+            [CanBeNull] DateTime? expiresOn = null
+        )
             : base(user, author)
         {
             this.Reason = reason;

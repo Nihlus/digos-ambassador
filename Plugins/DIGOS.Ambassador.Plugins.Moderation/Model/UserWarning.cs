@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <param name="author">The user that created the note.</param>
         /// <param name="reason">The content of the note.</param>
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
-        public UserWarning(User user, User author, string reason)
+        public UserWarning([NotNull] User user, [NotNull] User author, [NotNull] string reason)
             : base(user, author)
         {
             this.Reason = reason;

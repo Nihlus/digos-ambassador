@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <param name="author">The user that created the note.</param>
         /// <param name="content">The content of the note.</param>
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
-        public UserNote(User user, User author, string content)
+        public UserNote([NotNull] User user, [NotNull] User author, [NotNull] string content)
             : base(user, author)
         {
             this.Content = content;
