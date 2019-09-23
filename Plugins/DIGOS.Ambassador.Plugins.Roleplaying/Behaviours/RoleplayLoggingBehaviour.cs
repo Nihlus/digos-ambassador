@@ -40,11 +40,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     [UsedImplicitly]
     internal sealed class RoleplayLoggingBehaviour : ClientEventBehaviour
     {
-        /// <summary>
-        /// Holds the logging instance for this type.
-        /// </summary>
-        private static readonly ILog Log = LogManager.GetLogger(typeof(RoleplayLoggingBehaviour));
-
         [NotNull]
         private readonly RoleplayService _roleplays;
 
@@ -92,7 +87,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
                 if (updatedMessages > 0)
                 {
-                    Log.Info
+                    this.Log.Info
                     (
                         $"Added or updated {updatedMessages} missed {(updatedMessages > 1 ? "messages" : "message")} " +
                         $"in \"{activeRoleplay.Name}\"."
