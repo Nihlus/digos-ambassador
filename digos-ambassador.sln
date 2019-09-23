@@ -83,6 +83,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{7264D62F-A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Core.Tests", "Tests\Core\DIGOS.Ambassador.Core.Tests\DIGOS.Ambassador.Core.Tests.csproj", "{B89CD370-2A78-43F8-89BB-ED9DD4E8622D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Plugins.Moderation", "Plugins\DIGOS.Ambassador.Plugins.Moderation\DIGOS.Ambassador.Plugins.Moderation.csproj", "{7CE2854B-3903-46E5-B5F9-E96E9C307E47}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -201,6 +203,10 @@ Global
 		{B89CD370-2A78-43F8-89BB-ED9DD4E8622D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B89CD370-2A78-43F8-89BB-ED9DD4E8622D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B89CD370-2A78-43F8-89BB-ED9DD4E8622D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CE2854B-3903-46E5-B5F9-E96E9C307E47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CE2854B-3903-46E5-B5F9-E96E9C307E47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CE2854B-3903-46E5-B5F9-E96E9C307E47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CE2854B-3903-46E5-B5F9-E96E9C307E47}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -233,5 +239,6 @@ Global
 		{86B9E4EE-9341-460D-BA33-B78EA98494D3} = {D01849C4-E9C7-4BB8-BFDF-970FE307C82A}
 		{7264D62F-AFCC-4191-BB5C-8479034F6D0F} = {1EDC2213-9E6B-4F55-974F-6466F48B4385}
 		{B89CD370-2A78-43F8-89BB-ED9DD4E8622D} = {7264D62F-AFCC-4191-BB5C-8479034F6D0F}
+		{7CE2854B-3903-46E5-B5F9-E96E9C307E47} = {4A182B87-C1AD-49B5-A162-86AEFACCE002}
 	EndGlobalSection
 EndGlobal
