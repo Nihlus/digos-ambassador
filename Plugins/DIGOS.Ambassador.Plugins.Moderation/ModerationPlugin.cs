@@ -27,6 +27,7 @@ using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Moderation;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
+using DIGOS.Ambassador.Plugins.Moderation.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,7 +51,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation
         public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddSchemaAwareDbContextPool<ModerationDatabaseContext>();
+                .AddSchemaAwareDbContextPool<ModerationDatabaseContext>()
+                .AddScoped<ModerationService>();
 
             return Task.FromResult(true);
         }

@@ -36,6 +36,11 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         private const string SchemaName = "ModerationModule";
 
         /// <summary>
+        /// Gets the database set of server settings.
+        /// </summary>
+        public DbSet<ServerModerationSettings> ServerSettings { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ModerationDatabaseContext"/> class.
         /// </summary>
         /// <param name="contextOptions">The context options.</param>
