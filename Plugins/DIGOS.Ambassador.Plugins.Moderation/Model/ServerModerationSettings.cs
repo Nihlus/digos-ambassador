@@ -48,7 +48,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         public long? ModerationLogChannel { get; internal set; }
 
         /// <summary>
-        /// Gets the Discord ID of the channel where events are logged.
+        /// Gets the Discord ID of the channel where events are logged, such as deleted messages, username changes, et
+        /// cetera.
         /// </summary>
         public long? MonitoringChannel { get; internal set; }
 
