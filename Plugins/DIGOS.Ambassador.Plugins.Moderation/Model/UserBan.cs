@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -39,16 +40,19 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the reason for the ban.
         /// </summary>
+        [NotNull, Required]
         public string Reason { get; internal set; }
 
         /// <summary>
         /// Gets the time at which the ban was last updated.
         /// </summary>
+        [Required]
         public DateTime UpdatedAt { get; internal set; }
 
         /// <summary>
         /// Gets the time at which the ban expires.
         /// </summary>
+        [CanBeNull]
         public DateTime? ExpiresOn { get; internal set; }
 
         /// <summary>
@@ -62,6 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <remarks>
         /// Required by EF Core.
         /// </remarks>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
         protected UserBan()
         {
         }

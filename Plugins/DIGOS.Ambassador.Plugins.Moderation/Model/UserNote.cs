@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
@@ -40,11 +41,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the content of the note.
         /// </summary>
+        [NotNull, Required]
         public string Content { get; internal set; }
 
         /// <summary>
         /// Gets the time at which the note was last updated.
         /// </summary>
+        [Required]
         public DateTime UpdatedAt { get; internal set; }
 
         /// <summary>
@@ -53,6 +56,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <remarks>
         /// Required by EF Core.
         /// </remarks>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
         protected UserNote()
         {
         }
