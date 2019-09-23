@@ -53,6 +53,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         public long? MonitoringChannel { get; internal set; }
 
         /// <summary>
+        /// Gets the number of warnings a user can have before any further warnings should prompt further action.
+        /// Defaults to three.
+        /// </summary>
+        public int WarningThreshold { get; internal set; } = 3;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ServerModerationSettings"/> class.
         /// </summary>
         /// <remarks>
