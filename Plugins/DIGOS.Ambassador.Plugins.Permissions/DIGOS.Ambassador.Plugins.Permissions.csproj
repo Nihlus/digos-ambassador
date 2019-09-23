@@ -2,9 +2,9 @@
 
     <PropertyGroup>
         <Version>1.0.0</Version>
-        <Description>Provides a crude permissions system. This plugin is not recommended.</Description>
+        <Description>Provides a simple permissions system.</Description>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <TargetFrameworks>netcoreapp2.2;netstandard2.0</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
