@@ -41,6 +41,21 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         public DbSet<ServerModerationSettings> ServerSettings { get; private set; }
 
         /// <summary>
+        /// Gets the database set of user notes.
+        /// </summary>
+        public DbSet<UserNote> UserNotes { get; private set; }
+
+        /// <summary>
+        /// Gets the database set of user warnings.
+        /// </summary>
+        public DbSet<UserWarning> UserWarnings { get; private set; }
+
+        /// <summary>
+        /// Gets the database set of user bans.
+        /// </summary>
+        public DbSet<UserBan> UserBans { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ModerationDatabaseContext"/> class.
         /// </summary>
         /// <param name="contextOptions">The context options.</param>
