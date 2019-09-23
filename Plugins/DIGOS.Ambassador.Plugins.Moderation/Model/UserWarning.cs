@@ -24,6 +24,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model.Bases;
 using JetBrains.Annotations;
@@ -44,10 +45,26 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         public string Reason { get; internal set; }
 
         /// <summary>
+        /// Gets the message that caused the warning, if any.
+        /// </summary>
+        public long? MessageID { get; internal set; }
+
+        /// <summary>
         /// Gets the time at which the note was last updated.
         /// </summary>
         [Required]
         public DateTime UpdatedAt { get; internal set; }
+
+        /// <summary>
+        /// Gets the time at which the warning expires.
+        /// </summary>
+        [CanBeNull]
+        public DateTime? ExpiresOn { get; internal set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the warning is temporary.
+        /// </summary>
+        public bool IsTemporary => this.ExpiresOn.HasValue;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserWarning"/> class.
@@ -63,16 +80,29 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="UserWarning"/> class.
         /// </summary>
-        /// <param name="user">The user that the note is attached to.</param>
-        /// <param name="author">The user that created the note.</param>
-        /// <param name="reason">The content of the note.</param>
+        /// <param name="server">The server that the warning was created on.</param>
+        /// <param name="user">The user that the warning is attached to.</param>
+        /// <param name="author">The user that created the warning.</param>
+        /// <param name="reason">The reason for the warning.</param>
+        /// <param name="messageID">The message that caused the warning, if any.</param>
+        /// <param name="expiresOn">The time at which the ban expires.</param>
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
-        public UserWarning([NotNull] User user, [NotNull] User author, [NotNull] string reason)
-            : base(user, author)
+        public UserWarning
+        (
+            [NotNull] Server server,
+            [NotNull] User user,
+            [NotNull] User author,
+            [NotNull] string reason,
+            [CanBeNull] long? messageID = null,
+            [CanBeNull] DateTime? expiresOn = null
+        )
+            : base(server, user, author)
         {
             this.Reason = reason;
+            this.MessageID = messageID;
 
             this.UpdatedAt = DateTime.UtcNow;
+            this.ExpiresOn = expiresOn;
         }
     }
 }

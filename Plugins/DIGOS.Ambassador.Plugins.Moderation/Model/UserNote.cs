@@ -25,6 +25,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model.Bases;
 using JetBrains.Annotations;
@@ -64,12 +65,19 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="UserNote"/> class.
         /// </summary>
+        /// <param name="server">The server that the note was created on.</param>
         /// <param name="user">The user that the note is attached to.</param>
         /// <param name="author">The user that created the note.</param>
         /// <param name="content">The content of the note.</param>
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
-        public UserNote([NotNull] User user, [NotNull] User author, [NotNull] string content)
-            : base(user, author)
+        public UserNote
+        (
+            [NotNull] Server server,
+            [NotNull] User user,
+            [NotNull] User author,
+            [NotNull] string content
+        )
+            : base(server, user, author)
         {
             this.Content = content;
 

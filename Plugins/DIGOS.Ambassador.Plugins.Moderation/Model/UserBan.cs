@@ -24,6 +24,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model.Bases;
 using JetBrains.Annotations;
@@ -42,6 +43,11 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// </summary>
         [NotNull, Required]
         public string Reason { get; internal set; }
+
+        /// <summary>
+        /// Gets the message that caused the warning, if any.
+        /// </summary>
+        public long? MessageID { get; internal set; }
 
         /// <summary>
         /// Gets the time at which the ban was last updated.
@@ -74,21 +80,26 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="UserBan"/> class.
         /// </summary>
-        /// <param name="user">The user that the note is attached to.</param>
-        /// <param name="author">The user that created the note.</param>
-        /// <param name="reason">The content of the note.</param>
+        /// <param name="server">The server that the ban was created on.</param>
+        /// <param name="user">The user that the ban is attached to.</param>
+        /// <param name="author">The user that created the ban.</param>
+        /// <param name="reason">The reason for the ban.</param>
+        /// <param name="messageID">The message that caused the warning, if any.</param>
         /// <param name="expiresOn">The time at which the ban expires.</param>
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
         public UserBan
         (
+            [NotNull] Server server,
             [NotNull] User user,
             [NotNull] User author,
             [NotNull] string reason,
+            [CanBeNull] long? messageID = null,
             [CanBeNull] DateTime? expiresOn = null
         )
-            : base(user, author)
+            : base(server, user, author)
         {
             this.Reason = reason;
+            this.MessageID = messageID;
 
             this.UpdatedAt = DateTime.UtcNow;
             this.ExpiresOn = expiresOn;

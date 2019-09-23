@@ -23,6 +23,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using DIGOS.Ambassador.Core.Database.Entities;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 
@@ -34,6 +35,11 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model.Bases
     [PublicAPI]
     public abstract class AuthoredUserEntity : EFEntity
     {
+        /// <summary>
+        /// Gets the server that the entity was authored on.
+        /// </summary>
+        public virtual Server Server { get; private set; }
+
         /// <summary>
         /// Gets the user that the entity is associated with.
         /// </summary>
@@ -64,10 +70,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model.Bases
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthoredUserEntity"/> class.
         /// </summary>
+        /// <param name="server">The server that the entity was authored on.</param>
         /// <param name="user">The user that the entity is associated with.</param>
         /// <param name="author">The user that created the entity.</param>
-        protected AuthoredUserEntity([NotNull] User user, [NotNull] User author)
+        protected AuthoredUserEntity([NotNull] Server server, [NotNull] User user, [NotNull] User author)
         {
+            this.Server = server;
             this.User = user;
             this.Author = author;
 
