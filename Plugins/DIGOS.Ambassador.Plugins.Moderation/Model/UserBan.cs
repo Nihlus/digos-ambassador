@@ -47,6 +47,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the message that caused the warning, if any.
         /// </summary>
+        [CanBeNull]
         public long? MessageID { get; internal set; }
 
         /// <summary>
