@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using Discord;
 using JetBrains.Annotations;
 using Moq;
@@ -38,13 +39,7 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// <param name="id">The ID of the object.</param>
         /// <returns>A mocked object.</returns>
         [NotNull]
-        public static IUser CreateDiscordUser(long id)
-        {
-            var mock = new Mock<IUser>();
-            mock.Setup(u => u.Id).Returns((ulong)id);
-
-            return mock.Object;
-        }
+        public static IUser CreateDiscordUser(ulong id) => CreateDiscordEntity<IUser>(id);
 
         /// <summary>
         /// Creates a simple mocked <see cref="IGuildUser"/> object with the given ID.
@@ -52,13 +47,7 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// <param name="id">The ID of the object.</param>
         /// <returns>A mocked object.</returns>
         [NotNull]
-        public static IGuildUser CreateDiscordGuildUser(long id)
-        {
-            var mock = new Mock<IGuildUser>();
-            mock.Setup(u => u.Id).Returns((ulong)id);
-
-            return mock.Object;
-        }
+        public static IGuildUser CreateDiscordGuildUser(ulong id) => CreateDiscordEntity<IGuildUser>(id);
 
         /// <summary>
         /// Creates a simple mocked <see cref="IGuild"/> object with the given ID.
@@ -96,6 +85,32 @@ namespace DIGOS.Ambassador.Tests.Utility
             {
                 mock.Setup(r => r.Guild).Returns(guild);
             }
+
+            return mock.Object;
+        }
+
+        /// <summary>
+        /// Creates a simple mocked <see cref="ITextChannel"/> object with the the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the object.</param>
+        /// <returns>A mocked object.</returns>
+        [NotNull]
+        public static ITextChannel CreateDiscordTextChannel(ulong id) => CreateDiscordEntity<ITextChannel>(id);
+
+        /// <summary>
+        /// Creates a generic mocked Discord entity with the given ID.
+        /// </summary>
+        /// <param name="id">The ID of the entity.</param>
+        /// <param name="mockConfiguration">The configuration method for the mocked entity.</param>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <returns>A mocked object.</returns>
+        public static TEntity CreateDiscordEntity<TEntity>(ulong id, Action<Mock<TEntity>> mockConfiguration = null)
+            where TEntity : class, IEntity<ulong>
+        {
+            var mock = new Mock<TEntity>();
+            mock.Setup(r => r.Id).Returns(id);
+
+            mockConfiguration?.Invoke(mock);
 
             return mock.Object;
         }

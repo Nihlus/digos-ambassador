@@ -135,5 +135,98 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             return settings;
         }
+
+        /// <summary>
+        /// Sets the moderation log channel for the given server.
+        /// </summary>
+        /// <param name="guild">The server.</param>
+        /// <param name="channel">The channel.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetModerationLogChannelAsync
+        (
+            [NotNull] IGuild guild,
+            [NotNull] ITextChannel channel
+        )
+        {
+            var getSettings = await GetOrCreateServerSettingsAsync(guild);
+            if (!getSettings.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getSettings);
+            }
+
+            var settings = getSettings.Entity;
+
+            if (settings.ModerationLogChannel == (long)channel.Id)
+            {
+                return ModifyEntityResult.FromError("That's already the moderation log channel.");
+            }
+
+            settings.ModerationLogChannel = (long)channel.Id;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Sets the monitoring channel for the given server.
+        /// </summary>
+        /// <param name="guild">The server.</param>
+        /// <param name="channel">The channel.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetMonitoringChannelAsync
+        (
+            [NotNull] IGuild guild,
+            [NotNull] ITextChannel channel
+        )
+        {
+            var getSettings = await GetOrCreateServerSettingsAsync(guild);
+            if (!getSettings.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getSettings);
+            }
+
+            var settings = getSettings.Entity;
+
+            if (settings.MonitoringChannel == (long)channel.Id)
+            {
+                return ModifyEntityResult.FromError("That's already the monitoring channel.");
+            }
+
+            settings.MonitoringChannel = (long)channel.Id;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Sets the warning threshold for the given server.
+        /// </summary>
+        /// <param name="guild">The server.</param>
+        /// <param name="warningThreshold">The warning threshold.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetWarningThresholdAsync
+        (
+            [NotNull] IGuild guild,
+            int warningThreshold
+        )
+        {
+            var getSettings = await GetOrCreateServerSettingsAsync(guild);
+            if (!getSettings.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getSettings);
+            }
+
+            var settings = getSettings.Entity;
+
+            if (settings.WarningThreshold == warningThreshold)
+            {
+                return ModifyEntityResult.FromError($"The warning threshold is already {warningThreshold}.");
+            }
+
+            settings.WarningThreshold = warningThreshold;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
     }
 }
