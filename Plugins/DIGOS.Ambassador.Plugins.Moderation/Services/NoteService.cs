@@ -24,8 +24,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
-using DIGOS.Ambassador.Plugins.Core.Model.Servers;
-using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;

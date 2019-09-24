@@ -24,7 +24,6 @@
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;

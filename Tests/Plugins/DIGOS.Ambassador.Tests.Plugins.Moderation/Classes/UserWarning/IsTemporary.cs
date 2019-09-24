@@ -31,7 +31,7 @@ using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Classes.UserWarning
 {
-    public partial class UserWarningTests
+    public class UserWarningTests
     {
         public class IsTemporary
         {

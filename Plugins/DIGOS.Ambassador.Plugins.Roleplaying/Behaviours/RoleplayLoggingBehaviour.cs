@@ -30,7 +30,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
-using log4net;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 {

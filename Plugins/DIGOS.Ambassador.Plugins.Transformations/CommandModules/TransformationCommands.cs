@@ -842,7 +842,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             var eb = new EmbedBuilder();
             eb.WithColor(Color.DarkPurple);
-            eb.WithTitle($"{character.Name} {(character.Nickname is null ? string.Empty : $"\"{character.Nickname}\"")}".Trim());
+            eb.WithTitle($"{character.Name} \"{character.Nickname}\"".Trim());
 
             var owner = character.Owner;
             var user = await this.Context.Client.GetUserAsync((ulong)owner.DiscordID);

@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;

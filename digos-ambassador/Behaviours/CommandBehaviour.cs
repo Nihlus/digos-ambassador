@@ -40,7 +40,6 @@ using Discord.WebSocket;
 
 using Humanizer;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Behaviours

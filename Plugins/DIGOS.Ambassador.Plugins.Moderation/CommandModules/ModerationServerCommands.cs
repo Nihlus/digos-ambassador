@@ -22,7 +22,6 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using Discord;
 using Discord.Commands;

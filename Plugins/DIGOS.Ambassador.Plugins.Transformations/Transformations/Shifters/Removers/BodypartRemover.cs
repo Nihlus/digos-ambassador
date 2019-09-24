@@ -23,7 +23,6 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
-using DIGOS.Ambassador.Plugins.Transformations.Services;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
@@ -34,41 +33,35 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     internal sealed class BodypartRemover : AppearanceRemover
     {
         [NotNull]
-        private readonly TransformationService _transformations;
-
-        [NotNull]
         private readonly TransformationDescriptionBuilder _descriptionBuilder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BodypartRemover"/> class.
         /// </summary>
         /// <param name="appearance">The appearance that is being shifted.</param>
-        /// <param name="transformations">The transformation service.</param>
         /// <param name="descriptionBuilder">The description builder.</param>
         public BodypartRemover
         (
             [NotNull] Appearance appearance,
-            [NotNull] TransformationService transformations,
             [NotNull] TransformationDescriptionBuilder descriptionBuilder
         )
             : base(appearance)
         {
-            _transformations = transformations;
             _descriptionBuilder = descriptionBuilder;
         }
 
         /// <inheritdoc />
-        protected override async Task<ShiftBodypartResult> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
+        protected override Task<ShiftBodypartResult> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
         {
             if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var component))
             {
-                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
+                return Task.FromResult(ShiftBodypartResult.FromError("The character doesn't have that bodypart."));
             }
 
             this.Appearance.Components.Remove(component);
 
             var removeMessage = _descriptionBuilder.BuildRemoveMessage(this.Appearance, bodypart);
-            return ShiftBodypartResult.FromSuccess(removeMessage, ShiftBodypartAction.Remove);
+            return Task.FromResult(ShiftBodypartResult.FromSuccess(removeMessage, ShiftBodypartAction.Remove));
         }
 
         /// <inheritdoc />

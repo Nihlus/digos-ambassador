@@ -36,7 +36,6 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
 using DIGOS.Ambassador.Plugins.Transformations.TypeReaders;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;

@@ -23,7 +23,6 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
-using DIGOS.Ambassador.Plugins.Transformations.Services;
 using Humanizer;
 using JetBrains.Annotations;
 
@@ -34,9 +33,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// </summary>
     internal sealed class PatternShifter : AppearanceShifter
     {
-        [NotNull]
-        private readonly TransformationService _transformations;
-
         [NotNull]
         private readonly TransformationDescriptionBuilder _descriptionBuilder;
 
@@ -51,21 +47,18 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="appearance">The appearance to shift.</param>
         /// <param name="pattern">The colour to shift into.</param>
         /// <param name="patternColour">The colour of the pattern to shift into.</param>
-        /// <param name="transformations">The transformation service.</param>
         /// <param name="descriptionBuilder">The description builder.</param>
         public PatternShifter
         (
             [NotNull] Appearance appearance,
             Pattern pattern,
             [NotNull] Colour patternColour,
-            [NotNull] TransformationService transformations,
             [NotNull] TransformationDescriptionBuilder descriptionBuilder
         )
             : base(appearance)
         {
             _pattern = pattern;
             _patternColour = patternColour;
-            _transformations = transformations;
             _descriptionBuilder = descriptionBuilder;
         }
 

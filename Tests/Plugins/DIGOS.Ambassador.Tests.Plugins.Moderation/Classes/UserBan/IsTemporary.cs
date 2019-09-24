@@ -31,7 +31,7 @@ using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Classes.UserBan
 {
-    public partial class UserBanTests
+    public class UserBanTests
     {
         public class IsTemporary
         {

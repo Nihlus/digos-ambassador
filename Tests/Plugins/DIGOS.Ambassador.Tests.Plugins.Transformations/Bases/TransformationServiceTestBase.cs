@@ -32,7 +32,6 @@ using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;

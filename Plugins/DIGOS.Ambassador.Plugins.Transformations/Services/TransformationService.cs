@@ -238,7 +238,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var bodypartRemover = new BodypartRemover
             (
                 appearance,
-                this,
                 _descriptionBuilder
             );
 
@@ -284,7 +283,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var appearance = getAppearanceResult.Entity;
 
-            var patternRemover = new PatternRemover(appearance, this, _descriptionBuilder);
+            var patternRemover = new PatternRemover(appearance, _descriptionBuilder);
             var shiftResult = await patternRemover.RemoveAsync(bodyPart, chirality);
 
             if (shiftResult.IsSuccess)
@@ -390,7 +389,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var appearance = getCurrentAppearance.Entity;
 
-            var colourShifter = new ColourShifter(appearance, colour, this, _descriptionBuilder);
+            var colourShifter = new ColourShifter(appearance, colour, _descriptionBuilder);
             var shiftResult = await colourShifter.ShiftAsync(bodyPart, chirality);
 
             if (shiftResult.IsSuccess)
@@ -437,7 +436,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var appearance = getAppearanceResult.Entity;
 
-            var patternShifter = new PatternShifter(appearance, pattern, patternColour, this, _descriptionBuilder);
+            var patternShifter = new PatternShifter(appearance, pattern, patternColour, _descriptionBuilder);
             var shiftResult = await patternShifter.ShiftAsync(bodyPart, chirality);
 
             if (shiftResult.IsSuccess)
@@ -482,7 +481,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var appearance = getAppearanceResult.Entity;
 
-            var patternColourShifter = new PatternColourShifter(appearance, patternColour, this, _descriptionBuilder);
+            var patternColourShifter = new PatternColourShifter(appearance, patternColour, _descriptionBuilder);
             var shiftResult = await patternColourShifter.ShiftAsync(bodyPart, chirality);
 
             if (shiftResult.IsSuccess)
