@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewReasonsAreEmpty()
             {
-                var result = await this.Warnings.SetWarningReasonsAsync(_warning, string.Empty);
+                var result = await this.Warnings.SetWarningReasonAsync(_warning, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -52,7 +52,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             public async Task ReturnsUnsuccessfulIfNewReasonsAreNull()
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Warnings.SetWarningReasonsAsync(_warning, null);
+                var result = await this.Warnings.SetWarningReasonAsync(_warning, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewReasonIsTooLong()
             {
-                var result = await this.Warnings.SetWarningReasonsAsync(_warning, new string('a', 1025));
+                var result = await this.Warnings.SetWarningReasonAsync(_warning, new string('a', 1025));
 
                 Assert.False(result.IsSuccess);
             }
@@ -68,8 +68,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewReasonsAreIdentical()
             {
-                await this.Warnings.SetWarningReasonsAsync(_warning, "Dummy thicc");
-                var result = await this.Warnings.SetWarningReasonsAsync(_warning, "Dummy thicc");
+                await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
+                var result = await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
 
                 Assert.False(result.IsSuccess);
             }
@@ -77,8 +77,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ReturnsSuccessfulIfNewReasonsAreWellFormed()
             {
-                await this.Warnings.SetWarningReasonsAsync(_warning, "Dummy thicc");
-                var result = await this.Warnings.SetWarningReasonsAsync(_warning, "Not dummy thicc");
+                await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
+                var result = await this.Warnings.SetWarningReasonAsync(_warning, "Not dummy thicc");
 
                 Assert.True(result.IsSuccess);
             }
@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             [Fact]
             public async Task ActuallySetsReasons()
             {
-                await this.Warnings.SetWarningReasonsAsync(_warning, "Dummy thicc");
+                await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
 
                 Assert.Equal("Dummy thicc", _warning.Reason);
             }
@@ -96,7 +96,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             {
                 var before = _warning.UpdatedAt;
 
-                await this.Warnings.SetWarningReasonsAsync(_warning, "Dummy thicc");
+                await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
 
                 var after = _warning.UpdatedAt;
 

@@ -63,6 +63,19 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         }
 
         /// <summary>
+        /// Gets the warnings attached to the given user.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <returns>The warnings.</returns>
+        public IQueryable<UserWarning> GetWarnings([NotNull] IGuildUser user)
+        {
+            return _database.UserWarnings.Where
+            (
+                n => n.User.DiscordID == (long)user.Id && n.Server.DiscordID == (long)user.Guild.Id
+            );
+        }
+
+        /// <summary>
         /// Retrieves a warning with the given ID from the database.
         /// </summary>
         /// <param name="server">The server the warning is on.</param>
@@ -129,7 +142,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var warning = new UserWarning(server, user, author, string.Empty);
 
-            var setReason = await SetWarningReasonsAsync(warning, reason);
+            var setReason = await SetWarningReasonAsync(warning, reason);
             if (!setReason.IsSuccess)
             {
                 return CreateEntityResult<UserWarning>.FromError(setReason);
@@ -173,7 +186,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="warning">The warning.</param>
         /// <param name="reason">The reason.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetWarningReasonsAsync([NotNull] UserWarning warning, [NotNull] string reason)
+        public async Task<ModifyEntityResult> SetWarningReasonAsync([NotNull] UserWarning warning, [NotNull] string reason)
         {
             if (reason.IsNullOrWhitespace())
             {
