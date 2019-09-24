@@ -20,12 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using Discord;
+using Discord.Rest;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 
@@ -313,6 +315,63 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             eb.WithDescription($"{user.Mention} changed their discriminator from {oldDiscriminator} to {newDiscriminator}.");
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
+        }
+
+        /// <summary>
+        /// Posts a notification that a message was deleted.
+        /// </summary>
+        /// <param name="message">The deleted message.</param>
+        /// <param name="messageChannel">The channel the message was deleted from.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task NotifyMessageDeleted(IMessage message, ISocketMessageChannel messageChannel)
+        {
+            if (!(messageChannel is ITextChannel textChannel))
+            {
+                return;
+            }
+
+            var getChannel = await GetMonitoringChannelAsync(textChannel.Guild);
+            if (!getChannel.IsSuccess)
+            {
+                return;
+            }
+
+            var channel = getChannel.Entity;
+
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithTitle("Message Deleted");
+            eb.WithColor(Color.Orange);
+
+            var extra = string.Empty;
+            if ((await textChannel.Guild.GetUserAsync(_client.CurrentUser.Id)).GuildPermissions.ViewAuditLog)
+            {
+                var auditLogs = await textChannel.Guild.GetAuditLogsAsync();
+                var deletionEntry = auditLogs.FirstOrDefault
+                (
+                    e => e.Data is MessageDeleteAuditLogData deleteAuditLogData &&
+                         deleteAuditLogData.AuthorId == message.Author.Id
+                );
+
+                if (!(deletionEntry is null))
+                {
+                    extra = $"by {deletionEntry.User.Mention}.";
+                }
+                else
+                {
+                    // No audit entries are generated when the user deletes a message themselves
+                    extra = $"by {message.Author.Mention}.";
+                }
+            }
+
+            eb.WithDescription
+            (
+                $"A message was deleted from {MentionUtils.MentionChannel(textChannel.Id)} {extra}"
+            );
+
+            var quote = _feedback.CreateMessageQuote(message, _client.CurrentUser);
+
+            await _feedback.SendEmbedAsync(channel, eb.Build());
+            await _feedback.SendEmbedAsync(channel, quote.Build());
         }
 
         /// <summary>

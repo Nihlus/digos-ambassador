@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Behaviours;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
+using Discord;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 
@@ -70,6 +71,17 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     newMember.Discriminator
                 );
             }
+        }
+
+        /// <inheritdoc />
+        protected override async Task MessageDeleted(Cacheable<IMessage, ulong> message, ISocketMessageChannel channel)
+        {
+            if (!message.HasValue)
+            {
+                return;
+            }
+
+            await _logging.NotifyMessageDeleted(message.Value, channel);
         }
     }
 }
