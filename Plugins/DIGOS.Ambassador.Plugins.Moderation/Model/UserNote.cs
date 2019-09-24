@@ -48,7 +48,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the time at which the note was last updated.
         /// </summary>
-        [Required]
         public DateTime UpdatedAt { get; internal set; }
 
         /// <summary>
