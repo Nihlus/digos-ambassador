@@ -239,7 +239,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task NotifyUserLeft([NotNull] IGuildUser user)
         {
-            var getChannel = await GetModerationLogChannelAsync(user.Guild);
+            var getChannel = await GetMonitoringChannelAsync(user.Guild);
             if (!getChannel.IsSuccess)
             {
                 return;
@@ -269,7 +269,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             [NotNull] string newUsername
         )
         {
-            var getChannel = await GetModerationLogChannelAsync(user.Guild);
+            var getChannel = await GetMonitoringChannelAsync(user.Guild);
             if (!getChannel.IsSuccess)
             {
                 return;
@@ -299,7 +299,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             [NotNull] string newDiscriminator
         )
         {
-            var getChannel = await GetModerationLogChannelAsync(user.Guild);
+            var getChannel = await GetMonitoringChannelAsync(user.Guild);
             if (!getChannel.IsSuccess)
             {
                 return;
