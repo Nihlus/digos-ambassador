@@ -63,6 +63,19 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         }
 
         /// <summary>
+        /// Gets the bans issued on the given guild.
+        /// </summary>
+        /// <param name="guild">The guild.</param>
+        /// <returns>The warnings.</returns>
+        public IQueryable<UserBan> GetBans([NotNull] IGuild guild)
+        {
+            return _database.UserBans.Where
+            (
+                n => n.Server.DiscordID == (long)guild.Id
+            );
+        }
+
+        /// <summary>
         /// Gets the bans attached to the given user.
         /// </summary>
         /// <param name="user">The user.</param>

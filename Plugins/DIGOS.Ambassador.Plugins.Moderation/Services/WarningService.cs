@@ -63,6 +63,19 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         }
 
         /// <summary>
+        /// Gets the warnings issued on the given guild.
+        /// </summary>
+        /// <param name="guild">The guild.</param>
+        /// <returns>The warnings.</returns>
+        public IQueryable<UserWarning> GetWarnings([NotNull] IGuild guild)
+        {
+            return _database.UserWarnings.Where
+            (
+                n => n.Server.DiscordID == (long)guild.Id
+            );
+        }
+
+        /// <summary>
         /// Gets the warnings attached to the given user.
         /// </summary>
         /// <param name="user">The user.</param>

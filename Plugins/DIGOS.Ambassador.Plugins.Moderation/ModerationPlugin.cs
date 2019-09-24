@@ -24,6 +24,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Discord.Behaviours.Services;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Moderation;
@@ -86,6 +87,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation
             await commands.AddModuleAsync<NoteCommands>(serviceProvider);
             await commands.AddModuleAsync<WarningCommands>(serviceProvider);
             await commands.AddModuleAsync<BanCommands>(serviceProvider);
+
+            var behaviours = serviceProvider.GetRequiredService<BehaviourService>();
+            await behaviours.AddBehavioursAsync(Assembly.GetExecutingAssembly(), serviceProvider);
 
             return true;
         }
