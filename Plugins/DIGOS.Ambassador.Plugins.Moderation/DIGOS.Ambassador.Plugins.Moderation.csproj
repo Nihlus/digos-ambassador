@@ -42,6 +42,33 @@
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="CommandModules\ModerationServerCommands.cs">
+        <DependentUpon>ModerationCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\ModerationNoteCommands.cs">
+        <DependentUpon>ModerationCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\ModerationBanCommands.cs">
+        <DependentUpon>ModerationCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\ModerationWarningCommands.cs">
+        <DependentUpon>ModerationCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\ModerationServerSetCommands.cs">
+        <DependentUpon>ModerationServerCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\ModerationBanSetCommands.cs">
+        <DependentUpon>ModerationBanCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\ModerationNoteSetCommands.cs">
+        <DependentUpon>ModerationNoteCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\ModerationWarningSetCommands.cs">
+        <DependentUpon>ModerationWarningCommands.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
     <Import Project="..\..\msbuild\nuget-common.props" />
 
 </Project>
