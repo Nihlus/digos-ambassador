@@ -1,5 +1,5 @@
 //
-//  ModerationBanCommands.cs
+//  ManageNotes.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,23 +20,25 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Discord.Commands;
+using System;
+using DIGOS.Ambassador.Plugins.Permissions;
 using JetBrains.Annotations;
 
-#pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
-
-namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
+namespace DIGOS.Ambassador.Plugins.Moderation.Permissions
 {
-    public partial class ModerationCommands
+    /// <summary>
+    /// Represents a permission that allows a user to manage notes in the bot.
+    /// </summary>
+    [PublicAPI]
+    public sealed class ManageNotes : Permission
     {
-        /// <summary>
-        /// Ban-related commands, such as viewing or editing info about a specific ban.
-        /// </summary>
-        [PublicAPI]
-        [Group("ban")]
-        [Summary("Ban-related commands, such as viewing or editing info about a specific ban.")]
-        public partial class ModerationBanCommands : ModuleBase
-        {
-        }
+        /// <inheritdoc />
+        public override Guid UniqueIdentifier { get; } = new Guid("8FB711F2-336E-44C8-9E94-FBA4BAF1255D");
+
+        /// <inheritdoc />
+        public override string FriendlyName => nameof(ManageNotes);
+
+        /// <inheritdoc />
+        public override string Description => "Allows you to manage notes in the bot.";
     }
 }

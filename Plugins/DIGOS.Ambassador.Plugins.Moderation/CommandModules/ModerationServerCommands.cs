@@ -68,7 +68,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             /// </summary>
             [Command("settings")]
             [Summary("Shows the server's moderation settings.")]
-            public async Task ShowServerSettings()
+            [RequireContext(ContextType.Guild)]
+            public async Task ShowServerSettingsAsync()
             {
                 var guild = this.Context.Guild;
 

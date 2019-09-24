@@ -1,5 +1,5 @@
 //
-//  ModerationWarningCommands.cs
+//  WarningSetCommands.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -27,15 +27,14 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 {
-    public partial class ModerationCommands
+    public partial class WarningCommands
     {
         /// <summary>
-        /// Warning-related commands, such as viewing or editing info about a specific warning.
+        /// Warning setter commands.
         /// </summary>
         [PublicAPI]
-        [Group("warning")]
-        [Summary("Warning-related commands, such as viewing or editing info about a specific warning.")]
-        public partial class ModerationWarningCommands : ModuleBase
+        [Group("set")]
+        public class WarningSetCommands : ModuleBase
         {
         }
     }

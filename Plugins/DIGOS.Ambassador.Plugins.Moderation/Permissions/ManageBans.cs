@@ -1,5 +1,5 @@
 //
-//  ModerationWarningSetCommands.cs
+//  ManageBans.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,25 +20,25 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Discord.Commands;
+using System;
+using DIGOS.Ambassador.Plugins.Permissions;
 using JetBrains.Annotations;
 
-#pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
-
-namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
+namespace DIGOS.Ambassador.Plugins.Moderation.Permissions
 {
-    public partial class ModerationCommands
+    /// <summary>
+    /// Represents a permission that allows a user to manage bans in the bot.
+    /// </summary>
+    [PublicAPI]
+    public sealed class ManageBans : Permission
     {
-        public partial class ModerationWarningCommands
-        {
-            /// <summary>
-            /// Warning setter commands.
-            /// </summary>
-            [PublicAPI]
-            [Group("set")]
-            public class ModerationWarningSetCommands : ModuleBase
-            {
-            }
-        }
+        /// <inheritdoc />
+        public override Guid UniqueIdentifier { get; } = new Guid("AACA38C2-CF2B-4760-8AE7-7BE88DE0715B");
+
+        /// <inheritdoc />
+        public override string FriendlyName => nameof(ManageBans);
+
+        /// <inheritdoc />
+        public override string Description => "Allows you to manage bans in the bot.";
     }
 }

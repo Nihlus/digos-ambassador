@@ -64,6 +64,19 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         }
 
         /// <summary>
+        /// Gets the notes attached to the given user.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <returns>The notes.</returns>
+        public IQueryable<UserNote> GetNotes([NotNull] IGuildUser user)
+        {
+            return _database.UserNotes.Where
+            (
+                n => n.User.DiscordID == (long)user.Id && n.Server.DiscordID == (long)user.Guild.Id
+            );
+        }
+
+        /// <summary>
         /// Retrieves a note with the given ID from the database.
         /// </summary>
         /// <param name="server">The server the note is on.</param>

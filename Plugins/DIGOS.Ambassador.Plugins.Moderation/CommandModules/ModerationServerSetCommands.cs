@@ -73,7 +73,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 [Command("moderation-log-channel")]
                 [Summary("Sets the moderation log channel.")]
                 [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
-                public async Task SetModerationLogChannel([NotNull] ITextChannel channel)
+                [RequireContext(ContextType.Guild)]
+                public async Task SetModerationLogChannelAsync([NotNull] ITextChannel channel)
                 {
                     var setChannel = await _moderation.SetModerationLogChannelAsync(this.Context.Guild, channel);
                     if (!setChannel.IsSuccess)
@@ -92,7 +93,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 [Command("event-monitoring-channel")]
                 [Summary("Sets the event monitoring channel.")]
                 [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
-                public async Task SetMonitoringChannel([NotNull] ITextChannel channel)
+                [RequireContext(ContextType.Guild)]
+                public async Task SetMonitoringChannelAsync([NotNull] ITextChannel channel)
                 {
                     var setChannel = await _moderation.SetMonitoringChannelAsync(this.Context.Guild, channel);
                     if (!setChannel.IsSuccess)
@@ -111,7 +113,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 [Command("warning-threshold")]
                 [Summary("Sets the warning threshold.")]
                 [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
-                public async Task SetWarningThreshold(int threshold)
+                [RequireContext(ContextType.Guild)]
+                public async Task SetWarningThresholdAsync(int threshold)
                 {
                     var setChannel = await _moderation.SetWarningThresholdAsync(this.Context.Guild, threshold);
                     if (!setChannel.IsSuccess)

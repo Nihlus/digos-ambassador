@@ -46,25 +46,19 @@
       <Compile Update="CommandModules\ModerationServerCommands.cs">
         <DependentUpon>ModerationCommands.cs</DependentUpon>
       </Compile>
-      <Compile Update="CommandModules\ModerationNoteCommands.cs">
-        <DependentUpon>ModerationCommands.cs</DependentUpon>
-      </Compile>
-      <Compile Update="CommandModules\ModerationBanCommands.cs">
-        <DependentUpon>ModerationCommands.cs</DependentUpon>
-      </Compile>
-      <Compile Update="CommandModules\ModerationWarningCommands.cs">
-        <DependentUpon>ModerationCommands.cs</DependentUpon>
-      </Compile>
+      <Compile Update="CommandModules\NoteCommands.cs" />
+      <Compile Update="CommandModules\BanCommands.cs" />
+      <Compile Update="CommandModules\WarningCommands.cs" />
       <Compile Update="CommandModules\ModerationServerSetCommands.cs">
         <DependentUpon>ModerationServerCommands.cs</DependentUpon>
       </Compile>
-      <Compile Update="CommandModules\ModerationBanSetCommands.cs">
+      <Compile Update="CommandModules\BanSetCommands.cs">
         <DependentUpon>ModerationBanCommands.cs</DependentUpon>
       </Compile>
-      <Compile Update="CommandModules\ModerationNoteSetCommands.cs">
+      <Compile Update="CommandModules\NoteSetCommands.cs">
         <DependentUpon>ModerationNoteCommands.cs</DependentUpon>
       </Compile>
-      <Compile Update="CommandModules\ModerationWarningSetCommands.cs">
+      <Compile Update="CommandModules\WarningSetCommands.cs">
         <DependentUpon>ModerationWarningCommands.cs</DependentUpon>
       </Compile>
     </ItemGroup>

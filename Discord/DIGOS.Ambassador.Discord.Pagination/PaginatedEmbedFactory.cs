@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using Discord;
 using JetBrains.Annotations;
@@ -34,6 +35,57 @@ namespace DIGOS.Ambassador.Discord.Pagination
     /// </summary>
     public static class PaginatedEmbedFactory
     {
+        /// <summary>
+        /// Creates a simple paginated list from a collection of items.
+        /// </summary>
+        /// <param name="feedbackService">The user feedback service.</param>
+        /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
+        /// <param name="items">The items.</param>
+        /// <param name="pageBuilder">A function that builds a page for a single value in the collection.</param>
+        /// <param name="emptyCollectionDescription">The description to use when the collection is empty.</param>
+        /// <param name="appearance">The appearance settings to use for the pager.</param>
+        /// <typeparam name="TItem">The type of the items in the collection.</typeparam>
+        /// <returns>The paginated embed.</returns>
+        public static async Task<PaginatedEmbed> PagesFromCollectionAsync<TItem>
+        (
+            UserFeedbackService feedbackService,
+            IUser sourceUser,
+            IEnumerable<TItem> items,
+            Func<EmbedBuilder, TItem, Task> pageBuilder,
+            [NotNull] string emptyCollectionDescription = "There's nothing here.",
+            [CanBeNull] PaginatedAppearanceOptions appearance = null
+        )
+        {
+            appearance = appearance ?? PaginatedAppearanceOptions.Default;
+
+            var enumeratedItems = items.ToList();
+            var paginatedEmbed = new PaginatedEmbed(feedbackService, sourceUser) { Appearance = appearance };
+
+            IEnumerable<EmbedBuilder> pages;
+            if (!enumeratedItems.Any())
+            {
+                var eb = paginatedEmbed.Appearance.CreateEmbedBase().WithDescription(emptyCollectionDescription);
+                pages = new[] { eb };
+            }
+            else
+            {
+                var pageList = new List<EmbedBuilder>();
+                foreach (var item in enumeratedItems)
+                {
+                    var page = paginatedEmbed.Appearance.CreateEmbedBase();
+                    await pageBuilder(page, item);
+
+                    pageList.Add(page);
+                }
+
+                pages = pageList;
+            }
+
+            paginatedEmbed.WithPages(pages);
+
+            return paginatedEmbed;
+        }
+
         /// <summary>
         /// Creates a simple paginated list from a collection of items.
         /// </summary>

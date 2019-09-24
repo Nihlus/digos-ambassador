@@ -83,6 +83,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation
 
             var commands = serviceProvider.GetRequiredService<CommandService>();
             await commands.AddModuleAsync<ModerationCommands>(serviceProvider);
+            await commands.AddModuleAsync<NoteCommands>(serviceProvider);
+            await commands.AddModuleAsync<WarningCommands>(serviceProvider);
+            await commands.AddModuleAsync<BanCommands>(serviceProvider);
 
             return true;
         }

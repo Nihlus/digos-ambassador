@@ -1,5 +1,5 @@
 //
-//  ModerationBanSetCommands.cs
+//  BanSetCommands.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -27,18 +27,15 @@ using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 {
-    public partial class ModerationCommands
+    public partial class BanCommands
     {
-        public partial class ModerationBanCommands
+        /// <summary>
+        /// Ban setter commands.
+        /// </summary>
+        [PublicAPI]
+        [Group("set")]
+        public class BanSetCommands : ModuleBase
         {
-            /// <summary>
-            /// Ban setter commands.
-            /// </summary>
-            [PublicAPI]
-            [Group("set")]
-            public class ModerationBanSetCommands : ModuleBase
-            {
-            }
         }
     }
 }
