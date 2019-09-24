@@ -69,7 +69,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <param name="user">The user that the note is attached to.</param>
         /// <param name="author">The user that created the note.</param>
         /// <param name="content">The content of the note.</param>
-        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
         public UserNote
         (
             [NotNull] Server server,

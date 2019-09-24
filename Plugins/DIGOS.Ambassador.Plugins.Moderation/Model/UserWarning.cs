@@ -87,7 +87,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <param name="reason">The reason for the warning.</param>
         /// <param name="messageID">The message that caused the warning, if any.</param>
         /// <param name="expiresOn">The time at which the ban expires.</param>
-        [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
         public UserWarning
         (
             [NotNull] Server server,
