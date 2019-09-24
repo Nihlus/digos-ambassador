@@ -20,6 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Plugins.Moderation.Services;
+using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
 
@@ -37,6 +42,65 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Server-related commands, such as viewing or editing info about a specific server.")]
         public partial class ModerationServerCommands : ModuleBase
         {
+            [NotNull]
+            private readonly ModerationService _moderation;
+
+            [NotNull]
+            private readonly UserFeedbackService _feedback;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ModerationServerCommands"/> class.
+            /// </summary>
+            /// <param name="moderation">The moderation service.</param>
+            /// <param name="feedback">The feedback service.</param>
+            public ModerationServerCommands
+            (
+                [NotNull] ModerationService moderation,
+                [NotNull] UserFeedbackService feedback
+            )
+            {
+                _moderation = moderation;
+                _feedback = feedback;
+            }
+
+            /// <summary>
+            /// Shows the server's moderation settings.
+            /// </summary>
+            [Command("settings")]
+            [Summary("Shows the server's moderation settings.")]
+            public async Task ShowServerSettings()
+            {
+                var guild = this.Context.Guild;
+
+                var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guild);
+                if (!getSettings.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, getSettings.ErrorReason);
+                    return;
+                }
+
+                var settings = getSettings.Entity;
+
+                var eb = _feedback.CreateEmbedBase();
+                eb.WithTitle(guild.Name);
+                eb.WithThumbnailUrl(guild.IconUrl);
+
+                var moderationLogChannelName = settings.ModerationLogChannel.HasValue
+                    ? MentionUtils.MentionChannel((ulong)settings.ModerationLogChannel)
+                    : "None";
+
+                eb.AddField("Moderation Log Channel", moderationLogChannelName);
+
+                var monitoringChannelName = settings.MonitoringChannel.HasValue
+                    ? MentionUtils.MentionChannel((ulong)settings.MonitoringChannel)
+                    : "None";
+
+                eb.AddField("Event Monitor Channel", monitoringChannelName);
+
+                eb.AddField("Warning Threshold", settings.WarningThreshold);
+
+                await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            }
         }
     }
 }

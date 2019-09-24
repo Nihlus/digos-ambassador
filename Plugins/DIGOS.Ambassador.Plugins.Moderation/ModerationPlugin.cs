@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
@@ -29,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Moderation;
 using DIGOS.Ambassador.Plugins.Moderation.CommandModules;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
+using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
@@ -50,8 +52,35 @@ namespace DIGOS.Ambassador.Plugins.Moderation
         public override string Description => "Provides simple moderation tools.";
 
         /// <inheritdoc />
+        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .AddSchemaAwareDbContextPool<ModerationDatabaseContext>();
+
+            serviceCollection
+                .AddScoped<ModerationService>()
+                .AddScoped<NoteService>()
+                .AddScoped<WarningService>()
+                .AddScoped<BanService>();
+
+            return Task.FromResult(true);
+        }
+
+        /// <inheritdoc />
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
+            var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
+            var registrationResult = permissionRegistry.RegisterPermissions
+            (
+                Assembly.GetExecutingAssembly(),
+                serviceProvider
+            );
+
+            if (!registrationResult.IsSuccess)
+            {
+                return false;
+            }
+
             var commands = serviceProvider.GetRequiredService<CommandService>();
             await commands.AddModuleAsync<ModerationCommands>(serviceProvider);
 
