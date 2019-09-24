@@ -35,7 +35,7 @@ using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
 {
-    public partial class UserService
+    public partial class NoteService
     {
         public class DeleteNoteAsync : NoteServiceTestBase
         {
