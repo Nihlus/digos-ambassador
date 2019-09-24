@@ -285,6 +285,51 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                     $"{permission.FriendlyName} granted to {discordUser.Mention}."
                 );
             }
+
+            /// <summary>
+            /// Grant the targeted role the given permission.
+            /// </summary>
+            /// <param name="discordRole">The Discord role.</param>
+            /// <param name="permissionName">The permission that is to be granted.</param>
+            /// <param name="grantedTarget">The target that the permission should be valid for.</param>
+            [Command]
+            [Summary("Grant the targeted role the given permission.")]
+            [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
+            public async Task Default
+            (
+                [NotNull] IRole discordRole,
+                [NotNull] string permissionName,
+                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
+                PermissionTarget grantedTarget = PermissionTarget.Self
+            )
+            {
+                var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
+                if (!getPermissionResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, getPermissionResult.ErrorReason);
+                    return;
+                }
+
+                var permission = getPermissionResult.Entity;
+                var grantPermissionResult = await _permissions.GrantPermissionAsync
+                (
+                    discordRole,
+                    permission,
+                    grantedTarget
+                );
+
+                if (!grantPermissionResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, grantPermissionResult.ErrorReason);
+                    return;
+                }
+
+                await _feedback.SendConfirmationAsync
+                (
+                    this.Context,
+                    $"{permission.FriendlyName} granted to {MentionUtils.MentionRole(discordRole.Id)}."
+                );
+            }
         }
 
         /// <summary>
@@ -380,6 +425,51 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                 (
                     this.Context,
                     $"{permission.FriendlyName} revoked from {discordUser.Mention}."
+                );
+            }
+
+            /// <summary>
+            /// Revoke the given permission from the targeted role.
+            /// </summary>
+            /// <param name="discordRole">The Discord role.</param>
+            /// <param name="permissionName">The permission that is to be revoked.</param>
+            /// <param name="revokedTarget">The target that is to be revoked.</param>
+            [Command]
+            [Summary("Revoke the given permission from the targeted role.")]
+            [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]
+            public async Task Default
+            (
+                [NotNull] IRole discordRole,
+                string permissionName,
+                [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
+                PermissionTarget revokedTarget = PermissionTarget.Self
+            )
+            {
+                var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
+                if (!getPermissionResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, getPermissionResult.ErrorReason);
+                    return;
+                }
+
+                var permission = getPermissionResult.Entity;
+                var revokePermissionResult = await _permissions.RevokePermissionAsync
+                (
+                    discordRole,
+                    permission,
+                    revokedTarget
+                );
+
+                if (!revokePermissionResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, revokePermissionResult.ErrorReason);
+                    return;
+                }
+
+                await _feedback.SendConfirmationAsync
+                (
+                    this.Context,
+                    $"{permission.FriendlyName} revoked from {MentionUtils.MentionRole(discordRole.Id)}."
                 );
             }
         }
