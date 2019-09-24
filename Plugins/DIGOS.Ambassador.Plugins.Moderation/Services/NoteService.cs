@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Results;
@@ -175,6 +176,27 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Deletes the given note.
+        /// </summary>
+        /// <param name="note">The note to delete.</param>
+        /// <returns>A deletion result which may or may note have succeeded.</returns>
+        public async Task<DeleteEntityResult> DeleteNoteAsync([NotNull] UserNote note)
+        {
+            if (!_database.UserNotes.Any(n => n.ID == note.ID))
+            {
+                return DeleteEntityResult.FromError
+                (
+                    "That note isn't in the database. This is probably an error in the bot."
+                );
+            }
+
+            _database.UserNotes.Remove(note);
+            await _database.SaveChangesAsync();
+
+            return DeleteEntityResult.FromSuccess();
         }
     }
 }
