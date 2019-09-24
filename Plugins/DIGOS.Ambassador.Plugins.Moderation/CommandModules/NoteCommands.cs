@@ -54,22 +54,28 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [NotNull]
         private readonly InteractivityService _interactivity;
 
+        [NotNull]
+        private readonly ChannelLoggingService _logging;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NoteCommands"/> class.
         /// </summary>
         /// <param name="notes">The moderation service.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="interactivity">The interactivity service.</param>
+        /// <param name="logging">The logging service.</param>
         public NoteCommands
         (
             [NotNull] NoteService notes,
             [NotNull] UserFeedbackService feedback,
-            [NotNull] InteractivityService interactivity
+            [NotNull] InteractivityService interactivity,
+            [NotNull] ChannelLoggingService logging
         )
         {
             _notes = notes;
             _feedback = feedback;
             _interactivity = interactivity;
+            _logging = logging;
         }
 
         /// <summary>
@@ -140,6 +146,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             var note = addNote.Entity;
             await _feedback.SendConfirmationAsync(this.Context, $"Note added (ID {note.ID}).");
+            await _logging.NotifyUserNoteAdded(note);
         }
 
         /// <summary>
@@ -169,6 +176,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Note deleted.");
+
+            var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
+            await _logging.NotifyUserNoteRemoved(note, rescinder);
         }
     }
 }

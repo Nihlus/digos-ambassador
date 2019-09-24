@@ -59,6 +59,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [NotNull]
         private readonly InteractivityService _interactivity;
 
+        [NotNull]
+        private readonly ChannelLoggingService _logging;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="WarningCommands"/> class.
         /// </summary>
@@ -66,18 +69,21 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// <param name="warnings">The warning service.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="interactivity">The interactivity service.</param>
+        /// <param name="logging">The logging service.</param>
         public WarningCommands
         (
             [NotNull] ModerationService moderation,
             [NotNull] WarningService warnings,
             [NotNull] UserFeedbackService feedback,
-            [NotNull] InteractivityService interactivity
+            [NotNull] InteractivityService interactivity,
+            [NotNull] ChannelLoggingService logging
         )
         {
             _moderation = moderation;
             _warnings = warnings;
             _feedback = feedback;
             _interactivity = interactivity;
+            _logging = logging;
         }
 
         /// <summary>
@@ -172,6 +178,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var warning = addWarning.Entity;
             await _feedback.SendConfirmationAsync(this.Context, $"Warning added (ID {warning.ID}).");
 
+            await _logging.NotifyUserWarningAdded(warning);
+
             var getSettings = await _moderation.GetOrCreateServerSettingsAsync(this.Context.Guild);
             if (!getSettings.IsSuccess)
             {
@@ -217,6 +225,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Warning deleted.");
+
+            var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
+            await _logging.NotifyUserWarningRemoved(warning, rescinder);
         }
     }
 }

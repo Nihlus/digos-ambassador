@@ -58,6 +58,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [NotNull]
         private readonly InteractivityService _interactivity;
 
+        [NotNull]
+        private readonly ChannelLoggingService _logging;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BanCommands"/> class.
         /// </summary>
@@ -65,18 +68,21 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// <param name="bans">The ban service.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="interactivity">The interactivity service.</param>
+        /// <param name="logging">The logging service.</param>
         public BanCommands
         (
             [NotNull] ModerationService moderation,
             [NotNull] BanService bans,
             [NotNull] UserFeedbackService feedback,
-            [NotNull] InteractivityService interactivity
+            [NotNull] InteractivityService interactivity,
+            [NotNull] ChannelLoggingService logging
         )
         {
             _moderation = moderation;
             _bans = bans;
             _feedback = feedback;
             _interactivity = interactivity;
+            _logging = logging;
         }
 
         /// <summary>
@@ -173,6 +179,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             await this.Context.Guild.AddBanAsync((ulong)ban.User.DiscordID, reason: reason);
             await _feedback.SendConfirmationAsync(this.Context, $"User banned (ban ID {ban.ID}).");
+
+            await _logging.NotifyUserBanned(ban);
         }
 
         /// <summary>
@@ -204,6 +212,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             await this.Context.Guild.RemoveBanAsync((ulong)ban.User.DiscordID);
             await _feedback.SendConfirmationAsync(this.Context, "Ban rescinded.");
+
+            var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
+            await _logging.NotifyUserUnbanned(ban, rescinder);
         }
     }
 }

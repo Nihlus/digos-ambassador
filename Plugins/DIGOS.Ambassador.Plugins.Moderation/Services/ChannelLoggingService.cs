@@ -22,6 +22,8 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using Discord;
 using Discord.WebSocket;
@@ -35,18 +37,26 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     public sealed class ChannelLoggingService
     {
         private readonly ModerationService _moderation;
-
         private readonly DiscordSocketClient _client;
+
+        private readonly UserFeedbackService _feedback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelLoggingService"/> class.
         /// </summary>
         /// <param name="moderation">The moderation service.</param>
         /// <param name="client">The Discord client in use.</param>
-        public ChannelLoggingService([NotNull] ModerationService moderation, [NotNull] DiscordSocketClient client)
+        /// <param name="feedback">The feedback service.</param>
+        public ChannelLoggingService
+        (
+            [NotNull] ModerationService moderation,
+            [NotNull] DiscordSocketClient client,
+            [NotNull] UserFeedbackService feedback
+        )
         {
             _moderation = moderation;
             _client = client;
+            _feedback = feedback;
         }
 
         /// <summary>
@@ -64,14 +74,25 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             var channel = getChannel.Entity;
+
+            var author = guild.GetUser((ulong)ban.Author.DiscordID);
+
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithTitle("User Banned");
+            eb.WithColor(Color.Red);
+
+            eb.WithDescription($"User with ID {ban.User.DiscordID} was banned by {author.Mention}.");
+
+            await _feedback.SendEmbedAsync(channel, eb.Build());
         }
 
         /// <summary>
         /// Posts a notification that a user was unbanned.
         /// </summary>
         /// <param name="ban">The ban.</param>
+        /// <param name="rescinder">The person who rescinded the ban.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserUnbanned([NotNull] UserBan ban)
+        public async Task NotifyUserUnbanned([NotNull] UserBan ban, IGuildUser rescinder)
         {
             var guild = _client.GetGuild((ulong)ban.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
@@ -81,6 +102,18 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             var channel = getChannel.Entity;
+
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithTitle("User Unbanned");
+            eb.WithColor(Color.Green);
+
+            var whoDidIt = rescinder.IsMe(_client)
+                ? "(expired)"
+                : $"by {rescinder.Mention}";
+
+            eb.WithDescription($"User with ID {ban.User.DiscordID} was unbanned {whoDidIt}.");
+
+            await _feedback.SendEmbedAsync(channel, eb.Build());
         }
 
         /// <summary>
@@ -98,14 +131,25 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             var channel = getChannel.Entity;
+
+            var author = guild.GetUser((ulong)warning.Author.DiscordID);
+
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithTitle("User Warned");
+            eb.WithColor(Color.Orange);
+
+            eb.WithDescription($"User with ID {warning.User.DiscordID} was warned by {author.Mention}.");
+
+            await _feedback.SendEmbedAsync(channel, eb.Build());
         }
 
         /// <summary>
         /// Posts a notification that a warning was rescinded.
         /// </summary>
         /// <param name="warning">The warning.</param>
+        /// <param name="rescinder">The person who rescinded the warning.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserWarningRemoved([NotNull] UserWarning warning)
+        public async Task NotifyUserWarningRemoved([NotNull] UserWarning warning, [NotNull] IGuildUser rescinder)
         {
             var guild = _client.GetGuild((ulong)warning.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
@@ -115,6 +159,21 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             var channel = getChannel.Entity;
+
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithTitle("User Unbanned");
+            eb.WithColor(Color.Green);
+
+            var whoDidIt = rescinder.IsMe(_client)
+                ? "(expired)"
+                : $"by {rescinder.Mention}";
+
+            eb.WithDescription
+            (
+                $"A warning was removed from user with ID {warning.User.DiscordID} {whoDidIt}."
+            );
+
+            await _feedback.SendEmbedAsync(channel, eb.Build());
         }
 
         /// <summary>
@@ -132,14 +191,25 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             var channel = getChannel.Entity;
+
+            var author = guild.GetUser((ulong)note.Author.DiscordID);
+
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithTitle("Note Added");
+            eb.WithColor(Color.Gold);
+
+            eb.WithDescription($"A note was added to user with ID {note.User.DiscordID} by {author.Mention}.");
+
+            await _feedback.SendEmbedAsync(channel, eb.Build());
         }
 
         /// <summary>
         /// Posts a notification that a note was removed from a user.
         /// </summary>
         /// <param name="note">The note.</param>
+        /// <param name="remover">The person that removed the note.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserNoteRemoved([NotNull] UserNote note)
+        public async Task NotifyUserNoteRemoved([NotNull] UserNote note, [NotNull] IGuildUser remover)
         {
             var guild = _client.GetGuild((ulong)note.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
@@ -149,6 +219,17 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             var channel = getChannel.Entity;
+
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithTitle("Note Removed");
+            eb.WithColor(Color.Green);
+
+            eb.WithDescription
+            (
+                $"A note was removed from user with ID {note.User.DiscordID} by {remover.Mention}."
+            );
+
+            await _feedback.SendEmbedAsync(channel, eb.Build());
         }
 
         /// <summary>
@@ -165,6 +246,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             var channel = getChannel.Entity;
+
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithColor(Color.Blue);
+
+            eb.WithDescription($"{user.Mention} left the server.");
+
+            await _feedback.SendEmbedAsync(channel, eb.Build());
         }
 
         /// <summary>
@@ -188,6 +276,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             var channel = getChannel.Entity;
+
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithColor(Color.Blue);
+
+            eb.WithDescription($"{user.Mention} changed their username from {oldUsername} to {newUsername}.");
+
+            await _feedback.SendEmbedAsync(channel, eb.Build());
         }
 
         /// <summary>
@@ -211,6 +306,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             var channel = getChannel.Entity;
+
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithColor(Color.Blue);
+
+            eb.WithDescription($"{user.Mention} changed their discriminator from {oldDiscriminator} to {newDiscriminator}.");
+
+            await _feedback.SendEmbedAsync(channel, eb.Build());
         }
 
         /// <summary>
