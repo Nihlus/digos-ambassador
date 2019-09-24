@@ -62,7 +62,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation
                 .AddScoped<ModerationService>()
                 .AddScoped<NoteService>()
                 .AddScoped<WarningService>()
-                .AddScoped<BanService>();
+                .AddScoped<BanService>()
+                .AddScoped<ChannelLoggingService>();
 
             return Task.FromResult(true);
         }
