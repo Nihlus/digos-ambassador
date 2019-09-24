@@ -26,8 +26,10 @@ using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Moderation;
+using DIGOS.Ambassador.Plugins.Moderation.CommandModules;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
+using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,13 +50,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation
         public override string Description => "Provides simple moderation tools.";
 
         /// <inheritdoc />
-        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
-            serviceCollection
-                .AddSchemaAwareDbContextPool<ModerationDatabaseContext>()
-                .AddScoped<ModerationService>();
+            var commands = serviceProvider.GetRequiredService<CommandService>();
+            await commands.AddModuleAsync<ModerationCommands>(serviceProvider);
 
-            return Task.FromResult(true);
+            return true;
         }
 
         /// <inheritdoc />
