@@ -90,6 +90,18 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
 
                 Assert.Equal("Dummy thicc", _warning.Reason);
             }
+
+            [Fact]
+            public async Task SetterUpdatesTimestamp()
+            {
+                var before = _warning.UpdatedAt;
+
+                await this.Warnings.SetWarningReasonsAsync(_warning, "Dummy thicc");
+
+                var after = _warning.UpdatedAt;
+
+                Assert.True(before < after);
+            }
         }
     }
 }

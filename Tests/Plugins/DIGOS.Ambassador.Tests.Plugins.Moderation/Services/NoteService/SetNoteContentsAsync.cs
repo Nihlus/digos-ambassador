@@ -90,6 +90,18 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
 
                 Assert.Equal("Dummy thicc", _note.Content);
             }
+
+            [Fact]
+            public async Task SetterUpdatesTimestamp()
+            {
+                var before = _note.UpdatedAt;
+
+                await this.Notes.SetNoteContentsAsync(_note, "Dummy thicc");
+
+                var after = _note.UpdatedAt;
+
+                Assert.True(before < after);
+            }
         }
     }
 }

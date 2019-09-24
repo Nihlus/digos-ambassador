@@ -71,6 +71,18 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
 
                 Assert.Equal(1, _warning.MessageID);
             }
+
+            [Fact]
+            public async Task SetterUpdatesTimestamp()
+            {
+                var before = _warning.UpdatedAt;
+
+                await this.Warnings.SetWarningContextMessageAsync(_warning, 1);
+
+                var after = _warning.UpdatedAt;
+
+                Assert.True(before < after);
+            }
         }
     }
 }

@@ -82,5 +82,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
 
             this.UpdatedAt = DateTime.UtcNow;
         }
+
+        /// <summary>
+        /// Notifies the entity that it has been updated, updating its timestamp.
+        /// </summary>
+        public void NotifyUpdate()
+        {
+            this.UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

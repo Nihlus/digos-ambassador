@@ -81,6 +81,19 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
 
                 Assert.Equal(expiryDate, _warning.ExpiresOn);
             }
+
+            [Fact]
+            public async Task SetterUpdatesTimestamp()
+            {
+                var before = _warning.UpdatedAt;
+
+                var expiryDate = DateTime.Today.AddDays(1);
+                await this.Warnings.SetWarningExpiryDateAsync(_warning, expiryDate);
+
+                var after = _warning.UpdatedAt;
+
+                Assert.True(before < after);
+            }
         }
     }
 }

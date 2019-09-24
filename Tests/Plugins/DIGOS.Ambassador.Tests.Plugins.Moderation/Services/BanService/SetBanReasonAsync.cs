@@ -36,14 +36,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
 {
     public partial class BanService
     {
-        public class SetBanReasonsAsync : BanServiceTestBase
+        public class SetBanReasonAsync : BanServiceTestBase
         {
             private readonly UserBan _ban = new UserBan(new Server(0), new User(0), new User(1), string.Empty);
 
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewReasonsAreEmpty()
             {
-                var result = await this.Bans.SetBanReasonsAsync(_ban, string.Empty);
+                var result = await this.Bans.SetBanReasonAsync(_ban, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -52,7 +52,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             public async Task ReturnsUnsuccessfulIfNewReasonsAreNull()
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Bans.SetBanReasonsAsync(_ban, null);
+                var result = await this.Bans.SetBanReasonAsync(_ban, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewReasonIsTooLong()
             {
-                var result = await this.Bans.SetBanReasonsAsync(_ban, new string('a', 1025));
+                var result = await this.Bans.SetBanReasonAsync(_ban, new string('a', 1025));
 
                 Assert.False(result.IsSuccess);
             }
@@ -68,8 +68,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ReturnsUnsuccessfulIfNewReasonsAreIdentical()
             {
-                await this.Bans.SetBanReasonsAsync(_ban, "Dummy thicc");
-                var result = await this.Bans.SetBanReasonsAsync(_ban, "Dummy thicc");
+                await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
+                var result = await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
 
                 Assert.False(result.IsSuccess);
             }
@@ -77,8 +77,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ReturnsSuccessfulIfNewReasonsAreWellFormed()
             {
-                await this.Bans.SetBanReasonsAsync(_ban, "Dummy thicc");
-                var result = await this.Bans.SetBanReasonsAsync(_ban, "Not dummy thicc");
+                await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
+                var result = await this.Bans.SetBanReasonAsync(_ban, "Not dummy thicc");
 
                 Assert.True(result.IsSuccess);
             }
@@ -86,9 +86,21 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             [Fact]
             public async Task ActuallySetsReasons()
             {
-                await this.Bans.SetBanReasonsAsync(_ban, "Dummy thicc");
+                await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
 
                 Assert.Equal("Dummy thicc", _ban.Reason);
+            }
+
+            [Fact]
+            public async Task SetterUpdatesTimestamp()
+            {
+                var before = _ban.UpdatedAt;
+
+                await this.Bans.SetBanReasonAsync(_ban, "Dummy thicc");
+
+                var after = _ban.UpdatedAt;
+
+                Assert.True(before < after);
             }
         }
     }

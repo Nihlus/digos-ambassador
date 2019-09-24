@@ -173,6 +173,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             note.Content = content;
+            note.NotifyUpdate();
+
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();

@@ -129,7 +129,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var ban = new UserBan(server, user, author, string.Empty);
 
-            var setReason = await SetBanReasonsAsync(ban, reason);
+            var setReason = await SetBanReasonAsync(ban, reason);
             if (!setReason.IsSuccess)
             {
                 return CreateEntityResult<UserBan>.FromError(setReason);
@@ -173,7 +173,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="ban">The ban.</param>
         /// <param name="reason">The reason.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetBanReasonsAsync([NotNull] UserBan ban, [NotNull] string reason)
+        public async Task<ModifyEntityResult> SetBanReasonAsync([NotNull] UserBan ban, [NotNull] string reason)
         {
             if (reason.IsNullOrWhitespace())
             {
@@ -194,6 +194,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             ban.Reason = reason;
+            ban.NotifyUpdate();
+
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -217,6 +219,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             ban.MessageID = messageID;
+            ban.NotifyUpdate();
+
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -245,6 +249,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             ban.ExpiresOn = expiresOn;
+            ban.NotifyUpdate();
+
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();

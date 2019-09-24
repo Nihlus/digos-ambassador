@@ -71,6 +71,18 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
 
                 Assert.Equal(1, _ban.MessageID);
             }
+
+            [Fact]
+            public async Task SetterUpdatesTimestamp()
+            {
+                var before = _ban.UpdatedAt;
+
+                await this.Bans.SetBanContextMessageAsync(_ban, 1);
+
+                var after = _ban.UpdatedAt;
+
+                Assert.True(before < after);
+            }
         }
     }
 }

@@ -194,6 +194,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             warning.Reason = reason;
+            warning.NotifyUpdate();
+
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -217,6 +219,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             warning.MessageID = messageID;
+            warning.NotifyUpdate();
+
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -245,6 +249,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             warning.ExpiresOn = expiresOn;
+            warning.NotifyUpdate();
+
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();

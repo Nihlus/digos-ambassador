@@ -81,6 +81,19 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
 
                 Assert.Equal(expiryDate, _ban.ExpiresOn);
             }
+
+            [Fact]
+            public async Task SetterUpdatesTimestamp()
+            {
+                var before = _ban.UpdatedAt;
+
+                var expiryDate = DateTime.Today.AddDays(1);
+                await this.Bans.SetBanExpiryDateAsync(_ban, expiryDate);
+
+                var after = _ban.UpdatedAt;
+
+                Assert.True(before < after);
+            }
         }
     }
 }
