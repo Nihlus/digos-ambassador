@@ -330,6 +330,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 return;
             }
 
+            // We don't care about bot messages
+            if (message.Author.IsBot | message.Author.IsWebhook)
+            {
+                return;
+            }
+
             var getChannel = await GetMonitoringChannelAsync(textChannel.Guild);
             if (!getChannel.IsSuccess)
             {
@@ -354,6 +360,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
                 if (!(deletionEntry is null))
                 {
+                    // We don't care about bot deletions
+                    if (deletionEntry.User.IsBot | deletionEntry.User.IsWebhook)
+                    {
+                        return;
+                    }
+
                     extra = $"by {deletionEntry.User.Mention}.";
                 }
                 else
