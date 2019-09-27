@@ -118,7 +118,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 return;
             }
 
-            await PostArchivedRoleplayAsync(guild, roleplay);
+            if (roleplay.IsPublic)
+            {
+                await PostArchivedRoleplayAsync(guild, roleplay);
+            }
 
             var dedicatedChannel = guild.GetTextChannel((ulong)roleplay.DedicatedChannelID);
             if (dedicatedChannel is null)
