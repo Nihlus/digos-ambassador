@@ -180,7 +180,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 var eb = _feedback.CreateEmbedBase();
                 eb.WithTitle($"{exportedRoleplay.Title} - Archived");
                 eb.WithDescription(roleplay.Summary);
-                eb.WithFooter($"Archived on {DateTime.Now.Date}.");
+                eb.WithFooter($"Archived on {DateTime.Now:d}.");
 
                 await archiveChannel.SendFileAsync
                 (
