@@ -48,6 +48,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         public long? DedicatedRoleplayChannelsCategory { get; internal set; }
 
         /// <summary>
+        /// Gets the channel that archived roleplays are exported to.
+        /// </summary>
+        public long? ArchiveChannel { get; internal set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ServerRoleplaySettings"/> class.
         /// </summary>
         /// <remarks>

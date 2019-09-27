@@ -864,12 +864,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             {
                 case ExportFormat.PDF:
                 {
-                    exporter = new PDFRoleplayExporter(this.Context);
+                    exporter = new PDFRoleplayExporter(this.Context.Guild);
                     break;
                 }
                 case ExportFormat.Plaintext:
                 {
-                    exporter = new PlaintextRoleplayExporter(this.Context);
+                    exporter = new PlaintextRoleplayExporter(this.Context.Guild);
                     break;
                 }
                 default:

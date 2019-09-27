@@ -102,6 +102,41 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                     await _feedback.SendConfirmationAsync(this.Context, "Dedicated channel category set.");
                 }
+
+                /// <summary>
+                /// Sets the channel to use for archival of roleplays.
+                /// </summary>
+                /// <param name="channel">The channel to use.</param>
+                [UsedImplicitly]
+                [Command("archive-channel")]
+                [Summary("Sets the channel to use for archival of roleplays.")]
+                [RequireContext(Guild)]
+                [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
+                public async Task SetArchiveChannelAsync(ITextChannel channel)
+                {
+                    var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                    if (!getServerResult.IsSuccess)
+                    {
+                        await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
+                        return;
+                    }
+
+                    var server = getServerResult.Entity;
+
+                    var result = await _roleplaying.SetArchiveChannelAsync
+                    (
+                        server,
+                        channel
+                    );
+
+                    if (!result.IsSuccess)
+                    {
+                        await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                        return;
+                    }
+
+                    await _feedback.SendConfirmationAsync(this.Context, "Archive channel set.");
+                }
             }
         }
     }

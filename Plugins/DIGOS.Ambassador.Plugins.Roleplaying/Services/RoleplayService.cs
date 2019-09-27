@@ -1228,5 +1228,32 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             return ModifyEntityResult.FromSuccess();
         }
+
+        /// <summary>
+        /// Sets the channel to use for archived roleplays.
+        /// </summary>
+        /// <param name="server">The server.</param>
+        /// <param name="channel">The channel to use.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        [NotNull, ItemNotNull]
+        public async Task<ModifyEntityResult> SetArchiveChannelAsync
+        (
+            [NotNull] Server server,
+            [CanBeNull] ITextChannel channel
+        )
+        {
+            var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
+            if (!getSettingsResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getSettingsResult);
+            }
+
+            var settings = getSettingsResult.Entity;
+
+            settings.ArchiveChannel = (long?)channel?.Id;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
     }
 }

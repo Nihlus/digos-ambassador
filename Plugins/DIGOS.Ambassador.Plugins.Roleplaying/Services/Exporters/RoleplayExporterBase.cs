@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
+using Discord;
 using Discord.Commands;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
@@ -32,17 +33,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
     internal abstract class RoleplayExporterBase : IRoleplayExporter
     {
         /// <summary>
-        /// Gets the context of the export operation.
+        /// Gets the guild that the exporter is scoped to.
         /// </summary>
-        protected ICommandContext Context { get; }
+        protected IGuild Guild { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayExporterBase"/> class.
         /// </summary>
-        /// <param name="context">The context of the export operation.</param>
-        protected RoleplayExporterBase(ICommandContext context)
+        /// <param name="guild">The context of the export operation.</param>
+        protected RoleplayExporterBase(IGuild guild)
         {
-            this.Context = context;
+            this.Guild = guild;
         }
 
         /// <inheritdoc />

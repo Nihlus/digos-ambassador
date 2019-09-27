@@ -27,6 +27,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
+using Discord;
 using Discord.Commands;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
@@ -49,9 +50,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
         /// <summary>
         /// Initializes a new instance of the <see cref="PDFRoleplayExporter"/> class.
         /// </summary>
-        /// <param name="context">The context of the export operation.</param>
-        public PDFRoleplayExporter(ICommandContext context)
-            : base(context)
+        /// <param name="guild">The context of the export operation.</param>
+        public PDFRoleplayExporter(IGuild guild)
+            : base(guild)
         {
         }
 
@@ -68,7 +69,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                 writer.Open();
                 pdfDoc.Open();
 
-                var owner = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
+                var owner = await this.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
 
                 pdfDoc.AddAuthor(owner.Nickname);
                 pdfDoc.AddCreationDate();
@@ -81,7 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                     (
                         async p =>
                         {
-                            var guildUser = await this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID);
+                            var guildUser = await this.Guild.GetUserAsync((ulong)p.User.DiscordID);
                             if (guildUser is null)
                             {
                                 var messageByUser = roleplay.Messages.FirstOrDefault

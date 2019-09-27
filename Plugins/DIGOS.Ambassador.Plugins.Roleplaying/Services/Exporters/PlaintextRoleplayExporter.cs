@@ -24,6 +24,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
+using Discord;
 using Discord.Commands;
 using MoreLinq.Extensions;
 
@@ -37,16 +38,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaintextRoleplayExporter"/> class.
         /// </summary>
-        /// <param name="context">The command context for this export operation.</param>
-        public PlaintextRoleplayExporter(ICommandContext context)
-            : base(context)
+        /// <param name="guild">The command context for this export operation.</param>
+        public PlaintextRoleplayExporter(IGuild guild)
+            : base(guild)
         {
         }
 
         /// <inheritdoc />
         public override async Task<ExportedRoleplay> ExportAsync(Roleplay roleplay)
         {
-            var owner = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
+            var owner = await this.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
 
             var filePath = Path.GetTempFileName();
             using (var of = File.Create(filePath))
@@ -56,7 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                     await ofw.WriteLineAsync($"Roleplay name: {roleplay.Name}");
                     await ofw.WriteLineAsync($"Owner: {owner.Username}");
 
-                    var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Context.Guild.GetUserAsync((ulong)p.User.DiscordID)));
+                    var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Guild.GetUserAsync((ulong)p.User.DiscordID)));
 
                     await ofw.WriteLineAsync("Participants:");
                     foreach (var participant in joinedUsers)
