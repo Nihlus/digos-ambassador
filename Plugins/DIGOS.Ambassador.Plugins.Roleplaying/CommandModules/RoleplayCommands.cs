@@ -306,7 +306,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             {
                 var deleteDedicatedChannelResult = await _roleplays.DeleteDedicatedRoleplayChannelAsync
                 (
-                    this.Context,
+                    this.Context.Guild,
                     roleplay
                 );
 

@@ -961,23 +961,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Deletes the dedicated channel for the roleplay.
         /// </summary>
-        /// <param name="context">The context in which the request was made.</param>
+        /// <param name="guild">The context in which the request was made.</param>
         /// <param name="roleplay">The roleplay to delete the channel of.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         [NotNull, ItemNotNull]
         public async Task<ModifyEntityResult> DeleteDedicatedRoleplayChannelAsync
         (
-            [NotNull] ICommandContext context,
+            [NotNull] IGuild guild,
             [NotNull] Roleplay roleplay)
         {
-            if (!(await context.Guild.GetUserAsync(context.Client.CurrentUser.Id)).GuildPermissions.ManageChannels)
-            {
-                return ModifyEntityResult.FromError
-                (
-                    "I don't have permission to manage channels, so I can't delete dedicated RP channels."
-                );
-            }
-
             if (roleplay.DedicatedChannelID is null)
             {
                 return ModifyEntityResult.FromError
@@ -986,7 +978,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 );
             }
 
-            var getDedicatedChannelResult = await GetDedicatedRoleplayChannelAsync(context.Guild, roleplay);
+            var getDedicatedChannelResult = await GetDedicatedRoleplayChannelAsync(guild, roleplay);
             if (getDedicatedChannelResult.IsSuccess)
             {
                 await getDedicatedChannelResult.Entity.DeleteAsync();

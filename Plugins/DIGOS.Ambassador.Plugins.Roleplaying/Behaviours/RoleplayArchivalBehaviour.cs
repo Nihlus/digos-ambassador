@@ -118,6 +118,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 return;
             }
 
+            await PostArchivedRoleplayAsync(guild, roleplay);
+
             var dedicatedChannel = guild.GetTextChannel((ulong)roleplay.DedicatedChannelID);
             if (dedicatedChannel is null)
             {
@@ -131,9 +133,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 await _roleplays.AddToOrUpdateMessageInRoleplayAsync(roleplay, message);
             }
 
-            await dedicatedChannel.DeleteAsync();
-
-            await PostArchivedRoleplayAsync(guild, roleplay);
+            await _roleplays.DeleteDedicatedRoleplayChannelAsync(guild, roleplay);
         }
 
         /// <summary>
