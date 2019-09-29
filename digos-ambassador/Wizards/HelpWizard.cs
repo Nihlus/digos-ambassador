@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Wizards
         /// Gets the emotes that are currently rejected by the wizard.
         /// </summary>
         [NotNull]
-        private IReadOnlyCollection<IEmote> CurrrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
+        private IReadOnlyCollection<IEmote> CurrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
 
         [NotNull, ItemNotNull]
         private readonly IReadOnlyList<ModuleInfo> _modules;
@@ -238,7 +238,7 @@ namespace DIGOS.Ambassador.Wizards
 
             await this.Message.ModifyAsync(m => m.Embed = _loadingEmbed);
 
-            foreach (var emote in this.CurrrentlyRejectedEmotes)
+            foreach (var emote in this.CurrentlyRejectedEmotes)
             {
                 if (!this.Message.Reactions.ContainsKey(emote) || !this.Message.Reactions[emote].IsMe)
                 {

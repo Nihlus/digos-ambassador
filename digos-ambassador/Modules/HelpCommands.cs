@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Modules
         [UsedImplicitly]
         [Command]
         [Summary("Lists available commands that match the given search text.")]
-        public async Task HelpAsync([CanBeNull, Remainder] string searchText)
+        public async Task HelpAsync([NotNull, Remainder] string searchText)
         {
             searchText = searchText.Unquote();
 

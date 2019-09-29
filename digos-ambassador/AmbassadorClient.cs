@@ -121,7 +121,7 @@ namespace DIGOS.Ambassador
                     Log.Warn
                     (
                         $"The plugin \"{availablePlugin.Name}\" (v{availablePlugin.Version}) failed to " +
-                        $"register its services. It will not be loaded."
+                        "register its services. It will not be loaded."
                     );
 
                     continue;
@@ -154,7 +154,7 @@ namespace DIGOS.Ambassador
                     (
                         $"The plugin \"{plugin.Name}\"" +
                         $" (v{plugin.Version}) failed to migrate its database. It may not " +
-                        $"be functional."
+                        "be functional."
                     );
                 }
             }
@@ -173,7 +173,7 @@ namespace DIGOS.Ambassador
                     (
                         $"The plugin \"{plugin.Name}\"" +
                         $" (v{plugin.Version}) failed to migrate its database. It may not " +
-                        $"be functional."
+                        "be functional."
                     );
                 }
             }

@@ -124,13 +124,15 @@ namespace DIGOS.Ambassador.Services
                     eb.AddField("Restrictions", restrictions);
                 }
 
-                if (variant != commandGroup.Last())
+                if (variant == commandGroup.Last())
                 {
-                    var previousField = eb.Fields.Last();
-
-                    // Add a spacer
-                    previousField.WithValue($"{previousField.Value}\n\u200b");
+                    continue;
                 }
+
+                var previousField = eb.Fields.Last();
+
+                // Add a spacer
+                previousField.WithValue($"{previousField.Value}\n\u200b");
             }
 
             return eb;
@@ -162,14 +164,16 @@ namespace DIGOS.Ambassador.Services
                 );
             }
 
-            if (commands.Count > maxCommands)
+            if (commands.Count <= maxCommands)
             {
-                var remainingCommands = commands.Count - maxCommands;
-                eb.WithFooter
-                (
-                    $"+ {remainingCommands} more {(remainingCommands > 1 ? "command".Pluralize() : "command")}."
-                );
+                return eb.Build();
             }
+
+            var remainingCommands = commands.Count - maxCommands;
+            eb.WithFooter
+            (
+                $"+ {remainingCommands} more {(remainingCommands > 1 ? "command".Pluralize() : "command")}."
+            );
 
             return eb.Build();
         }
@@ -181,7 +185,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A humanized parameter list.</returns>
         [Pure]
         [NotNull]
-        public string BuildParameterList([NotNull] CommandInfo command)
+        private string BuildParameterList([NotNull] CommandInfo command)
         {
             if (!command.Parameters.Any())
             {
@@ -216,7 +220,7 @@ namespace DIGOS.Ambassador.Services
         /// <returns>A humanized parameter list.</returns>
         [Pure]
         [NotNull, ItemNotNull]
-        public IEnumerable<string> BuildDetailedParameterList([NotNull] CommandInfo command)
+        private IEnumerable<string> BuildDetailedParameterList([NotNull] CommandInfo command)
         {
             if (!command.Parameters.Any())
             {
