@@ -25,7 +25,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord;
-using Discord.Commands;
 using MoreLinq.Extensions;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters

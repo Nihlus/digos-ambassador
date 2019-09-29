@@ -482,19 +482,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     }
                 }
 
-                if (!(character.Nickname is null))
-                {
-                    var resetNickResult = await _discord.SetUserNicknameAsync
-                    (
-                        this.Context,
-                        owner,
-                        owner.Username
-                    );
+                var resetNickResult = await _discord.SetUserNicknameAsync
+                (
+                    this.Context,
+                    owner,
+                    owner.Username
+                );
 
-                    if (!resetNickResult.IsSuccess)
-                    {
-                        await _feedback.SendErrorAsync(this.Context, resetNickResult.ErrorReason);
-                    }
+                if (!resetNickResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, resetNickResult.ErrorReason);
                 }
             }
         }
@@ -533,7 +530,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 this.Context.User,
                 characters,
                 c => c.Name,
-                c => c.Summary ?? "No summary set.",
+                c => c.Summary,
                 "You don't have any characters.",
                 appearance
             );

@@ -28,7 +28,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord;
-using Discord.Commands;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using JetBrains.Annotations;
