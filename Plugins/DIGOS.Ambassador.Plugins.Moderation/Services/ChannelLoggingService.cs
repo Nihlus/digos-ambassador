@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Results;
@@ -351,27 +352,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var extra = string.Empty;
             if ((await textChannel.Guild.GetUserAsync(_client.CurrentUser.Id)).GuildPermissions.ViewAuditLog)
             {
-                var auditLogs = await textChannel.Guild.GetAuditLogsAsync();
-                var deletionEntry = auditLogs.FirstOrDefault
-                (
-                    e => e.Data is MessageDeleteAuditLogData deleteAuditLogData &&
-                         deleteAuditLogData.AuthorId == message.Author.Id
-                );
+                var mostProbableDeleter = await FindMostProbableDeleterAsync(message, textChannel);
 
-                if (!(deletionEntry is null))
+                // We don't care about bot deletions
+                if (!(mostProbableDeleter.IsBot || mostProbableDeleter.IsWebhook))
                 {
-                    // We don't care about bot deletions
-                    if (deletionEntry.User.IsBot | deletionEntry.User.IsWebhook)
-                    {
-                        return;
-                    }
-
-                    extra = $"by {deletionEntry.User.Mention}.";
-                }
-                else
-                {
-                    // No audit entries are generated when the user deletes a message themselves
-                    extra = $"by {message.Author.Mention}.";
+                    extra = $"by {mostProbableDeleter.Mention}.";
                 }
             }
 
@@ -452,6 +438,33 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             return RetrieveEntityResult<ITextChannel>.FromSuccess(textChannel);
+        }
+
+        private async Task<IUser> FindMostProbableDeleterAsync(IMessage message, ITextChannel channel)
+        {
+            bool AreDateTimeOffsetsCloseEnough(DateTimeOffset first, DateTimeOffset second)
+            {
+                return (first - second) < TimeSpan.FromSeconds(5);
+            }
+
+            var deletionTime = DateTimeOffset.UtcNow;
+
+            var auditLogs = await channel.Guild.GetAuditLogsAsync();
+            var deletionEntry = auditLogs.FirstOrDefault
+            (
+                e => e.Data is MessageDeleteAuditLogData deleteAuditLogData &&
+                     deleteAuditLogData.AuthorId == message.Author.Id &&
+                     deleteAuditLogData.ChannelId == message.Channel.Id
+                     && AreDateTimeOffsetsCloseEnough(deletionTime, e.CreatedAt)
+            );
+
+            if (!(deletionEntry is null))
+            {
+                return deletionEntry.User;
+            }
+
+            // No audit entries are generated when the user deletes a message themselves
+            return message.Author;
         }
     }
 }

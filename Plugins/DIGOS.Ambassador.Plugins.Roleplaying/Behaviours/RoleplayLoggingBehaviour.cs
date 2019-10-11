@@ -72,6 +72,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
                 // ReSharper disable once PossibleInvalidOperationException
                 var channel = guild.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID.Value);
+                if (channel is null)
+                {
+                    continue;
+                }
 
                 var updatedMessages = 0;
                 foreach (var message in await channel.GetMessagesAsync().FlattenAsync())
