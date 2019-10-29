@@ -442,6 +442,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
         private async Task<IUser> FindMostProbableDeleterAsync(IMessage message, ITextChannel channel)
         {
+            // TODO: Wait for a hotfix from Discord.NET
+            /*
             bool AreDateTimeOffsetsCloseEnough(DateTimeOffset first, DateTimeOffset second)
             {
                 return (first - second) < TimeSpan.FromSeconds(5);
@@ -462,6 +464,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             {
                 return deletionEntry.User;
             }
+            */
 
             // No audit entries are generated when the user deletes a message themselves
             return message.Author;
