@@ -227,7 +227,7 @@ namespace DIGOS.Ambassador.Modules
                 }
 
                 var emojiCode = string.Join("-", hexValues);
-                emoteUrl = $"https://raw.githubusercontent.com/twitter/twemoji/gh-pages/2/72x72/{emojiCode}.png";
+                emoteUrl = $"https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/{emojiCode}.png";
             }
 
             using (var client = new HttpClient())
