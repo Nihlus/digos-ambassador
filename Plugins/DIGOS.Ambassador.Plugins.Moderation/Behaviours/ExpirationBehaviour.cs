@@ -44,22 +44,28 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
         [NotNull]
         private readonly BanService _bans;
 
+        [NotNull]
+        private readonly ChannelLoggingService _logging;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ExpirationBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client.</param>
         /// <param name="warnings">The warning service.</param>
         /// <param name="bans">The ban service.</param>
+        /// <param name="logging">The channel logging service.</param>
         public ExpirationBehaviour
         (
             [NotNull] DiscordSocketClient client,
             [NotNull] WarningService warnings,
-            [NotNull] BanService bans
+            [NotNull] BanService bans,
+            [NotNull] ChannelLoggingService logging
         )
             : base(client)
         {
             _warnings = warnings;
             _bans = bans;
+            _logging = logging;
         }
 
         /// <inheritdoc/>
@@ -81,6 +87,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 {
                     if (warning.ExpiresOn <= now)
                     {
+                        var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
+                        await _logging.NotifyUserWarningRemoved(warning, rescinder);
+
                         await _warnings.DeleteWarningAsync(warning);
                     }
                 }
@@ -96,6 +105,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 {
                     if (ban.ExpiresOn <= now)
                     {
+                        var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
+                        await _logging.NotifyUserUnbanned(ban, rescinder);
+
                         await _bans.DeleteBanAsync(ban);
                         await guild.RemoveBanAsync((ulong)ban.User.DiscordID);
                     }
