@@ -217,6 +217,11 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             var warning = getWarning.Entity;
 
+            // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
+            // navigation properties can't be evaluated
+            var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
+            await _logging.NotifyUserWarningRemoved(warning, rescinder);
+
             var deleteWarning = await _warnings.DeleteWarningAsync(warning);
             if (!deleteWarning.IsSuccess)
             {
@@ -225,9 +230,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Warning deleted.");
-
-            var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
-            await _logging.NotifyUserWarningRemoved(warning, rescinder);
         }
     }
 }

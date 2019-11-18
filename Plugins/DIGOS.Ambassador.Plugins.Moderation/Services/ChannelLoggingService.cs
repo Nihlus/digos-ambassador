@@ -164,7 +164,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var channel = getChannel.Entity;
 
             var eb = _feedback.CreateEmbedBase();
-            eb.WithTitle("User Unbanned");
+            eb.WithTitle("Warning Removed");
             eb.WithColor(Color.Green);
 
             var whoDidIt = rescinder.IsMe(_client)
