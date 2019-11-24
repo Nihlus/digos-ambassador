@@ -31,7 +31,7 @@
 
     <ItemGroup>
         <PackageReference Include="Humanizer" Version="2.7.2" />
-        <PackageReference Include="Discord.Net" Version="2.1.1" />
+        <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
     </ItemGroup>
 
     <Import Project="..\..\msbuild\nuget-common.props" />

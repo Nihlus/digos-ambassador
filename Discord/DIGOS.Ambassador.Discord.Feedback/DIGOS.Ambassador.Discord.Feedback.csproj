@@ -26,7 +26,7 @@
 
     <ItemGroup>
         <PackageReference Include="Humanizer" Version="2.7.2" />
-        <PackageReference Include="Discord.Net" Version="2.1.1" />
+        <PackageReference Include="Discord.Net.Core" Version="2.1.1" />
     </ItemGroup>
 
     <ItemGroup>
