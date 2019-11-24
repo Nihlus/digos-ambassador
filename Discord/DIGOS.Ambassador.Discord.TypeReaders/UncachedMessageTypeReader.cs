@@ -29,7 +29,7 @@ using Discord.Commands;
 namespace DIGOS.Ambassador.Discord.TypeReaders
 {
     /// <summary>
-    /// Reads an IMessage, downloading it if neccesary.
+    /// Reads an IMessage, downloading it if necessary.
     /// </summary>
     /// <typeparam name="T">A type implementing <see cref="IMessage"/>.</typeparam>
     public class UncachedMessageTypeReader<T> : TypeReader where T : class, IMessage
