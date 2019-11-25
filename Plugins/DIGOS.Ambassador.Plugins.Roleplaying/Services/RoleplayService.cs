@@ -1247,5 +1247,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             return ModifyEntityResult.FromSuccess();
         }
+
+        /// <summary>
+        /// Refreshes the timestamp on the given roleplay.
+        /// </summary>
+        /// <param name="roleplay">The roleplay.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public async Task<ModifyEntityResult> RefreshRoleplayAsync(Roleplay roleplay)
+        {
+            roleplay.LastUpdated = DateTime.Now;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
     }
 }

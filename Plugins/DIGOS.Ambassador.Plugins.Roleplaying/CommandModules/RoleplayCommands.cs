@@ -1108,5 +1108,34 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 this.Context, "Roleplays hidden."
             );
         }
+
+        /// <summary>
+        /// Manually refreshes the given roleplay, resetting its last-updated time to now.
+        /// </summary>
+        /// <param name="roleplay">The roleplay.</param>
+        [UsedImplicitly]
+        [Command("refresh")]
+        [Summary("Manually refreshes the given roleplay, resetting its last-updated time to now.")]
+        [RequireContext(ContextType.Guild)]
+        public async Task RefreshRoleplayAsync([NotNull] Roleplay roleplay)
+        {
+            var isOwner = roleplay.IsOwner(this.Context.User);
+            var isParticipant = roleplay.HasJoined(this.Context.User);
+
+            if (!(isOwner || isParticipant))
+            {
+                await _feedback.SendErrorAsync(this.Context, "You don't own that roleplay, nor are you a participant.");
+                return;
+            }
+
+            var refreshResult = await _roleplays.RefreshRoleplayAsync(roleplay);
+            if (!refreshResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, refreshResult.ErrorReason);
+                return;
+            }
+
+            await _feedback.SendConfirmationAsync(this.Context, "Timeout refreshed.");
+        }
     }
 }
