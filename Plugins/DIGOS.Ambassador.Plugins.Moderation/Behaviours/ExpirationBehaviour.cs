@@ -29,6 +29,8 @@ using DIGOS.Ambassador.Plugins.Moderation.Services;
 using Discord;
 using Discord.WebSocket;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 {
@@ -36,7 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
     /// Rescinds expired warnings and bans.
     /// </summary>
     [UsedImplicitly]
-    internal sealed class ExpirationBehaviour : ContinuousBehaviour
+    internal sealed class ExpirationBehaviour : ContinuousDiscordBehaviour<ExpirationBehaviour>
     {
         [NotNull]
         private readonly WarningService _warnings;
@@ -51,17 +53,21 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
         /// Initializes a new instance of the <see cref="ExpirationBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client.</param>
+        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="logger">The logging instance for this type.</param>
         /// <param name="warnings">The warning service.</param>
         /// <param name="bans">The ban service.</param>
         /// <param name="logging">The channel logging service.</param>
         public ExpirationBehaviour
         (
             [NotNull] DiscordSocketClient client,
+            [NotNull] IServiceScope serviceScope,
+            [NotNull] ILogger<ExpirationBehaviour> logger,
             [NotNull] WarningService warnings,
             [NotNull] BanService bans,
             [NotNull] ChannelLoggingService logging
         )
-            : base(client)
+            : base(client, serviceScope, logger)
         {
             _warnings = warnings;
             _bans = bans;

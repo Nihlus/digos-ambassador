@@ -26,13 +26,16 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Behaviours;
 using Discord.WebSocket;
+using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DIGOS.Ambassador.Core
 {
     /// <summary>
     /// Represents a behaviour that does things at a later date.
     /// </summary>
-    public class DelayedActionBehaviour : ContinuousBehaviour
+    public class DelayedActionBehaviour : ContinuousDiscordBehaviour<DelayedActionBehaviour>
     {
         /// <summary>
         /// Gets the events that are currently running.
@@ -43,9 +46,17 @@ namespace DIGOS.Ambassador.Core
         /// Initializes a new instance of the <see cref="DelayedActionBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client.</param>
+        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="logger">The logging instance for this type.</param>
         /// <param name="delayedActions">The do-later service.</param>
-        public DelayedActionBehaviour(DiscordSocketClient client, DelayedActionService delayedActions)
-            : base(client)
+        public DelayedActionBehaviour
+        (
+            DiscordSocketClient client,
+            [NotNull] IServiceScope serviceScope,
+            [NotNull] ILogger<DelayedActionBehaviour> logger,
+            DelayedActionService delayedActions
+        )
+            : base(client, serviceScope, logger)
         {
             _delayedActions = delayedActions;
         }
@@ -68,7 +79,7 @@ namespace DIGOS.Ambassador.Core
                     catch (Exception e)
                     {
                         // Nom nom nom
-                        this.Log.Error("Error in delayed action.", e);
+                        this.Log.LogError("Error in delayed action.", e);
                     }
                 }
                 else

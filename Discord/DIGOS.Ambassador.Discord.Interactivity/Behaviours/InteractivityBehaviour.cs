@@ -24,13 +24,16 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Behaviours;
 using Discord;
 using Discord.WebSocket;
+using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DIGOS.Ambassador.Discord.Interactivity.Behaviours
 {
     /// <summary>
     /// Represents a behaviour that continuously monitors and responds to interactions.
     /// </summary>
-    public class InteractivityBehaviour : ClientEventBehaviour
+    public class InteractivityBehaviour : ClientEventBehaviour<InteractivityBehaviour>
     {
         private readonly InteractivityService _interactivity;
 
@@ -38,9 +41,17 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Behaviours
         /// Initializes a new instance of the <see cref="InteractivityBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client.</param>
+        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="logger">The logging instance for this type.</param>
         /// <param name="interactivity">The interactivity service.</param>
-        public InteractivityBehaviour(DiscordSocketClient client, InteractivityService interactivity)
-            : base(client)
+        public InteractivityBehaviour
+        (
+            DiscordSocketClient client,
+            [NotNull] IServiceScope serviceScope,
+            [NotNull] ILogger<InteractivityBehaviour> logger,
+            InteractivityService interactivity
+        )
+            : base(client, serviceScope, logger)
         {
             _interactivity = interactivity;
         }

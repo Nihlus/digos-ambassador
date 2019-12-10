@@ -41,16 +41,15 @@ using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DIGOS.Ambassador.Behaviours
 {
     /// <summary>
     /// Acts as a behaviour for invoking commands, and logging their results.
     /// </summary>
-    public class CommandBehaviour : ClientEventBehaviour
+    public class CommandBehaviour : ClientEventBehaviour<CommandBehaviour>
     {
-        private readonly IServiceProvider _services;
-
         private readonly UserFeedbackService _feedback;
         private readonly PrivacyService _privacy;
         private readonly ContentService _content;
@@ -61,7 +60,8 @@ namespace DIGOS.Ambassador.Behaviours
         /// Initializes a new instance of the <see cref="CommandBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
-        /// <param name="services">The available services.</param>
+        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="logger">The logging instance for this type.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="privacy">The privacy service.</param>
         /// <param name="content">The content service.</param>
@@ -70,16 +70,16 @@ namespace DIGOS.Ambassador.Behaviours
         public CommandBehaviour
         (
             DiscordSocketClient client,
-            IServiceProvider services,
+            [NotNull] IServiceScope serviceScope,
+            [NotNull] ILogger<CommandBehaviour> logger,
             UserFeedbackService feedback,
             PrivacyService privacy,
             ContentService content,
             CommandService commands,
             HelpService help
         )
-            : base(client)
+            : base(client, serviceScope, logger)
         {
-            _services = services;
             _feedback = feedback;
             _privacy = privacy;
             _content = content;
@@ -164,7 +164,7 @@ namespace DIGOS.Ambassador.Behaviours
             }
 
             // Create a service scope for this command
-            using (var scope = _services.CreateScope())
+            using (var scope = this.Services.CreateScope())
             {
                 var result = await _commands.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
                 await HandleCommandResultAsync(context, result, argumentPos);
@@ -290,7 +290,7 @@ namespace DIGOS.Ambassador.Behaviours
         {
             // Log the exception for later debugging purposes
             var executeResult = (ExecuteResult)result;
-            this.Log.Error(executeResult.Exception);
+            this.Log.LogError(executeResult.Exception.ToString());
 
             // Alert the user, explain what happened, and ask them to make a bug report.
             var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();

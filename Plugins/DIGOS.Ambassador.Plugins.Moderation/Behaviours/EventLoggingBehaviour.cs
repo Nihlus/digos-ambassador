@@ -26,6 +26,8 @@ using DIGOS.Ambassador.Plugins.Moderation.Services;
 using Discord;
 using Discord.WebSocket;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 {
@@ -33,7 +35,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
     /// Logs various client events.
     /// </summary>
     [UsedImplicitly]
-    public class EventLoggingBehaviour : ClientEventBehaviour
+    public class EventLoggingBehaviour : ClientEventBehaviour<EventLoggingBehaviour>
     {
         private readonly ChannelLoggingService _logging;
 
@@ -41,9 +43,17 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
         /// Initializes a new instance of the <see cref="EventLoggingBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client in use.</param>
+        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="logger">The logging instance for this type.</param>
         /// <param name="logging">The logging service.</param>
-        public EventLoggingBehaviour([NotNull] DiscordSocketClient client, [NotNull] ChannelLoggingService logging)
-            : base(client)
+        public EventLoggingBehaviour
+        (
+            [NotNull] DiscordSocketClient client,
+            [NotNull] IServiceScope serviceScope,
+            [NotNull] ILogger<EventLoggingBehaviour> logger,
+            [NotNull] ChannelLoggingService logging
+        )
+            : base(client, serviceScope, logger)
         {
             _logging = logging;
         }

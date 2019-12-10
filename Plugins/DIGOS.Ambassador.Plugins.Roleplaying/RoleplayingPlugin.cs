@@ -25,7 +25,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Behaviours.Services;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
@@ -40,6 +39,7 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours.Services;
 
 [assembly: AmbassadorPlugin(typeof(RoleplayingPlugin))]
 

@@ -29,7 +29,6 @@ using DIGOS.Ambassador.Core.Database.Services;
 using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord;
-using DIGOS.Ambassador.Discord.Behaviours.Services;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
@@ -42,6 +41,8 @@ using Discord.WebSocket;
 using JetBrains.Annotations;
 using log4net;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Remora.Behaviours.Services;
 
 #pragma warning disable SA1118 // Parameter spans multiple lines, big strings
 
@@ -109,7 +110,16 @@ namespace DIGOS.Ambassador
                 .AddSingleton<Random>()
                 .AddSingleton(pluginService)
                 .AddSingleton<SchemaAwareDbContextService>()
-                .AddSingleton(FileSystemFactory.CreateContentFileSystem());
+                .AddSingleton(FileSystemFactory.CreateContentFileSystem())
+                .AddLogging
+                (
+                    c => c
+                        .AddLog4Net()
+                        .AddFilter("Microsoft.EntityFrameworkCore.Infrastructure", LogLevel.Warning)
+                        .AddFilter("Microsoft.EntityFrameworkCore.Query", LogLevel.Error)
+                        .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
+                        .AddFilter("Microsoft.EntityFrameworkCore.Migrations", LogLevel.Warning)
+                );
 
             var successfullyRegisteredPlugins = new List<IPluginDescriptor>();
 

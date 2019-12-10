@@ -24,7 +24,6 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Behaviours.Services;
 using DIGOS.Ambassador.Plugins.Abstractions;
 using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
 using DIGOS.Ambassador.Plugins.Moderation;
@@ -36,6 +35,7 @@ using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours.Services;
 
 [assembly: AmbassadorPlugin(typeof(ModerationPlugin))]
 

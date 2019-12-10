@@ -30,6 +30,8 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 {
@@ -37,7 +39,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     /// Acts on user messages, logging them into an active roleplay if relevant.
     /// </summary>
     [UsedImplicitly]
-    internal sealed class RoleplayLoggingBehaviour : ClientEventBehaviour
+    internal sealed class RoleplayLoggingBehaviour : ClientEventBehaviour<RoleplayLoggingBehaviour>
     {
         [NotNull]
         private readonly RoleplayService _roleplays;
@@ -46,13 +48,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// Initializes a new instance of the <see cref="RoleplayLoggingBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
+        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="logger">The logging instance for this type.</param>
         /// <param name="roleplays">The roleplay service.</param>
         public RoleplayLoggingBehaviour
         (
             [NotNull] DiscordSocketClient client,
+            [NotNull] IServiceScope serviceScope,
+            [NotNull] ILogger<RoleplayLoggingBehaviour> logger,
             [NotNull] RoleplayService roleplays
         )
-            : base(client)
+            : base(client, serviceScope, logger)
         {
             _roleplays = roleplays;
         }
@@ -90,7 +96,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
                 if (updatedMessages > 0)
                 {
-                    this.Log.Info
+                    this.Log.LogInformation
                     (
                         $"Added or updated {updatedMessages} missed {(updatedMessages > 1 ? "messages" : "message")} " +
                         $"in \"{activeRoleplay.Name}\"."

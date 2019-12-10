@@ -28,14 +28,19 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Remora.Behaviours.Bases;
 
 namespace DIGOS.Ambassador.Discord.Behaviours
 {
     /// <summary>
     /// Represents a behaviour that continuously monitors and responds to interactions.
     /// </summary>
+    /// <typeparam name="TBehaviour">The inheriting behaviour.</typeparam>
     [PublicAPI]
-    public abstract class ClientEventBehaviour : ContinuousBehaviour
+    public abstract class ClientEventBehaviour<TBehaviour> : ContinuousDiscordBehaviour<TBehaviour>
+        where TBehaviour : ContinuousBehaviour<TBehaviour>
     {
         /// <summary>
         /// Gets the events that are currently running.
@@ -43,11 +48,18 @@ namespace DIGOS.Ambassador.Discord.Behaviours
         private ConcurrentQueue<Task> RunningEvents { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ClientEventBehaviour"/> class.
+        /// Initializes a new instance of the <see cref="ClientEventBehaviour{TBehaviour}"/> class.
         /// </summary>
         /// <param name="client">The Discord client.</param>
-        protected ClientEventBehaviour(DiscordSocketClient client)
-            : base(client)
+        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="logger">The logging instance for this type.</param>
+        protected ClientEventBehaviour
+        (
+            [NotNull] DiscordSocketClient client,
+            [NotNull] IServiceScope serviceScope,
+            [NotNull] ILogger<TBehaviour> logger
+        )
+            : base(client, serviceScope, logger)
         {
             this.RunningEvents = new ConcurrentQueue<Task>();
         }
@@ -991,7 +1003,7 @@ namespace DIGOS.Ambassador.Discord.Behaviours
                     catch (Exception e)
                     {
                         // Nom nom nom
-                        this.Log.Error("Error in client event handler.", e);
+                        this.Log.LogError("Error in client event handler.", e);
                     }
                 }
                 else

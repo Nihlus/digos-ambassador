@@ -28,13 +28,16 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
+using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DIGOS.Ambassador.Behaviours
 {
     /// <summary>
     /// Acts on user joins, sending them the server's join message.
     /// </summary>
-    public class JoinMessageBehaviour : ClientEventBehaviour
+    public class JoinMessageBehaviour : ClientEventBehaviour<JoinMessageBehaviour>
     {
         private readonly UserFeedbackService _feedback;
         private readonly ServerService _servers;
@@ -43,15 +46,19 @@ namespace DIGOS.Ambassador.Behaviours
         /// Initializes a new instance of the <see cref="JoinMessageBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
+        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="logger">The logging instance for this type.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="servers">The server service.</param>
         public JoinMessageBehaviour
         (
             DiscordSocketClient client,
+            [NotNull] IServiceScope serviceScope,
+            [NotNull] ILogger<JoinMessageBehaviour> logger,
             UserFeedbackService feedback,
             ServerService servers
         )
-            : base(client)
+            : base(client, serviceScope, logger)
         {
             _feedback = feedback;
             _servers = servers;

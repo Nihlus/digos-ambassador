@@ -35,6 +35,8 @@ using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 {
@@ -42,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     /// Continuously archives old roleplays.
     /// </summary>
     [UsedImplicitly]
-    public class RoleplayArchivalBehaviour : ContinuousBehaviour
+    public class RoleplayArchivalBehaviour : ContinuousDiscordBehaviour<RoleplayArchivalBehaviour>
     {
         [NotNull]
         private readonly RoleplayService _roleplays;
@@ -57,17 +59,21 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// Initializes a new instance of the <see cref="RoleplayArchivalBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client.</param>
+        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="logger">The logging instance for this type.</param>
         /// <param name="roleplays">The roleplaying service.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="servers">The server service.</param>
         public RoleplayArchivalBehaviour
         (
             [NotNull] DiscordSocketClient client,
+            [NotNull] IServiceScope serviceScope,
+            [NotNull] ILogger<RoleplayArchivalBehaviour> logger,
             [NotNull] RoleplayService roleplays,
             [NotNull] UserFeedbackService feedback,
             [NotNull] ServerService servers
         )
-            : base(client)
+            : base(client, serviceScope, logger)
         {
             _roleplays = roleplays;
             _feedback = feedback;
@@ -150,7 +156,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             var getServer = await _servers.GetOrRegisterServerAsync(guild);
             if (!getServer.IsSuccess)
             {
-                this.Log.Warn("Failed to get the server for the current guild. Bug?");
+                this.Log.LogWarning("Failed to get the server for the current guild. Bug?");
                 return;
             }
 
@@ -159,7 +165,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             var getSettings = await _roleplays.GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettings.IsSuccess)
             {
-                this.Log.Warn("Failed to get the server settings for the current guild. Bug?");
+                this.Log.LogWarning("Failed to get the server settings for the current guild. Bug?");
                 return;
             }
 
@@ -173,7 +179,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             var archiveChannel = guild.GetTextChannel((ulong)settings.ArchiveChannel);
             if (archiveChannel is null)
             {
-                this.Log.Warn("Failed to get the archive channel for the current guild. Deleted?");
+                this.Log.LogWarning("Failed to get the archive channel for the current guild. Deleted?");
                 return;
             }
 

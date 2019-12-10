@@ -34,6 +34,8 @@ using Discord.Net;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 {
@@ -41,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     /// Times out roleplays, stopping them if they've been inactive for more than a set time.
     /// </summary>
     [UsedImplicitly]
-    internal sealed class RoleplayTimeoutBehaviour : ContinuousBehaviour
+    internal sealed class RoleplayTimeoutBehaviour : ContinuousDiscordBehaviour<RoleplayTimeoutBehaviour>
     {
         /// <summary>
         /// Gets the database context.
@@ -65,17 +67,21 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// Initializes a new instance of the <see cref="RoleplayTimeoutBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
+        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="logger">The logging instance for this type.</param>
         /// <param name="database">The database.</param>
         /// <param name="roleplays">The roleplay service.</param>
         /// <param name="feedback">The feedback service.</param>
         public RoleplayTimeoutBehaviour
         (
             DiscordSocketClient client,
+            [NotNull] IServiceScope serviceScope,
+            [NotNull] ILogger<RoleplayTimeoutBehaviour> logger,
             RoleplayingDatabaseContext database,
             RoleplayService roleplays,
             [NotNull] UserFeedbackService feedback
         )
-            : base(client)
+            : base(client, serviceScope, logger)
         {
             this.Database = database;
             this.Roleplays = roleplays;

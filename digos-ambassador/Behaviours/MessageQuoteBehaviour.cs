@@ -34,13 +34,15 @@ using Discord.WebSocket;
 
 using Humanizer;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DIGOS.Ambassador.Behaviours
 {
     /// <summary>
     /// Generates quotes from message links. Based on code from MODiX.
     /// </summary>
-    public class MessageQuoteBehaviour : ClientEventBehaviour
+    public class MessageQuoteBehaviour : ClientEventBehaviour<MessageQuoteBehaviour>
     {
         private static readonly Regex Pattern = new Regex
         (
@@ -54,9 +56,17 @@ namespace DIGOS.Ambassador.Behaviours
         /// Initializes a new instance of the <see cref="MessageQuoteBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
+        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="logger">The logging instance for this type.</param>
         /// <param name="feedback">The feedback service.</param>
-        public MessageQuoteBehaviour(DiscordSocketClient client, UserFeedbackService feedback)
-            : base(client)
+        public MessageQuoteBehaviour
+        (
+            DiscordSocketClient client,
+            [NotNull] IServiceScope serviceScope,
+            [NotNull] ILogger<MessageQuoteBehaviour> logger,
+            UserFeedbackService feedback
+        )
+            : base(client, serviceScope, logger)
         {
             _feedback = feedback;
         }
