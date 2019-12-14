@@ -41,6 +41,7 @@ using log4net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Services;
+using Remora.EntityFrameworkCore.Modular.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Services;
 using Remora.Results;
@@ -110,7 +111,7 @@ namespace DIGOS.Ambassador
                 .AddSingleton<HelpService>()
                 .AddSingleton<Random>()
                 .AddSingleton(pluginService)
-                .AddSingleton<ContextConfigurationService>()
+                .AddSingleton<SchemaAwareDbContextService>()
                 .AddSingleton(FileSystemFactory.CreateContentFileSystem())
                 .AddSingleton<ContextConfigurationService>()
                 .AddLogging
