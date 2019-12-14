@@ -2,12 +2,6 @@
 <module type="RIDER_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$USER_HOME$/.nuget/packages/microsoft.net.test.sdk/16.3.0/build/netcoreapp1.0" />
-    <content url="file://$USER_HOME$/.nuget/packages/remora.plugins.abstractions/1.0.0/contentFiles/any/netstandard2.0/LICENSE" />
-    <content url="file://$USER_HOME$/.nuget/packages/remora.plugins.abstractions/1.0.0/contentFiles/any/netstandard2.0/Remora.Plugins.Abstractions.ExternalAnnotations.xml" />
-    <content url="file://$USER_HOME$/.nuget/packages/remora.plugins/1.0.0/contentFiles/any/netstandard2.0/LICENSE" />
-    <content url="file://$USER_HOME$/.nuget/packages/remora.plugins/1.0.0/contentFiles/any/netstandard2.0/Remora.Plugins.ExternalAnnotations.xml" />
-    <content url="file://$USER_HOME$/.nuget/packages/remora.results/1.0.0/contentFiles/any/netstandard2.0/LICENSE" />
-    <content url="file://$USER_HOME$/.nuget/packages/remora.results/1.0.0/contentFiles/any/netstandard2.0/Remora.Results.ExternalAnnotations.xml" />
     <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.1/build/netcoreapp1.0/xunit.runner.reporters.netcoreapp10.dll" />
     <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.1/build/netcoreapp1.0/xunit.runner.utility.netcoreapp10.dll" />
     <content url="file://$USER_HOME$/.nuget/packages/xunit.runner.visualstudio/2.4.1/build/netcoreapp1.0/xunit.runner.visualstudio.dotnetcore.testadapter.dll" />

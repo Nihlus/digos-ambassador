@@ -30,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Humanizer" Version="2.7.2" />
+        <PackageReference Include="Humanizer" Version="2.7.9" />
         <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
     </ItemGroup>
 
