@@ -44,14 +44,12 @@ namespace DIGOS.Ambassador.Tools
         [CanBeNull]
         public object ReadYaml(IParser parser, Type type)
         {
-            var speciesName = parser.Allow<Scalar>().Value;
-
-            if (speciesName is null)
+            if (!parser.TryConsume<Scalar>(out var speciesName))
             {
                 return null;
             }
 
-            return new Species(speciesName, "Dummy");
+            return new Species(speciesName.Value, "Dummy");
         }
 
         /// <inheritdoc />

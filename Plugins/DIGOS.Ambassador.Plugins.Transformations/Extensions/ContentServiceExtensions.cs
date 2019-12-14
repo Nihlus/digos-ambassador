@@ -121,7 +121,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
 
             var deser = new DeserializerBuilder()
                 .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-                .WithNamingConvention(new UnderscoredNamingConvention())
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
 
             var species = new List<Species>();
@@ -194,7 +194,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                 .WithTypeConverter(new ColourYamlConverter())
                 .WithTypeConverter(new SpeciesYamlConverter(transformation))
                 .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-                .WithNamingConvention(new UnderscoredNamingConvention())
+                .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
 
             foreach (var transformationFile in transformationFiles)

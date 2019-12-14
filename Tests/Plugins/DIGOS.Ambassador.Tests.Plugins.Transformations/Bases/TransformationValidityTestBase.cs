@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var deserB = new DeserializerBuilder()
                     .WithTypeConverter(new ColourYamlConverter())
                     .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-                    .WithNamingConvention(new UnderscoredNamingConvention());
+                    .WithNamingConvention(UnderscoredNamingConvention.Instance);
 
                 if (typeof(T) != typeof(Species))
                 {

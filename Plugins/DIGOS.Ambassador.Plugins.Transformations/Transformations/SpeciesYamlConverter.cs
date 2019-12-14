@@ -56,14 +56,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <inheritdoc />
         public object ReadYaml(IParser parser, Type type)
         {
-            var speciesName = parser.Allow<Scalar>().Value;
-
-            if (speciesName is null)
+            if (!parser.TryConsume<Scalar>(out var speciesName))
             {
                 return null;
             }
 
-            var getSpeciesResult = this.Transformation.GetSpeciesByName(speciesName);
+            var getSpeciesResult = this.Transformation.GetSpeciesByName(speciesName.Value);
             if (!getSpeciesResult.IsSuccess)
             {
                 throw new InvalidOperationException(getSpeciesResult.ErrorReason);

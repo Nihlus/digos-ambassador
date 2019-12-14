@@ -44,14 +44,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         [CanBeNull]
         public object ReadYaml([NotNull] IParser parser, [NotNull] Type type)
         {
-            var rawColour = parser.Allow<Scalar>().Value;
-
-            if (rawColour is null)
+            if (!parser.TryConsume<Scalar>(out var rawColour))
             {
                 return null;
             }
 
-            if (!Colour.TryParse(rawColour, out var value))
+            if (!Colour.TryParse(rawColour.Value, out var value))
             {
                 throw new ArgumentException("Failed to parse a valid colour.");
             }
