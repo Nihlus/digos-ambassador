@@ -25,8 +25,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions;
-using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
+using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.CommandModules;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
@@ -36,8 +35,10 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Plugins.Abstractions;
+using Remora.Plugins.Abstractions.Attributes;
 
-[assembly: AmbassadorPlugin(typeof(PermissionsPlugin))]
+[assembly: RemoraPlugin(typeof(PermissionsPlugin))]
 
 namespace DIGOS.Ambassador.Plugins.Permissions
 {

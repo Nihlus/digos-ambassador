@@ -1,5 +1,5 @@
-﻿//
-//  DeleteEntityResult.cs
+//
+//  IMigratablePlugin.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,42 +21,32 @@
 //
 
 using System;
-using DIGOS.Ambassador.Core.Results.Base;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Remora.Plugins.Abstractions;
 
-namespace DIGOS.Ambassador.Core.Results
+namespace DIGOS.Ambassador.Plugins.Abstractions.Database
 {
     /// <summary>
-    /// Encapsulates the result of an attempt to delete an entity.
+    /// Represents the public API of a plugin supporting migrations.
     /// </summary>
-    public class DeleteEntityResult : ResultBase<DeleteEntityResult>
+    [PublicAPI]
+    public interface IMigratablePlugin : IPluginDescriptor
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="DeleteEntityResult"/> class.
+        /// Performs any migrations required by the plugin.
         /// </summary>
-        private DeleteEntityResult()
-        {
-        }
-
-        /// <inheritdoc cref="ResultBase{TResultType}(string,Exception)"/>
-        [UsedImplicitly]
-        private DeleteEntityResult
-        (
-            [CanBeNull] string errorReason,
-            [CanBeNull] Exception exception = null
-        )
-            : base(errorReason, exception)
-        {
-        }
+        /// <param name="serviceProvider">The available services.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [NotNull]
+        Task<bool> MigratePluginAsync([NotNull] IServiceProvider serviceProvider);
 
         /// <summary>
-        /// Creates a new successful result.
+        /// Determines whether the database has been created.
         /// </summary>
-        /// <returns>A successful result.</returns>
-        [Pure]
-        public static DeleteEntityResult FromSuccess()
-        {
-            return new DeleteEntityResult();
-        }
+        /// <param name="serviceProvider">The available services.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        [NotNull]
+        Task<bool> IsDatabaseCreatedAsync([NotNull] IServiceProvider serviceProvider);
     }
 }

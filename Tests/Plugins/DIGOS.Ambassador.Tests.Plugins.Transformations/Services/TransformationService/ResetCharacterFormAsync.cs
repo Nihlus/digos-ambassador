@@ -25,7 +25,6 @@
 #pragma warning disable SA1649
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
@@ -76,7 +75,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var result = await this.Transformations.ResetCharacterFormAsync(_character);
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
+                Assert.True(result.WasModified);
                 Assert.NotNull(_appearance);
                 Assert.Equal(_appearance.Height, _appearance.Height);
             }

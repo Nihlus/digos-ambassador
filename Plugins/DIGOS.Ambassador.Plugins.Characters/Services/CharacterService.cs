@@ -24,7 +24,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
@@ -38,7 +37,7 @@ using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-
+using Remora.Results;
 using Image = DIGOS.Ambassador.Plugins.Characters.Model.Data.Image;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Services

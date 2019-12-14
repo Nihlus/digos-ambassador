@@ -21,10 +21,10 @@
 //
 
 using System;
-using DIGOS.Ambassador.Core.Results.Base;
 using JetBrains.Annotations;
+using Remora.Results;
 
-namespace DIGOS.Ambassador.Core.Results
+namespace DIGOS.Ambassador.Plugins.Transformations.Results
 {
     /// <summary>
     /// Represents an attempt to shift a part of a character's body.

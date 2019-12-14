@@ -23,12 +23,12 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
 {

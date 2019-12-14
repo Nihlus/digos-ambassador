@@ -23,7 +23,6 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -32,6 +31,7 @@ using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Characters.TypeReaders
 {

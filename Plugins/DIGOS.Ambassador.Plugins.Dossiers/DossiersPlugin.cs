@@ -23,8 +23,7 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions;
-using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
+using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Dossiers;
 using DIGOS.Ambassador.Plugins.Dossiers.CommandModules;
 using DIGOS.Ambassador.Plugins.Dossiers.Model;
@@ -34,8 +33,10 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Plugins.Abstractions;
+using Remora.Plugins.Abstractions.Attributes;
 
-[assembly: AmbassadorPlugin(typeof(DossiersPlugin))]
+[assembly: RemoraPlugin(typeof(DossiersPlugin))]
 
 namespace DIGOS.Ambassador.Plugins.Dossiers
 {

@@ -23,7 +23,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Discord;
@@ -138,7 +137,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _newDBUser, ownerEntities, entityOwnedByOriginal);
                 Assert.True(result.IsSuccess);
                 Assert.Same(_newDBUser, entityOwnedByOriginal.Owner);
-                Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
+                Assert.True(result.WasModified);
             }
 
             public Task DisposeAsync()

@@ -27,12 +27,12 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
 using MoreLinq.Extensions;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
 {

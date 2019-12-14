@@ -23,8 +23,8 @@
 using System;
 using System.IO;
 using CommandLine;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
+using Remora.Results;
 using YamlDotNet.Core;
 using Parser = CommandLine.Parser;
 

@@ -26,8 +26,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.TypeReaders;
-using DIGOS.Ambassador.Plugins.Abstractions;
-using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
+using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying;
 using DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
@@ -40,8 +39,10 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours.Services;
+using Remora.Plugins.Abstractions;
+using Remora.Plugins.Abstractions.Attributes;
 
-[assembly: AmbassadorPlugin(typeof(RoleplayingPlugin))]
+[assembly: RemoraPlugin(typeof(RoleplayingPlugin))]
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying
 {

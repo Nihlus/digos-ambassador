@@ -27,8 +27,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Async;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Results;
 using JetBrains.Annotations;
+using Remora.Results;
 using Zio;
 
 namespace DIGOS.Ambassador.Core.Services

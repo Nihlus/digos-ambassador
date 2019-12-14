@@ -27,7 +27,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Extensions;
@@ -50,6 +49,7 @@ using Discord.Net;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks

@@ -24,9 +24,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DIGOS.Ambassador.Core.Results;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Permissions.Services
 {

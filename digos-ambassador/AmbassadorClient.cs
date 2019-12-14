@@ -26,14 +26,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core;
 using DIGOS.Ambassador.Core.Database.Services;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
-using DIGOS.Ambassador.Plugins.Abstractions;
-using DIGOS.Ambassador.Plugins.Services;
+using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Commands;
@@ -43,6 +41,9 @@ using log4net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Services;
+using Remora.Plugins.Abstractions;
+using Remora.Plugins.Services;
+using Remora.Results;
 
 #pragma warning disable SA1118 // Parameter spans multiple lines, big strings
 

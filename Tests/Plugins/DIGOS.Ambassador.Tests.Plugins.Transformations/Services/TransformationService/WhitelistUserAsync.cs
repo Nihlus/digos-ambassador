@@ -26,7 +26,6 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
 using Xunit;
@@ -46,7 +45,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var result = await this.Transformations.WhitelistUserAsync(_user, _whitelistedUser);
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
+                Assert.True(result.WasModified);
 
                 Assert.NotEmpty(this.Database.GlobalUserProtections.First().Whitelist);
                 Assert.Equal((long)_whitelistedUser.Id, this.Database.GlobalUserProtections.First().Whitelist.First().DiscordID);

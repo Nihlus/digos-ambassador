@@ -22,8 +22,8 @@
 
 using System;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
+using DIGOS.Ambassador.Plugins.Transformations.Results;
 using Humanizer;
 using JetBrains.Annotations;
 

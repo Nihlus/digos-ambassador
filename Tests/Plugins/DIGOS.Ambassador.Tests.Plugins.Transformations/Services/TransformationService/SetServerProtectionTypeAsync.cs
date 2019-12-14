@@ -26,7 +26,6 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
@@ -53,7 +52,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.Equal(ModifyEntityAction.Edited, result.ActionTaken);
+                Assert.True(result.WasModified);
                 Assert.Equal(expected, this.Database.ServerUserProtections.First().Type);
             }
 

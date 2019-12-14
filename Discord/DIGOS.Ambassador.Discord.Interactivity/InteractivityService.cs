@@ -24,13 +24,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Discord;
 using Discord.WebSocket;
 using JetBrains.Annotations;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Interactivity
 {

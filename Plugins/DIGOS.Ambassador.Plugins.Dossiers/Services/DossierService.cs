@@ -26,13 +26,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Dossiers.Model;
 using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.Results;
 using Zio;
 
 namespace DIGOS.Ambassador.Plugins.Dossiers.Services

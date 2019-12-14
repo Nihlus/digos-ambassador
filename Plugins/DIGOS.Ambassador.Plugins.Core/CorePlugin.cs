@@ -25,8 +25,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions;
-using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
+using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Core;
 using DIGOS.Ambassador.Plugins.Core.CommandModules;
 using DIGOS.Ambassador.Plugins.Core.Model;
@@ -39,9 +38,11 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Plugins.Abstractions;
+using Remora.Plugins.Abstractions.Attributes;
 
 [assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Core")]
-[assembly: AmbassadorPlugin(typeof(CorePlugin))]
+[assembly: RemoraPlugin(typeof(CorePlugin))]
 
 namespace DIGOS.Ambassador.Plugins.Core
 {

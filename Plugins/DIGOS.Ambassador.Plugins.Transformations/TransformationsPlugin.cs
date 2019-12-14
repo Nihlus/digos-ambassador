@@ -26,8 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions;
-using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
+using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.CommandModules;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
@@ -41,9 +40,11 @@ using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Plugins.Abstractions;
+using Remora.Plugins.Abstractions.Attributes;
 
 [assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Transformations")]
-[assembly: AmbassadorPlugin(typeof(TransformationsPlugin))]
+[assembly: RemoraPlugin(typeof(TransformationsPlugin))]
 
 namespace DIGOS.Ambassador.Plugins.Transformations
 {

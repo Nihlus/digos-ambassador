@@ -23,7 +23,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Kinks.Extensions;
@@ -33,6 +32,7 @@ using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using MoreLinq.Extensions;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.Services
 {

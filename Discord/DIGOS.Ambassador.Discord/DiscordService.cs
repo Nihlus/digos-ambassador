@@ -26,11 +26,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Results;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
 using JetBrains.Annotations;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord
 {
@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Discord
 
             if (guildUser.RoleIds.Contains(role.Id))
             {
-                return ModifyEntityResult.FromSuccess(ModifyEntityAction.None);
+                return ModifyEntityResult.FromSuccess(false);
             }
 
             try
@@ -172,7 +172,7 @@ namespace DIGOS.Ambassador.Discord
 
             if (!guildUser.RoleIds.Contains(role.Id))
             {
-                return ModifyEntityResult.FromSuccess(ModifyEntityAction.None);
+                return ModifyEntityResult.FromSuccess(false);
             }
 
             try

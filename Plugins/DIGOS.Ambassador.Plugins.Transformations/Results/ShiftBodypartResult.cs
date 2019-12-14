@@ -1,5 +1,5 @@
 ﻿//
-//  ModifyEntityResult.cs
+//  ShiftBodypartResult.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,55 +21,60 @@
 //
 
 using System;
-using DIGOS.Ambassador.Core.Results.Base;
 using JetBrains.Annotations;
+using Remora.Results;
 
-namespace DIGOS.Ambassador.Core.Results
+namespace DIGOS.Ambassador.Plugins.Transformations.Results
 {
     /// <summary>
-    /// Encapsulates the result of an attempt to add or edit an entity.
+    /// Represents an attempt to shift a part of a character's body.
     /// </summary>
-    public class ModifyEntityResult : ResultBase<ModifyEntityResult>
+    public class ShiftBodypartResult : ResultBase<ShiftBodypartResult>
     {
         /// <summary>
-        /// Gets the action that was taken on the entity.
+        /// Gets the shifting message.
         /// </summary>
-        public ModifyEntityAction? ActionTaken { get; }
+        public string ShiftMessage { get; }
 
         /// <summary>
-        /// Gets a value indicating whether or not any entity was modified.
+        /// Gets the action that was performed on the bodypart.
         /// </summary>
-        public bool WasModified => this.ActionTaken.HasValue;
+        public ShiftBodypartAction Action { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ModifyEntityResult"/> class.
+        /// Initializes a new instance of the <see cref="ShiftBodypartResult"/> class.
         /// </summary>
-        /// <param name="actionTaken">The action that was taken on the entity.</param>
-        private ModifyEntityResult([CanBeNull] ModifyEntityAction? actionTaken)
+        /// <param name="shiftMessage">The message to display to the user when shifting.</param>
+        /// <param name="action">The action that was performed on the bodypart.</param>
+        private ShiftBodypartResult([CanBeNull] string shiftMessage, ShiftBodypartAction action)
         {
-            this.ActionTaken = actionTaken;
+            this.ShiftMessage = shiftMessage;
+            this.Action = action;
         }
 
         /// <inheritdoc cref="ResultBase{TResultType}(string,Exception)"/>
         [UsedImplicitly]
-        private ModifyEntityResult
+        private ShiftBodypartResult
         (
             [CanBeNull] string errorReason,
             [CanBeNull] Exception exception = null
         )
             : base(errorReason, exception)
         {
+            // Assume that the programmer isn't dumb and leaves dirty changes on failure
+            this.Action = ShiftBodypartAction.Nothing;
         }
 
         /// <summary>
         /// Creates a new successful result.
         /// </summary>
-        /// <param name="actionTaken">The action that was taken on the entity.</param>
         /// <returns>A successful result.</returns>
+        /// <param name="shiftMessage">The message to display to the user when shifting.</param>
+        /// <param name="action">The action that was performed on the bodypart.</param>
         [Pure]
-        public static ModifyEntityResult FromSuccess(ModifyEntityAction actionTaken = ModifyEntityAction.Edited)
+        public static ShiftBodypartResult FromSuccess([NotNull] string shiftMessage, ShiftBodypartAction action)
         {
-            return new ModifyEntityResult(actionTaken);
+            return new ShiftBodypartResult(shiftMessage, action);
         }
     }
 }

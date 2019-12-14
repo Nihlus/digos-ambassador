@@ -1,5 +1,5 @@
-﻿//
-//  ModifyEntityAction.cs
+//
+//  ShiftBodypartAction.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,21 +20,31 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Core.Results
+namespace DIGOS.Ambassador.Plugins.Transformations.Results
 {
     /// <summary>
-    /// Enumerates which actions can be taken when an entity is modified.
+    /// Enumerates the actions that can be taken on a bodypart during a shift.
     /// </summary>
-    public enum ModifyEntityAction
+    public enum ShiftBodypartAction
     {
         /// <summary>
-        /// An existing entity was edited.
+        /// The bodypart was added.
         /// </summary>
-        Edited,
+        Add,
 
         /// <summary>
-        /// No change was required.
+        /// The bodypart was removed.
         /// </summary>
-        None
+        Remove,
+
+        /// <summary>
+        /// The bodypart was shifted.
+        /// </summary>
+        Shift,
+
+        /// <summary>
+        /// Nothing was done to the bodypart.
+        /// </summary>
+        Nothing
     }
 }

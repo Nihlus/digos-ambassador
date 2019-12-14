@@ -24,8 +24,7 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions;
-using DIGOS.Ambassador.Plugins.Abstractions.Attributes;
+using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Kinks;
 using DIGOS.Ambassador.Plugins.Kinks.CommandModules;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
@@ -35,8 +34,10 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Plugins.Abstractions;
+using Remora.Plugins.Abstractions.Attributes;
 
-[assembly: AmbassadorPlugin(typeof(KinksPlugin))]
+[assembly: RemoraPlugin(typeof(KinksPlugin))]
 
 namespace DIGOS.Ambassador.Plugins.Kinks
 {

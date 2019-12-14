@@ -22,7 +22,6 @@
 
 using System.Net;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Model;
@@ -31,6 +30,7 @@ using Discord;
 using Discord.Net;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.Results;
 using Zio;
 
 namespace DIGOS.Ambassador.Plugins.Core.Services.Users

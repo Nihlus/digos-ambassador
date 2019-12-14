@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Results;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
@@ -37,6 +36,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 
 using JetBrains.Annotations;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Wizards
 {
