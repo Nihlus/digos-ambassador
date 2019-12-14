@@ -22,11 +22,11 @@
 
 using System;
 using System.Data;
-using DIGOS.Ambassador.Core.Database;
 using JetBrains.Annotations;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
+using Remora.EntityFrameworkCore.Modular;
+using Remora.EntityFrameworkCore.Modular.Services;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {
@@ -56,9 +56,11 @@ namespace DIGOS.Ambassador.Tests.TestBases
                 .UseLazyLoadingProxies()
                 .UseSqlite(_connection);
 
+            var contextService = new SchemaAwareDbContextService();
+
             if (typeof(TContext).IsSubclassOf(typeof(SchemaAwareDbContext)))
             {
-                optionsBuilder.ReplaceService<IMigrationsModelDiffer, SchemaAwareMigrationsModelDiffer>();
+                contextService.ConfigureSchemaAwareContext(optionsBuilder);
             }
         }
 

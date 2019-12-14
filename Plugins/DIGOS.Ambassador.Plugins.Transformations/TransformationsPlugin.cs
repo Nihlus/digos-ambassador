@@ -78,7 +78,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations
                 })
                 .AddScoped<LuaService>()
                 .AddScoped<TransformationService>()
-                .AddSchemaAwareDbContextPool<TransformationsDatabaseContext>();
+                .AddConfiguredSchemaAwareDbContextPool<TransformationsDatabaseContext>();
 
             return Task.FromResult(true);
         }

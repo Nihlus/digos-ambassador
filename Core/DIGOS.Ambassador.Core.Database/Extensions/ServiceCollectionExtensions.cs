@@ -21,34 +21,37 @@
 //
 
 using DIGOS.Ambassador.Core.Database.Services;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.EntityFrameworkCore.Modular;
+using Remora.EntityFrameworkCore.Modular.Extensions;
 
 namespace DIGOS.Ambassador.Core.Database.Extensions
 {
     /// <summary>
-    /// Extension methods for service collections.
+    /// Contains extension methods for the <see cref="IServiceCollection"/> interface.
     /// </summary>
+    [PublicAPI]
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds and configures a pool of schema-aware database contexts.
+        /// Adds and configures a database pool for the given schema-aware context type.
         /// </summary>
         /// <param name="this">The service collection.</param>
-        /// <typeparam name="TContext">The context type to add.</typeparam>
-        /// <returns>The service collection, with the pool.</returns>
-        public static IServiceCollection AddSchemaAwareDbContextPool<TContext>(this IServiceCollection @this)
+        /// <typeparam name="TContext">The context type.</typeparam>
+        /// <returns>The service collection, with the pool added.</returns>
+        [PublicAPI, NotNull]
+        public static IServiceCollection AddConfiguredSchemaAwareDbContextPool<TContext>
+        (
+            [NotNull] this IServiceCollection @this
+        )
             where TContext : SchemaAwareDbContext
         {
-            @this.AddDbContextPool<TContext>
-            (
-                (serviceProvider, optionsBuilder) =>
-                {
-                    var schemaAwareDbContextService = serviceProvider.GetRequiredService<SchemaAwareDbContextService>();
-                    schemaAwareDbContextService.ConfigureSchemaAwareContext<TContext>(optionsBuilder);
-                }
-            );
-
-            return @this;
+            return @this.AddSchemaAwareDbContextPool<TContext>((provider, builder) =>
+            {
+                var configurationService = provider.GetRequiredService<ContextConfigurationService>();
+                configurationService.ConfigureSchemaAwareContext<TContext>(builder);
+            });
         }
     }
 }

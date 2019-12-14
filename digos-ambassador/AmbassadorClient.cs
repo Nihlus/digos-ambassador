@@ -110,8 +110,9 @@ namespace DIGOS.Ambassador
                 .AddSingleton<HelpService>()
                 .AddSingleton<Random>()
                 .AddSingleton(pluginService)
-                .AddSingleton<SchemaAwareDbContextService>()
+                .AddSingleton<ContextConfigurationService>()
                 .AddSingleton(FileSystemFactory.CreateContentFileSystem())
+                .AddSingleton<ContextConfigurationService>()
                 .AddLogging
                 (
                     c => c

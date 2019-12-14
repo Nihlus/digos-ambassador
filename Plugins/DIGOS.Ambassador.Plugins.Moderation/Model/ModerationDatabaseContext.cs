@@ -21,9 +21,9 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
-using DIGOS.Ambassador.Core.Database;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.EntityFrameworkCore.Modular;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.Model
 {

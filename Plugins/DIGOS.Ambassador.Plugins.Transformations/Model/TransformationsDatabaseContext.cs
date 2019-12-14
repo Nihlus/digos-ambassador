@@ -21,10 +21,10 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
-using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.EntityFrameworkCore.Modular;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Model
 {

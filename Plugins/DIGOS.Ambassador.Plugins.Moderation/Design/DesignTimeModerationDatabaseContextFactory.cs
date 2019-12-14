@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Design
         public ModerationDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<ModerationDatabaseContext>();
-            new SchemaAwareDbContextService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
+            new ContextConfigurationService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
                 .ConfigureSchemaAwareContext<ModerationDatabaseContext>(optionsBuilder);
 
             return new ModerationDatabaseContext(optionsBuilder.Options);

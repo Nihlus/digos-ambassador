@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks
         {
             serviceCollection
                 .AddScoped<KinkService>()
-                .AddSchemaAwareDbContextPool<KinksDatabaseContext>();
+                .AddConfiguredSchemaAwareDbContextPool<KinksDatabaseContext>();
 
             return Task.FromResult(true);
         }

@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Design
         public CoreDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<CoreDatabaseContext>();
-            new SchemaAwareDbContextService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
+            new ContextConfigurationService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
                 .ConfigureSchemaAwareContext<CoreDatabaseContext>(optionsBuilder);
 
             return new CoreDatabaseContext(optionsBuilder.Options);

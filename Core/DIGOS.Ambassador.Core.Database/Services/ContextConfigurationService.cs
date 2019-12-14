@@ -1,5 +1,5 @@
 //
-//  SchemaAwareDbContextService.cs
+//  ContextConfigurationService.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -27,22 +27,23 @@ using DIGOS.Ambassador.Core.Database.Credentials;
 using DIGOS.Ambassador.Core.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Remora.EntityFrameworkCore.Modular;
 
 namespace DIGOS.Ambassador.Core.Database.Services
 {
     /// <summary>
     /// Serves functionality for schema-aware database contexts.
     /// </summary>
-    public class SchemaAwareDbContextService
+    public class ContextConfigurationService
     {
         private readonly ContentService _content;
         private readonly Dictionary<Type, string> _knownSchemas;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SchemaAwareDbContextService"/> class.
+        /// Initializes a new instance of the <see cref="ContextConfigurationService"/> class.
         /// </summary>
         /// <param name="content">The content service.</param>
-        public SchemaAwareDbContextService(ContentService content)
+        public ContextConfigurationService(ContentService content)
         {
             _content = content;
             _knownSchemas = new Dictionary<Type, string>();
@@ -96,8 +97,6 @@ namespace DIGOS.Ambassador.Core.Database.Services
                     credentials.GetConnectionString(),
                     b => b.MigrationsHistoryTable(HistoryRepository.DefaultTableName + schema)
                 );
-
-            optionsBuilder.ReplaceService<IMigrationsModelDiffer, SchemaAwareMigrationsModelDiffer>();
         }
     }
 }

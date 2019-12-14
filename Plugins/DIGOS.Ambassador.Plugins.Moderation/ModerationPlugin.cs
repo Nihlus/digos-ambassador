@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation
         public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddSchemaAwareDbContextPool<ModerationDatabaseContext>();
+                .AddConfiguredSchemaAwareDbContextPool<ModerationDatabaseContext>();
 
             serviceCollection
                 .AddScoped<ModerationService>()

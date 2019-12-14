@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Core
                 .AddScoped<UserService>()
                 .AddScoped<PrivacyService>()
                 .AddScoped<OwnedEntityService>()
-                .AddSchemaAwareDbContextPool<CoreDatabaseContext>();
+                .AddConfiguredSchemaAwareDbContextPool<CoreDatabaseContext>();
 
             return Task.FromResult(true);
         }

@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions
             serviceCollection
                 .AddSingleton<PermissionRegistryService>()
                 .AddScoped<PermissionService>()
-                .AddSchemaAwareDbContextPool<PermissionsDatabaseContext>();
+                .AddConfiguredSchemaAwareDbContextPool<PermissionsDatabaseContext>();
 
             return Task.FromResult(true);
         }

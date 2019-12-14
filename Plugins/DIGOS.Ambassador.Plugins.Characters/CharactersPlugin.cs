@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Characters
             serviceCollection
                 .AddSingleton<PronounService>()
                 .AddScoped<CharacterService>()
-                .AddSchemaAwareDbContextPool<CharactersDatabaseContext>();
+                .AddConfiguredSchemaAwareDbContextPool<CharactersDatabaseContext>();
 
             return Task.FromResult(true);
         }

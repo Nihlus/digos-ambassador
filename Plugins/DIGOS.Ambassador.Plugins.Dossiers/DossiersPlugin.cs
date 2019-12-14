@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers
         /// <inheritdoc/>
         public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSchemaAwareDbContextPool<DossiersDatabaseContext>();
+            serviceCollection.AddConfiguredSchemaAwareDbContextPool<DossiersDatabaseContext>();
             serviceCollection.AddSingleton<DossierService>();
 
             return Task.FromResult(true);

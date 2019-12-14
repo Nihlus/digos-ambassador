@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Design
         public TransformationsDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<TransformationsDatabaseContext>();
-            new SchemaAwareDbContextService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
+            new ContextConfigurationService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
                 .ConfigureSchemaAwareContext<TransformationsDatabaseContext>(optionsBuilder);
 
             return new TransformationsDatabaseContext(optionsBuilder.Options);

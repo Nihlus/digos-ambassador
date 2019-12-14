@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Design
         public RoleplayingDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<RoleplayingDatabaseContext>();
-            new SchemaAwareDbContextService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
+            new ContextConfigurationService(new ContentService(FileSystemFactory.CreateContentFileSystem()))
                 .ConfigureSchemaAwareContext<RoleplayingDatabaseContext>(optionsBuilder);
 
             return new RoleplayingDatabaseContext(optionsBuilder.Options);
