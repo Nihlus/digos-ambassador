@@ -165,7 +165,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// </summary>
         /// <param name="channel">The channel.</param>
         /// <returns>The displayed message.</returns>
-        private async Task<IUserMessage> DisplayAsync(IMessageChannel channel)
+        private async Task<IUserMessage?> DisplayAsync(IMessageChannel channel)
         {
             if (this.IsDeleting)
             {

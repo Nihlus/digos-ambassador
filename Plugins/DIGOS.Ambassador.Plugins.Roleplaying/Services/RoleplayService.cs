@@ -282,7 +282,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             if (roleplay.Messages.Any(m => m.DiscordMessageID == (long)message.Id))
             {
                 // Edit the existing message
-                var existingMessage = roleplay.Messages.Find(m => m.DiscordMessageID == (long)message.Id);
+                var existingMessage = roleplay.Messages.First(m => m.DiscordMessageID == (long)message.Id);
 
                 if (existingMessage.Contents.Equals(message.Content))
                 {

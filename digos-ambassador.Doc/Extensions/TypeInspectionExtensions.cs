@@ -242,16 +242,16 @@ namespace DIGOS.Ambassador.Doc.Extensions
             }
 
             commands = module.Methods.Select
-                (
-                    m =>
-                    {
-                        var wasParsed = CommandInformation.TryCreate(m, parentModule, out var command);
-                        return (wasParsed, command);
-                    }
-                )
-                .Where(cr => cr.wasParsed)
-                .Select(cr => cr.command)
-                .ToArray();
+            (
+                m =>
+                {
+                    var wasParsed = CommandInformation.TryCreate(m, parentModule, out var command);
+                    return (wasParsed, command);
+                }
+            )
+            .Where(cr => cr.wasParsed)
+            .Select(cr => cr.command)
+            .ToArray();
 
             return true;
         }
@@ -279,16 +279,16 @@ namespace DIGOS.Ambassador.Doc.Extensions
             }
 
             submodules = module.NestedTypes.Where(t => t.IsProbablyCommandModule()).Select
-                (
-                    t =>
-                    {
-                        var wasParsed = ModuleInformation.TryCreate(t, out var submodule, parentModule);
-                        return (wasParsed, submodule);
-                    }
-                )
-                .Where(mr => mr.wasParsed)
-                .Select(mr => mr.submodule)
-                .ToArray();
+            (
+                t =>
+                {
+                    var wasParsed = ModuleInformation.TryCreate(t, out var submodule, parentModule);
+                    return (wasParsed, submodule);
+                }
+            )
+            .Where(mr => mr.wasParsed)
+            .Select(mr => mr.submodule)
+            .ToArray();
 
             return true;
         }

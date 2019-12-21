@@ -21,8 +21,10 @@
 //
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using JetBrains.Annotations;
+
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace DIGOS.Ambassador.Core.Extensions
 {
@@ -31,6 +33,28 @@ namespace DIGOS.Ambassador.Core.Extensions
     /// </summary>
     public static class EnumExtensions
     {
+        /// <summary>
+        /// Attempts to get an instance of a custom attribute from the given enum value.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <param name="customAttribute">The attribute.</param>
+        /// <typeparam name="T">The attribute type.</typeparam>
+        /// <returns>true if the attribute was successfully retrieved; otherwise, false.</returns>
+        public static bool TryGetCustomAttribute<T>
+        (
+            [NotNull] this Enum value,
+            [NotNullWhen(true)] out T? customAttribute
+        ) where T : Attribute
+        {
+            customAttribute = value.GetCustomAttribute<T>();
+            if (customAttribute is null)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Gets a custom attribute of type <typeparamref name="T"/> from the given enum value.
         /// </summary>
@@ -41,7 +65,12 @@ namespace DIGOS.Ambassador.Core.Extensions
         {
             var enumType = value.GetType();
             var name = Enum.GetName(enumType, value);
-            return enumType.GetField(name).GetCustomAttributes(false).OfType<T>().SingleOrDefault();
+            if (name is null)
+            {
+                return null;
+            }
+
+            return enumType.GetField(name)?.GetCustomAttributes(false).OfType<T>().SingleOrDefault();
         }
 
         /// <summary>

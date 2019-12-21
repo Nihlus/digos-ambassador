@@ -204,7 +204,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             );
 
             // The +3 here includes the surrounding braces and the @
-            var tokenObject = creationMethod?.Invoke(null, new object[] { start, tokenText.Length + 3, data, _services } );
+            var tokenObject = creationMethod?.Invoke
+            (
+                null,
+                new object?[] { start, tokenText.Length + 3, data, _services }
+            );
 
             return tokenObject as IReplaceableTextToken;
         }

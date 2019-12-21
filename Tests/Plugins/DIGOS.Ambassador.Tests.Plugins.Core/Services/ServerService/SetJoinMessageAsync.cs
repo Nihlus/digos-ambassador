@@ -46,6 +46,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             [Fact]
             public async Task ReturnsErrorIfNewJoinMessageIsNull()
             {
+                // ReSharper disable once AssignNullToNotNullAttribute
                 var result = await this.Servers.SetJoinMessageAsync(_server, null);
 
                 Assert.False(result.IsSuccess);

@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 var guild = this.Client.GetGuild((ulong)activeRoleplay.ServerID);
 
                 // ReSharper disable once PossibleInvalidOperationException
-                var channel = guild.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID.Value);
+                var channel = guild.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID!.Value);
                 if (channel is null)
                 {
                     continue;

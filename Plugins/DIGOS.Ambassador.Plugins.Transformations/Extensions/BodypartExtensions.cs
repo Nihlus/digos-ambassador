@@ -68,17 +68,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         {
             var compositeParts = Enum.GetValues(typeof(Bodypart))
             .Cast<Bodypart>()
-            .Where
-            (
-                b =>
-                    b.HasCustomAttribute<CompositeAttribute>()
-            )
             .SelectMany
             (
                 b =>
+                {
+                    if (b.TryGetCustomAttribute<CompositeAttribute>(out var compositeAttribute))
+                    {
+                        return compositeAttribute.ComposingParts;
+                    }
 
-                    // ReSharper disable once PossibleNullReferenceException
-                    b.GetCustomAttribute<CompositeAttribute>().ComposingParts
+                    return new Bodypart[] { };
+                }
             );
 
             return compositeParts.Contains(@this);
@@ -108,8 +108,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                 yield break;
             }
 
-            // ReSharper disable once PossibleNullReferenceException
-            foreach (var part in @this.GetCustomAttribute<CompositeAttribute>().ComposingParts)
+            if (!@this.TryGetCustomAttribute<CompositeAttribute>(out var compositeAttribute))
+            {
+                yield break;
+            }
+
+            foreach (var part in compositeAttribute.ComposingParts)
             {
                 yield return part;
             }

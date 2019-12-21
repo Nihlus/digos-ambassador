@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
@@ -29,8 +30,9 @@ using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Discord;
 using Discord.WebSocket;
-using JetBrains.Annotations;
 using Remora.Results;
+
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace DIGOS.Ambassador.Discord.Interactivity
 {
@@ -70,7 +72,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         public async Task<RetrieveEntityResult<IUserMessage>> GetNextMessageAsync
         (
             [NotNull] IMessageChannel channel,
-            Func<IUserMessage, bool>? filter = null,
+            [AllowNull] Func<IUserMessage, bool> filter = null,
             TimeSpan? timeout = null
         )
         {

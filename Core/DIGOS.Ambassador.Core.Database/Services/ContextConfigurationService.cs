@@ -57,7 +57,11 @@ namespace DIGOS.Ambassador.Core.Database.Services
             }
 
             var dummyOptions = new DbContextOptionsBuilder<TContext>().Options;
-            var dummyContext = (TContext)Activator.CreateInstance(typeof(TContext), dummyOptions);
+            var dummyContext = Activator.CreateInstance(typeof(TContext), dummyOptions) as TContext;
+            if (dummyContext is null)
+            {
+                return;
+            }
 
             var schema = dummyContext.Schema;
             _knownSchemas.Add(typeof(TContext), schema);
@@ -80,7 +84,7 @@ namespace DIGOS.Ambassador.Core.Database.Services
                 throw new InvalidOperationException("Failed to get the database credential stream.");
             }
 
-            DatabaseCredentials credentials;
+            DatabaseCredentials? credentials;
             using (var credentialStream = new StreamReader(getCredentialStream.Entity))
             {
                 var content = credentialStream.ReadToEnd();

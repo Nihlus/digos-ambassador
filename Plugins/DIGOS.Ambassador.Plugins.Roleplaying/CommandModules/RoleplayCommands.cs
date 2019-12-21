@@ -662,7 +662,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var joinedMentions = joinedUsers.Select(async u => (await u).Mention);
 
             // ReSharper disable once PossibleInvalidOperationException
-            var channel = await this.Context.Guild.GetTextChannelAsync((ulong)roleplay.ActiveChannelID);
+            var channel = await this.Context.Guild.GetTextChannelAsync((ulong)roleplay.ActiveChannelID!);
 
             var activationMessage = $"The roleplay \"{roleplay.Name}\" is now active in " +
                                     $"{MentionUtils.MentionChannel(channel.Id)}.";

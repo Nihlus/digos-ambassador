@@ -43,10 +43,15 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
     public abstract class OwnedEntityTypeReader<TEntity> : TypeReader where TEntity : class, IOwnedNamedEntity
     {
         /// <inheritdoc />
-        public sealed override async Task<TypeReaderResult> ReadAsync([NotNull] ICommandContext context, string input, IServiceProvider services)
+        public sealed override async Task<TypeReaderResult> ReadAsync
+        (
+            [NotNull] ICommandContext context,
+            string input,
+            IServiceProvider services
+        )
         {
             IUser? owner = null;
-            string entityName;
+            string? entityName;
             if (!input.IsNullOrWhitespace() && input.Any(c => c == ':'))
             {
                 // We have a mentioned owner and a name. Owners may have colons in the name, so let's check from the back.

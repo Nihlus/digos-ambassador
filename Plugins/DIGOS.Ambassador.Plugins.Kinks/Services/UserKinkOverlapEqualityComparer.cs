@@ -31,17 +31,16 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
     internal sealed class UserKinkOverlapEqualityComparer : IEqualityComparer<UserKink>
     {
         /// <inheritdoc />
-        public bool Equals(UserKink x, UserKink y)
+        public bool Equals(UserKink? x, UserKink? y)
         {
-            if (x is null ^ y is null)
+            if (x is null && y is null)
             {
-                return false;
+                return true;
             }
 
-            if (x is null)
+            if (x is null || y is null)
             {
-                // then y must also be null
-                return true;
+                return false;
             }
 
             return
