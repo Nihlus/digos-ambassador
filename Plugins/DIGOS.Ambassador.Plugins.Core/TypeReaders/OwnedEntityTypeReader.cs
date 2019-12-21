@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
         /// <inheritdoc />
         public sealed override async Task<TypeReaderResult> ReadAsync([NotNull] ICommandContext context, string input, IServiceProvider services)
         {
-            IUser owner = null;
+            IUser? owner = null;
             string entityName;
             if (!input.IsNullOrWhitespace() && input.Any(c => c == ':'))
             {

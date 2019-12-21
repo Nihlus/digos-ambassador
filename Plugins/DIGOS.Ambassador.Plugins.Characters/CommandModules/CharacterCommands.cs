@@ -631,7 +631,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 invoker
             );
 
-            CharacterRole previousRole = null;
+            CharacterRole? previousRole = null;
             if (getPreviousCharacterResult.IsSuccess)
             {
                 previousRole = getPreviousCharacterResult.Entity.Role;

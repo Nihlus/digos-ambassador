@@ -176,7 +176,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             tokenText = new string(tokenText.Skip(1).ToArray());
 
             string identifier;
-            string data = null;
+            string? data = null;
             if (tokenText.Contains('|'))
             {
                 var splitter = tokenText.LastIndexOf('|');
@@ -206,7 +206,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             // The +3 here includes the surrounding braces and the @
             var tokenObject = creationMethod?.Invoke(null, new object[] { start, tokenText.Length + 3, data, _services } );
 
-            return (IReplaceableTextToken)tokenObject;
+            return tokenObject as IReplaceableTextToken;
         }
     }
 }

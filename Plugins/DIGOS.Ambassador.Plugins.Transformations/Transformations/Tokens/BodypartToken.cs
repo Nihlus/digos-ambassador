@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         }
 
         /// <inheritdoc/>
-        protected override BodypartToken Initialize(string data)
+        protected override BodypartToken Initialize(string? data)
         {
             if (data is null)
             {

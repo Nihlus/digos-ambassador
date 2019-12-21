@@ -44,8 +44,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.TypeReaders
         /// <inheritdoc />
         protected override async Task<RetrieveEntityResult<Character>> RetrieveEntityAsync
         (
-            IUser entityOwner,
-            string entityName,
+            IUser? entityOwner,
+            string? entityName,
             ICommandContext context,
             IServiceProvider services
         )

@@ -78,7 +78,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         }
 
         /// <inheritdoc />
-        protected override LuaSnippetToken Initialize(string data)
+        protected override LuaSnippetToken Initialize(string? data)
         {
             this.Snippet = data ?? string.Empty;
             return this;

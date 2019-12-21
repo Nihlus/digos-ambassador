@@ -42,7 +42,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
     public sealed class RoleplayTypeReader : OwnedEntityTypeReader<Roleplay>
     {
         /// <inheritdoc />
-        protected override async Task<RetrieveEntityResult<Roleplay>> RetrieveEntityAsync(IUser entityOwner, string entityName, ICommandContext context, IServiceProvider services)
+        protected override async Task<RetrieveEntityResult<Roleplay>> RetrieveEntityAsync
+        (
+            IUser? entityOwner,
+            string? entityName,
+            ICommandContext context,
+            IServiceProvider services
+        )
         {
             var roleplayService = services.GetRequiredService<RoleplayService>();
 

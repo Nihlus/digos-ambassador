@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         }
 
         /// <inheritdoc />
-        protected override PatternToken Initialize(string data)
+        protected override PatternToken Initialize(string? data)
         {
             return this;
         }

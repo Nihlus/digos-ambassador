@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         }
 
         /// <inheritdoc />
-        protected override SideToken Initialize(string data)
+        protected override SideToken Initialize(string? data)
         {
             return this;
         }

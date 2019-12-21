@@ -42,10 +42,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         public int Length { get; set; }
 
         /// <inheritdoc />
-        public abstract string GetText(Appearance appearance, AppearanceComponent component);
+        public abstract string GetText(Appearance appearance, AppearanceComponent? component);
 
         /// <inheritdoc />
-        public virtual Task<string> GetTextAsync(Appearance appearance, AppearanceComponent component)
+        public virtual Task<string> GetTextAsync(Appearance appearance, AppearanceComponent? component)
         {
             return Task.Run(() => GetText(appearance, component));
         }

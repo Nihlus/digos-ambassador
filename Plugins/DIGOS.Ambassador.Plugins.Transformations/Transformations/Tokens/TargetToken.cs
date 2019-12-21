@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         }
 
         /// <inheritdoc />
-        protected override TargetToken Initialize(string data)
+        protected override TargetToken Initialize(string? data)
         {
             return this;
         }

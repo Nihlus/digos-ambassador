@@ -54,7 +54,10 @@ namespace DIGOS.Ambassador.Tools
         /// <inheritdoc />
         public void WriteYaml([NotNull] IEmitter emitter, object? value, Type type)
         {
-            var species = (Species)value;
+            if (!(value is Species species))
+            {
+                return;
+            }
 
             emitter.Emit(new Scalar(species.Name));
         }

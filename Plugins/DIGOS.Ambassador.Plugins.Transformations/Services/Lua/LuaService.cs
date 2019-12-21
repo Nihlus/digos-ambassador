@@ -209,7 +209,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         public Task<RetrieveEntityResult<string>> ExecuteSnippetAsync
         (
             [NotNull] string snippet,
-            [NotNull] params (string name, object value)[] variables
+            [NotNull] params (string Name, object Value)[] variables
         )
         {
             return Task.Run

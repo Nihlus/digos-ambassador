@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         }
 
         /// <inheritdoc />
-        protected override LuaScriptToken Initialize(string data)
+        protected override LuaScriptToken Initialize(string? data)
         {
             this.ScriptName = data ?? string.Empty;
             return this;

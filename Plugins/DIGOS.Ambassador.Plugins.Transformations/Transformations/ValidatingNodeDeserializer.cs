@@ -46,7 +46,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         }
 
         /// <inheritdoc />
-        public bool Deserialize(IParser parser, Type expectedType, Func<IParser, Type, object> nestedObjectDeserializer, out object value)
+        public bool Deserialize
+        (
+            IParser parser,
+            Type expectedType,
+            Func<IParser, Type, object?> nestedObjectDeserializer,
+            out object? value
+        )
         {
             if (_nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
             {

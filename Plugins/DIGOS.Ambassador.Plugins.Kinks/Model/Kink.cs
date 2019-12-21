@@ -94,7 +94,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
 
         /// <inheritdoc />
         [SuppressMessage("ReSharper", "ArrangeThisQualifier", Justification = "Used for explicit differentiation between compared objects.")]
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (ReferenceEquals(null, obj))
             {

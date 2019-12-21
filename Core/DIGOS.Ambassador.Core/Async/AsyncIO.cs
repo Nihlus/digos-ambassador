@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Core.Async
             var lines = new List<string>();
             using (var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen))
             {
-                string line;
+                string? line;
                 while ((line = await reader.ReadLineAsync()) != null)
                 {
                     lines.Add(line);

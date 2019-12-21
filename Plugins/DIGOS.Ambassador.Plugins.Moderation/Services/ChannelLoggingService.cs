@@ -455,7 +455,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             return RetrieveEntityResult<ITextChannel>.FromSuccess(textChannel);
         }
 
-        private async Task<IUser> FindMostProbableDeleterAsync(IMessage message, ITextChannel channel)
+        private Task<IUser> FindMostProbableDeleterAsync(IMessage message, ITextChannel channel)
         {
             // TODO: Wait for a hotfix from Discord.NET
             /*
@@ -482,7 +482,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             */
 
             // No audit entries are generated when the user deletes a message themselves
-            return message.Author;
+            return Task.FromResult(message.Author);
         }
     }
 }

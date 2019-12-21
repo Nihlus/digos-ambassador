@@ -101,7 +101,7 @@ namespace DIGOS.Ambassador.Doc.Reflection
         public static bool TryCreate
         (
             [NotNull] TypeDefinition moduleType,
-            out? ModuleInformation information,
+            out ModuleInformation? information,
             ModuleInformation? parentModule = null
         )
         {

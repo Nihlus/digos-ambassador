@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         }
 
         /// <inheritdoc />
-        protected override SpeciesToken Initialize(string data)
+        protected override SpeciesToken Initialize(string? data)
         {
             return this;
         }

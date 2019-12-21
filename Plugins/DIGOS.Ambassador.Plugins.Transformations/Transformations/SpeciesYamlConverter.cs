@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         }
 
         /// <inheritdoc />
-        public void WriteYaml([NotNull] IEmitter emitter, object value, Type type)
+        public void WriteYaml([NotNull] IEmitter emitter, object? value, Type type)
         {
             var species = (Species)value;
 

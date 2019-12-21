@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         }
 
         /// <inheritdoc />
-        protected override SexToken Initialize(string data)
+        protected override SexToken Initialize(string? data)
         {
             return this;
         }

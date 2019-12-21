@@ -104,7 +104,7 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// <param name="mockConfiguration">The configuration method for the mocked entity.</param>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <returns>A mocked object.</returns>
-        public static TEntity CreateDiscordEntity<TEntity>(ulong id, Action<Mock<TEntity>> mockConfiguration = null)
+        public static TEntity CreateDiscordEntity<TEntity>(ulong id, Action<Mock<TEntity>>? mockConfiguration = null)
             where TEntity : class, IEntity<ulong>
         {
             var mock = new Mock<TEntity>();

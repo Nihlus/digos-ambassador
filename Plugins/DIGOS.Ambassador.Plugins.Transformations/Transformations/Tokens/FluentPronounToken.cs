@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         }
 
         /// <inheritdoc />
-        protected override FluentPronounToken Initialize(string data)
+        protected override FluentPronounToken Initialize(string? data)
         {
             if (data is null)
             {
