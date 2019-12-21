@@ -137,15 +137,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         protected override async Task MessageUpdated
         (
             Cacheable<IMessage, ulong> oldMessage,
-            SocketMessage? updatedMessage,
+            SocketMessage updatedMessage,
             ISocketMessageChannel messageChannel
         )
         {
-            if (updatedMessage is null)
-            {
-                return;
-            }
-
             // Ignore all changes except text changes
             var isTextUpdate = updatedMessage.EditedTimestamp.HasValue &&
                                 updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
