@@ -1,5 +1,5 @@
 //
-//  GetServerSettingsAsync.cs
+//  SetWarningThresholdAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>

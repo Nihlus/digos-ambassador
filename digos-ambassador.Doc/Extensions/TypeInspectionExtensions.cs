@@ -26,6 +26,8 @@ using DIGOS.Ambassador.Doc.Reflection;
 using JetBrains.Annotations;
 using Mono.Cecil;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Doc.Extensions
 {
     /// <summary>
@@ -44,8 +46,8 @@ namespace DIGOS.Ambassador.Doc.Extensions
         [Pure, ContractAnnotation("=> false, name : null; => true, name : notnull")]
         public static bool TryGetModuleName
         (
-            [JetBrains.Annotations.NotNull] this TypeDefinition provider,
-            out string? name
+            [NotNull] this TypeDefinition provider,
+            [NotNullWhen(true)] out string? name
         )
         {
             name = null;
@@ -70,7 +72,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="group">The group.</param>
         /// <returns>true if the group was successfully retrieved; otherwise, false.</returns>
         [Pure, ContractAnnotation("=> false, group : null; => true, group : notnull")]
-        public static bool TryGetGroup(this TypeDefinition provider, out string? group)
+        public static bool TryGetGroup(this TypeDefinition provider, [NotNullWhen(true)] out string? group)
         {
             group = null;
 
@@ -96,7 +98,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="name">The name.</param>
         /// <returns>true if the name was successfully retrieved; otherwise, false.</returns>
         [Pure, ContractAnnotation("=> false, name : null; => true, name : notnull")]
-        public static bool TryGetName(this ICustomAttributeProvider provider, out string? name)
+        public static bool TryGetName(this ICustomAttributeProvider provider, [NotNullWhen(true)] out string? name)
         {
             name = null;
 
@@ -122,7 +124,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="name">The name.</param>
         /// <returns>true if the name was successfully retrieved; otherwise, false.</returns>
         [Pure, ContractAnnotation("=> false, name : null; => true, name : notnull")]
-        public static bool TryGetCommandName(this MethodDefinition provider, out string? name)
+        public static bool TryGetCommandName(this MethodDefinition provider, [NotNullWhen(true)] out string? name)
         {
             name = null;
 
@@ -155,8 +157,8 @@ namespace DIGOS.Ambassador.Doc.Extensions
         [Pure, ContractAnnotation("=> false, summary : null; => true, summary : notnull")]
         public static bool TryGetSummary
         (
-            [JetBrains.Annotations.NotNull] this ICustomAttributeProvider provider,
-            out string? summary
+            [NotNull] this ICustomAttributeProvider provider,
+            [NotNullWhen(true)] out string? summary
         )
         {
             summary = null;
@@ -190,8 +192,8 @@ namespace DIGOS.Ambassador.Doc.Extensions
         [Pure, ContractAnnotation("=> false, aliases : null; => true, aliases : notnull")]
         public static bool TryGetAliases
         (
-            [JetBrains.Annotations.NotNull] this ICustomAttributeProvider provider,
-            out string[]? aliases
+            [NotNull] this ICustomAttributeProvider provider,
+            [NotNullWhen(true)] out string[]? aliases
         )
         {
             aliases = null;
@@ -227,9 +229,9 @@ namespace DIGOS.Ambassador.Doc.Extensions
         [Pure, ContractAnnotation("=> false, commands : null; => true, commands : notnull")]
         public static bool TryGetCommands
         (
-            [JetBrains.Annotations.NotNull] this TypeDefinition module,
+            [NotNull] this TypeDefinition module,
             ModuleInformation parentModule,
-            out CommandInformation[]? commands
+            [NotNullWhen(true)] out CommandInformation[]? commands
         )
         {
             commands = null;
@@ -264,9 +266,9 @@ namespace DIGOS.Ambassador.Doc.Extensions
         [Pure, ContractAnnotation("=> false, submodules : null; => true, submodules : notnull")]
         public static bool TryGetSubmodules
         (
-            [JetBrains.Annotations.NotNull] this TypeDefinition module,
+            [NotNull] this TypeDefinition module,
             ModuleInformation parentModule,
-            out ModuleInformation[]? submodules
+            [NotNullWhen(true)] out ModuleInformation[]? submodules
         )
         {
             submodules = null;

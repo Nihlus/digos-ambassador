@@ -1,5 +1,5 @@
 //
-//  SetWarningReasonsAsync.cs
+//  SetBanContextMessageAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>

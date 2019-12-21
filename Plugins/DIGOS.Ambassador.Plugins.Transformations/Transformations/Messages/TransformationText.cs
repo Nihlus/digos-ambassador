@@ -21,8 +21,11 @@
 //
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
+
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
 {
@@ -53,7 +56,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
         /// <returns>true if the deserialization was successful; otherwise, false.</returns>
         [Pure]
         [ContractAnnotation("=> true, text : notnull; => false, text : null")]
-        public static bool TryDeserialize([NotNull] string json, out TransformationText? text)
+        public static bool TryDeserialize([NotNull] string json, [NotNullWhen(true)] out TransformationText? text)
         {
             text = null;
             try

@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using DIGOS.Ambassador.Core.Extensions;
 using Humanizer;
@@ -77,7 +78,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <returns>true if the parsing was successful; otherwise, false.</returns>
         [Pure]
         [ContractAnnotation("input : null => false, colour : null; => false, colour : null; => true, colour : notnull")]
-        public static bool TryParse(string? input, out Colour? colour)
+        public static bool TryParse
+        (
+            string? input,
+            [NotNullWhen(true)] out Colour? colour
+        )
         {
             colour = null;
 
@@ -118,7 +123,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// Clones this colour, creating a new unbound colour with the same settings.
         /// </summary>
         /// <returns>The cloned colour.</returns>
-        [Pure, NotNull]
+        [Pure, JetBrains.Annotations.NotNull]
         public Colour Clone()
         {
             return new Colour(this.Shade, this.Modifier);
@@ -129,8 +134,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// </summary>
         /// <param name="other">The other colour.</param>
         /// <returns>The copied colour.</returns>
-        [Pure, NotNull]
-        public static Colour CopyFrom([NotNull] Colour other)
+        [Pure, JetBrains.Annotations.NotNull]
+        public static Colour CopyFrom([JetBrains.Annotations.NotNull] Colour other)
         {
             return other.Clone();
         }

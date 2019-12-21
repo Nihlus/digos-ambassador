@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Core.Database.Services
             }
 
             var dummyOptions = new DbContextOptionsBuilder<TContext>().Options;
-            var dummyContext = (TContext?)Activator.CreateInstance(typeof(TContext), dummyOptions);
+            var dummyContext = (TContext)Activator.CreateInstance(typeof(TContext), dummyOptions);
 
             var schema = dummyContext.Schema;
             _knownSchemas.Add(typeof(TContext), schema);

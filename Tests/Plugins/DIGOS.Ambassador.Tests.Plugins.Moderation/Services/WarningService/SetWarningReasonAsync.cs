@@ -1,5 +1,5 @@
 //
-//  SetWarningReasonsAsync.cs
+//  SetWarningReasonAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -35,12 +35,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
 {
     public partial class WarningService
     {
-        public class SetWarningReasonsAsync : WarningServiceTestBase
+        public class SetWarningReasonAsync : WarningServiceTestBase
         {
             private readonly UserWarning _warning = new UserWarning(new Server(0), new User(0), new User(1), string.Empty);
 
             [Fact]
-            public async Task ReturnsUnsuccessfulIfNewReasonsAreEmpty()
+            public async Task ReturnsUnsuccessfulIfNewReasonIsEmpty()
             {
                 var result = await this.Warnings.SetWarningReasonAsync(_warning, string.Empty);
 
@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulIfNewReasonsAreNull()
+            public async Task ReturnsUnsuccessfulIfNewReasonIsNull()
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
                 var result = await this.Warnings.SetWarningReasonAsync(_warning, null);
@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulIfNewReasonsAreIdentical()
+            public async Task ReturnsUnsuccessfulIfNewReasonIsIdentical()
             {
                 await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
                 var result = await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             }
 
             [Fact]
-            public async Task ReturnsSuccessfulIfNewReasonsAreWellFormed()
+            public async Task ReturnsSuccessfulIfNewReasonIsWellFormed()
             {
                 await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
                 var result = await this.Warnings.SetWarningReasonAsync(_warning, "Not dummy thicc");
@@ -83,7 +83,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             }
 
             [Fact]
-            public async Task ActuallySetsReasons()
+            public async Task ActuallySetsReason()
             {
                 await this.Warnings.SetWarningReasonAsync(_warning, "Dummy thicc");
 

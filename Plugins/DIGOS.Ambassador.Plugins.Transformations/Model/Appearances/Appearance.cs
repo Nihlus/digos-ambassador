@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Entities;
@@ -49,7 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the character that the appearance belongs to.
         /// </summary>
-        [Required, NotNull]
+        [Required, JetBrains.Annotations.NotNull]
         public virtual Character Character { get; private set; }
 
         /// <summary>
@@ -65,7 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the parts that compose this appearance.
         /// </summary>
-        [NotNull, ItemNotNull]
+        [JetBrains.Annotations.NotNull, ItemNotNull]
         public virtual List<AppearanceComponent> Components { get; private set; } = new List<AppearanceComponent>();
 
         /// <summary>
@@ -111,8 +112,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// </summary>
         /// <param name="sourceAppearance">The source appearance.</param>
         /// <returns>The new appearance.</returns>
-        [NotNull]
-        public static Appearance CopyFrom([NotNull] Appearance sourceAppearance)
+        [JetBrains.Annotations.NotNull]
+        public static Appearance CopyFrom([JetBrains.Annotations.NotNull] Appearance sourceAppearance)
         {
             var componentCopies = sourceAppearance.Components.Select(AppearanceComponent.CopyFrom).ToList();
 
@@ -128,11 +129,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="character">The character that the appearance is linked to.</param>
         /// <param name="transformations">The transformation service.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, JetBrains.Annotations.NotNull, ItemNotNull]
         public static async Task<CreateEntityResult<Appearance>> CreateDefaultAsync
         (
-            [NotNull] Character character,
-            [NotNull] TransformationService transformations
+            [JetBrains.Annotations.NotNull] Character character,
+            [JetBrains.Annotations.NotNull] TransformationService transformations
         )
         {
             var getSpeciesResult = await transformations.GetSpeciesByNameAsync("template");
@@ -217,7 +218,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="bodypart">The bodypart to get.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>The appearance component of the bodypart.</returns>
-        [Pure, NotNull]
+        [Pure, JetBrains.Annotations.NotNull]
         public AppearanceComponent GetAppearanceComponent(Bodypart bodypart, Chirality chirality)
         {
             if (bodypart.IsChiral() && chirality == Chirality.Center)
@@ -247,7 +248,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <returns>True if a component could be retrieved, otherwise, false.</returns>
         [Pure]
         [ContractAnnotation("=> true, component:notnull; => false, component:null")]
-        public bool TryGetAppearanceComponent(Bodypart bodypart, Chirality chirality, out AppearanceComponent? component)
+        public bool TryGetAppearanceComponent
+        (
+            Bodypart bodypart,
+            Chirality chirality,
+            [NotNullWhen(true)] out AppearanceComponent? component
+        )
         {
             component = null;
 

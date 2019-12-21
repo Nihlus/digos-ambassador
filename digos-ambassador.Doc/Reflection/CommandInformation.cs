@@ -87,7 +87,7 @@ namespace DIGOS.Ambassador.Doc.Reflection
         (
             [NotNull] MethodDefinition commandMethod,
             [NotNull] ModuleInformation module,
-            out CommandInformation? information
+            [NotNullWhen(true)] out CommandInformation? information
         )
         {
             information = null;

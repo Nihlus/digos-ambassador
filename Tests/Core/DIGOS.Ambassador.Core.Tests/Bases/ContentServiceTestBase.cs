@@ -1,5 +1,5 @@
 //
-//  IsEntityNameUniqueForUserAsync.cs
+//  ContentServiceTestBase.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Core.Tests.Bases
         /// Configures the file system.
         /// </summary>
         /// <param name="fileSystem">The file system to configure.</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected virtual Task ConfigureFileSystemAsync(IFileSystem fileSystem)
         {
             return Task.CompletedTask;

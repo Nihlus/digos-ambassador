@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using JetBrains.Annotations;
 
@@ -76,6 +77,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="quoteChars">The quote characters.</param>
         /// <returns>The unquoted string.</returns>
         [ContractAnnotation("this : null => null; this : notnull => notnull")]
+        [return: NotNullIfNotNull("this")]
         public static string? Unquote(this string? @this, IReadOnlyCollection<char>? quoteChars = null)
         {
             quoteChars = quoteChars ?? new[] { '‘', '\'', '’', '“', '”', '\"' };
@@ -105,6 +107,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="quoteChar">The quote character.</param>
         /// <returns>The quoted string.</returns>
         [ContractAnnotation("this : null => null; this : notnull => notnull")]
+        [return: NotNullIfNotNull("this")]
         public static string? Quote(this string? @this, char quoteChar = '"')
         {
             if (@this is null)

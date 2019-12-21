@@ -1,5 +1,5 @@
 //
-//  CreateWarningAsync.cs
+//  CreateBanAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
