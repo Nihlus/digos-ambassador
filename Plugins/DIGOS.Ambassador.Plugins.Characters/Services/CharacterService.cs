@@ -420,7 +420,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         )
         {
             // Default the nickname to the character name
-            characterNickname = characterNickname ?? characterName;
+            characterNickname ??= characterName;
 
             var getOwnerResult = await _users.GetOrRegisterUserAsync(context.Message.Author);
             if (!getOwnerResult.IsSuccess)

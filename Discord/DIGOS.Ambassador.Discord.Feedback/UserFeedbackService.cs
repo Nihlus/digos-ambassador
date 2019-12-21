@@ -193,7 +193,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
             TimeSpan? timeout = null
         )
         {
-            timeout = timeout ?? TimeSpan.FromSeconds(15.0);
+            timeout ??= TimeSpan.FromSeconds(15.0);
 
             var message = await channel.SendMessageAsync(string.Empty, embed: eb);
 
@@ -352,7 +352,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         [NotNull]
         public EmbedBuilder CreateEmbedBase(Color? color = null)
         {
-            color = color ?? Color.DarkPurple;
+            color ??= Color.DarkPurple;
 
             var eb = new EmbedBuilder();
             eb.WithColor(color.Value);

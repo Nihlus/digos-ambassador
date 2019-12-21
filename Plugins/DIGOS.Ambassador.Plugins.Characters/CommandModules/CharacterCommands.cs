@@ -414,7 +414,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             string? characterAvatarUrl = null
         )
         {
-            characterAvatarUrl = characterAvatarUrl ?? _content.GetDefaultAvatarUri().ToString();
+            characterAvatarUrl ??= _content.GetDefaultAvatarUri().ToString();
 
             var createCharacterResult = await _characters.CreateCharacterAsync
             (
@@ -507,7 +507,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task ListOwnedCharactersAsync(IUser? discordUser = null)
         {
-            discordUser = discordUser ?? this.Context.Message.Author;
+            discordUser ??= this.Context.Message.Author;
 
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)

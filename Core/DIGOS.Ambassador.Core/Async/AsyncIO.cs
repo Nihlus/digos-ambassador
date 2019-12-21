@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Core.Async
             Encoding? encoding = null
         )
         {
-            encoding = encoding ?? Encoding.UTF8;
+            encoding ??= Encoding.UTF8;
 
             // Open the FileStream with the same FileMode, FileAccess
             // and FileShare as a call to File.OpenText would've done.
@@ -83,7 +83,7 @@ namespace DIGOS.Ambassador.Core.Async
             bool leaveOpen = true
         )
         {
-            encoding = encoding ?? Encoding.UTF8;
+            encoding ??= Encoding.UTF8;
 
             var lines = new List<string>();
             using (var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen))
@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Core.Async
         [NotNull]
         public static async Task<string> ReadAllTextAsync([NotNull] string path, Encoding? encoding = null)
         {
-            encoding = encoding ?? Encoding.UTF8;
+            encoding ??= Encoding.UTF8;
 
             // Open the FileStream with the same FileMode, FileAccess
             // and FileShare as a call to File.OpenText would've done.
@@ -131,7 +131,7 @@ namespace DIGOS.Ambassador.Core.Async
             bool leaveOpen = true
         )
         {
-            encoding = encoding ?? Encoding.UTF8;
+            encoding ??= Encoding.UTF8;
 
             using (var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen))
             {

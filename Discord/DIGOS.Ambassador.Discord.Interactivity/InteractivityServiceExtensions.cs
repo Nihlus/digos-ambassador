@@ -101,7 +101,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             TimeSpan? timeout = null
         )
         {
-            timeout = timeout ?? TimeSpan.FromMinutes(5.0);
+            timeout ??= TimeSpan.FromMinutes(5.0);
 
             var userChannel = await context.User.GetOrCreateDMChannelAsync();
             try

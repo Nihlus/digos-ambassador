@@ -213,7 +213,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task ListOwnedRoleplaysAsync(IUser? discordUser = null)
         {
-            discordUser = discordUser ?? this.Context.Message.Author;
+            discordUser ??= this.Context.Message.Author;
 
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
@@ -767,7 +767,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             IMessage? finalMessage = null
         )
         {
-            finalMessage = finalMessage ?? this.Context.Message;
+            finalMessage ??= this.Context.Message;
 
             if (startMessage.Channel != finalMessage.Channel)
             {

@@ -74,8 +74,8 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             TimeSpan? timeout = null
         )
         {
-            filter = filter ?? (m => true);
-            timeout = timeout ?? TimeSpan.FromSeconds(15);
+            filter ??= m => true;
+            timeout ??= TimeSpan.FromSeconds(15);
 
             var messageTrigger = new TaskCompletionSource<IUserMessage>();
 
@@ -155,7 +155,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             TimeSpan? timeout = null
         )
         {
-            timeout = timeout ?? TimeSpan.FromSeconds(15.0);
+            timeout ??= TimeSpan.FromSeconds(15.0);
 
             _trackedMessages.Add(message);
             await message.SendAsync(this, channel);

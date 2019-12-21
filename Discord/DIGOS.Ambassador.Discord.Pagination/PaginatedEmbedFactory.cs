@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             PaginatedAppearanceOptions? appearance = null
         )
         {
-            appearance = appearance ?? PaginatedAppearanceOptions.Default;
+            appearance ??= PaginatedAppearanceOptions.Default;
 
             var enumeratedItems = items.ToList();
             var paginatedEmbed = new PaginatedEmbed(feedbackService, sourceUser) { Appearance = appearance };
@@ -109,7 +109,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             PaginatedAppearanceOptions? appearance = null
         )
         {
-            appearance = appearance ?? PaginatedAppearanceOptions.Default;
+            appearance ??= PaginatedAppearanceOptions.Default;
 
             var enumeratedItems = items.ToList();
             var paginatedEmbed = new PaginatedEmbed(feedbackService, sourceUser) { Appearance = appearance };

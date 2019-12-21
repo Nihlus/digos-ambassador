@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         [return: NotNullIfNotNull("this")]
         public static string? Unquote(this string? @this, IReadOnlyCollection<char>? quoteChars = null)
         {
-            quoteChars = quoteChars ?? new[] { '‘', '\'', '’', '“', '”', '\"' };
+            quoteChars ??= new[] { '‘', '\'', '’', '“', '”', '\"' };
 
             if (@this is null)
             {

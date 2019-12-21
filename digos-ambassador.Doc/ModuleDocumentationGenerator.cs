@@ -178,7 +178,7 @@ namespace DIGOS.Ambassador.Doc
         /// <returns>A task that must be awaited.</returns>
         private async Task SavePageAsync([NotNull] MarkdownPage page, string? subdirectory = null)
         {
-            subdirectory = subdirectory ?? string.Empty;
+            subdirectory ??= string.Empty;
 
             var outputDirectory = Path.Combine(_outputPath, subdirectory);
             Directory.CreateDirectory(outputDirectory);

@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="assembly">The assembly to scan. Defaults to the executing assembly.</param>
         public void DiscoverAvailableTokens(Assembly? assembly = null)
         {
-            assembly = assembly ?? Assembly.GetExecutingAssembly();
+            assembly ??= Assembly.GetExecutingAssembly();
             var tokenTypes = assembly.DefinedTypes.Where
             (
                 t =>
