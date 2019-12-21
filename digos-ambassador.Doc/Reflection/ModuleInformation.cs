@@ -27,6 +27,8 @@ using DIGOS.Ambassador.Doc.Extensions;
 using JetBrains.Annotations;
 using Mono.Cecil;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Doc.Reflection
 {
     /// <summary>
@@ -68,8 +70,7 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// <summary>
         /// Gets the parent module, if any.
         /// </summary>
-        [CanBeNull]
-        public ModuleInformation Parent { get; private set; }
+        public ModuleInformation? Parent { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether this module is a submodule.
@@ -100,8 +101,8 @@ namespace DIGOS.Ambassador.Doc.Reflection
         public static bool TryCreate
         (
             [NotNull] TypeDefinition moduleType,
-            [CanBeNull] out ModuleInformation information,
-            [CanBeNull] ModuleInformation parentModule = null
+            out? ModuleInformation information,
+            ModuleInformation? parentModule = null
         )
         {
             information = null;

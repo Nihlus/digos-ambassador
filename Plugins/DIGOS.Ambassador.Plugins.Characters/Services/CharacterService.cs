@@ -125,8 +125,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
         (
             [NotNull] ICommandContext context,
-            [CanBeNull] User characterOwner,
-            [CanBeNull] string characterName
+            User? characterOwner,
+            string? characterName
         )
         {
             var getInvokerResult = await _users.GetOrRegisterUserAsync(context.User);
@@ -414,9 +414,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             [NotNull] ICommandContext context,
             [NotNull] string characterName,
             [NotNull] string characterAvatarUrl,
-            [CanBeNull] string characterNickname,
-            [CanBeNull] string characterSummary,
-            [CanBeNull] string characterDescription
+            string? characterNickname,
+            string? characterSummary,
+            string? characterDescription
         )
         {
             // Default the nickname to the character name
@@ -875,7 +875,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             [NotNull] Character character,
             [NotNull] string imageName,
             [NotNull] string imageUrl,
-            [CanBeNull] string imageCaption = null,
+            string? imageCaption = null,
             bool isNSFW = false
         )
         {

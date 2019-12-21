@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// Discovers available tokens in the given assembly, adding them to the tokenizer.
         /// </summary>
         /// <param name="assembly">The assembly to scan. Defaults to the executing assembly.</param>
-        public void DiscoverAvailableTokens([CanBeNull] Assembly assembly = null)
+        public void DiscoverAvailableTokens(Assembly? assembly = null)
         {
             assembly = assembly ?? Assembly.GetExecutingAssembly();
             var tokenTypes = assembly.DefinedTypes.Where
@@ -160,8 +160,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="start">The start index of the token.</param>
         /// <param name="tokenText">The raw text of the token.</param>
         /// <returns>A token object.</returns>
-        [CanBeNull]
-        public IReplaceableTextToken ParseToken(int start, [NotNull] string tokenText)
+        public IReplaceableTextToken? ParseToken(int start, [NotNull] string tokenText)
         {
             // Tokens are of the format @<tag>|<data>
             if (tokenText.Length <= 1)

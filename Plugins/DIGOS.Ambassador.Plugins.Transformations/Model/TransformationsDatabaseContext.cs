@@ -26,6 +26,8 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Plugins.Transformations.Model
 {
     /// <summary>

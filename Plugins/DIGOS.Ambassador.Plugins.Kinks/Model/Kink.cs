@@ -27,6 +27,8 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Plugins.Kinks.Model
 {
     /// <summary>
@@ -132,7 +134,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         /// <param name="left">The first object.</param>
         /// <param name="right">The second object.</param>
         /// <returns>true if the objects are equal; otherwise, false.</returns>
-        public static bool operator ==([CanBeNull] Kink left, [CanBeNull] Kink right)
+        public static bool operator ==(Kink? left, Kink? right)
         {
             return Equals(left, right);
         }
@@ -143,7 +145,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         /// <param name="left">The first object.</param>
         /// <param name="right">The second object.</param>
         /// <returns>true if the objects are equal; otherwise, false.</returns>
-        public static bool operator !=([CanBeNull] Kink left, [CanBeNull] Kink right)
+        public static bool operator !=(Kink? left, Kink? right)
         {
             return !Equals(left, right);
         }

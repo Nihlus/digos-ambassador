@@ -176,7 +176,7 @@ namespace DIGOS.Ambassador.Doc
         /// <param name="page">The page to save.</param>
         /// <param name="subdirectory">The subdirectory to save it in, if any.</param>
         /// <returns>A task that must be awaited.</returns>
-        private async Task SavePageAsync([NotNull] MarkdownPage page, [CanBeNull] string subdirectory = null)
+        private async Task SavePageAsync([NotNull] MarkdownPage page, string? subdirectory = null)
         {
             subdirectory = subdirectory ?? string.Empty;
 

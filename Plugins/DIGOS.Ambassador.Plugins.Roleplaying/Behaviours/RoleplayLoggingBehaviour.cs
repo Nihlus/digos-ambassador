@@ -137,7 +137,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         protected override async Task MessageUpdated
         (
             Cacheable<IMessage, ulong> oldMessage,
-            [CanBeNull] SocketMessage updatedMessage,
+            SocketMessage? updatedMessage,
             ISocketMessageChannel messageChannel
         )
         {

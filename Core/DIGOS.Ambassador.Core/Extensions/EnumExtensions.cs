@@ -37,8 +37,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="value">The value.</param>
         /// <typeparam name="T">The attribute type.</typeparam>
         /// <returns>The attribute.</returns>
-        [CanBeNull]
-        public static T GetCustomAttribute<T>([NotNull] this Enum value) where T : Attribute
+        public static T? GetCustomAttribute<T>([NotNull] this Enum value) where T : Attribute
         {
             var enumType = value.GetType();
             var name = Enum.GetName(enumType, value);

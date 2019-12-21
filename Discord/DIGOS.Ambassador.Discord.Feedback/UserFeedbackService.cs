@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         (
             [NotNull] ICommandContext context,
             [NotNull] string contents,
-            [CanBeNull] TimeSpan? timeout = null
+            TimeSpan? timeout = null
         )
         {
             await SendEmbedAndDeleteAsync(context, Color.Red, contents, timeout);
@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         (
             [NotNull] ICommandContext context,
             [NotNull] string contents,
-            [CanBeNull] TimeSpan? timeout = null
+            TimeSpan? timeout = null
         )
         {
             await SendEmbedAndDeleteAsync(context, Color.Orange, contents, timeout);
@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         (
             [NotNull] ICommandContext context,
             [NotNull] string contents,
-            [CanBeNull] TimeSpan? timeout = null
+            TimeSpan? timeout = null
         )
         {
             await SendEmbedAndDeleteAsync(context, Color.DarkPurple, contents, timeout);
@@ -116,7 +116,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
             [NotNull] ICommandContext context,
             Color colour,
             [NotNull] string contents,
-            [CanBeNull] TimeSpan? timeout = null
+            TimeSpan? timeout = null
         )
         {
             var eb = CreateFeedbackEmbed(context.User, colour, contents);
@@ -190,7 +190,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         (
             [NotNull] IMessageChannel channel,
             [NotNull] Embed eb,
-            [CanBeNull] TimeSpan? timeout = null
+            TimeSpan? timeout = null
         )
         {
             timeout = timeout ?? TimeSpan.FromSeconds(15.0);
@@ -350,7 +350,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <returns>A basic embed.</returns>
         [Pure]
         [NotNull]
-        public EmbedBuilder CreateEmbedBase([CanBeNull] Color? color = null)
+        public EmbedBuilder CreateEmbedBase(Color? color = null)
         {
             color = color ?? Color.DarkPurple;
 

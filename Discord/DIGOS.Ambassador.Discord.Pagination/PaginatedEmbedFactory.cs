@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             IEnumerable<TItem> items,
             Func<EmbedBuilder, TItem, Task> pageBuilder,
             [NotNull] string emptyCollectionDescription = "There's nothing here.",
-            [CanBeNull] PaginatedAppearanceOptions appearance = null
+            PaginatedAppearanceOptions? appearance = null
         )
         {
             appearance = appearance ?? PaginatedAppearanceOptions.Default;
@@ -106,7 +106,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             Func<TItem, string> titleSelector,
             Func<TItem, string> valueSelector,
             [NotNull] string emptyCollectionDescription = "There's nothing here.",
-            [CanBeNull] PaginatedAppearanceOptions appearance = null
+            PaginatedAppearanceOptions? appearance = null
         )
         {
             appearance = appearance ?? PaginatedAppearanceOptions.Default;

@@ -29,6 +29,8 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Plugins.Transformations.Model
 {
     /// <summary>
@@ -70,16 +72,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the default pattern of the transformation (if any).
         /// </summary>
-        [CanBeNull]
         [YamlMember(Alias = "default_pattern")]
         public Pattern? DefaultPattern { get; set; }
 
         /// <summary>
         /// Gets or sets the default colour of the pattern (if any).
         /// </summary>
-        [CanBeNull]
         [YamlMember(Alias = "default_pattern_colour")]
-        public virtual Colour DefaultPatternColour { get; set; }
+        public virtual Colour? DefaultPatternColour { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this transformation is NSFW.
@@ -105,16 +105,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the uniform shift message, used when two chiral parts shift together.
         /// </summary>
-        [CanBeNull]
         [YamlMember(Alias = "uniform_shift_message")]
-        public string UniformShiftMessage { get; set; }
+        public string? UniformShiftMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the uniform grow message, used when two chiral parts grow together.
         /// </summary>
-        [CanBeNull]
         [YamlMember(Alias = "uniform_grow_message")]
-        public string UniformGrowMessage { get; set; }
+        public string? UniformGrowMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the text of the description when the species of the complementary bodyparts don't match.
@@ -126,9 +124,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the text of the description when the species of the complementary bodyparts match.
         /// </summary>
-        [CanBeNull]
         [YamlMember(Alias = "uniform_description")]
-        public string UniformDescription { get; set; }
+        public string? UniformDescription { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Transformation"/> class.

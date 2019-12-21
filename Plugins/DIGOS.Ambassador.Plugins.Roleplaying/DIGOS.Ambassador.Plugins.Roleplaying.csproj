@@ -8,11 +8,12 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <TargetFrameworks>netcoreapp2.2;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <RunCodeAnalysis>true</RunCodeAnalysis>
         <CodeAnalysisRuleSet>..\..\stylecop.ruleset</CodeAnalysisRuleSet>
-        <LangVersion>8</LangVersion>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>

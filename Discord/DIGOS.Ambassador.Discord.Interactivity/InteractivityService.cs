@@ -70,8 +70,8 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         public async Task<RetrieveEntityResult<IUserMessage>> GetNextMessageAsync
         (
             [NotNull] IMessageChannel channel,
-            [CanBeNull] Func<IUserMessage, bool> filter = null,
-            [CanBeNull] TimeSpan? timeout = null
+            Func<IUserMessage, bool>? filter = null,
+            TimeSpan? timeout = null
         )
         {
             filter = filter ?? (m => true);
@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         (
             [NotNull] IMessageChannel channel,
             [NotNull] IInteractiveMessage message,
-            [CanBeNull] TimeSpan? timeout = null
+            TimeSpan? timeout = null
         )
         {
             timeout = timeout ?? TimeSpan.FromSeconds(15.0);

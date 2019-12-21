@@ -29,6 +29,8 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model.Bases;
 using JetBrains.Annotations;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Plugins.Moderation.Model
 {
     /// <summary>

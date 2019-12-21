@@ -62,8 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// <summary>
         /// Gets the server's description.
         /// </summary>
-        [CanBeNull]
-        public string Description { get; internal set; }
+        public string? Description { get; internal set; }
 
         /// <summary>
         /// Gets a value indicating whether the first-join message should be sent to users when they first join the
@@ -74,8 +73,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// <summary>
         /// Gets the server's first-join message.
         /// </summary>
-        [CanBeNull]
-        public string JoinMessage { get; internal set; }
+        public string? JoinMessage { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Server"/> class.

@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="data">Generic data.</param>
         /// <returns>An initialized instance of a token.</returns>
         [NotNull]
-        protected abstract T Initialize([CanBeNull] string data);
+        protected abstract T Initialize(string? data);
 
         /// <summary>
         /// Creates a new, initialized token from the given start and end positions, along with generic data.
@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="services">The application's service collection.</param>
         /// <returns>An initialized instance of a token.</returns>
         [NotNull]
-        public static T CreateFrom(int start, int length, [CanBeNull] string data, [NotNull] IServiceProvider services)
+        public static T CreateFrom(int start, int length, string? data, [NotNull] IServiceProvider services)
         {
             var token = (ReplacableTextToken<T>)ActivatorUtilities.CreateInstance(services, typeof(T));
             token.Start = start;

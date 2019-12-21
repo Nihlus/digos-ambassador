@@ -127,7 +127,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         public DetermineConditionResult IsEntityNameValid
         (
             [NotNull] IEnumerable<string> commandNames,
-            [CanBeNull] string entityName
+            string? entityName
         )
         {
             if (entityName.IsNullOrWhitespace())

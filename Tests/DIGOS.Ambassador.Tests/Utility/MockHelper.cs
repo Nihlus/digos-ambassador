@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// <param name="ownerId">The ID of the guild owner.</param>
         /// <returns>A mocked object.</returns>
         [NotNull]
-        public static IGuild CreateDiscordGuild(long id, [CanBeNull] long? ownerId = null)
+        public static IGuild CreateDiscordGuild(long id, long? ownerId = null)
         {
             var mock = new Mock<IGuild>();
             mock.Setup(u => u.Id).Returns((ulong)id);
@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// <param name="guild">The guild of the role.</param>
         /// <returns>A mocked object.</returns>
         [NotNull]
-        public static IRole CreateDiscordRole(int id, [CanBeNull] IGuild guild = null)
+        public static IRole CreateDiscordRole(int id, IGuild? guild = null)
         {
             var mock = new Mock<IRole>();
             mock.Setup(r => r.Id).Returns((ulong)id);

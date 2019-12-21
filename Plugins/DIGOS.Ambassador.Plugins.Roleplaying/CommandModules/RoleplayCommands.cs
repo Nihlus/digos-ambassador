@@ -211,7 +211,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("list-owned")]
         [Summary("Lists the roleplays that the given user owns.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ListOwnedRoleplaysAsync([CanBeNull] IUser discordUser = null)
+        public async Task ListOwnedRoleplaysAsync(IUser? discordUser = null)
         {
             discordUser = discordUser ?? this.Context.Message.Author;
 
@@ -763,9 +763,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             Roleplay roleplay,
             [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
             IMessage startMessage,
-            [CanBeNull]
             [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
-            IMessage finalMessage = null
+            IMessage? finalMessage = null
         )
         {
             finalMessage = finalMessage ?? this.Context.Message;

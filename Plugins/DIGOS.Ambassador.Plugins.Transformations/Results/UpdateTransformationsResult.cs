@@ -78,8 +78,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Results
         [UsedImplicitly]
         private UpdateTransformationsResult
         (
-            [CanBeNull] string errorReason,
-            [CanBeNull] Exception exception = null
+            string? errorReason,
+            Exception? exception = null
         )
             : base(errorReason, exception)
         {

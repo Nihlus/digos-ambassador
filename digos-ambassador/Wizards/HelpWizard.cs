@@ -38,6 +38,8 @@ using Discord.WebSocket;
 using JetBrains.Annotations;
 using Remora.Results;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Wizards
 {
     /// <summary>
@@ -99,8 +101,7 @@ namespace DIGOS.Ambassador.Wizards
          * Command list state
          */
 
-        [CanBeNull]
-        private ModuleInfo _currentModule;
+        private ModuleInfo? _currentModule;
 
         private int _commandListOffset;
 

@@ -35,8 +35,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// <summary>
         /// Gets the message that the interactive message wraps.
         /// </summary>
-        [CanBeNull]
-        IUserMessage Message { get; }
+        IUserMessage? Message { get; }
 
         /// <summary>
         /// Gets the user that caused the interactive message to be created.

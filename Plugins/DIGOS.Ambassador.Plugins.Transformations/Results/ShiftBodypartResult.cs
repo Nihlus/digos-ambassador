@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Results
         /// </summary>
         /// <param name="shiftMessage">The message to display to the user when shifting.</param>
         /// <param name="action">The action that was performed on the bodypart.</param>
-        private ShiftBodypartResult([CanBeNull] string shiftMessage, ShiftBodypartAction action)
+        private ShiftBodypartResult(string? shiftMessage, ShiftBodypartAction action)
         {
             this.ShiftMessage = shiftMessage;
             this.Action = action;
@@ -56,8 +56,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Results
         [UsedImplicitly]
         private ShiftBodypartResult
         (
-            [CanBeNull] string errorReason,
-            [CanBeNull] Exception exception = null
+            string? errorReason,
+            Exception? exception = null
         )
             : base(errorReason, exception)
         {

@@ -408,10 +408,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         public async Task CreateCharacterAsync
         (
             [NotNull] string characterName,
-            [CanBeNull] string characterNickname = null,
-            [CanBeNull] string characterSummary = null,
-            [CanBeNull] string characterDescription = null,
-            [CanBeNull] string characterAvatarUrl = null
+            string? characterNickname = null,
+            string? characterSummary = null,
+            string? characterDescription = null,
+            string? characterAvatarUrl = null
         )
         {
             characterAvatarUrl = characterAvatarUrl ?? _content.GetDefaultAvatarUri().ToString();
@@ -505,7 +505,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("list-owned")]
         [Summary("Lists the characters owned by a given user.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ListOwnedCharactersAsync([CanBeNull] IUser discordUser = null)
+        public async Task ListOwnedCharactersAsync(IUser? discordUser = null)
         {
             discordUser = discordUser ?? this.Context.Message.Author;
 
@@ -921,8 +921,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [NotNull]
             [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
             Character character,
-            [CanBeNull] string imageName = null,
-            [CanBeNull] string imageCaption = null,
+            string? imageName = null,
+            string? imageCaption = null,
             bool isNSFW = false
         )
         {
@@ -970,7 +970,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             Character character,
             [NotNull] string imageName,
             [NotNull] string imageUrl,
-            [CanBeNull] string imageCaption = null,
+            string? imageCaption = null,
             bool isNSFW = false
         )
         {
@@ -1388,7 +1388,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 [NotNull]
                 [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
-                [CanBeNull] string newCharacterAvatarUrl = null
+                string? newCharacterAvatarUrl = null
             )
             {
                 if (newCharacterAvatarUrl is null)
@@ -1528,8 +1528,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 [NotNull]
                 [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
-                [CanBeNull]
-                string newCharacterDescription = null
+                string? newCharacterDescription = null
             )
             {
                 if (newCharacterDescription is null)

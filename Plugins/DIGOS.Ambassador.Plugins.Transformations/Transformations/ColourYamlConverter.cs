@@ -41,8 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         }
 
         /// <inheritdoc />
-        [CanBeNull]
-        public object ReadYaml([NotNull] IParser parser, [NotNull] Type type)
+        public object? ReadYaml([NotNull] IParser parser, [NotNull] Type type)
         {
             if (!parser.TryConsume<Scalar>(out var rawColour))
             {
@@ -58,7 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         }
 
         /// <inheritdoc />
-        public void WriteYaml([NotNull] IEmitter emitter, [NotNull] object value, [NotNull] Type type)
+        public void WriteYaml([NotNull] IEmitter emitter, object? value, [NotNull] Type type)
         {
             emitter.Emit(new Scalar(value.ToString()));
         }

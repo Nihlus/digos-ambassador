@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Discord;
 using JetBrains.Annotations;
 using Image = DIGOS.Ambassador.Plugins.Characters.Model.Data.Image;
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Model
 {
@@ -106,8 +107,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets a custom role that gets applied along with the character, similar to a nickname.
         /// </summary>
-        [CanBeNull]
-        public virtual CharacterRole Role { get; internal set; }
+        public virtual CharacterRole? Role { get; internal set; }
 
         /// <inheritdoc />
         [NotMapped]
@@ -139,7 +139,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
             [NotNull] User owner,
             [NotNull] string name,
             [NotNull] string avatarUrl = "https://www.example.com/avatar.png",
-            [CanBeNull] string nickname = null,
+            string? nickname = null,
             [NotNull] string summary = "No summary set.",
             [NotNull] string description = "No description set.",
             [NotNull] string pronounProviderFamily = "They"

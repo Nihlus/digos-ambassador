@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <returns>true if the string is null or whitespace; otherwise, false.</returns>
         [Pure]
         [ContractAnnotation("source:null => true")]
-        public static bool IsNullOrWhitespace([CanBeNull] this string source)
+        public static bool IsNullOrWhitespace(this string? source)
         {
             return string.IsNullOrWhiteSpace(source);
         }
@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <returns>true if the string is null or empty; otherwise, false.</returns>
         [Pure]
         [ContractAnnotation("source:null => true")]
-        public static bool IsNullOrEmpty([CanBeNull] this string source)
+        public static bool IsNullOrEmpty(this string? source)
         {
             return string.IsNullOrEmpty(source);
         }
@@ -64,7 +64,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="comparer">The string comparer to use.</param>
         /// <returns>true if the string contains the other string; otherwise, false.</returns>
         [Pure]
-        public static bool Contains([CanBeNull] this string @this, [CanBeNull] string search, StringComparison comparer)
+        public static bool Contains(this string? @this, string? search, StringComparison comparer)
         {
             return @this != null && search != null && @this.IndexOf(search, comparer) >= 0;
         }
@@ -75,9 +75,8 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="this">The string.</param>
         /// <param name="quoteChars">The quote characters.</param>
         /// <returns>The unquoted string.</returns>
-        [CanBeNull]
         [ContractAnnotation("this : null => null; this : notnull => notnull")]
-        public static string Unquote([CanBeNull] this string @this, IReadOnlyCollection<char> quoteChars = null)
+        public static string? Unquote(this string? @this, IReadOnlyCollection<char>? quoteChars = null)
         {
             quoteChars = quoteChars ?? new[] { '‘', '\'', '’', '“', '”', '\"' };
 
@@ -105,9 +104,8 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="this">The string.</param>
         /// <param name="quoteChar">The quote character.</param>
         /// <returns>The quoted string.</returns>
-        [CanBeNull]
         [ContractAnnotation("this : null => null; this : notnull => notnull")]
-        public static string Quote([CanBeNull] this string @this, char quoteChar = '"')
+        public static string? Quote(this string? @this, char quoteChar = '"')
         {
             if (@this is null)
             {

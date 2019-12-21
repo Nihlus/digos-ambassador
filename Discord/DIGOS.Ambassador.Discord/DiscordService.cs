@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Discord
         (
             [NotNull] ICommandContext context,
             [NotNull] IGuildUser guildUser,
-            [CanBeNull] string nickname
+            string? nickname
         )
         {
             if (!await HasPermissionAsync(context, GuildPermission.ManageNicknames))

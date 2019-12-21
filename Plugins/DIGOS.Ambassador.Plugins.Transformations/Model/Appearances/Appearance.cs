@@ -247,7 +247,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <returns>True if a component could be retrieved, otherwise, false.</returns>
         [Pure]
         [ContractAnnotation("=> true, component:notnull; => false, component:null")]
-        public bool TryGetAppearanceComponent(Bodypart bodypart, Chirality chirality, [CanBeNull] out AppearanceComponent component)
+        public bool TryGetAppearanceComponent(Bodypart bodypart, Chirality chirality, out? AppearanceComponent component)
         {
             component = null;
 

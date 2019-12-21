@@ -27,6 +27,8 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using JetBrains.Annotations;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Plugins.Moderation.Model
 {
     /// <summary>
@@ -45,14 +47,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the Discord ID of the channel where moderation actions are logged.
         /// </summary>
-        [CanBeNull]
         public long? ModerationLogChannel { get; internal set; }
 
         /// <summary>
         /// Gets the Discord ID of the channel where events are logged, such as deleted messages, username changes, et
         /// cetera.
         /// </summary>
-        [CanBeNull]
         public long? MonitoringChannel { get; internal set; }
 
         /// <summary>

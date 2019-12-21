@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="other">The other colour.</param>
         /// <returns>true if the colours are the same; otherwise, false.</returns>
         [Pure]
-        public bool IsSameColourAs([CanBeNull] Colour other)
+        public bool IsSameColourAs(Colour? other)
         {
             if (other is null)
             {
@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <returns>true if the parsing was successful; otherwise, false.</returns>
         [Pure]
         [ContractAnnotation("input : null => false, colour : null; => false, colour : null; => true, colour : notnull")]
-        public static bool TryParse([CanBeNull] string input, [CanBeNull] out Colour colour)
+        public static bool TryParse(string? input, out? Colour colour)
         {
             colour = null;
 

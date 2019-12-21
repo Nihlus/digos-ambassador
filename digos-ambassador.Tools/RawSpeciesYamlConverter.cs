@@ -41,8 +41,7 @@ namespace DIGOS.Ambassador.Tools
         }
 
         /// <inheritdoc />
-        [CanBeNull]
-        public object ReadYaml(IParser parser, Type type)
+        public object? ReadYaml(IParser parser, Type type)
         {
             if (!parser.TryConsume<Scalar>(out var speciesName))
             {
@@ -53,7 +52,7 @@ namespace DIGOS.Ambassador.Tools
         }
 
         /// <inheritdoc />
-        public void WriteYaml([NotNull] IEmitter emitter, object value, Type type)
+        public void WriteYaml([NotNull] IEmitter emitter, object? value, Type type)
         {
             var species = (Species)value;
 

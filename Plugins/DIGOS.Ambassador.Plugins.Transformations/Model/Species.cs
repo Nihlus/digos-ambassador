@@ -28,6 +28,8 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Plugins.Transformations.Model
 {
     /// <summary>
@@ -44,8 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the parent species.
         /// </summary>
-        [CanBeNull]
-        public virtual Species Parent { get; set; }
+        public virtual Species? Parent { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the species.
@@ -112,7 +113,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <returns>true if the species are the same; otherwise, false.</returns>
         [Pure]
         [ContractAnnotation("species:null => false")]
-        public bool IsSameSpeciesAs([CanBeNull] Species species)
+        public bool IsSameSpeciesAs(Species? species)
         {
             if (species is null)
             {

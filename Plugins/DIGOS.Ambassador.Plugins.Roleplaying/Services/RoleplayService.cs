@@ -321,8 +321,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync
         (
             [NotNull] ICommandContext context,
-            [CanBeNull] IUser roleplayOwner,
-            [CanBeNull] string roleplayName
+            IUser? roleplayOwner,
+            string? roleplayName
         )
         {
             if (roleplayOwner is null && roleplayName is null)
@@ -438,7 +438,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="guild">The guild to scope the search to.</param>
         /// <returns>A queryable list of roleplays belonging to the user.</returns>
         [Pure, NotNull, ItemNotNull]
-        public IQueryable<Roleplay> GetRoleplays([CanBeNull] IGuild guild = null)
+        public IQueryable<Roleplay> GetRoleplays(IGuild? guild = null)
         {
             if (guild is null)
             {
@@ -1204,7 +1204,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         public async Task<ModifyEntityResult> SetDedicatedRoleplayChannelCategoryAsync
         (
             [NotNull] Server server,
-            [CanBeNull] ICategoryChannel category
+            ICategoryChannel? category
         )
         {
             var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
@@ -1231,7 +1231,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         public async Task<ModifyEntityResult> SetArchiveChannelAsync
         (
             [NotNull] Server server,
-            [CanBeNull] ITextChannel channel
+            ITextChannel? channel
         )
         {
             var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);

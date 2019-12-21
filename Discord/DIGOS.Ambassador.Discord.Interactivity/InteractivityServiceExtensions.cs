@@ -98,7 +98,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             [NotNull] ICommandContext context,
             [NotNull] UserFeedbackService feedback,
             [NotNull] InteractiveMessage message,
-            [CanBeNull] TimeSpan? timeout = null
+            TimeSpan? timeout = null
         )
         {
             timeout = timeout ?? TimeSpan.FromMinutes(5.0);

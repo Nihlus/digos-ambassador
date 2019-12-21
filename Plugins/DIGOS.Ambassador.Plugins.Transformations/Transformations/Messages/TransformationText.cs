@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
         /// <returns>true if the deserialization was successful; otherwise, false.</returns>
         [Pure]
         [ContractAnnotation("=> true, text : notnull; => false, text : null")]
-        public static bool TryDeserialize([NotNull] string json, [CanBeNull] out TransformationText text)
+        public static bool TryDeserialize([NotNull] string json, out? TransformationText text)
         {
             text = null;
             try

@@ -46,7 +46,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         /// <summary>
         /// Gets the current timezone of the user. This is an hour offset ( + or - ) to UTC/GMT.
         /// </summary>
-        [CanBeNull]
         public int? Timezone { get; internal set; }
 
         /// <summary>

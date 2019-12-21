@@ -6,16 +6,16 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>netcoreapp2.2;netstandard2.0</TargetFrameworks>
-    <RuntimeIdentifiers>linux-x64,osx-x64,win-x64</RuntimeIdentifiers>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
     <RootNamespace>DIGOS.Ambassador.Tools</RootNamespace>
     <AssemblyName>DIGOS.Ambassador.Tools</AssemblyName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <CodeAnalysisRuleSet>..\stylecop.ruleset</CodeAnalysisRuleSet>
-    <LangVersion>7.1</LangVersion>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <AdditionalFiles Include="$(ProjectDir)\..\stylecop.json">
       <Link>stylecop.json</Link>

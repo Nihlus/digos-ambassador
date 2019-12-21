@@ -133,8 +133,8 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         protected abstract Task<RetrieveEntityResult<TEntity>> RetrieveEntityAsync
         (
-            [CanBeNull] IUser entityOwner,
-            [CanBeNull] string entityName,
+            IUser? entityOwner,
+            string? entityName,
             [NotNull] ICommandContext context,
             [NotNull] IServiceProvider services
         );

@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         (
             [NotNull] string text,
             [NotNull] Appearance appearance,
-            [CanBeNull] AppearanceComponent component
+            AppearanceComponent? component
         )
         {
             var tokens = _tokenizer.GetTokens(text);

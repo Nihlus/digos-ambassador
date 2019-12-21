@@ -38,7 +38,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the colour modifier.
         /// </summary>
-        [CanBeNull]
         ShadeModifier? Modifier { get; }
     }
 }

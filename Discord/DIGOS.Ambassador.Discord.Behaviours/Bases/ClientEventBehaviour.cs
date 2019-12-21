@@ -448,7 +448,7 @@ namespace DIGOS.Ambassador.Discord.Behaviours
         /// </summary>
         /// <param name="exception">The exception that caused the disconnect; if any.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected virtual Task Disconnected([CanBeNull] Exception exception)
+        protected virtual Task Disconnected(Exception? exception)
         {
             return Task.CompletedTask;
         }
@@ -877,7 +877,7 @@ namespace DIGOS.Ambassador.Discord.Behaviours
         /// </summary>
         /// <param name="exception">The exception that caused the disconnect; if any.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private Task OnDisconnected([CanBeNull] Exception exception)
+        private Task OnDisconnected(Exception? exception)
         {
             this.RunningEvents.Enqueue(Disconnected(exception));
             return Task.CompletedTask;

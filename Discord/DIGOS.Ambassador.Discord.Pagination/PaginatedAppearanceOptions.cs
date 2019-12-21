@@ -108,8 +108,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <summary>
         /// Gets or sets the author of the paginated message.
         /// </summary>
-        [CanBeNull]
-        public IUser Author { get; set; }
+        public IUser? Author { get; set; }
 
         /// <summary>
         /// Gets or sets the colour of the paginated message's embed.

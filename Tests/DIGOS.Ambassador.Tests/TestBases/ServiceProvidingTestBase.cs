@@ -22,8 +22,9 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace DIGOS.Ambassador.Tests.TestBases
 {

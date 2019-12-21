@@ -29,6 +29,8 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model.Bases;
 using JetBrains.Annotations;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Plugins.Moderation.Model
 {
     /// <summary>
@@ -47,7 +49,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the message that caused the warning, if any.
         /// </summary>
-        [CanBeNull]
         public long? MessageID { get; internal set; }
 
         /// <summary>
@@ -58,7 +59,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the time at which the ban expires.
         /// </summary>
-        [CanBeNull]
         public DateTime? ExpiresOn { get; internal set; }
 
         /// <summary>
@@ -92,8 +92,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
             [NotNull] User user,
             [NotNull] User author,
             [NotNull] string reason,
-            [CanBeNull] long? messageID = null,
-            [CanBeNull] DateTime? expiresOn = null
+            long? messageID = null,
+            DateTime? expiresOn = null
         )
             : base(server, user, author)
         {

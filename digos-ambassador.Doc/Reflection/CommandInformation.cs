@@ -27,6 +27,8 @@ using DIGOS.Ambassador.Doc.Extensions;
 using JetBrains.Annotations;
 using Mono.Cecil;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Doc.Reflection
 {
     /// <summary>
@@ -85,7 +87,7 @@ namespace DIGOS.Ambassador.Doc.Reflection
         (
             [NotNull] MethodDefinition commandMethod,
             [NotNull] ModuleInformation module,
-            [CanBeNull] out CommandInformation information
+            out? CommandInformation information
         )
         {
             information = null;

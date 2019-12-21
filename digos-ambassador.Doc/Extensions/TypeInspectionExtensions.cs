@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         public static bool TryGetModuleName
         (
             [NotNull] this TypeDefinition provider,
-            [CanBeNull] out string name
+            out? string name
         )
         {
             name = null;
@@ -155,7 +155,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         public static bool TryGetSummary
         (
             [NotNull] this ICustomAttributeProvider provider,
-            [CanBeNull] out string summary
+            out? string summary
         )
         {
             summary = null;
@@ -190,7 +190,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         public static bool TryGetAliases
         (
             [NotNull] this ICustomAttributeProvider provider,
-            [CanBeNull] out string[] aliases
+            out? string[] aliases
         )
         {
             aliases = null;
@@ -228,7 +228,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         (
             [NotNull] this TypeDefinition module,
             ModuleInformation parentModule,
-            [CanBeNull] out CommandInformation[] commands
+            out? CommandInformation[] commands
         )
         {
             commands = null;
@@ -265,7 +265,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         (
             [NotNull] this TypeDefinition module,
             ModuleInformation parentModule,
-            [CanBeNull] out ModuleInformation[] submodules
+            out? ModuleInformation[] submodules
         )
         {
             submodules = null;

@@ -30,7 +30,9 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+
 using static DIGOS.Ambassador.Plugins.Transformations.Transformations.Chirality;
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
 {
@@ -61,14 +63,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the pattern of the component's secondary colour (if any).
         /// </summary>
-        [CanBeNull]
         public Pattern? Pattern { get; internal set; }
 
         /// <summary>
         /// Gets the component's pattern colour.
         /// </summary>
-        [CanBeNull]
-        public virtual Colour PatternColour { get; internal set; }
+        public virtual Colour? PatternColour { get; internal set; }
 
         /// <summary>
         /// Gets the bodypart that the component is.

@@ -33,6 +33,8 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Discord;
 using JetBrains.Annotations;
 
+using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
+
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
 {
     /// <summary>
@@ -98,7 +100,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the last time the roleplay was updated.
         /// </summary>
-        [CanBeNull]
         public DateTime? LastUpdated { get; internal set; }
 
         /// <summary>

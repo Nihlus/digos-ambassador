@@ -125,8 +125,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             [NotNull] IUser authorUser,
             [NotNull] IGuildUser guildUser,
             [NotNull] string reason,
-            [CanBeNull] long? messageID = null,
-            [CanBeNull] DateTime? expiresOn = null
+            long? messageID = null,
+            DateTime? expiresOn = null
         )
         {
             var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);

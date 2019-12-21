@@ -48,8 +48,7 @@ namespace DIGOS.Ambassador.Doc
         /// <summary>
         /// Gets or sets the page footer.
         /// </summary>
-        [CanBeNull]
-        public string Footer { get; set; }
+        public string? Footer { get; set; }
 
         private readonly List<MarkdownSection> _sections = new List<MarkdownSection>();
 

@@ -52,7 +52,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         string GetText
         (
             [NotNull] Appearance appearance,
-            [CanBeNull] AppearanceComponent component
+            AppearanceComponent? component
         );
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         Task<string> GetTextAsync
         (
             [NotNull] Appearance appearance,
-            [CanBeNull] AppearanceComponent component
+            AppearanceComponent? component
         );
     }
 }
