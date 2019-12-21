@@ -245,3 +245,5 @@ database.credentials
 bot-dev.token
 database-dev.credentials
 
+# Annotations
+*.ExternalAnnotations.xml

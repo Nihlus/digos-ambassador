@@ -11,9 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "metadata", ".\", "{F1A57014
 		stylecop.json = stylecop.json
 		stylecop.ruleset = stylecop.ruleset
 		.travis.yml = .travis.yml
+		Directory.Build.props = Directory.Build.props
 	EndProjectSection
 EndProject
-
 
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "digos_ambassador", "digos-ambassador/digos-ambassador.csproj", "{D44A340E-6344-4E42-827C-E63C12C603BE}"
 EndProject
