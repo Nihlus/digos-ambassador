@@ -455,6 +455,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             return RetrieveEntityResult<ITextChannel>.FromSuccess(textChannel);
         }
 
+        // ReSharper disable once UnusedParameter.Local
         private Task<IUser> FindMostProbableDeleterAsync(IMessage message, ITextChannel channel)
         {
             // TODO: Wait for a hotfix from Discord.NET

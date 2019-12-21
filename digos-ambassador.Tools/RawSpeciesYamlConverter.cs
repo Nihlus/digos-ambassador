@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Tools
                 return null;
             }
 
-            return new Species(speciesName.Value, "Dummy");
+            return new Species(speciesName.Value, "Dummy", "dummy");
         }
 
         /// <inheritdoc />

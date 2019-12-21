@@ -52,7 +52,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         }
 
         /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent component)
+        public override string GetText(Appearance appearance, AppearanceComponent? component)
         {
             var character = appearance.Character;
             var pronounProvider = _pronouns.GetPronounProvider(character);

@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     public sealed class TargetToken : ReplacableTextToken<TargetToken>
     {
         /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent component)
+        public override string GetText(Appearance appearance, AppearanceComponent? component)
         {
             var character = appearance.Character;
 

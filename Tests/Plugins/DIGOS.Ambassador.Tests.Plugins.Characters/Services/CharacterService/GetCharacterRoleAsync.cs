@@ -36,7 +36,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     {
         public class GetCharacterRoleAsync : CharacterServiceTestBase
         {
-            private readonly IGuild _discordGuild;
             private readonly IRole _discordRole;
             private readonly IRole _unregisteredDiscordRole;
 
@@ -44,9 +43,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public GetCharacterRoleAsync()
             {
-                _discordGuild = MockHelper.CreateDiscordGuild(0);
-                _discordRole = MockHelper.CreateDiscordRole(1, _discordGuild);
-                _unregisteredDiscordRole = MockHelper.CreateDiscordRole(2, _discordGuild);
+                var discordGuild = MockHelper.CreateDiscordGuild(0);
+                _discordRole = MockHelper.CreateDiscordRole(1, discordGuild);
+                _unregisteredDiscordRole = MockHelper.CreateDiscordRole(2, discordGuild);
             }
 
             public override async Task InitializeAsync()

@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             var hairTransformation = new Transformation
             (
-                new Species("dummy", "dummy"),
+                new Species("dummy", "dummy", "dummy"),
                 "dummy",
                 hairColour,
                 "dummy",

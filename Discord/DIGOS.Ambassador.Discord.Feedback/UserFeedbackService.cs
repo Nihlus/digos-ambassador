@@ -510,9 +510,10 @@ namespace DIGOS.Ambassador.Discord.Feedback
                 return;
             }
 
-            if (message.Channel is IGuildChannel guildChannel && guildChannel.Guild is IGuild guild)
+            if (message.Channel is IGuildChannel guildChannel)
             {
-                var messageUrl = $"https://discordapp.com/channels/{guild.Id}/{guildChannel.Id}/{message.Id}";
+                var messageUrl = $"https://discordapp.com/channels/" +
+                                 $"{guildChannel.Guild.Id}/{guildChannel.Id}/{message.Id}";
 
                 embed.WithUrl(messageUrl);
             }

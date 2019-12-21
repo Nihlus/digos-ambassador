@@ -38,13 +38,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     {
         public class CreateCharacterRoleAsync : CharacterServiceTestBase
         {
-            private readonly IGuild _discordGuild;
             private readonly IRole _discordRole;
 
             public CreateCharacterRoleAsync()
             {
-                _discordGuild = MockHelper.CreateDiscordGuild(0);
-                _discordRole = MockHelper.CreateDiscordRole(1, _discordGuild);
+                var discordGuild = MockHelper.CreateDiscordGuild(0);
+                _discordRole = MockHelper.CreateDiscordRole(1, discordGuild);
             }
 
             [Fact]

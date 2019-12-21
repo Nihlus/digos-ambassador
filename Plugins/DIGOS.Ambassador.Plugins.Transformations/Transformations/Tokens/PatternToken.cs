@@ -35,7 +35,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     public sealed class PatternToken : ReplacableTextToken<PatternToken>
     {
         /// <inheritdoc />
-        public override string GetText(Appearance appearance, AppearanceComponent component)
+        public override string GetText(Appearance appearance, AppearanceComponent? component)
         {
             if (component is null)
             {

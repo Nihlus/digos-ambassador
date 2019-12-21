@@ -84,11 +84,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// Initializes a new instance of the <see cref="Species"/> class.
         /// </summary>
         /// <param name="name">The species name.</param>
-        /// <param name="description">The description of the species..</param>
-        public Species(string name, string description)
+        /// <param name="description">The description of the species.</param>
+        /// <param name="author">The author of the species..</param>
+        public Species(string name, string description, string author)
         {
             this.Name = name;
             this.Description = description;
+            this.Author = author;
         }
 
         /// <summary>

@@ -44,15 +44,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             private readonly IUser _newOwner = MockHelper.CreateDiscordUser(1);
             private readonly IGuild _guild = MockHelper.CreateDiscordGuild(2);
 
-            private readonly User _dbOldOwner;
             private readonly User _dbNewOwner;
 
             public TransferCharacterOwnershipAsync()
             {
-                _dbOldOwner = new User((long)_originalOwner.Id);
+                var dbOldOwner = new User((long)_originalOwner.Id);
                 _dbNewOwner = new User((long)_newOwner.Id);
 
-                _character = new Character((long)_guild.Id, _dbOldOwner, "Dummy");
+                _character = new Character((long)_guild.Id, dbOldOwner, "Dummy");
 
                 this.Database.Characters.Update(_character);
                 this.Database.SaveChanges();

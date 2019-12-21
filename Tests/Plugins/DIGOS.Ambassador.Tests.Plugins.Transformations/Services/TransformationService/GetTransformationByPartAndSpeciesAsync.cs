@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfSpeciesDoesNotExist()
             {
-                var nonexistantSpecies = new Species("ooga", "Dummy");
+                var nonexistantSpecies = new Species("ooga", "Dummy", "booga");
                 var result = await this.Transformations.GetTransformationsByPartAndSpeciesAsync
                 (
                     Bodypart.Face,
