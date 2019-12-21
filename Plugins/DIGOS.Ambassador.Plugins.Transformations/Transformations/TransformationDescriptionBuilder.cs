@@ -291,17 +291,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                 return false;
             }
 
-            if (component.PatternColour is null ^ component.PatternColour is null)
-            {
-                return false;
-            }
-
             if (component.PatternColour is null && opposingComponent.PatternColour is null)
             {
                 return true;
             }
 
-            if (component.PatternColour is null ^ opposingComponent.PatternColour is null)
+            if (component.PatternColour is null || opposingComponent.PatternColour is null)
             {
                 return false;
             }
