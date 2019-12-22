@@ -26,6 +26,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Services.Lua;
 using JetBrains.Annotations;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
 {
     /// <summary>

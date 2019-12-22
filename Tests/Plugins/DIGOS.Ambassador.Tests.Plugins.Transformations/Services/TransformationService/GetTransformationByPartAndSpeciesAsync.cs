@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
     public partial class TransformationServiceTests

@@ -48,6 +48,7 @@ using Remora.Results;
 
 #pragma warning disable SA1118 // Parameter spans multiple lines, big strings
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador
 {
     /// <summary>

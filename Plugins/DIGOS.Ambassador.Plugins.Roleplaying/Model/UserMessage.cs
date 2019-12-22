@@ -26,6 +26,7 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using Discord;
 using JetBrains.Annotations;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
 {
     /// <summary>

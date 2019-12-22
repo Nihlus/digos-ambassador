@@ -30,6 +30,7 @@ using JetBrains.Annotations;
 
 using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Moderation.Model
 {
     /// <summary>

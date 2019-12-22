@@ -29,6 +29,7 @@ using Xunit;
 using Zio;
 using Zio.FileSystems;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Core.Tests.Bases
 {
     /// <summary>

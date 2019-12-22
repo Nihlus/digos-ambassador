@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Tests.TestBases;
 using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
 {
     /// <summary>

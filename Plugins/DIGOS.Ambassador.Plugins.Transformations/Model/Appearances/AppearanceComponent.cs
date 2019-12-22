@@ -32,6 +32,7 @@ using Microsoft.EntityFrameworkCore;
 using static DIGOS.Ambassador.Plugins.Transformations.Transformations.Chirality;
 using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
 {
     /// <summary>

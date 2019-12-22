@@ -37,6 +37,7 @@ using static DIGOS.Ambassador.Plugins.Transformations.Transformations.Bodypart;
 
 using PureAttribute = JetBrains.Annotations.PureAttribute;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
 {
     /// <summary>

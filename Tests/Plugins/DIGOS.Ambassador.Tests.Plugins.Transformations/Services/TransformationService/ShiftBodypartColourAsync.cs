@@ -39,6 +39,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
     public partial class TransformationServiceTests
