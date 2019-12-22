@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         public long DiscordID { get; private set; }
 
         /// <summary>
-        /// Gets  the biography of the user. This contains useful information that the users provide themselves.
+        /// Gets the biography of the user. This contains useful information that the users provide themselves.
         /// </summary>
         public string Bio { get; internal set; }
 
@@ -55,6 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         public User(long discordID)
         {
             this.DiscordID = discordID;
+            this.Bio = string.Empty;
         }
     }
 }
