@@ -115,7 +115,12 @@ namespace DIGOS.Ambassador.Services
 
                 if (!(contexts is null))
                 {
-                    var separateContexts = contexts.ToString().Split(',');
+                    var separateContexts = contexts.ToString()?.Split(',');
+                    if (separateContexts is null)
+                    {
+                        continue;
+                    }
+
                     separateContexts = separateContexts.Select(c => c.Pluralize()).ToArray();
 
                     var restrictions = $"*Can only be used in {separateContexts.Humanize()}.*"

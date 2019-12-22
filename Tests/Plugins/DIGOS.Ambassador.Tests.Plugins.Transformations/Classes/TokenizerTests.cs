@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             var token = tokenizer.ParseToken(0, TokenWithoutOptionalData) as ColourToken;
 
             Assert.NotNull(token);
-            Assert.False(token.UsePattern);
+            Assert.False(token!.UsePattern);
         }
 
         [Fact]
@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             var token = tokenizer.ParseToken(0, TokenWithOptionalData) as ColourToken;
 
             Assert.NotNull(token);
-            Assert.True(token.UsePattern);
+            Assert.True(token!.UsePattern);
         }
 
         [Fact]

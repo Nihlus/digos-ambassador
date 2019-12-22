@@ -24,6 +24,8 @@
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
+using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
@@ -82,7 +84,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 _context = mockedContext.Object;
 
-                Colour.TryParse("bright purple", out _newPatternColour);
+                if (!Colour.TryParse("bright purple", out var patternColour))
+                {
+                    throw new InvalidOperationException("Bad colour.");
+                }
+
+                _newPatternColour = patternColour;
             }
 
             /// <inheritdoc />
@@ -118,8 +125,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 _character = this.CharacterDatabase.Characters.First();
 
-                Colour.TryParse("dull white", out _originalPatternColour);
-                Assert.NotNull(_originalPatternColour);
+                if (!Colour.TryParse("dull white", out var patternColour))
+                {
+                    throw new InvalidOperationException("Bad colour.");
+                }
+
+                _originalPatternColour = patternColour;
 
                 await this.Transformations.ShiftBodypartPatternAsync
                 (

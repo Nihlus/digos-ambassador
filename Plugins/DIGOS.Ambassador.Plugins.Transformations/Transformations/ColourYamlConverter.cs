@@ -59,12 +59,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <inheritdoc />
         public void WriteYaml([NotNull] IEmitter emitter, object? value, [NotNull] Type type)
         {
-            if (value is null)
+            var valueString = value?.ToString();
+            if (valueString is null)
             {
                 return;
             }
 
-            emitter.Emit(new Scalar(value.ToString()));
+            emitter.Emit(new Scalar(valueString));
         }
     }
 }

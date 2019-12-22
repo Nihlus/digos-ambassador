@@ -1201,7 +1201,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
                 var currentCharactersWithRole = await _characters.GetCharacters(this.Context.Guild)
                     .Where(c => c.HasRole)
-                    .Where(c => c.Role.ID == getExistingRoleResult.Entity.ID)
+                    .Where(c => c.Role!.ID == getExistingRoleResult.Entity.ID)
                     .Where(c => c.IsCurrent)
                     .ToListAsync();
 

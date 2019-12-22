@@ -295,6 +295,14 @@ namespace DIGOS.Ambassador.Wizards
                 }
                 case HelpWizardState.CommandListing:
                 {
+                    if (_currentModule is null)
+                    {
+                        throw new InvalidOperationException
+                        (
+                            "A command listing was requested, but no module is loaded."
+                        );
+                    }
+
                     var eb = _feedback.CreateEmbedBase();
 
                     eb.WithTitle($"Available commands in {_currentModule.Name}");
@@ -629,6 +637,11 @@ namespace DIGOS.Ambassador.Wizards
         [SuppressMessage("Style", "SA1118", Justification = "Large text blocks.")]
         private async Task DisplayHelpTextAsync()
         {
+            if (this.Message is null || this.Channel is null)
+            {
+                return;
+            }
+
             var eb = new EmbedBuilder();
             eb.WithColor(Color.DarkPurple);
 

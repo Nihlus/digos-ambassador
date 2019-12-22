@@ -26,7 +26,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     /// Represents a named node that holds a value.
     /// </summary>
     /// <typeparam name="T">The type of value.</typeparam>
-    internal sealed class ValueNode<T> : NamedNode<T>
+    internal sealed class ValueNode<T> : NamedNode<T> where T : notnull
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ValueNode{T}"/> class.

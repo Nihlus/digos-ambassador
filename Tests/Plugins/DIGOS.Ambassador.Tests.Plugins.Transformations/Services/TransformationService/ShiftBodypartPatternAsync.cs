@@ -24,6 +24,7 @@
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
@@ -78,7 +79,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 _context = mockedContext.Object;
 
                 _newPattern = Pattern.Swirly;
-                Colour.TryParse("bright purple", out _newPatternColour);
+                if (!Colour.TryParse("bright purple", out var patternColour))
+                {
+                    throw new InvalidOperationException("Bad colour.");
+                }
+
+                _newPatternColour = patternColour;
             }
 
             protected override async Task InitializeTestAsync()
