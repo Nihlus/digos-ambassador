@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -36,6 +37,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
     /// <summary>
     /// Serves as a test base for warning service tests.
     /// </summary>
+    [PublicAPI]
     public class WarningServiceTestBase : DatabaseProvidingTestBase
     {
         /// <summary>

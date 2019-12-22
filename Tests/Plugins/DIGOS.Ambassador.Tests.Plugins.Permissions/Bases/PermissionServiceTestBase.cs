@@ -25,6 +25,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -33,6 +34,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
     /// <summary>
     /// Serves as a test base for permission service tests.
     /// </summary>
+    [PublicAPI]
     public abstract class PermissionServiceTestBase : DatabaseProvidingTestBase
     {
         /// <summary>

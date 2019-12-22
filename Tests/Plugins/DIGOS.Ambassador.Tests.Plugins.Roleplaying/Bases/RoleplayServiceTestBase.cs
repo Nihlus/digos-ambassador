@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Discord.Commands;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -38,6 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
     /// <summary>
     /// Serves as a test base for roleplay service tests.
     /// </summary>
+    [PublicAPI]
     public abstract class RoleplayServiceTestBase : DatabaseProvidingTestBase
     {
         /// <summary>

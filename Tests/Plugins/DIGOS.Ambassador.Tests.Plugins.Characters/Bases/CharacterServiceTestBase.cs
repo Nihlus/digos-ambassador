@@ -33,6 +33,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Discord.Commands;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -42,6 +43,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     /// <summary>
     /// Serves as a test base for character service tests.
     /// </summary>
+    [PublicAPI]
     public abstract class CharacterServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
     {
         /// <summary>

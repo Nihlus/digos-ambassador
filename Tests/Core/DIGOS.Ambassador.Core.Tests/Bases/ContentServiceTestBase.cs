@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Tests.TestBases;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Zio;
@@ -35,6 +36,7 @@ namespace DIGOS.Ambassador.Core.Tests.Bases
     /// <summary>
     /// Serves as a base class for content service tests.
     /// </summary>
+    [PublicAPI]
     public abstract class ContentServiceTestBase : ServiceProvidingTestBase, IAsyncLifetime
     {
         /// <summary>
