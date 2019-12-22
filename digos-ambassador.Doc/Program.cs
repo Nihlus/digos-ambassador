@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Doc
     /// </summary>
     internal static class Program
     {
-        private static Options _options;
+        private static Options? _options;
 
         private static async Task Main(string[] args)
         {

@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Doc
                 return (wasCreated, info);
             })
             .Where(wi => wi.wasCreated)
-            .Select(wi => wi.info)
+            .Select(wi => wi.info!)
             .OrderBy(i => i.Name)
             .ToList();
 
@@ -317,9 +317,8 @@ namespace DIGOS.Ambassador.Doc
             yield return new MarkdownParagraph()
             .AppendLine
             (
-                new MarkdownText
+                new MarkdownText(commandDisplayAliases)
                 {
-                    Content = commandDisplayAliases,
                     Emphasis = Bold
                 }
             )

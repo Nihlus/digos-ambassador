@@ -208,13 +208,12 @@ namespace DIGOS.Ambassador.Doc.Extensions
                 return false;
             }
 
-            var aliasArguments = aliasesAttribute.ConstructorArguments.First().Value as CustomAttributeArgument[];
-            if (aliasArguments is null)
+            if (!(aliasesAttribute.ConstructorArguments.First().Value is CustomAttributeArgument[] aliasArguments))
             {
                 return false;
             }
 
-            aliases = aliasArguments.Select(a => a.Value as string).ToArray();
+            aliases = aliasArguments.Select(a => (string)a.Value).ToArray();
 
             return true;
         }
@@ -250,7 +249,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
                 }
             )
             .Where(cr => cr.wasParsed)
-            .Select(cr => cr.command)
+            .Select(cr => cr.command!)
             .ToArray();
 
             return true;
@@ -287,7 +286,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
                 }
             )
             .Where(mr => mr.wasParsed)
-            .Select(mr => mr.submodule)
+            .Select(mr => mr.submodule!)
             .ToArray();
 
             return true;

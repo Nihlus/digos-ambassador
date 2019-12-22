@@ -41,19 +41,19 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// Gets the name of the module.
         /// </summary>
         [NotNull]
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Gets the summary of the module.
         /// </summary>
         [NotNull]
-        public string Summary { get; private set; }
+        public string Summary { get; }
 
         /// <summary>
         /// Gets the aliases of the module, if any.
         /// </summary>
         [NotNull, ItemNotNull]
-        public IReadOnlyCollection<string> Aliases { get; private set; }
+        public IReadOnlyCollection<string> Aliases { get; }
 
         /// <summary>
         /// Gets the commands defined in the module.
@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// <summary>
         /// Gets the parent module, if any.
         /// </summary>
-        public ModuleInformation? Parent { get; private set; }
+        public ModuleInformation? Parent { get; }
 
         /// <summary>
         /// Gets a value indicating whether this module is a submodule.
@@ -80,14 +80,25 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// <summary>
         /// Gets a value indicating whether this module has a prefix.
         /// </summary>
-        public bool HasPrefix { get; private set; }
+        public bool HasPrefix { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ModuleInformation"/> class.
-        /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Only used in TryCreate")]
-        private ModuleInformation()
+        private ModuleInformation
+        (
+            string name,
+            string summary,
+            List<string> allAliases,
+            ModuleInformation? parentModule,
+            bool hasPrefix
+        )
         {
+            this.Name = name;
+            this.Summary = summary;
+            this.Aliases = allAliases;
+            this.Parent = parentModule;
+            this.HasPrefix = hasPrefix;
+
+            this.Commands = new List<CommandInformation>();
+            this.Submodules = new List<ModuleInformation>();
         }
 
         /// <summary>
@@ -130,13 +141,13 @@ namespace DIGOS.Ambassador.Doc.Reflection
             allAliases = allAliases.Distinct().ToList();
 
             var newInformation = new ModuleInformation
-            {
-                Name = name,
-                Summary = summary,
-                Aliases = allAliases,
-                Parent = parentModule,
-                HasPrefix = hasPrefix
-            };
+            (
+                name,
+                summary,
+                allAliases,
+                parentModule,
+                hasPrefix
+            );
 
             if (!moduleType.TryGetCommands(newInformation, out var commands))
             {

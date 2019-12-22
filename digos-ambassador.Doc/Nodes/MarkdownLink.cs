@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Doc.Nodes
         /// <summary>
         /// Gets or sets the link's hover tooltip.
         /// </summary>
-        public string Tooltip { get; set; }
+        public string? Tooltip { get; set; }
 
         /// <inheritdoc />
         [NotNull]

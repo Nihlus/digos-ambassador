@@ -50,8 +50,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
                 thisPrefix = @this.Name;
             }
 
-            // ReSharper disable once AssignNullToNotNullAttribute
-            return @this.IsSubmodule ? $"{GetNameChain(@this.Parent)} {thisPrefix}" : thisPrefix;
+            return @this.IsSubmodule ? $"{GetNameChain(@this.Parent!)} {thisPrefix}" : thisPrefix;
         }
 
         /// <summary>
@@ -67,7 +66,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
                 if (@this.IsSubmodule)
                 {
                     // ReSharper disable once AssignNullToNotNullAttribute
-                    foreach (var parentAliasChain in GetAliasChains(@this.Parent))
+                    foreach (var parentAliasChain in GetAliasChains(@this.Parent!))
                     {
                         yield return $"{parentAliasChain} {alias}";
                     }

@@ -28,9 +28,9 @@ namespace DIGOS.Ambassador.Doc.Nodes
     public class MarkdownText : IMarkdownNode
     {
         /// <summary>
-        /// Gets or sets the contents of the text.
+        /// Gets the contents of the text.
         /// </summary>
-        public string Content { get; set; }
+        public string Content { get; }
 
         /// <summary>
         /// Gets or sets the type of emphasis placed on the text.
@@ -44,13 +44,6 @@ namespace DIGOS.Ambassador.Doc.Nodes
         public MarkdownText(string text)
         {
             this.Content = text;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MarkdownText"/> class.
-        /// </summary>
-        public MarkdownText()
-        {
         }
 
         /// <inheritdoc />

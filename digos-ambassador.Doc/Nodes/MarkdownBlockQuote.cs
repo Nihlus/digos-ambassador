@@ -30,9 +30,18 @@ namespace DIGOS.Ambassador.Doc.Nodes
     public class MarkdownBlockQuote : IMarkdownNode
     {
         /// <summary>
-        /// Gets or sets the quoted content.
+        /// Gets the quoted content.
         /// </summary>
-        public IMarkdownNode Content { get; set; }
+        public IMarkdownNode Content { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MarkdownBlockQuote"/> class.
+        /// </summary>
+        /// <param name="content">The contents.</param>
+        public MarkdownBlockQuote(IMarkdownNode content)
+        {
+            this.Content = content;
+        }
 
         /// <inheritdoc />
         public string Compile()

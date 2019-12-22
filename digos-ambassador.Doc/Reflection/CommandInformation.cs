@@ -41,38 +41,54 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// Gets the name of the command.
         /// </summary>
         [NotNull]
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Gets the summary of the command.
         /// </summary>
         [NotNull]
-        public string Summary { get; private set; }
+        public string Summary { get; }
 
         /// <summary>
         /// Gets the aliases of the command, if any.
         /// </summary>
         [NotNull]
-        public IReadOnlyCollection<string> Aliases { get; private set; }
+        public IReadOnlyCollection<string> Aliases { get; }
 
         /// <summary>
         /// Gets the parameters of the command, if any.
         /// </summary>
         [NotNull]
-        public IReadOnlyCollection<ParameterDefinition> Parameters { get; private set; }
+        public IReadOnlyCollection<ParameterDefinition> Parameters { get; }
 
         /// <summary>
         /// Gets the module that the command is defined in.
         /// </summary>
         [NotNull]
-        public ModuleInformation Module { get; private set; }
+        public ModuleInformation Module { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandInformation"/> class.
         /// </summary>
-        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Only used in TryCreate")]
-        private CommandInformation()
+        /// <param name="name">The name of the command.</param>
+        /// <param name="summary">The summary of the command.</param>
+        /// <param name="aliases">The aliases of the command, if any.</param>
+        /// <param name="parameters">The parameters of the command, if any.</param>
+        /// <param name="module">The module the command belongs to.</param>
+        private CommandInformation
+        (
+            string name,
+            string summary,
+            List<string> aliases,
+            ParameterDefinition[] parameters,
+            ModuleInformation module
+        )
         {
+            this.Name = name;
+            this.Summary = summary;
+            this.Aliases = aliases;
+            this.Parameters = parameters;
+            this.Module = module;
         }
 
         /// <summary>
@@ -117,13 +133,13 @@ namespace DIGOS.Ambassador.Doc.Reflection
                 : new ParameterDefinition[] { };
 
             information = new CommandInformation
-            {
-                Name = name,
-                Summary = summary,
-                Aliases = allAliases,
-                Parameters = parameters,
-                Module = module
-            };
+            (
+                name,
+                summary,
+                allAliases,
+                parameters,
+                module
+            );
 
             return true;
         }

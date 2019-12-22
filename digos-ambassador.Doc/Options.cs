@@ -31,15 +31,26 @@ namespace DIGOS.Ambassador.Doc
     public class Options
     {
         /// <summary>
-        /// Gets or sets the path to the assembly that documentation should be generated from.
+        /// Gets the path to the assembly that documentation should be generated from.
         /// </summary>
         [Option('i', "assemblies", Required = true)]
-        public IEnumerable<string> AssemblyPaths { get; set; }
+        public IEnumerable<string> AssemblyPaths { get; }
 
         /// <summary>
-        /// Gets or sets the path where documentation files should be emitted.
+        /// Gets the path where documentation files should be emitted.
         /// </summary>
         [Option('o', "output", Required = true)]
-        public string OutputPath { get; set; }
+        public string OutputPath { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Options"/> class.
+        /// </summary>
+        /// <param name="assemblyPaths">The assemblies to process.</param>
+        /// <param name="outputPath">The output path for documentation.</param>
+        public Options(IEnumerable<string> assemblyPaths, string outputPath)
+        {
+            this.AssemblyPaths = assemblyPaths;
+            this.OutputPath = outputPath;
+        }
     }
 }

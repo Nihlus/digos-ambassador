@@ -30,19 +30,35 @@ namespace DIGOS.Ambassador.Doc.Nodes
     public class MarkdownCodeBlock : IMarkdownNode
     {
         /// <summary>
-        /// Gets or sets the syntax highlighting to use.
+        /// Gets the code content.
         /// </summary>
-        public string Highlighting { get; set; }
+        public IMarkdownNode Content { get; }
 
         /// <summary>
-        /// Gets or sets the code content.
+        /// Gets the syntax highlighting to use.
         /// </summary>
-        public IMarkdownNode Content { get; set; }
+        public string? Highlighting { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MarkdownCodeBlock"/> class.
+        /// </summary>
+        /// <param name="content">The contents of the block.</param>
+        /// <param name="highlighting">The highlighting to use, if any.</param>
+        public MarkdownCodeBlock(IMarkdownNode content, string? highlighting = null)
+        {
+            this.Content = content;
+            this.Highlighting = highlighting;
+        }
 
         /// <inheritdoc />
         [NotNull]
         public string Compile()
         {
+            if (this.Highlighting is null)
+            {
+                return $"```\n{this.Content.Compile()}\n```";
+            }
+
             return $"```{this.Highlighting}\n{this.Content.Compile()}\n```";
         }
     }
