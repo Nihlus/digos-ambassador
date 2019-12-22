@@ -31,13 +31,14 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     public static partial class UserServiceTests
     {
         public class SetUserBioAsync : UserServiceTestBase
         {
-            private User _user;
+            private User _user = null!;
 
             public static IEnumerable<object?[]> InvalidBios
             {

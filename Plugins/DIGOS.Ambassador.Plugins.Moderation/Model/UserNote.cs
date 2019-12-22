@@ -43,8 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the content of the note.
         /// </summary>
-        [NotNull, Required]
-        public string Content { get; internal set; }
+        public string Content { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the time at which the note was last updated.

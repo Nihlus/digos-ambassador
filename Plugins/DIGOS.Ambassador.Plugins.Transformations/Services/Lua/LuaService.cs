@@ -127,7 +127,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// <returns>A sandboxed lua state.</returns>
         [NotNull]
         [MustUseReturnValue("The state must be disposed after use.")]
-        private NLua.Lua GetState([NotNull] params (string Name, object Value)[] variables)
+        private NLua.Lua GetState([NotNull] params (string Name, object? Value)[] variables)
         {
             var state = new NLua.Lua();
 
@@ -209,7 +209,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         public Task<RetrieveEntityResult<string>> ExecuteSnippetAsync
         (
             [NotNull] string snippet,
-            [NotNull] params (string Name, object Value)[] variables
+            [NotNull] params (string Name, object? Value)[] variables
         )
         {
             return Task.Run
@@ -264,7 +264,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync
         (
             [PathReference] UPath scriptPath,
-            [NotNull] params (string Name, object Value)[] variables
+            [NotNull] params (string Name, object? Value)[] variables
         )
         {
             var getScriptResult = _contentService.OpenLocalStream(scriptPath);

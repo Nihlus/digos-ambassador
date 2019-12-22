@@ -35,13 +35,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
         /// Gets or sets the error that the API returned, if any.
         /// </summary>
         [JsonProperty("error")]
-        public string Error { get; set; }
+        public string? Error { get; set; }
 
         /// <summary>
         /// Gets or sets the kink categories.
         /// </summary>
         [JsonProperty("kinks")]
-        public Dictionary<string, FListKinkCategory> KinkCategories { get; set; }
+        public Dictionary<string, FListKinkCategory>? KinkCategories { get; set; }
 
         /// <summary>
         /// Creates a new <see cref="KinkCollection"/> from the given JSON string.

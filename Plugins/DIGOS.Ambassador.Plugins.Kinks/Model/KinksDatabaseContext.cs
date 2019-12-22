@@ -24,6 +24,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Kinks.Model
 {
     /// <summary>
@@ -37,24 +38,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         /// <summary>
         /// Gets or sets the table where kinks are stored.
         /// </summary>
-        public DbSet<Kink> Kinks
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<Kink> Kinks { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where user kinks are stored.
         /// </summary>
-        public DbSet<UserKink> UserKinks
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<UserKink> UserKinks { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KinksDatabaseContext"/> class.

@@ -53,12 +53,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the author's nickname at the time of sending.
         /// </summary>
-        public string AuthorNickname { get; private set; }
+        public string AuthorNickname { get; private set; } = null!;
 
         /// <summary>
         /// Gets the contents of the message.
         /// </summary>
-        public string Contents { get; internal set; }
+        public string Contents { get; internal set; } = null!;
 
         /// <summary>
         /// Creates a new <see cref="UserMessage"/> from the specified Discord message.

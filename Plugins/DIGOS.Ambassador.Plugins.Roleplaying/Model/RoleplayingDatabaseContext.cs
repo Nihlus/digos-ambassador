@@ -37,24 +37,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets or sets the table where roleplays are stored.
         /// </summary>
-        public DbSet<Roleplay> Roleplays
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<Roleplay> Roleplays { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where server settings are stored.
         /// </summary>
-        public DbSet<ServerRoleplaySettings> ServerSettings
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<ServerRoleplaySettings> ServerSettings { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayingDatabaseContext"/> class.

@@ -48,8 +48,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         public long ServerID { get; private set; }
 
         /// <inheritdoc />
-        [Required]
-        public virtual User Owner { get; set; }
+        public virtual User Owner { get; set; } = null!;
 
         /// <summary>
         /// Gets a value indicating whether or not the roleplay is currently active in a channel.
@@ -79,22 +78,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the users that are participating in the roleplay in any way.
         /// </summary>
-        [NotNull]
         public virtual List<RoleplayParticipant> ParticipatingUsers { get; private set; }
             = new List<RoleplayParticipant>();
 
         /// <inheritdoc />
-        public string Name { get; internal set; }
+        public string Name { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the summary of the roleplay.
         /// </summary>
-        public string Summary { get; internal set; }
+        public string Summary { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the saved messages in the roleplay.
         /// </summary>
-        [NotNull]
         public virtual List<UserMessage> Messages { get; private set; } = new List<UserMessage>();
 
         /// <summary>
@@ -105,21 +102,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the users that have joined the roleplay.
         /// </summary>
-        [NotNull, NotMapped]
         public IEnumerable<RoleplayParticipant> JoinedUsers =>
             this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Joined);
 
         /// <summary>
         /// Gets the users that have been kicked from the roleplay.
         /// </summary>
-        [NotNull, NotMapped]
         public IEnumerable<RoleplayParticipant> KickedUsers =>
             this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Kicked);
 
         /// <summary>
         /// Gets the users that have been invited to the roleplay.
         /// </summary>
-        [NotNull, NotMapped]
         public IEnumerable<RoleplayParticipant> InvitedUsers =>
             this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Invited);
 

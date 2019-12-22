@@ -273,6 +273,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         [NotNull]
         private async Task ConsumeCategoryInteractionAsync([NotNull] SocketReaction reaction)
         {
+            if (this.Message is null || this.Channel is null)
+            {
+                return;
+            }
+
             var emote = reaction.Emote;
 
             if (emote.Equals(Next))
@@ -409,6 +414,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         [SuppressMessage("Style", "SA1118", Justification = "Large text blocks.")]
         private async Task DisplayHelpTextAsync()
         {
+            if (this.Message is null || this.Channel is null)
+            {
+                return;
+            }
+
             var eb = new EmbedBuilder();
             eb.WithColor(Color.DarkPurple);
 

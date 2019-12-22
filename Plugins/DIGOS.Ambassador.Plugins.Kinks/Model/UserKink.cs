@@ -20,12 +20,12 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Kinks.Model
 {
     /// <summary>
@@ -38,14 +38,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         /// <summary>
         /// Gets the user the kink belongs to.
         /// </summary>
-        [Required, NotNull]
-        public virtual User User { get; private set; }
+        public virtual User User { get; private set; } = null!;
 
         /// <summary>
         /// Gets the kink.
         /// </summary>
-        [Required, NotNull]
-        public virtual Kink Kink { get; private set; }
+        public virtual Kink Kink { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user's preference for the kink.

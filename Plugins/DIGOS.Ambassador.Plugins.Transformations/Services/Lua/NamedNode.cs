@@ -29,26 +29,28 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     internal abstract class NamedNode<T> : INode
     {
         /// <inheritdoc />
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
-        /// Gets or sets the value of the node.
+        /// Gets the value of the node.
         /// </summary>
-        public T Value { get; set; }
+        public T Value { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NamedNode{T}"/> class.
         /// </summary>
         /// <param name="name">The name of the node.</param>
-        protected NamedNode(string name)
+        /// <param name="value">The value of the node.</param>
+        protected NamedNode(string name, T value)
         {
             this.Name = name;
+            this.Value = value;
         }
 
         /// <inheritdoc />
         public virtual string Format(bool pretty = false)
         {
-            return this.Value.ToString();
+            return this.Value.ToString() ?? "None";
         }
 
         /// <inheritdoc />

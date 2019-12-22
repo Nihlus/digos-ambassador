@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador
 
         private readonly BehaviourService _behaviours;
 
-        private IServiceProvider _services;
+        private IServiceProvider _services = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorClient"/> class.

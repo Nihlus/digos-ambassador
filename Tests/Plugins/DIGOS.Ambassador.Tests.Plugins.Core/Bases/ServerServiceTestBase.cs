@@ -31,6 +31,7 @@ using Xunit;
 
 #pragma warning disable SA1648
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     /// <summary>
@@ -41,12 +42,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         /// <summary>
         /// Gets the server service object.
         /// </summary>
-        protected ServerService Servers { get; private set; }
+        protected ServerService Servers { get; private set; } = null!;
 
         /// <summary>
         /// Gets the database.
         /// </summary>
-        protected CoreDatabaseContext Database { get; private set; }
+        protected CoreDatabaseContext Database { get; private set; } = null!;
 
         /// <inheritdoc />
         public virtual Task InitializeAsync()

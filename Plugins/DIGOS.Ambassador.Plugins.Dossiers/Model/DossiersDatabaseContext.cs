@@ -24,6 +24,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Dossiers.Model
 {
     /// <summary>
@@ -37,13 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Model
         /// <summary>
         /// Gets or sets the table where dossiers are stored.
         /// </summary>
-        public DbSet<Dossier> Dossiers
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<Dossier> Dossiers { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DossiersDatabaseContext"/> class.

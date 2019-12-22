@@ -27,6 +27,7 @@ using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     /// <summary>
@@ -37,7 +38,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         /// <summary>
         /// Gets the pronoun service object.
         /// </summary>
-        protected PronounService Pronouns { get; private set; }
+        protected PronounService Pronouns { get; private set; } = null!;
 
         /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)

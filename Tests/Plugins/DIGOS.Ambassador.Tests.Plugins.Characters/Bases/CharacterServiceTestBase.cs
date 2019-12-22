@@ -36,6 +36,7 @@ using Discord.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     /// <summary>
@@ -46,22 +47,22 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         /// <summary>
         /// Gets the database.
         /// </summary>
-        protected CharactersDatabaseContext Database { get; private set; }
+        protected CharactersDatabaseContext Database { get; private set; } = null!;
 
         /// <summary>
         /// Gets the character service object.
         /// </summary>
-        protected CharacterService Characters { get; private set; }
+        protected CharacterService Characters { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user service.
         /// </summary>
-        protected UserService Users { get; private set; }
+        protected UserService Users { get; private set; } = null!;
 
         /// <summary>
         /// Gets the command service dependency.
         /// </summary>
-        protected CommandService Commands { get; private set; }
+        protected CommandService Commands { get; private set; } = null!;
 
         /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)

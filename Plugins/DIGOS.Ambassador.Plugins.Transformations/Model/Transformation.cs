@@ -53,21 +53,18 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the species that this transformation belongs to.
         /// </summary>
-        [Required, NotNull]
-        public virtual Species Species { get; set; }
+        public virtual Species Species { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets a short description of the transformation.
         /// </summary>
-        [Required, NotNull]
-        public string Description { get; set; }
+        public string Description { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the default base colour of the transformation.
         /// </summary>
-        [Required, NotNull]
         [YamlMember(Alias = "default_base_colour")]
-        public virtual Colour DefaultBaseColour { get; set; }
+        public virtual Colour DefaultBaseColour { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the default pattern of the transformation (if any).
@@ -84,23 +81,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets a value indicating whether this transformation is NSFW.
         /// </summary>
-        [Required]
         [YamlMember(Alias = "is_nsfw")]
         public bool IsNSFW { get; set; }
 
         /// <summary>
         /// Gets or sets the text of the message when an existing bodypart shifts into this one.
         /// </summary>
-        [Required, NotNull]
         [YamlMember(Alias = "shift_message")]
-        public string ShiftMessage { get; set; }
+        public string ShiftMessage { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the text of the message when this bodypart is added where none existed before.
         /// </summary>
-        [Required, NotNull]
         [YamlMember(Alias = "grow_message")]
-        public string GrowMessage { get; set; }
+        public string GrowMessage { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the uniform shift message, used when two chiral parts shift together.
@@ -117,9 +111,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the text of the description when the species of the complementary bodyparts don't match.
         /// </summary>
-        [Required, NotNull]
         [YamlMember(Alias = "single_description")]
-        public string SingleDescription { get; set; }
+        public string SingleDescription { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the text of the description when the species of the complementary bodyparts match.

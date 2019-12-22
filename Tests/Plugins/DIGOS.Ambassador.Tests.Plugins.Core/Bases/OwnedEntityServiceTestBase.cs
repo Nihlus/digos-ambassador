@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     /// <summary>
@@ -38,17 +39,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         /// <summary>
         /// Gets the database.
         /// </summary>
-        protected CoreDatabaseContext Database { get; private set; }
+        protected CoreDatabaseContext Database { get; private set; } = null!;
 
         /// <summary>
         /// Gets the owned entity service object.
         /// </summary>
-        protected OwnedEntityService Entities { get; private set; }
+        protected OwnedEntityService Entities { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user service.
         /// </summary>
-        protected UserService Users { get; private set; }
+        protected UserService Users { get; private set; } = null!;
 
         /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)

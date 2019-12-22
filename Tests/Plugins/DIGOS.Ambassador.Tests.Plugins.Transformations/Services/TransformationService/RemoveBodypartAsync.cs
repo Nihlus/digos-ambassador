@@ -47,9 +47,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             private readonly IUser _invoker = MockHelper.CreateDiscordGuildUser(1);
 
             private readonly ICommandContext _context;
-            private Character _character;
+            private Character _character = null!;
 
-            private Appearance _appearance;
+            private Appearance _appearance = null!;
 
             public RemoveBodypartAsync()
             {

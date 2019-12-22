@@ -159,7 +159,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
                         continue;
                     }
 
-                    InsertShiftMessage(shiftResult.ShiftMessage);
+                    InsertShiftMessage(shiftResult.ShiftMessage!);
                     continue;
                 }
 

@@ -142,7 +142,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
                         continue;
                     }
 
-                    InsertRemovalMessage(shiftResult.ShiftMessage);
+                    InsertRemovalMessage(shiftResult.ShiftMessage!);
                     continue;
                 }
 

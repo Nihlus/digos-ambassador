@@ -332,7 +332,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             if (roleplayOwner is null)
             {
-                return await GetNamedRoleplayAsync(roleplayName, context.Guild);
+                return await GetNamedRoleplayAsync(roleplayName!, context.Guild);
             }
 
             if (roleplayName.IsNullOrWhitespace())

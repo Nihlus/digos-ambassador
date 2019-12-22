@@ -30,10 +30,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     internal interface INode
     {
         /// <summary>
-        /// Gets or sets the name of the node.
+        /// Gets the name of the node.
         /// </summary>
-        [NotNull]
-        string Name { get; set; }
+        string Name { get; }
 
         /// <summary>
         /// Formats the node into a lua string.

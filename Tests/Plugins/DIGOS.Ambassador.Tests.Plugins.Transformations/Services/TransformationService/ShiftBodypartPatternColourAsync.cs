@@ -53,25 +53,25 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             private readonly Colour _newPatternColour;
 
             private readonly ICommandContext _context;
-            private Character _character;
+            private Character _character = null!;
 
-            private Colour _originalPatternColour;
+            private Colour _originalPatternColour = null!;
 
             public ShiftBodypartPatternColourAsync()
             {
                 var mockedGuild = new Mock<IGuild>();
                 mockedGuild.Setup(g => g.Id).Returns(1);
                 mockedGuild.Setup
-                    (
-                        c =>
-                            c.GetUserAsync
-                            (
-                                It.Is<ulong>(id => id == _owner.Id),
-                                CacheMode.AllowDownload,
-                                null
-                            )
-                    )
-                    .Returns(Task.FromResult((IGuildUser)_owner));
+                (
+                    c =>
+                        c.GetUserAsync
+                        (
+                            It.Is<ulong>(id => id == _owner.Id),
+                            CacheMode.AllowDownload,
+                            null
+                        )
+                )
+                .Returns(Task.FromResult((IGuildUser)_owner));
 
                 _guild = mockedGuild.Object;
 

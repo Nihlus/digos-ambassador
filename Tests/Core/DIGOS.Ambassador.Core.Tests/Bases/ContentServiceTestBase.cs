@@ -39,12 +39,12 @@ namespace DIGOS.Ambassador.Core.Tests.Bases
         /// <summary>
         /// Gets the file system implementation that's in use.
         /// </summary>
-        protected IFileSystem FileSystem { get; private set; }
+        protected IFileSystem FileSystem { get; private set; } = null!;
 
         /// <summary>
         /// Gets the content service.
         /// </summary>
-        protected ContentService ContentService { get; private set; }
+        protected ContentService ContentService { get; private set; } = null!;
 
         /// <summary>
         /// Configures the file system.

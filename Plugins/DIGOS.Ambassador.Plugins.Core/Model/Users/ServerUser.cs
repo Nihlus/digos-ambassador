@@ -20,12 +20,12 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using JetBrains.Annotations;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Core.Model.Users
 {
     /// <summary>
@@ -38,14 +38,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         /// <summary>
         /// Gets the server the user has joined.
         /// </summary>
-        [Required, NotNull]
-        public virtual Server Server { get; private set; }
+        public virtual Server Server { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user that has joined the server.
         /// </summary>
-        [Required, NotNull]
-        public virtual User User { get; private set; }
+        public virtual User User { get; private set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerUser"/> class.

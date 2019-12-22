@@ -42,12 +42,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
         /// <summary>
         /// Gets the database.
         /// </summary>
-        public RoleplayingDatabaseContext Database { get; private set; }
+        public RoleplayingDatabaseContext Database { get; private set; } = null!;
 
         /// <summary>
         /// Gets the roleplay service object.
         /// </summary>
-        protected RoleplayService Roleplays { get; private set; }
+        protected RoleplayService Roleplays { get; private set; } = null!;
 
         /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)

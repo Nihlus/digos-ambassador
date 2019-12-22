@@ -149,7 +149,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 (
                     context,
                     invoker,
-                    characterName
+                    characterName!
                 );
 
                 if (invokerCharacterResult.IsSuccess)
@@ -157,7 +157,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     return invokerCharacterResult;
                 }
 
-                return await GetNamedCharacterAsync(characterName, context.Guild);
+                return await GetNamedCharacterAsync(characterName!, context.Guild);
             }
 
             if (characterName.IsNullOrWhitespace())

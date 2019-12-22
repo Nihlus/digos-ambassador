@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             private readonly Colour _newPatternColour;
 
             private readonly ICommandContext _context;
-            private Character _character;
+            private Character _character = null!;
 
             public ShiftBodypartPatternAsync()
             {

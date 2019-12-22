@@ -47,22 +47,22 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         /// <summary>
         /// Gets the database.
         /// </summary>
-        protected TransformationsDatabaseContext Database { get; private set; }
+        protected TransformationsDatabaseContext Database { get; private set; } = null!;
 
         /// <summary>
         /// Gets the character database.
         /// </summary>
-        protected CharactersDatabaseContext CharacterDatabase { get; private set; }
+        protected CharactersDatabaseContext CharacterDatabase { get; private set; } = null!;
 
         /// <summary>
         /// Gets the transformation service object.
         /// </summary>
-        protected TransformationService Transformations { get; private set; }
+        protected TransformationService Transformations { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user service.
         /// </summary>
-        protected UserService Users { get; private set; }
+        protected UserService Users { get; private set; } = null!;
 
         /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)

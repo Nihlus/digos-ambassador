@@ -25,8 +25,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
 
-using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
-
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Permissions.Model
 {
     /// <summary>
@@ -40,28 +39,14 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// <summary>
         /// Gets or sets the table where role-associated permissions are stored.
         /// </summary>
-        [NotNull]
         [ItemNotNull]
-        public DbSet<RolePermission> RolePermissions
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<RolePermission> RolePermissions { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where user-associated permissions are stored.
         /// </summary>
-        [NotNull]
         [ItemNotNull]
-        public DbSet<UserPermission> UserPermissions
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<UserPermission> UserPermissions { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PermissionsDatabaseContext"/> class.

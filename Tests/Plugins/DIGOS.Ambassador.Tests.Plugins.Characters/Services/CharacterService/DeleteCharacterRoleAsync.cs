@@ -30,13 +30,14 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public partial class CharacterServiceTests
     {
         public class DeleteCharacterRoleAsync : CharacterServiceTestBase
         {
-            private CharacterRole _role;
+            private CharacterRole _role = null!;
 
             public override async Task InitializeAsync()
             {

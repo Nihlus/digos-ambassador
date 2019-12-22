@@ -41,14 +41,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the roleplay that the user is a part of.
         /// </summary>
-        [NotNull, Required]
-        public virtual Roleplay Roleplay { get; private set; }
+        public virtual Roleplay Roleplay { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user that is part of the roleplay.
         /// </summary>
-        [NotNull, Required]
-        public virtual User User { get; private set; }
+        public virtual User User { get; private set; } = null!;
 
         /// <summary>
         /// Gets the current status of the user in the roleplay.

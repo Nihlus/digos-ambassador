@@ -46,12 +46,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         public long ServerID { get; private set; }
 
         /// <inheritdoc />
-        [Required]
-        public virtual User Owner { get; set; }
+        public virtual User Owner { get; set; } = null!;
 
         /// <inheritdoc />
-        [Required]
-        public string Name { get; internal set; }
+        public string Name { get; internal set; } = null!;
 
         /// <summary>
         /// Gets a value indicating whether the character is the user's default character.
@@ -66,26 +64,22 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets a URL pointing to the character's avatar.
         /// </summary>
-        [Required, NotNull]
-        public string AvatarUrl { get; internal set; }
+        public string AvatarUrl { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the nickname that a user should have when playing as the character.
         /// </summary>
-        [Required, NotNull]
-        public string Nickname { get; internal set; }
+        public string Nickname { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the character summary.
         /// </summary>
-        [Required, NotNull]
-        public string Summary { get; internal set; }
+        public string Summary { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the full description of the character.
         /// </summary>
-        [Required, NotNull]
-        public string Description { get; internal set; }
+        public string Description { get; internal set; } = null!;
 
         /// <summary>
         /// Gets a value indicating whether the character is NSFW.
@@ -95,14 +89,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets the images associated with the character.
         /// </summary>
-        [Required, NotNull, ItemNotNull]
         public virtual List<Image> Images { get; internal set; } = new List<Image>();
 
         /// <summary>
         /// Gets the preferred pronoun family of the character.
         /// </summary>
-        [Required, NotNull]
-        public string PronounProviderFamily { get; internal set; }
+        public string PronounProviderFamily { get; internal set; } = null!;
 
         /// <summary>
         /// Gets a custom role that gets applied along with the character, similar to a nickname.
@@ -110,8 +102,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         public virtual CharacterRole? Role { get; internal set; }
 
         /// <inheritdoc />
-        [NotMapped]
         public string EntityTypeDisplayName => nameof(Character);
+
+        /// <summary>
+        /// Gets a value indicating whether the character has a role.
+        /// </summary>
+        public bool HasRole => !(this.Role is null);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Character"/> class.

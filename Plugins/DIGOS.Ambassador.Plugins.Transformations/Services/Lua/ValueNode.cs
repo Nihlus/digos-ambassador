@@ -31,16 +31,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// <summary>
         /// Initializes a new instance of the <see cref="ValueNode{T}"/> class.
         /// </summary>
-        /// <param name="value">The node's value.</param>
-        public ValueNode(string value)
-            : base(value)
+        /// <param name="name">The node's name.</param>
+        /// <param name="originalValue">The original value of the node.</param>
+        public ValueNode(string name, T originalValue)
+            : base(name, originalValue)
         {
         }
 
         /// <inheritdoc />
         public override string Format(bool pretty = false)
         {
-            return $"{this.Name} = {this.Value.ToString()}";
+            return $"{this.Name} = {this.Value.ToString() ?? "None"}";
         }
     }
 }

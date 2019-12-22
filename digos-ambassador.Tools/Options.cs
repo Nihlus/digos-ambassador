@@ -1,5 +1,5 @@
 ﻿//
-//  CommandLineOptions.cs
+//  Options.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -27,12 +27,21 @@ namespace DIGOS.Ambassador.Tools
     /// <summary>
     /// Options for the command line.
     /// </summary>
-    public class CommandLineOptions
+    public class Options
     {
         /// <summary>
-        /// Gets or sets the path to the file or directory to verify.
+        /// Gets the path to the file or directory to verify.
         /// </summary>
         [Option('v', "verify", HelpText = "Sets the path to the file or directory to verify.", Required = true)]
-        public string VerifyPath { get; set; }
+        public string VerifyPath { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Options"/> class.
+        /// </summary>
+        /// <param name="verifyPath">The path to the file or directory to verify.</param>
+        public Options(string verifyPath)
+        {
+            this.VerifyPath = verifyPath;
+        }
     }
 }

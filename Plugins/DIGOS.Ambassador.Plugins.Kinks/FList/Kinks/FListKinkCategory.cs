@@ -30,15 +30,26 @@ namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
     internal class FListKinkCategory
     {
         /// <summary>
-        /// Gets or sets the category name.
+        /// Gets the category name.
         /// </summary>
         [JsonProperty("group")]
-        public string Group { get; set; }
+        public string Group { get; }
 
         /// <summary>
-        /// Gets or sets the kinks in the category.
+        /// Gets the kinks in the category.
         /// </summary>
         [JsonProperty("items")]
-        public FListKink[] Kinks { get; set; }
+        public FListKink[] Kinks { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FListKinkCategory"/> class.
+        /// </summary>
+        /// <param name="group">The category name.</param>
+        /// <param name="kinks">The retrieved kinks.</param>
+        public FListKinkCategory(string group, FListKink[] kinks)
+        {
+            this.Group = group;
+            this.Kinks = kinks;
+        }
     }
 }

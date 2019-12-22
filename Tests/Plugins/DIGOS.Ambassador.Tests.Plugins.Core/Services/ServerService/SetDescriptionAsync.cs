@@ -28,14 +28,16 @@ using Xunit;
 #pragma warning disable SA1600
 #pragma warning disable CS1591
 #pragma warning disable SA1649
+#pragma warning disable CS8625
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     public static partial class ServerServiceTests
     {
         public class SetDescriptionAsync : ServerServiceTestBase
         {
-            private Server _server;
+            private Server _server = null!;
 
             public override async Task InitializeAsync()
             {

@@ -41,7 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// <summary>
         /// Gets the name of the script to execute.
         /// </summary>
-        public string ScriptName { get; private set; }
+        public string ScriptName { get; private set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LuaScriptToken"/> class.

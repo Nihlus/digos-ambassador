@@ -41,62 +41,27 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the table where transformation species are stored.
         /// </summary>
-        [NotNull, ItemNotNull]
-        public DbSet<Species> Species
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<Species> Species { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where transformations are stored.
         /// </summary>
-        [NotNull, ItemNotNull]
-        public DbSet<Transformation> Transformations
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<Transformation> Transformations { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where global transformation protections are stored.
         /// </summary>
-        [NotNull, ItemNotNull]
-        public DbSet<GlobalUserProtection> GlobalUserProtections
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<GlobalUserProtection> GlobalUserProtections { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where server-specific transformation protections are stored.
         /// </summary>
-        [NotNull, ItemNotNull]
-        public DbSet<ServerUserProtection> ServerUserProtections
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<ServerUserProtection> ServerUserProtections { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where appearance configurations are stored.
         /// </summary>
-        [NotNull, ItemNotNull]
-        public DbSet<Appearance> Appearances
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<Appearance> Appearances { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformationsDatabaseContext"/> class.

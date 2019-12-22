@@ -51,20 +51,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the name of the species.
         /// </summary>
-        [Required, NotNull]
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the description of the species.
         /// </summary>
-        [Required, NotNull]
-        public string Description { get; set; }
+        public string Description { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the author of the species.
         /// </summary>
-        [Required, NotNull]
-        public string Author { get; set; }
+        public string Author { get; set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Species"/> class.

@@ -41,8 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the server the settings are relevant for.
         /// </summary>
-        [NotNull, Required]
-        public virtual Server Server { get; private set; }
+        public virtual Server Server { get; private set; } = null!;
 
         /// <summary>
         /// Gets the channel category generated roleplay channels should be created under.

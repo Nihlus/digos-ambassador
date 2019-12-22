@@ -53,9 +53,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             private readonly Colour _newColour;
 
             private readonly ICommandContext _context;
-            private Character _character;
+            private Character _character = null!;
 
-            private Colour _originalColour;
+            private Colour _originalColour = null!;
 
             public ShiftBodypartColourAsync()
             {

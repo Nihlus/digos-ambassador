@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         [NotNull]
         public string Build(bool pretty = false)
         {
-            var metatable = new TableNode("env");
+            var metatable = new TableNode("env", new List<INode>());
 
             foreach (var entry in _entries)
             {
@@ -78,10 +78,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
             var components = value.Split('.');
             if (components.Length == 1)
             {
-                var valueNode = new ValueNode<string>(value)
-                {
-                    Value = originalValue
-                };
+                var valueNode = new ValueNode<string>(value, originalValue);
 
                 parent.Value.Add(valueNode);
                 return;
@@ -90,7 +87,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
             var subnode = parent.Value.FirstOrDefault(t => t.Name == components.First());
             if (subnode is null)
             {
-                subnode = new TableNode(components.First());
+                subnode = new TableNode(components.First(), new List<INode>());
                 parent.Value.Add(subnode);
             }
 

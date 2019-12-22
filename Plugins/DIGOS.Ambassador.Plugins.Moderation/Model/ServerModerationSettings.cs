@@ -41,8 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the server.
         /// </summary>
-        [NotNull, Required]
-        public virtual Server Server { get; private set; }
+        public virtual Server Server { get; private set; } = null!;
 
         /// <summary>
         /// Gets the Discord ID of the channel where moderation actions are logged.

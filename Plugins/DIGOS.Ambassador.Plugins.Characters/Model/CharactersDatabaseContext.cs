@@ -38,35 +38,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets or sets the table where characters are stored.
         /// </summary>
-        public DbSet<Character> Characters
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<Character> Characters { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where images are stored.
         /// </summary>
-        public DbSet<Image> Images
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<Image> Images { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where character roles are stored.
         /// </summary>
-        public DbSet<CharacterRole> CharacterRoles
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<CharacterRole> CharacterRoles { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CharactersDatabaseContext"/> class.

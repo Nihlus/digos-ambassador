@@ -50,8 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the character that the appearance belongs to.
         /// </summary>
-        [Required, JetBrains.Annotations.NotNull]
-        public virtual Character Character { get; private set; }
+        public virtual Character Character { get; private set; } = null!;
 
         /// <summary>
         /// Gets a value indicating whether this appearance is the character's default one.
@@ -66,7 +65,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the parts that compose this appearance.
         /// </summary>
-        [JetBrains.Annotations.NotNull, ItemNotNull]
         public virtual List<AppearanceComponent> Components { get; private set; } = new List<AppearanceComponent>();
 
         /// <summary>

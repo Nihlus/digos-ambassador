@@ -316,6 +316,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
             }
 
             var kinkCollection = JsonConvert.DeserializeObject<KinkCollection>(json);
+            if (kinkCollection.KinkCategories is null)
+            {
+                await _feedback.SendErrorAsync(this.Context, $"Received an error from F-List: {kinkCollection.Error}");
+                return;
+            }
+
             foreach (var kinkSection in kinkCollection.KinkCategories)
             {
                 if (!Enum.TryParse<KinkCategory>(kinkSection.Key, out var kinkCategory))

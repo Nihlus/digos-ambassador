@@ -30,6 +30,7 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public partial class CharacterServiceTests
@@ -39,7 +40,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             private readonly IRole _discordRole;
             private readonly IRole _unregisteredDiscordRole;
 
-            private CharacterRole _role;
+            private CharacterRole _role = null!;
 
             public GetCharacterRoleAsync()
             {

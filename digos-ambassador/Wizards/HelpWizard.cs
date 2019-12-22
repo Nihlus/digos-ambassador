@@ -297,7 +297,6 @@ namespace DIGOS.Ambassador.Wizards
                 {
                     var eb = _feedback.CreateEmbedBase();
 
-                    // ReSharper disable once PossibleNullReferenceException
                     eb.WithTitle($"Available commands in {_currentModule.Name}");
 
                     var description = $"Click {EnterModule} and type in a command to see detailed information." +
@@ -367,6 +366,11 @@ namespace DIGOS.Ambassador.Wizards
 
         private async Task ConsumeCommandListInteractionAsync([NotNull] SocketReaction reaction)
         {
+            if (this.Message is null || this.Channel is null)
+            {
+                return;
+            }
+
             var emote = reaction.Emote;
 
             if (!this.AcceptedEmotes.Contains(emote))
@@ -384,7 +388,11 @@ namespace DIGOS.Ambassador.Wizards
 
             if (emote.Equals(Next))
             {
-                // ReSharper disable once AssignNullToNotNullAttribute
+                if (_currentModule is null)
+                {
+                    return;
+                }
+
                 if (_commandListOffset + 1 > _commandListPages[_currentModule].Count - 1)
                 {
                     return;
@@ -407,14 +415,22 @@ namespace DIGOS.Ambassador.Wizards
             }
             else if (emote.Equals(Last))
             {
-                // ReSharper disable once AssignNullToNotNullAttribute
+                if (_currentModule is null)
+                {
+                    return;
+                }
+
                 _commandListOffset = _commandListPages[_currentModule].Count - 1;
             }
             else if (emote.Equals(EnterModule))
             {
+                if (_currentModule is null)
+                {
+                    return;
+                }
+
                 bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
 
-                // ReSharper disable once PossibleNullReferenceException
                 if (!_currentModule.Commands.Any())
                 {
                     await _feedback.SendWarningAndDeleteAsync
@@ -486,6 +502,11 @@ namespace DIGOS.Ambassador.Wizards
 
         private async Task ConsumeModuleListInteractionAsync([NotNull] SocketReaction reaction)
         {
+            if (this.Message is null || this.Channel is null)
+            {
+                return;
+            }
+
             var emote = reaction.Emote;
 
             if (!this.AcceptedEmotes.Contains(emote))

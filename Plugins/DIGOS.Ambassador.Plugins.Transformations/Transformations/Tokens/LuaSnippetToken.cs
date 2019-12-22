@@ -40,8 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// <summary>
         /// Gets the snippet of lua code to execute.
         /// </summary>
-        [NotNull]
-        public string Snippet { get; private set; }
+        public string Snippet { get; private set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LuaSnippetToken"/> class.

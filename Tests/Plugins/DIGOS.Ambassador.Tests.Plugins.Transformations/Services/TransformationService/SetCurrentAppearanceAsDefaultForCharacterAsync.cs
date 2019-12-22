@@ -39,10 +39,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         public class SetCurrentAppearanceAsDefaultForCharacterAsync : TransformationServiceTestBase
         {
             private readonly IUser _user = MockHelper.CreateDiscordUser(0);
-            private User _owner;
-            private Character _character;
+            private User _owner = null!;
+            private Character _character = null!;
 
-            private Appearance _appearance;
+            private Appearance _appearance = null!;
 
             protected override async Task InitializeTestAsync()
             {

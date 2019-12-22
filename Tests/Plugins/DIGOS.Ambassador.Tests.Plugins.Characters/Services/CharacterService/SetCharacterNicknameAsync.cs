@@ -31,7 +31,9 @@ using Xunit;
 #pragma warning disable SA1600
 #pragma warning disable CS1591
 #pragma warning disable SA1649
+#pragma warning disable CS8625
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public partial class CharacterServiceTests
@@ -42,8 +44,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             private readonly IUser _user = MockHelper.CreateDiscordUser(0);
 
-            private User _owner;
-            private Character _character;
+            private User _owner = null!;
+            private Character _character = null!;
 
             public override async Task InitializeAsync()
             {

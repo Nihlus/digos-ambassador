@@ -43,8 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the reason for the warning.
         /// </summary>
-        [NotNull, Required]
-        public string Reason { get; internal set; }
+        public string Reason { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the message that caused the warning, if any.

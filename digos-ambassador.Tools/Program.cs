@@ -35,12 +35,17 @@ namespace DIGOS.Ambassador.Tools
     /// </summary>
     internal static class Program
     {
-        private static CommandLineOptions _options;
+        private static Options? _options;
 
         private static int Main(string[] args)
         {
-            Parser.Default.ParseArguments<CommandLineOptions>(args)
+            Parser.Default.ParseArguments<Options>(args)
             .WithParsed(r => _options = r);
+
+            if (_options is null)
+            {
+                return 1;
+            }
 
             var verifier = new TransformationFileVerifier();
 

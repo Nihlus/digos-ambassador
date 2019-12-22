@@ -41,8 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets the user that owns this protection data.
         /// </summary>
-        [Required]
-        public virtual User User { get; private set; }
+        public virtual User User { get; private set; } = null!;
 
         /// <summary>
         /// Gets the default protection type to use on new servers.
@@ -57,20 +56,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets the list of users that are listed in this protection entry.
         /// </summary>
-        [NotNull, ItemNotNull]
         public virtual List<UserProtectionEntry> UserListing { get; private set; } = new List<UserProtectionEntry>();
 
         /// <summary>
         /// Gets the list of users that are allowed to transform the owner.
         /// </summary>
-        [NotNull, NotMapped]
         public IEnumerable<User> Whitelist =>
             this.UserListing.Where(u => u.Type == ListingType.Whitelist).Select(u => u.User);
 
         /// <summary>
         /// Gets the list of users that are prohibited from transforming the owner.
         /// </summary>
-        [NotNull, NotMapped]
         public IEnumerable<User> Blacklist =>
                 this.UserListing.Where(u => u.Type == ListingType.Blacklist).Select(u => u.User);
 

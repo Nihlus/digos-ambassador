@@ -34,10 +34,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// Initializes a new instance of the <see cref="TableNode"/> class.
         /// </summary>
         /// <param name="name">The name of the table.</param>
-        public TableNode(string name)
-            : base(name)
+        /// <param name="value">The nodes in the table.</param>
+        public TableNode(string name, List<INode> value)
+            : base(name, value)
         {
-            this.Value = new List<INode>();
         }
 
         /// <inheritdoc />

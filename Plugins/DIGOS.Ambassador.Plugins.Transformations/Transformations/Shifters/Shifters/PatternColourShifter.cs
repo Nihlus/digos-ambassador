@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
             // ReSharper disable once PossibleNullReferenceException
             // Having a pattern implies having a pattern colour
-            if (currentComponent.PatternColour.IsSameColourAs(_colour))
+            if (currentComponent.PatternColour!.IsSameColourAs(_colour))
             {
                 return ShiftBodypartResult.FromError("The pattern is already that colour.");
             }

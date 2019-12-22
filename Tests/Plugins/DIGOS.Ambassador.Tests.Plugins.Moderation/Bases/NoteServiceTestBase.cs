@@ -40,12 +40,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
         /// <summary>
         /// Gets the database context.
         /// </summary>
-        protected ModerationDatabaseContext Database { get; private set; }
+        protected ModerationDatabaseContext Database { get; private set; } = null!;
 
         /// <summary>
         /// Gets the note service.
         /// </summary>
-        protected NoteService Notes { get; private set; }
+        protected NoteService Notes { get; private set; } = null!;
 
         /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)

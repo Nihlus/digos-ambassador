@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class IsPartAndSpeciesCombinationUniqueAsync : TransformationServiceTestBase
         {
-            private Species _templateSpecies;
+            private Species _templateSpecies = null!;
 
             protected override async Task InitializeTestAsync()
             {

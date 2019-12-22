@@ -46,8 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the component's current transformation.
         /// </summary>
-        [Required]
-        public virtual Transformation Transformation { get; internal set; }
+        public virtual Transformation Transformation { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the chirality of the component.
@@ -57,8 +56,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the base colour of the component.
         /// </summary>
-        [NotNull, Required]
-        public virtual Colour BaseColour { get; internal set; }
+        public virtual Colour BaseColour { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the pattern of the component's secondary colour (if any).
@@ -73,7 +71,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the bodypart that the component is.
         /// </summary>
-        [NotMapped]
         public Bodypart Bodypart => this.Transformation.Part;
 
         /// <summary>

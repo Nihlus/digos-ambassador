@@ -39,14 +39,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets the global protection entry that the user has been listed in.
         /// </summary>
-        [Required, NotNull]
-        public virtual GlobalUserProtection GlobalProtection { get; private set; }
+        public virtual GlobalUserProtection GlobalProtection { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user that's listed in the global protection entry.
         /// </summary>
-        [Required, NotNull]
-        public virtual User User { get; private set; }
+        public virtual User User { get; private set; } = null!;
 
         /// <summary>
         /// Gets the type of listing.

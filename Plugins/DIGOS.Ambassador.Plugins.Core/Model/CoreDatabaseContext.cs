@@ -26,6 +26,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Core.Model
 {
     /// <summary>
@@ -39,35 +40,17 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
         /// <summary>
         /// Gets or sets the table where the user information is stored.
         /// </summary>
-        public DbSet<User> Users
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<User> Users { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where server-specific settings are stored.
         /// </summary>
-        public DbSet<Server> Servers
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<Server> Servers { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where user consents are stored.
         /// </summary>
-        public DbSet<UserConsent> UserConsents
-        {
-            get;
-
-            [UsedImplicitly]
-            set;
-        }
+        public DbSet<UserConsent> UserConsents { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CoreDatabaseContext"/> class.

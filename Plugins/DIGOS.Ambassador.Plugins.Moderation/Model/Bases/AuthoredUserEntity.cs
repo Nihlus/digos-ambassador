@@ -38,23 +38,21 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model.Bases
         /// <summary>
         /// Gets the server that the entity was authored on.
         /// </summary>
-        public virtual Server Server { get; private set; }
+        public virtual Server Server { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user that the entity is associated with.
         /// </summary>
-        public virtual User User { get; private set; }
+        public virtual User User { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user that created the entity.
         /// </summary>
-        [NotNull, Required]
-        public virtual User Author { get; private set; }
+        public virtual User Author { get; private set; } = null!;
 
         /// <summary>
         /// Gets the time at which the entity was created.
         /// </summary>
-        [Required]
         public DateTime CreatedAt { get; private set; }
 
         /// <summary>

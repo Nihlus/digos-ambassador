@@ -27,6 +27,7 @@ using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Permissions
 {
     /// <summary>
@@ -37,12 +38,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
         /// <summary>
         /// Gets the permission service instance.
         /// </summary>
-        protected PermissionService Permissions { get; private set; }
+        protected PermissionService Permissions { get; private set; } = null!;
 
         /// <summary>
         /// Gets the permission database.
         /// </summary>
-        protected PermissionsDatabaseContext Database { get; private set; }
+        protected PermissionsDatabaseContext Database { get; private set; } = null!;
 
         /// <inheritdoc />
         protected sealed override void RegisterServices(IServiceCollection serviceCollection)

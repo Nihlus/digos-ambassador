@@ -34,6 +34,7 @@ using Xunit;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
+// ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     public partial class OwnedEntityServiceTests
@@ -43,8 +44,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             private readonly IUser _originalUser;
             private readonly IUser _newUser;
 
-            private User _originalDBUser;
-            private User _newDBUser;
+            private User _originalDBUser = null!;
+            private User _newDBUser = null!;
 
             public TransferEntityOwnershipAsync()
             {

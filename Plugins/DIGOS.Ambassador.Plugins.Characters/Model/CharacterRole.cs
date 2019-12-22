@@ -38,8 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets the server that the role is on.
         /// </summary>
-        [Required, NotNull]
-        public virtual Server Server { get; private set; }
+        public virtual Server Server { get; private set; } = null!;
 
         /// <summary>
         /// Gets the role ID, taken from Discord.

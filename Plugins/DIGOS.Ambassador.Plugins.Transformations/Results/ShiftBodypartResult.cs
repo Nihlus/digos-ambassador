@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Results
         /// <summary>
         /// Gets the shifting message.
         /// </summary>
-        public string ShiftMessage { get; }
+        public string? ShiftMessage { get; }
 
         /// <summary>
         /// Gets the action that was performed on the bodypart.

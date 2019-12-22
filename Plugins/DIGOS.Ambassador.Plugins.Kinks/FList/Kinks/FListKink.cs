@@ -30,21 +30,34 @@ namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
     internal class FListKink
     {
         /// <summary>
-        /// Gets or sets the description of the kink.
+        /// Gets the description of the kink.
         /// </summary>
         [JsonProperty("description")]
-        public string Description { get; set; }
+        public string Description { get; }
 
         /// <summary>
-        /// Gets or sets the ID of the kink.
+        /// Gets the ID of the kink.
         /// </summary>
         [JsonProperty("kink_id")]
-        public uint KinkId { get; set; }
+        public uint KinkId { get; }
 
         /// <summary>
-        /// Gets or sets the name of the kink.
+        /// Gets the name of the kink.
         /// </summary>
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FListKink"/> class.
+        /// </summary>
+        /// <param name="description">The description of the kink.</param>
+        /// <param name="kinkId">The ID of the kink in F-List's database.</param>
+        /// <param name="name">The name of the kink.</param>
+        public FListKink(string description, uint kinkId, string name)
+        {
+            this.Description = description;
+            this.KinkId = kinkId;
+            this.Name = name;
+        }
     }
 }

@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class GetTransformationByPartAndSpeciesAsync : TransformationServiceTestBase
         {
-            private Species _templateSpecies;
+            private Species _templateSpecies = null!;
 
             protected override async Task InitializeTestAsync()
             {

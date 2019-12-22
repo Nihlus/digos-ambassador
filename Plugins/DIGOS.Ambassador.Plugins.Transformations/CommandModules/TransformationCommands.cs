@@ -219,7 +219,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 return;
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, result.ShiftMessage);
+            await _feedback.SendConfirmationAsync(this.Context, result.ShiftMessage!);
         }
 
         /// <summary>
@@ -332,7 +332,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 return;
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
+            await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage!);
         }
 
         /// <summary>
@@ -460,7 +460,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 return;
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
+            await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage!);
         }
 
         /// <summary>
@@ -568,7 +568,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 return;
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage);
+            await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage!);
         }
 
         /// <summary>

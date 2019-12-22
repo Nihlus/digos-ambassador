@@ -124,8 +124,13 @@ namespace DIGOS.Ambassador.Behaviours
                 return;
             }
 
-            foreach (Match match in Pattern.Matches(message.Content))
+            foreach (Match? match in Pattern.Matches(message.Content))
             {
+                if (match is null)
+                {
+                    continue;
+                }
+
                 if (!ulong.TryParse(match.Groups["GuildId"].Value, out _) ||
                     !ulong.TryParse(match.Groups["ChannelId"].Value, out var channelId) ||
                     !ulong.TryParse(match.Groups["MessageId"].Value, out var messageId))
