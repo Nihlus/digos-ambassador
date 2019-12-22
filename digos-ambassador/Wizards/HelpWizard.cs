@@ -27,6 +27,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Kinks.Extensions;
@@ -109,17 +110,19 @@ namespace DIGOS.Ambassador.Wizards
         /// Initializes a new instance of the <see cref="HelpWizard"/> class.
         /// </summary>
         /// <param name="modules">The modules available in the bot.</param>
+        /// <param name="interactivityService">The interactivity service.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="help">The help service.</param>
         /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
         public HelpWizard
         (
             [NotNull, ItemNotNull] IReadOnlyList<ModuleInfo> modules,
+            [NotNull] InteractivityService interactivityService,
             [NotNull] UserFeedbackService feedback,
             [NotNull] HelpService help,
             [NotNull] IUser sourceUser
         )
-            : base(sourceUser)
+            : base(sourceUser, interactivityService)
         {
             _modules = modules;
             _feedback = feedback;

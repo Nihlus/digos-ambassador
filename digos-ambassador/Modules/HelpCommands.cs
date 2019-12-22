@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Modules
         public async Task HelpAsync()
         {
             var modules = _commands.Modules.Where(m => !m.IsSubmodule).ToList();
-            var helpWizard = new HelpWizard(modules, _feedback, _help, this.Context.User);
+            var helpWizard = new HelpWizard(modules, _interactive, _feedback, _help, this.Context.User);
 
             await _interactive.SendPrivateInteractiveMessageAndDeleteAsync
             (
@@ -121,7 +121,7 @@ namespace DIGOS.Ambassador.Modules
                     module = module.GetTopLevelModule();
                 }
 
-                var helpWizard = new HelpWizard(topLevelModules, _feedback, _help, this.Context.User);
+                var helpWizard = new HelpWizard(topLevelModules, _interactive, _feedback, _help, this.Context.User);
                 await helpWizard.OpenModule(module.Name);
                 await _interactive.SendPrivateInteractiveMessageAndDeleteAsync
                 (

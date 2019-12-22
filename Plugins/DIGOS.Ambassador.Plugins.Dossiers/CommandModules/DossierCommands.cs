@@ -89,6 +89,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 dossiers,
                 d => d.Title,

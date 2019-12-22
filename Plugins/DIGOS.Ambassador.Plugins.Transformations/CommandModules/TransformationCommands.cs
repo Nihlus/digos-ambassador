@@ -588,6 +588,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 availableSpecies,
                 s => $"{s.Name.Humanize(LetterCasing.Title)} ({s.Name})",
@@ -636,6 +637,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             var paginatedMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 parts,
                 b => b.Humanize(),
@@ -685,6 +687,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             var paginatedMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 parts,
                 b => b.Humanize(),
@@ -716,6 +719,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             var paginatedMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 parts,
                 b => b.Humanize(),
@@ -747,6 +751,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             var paginatedMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 parts,
                 b => b.Humanize(),

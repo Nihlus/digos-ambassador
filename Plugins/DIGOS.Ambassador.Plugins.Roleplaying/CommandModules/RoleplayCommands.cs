@@ -186,6 +186,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 roleplays,
                 r => r.Name,
@@ -233,6 +234,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 roleplays,
                 r => r.Name,

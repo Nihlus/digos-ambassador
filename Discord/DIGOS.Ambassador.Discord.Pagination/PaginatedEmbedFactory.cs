@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
 using Discord;
 using JetBrains.Annotations;
 
@@ -39,6 +40,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// Creates a simple paginated list from a collection of items.
         /// </summary>
         /// <param name="feedbackService">The user feedback service.</param>
+        /// <param name="interactivityService">The interactivity service.</param>
         /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
         /// <param name="items">The items.</param>
         /// <param name="pageBuilder">A function that builds a page for a single value in the collection.</param>
@@ -49,6 +51,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         public static async Task<PaginatedEmbed> PagesFromCollectionAsync<TItem>
         (
             UserFeedbackService feedbackService,
+            InteractivityService interactivityService,
             IUser sourceUser,
             IEnumerable<TItem> items,
             Func<EmbedBuilder, TItem, Task> pageBuilder,
@@ -59,7 +62,10 @@ namespace DIGOS.Ambassador.Discord.Pagination
             appearance ??= PaginatedAppearanceOptions.Default;
 
             var enumeratedItems = items.ToList();
-            var paginatedEmbed = new PaginatedEmbed(feedbackService, sourceUser) { Appearance = appearance };
+            var paginatedEmbed = new PaginatedEmbed(feedbackService, interactivityService, sourceUser)
+            {
+                Appearance = appearance
+            };
 
             IEnumerable<EmbedBuilder> pages;
             if (!enumeratedItems.Any())
@@ -90,6 +96,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// Creates a simple paginated list from a collection of items.
         /// </summary>
         /// <param name="feedbackService">The user feedback service.</param>
+        /// <param name="interactivityService">The interactivity service.</param>
         /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
         /// <param name="items">The items.</param>
         /// <param name="titleSelector">A function that selects the title for each field.</param>
@@ -101,6 +108,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         public static PaginatedEmbed SimpleFieldsFromCollection<TItem>
         (
             UserFeedbackService feedbackService,
+            InteractivityService interactivityService,
             IUser sourceUser,
             IEnumerable<TItem> items,
             Func<TItem, string> titleSelector,
@@ -112,7 +120,10 @@ namespace DIGOS.Ambassador.Discord.Pagination
             appearance ??= PaginatedAppearanceOptions.Default;
 
             var enumeratedItems = items.ToList();
-            var paginatedEmbed = new PaginatedEmbed(feedbackService, sourceUser) { Appearance = appearance };
+            var paginatedEmbed = new PaginatedEmbed(feedbackService, interactivityService, sourceUser)
+            {
+                Appearance = appearance
+            };
 
             IEnumerable<EmbedBuilder> pages;
             if (!enumeratedItems.Any())

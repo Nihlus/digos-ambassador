@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Discord;
 using Discord.WebSocket;
@@ -58,13 +59,15 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// Initializes a new instance of the <see cref="PaginatedMessage{T1,T2}"/> class.
         /// </summary>
         /// <param name="feedbackService">The user feedback service.</param>
+        /// <param name="interactivityService">The interactivity service.</param>
         /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
         protected PaginatedMessage
         (
             UserFeedbackService feedbackService,
+            InteractivityService interactivityService,
             IUser sourceUser
         )
-            : base(sourceUser)
+            : base(sourceUser, interactivityService)
         {
             this.Feedback = feedbackService;
             this.Appearance.Color = Color.DarkPurple;
@@ -139,6 +142,11 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <inheritdoc/>
         protected override async Task OnInteractionAddedAsync(SocketReaction reaction)
         {
+            if (this.Message is null || this.Channel is null)
+            {
+                return;
+            }
+
             if (!reaction.User.IsSpecified)
             {
                 // Ignore unspecified users

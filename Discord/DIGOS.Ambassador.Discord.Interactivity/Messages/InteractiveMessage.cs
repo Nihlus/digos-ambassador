@@ -35,7 +35,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
     public abstract class InteractiveMessage : IInteractiveMessage
     {
         /// <inheritdoc/>
-        public IUserMessage Message { get; private set; }
+        public IUserMessage? Message { get; private set; }
 
         /// <inheritdoc />
         public IUser SourceUser { get; }
@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// <summary>
         /// Gets the channel the message is in.
         /// </summary>
-        protected IMessageChannel Channel { get; private set; }
+        protected IMessageChannel? Channel { get; private set; }
 
         /// <summary>
         /// Gets the context of the message the interactive message wraps.
@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// <summary>
         /// Gets the interactivity service that manages this interactive message.
         /// </summary>
-        protected InteractivityService Interactivity { get; private set; }
+        protected InteractivityService Interactivity { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the message is in the process of getting deleted.
@@ -64,16 +64,16 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// Initializes a new instance of the <see cref="InteractiveMessage"/> class.
         /// </summary>
         /// <param name="sourceUser">The source user.</param>
-        protected InteractiveMessage(IUser sourceUser)
+        /// <param name="interactivityService">The interactivity service.</param>
+        protected InteractiveMessage(IUser sourceUser, InteractivityService interactivityService)
         {
+            this.Interactivity = interactivityService;
             this.SourceUser = sourceUser;
         }
 
         /// <inheritdoc/>
         public async Task SendAsync(InteractivityService service, IMessageChannel channel)
         {
-            this.Interactivity = service;
-
             this.Channel = channel;
             this.Message = await DisplayAsync(channel);
 

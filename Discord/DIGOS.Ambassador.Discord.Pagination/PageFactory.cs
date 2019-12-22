@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
 
             foreach (var field in enumeratedFields)
             {
-                var fieldContentLength = field.Name.Length + field.Value.ToString().Length;
+                var fieldContentLength = field.Name.Length + (field.Value.ToString()?.Length ?? 0);
 
                 if (currentPage.Fields.Count >= maxFieldsPerPage || (currentPage.Length + fieldContentLength >= 1300))
                 {

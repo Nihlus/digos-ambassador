@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
@@ -72,7 +71,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         public async Task<RetrieveEntityResult<IUserMessage>> GetNextMessageAsync
         (
             [NotNull] IMessageChannel channel,
-            [AllowNull] Func<IUserMessage, bool> filter = null,
+            Func<IUserMessage, bool>? filter = null,
             TimeSpan? timeout = null
         )
         {
@@ -93,7 +92,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
                     return Task.CompletedTask;
                 }
 
-                if (filter(userMessage))
+                if (filter!(userMessage))
                 {
                     messageTrigger.SetResult(userMessage);
                 }

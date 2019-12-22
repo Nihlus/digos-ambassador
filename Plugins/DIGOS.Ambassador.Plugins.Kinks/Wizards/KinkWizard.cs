@@ -26,6 +26,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Kinks.Extensions;
@@ -94,15 +95,17 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// Initializes a new instance of the <see cref="KinkWizard"/> class.
         /// </summary>
         /// <param name="feedback">The user feedback service.</param>
+        /// <param name="interactivityService">The interactivity service.</param>
         /// <param name="kinkService">The kink service.</param>
         /// <param name="targetUser">The target user.</param>
         public KinkWizard
         (
             [NotNull] UserFeedbackService feedback,
+            [NotNull] InteractivityService interactivityService,
             [NotNull] KinkService kinkService,
             [NotNull] IUser targetUser
         )
-            : base(targetUser)
+            : base(targetUser, interactivityService)
         {
             _feedback = feedback;
             _kinks = kinkService;

@@ -104,6 +104,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var paginatedEmbed = await PaginatedEmbedFactory.PagesFromCollectionAsync
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 bans,
                 async (eb, ban) =>

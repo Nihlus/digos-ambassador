@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
 using Discord;
 
 namespace DIGOS.Ambassador.Discord.Pagination
@@ -34,9 +35,15 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// Initializes a new instance of the <see cref="PaginatedEmbed"/> class.
         /// </summary>
         /// <param name="feedbackService">The feedback service.</param>
+        /// <param name="interactivityService">The interactivity service.</param>
         /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
-        public PaginatedEmbed(UserFeedbackService feedbackService, IUser sourceUser)
-            : base(feedbackService, sourceUser)
+        public PaginatedEmbed
+        (
+            UserFeedbackService feedbackService,
+            InteractivityService interactivityService,
+            IUser sourceUser
+        )
+            : base(feedbackService, interactivityService, sourceUser)
         {
         }
 

@@ -165,7 +165,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 description: description
             );
 
-            var paginatedEmbed = new PaginatedEmbed(_feedback, this.Context.User).WithPages
+            var paginatedEmbed = new PaginatedEmbed(_feedback, _interactivity, this.Context.User).WithPages
             (
                 paginatedEmbedPages.Select
                 (
@@ -279,7 +279,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 embeds.Add(embed);
             }
 
-            var paginatedEmbed = new PaginatedEmbed(_feedback, this.Context.User)
+            var paginatedEmbed = new PaginatedEmbed(_feedback, _interactivity, this.Context.User)
             {
                 Appearance =
                 {
@@ -527,6 +527,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 characters,
                 c => c.Name,
@@ -854,7 +855,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 return;
             }
 
-            var gallery = new PaginatedGallery(_feedback, this.Context.User).WithPages(character.Images);
+            var gallery = new PaginatedGallery(_feedback, _interactivity, this.Context.User)
+                .WithPages(character.Images);
 
             gallery.Appearance = new PaginatedAppearanceOptions
             {
@@ -888,6 +890,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 character.Images,
                 i => i.Name,

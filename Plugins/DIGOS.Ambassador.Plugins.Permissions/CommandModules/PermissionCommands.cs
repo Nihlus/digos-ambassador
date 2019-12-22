@@ -105,6 +105,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 availablePermissions,
                 p => p.FormatTitle(),
@@ -173,6 +174,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
                 _feedback,
+                _interactivity,
                 this.Context.User,
                 permissionInfos,
                 p => p.Title,
