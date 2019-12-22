@@ -12,7 +12,7 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <SolutionRoot>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)\))</SolutionRoot>
+        <SolutionDir>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)/))</SolutionDir>
     </PropertyGroup>
 
     <!-- NuGet-related properties -->
@@ -28,15 +28,15 @@
 
         <RepositoryUrl>https://github.com/Nihlus/digos-ambassador</RepositoryUrl>
         <RepositoryBranch>master</RepositoryBranch>
-        <PackageOutputPath>$(SolutionRoot)/nuget</PackageOutputPath>
+        <PackageOutputPath>$(SolutionDir)/nuget</PackageOutputPath>
         <PackageProjectUrl>https://github.com/Nihlus/digos-ambassador</PackageProjectUrl>
         <PackageTags>digos;discord;bot;lewd;modular;</PackageTags>
     </PropertyGroup>
 
     <!-- Code inspection properties -->
     <PropertyGroup>
-        <StyleCopRuleset>$(SolutionRoot)/stylecop.ruleset</StyleCopRuleset>
-        <StyleCopConfiguration>$(SolutionRoot)/stylecop.json</StyleCopConfiguration>
+        <StyleCopRuleset>$(SolutionDir)/stylecop.ruleset</StyleCopRuleset>
+        <StyleCopConfiguration>$(SolutionDir)/stylecop.json</StyleCopConfiguration>
 
         <Nullable>enable</Nullable>
 
@@ -101,11 +101,13 @@
     <!-- JetBrains Annotations -->
     <PropertyGroup>
         <DefineConstants>$(DefineConstants);JETBRAINS_ANNOTATIONS</DefineConstants>
+        <FodyWeavers>$(SolutionDir)/FodyWeavers.xml</FodyWeavers>
     </PropertyGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="$(SolutionRoot)/FodyWeavers.xml">
+        <AdditionalFiles Include="$(FodyWeavers)">
             <InProject>false</InProject>
+            <Link>FodyWeavers.xml</Link>
         </AdditionalFiles>
     </ItemGroup>
 
