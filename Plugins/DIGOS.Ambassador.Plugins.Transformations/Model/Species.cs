@@ -21,14 +21,11 @@
 //
 
 using System;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
-
-using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Model
 {
