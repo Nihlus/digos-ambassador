@@ -61,12 +61,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets the list of users that are allowed to transform the owner.
         /// </summary>
+        [NotMapped]
         public IEnumerable<User> Whitelist =>
             this.UserListing.Where(u => u.Type == ListingType.Whitelist).Select(u => u.User);
 
         /// <summary>
         /// Gets the list of users that are prohibited from transforming the owner.
         /// </summary>
+        [NotMapped]
         public IEnumerable<User> Blacklist =>
                 this.UserListing.Where(u => u.Type == ListingType.Blacklist).Select(u => u.User);
 
