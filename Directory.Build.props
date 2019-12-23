@@ -72,7 +72,6 @@
             CS8622;
             CS8625;
             CS8626;
-            CS8626;
             CS8629;
             CS8631;
             CS8633;
@@ -83,6 +82,9 @@
             CS8644;
             CS8645;
         </WarningsAsErrors>
+        <NoWarn>
+            CS8632;
+        </NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
