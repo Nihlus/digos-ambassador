@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
@@ -39,6 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the server the settings are relevant for.
         /// </summary>
+        [Required]
         public virtual Server Server { get; private set; } = null!;
 
         /// <summary>

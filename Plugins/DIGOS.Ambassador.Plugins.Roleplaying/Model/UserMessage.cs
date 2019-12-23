@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
 using Discord;
@@ -54,11 +55,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the author's nickname at the time of sending.
         /// </summary>
+        [Required]
         public string AuthorNickname { get; private set; } = null!;
 
         /// <summary>
         /// Gets the contents of the message.
         /// </summary>
+        [Required]
         public string Contents { get; internal set; } = null!;
 
         /// <summary>

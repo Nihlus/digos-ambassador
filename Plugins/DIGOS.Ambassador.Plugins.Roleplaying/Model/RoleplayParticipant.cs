@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
@@ -41,11 +42,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the roleplay that the user is a part of.
         /// </summary>
+        [Required]
         public virtual Roleplay Roleplay { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user that is part of the roleplay.
         /// </summary>
+        [Required]
         public virtual User User { get; private set; } = null!;
 
         /// <summary>

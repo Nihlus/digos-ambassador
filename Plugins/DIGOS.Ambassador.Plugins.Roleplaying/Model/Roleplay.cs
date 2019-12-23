@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -48,6 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         public long ServerID { get; private set; }
 
         /// <inheritdoc />
+        [Required]
         public virtual User Owner { get; set; } = null!;
 
         /// <summary>
@@ -82,11 +84,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
             = new List<RoleplayParticipant>();
 
         /// <inheritdoc />
+        [Required]
         public string Name { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the summary of the roleplay.
         /// </summary>
+        [Required]
         public string Summary { get; internal set; } = null!;
 
         /// <summary>
@@ -102,22 +106,26 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the users that have joined the roleplay.
         /// </summary>
+        [NotMapped]
         public IEnumerable<RoleplayParticipant> JoinedUsers =>
             this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Joined);
 
         /// <summary>
         /// Gets the users that have been kicked from the roleplay.
         /// </summary>
+        [NotMapped]
         public IEnumerable<RoleplayParticipant> KickedUsers =>
             this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Kicked);
 
         /// <summary>
         /// Gets the users that have been invited to the roleplay.
         /// </summary>
+        [NotMapped]
         public IEnumerable<RoleplayParticipant> InvitedUsers =>
             this.ParticipatingUsers.Where(p => p.Status == ParticipantStatus.Invited);
 
         /// <inheritdoc />
+        [NotMapped]
         public string EntityTypeDisplayName => nameof(Roleplay);
 
         /// <summary>
