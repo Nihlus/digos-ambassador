@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Core.Services
         /// <summary>
         /// Gets the base remote content URI.
         /// </summary>
-        private Uri BaseRemoteUri { get; }
+        public Uri BaseRemoteUri { get; }
 
         /// <summary>
         /// Gets the base remote content URI.
@@ -109,7 +109,7 @@ namespace DIGOS.Ambassador.Core.Services
             this.AmbyPortraitUri = new Uri(this.BaseRemoteContentUri, "Portraits/amby-irbynx-3.png");
             this.BrokenAmbyUri = new Uri(this.BaseRemoteContentUri, "Portraits/maintenance.png");
             this.BwehUri = new Uri(this.BaseRemoteContentUri, "Portraits/bweh.png");
-            this.PrivacyPolicyUri = new Uri(this.BaseRemoteContentUri, "PrivacyPolicy.pdf");
+            this.PrivacyPolicyUri = new Uri(this.BaseRemoteContentUri, "Privacy/PrivacyPolicy.pdf");
 
             this.DatabaseCredentialsPath = UPath.Combine(UPath.Root, "Database", "database.credentials");
         }
