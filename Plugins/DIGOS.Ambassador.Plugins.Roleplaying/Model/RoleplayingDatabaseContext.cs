@@ -53,5 +53,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
             : base(SchemaName, contextOptions)
         {
         }
+
+        /// <inheritdoc/>
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Roleplay>().HasMany(r => r.ParticipatingUsers).WithOne(pu => pu.Roleplay);
+            modelBuilder.Entity<RoleplayParticipant>().HasOne(rp => rp.User).WithMany();
+        }
     }
 }
