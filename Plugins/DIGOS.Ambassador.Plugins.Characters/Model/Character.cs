@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
@@ -46,9 +47,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         public long ServerID { get; private set; }
 
         /// <inheritdoc />
+        [Required]
         public virtual User Owner { get; set; } = null!;
 
         /// <inheritdoc />
+        [Required]
         public string Name { get; internal set; } = null!;
 
         /// <summary>
@@ -64,21 +67,25 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets a URL pointing to the character's avatar.
         /// </summary>
+        [Required]
         public string AvatarUrl { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the nickname that a user should have when playing as the character.
         /// </summary>
+        [Required]
         public string Nickname { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the character summary.
         /// </summary>
+        [Required]
         public string Summary { get; internal set; } = null!;
 
         /// <summary>
         /// Gets the full description of the character.
         /// </summary>
+        [Required]
         public string Description { get; internal set; } = null!;
 
         /// <summary>
@@ -94,6 +101,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets the preferred pronoun family of the character.
         /// </summary>
+        [Required]
         public string PronounProviderFamily { get; internal set; } = null!;
 
         /// <summary>
@@ -102,11 +110,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         public virtual CharacterRole? Role { get; internal set; }
 
         /// <inheritdoc />
+        [NotMapped]
         public string EntityTypeDisplayName => nameof(Character);
 
         /// <summary>
         /// Gets a value indicating whether the character has a role.
         /// </summary>
+        [NotMapped]
         public bool HasRole => !(this.Role is null);
 
         /// <summary>

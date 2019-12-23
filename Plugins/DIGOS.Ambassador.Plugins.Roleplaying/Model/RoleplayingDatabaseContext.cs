@@ -57,6 +57,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Roleplay>().HasMany(r => r.ParticipatingUsers).WithOne(pu => pu.Roleplay);
             modelBuilder.Entity<RoleplayParticipant>().HasOne(rp => rp.User).WithMany();
         }

@@ -19,6 +19,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasDefaultSchema("RoleplayModule")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
                 .HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
 
@@ -49,9 +50,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long?>("ServerID");
+                    b.Property<long>("ServerID");
 
-                    b.Property<long?>("UserID");
+                    b.Property<long>("UserID");
 
                     b.HasKey("ID");
 
@@ -67,7 +68,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Bio");
+                    b.Property<string>("Bio")
+                        .IsRequired();
 
                     b.Property<long>("DiscordID");
 
@@ -95,13 +97,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
 
                     b.Property<DateTime?>("LastUpdated");
 
-                    b.Property<string>("Name");
+                    b.Property<string>("Name")
+                        .IsRequired();
 
                     b.Property<long>("OwnerID");
 
                     b.Property<long>("ServerID");
 
-                    b.Property<string>("Summary");
+                    b.Property<string>("Summary")
+                        .IsRequired();
 
                     b.HasKey("ID");
 
@@ -155,9 +159,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
 
                     b.Property<long>("AuthorDiscordID");
 
-                    b.Property<string>("AuthorNickname");
+                    b.Property<string>("AuthorNickname")
+                        .IsRequired();
 
-                    b.Property<string>("Contents");
+                    b.Property<string>("Contents")
+                        .IsRequired();
 
                     b.Property<long>("DiscordMessageID");
 
@@ -176,11 +182,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany("KnownUsers")
-                        .HasForeignKey("ServerID");
+                        .HasForeignKey("ServerID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Users.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserID");
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Roleplaying.Model.Roleplay", b =>

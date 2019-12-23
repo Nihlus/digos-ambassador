@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
@@ -45,6 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the component's current transformation.
         /// </summary>
+        [Required]
         public virtual Transformation Transformation { get; internal set; } = null!;
 
         /// <summary>
@@ -55,6 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <summary>
         /// Gets the base colour of the component.
         /// </summary>
+        [Required]
         public virtual Colour BaseColour { get; internal set; } = null!;
 
         /// <summary>

@@ -48,23 +48,25 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets or sets the bodypart that this transformation affects.
         /// </summary>
-        [Required]
         public Bodypart Part { get; set; }
 
         /// <summary>
         /// Gets or sets the species that this transformation belongs to.
         /// </summary>
+        [Required]
         public virtual Species Species { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets a short description of the transformation.
         /// </summary>
+        [Required]
         public string Description { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the default base colour of the transformation.
         /// </summary>
         [YamlMember(Alias = "default_base_colour")]
+        [Required]
         public virtual Colour DefaultBaseColour { get; set; } = null!;
 
         /// <summary>
@@ -89,12 +91,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// Gets or sets the text of the message when an existing bodypart shifts into this one.
         /// </summary>
         [YamlMember(Alias = "shift_message")]
+        [Required]
         public string ShiftMessage { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets the text of the message when this bodypart is added where none existed before.
         /// </summary>
         [YamlMember(Alias = "grow_message")]
+        [Required]
         public string GrowMessage { get; set; } = null!;
 
         /// <summary>
@@ -113,6 +117,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// Gets or sets the text of the description when the species of the complementary bodyparts don't match.
         /// </summary>
         [YamlMember(Alias = "single_description")]
+        [Required]
         public string SingleDescription { get; set; } = null!;
 
         /// <summary>

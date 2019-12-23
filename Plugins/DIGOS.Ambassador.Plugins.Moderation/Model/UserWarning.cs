@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
@@ -43,6 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the reason for the warning.
         /// </summary>
+        [Required]
         public string Reason { get; internal set; } = null!;
 
         /// <summary>

@@ -21,6 +21,7 @@
 //
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using DIGOS.Ambassador.Core.Database.Entities;
@@ -41,6 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <summary>
         /// Gets the user that owns this protection data.
         /// </summary>
+        [Required]
         public virtual User User { get; private set; } = null!;
 
         /// <summary>
