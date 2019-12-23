@@ -10,6 +10,12 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Content Include="Content\**\*.*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord\DIGOS.Ambassador.Discord.csproj" />
