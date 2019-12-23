@@ -7,10 +7,6 @@
         </Description>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <TargetFrameworks>netcoreapp3.0;netstandard2.0</TargetFrameworks>
-    </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Discord.Net" Version="2.1.1" />
         <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.6.1" />

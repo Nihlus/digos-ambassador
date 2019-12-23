@@ -4,10 +4,6 @@
         <IsPackable>false</IsPackable>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <TargetFrameworks>netcoreapp3.0;netstandard2.0</TargetFrameworks>
-    </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
         <PackageReference Include="MockQueryable.Moq" Version="1.1.0" />

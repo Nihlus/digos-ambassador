@@ -5,10 +5,6 @@
         <Description>Provides a simple permissions system.</Description>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <TargetFrameworks>netcoreapp3.0;netstandard2.0</TargetFrameworks>
-    </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Discord.Net" Version="2.1.1" />
     </ItemGroup>

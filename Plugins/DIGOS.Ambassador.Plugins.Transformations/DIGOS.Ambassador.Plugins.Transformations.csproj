@@ -5,10 +5,6 @@
         <Description>Provides dynamic, granular transformations for user characters.</Description>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <TargetFrameworks>netcoreapp3.0;netstandard2.0</TargetFrameworks>
-    </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Discord.Net" Version="2.1.1" />
         <PackageReference Include="YamlDotNet" Version="8.0.0" />

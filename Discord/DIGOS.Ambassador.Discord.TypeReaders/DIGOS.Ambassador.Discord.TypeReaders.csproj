@@ -5,10 +5,6 @@
         <Description>Additional generic type readers for Discord.</Description>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <TargetFrameworks>netcoreapp3.0;netstandard2.0</TargetFrameworks>
-    </PropertyGroup>
-
     <ItemGroup>
         <PackageReference Include="Humanizer" Version="2.7.9" />
         <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
