@@ -24,11 +24,11 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Behaviours;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.Behaviours;
 
 namespace DIGOS.Ambassador.Core
 {

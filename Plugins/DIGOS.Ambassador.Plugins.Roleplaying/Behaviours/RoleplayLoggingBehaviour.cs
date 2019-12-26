@@ -23,7 +23,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Behaviours;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Discord;
 using Discord.Commands;
@@ -32,6 +31,7 @@ using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.Behaviours;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 {
@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 var guild = this.Client.GetGuild((ulong)activeRoleplay.ServerID);
 
                 // ReSharper disable once PossibleInvalidOperationException
-                var channel = guild.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID!.Value);
+                var channel = guild?.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID!.Value);
                 if (channel is null)
                 {
                     continue;

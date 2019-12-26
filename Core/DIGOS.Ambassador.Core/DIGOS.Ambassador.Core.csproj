@@ -6,12 +6,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Remora.Discord.Behaviours" Version="1.0.0" />
         <PackageReference Include="Remora.Results" Version="1.0.3" />
         <PackageReference Include="Zio" Version="0.7.4" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Behaviours\DIGOS.Ambassador.Discord.Behaviours.csproj" />
     </ItemGroup>
 
 </Project>

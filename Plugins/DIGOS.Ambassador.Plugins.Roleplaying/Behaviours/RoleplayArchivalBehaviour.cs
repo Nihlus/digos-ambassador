@@ -23,7 +23,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Behaviours;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
@@ -37,6 +36,7 @@ using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.Behaviours;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 {

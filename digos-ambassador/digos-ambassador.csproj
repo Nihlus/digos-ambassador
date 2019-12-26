@@ -32,11 +32,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="3.0.3" />
+    <PackageReference Include="Remora.Discord.Commands.Behaviours" Version="3.0.0" />
     <PackageReference Include="Remora.Plugins" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Discord\DIGOS.Ambassador.Discord.Behaviours\DIGOS.Ambassador.Discord.Behaviours.csproj" />
     <ProjectReference Include="..\Discord\DIGOS.Ambassador.Discord\DIGOS.Ambassador.Discord.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Characters\DIGOS.Ambassador.Plugins.Characters.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />

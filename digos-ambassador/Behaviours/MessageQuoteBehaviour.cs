@@ -24,7 +24,6 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Behaviours;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using Discord;
@@ -36,6 +35,7 @@ using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.Behaviours;
 
 namespace DIGOS.Ambassador.Behaviours
 {

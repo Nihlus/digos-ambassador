@@ -24,7 +24,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Behaviours;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
@@ -36,6 +35,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.Behaviours;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 {

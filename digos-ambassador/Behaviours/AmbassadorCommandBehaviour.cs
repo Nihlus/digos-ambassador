@@ -1,5 +1,5 @@
 //
-//  CommandBehaviour.cs
+//  AmbassadorCommandBehaviour.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,13 +21,13 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Behaviours;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
@@ -38,26 +38,25 @@ using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
 
-using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Remora.Discord.Commands.Behaviours;
 
 namespace DIGOS.Ambassador.Behaviours
 {
     /// <summary>
     /// Acts as a behaviour for invoking commands, and logging their results.
     /// </summary>
-    public class CommandBehaviour : ClientEventBehaviour<CommandBehaviour>
+    public class AmbassadorCommandBehaviour : CommandBehaviour
     {
         private readonly UserFeedbackService _feedback;
         private readonly PrivacyService _privacy;
         private readonly ContentService _content;
-        private readonly CommandService _commands;
         private readonly HelpService _help;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommandBehaviour"/> class.
+        /// Initializes a new instance of the <see cref="AmbassadorCommandBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
         /// <param name="serviceScope">The service scope in use.</param>
@@ -67,155 +66,42 @@ namespace DIGOS.Ambassador.Behaviours
         /// <param name="content">The content service.</param>
         /// <param name="commands">The command service.</param>
         /// <param name="help">The help service.</param>
-        public CommandBehaviour
+        public AmbassadorCommandBehaviour
         (
             DiscordSocketClient client,
-            [NotNull] IServiceScope serviceScope,
-            [NotNull] ILogger<CommandBehaviour> logger,
+            IServiceScope serviceScope,
+            ILogger<AmbassadorCommandBehaviour> logger,
             UserFeedbackService feedback,
             PrivacyService privacy,
             ContentService content,
             CommandService commands,
             HelpService help
         )
-            : base(client, serviceScope, logger)
+            : base(client, serviceScope, logger, commands)
         {
             _feedback = feedback;
             _privacy = privacy;
             _content = content;
-            _commands = commands;
             _help = help;
         }
 
         /// <inheritdoc />
-        protected override async Task MessageUpdated
-        (
-            Cacheable<IMessage, ulong> oldMessage,
-            SocketMessage? updatedMessage,
-            ISocketMessageChannel messageChannel
-        )
+        protected override async Task ConfigureFiltersAsync(List<Func<SocketCommandContext, Task<bool>>> commandFilters)
         {
-            if (updatedMessage is null)
-            {
-                return;
-            }
+            // Include the base filters
+            await base.ConfigureFiltersAsync(commandFilters);
 
-            // Ignore all changes except text changes
-            var isTextUpdate = updatedMessage.EditedTimestamp.HasValue &&
-                               updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
-
-            if (!isTextUpdate)
-            {
-                return;
-            }
-
-            await MessageReceived(updatedMessage);
+            commandFilters.Add(HasConsentedOrCommandDoesNotRequireConsentAsync);
         }
 
         /// <inheritdoc />
-        protected override async Task MessageReceived(SocketMessage arg)
-        {
-            if (!(arg is SocketUserMessage message))
-            {
-                return;
-            }
-
-            if (arg.Author.IsBot || arg.Author.IsWebhook)
-            {
-                return;
-            }
-
-            var argumentPos = 0;
-            if (!(message.HasCharPrefix('!', ref argumentPos) || message.HasMentionPrefix(this.Client.CurrentUser, ref argumentPos)))
-            {
-                return;
-            }
-
-            if (message.Content.Length < 2)
-            {
-                return;
-            }
-
-            if (!message.Content.Any(char.IsLetterOrDigit))
-            {
-                return;
-            }
-
-            var context = new SocketCommandContext(this.Client, message);
-
-            // Perform first-time user checks, making sure the user has their default permissions, has consented, etc
-            if (!await _privacy.HasUserConsentedAsync(context.User) && !IsPrivacyExemptCommand(context, argumentPos))
-            {
-                // Ask for consent
-                var userDMChannel = await arg.Author.GetOrCreateDMChannelAsync();
-                var result = await _privacy.RequestConsentAsync(userDMChannel);
-                if (result.IsSuccess)
-                {
-                    return;
-                }
-
-                const string response = "It seems like you're not accepting DMs from non-friends. Please enable " +
-                                        "this, so you can read the bot's privacy policy and consent to data " +
-                                        "handling and processing.";
-
-                await _feedback.SendWarningAsync(context, response);
-
-                return;
-            }
-
-            // Create a service scope for this command
-            using (var scope = this.Services.CreateScope())
-            {
-                var result = await _commands.ExecuteAsync(context, argumentPos, scope.ServiceProvider);
-                await HandleCommandResultAsync(context, result, argumentPos);
-            }
-        }
-
-        /// <summary>
-        /// Determines whether the currently running command is exempt from user consent.
-        /// </summary>
-        /// <param name="context">The command context.</param>
-        /// <param name="argumentPos">The position in the message where the command begins.</param>
-        /// <returns>true if the command is exempt from consent; otherwise, false.</returns>
-        private bool IsPrivacyExemptCommand(ICommandContext context, int argumentPos)
-        {
-            // We need to gather consent from the user
-            var commandSearchResult = _commands.Search(context, argumentPos);
-            if (!commandSearchResult.IsSuccess)
-            {
-                return false;
-            }
-
-            // Some command we recognize as being exempt from the privacy regulations
-            // (mostly privacy commands) - if this is one of them, just run it
-            var potentialPrivacyCommand = commandSearchResult.Commands.FirstOrDefault().Command;
-            if (potentialPrivacyCommand.Attributes.Any(a => a is PrivacyExemptAttribute))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Handles the result of a command, alerting the user if errors occurred.
-        /// </summary>
-        /// <param name="context">The context of the command.</param>
-        /// <param name="result">The result of the command.</param>
-        /// <param name="argumentPos">The position in the message string where the command starts.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task HandleCommandResultAsync
+        protected override async Task OnCommandFailedAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] IResult result,
-            int argumentPos
+            SocketCommandContext context,
+            int commandStart,
+            ExecuteResult result
         )
         {
-            if (result.IsSuccess)
-            {
-                return;
-            }
-
             switch (result.Error)
             {
                 case CommandError.Exception:
@@ -247,7 +133,7 @@ namespace DIGOS.Ambassador.Behaviours
 
                         await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
 
-                        var searchResult = _commands.Search(context, argumentPos);
+                        var searchResult = this.Commands.Search(context, commandStart);
                         if (searchResult.Commands.Any())
                         {
                             await userDMChannel.SendMessageAsync
@@ -268,11 +154,69 @@ namespace DIGOS.Ambassador.Behaviours
 
                     break;
                 }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
             }
+        }
+
+        /// <summary>
+        /// Determines whether or not the user has consented to data storage and handling under the GDPR, or if the
+        /// command that is being executed is exempt from GDPR considerations.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <returns>true if the user has consented or the command does not require consent; otherwise, false.</returns>
+        private async Task<bool> HasConsentedOrCommandDoesNotRequireConsentAsync([NotNull] SocketCommandContext context)
+        {
+            // Find the argument pos
+            if (!FindCommandStartPosition(context.Message, out var argumentPos))
+            {
+                return true;
+            }
+
+            if (await _privacy.HasUserConsentedAsync(context.User) || IsPrivacyExemptCommand(context, argumentPos))
+            {
+                return true;
+            }
+
+            // Ask for consent
+            var userDMChannel = await context.User.GetOrCreateDMChannelAsync();
+            var result = await _privacy.RequestConsentAsync(userDMChannel);
+            if (result.IsSuccess)
+            {
+                return false;
+            }
+
+            const string response = "It seems like you're not accepting DMs from non-friends. Please enable " +
+                                    "this, so you can read the bot's privacy policy and consent to data " +
+                                    "handling and processing.";
+
+            await _feedback.SendWarningAsync(context, response);
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the currently running command is exempt from user consent.
+        /// </summary>
+        /// <param name="context">The command context.</param>
+        /// <param name="argumentPos">The position in the message where the command begins.</param>
+        /// <returns>true if the command is exempt from consent; otherwise, false.</returns>
+        private bool IsPrivacyExemptCommand(ICommandContext context, int argumentPos)
+        {
+            // We need to gather consent from the user
+            var commandSearchResult = this.Commands.Search(context, argumentPos);
+            if (!commandSearchResult.IsSuccess)
+            {
+                return false;
+            }
+
+            // Some command we recognize as being exempt from the privacy regulations
+            // (mostly privacy commands) - if this is one of them, just run it
+            var potentialPrivacyCommand = commandSearchResult.Commands.FirstOrDefault().Command;
+            if (potentialPrivacyCommand.Attributes.Any(a => a is PrivacyExemptAttribute))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -285,12 +229,11 @@ namespace DIGOS.Ambassador.Behaviours
         private async Task HandleInternalErrorAsync
         (
             [NotNull] ICommandContext context,
-            IResult result
+            ExecuteResult result
         )
         {
             // Log the exception for later debugging purposes
-            var executeResult = (ExecuteResult)result;
-            this.Log.LogError(executeResult.Exception.ToString());
+            this.Log.LogError(result.Exception.ToString());
 
             // Alert the user, explain what happened, and ask them to make a bug report.
             var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
@@ -329,46 +272,44 @@ namespace DIGOS.Ambassador.Behaviours
                 reportEmbed.WithTitle("Click here to create a new issue");
                 reportEmbed.WithUrl(_content.AutomaticBugReportCreationUri.ToString());
 
-                using (var ms = new MemoryStream())
+                using var ms = new MemoryStream();
+                var now = DateTime.UtcNow;
+
+                using (var sw = new StreamWriter(ms, Encoding.Default, 1024, true))
                 {
-                    var now = DateTime.UtcNow;
+                    await sw.WriteLineAsync("Automatic bug report");
+                    await sw.WriteLineAsync("====================");
+                    await sw.WriteLineAsync();
+                    await sw.WriteLineAsync($"Generated at: {now}");
 
-                    using (var sw = new StreamWriter(ms, Encoding.Default, 1024, true))
+                    var entryAssembly = Assembly.GetEntryAssembly();
+                    if (!(entryAssembly is null))
                     {
-                        await sw.WriteLineAsync("Automatic bug report");
-                        await sw.WriteLineAsync("====================");
-                        await sw.WriteLineAsync();
-                        await sw.WriteLineAsync($"Generated at: {now}");
-
-                        var entryAssembly = Assembly.GetEntryAssembly();
-                        if (!(entryAssembly is null))
-                        {
-                            await sw.WriteLineAsync($"Bot version: {entryAssembly.GetName().Version}");
-                        }
-
-                        await sw.WriteLineAsync($"Command message link: {context.Message.GetJumpUrl()}");
-                        await sw.WriteLineAsync
-                        (
-                            $"Ran by: {context.User.Username}#{context.User.Discriminator} ({context.User.Id})"
-                        );
-                        await sw.WriteLineAsync
-                        (
-                            $"In: {(context.Guild is null ? "DM" : $"{context.Guild.Name} ({context.Guild.Id})")}"
-                        );
-                        await sw.WriteLineAsync($"Full command: {context.Message.Content}");
-                        await sw.WriteLineAsync();
-                        await sw.WriteLineAsync("### Stack Trace");
-                        await sw.WriteLineAsync(executeResult.Exception.ToString());
+                        await sw.WriteLineAsync($"Bot version: {entryAssembly.GetName().Version}");
                     }
 
-                    // Rewind the stream before passing it along
-                    ms.Position = 0;
-                    await userDMChannel.SendMessageAsync(string.Empty, false, eb.Build());
-
-                    var date = now.ToShortDateString();
-                    var time = now.ToShortTimeString();
-                    await userDMChannel.SendFileAsync(ms, $"bug-report-{date}-{time}.md", string.Empty, false, reportEmbed.Build());
+                    await sw.WriteLineAsync($"Command message link: {context.Message.GetJumpUrl()}");
+                    await sw.WriteLineAsync
+                    (
+                        $"Ran by: {context.User.Username}#{context.User.Discriminator} ({context.User.Id})"
+                    );
+                    await sw.WriteLineAsync
+                    (
+                        $"In: {(context.Guild is null ? "DM" : $"{context.Guild.Name} ({context.Guild.Id})")}"
+                    );
+                    await sw.WriteLineAsync($"Full command: {context.Message.Content}");
+                    await sw.WriteLineAsync();
+                    await sw.WriteLineAsync("### Stack Trace");
+                    await sw.WriteLineAsync(result.Exception.ToString());
                 }
+
+                // Rewind the stream before passing it along
+                ms.Position = 0;
+                await userDMChannel.SendMessageAsync(string.Empty, false, eb.Build());
+
+                var date = now.ToShortDateString();
+                var time = now.ToShortTimeString();
+                await userDMChannel.SendFileAsync(ms, $"bug-report-{date}-{time}.md", string.Empty, false, reportEmbed.Build());
             }
             catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
             {
