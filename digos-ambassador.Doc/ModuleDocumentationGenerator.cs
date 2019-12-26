@@ -27,12 +27,12 @@ using System.Text;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Doc.Extensions;
-using DIGOS.Ambassador.Doc.Nodes;
 using DIGOS.Ambassador.Doc.Reflection;
 using Humanizer;
 using JetBrains.Annotations;
 using Mono.Cecil;
-using static DIGOS.Ambassador.Doc.Nodes.EmphasisType;
+using Remora.Markdown;
+using static Remora.Markdown.EmphasisType;
 
 namespace DIGOS.Ambassador.Doc
 {
