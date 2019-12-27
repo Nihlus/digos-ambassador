@@ -49,12 +49,13 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <DocGeneratorAssembly>$(ProjectDir)..\digos-ambassador.Doc\bin\Debug\netcoreapp2.2\DIGOS.Ambassador.Doc.dll</DocGeneratorAssembly>
+    <DocGeneratorAssembly>$(SolutionDir)\digos-ambassador.Doc\bin\Debug\netcoreapp3.0\DIGOS.Ambassador.Doc.dll</DocGeneratorAssembly>
     <DocGenerator>dotnet $(DocGeneratorAssembly)</DocGenerator>
   </PropertyGroup>
 
   <Target Name="GenerateDocs" AfterTargets="PostBuildEvent" Condition="Exists('$(DocGeneratorAssembly)')">
-    <Exec Command="$(DocGenerator) --assemblies $(OutputPath)$(AssemblyName)$(TargetExt) $(OutputPath)*.Plugins.*.dll --output $(ProjectDir)../docs" ContinueOnError="true" />
+    <Message Text="Generating module documentation..." Importance="normal" />
+    <Exec Command="$(DocGenerator) --assemblies $(OutputPath)$(AssemblyName)$(TargetExt) $(OutputPath)*.Plugins.*.dll --output $(SolutionDir)/docs" ContinueOnError="true" />
   </Target>
 
 </Project>
