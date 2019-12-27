@@ -324,7 +324,7 @@ namespace DIGOS.Ambassador.Doc
                 exampleBuilder.Append(" ");
 
                 var typeDefinition = parameter.ParameterType.Resolve();
-                if (typeDefinition.Name.StartsWith("Nullable") && typeDefinition.HasGenericParameters)
+                if (parameter.ParameterType.Name.StartsWith("Nullable") && parameter.ParameterType.IsGenericInstance)
                 {
                     var genericInstance = (GenericInstanceType)parameter.ParameterType;
                     typeDefinition = genericInstance.GenericArguments.First().Resolve();
@@ -425,9 +425,16 @@ namespace DIGOS.Ambassador.Doc
 
             foreach (var parameter in command.Parameters)
             {
+                var typeDefinition = parameter.ParameterType;
+                if (typeDefinition.Name.StartsWith("Nullable") && typeDefinition.IsGenericInstance)
+                {
+                    var genericInstance = (GenericInstanceType)parameter.ParameterType;
+                    typeDefinition = genericInstance.GenericArguments.First().Resolve();
+                }
+
                 var row = new MarkdownTableRow()
                     .AppendCell(new MarkdownText(parameter.Name))
-                    .AppendCell(new MarkdownText(parameter.ParameterType.Humanize()))
+                    .AppendCell(new MarkdownText(typeDefinition.Humanize()))
                     .AppendCell(new MarkdownInlineCode(parameter.IsOptional ? "yes" : "no"));
 
                 parameterTable.AppendRow(row);
