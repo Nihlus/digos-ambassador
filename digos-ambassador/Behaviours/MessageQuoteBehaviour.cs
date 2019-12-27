@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Behaviours
                 return;
             }
 
-            if (arg.Author.IsBot || arg.Author.IsWebhook)
+            if ((arg.Author.IsBot && !arg.Author.IsMe(this.Client)) || arg.Author.IsWebhook)
             {
                 return;
             }
