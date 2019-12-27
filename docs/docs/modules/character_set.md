@@ -6,7 +6,7 @@ These commands are prefixed with `character set`. You can also use `char set` or
 ## Commands
 ### *name*
 #### Overloads
-**`character set name`**
+**`!character set name "placeholder" "placeholder"`**
 
 Sets the name of a character.
 
@@ -19,7 +19,7 @@ Sets the name of a character.
 
 ### *avatar*
 #### Overloads
-**`character set avatar`**
+**`!character set avatar "placeholder" "placeholder"`**
 
 Sets the avatar of a character. You can attach an image instead of passing a url as a parameter.
 
@@ -32,7 +32,7 @@ Sets the avatar of a character. You can attach an image instead of passing a url
 
 ### *nickname*
 #### Overloads
-**`character set nickname` (or `character set nick`)**
+**`!character set nickname "placeholder" "placeholder"` (or `character set nick`)**
 
 Sets the nickname that the user should have when the character is active.
 
@@ -45,7 +45,7 @@ Sets the nickname that the user should have when the character is active.
 
 ### *summary*
 #### Overloads
-**`character set summary`**
+**`!character set summary "placeholder" "placeholder"`**
 
 Sets the summary of a character.
 
@@ -58,7 +58,7 @@ Sets the summary of a character.
 
 ### *description*
 #### Overloads
-**`character set description` (or `character set desc`)**
+**`!character set description "placeholder" "placeholder"` (or `character set desc`)**
 
 Sets the description of a character. You can attach a plaintext document instead of passing the contents as a parameter.
 
@@ -71,7 +71,7 @@ Sets the description of a character. You can attach a plaintext document instead
 
 ### *nsfw*
 #### Overloads
-**`character set nsfw`**
+**`!character set nsfw "placeholder" true`**
 
 Sets whether or not a character is NSFW.
 
@@ -84,7 +84,7 @@ Sets whether or not a character is NSFW.
 
 ### *pronoun*
 #### Overloads
-**`character set pronoun` (or `character set pronouns`)**
+**`!character set pronoun "placeholder" "placeholder"` (or `character set pronouns`)**
 
 Sets the preferred pronoun of a character.
 
@@ -97,7 +97,7 @@ Sets the preferred pronoun of a character.
 
 ### *role*
 #### Overloads
-**`character set role`**
+**`!character set role "placeholder" "placeholder"`**
 
 Sets the given character's display role.
 
@@ -110,11 +110,11 @@ Sets the given character's display role.
 
 ### *default*
 #### Overloads
-**`character set default`**
+**`!character set default`**
 
 Sets your default form to your current character.
 
-**`character set default`**
+**`!character set default "placeholder"`**
 
 Sets your default form to the given character.
 

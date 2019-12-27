@@ -11,7 +11,7 @@ Note-related commands, such as viewing or editing info about a specific note.
 ## Commands
 ### *list*
 #### Overloads
-**`note list`**
+**`!note list "placeholder"`**
 
 Lists the notes attached to the given user.
 
@@ -23,7 +23,7 @@ Lists the notes attached to the given user.
 
 ### *add*
 #### Overloads
-**`note add`**
+**`!note add "placeholder" "placeholder"`**
 
 Adds a note to the given user.
 
@@ -36,7 +36,7 @@ Adds a note to the given user.
 
 ### *delete*
 #### Overloads
-**`note delete`**
+**`!note delete 10`**
 
 Deletes the given note.
 

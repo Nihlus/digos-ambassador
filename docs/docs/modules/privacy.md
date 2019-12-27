@@ -8,7 +8,7 @@ Privacy-related commands (data storage, deleting requests, data protection, priv
 ## Commands
 ### *policy*
 #### Overloads
-**`privacy policy`**
+**`!privacy policy`**
 
 Requests a copy of the privacy policy.
 
@@ -16,7 +16,7 @@ Requests a copy of the privacy policy.
 
 ### *grant-consent*
 #### Overloads
-**`privacy grant-consent`**
+**`!privacy grant-consent`**
 
 Grants consent to store user data.
 
@@ -24,7 +24,7 @@ Grants consent to store user data.
 
 ### *revoke-consent*
 #### Overloads
-**`privacy revoke-consent`**
+**`!privacy revoke-consent`**
 
 Revokes consent to store user data.
 
@@ -32,7 +32,7 @@ Revokes consent to store user data.
 
 ### *contact*
 #### Overloads
-**`privacy contact`**
+**`!privacy contact`**
 
 Displays contact information for the privacy contact person.
 

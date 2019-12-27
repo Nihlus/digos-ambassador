@@ -11,7 +11,7 @@ Server-related commands, such as viewing or editing info about a specific server
 ## Commands
 ### *settings*
 #### Overloads
-**`moderation server settings`**
+**`!moderation server settings`**
 
 Shows the server's moderation settings.
 

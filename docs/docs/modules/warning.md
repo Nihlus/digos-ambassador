@@ -11,7 +11,7 @@ Warning-related commands, such as viewing or editing info about a specific warni
 ## Commands
 ### *list*
 #### Overloads
-**`warning list`**
+**`!warning list "placeholder"`**
 
 Lists the warnings attached to the given user.
 
@@ -23,7 +23,7 @@ Lists the warnings attached to the given user.
 
 ### *warning*
 #### Overloads
-**`warning`**
+**`!warning "placeholder" "placeholder" 5m`**
 
 Adds a warning to the given user.
 
@@ -31,13 +31,13 @@ Adds a warning to the given user.
 | --- | --- | --- |
 | user | IGuildUser | `no` |
 | content | string | `no` |
-| expiresAfter | Nullable`1 | `yes` |
+| expiresAfter | TimeSpan | `yes` |
 
 ---
 
 ### *delete*
 #### Overloads
-**`warning delete`**
+**`!warning delete 10`**
 
 Deletes the given warning.
 

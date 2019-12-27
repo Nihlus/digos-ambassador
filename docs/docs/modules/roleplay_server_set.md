@@ -6,7 +6,7 @@ These commands are prefixed with `roleplay server set`. You can also use `rp ser
 ## Commands
 ### *roleplay-category*
 #### Overloads
-**`roleplay server set roleplay-category`**
+**`!roleplay server set roleplay-category "placeholder"`**
 
 Sets the channel category to use for dedicated roleplays.
 
@@ -18,7 +18,7 @@ Sets the channel category to use for dedicated roleplays.
 
 ### *archive-channel*
 #### Overloads
-**`roleplay server set archive-channel`**
+**`!roleplay server set archive-channel "placeholder"`**
 
 Sets the channel to use for archival of roleplays.
 

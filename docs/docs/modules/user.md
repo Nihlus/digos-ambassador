@@ -11,11 +11,11 @@ User-related commands, such as viewing or editing info about a specific user.
 ## Commands
 ### *info*
 #### Overloads
-**`user info`**
+**`!user info`**
 
 Shows known information about the invoking user.
 
-**`user info`**
+**`!user info "placeholder"`**
 
 Shows known information about the target user.
 

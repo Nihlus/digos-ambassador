@@ -11,7 +11,7 @@ Commands for viewing, adding, and editing dossier entries.
 ## Commands
 ### *list*
 #### Overloads
-**`dossier list`**
+**`!dossier list`**
 
 Lists the available dossiers.
 
@@ -19,7 +19,7 @@ Lists the available dossiers.
 
 ### *view*
 #### Overloads
-**`dossier view` (or `dossier show`)**
+**`!dossier view "placeholder"` (or `dossier show`)**
 
 Views the named dossier.
 
@@ -31,7 +31,7 @@ Views the named dossier.
 
 ### *add*
 #### Overloads
-**`dossier add` (or `dossier create`)**
+**`!dossier add "placeholder" "placeholder"` (or `dossier create`)**
 
 Adds a new dossier with the given title and summary. A PDF with the full dossier can be attached.
 
@@ -44,7 +44,7 @@ Adds a new dossier with the given title and summary. A PDF with the full dossier
 
 ### *remove*
 #### Overloads
-**`dossier remove` (or `dossier delete`)**
+**`!dossier remove "placeholder"` (or `dossier delete`)**
 
 Removes the dossier with the given title.
 

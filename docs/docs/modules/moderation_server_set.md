@@ -6,7 +6,7 @@ These commands are prefixed with `moderation server set`. You can also use `mod 
 ## Commands
 ### *moderation-log-channel*
 #### Overloads
-**`moderation server set moderation-log-channel`**
+**`!moderation server set moderation-log-channel "placeholder"`**
 
 Sets the moderation log channel.
 
@@ -18,7 +18,7 @@ Sets the moderation log channel.
 
 ### *event-monitoring-channel*
 #### Overloads
-**`moderation server set event-monitoring-channel`**
+**`!moderation server set event-monitoring-channel "placeholder"`**
 
 Sets the event monitoring channel.
 
@@ -30,7 +30,7 @@ Sets the event monitoring channel.
 
 ### *warning-threshold*
 #### Overloads
-**`moderation server set warning-threshold`**
+**`!moderation server set warning-threshold 10`**
 
 Sets the warning threshold.
 

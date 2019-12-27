@@ -6,7 +6,7 @@ These commands are prefixed with `warning set`. You can also use `warn set` inst
 ## Commands
 ### *reason*
 #### Overloads
-**`warning set reason`**
+**`!warning set reason 10 "placeholder"`**
 
 Sets the reason for the warning.
 
@@ -19,7 +19,7 @@ Sets the reason for the warning.
 
 ### *context-message*
 #### Overloads
-**`warning set context-message`**
+**`!warning set context-message 10 "placeholder"`**
 
 Sets the contextually relevant message for the warning.
 
@@ -32,7 +32,7 @@ Sets the contextually relevant message for the warning.
 
 ### *duration*
 #### Overloads
-**`warning set duration`**
+**`!warning set duration 10 5m`**
 
 Sets the duration of the warning.
 

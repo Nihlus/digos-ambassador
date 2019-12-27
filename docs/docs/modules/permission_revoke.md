@@ -6,7 +6,7 @@ These commands are prefixed with `permission revoke`.
 ## Commands
 ### *permission revoke*
 #### Overloads
-**`permission revoke`**
+**`!permission revoke "placeholder" Self`**
 
 Revoke the given permission from yourself.
 
@@ -15,7 +15,7 @@ Revoke the given permission from yourself.
 | permissionName | string | `no` |
 | revokedTarget | PermissionTarget | `yes` |
 
-**`permission revoke`**
+**`!permission revoke "placeholder" "placeholder" Self`**
 
 Revoke the given permission from the targeted user.
 
@@ -25,7 +25,7 @@ Revoke the given permission from the targeted user.
 | permissionName | string | `no` |
 | revokedTarget | PermissionTarget | `yes` |
 
-**`permission revoke`**
+**`!permission revoke "placeholder" "placeholder" Self`**
 
 Revoke the given permission from the targeted role.
 

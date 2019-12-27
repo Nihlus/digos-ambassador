@@ -12,7 +12,7 @@ Commands for creating, editing, and interacting with user characters.
 ## Commands
 ### *available-pronouns*
 #### Overloads
-**`character available-pronouns` (or `character pronouns`)**
+**`!character available-pronouns` (or `character pronouns`)**
 
 Shows available pronoun families that can be used with characters.
 
@@ -20,11 +20,11 @@ Shows available pronoun families that can be used with characters.
 
 ### *show*
 #### Overloads
-**`character show` (or `character info`)**
+**`!character show` (or `character info`)**
 
 Shows quick information about your current character.
 
-**`character show` (or `character info`)**
+**`!character show "placeholder"` (or `character info`)**
 
 Shows quick information about a character.
 
@@ -36,11 +36,11 @@ Shows quick information about a character.
 
 ### *view-characters*
 #### Overloads
-**`character view-characters` (or `character view-char`)**
+**`!character view-characters` (or `character view-char`)**
 
 Shows a gallery of all your characters.
 
-**`character view-characters` (or `character view-char`)**
+**`!character view-characters "placeholder"` (or `character view-char`)**
 
 Shows a gallery of all the user's characters.
 
@@ -52,7 +52,7 @@ Shows a gallery of all the user's characters.
 
 ### *create*
 #### Overloads
-**`character create`**
+**`!character create "placeholder" "placeholder" "placeholder" "placeholder" "placeholder"`**
 
 Creates a new character.
 
@@ -68,7 +68,7 @@ Creates a new character.
 
 ### *delete*
 #### Overloads
-**`character delete`**
+**`!character delete "placeholder"`**
 
 Deletes the named character.
 
@@ -80,7 +80,7 @@ Deletes the named character.
 
 ### *list-owned*
 #### Overloads
-**`character list-owned` (as well as `character list` or `character owned`)**
+**`!character list-owned "placeholder"` (as well as `character list` or `character owned`)**
 
 Lists the characters owned by a given user.
 
@@ -92,7 +92,7 @@ Lists the characters owned by a given user.
 
 ### *random*
 #### Overloads
-**`character random`**
+**`!character random`**
 
 Switches the user's current character to a different one, picked at random.
 
@@ -100,7 +100,7 @@ Switches the user's current character to a different one, picked at random.
 
 ### *assume*
 #### Overloads
-**`character assume` (as well as `character become`, `character transform`, or `character active`)**
+**`!character assume "placeholder"` (as well as `character become`, `character transform`, or `character active`)**
 
 Sets the named character as the user's current character.
 
@@ -112,7 +112,7 @@ Sets the named character as the user's current character.
 
 ### *clear-default*
 #### Overloads
-**`character clear-default` (or `character drop-default`)**
+**`!character clear-default` (or `character drop-default`)**
 
 Clears your default form.
 
@@ -120,7 +120,7 @@ Clears your default form.
 
 ### *clear*
 #### Overloads
-**`character clear` (as well as `character drop` or `character default`)**
+**`!character clear` (as well as `character drop` or `character default`)**
 
 Clears any active characters from you, restoring your default form.
 
@@ -128,7 +128,7 @@ Clears any active characters from you, restoring your default form.
 
 ### *view-gallery*
 #### Overloads
-**`character view-gallery` (or `character gallery`)**
+**`!character view-gallery "placeholder"` (or `character gallery`)**
 
 View the images in a character's gallery.
 
@@ -140,7 +140,7 @@ View the images in a character's gallery.
 
 ### *list-images*
 #### Overloads
-**`character list-images`**
+**`!character list-images "placeholder"`**
 
 Lists the images in a character's gallery.
 
@@ -152,7 +152,7 @@ Lists the images in a character's gallery.
 
 ### *add-image*
 #### Overloads
-**`character add-image`**
+**`!character add-image "placeholder" "placeholder" "placeholder" true`**
 
 Adds an attached image to a character's gallery.
 
@@ -163,7 +163,7 @@ Adds an attached image to a character's gallery.
 | imageCaption | string | `yes` |
 | isNSFW | bool | `yes` |
 
-**`character add-image`**
+**`!character add-image "placeholder" "placeholder" "placeholder" "placeholder" true`**
 
 Adds a linked image to a character's gallery.
 
@@ -179,7 +179,7 @@ Adds a linked image to a character's gallery.
 
 ### *remove-image*
 #### Overloads
-**`character remove-image` (or `character delete-image`)**
+**`!character remove-image "placeholder" "placeholder"` (or `character delete-image`)**
 
 Removes an image from a character's gallery.
 
@@ -192,7 +192,7 @@ Removes an image from a character's gallery.
 
 ### *transfer-ownership*
 #### Overloads
-**`character transfer-ownership` (or `character transfer`)**
+**`!character transfer-ownership "placeholder" "placeholder"` (or `character transfer`)**
 
 Transfers ownership of the named character to another user.
 

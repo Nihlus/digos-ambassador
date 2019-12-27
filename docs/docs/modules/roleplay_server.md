@@ -11,7 +11,7 @@ Server-related commands, such as viewing or editing info about a specific server
 ## Commands
 ### *clear-roleplay-category*
 #### Overloads
-**`roleplay server clear-roleplay-category`**
+**`!roleplay server clear-roleplay-category`**
 
 Clears the channel category to use for dedicated roleplays.
 

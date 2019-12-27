@@ -6,7 +6,7 @@ These commands are prefixed with `server set`. You can also use `guild set` inst
 ## Commands
 ### *description*
 #### Overloads
-**`server set description`**
+**`!server set description "placeholder"`**
 
 Sets the server's description.
 
@@ -18,7 +18,7 @@ Sets the server's description.
 
 ### *join-message*
 #### Overloads
-**`server set join-message`**
+**`!server set join-message "placeholder"`**
 
 Sets the server's first-join message.
 
@@ -30,7 +30,7 @@ Sets the server's first-join message.
 
 ### *is-nsfw*
 #### Overloads
-**`server set is-nsfw`**
+**`!server set is-nsfw true`**
 
 Sets whether the server is NSFW.
 
@@ -42,7 +42,7 @@ Sets whether the server is NSFW.
 
 ### *send-join-messages*
 #### Overloads
-**`server set send-join-messages`**
+**`!server set send-join-messages true`**
 
 Sets whether the bot sends join messages to new users.
 

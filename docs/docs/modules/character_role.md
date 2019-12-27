@@ -6,13 +6,13 @@ These commands are prefixed with `character role`. You can also use `char role` 
 ## Commands
 ### *list*
 #### Overloads
-**`character role list`**
+**`!character role list`**
 
 ---
 
 ### *create*
 #### Overloads
-**`character role create`**
+**`!character role create "placeholder" Open`**
 
 Creates a new character role linked to a Discord role.
 
@@ -25,7 +25,7 @@ Creates a new character role linked to a Discord role.
 
 ### *delete*
 #### Overloads
-**`character role delete` (as well as `character role remove` or `character role erase`)**
+**`!character role delete "placeholder"` (as well as `character role remove` or `character role erase`)**
 
 Deletes the character role for a given discord role.
 
@@ -37,7 +37,7 @@ Deletes the character role for a given discord role.
 
 ### *access*
 #### Overloads
-**`character role access`**
+**`!character role access "placeholder" Open`**
 
 Sets the access conditions for the given role.
 
@@ -50,7 +50,7 @@ Sets the access conditions for the given role.
 
 ### *clear*
 #### Overloads
-**`character role clear`**
+**`!character role clear "placeholder"`**
 
 Clears the role from a character.
 

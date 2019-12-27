@@ -8,7 +8,7 @@ Various statistics-related commands.
 ## Commands
 ### *guild*
 #### Overloads
-**`stats guild` (or `stats server`)**
+**`!stats guild` (or `stats server`)**
 
 Displays statistics about the current guild.
 
@@ -16,7 +16,7 @@ Displays statistics about the current guild.
 
 ### *guilds*
 #### Overloads
-**`stats guilds` (or `stats servers`)**
+**`!stats guilds` (or `stats servers`)**
 
 Displays statistics about all guilds the bot has joined.
 

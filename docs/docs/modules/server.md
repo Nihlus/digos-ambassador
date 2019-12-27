@@ -11,7 +11,7 @@ Server-related commands, such as viewing or editing info about a specific server
 ## Commands
 ### *show*
 #### Overloads
-**`server show` (or `server info`)**
+**`!server show` (or `server info`)**
 
 Shows general information about the current server.
 
@@ -19,7 +19,7 @@ Shows general information about the current server.
 
 ### *join-message*
 #### Overloads
-**`server join-message`**
+**`!server join-message`**
 
 Shows the server's join message.
 

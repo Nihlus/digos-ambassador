@@ -6,7 +6,7 @@ These commands are prefixed with `ban set`. You can also use `warn set` instead 
 ## Commands
 ### *reason*
 #### Overloads
-**`ban set reason`**
+**`!ban set reason 10 "placeholder"`**
 
 Sets the reason for the ban.
 
@@ -19,7 +19,7 @@ Sets the reason for the ban.
 
 ### *context-message*
 #### Overloads
-**`ban set context-message`**
+**`!ban set context-message 10 "placeholder"`**
 
 Sets the contextually relevant message for the ban.
 
@@ -32,7 +32,7 @@ Sets the contextually relevant message for the ban.
 
 ### *duration*
 #### Overloads
-**`ban set duration`**
+**`!ban set duration 10 5m`**
 
 Sets the duration of the ban.
 

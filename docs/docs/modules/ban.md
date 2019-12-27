@@ -11,7 +11,7 @@ Ban-related commands, such as viewing or editing info about a specific ban.
 ## Commands
 ### *list*
 #### Overloads
-**`ban list`**
+**`!ban list "placeholder"`**
 
 Lists the bans attached to the given user.
 
@@ -23,7 +23,7 @@ Lists the bans attached to the given user.
 
 ### *ban*
 #### Overloads
-**`ban`**
+**`!ban "placeholder" "placeholder" 5m`**
 
 Bans the given user.
 
@@ -31,13 +31,13 @@ Bans the given user.
 | --- | --- | --- |
 | user | IGuildUser | `no` |
 | reason | string | `no` |
-| expiresAfter | Nullable`1 | `yes` |
+| expiresAfter | TimeSpan | `yes` |
 
 ---
 
 ### *delete*
 #### Overloads
-**`ban delete`**
+**`!ban delete 10`**
 
 Deletes the given ban.
 

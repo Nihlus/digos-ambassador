@@ -6,7 +6,7 @@ These commands are prefixed with `dossier set`.
 ## Commands
 ### *title*
 #### Overloads
-**`dossier set title`**
+**`!dossier set title "placeholder" "placeholder"`**
 
 Sets the title of the given dossier.
 
@@ -19,7 +19,7 @@ Sets the title of the given dossier.
 
 ### *summary*
 #### Overloads
-**`dossier set summary`**
+**`!dossier set summary "placeholder" "placeholder"`**
 
 Sets the summary of the given dossier.
 
@@ -32,7 +32,7 @@ Sets the summary of the given dossier.
 
 ### *data*
 #### Overloads
-**`dossier set data`**
+**`!dossier set data "placeholder"`**
 
 Sets the data of the given dossier. Attach a PDF to the command.
 

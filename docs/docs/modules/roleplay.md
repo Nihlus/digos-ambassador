@@ -12,11 +12,11 @@ Commands for interacting with and managing channel roleplays.
 ## Commands
 ### *show*
 #### Overloads
-**`roleplay show` (or `roleplay info`)**
+**`!roleplay show` (or `roleplay info`)**
 
 Shows information about the current roleplay.
 
-**`roleplay show` (or `roleplay info`)**
+**`!roleplay show "placeholder"` (or `roleplay info`)**
 
 Shows information about the specified roleplay.
 
@@ -28,7 +28,7 @@ Shows information about the specified roleplay.
 
 ### *list*
 #### Overloads
-**`roleplay list`**
+**`!roleplay list`**
 
 Lists all available roleplays in the server.
 
@@ -36,7 +36,7 @@ Lists all available roleplays in the server.
 
 ### *list-owned*
 #### Overloads
-**`roleplay list-owned`**
+**`!roleplay list-owned "placeholder"`**
 
 Lists the roleplays that the given user owns.
 
@@ -48,7 +48,7 @@ Lists the roleplays that the given user owns.
 
 ### *create*
 #### Overloads
-**`roleplay create`**
+**`!roleplay create "placeholder" "placeholder" true true`**
 
 Creates a new roleplay with the specified name.
 
@@ -63,7 +63,7 @@ Creates a new roleplay with the specified name.
 
 ### *delete*
 #### Overloads
-**`roleplay delete`**
+**`!roleplay delete "placeholder"`**
 
 Deletes the specified roleplay.
 
@@ -75,7 +75,7 @@ Deletes the specified roleplay.
 
 ### *join*
 #### Overloads
-**`roleplay join`**
+**`!roleplay join "placeholder"`**
 
 Joins the roleplay owned by the given person with the given name.
 
@@ -87,7 +87,7 @@ Joins the roleplay owned by the given person with the given name.
 
 ### *invite*
 #### Overloads
-**`roleplay invite`**
+**`!roleplay invite "placeholder" "placeholder"`**
 
 Invites the specified user to the given roleplay.
 
@@ -100,7 +100,7 @@ Invites the specified user to the given roleplay.
 
 ### *leave*
 #### Overloads
-**`roleplay leave`**
+**`!roleplay leave "placeholder"`**
 
 Leaves the roleplay owned by the given person with the given name.
 
@@ -112,7 +112,7 @@ Leaves the roleplay owned by the given person with the given name.
 
 ### *kick*
 #### Overloads
-**`roleplay kick`**
+**`!roleplay kick "placeholder" "placeholder"`**
 
 Kicks the given user from the named roleplay.
 
@@ -125,7 +125,7 @@ Kicks the given user from the named roleplay.
 
 ### *channel*
 #### Overloads
-**`roleplay channel`**
+**`!roleplay channel "placeholder"`**
 
 Makes the roleplay with the given name current in the current channel.
 
@@ -137,7 +137,7 @@ Makes the roleplay with the given name current in the current channel.
 
 ### *start*
 #### Overloads
-**`roleplay start`**
+**`!roleplay start "placeholder"`**
 
 Starts the roleplay with the given name.
 
@@ -149,7 +149,7 @@ Starts the roleplay with the given name.
 
 ### *stop*
 #### Overloads
-**`roleplay stop`**
+**`!roleplay stop "placeholder"`**
 
 Stops the given roleplay.
 
@@ -161,7 +161,7 @@ Stops the given roleplay.
 
 ### *include-previous*
 #### Overloads
-**`roleplay include-previous`**
+**`!roleplay include-previous "placeholder" "placeholder" "placeholder"`**
 
 Includes previous messages into the roleplay, starting at the given message.
 
@@ -175,7 +175,7 @@ Includes previous messages into the roleplay, starting at the given message.
 
 ### *transfer-ownership*
 #### Overloads
-**`roleplay transfer-ownership`**
+**`!roleplay transfer-ownership "placeholder" "placeholder"`**
 
 Transfers ownership of the named roleplay to the specified user.
 
@@ -188,7 +188,7 @@ Transfers ownership of the named roleplay to the specified user.
 
 ### *export*
 #### Overloads
-**`roleplay export`**
+**`!roleplay export "placeholder" PDF`**
 
  Exports the named roleplay owned by the given user, sending you a file with the contents.
 
@@ -201,7 +201,7 @@ Transfers ownership of the named roleplay to the specified user.
 
 ### *replay*
 #### Overloads
-**`roleplay replay`**
+**`!roleplay replay "placeholder" 5m 5m`**
 
 Replays the named roleplay owned by the given user to you.
 
@@ -215,7 +215,7 @@ Replays the named roleplay owned by the given user to you.
 
 ### *view*
 #### Overloads
-**`roleplay view`**
+**`!roleplay view "placeholder"`**
 
 Views the given roleplay, allowing you to read the channel.
 
@@ -227,7 +227,7 @@ Views the given roleplay, allowing you to read the channel.
 
 ### *hide*
 #### Overloads
-**`roleplay hide`**
+**`!roleplay hide "placeholder"`**
 
 Hides the given roleplay.
 
@@ -239,7 +239,7 @@ Hides the given roleplay.
 
 ### *hide-all*
 #### Overloads
-**`roleplay hide-all`**
+**`!roleplay hide-all`**
 
 Hides all roleplays in the server for the user.
 
@@ -247,7 +247,7 @@ Hides all roleplays in the server for the user.
 
 ### *refresh*
 #### Overloads
-**`roleplay refresh`**
+**`!roleplay refresh "placeholder"`**
 
 Manually refreshes the given roleplay, resetting its last-updated time to now.
 
@@ -259,7 +259,7 @@ Manually refreshes the given roleplay, resetting its last-updated time to now.
 
 ### *move-to*
 #### Overloads
-**`roleplay move-to` (as well as `roleplay copy-to` or `roleplay move`)**
+**`!roleplay move-to "placeholder" "placeholder"` (as well as `roleplay copy-to` or `roleplay move`)**
 
 Moves an ongoing roleplay outside of the bot's systems into a channel with the given name.
 

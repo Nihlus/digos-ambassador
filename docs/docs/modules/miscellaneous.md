@@ -8,11 +8,11 @@ Assorted commands that don't really fit anywhere - just for fun, testing, etc.
 ## Commands
 ### *contact*
 #### Overloads
-**`contact`**
+**`!contact`**
 
 Instructs Amby to contact you over DM.
 
-**`contact`**
+**`!contact "placeholder"`**
 
 Instructs Amby to contact a user over DM.
 
@@ -24,7 +24,7 @@ Instructs Amby to contact a user over DM.
 
 ### *sass*
 #### Overloads
-**`sass`**
+**`!sass`**
 
 Sasses the user in a DIGOS fashion.
 
@@ -32,7 +32,7 @@ Sasses the user in a DIGOS fashion.
 
 ### *bweh*
 #### Overloads
-**`bweh`**
+**`!bweh`**
 
 Bweh!
 
@@ -40,11 +40,11 @@ Bweh!
 
 ### *boop*
 #### Overloads
-**`boop`**
+**`!boop`**
 
 Boops you.
 
-**`boop`**
+**`!boop "placeholder"`**
 
 Boops the user.
 
@@ -56,11 +56,11 @@ Boops the user.
 
 ### *bap*
 #### Overloads
-**`bap`**
+**`!bap`**
 
 Baps you.
 
-**`bap`**
+**`!bap "placeholder"`**
 
 Baps the user.
 
@@ -72,7 +72,7 @@ Baps the user.
 
 ### *jumbo*
 #### Overloads
-**`jumbo`**
+**`!jumbo "placeholder"`**
 
 Sends a jumbo version of the given emote to the chat, if available.
 
@@ -84,7 +84,7 @@ Sends a jumbo version of the given emote to the chat, if available.
 
 ### *info*
 #### Overloads
-**`info` (as well as `information` or `about`)**
+**`!info` (as well as `information` or `about`)**
 
 Shows some information about Amby's metaworkings.
 

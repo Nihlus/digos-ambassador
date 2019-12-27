@@ -6,7 +6,7 @@ These commands are prefixed with `note set`.
 ## Commands
 ### *content*
 #### Overloads
-**`note set content`**
+**`!note set content 10 "placeholder"`**
 
 Sets the contents of the note.
 

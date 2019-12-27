@@ -8,11 +8,11 @@ Help-related commands that explain other commands or modules.
 ## Commands
 ### *help*
 #### Overloads
-**`help`**
+**`!help`**
 
 Lists available command modules.
 
-**`help`**
+**`!help "placeholder"`**
 
 Lists available commands that match the given search text.
 
