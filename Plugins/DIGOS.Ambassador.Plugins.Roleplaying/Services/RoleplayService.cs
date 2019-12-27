@@ -859,7 +859,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to create the channel for.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         [NotNull, ItemNotNull]
-        public async Task<CreateEntityResult<IGuildChannel>> CreateDedicatedRoleplayChannelAsync
+        public async Task<CreateEntityResult<ITextChannel>> CreateDedicatedRoleplayChannelAsync
         (
             [NotNull] ICommandContext context,
             [NotNull] Roleplay roleplay
@@ -868,14 +868,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var getServerResult = await _servers.GetOrRegisterServerAsync(context.Guild);
             if (!getServerResult.IsSuccess)
             {
-                return CreateEntityResult<IGuildChannel>.FromError(getServerResult);
+                return CreateEntityResult<ITextChannel>.FromError(getServerResult);
             }
 
             var server = getServerResult.Entity;
 
             if (!(await context.Guild.GetUserAsync(context.Client.CurrentUser.Id)).GuildPermissions.ManageChannels)
             {
-                return CreateEntityResult<IGuildChannel>.FromError
+                return CreateEntityResult<ITextChannel>.FromError
                 (
                     "I don't have permission to manage channels, so I can't create dedicated RP channels."
                 );
@@ -884,7 +884,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var getExistingChannelResult = await GetDedicatedRoleplayChannelAsync(context.Guild, roleplay);
             if (getExistingChannelResult.IsSuccess)
             {
-                return CreateEntityResult<IGuildChannel>.FromError
+                return CreateEntityResult<ITextChannel>.FromError
                 (
                     "The roleplay already has a dedicated channel."
                 );
@@ -893,7 +893,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettingsResult.IsSuccess)
             {
-                return CreateEntityResult<IGuildChannel>.FromError(getSettingsResult);
+                return CreateEntityResult<ITextChannel>.FromError(getSettingsResult);
             }
 
             var settings = getSettingsResult.Entity;
@@ -905,7 +905,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
                 if (categoryChannelCount >= 50)
                 {
-                    return CreateEntityResult<IGuildChannel>.FromError
+                    return CreateEntityResult<ITextChannel>.FromError
                     (
                         "The server's roleplaying category has reached its maximum number of channels. Try " +
                         "contacting the server's owners and either removing some old roleplays or setting up " +
@@ -955,7 +955,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             await dedicatedChannel.AddPermissionOverwriteAsync(everyoneRole, everyonePermissions);
 
             await _database.SaveChangesAsync();
-            return CreateEntityResult<IGuildChannel>.FromSuccess(dedicatedChannel);
+            return CreateEntityResult<ITextChannel>.FromSuccess(dedicatedChannel);
         }
 
         /// <summary>

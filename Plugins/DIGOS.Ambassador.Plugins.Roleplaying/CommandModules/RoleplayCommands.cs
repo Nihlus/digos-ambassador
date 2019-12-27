@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -1137,6 +1138,153 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Timeout refreshed.");
+        }
+
+        /// <summary>
+        /// Moves an ongoing roleplay outside of the bot's systems into a channel with the given name.
+        /// </summary>
+        /// <param name="newName">The name of the new bot-managed roleplay.</param>
+        /// <param name="participants">The participants of the roleplay.</param>
+        [UsedImplicitly]
+        [Command("move-to")]
+        [Alias("move-to", "copy-to", "move")]
+        [Summary("Moves an ongoing roleplay outside of the bot's systems into a channel with the given name.")]
+        [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(CreateRoleplay), PermissionTarget.Self)]
+        public async Task MoveRoleplayIntoChannelAsync(string newName, params IUser[] participants)
+        {
+            var createRoleplayAsync = await _roleplays.CreateRoleplayAsync
+            (
+                this.Context,
+                newName,
+                "No summary set.",
+                false,
+                true
+            );
+
+            if (!createRoleplayAsync.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, createRoleplayAsync.ErrorReason);
+                return;
+            }
+
+            var roleplay = createRoleplayAsync.Entity;
+
+            var createChannelAsync = await _roleplays.CreateDedicatedRoleplayChannelAsync(this.Context, roleplay);
+            if (!createChannelAsync.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, createChannelAsync.ErrorReason);
+                return;
+            }
+
+            var dedicatedChannel = createChannelAsync.Entity;
+
+            foreach (var participant in participants)
+            {
+                if (participant == this.Context.User)
+                {
+                    // Already added
+                    continue;
+                }
+
+                var addParticipantAsync = await _roleplays.AddUserToRoleplayAsync(this.Context, roleplay, participant);
+                if (addParticipantAsync.IsSuccess)
+                {
+                    continue;
+                }
+
+                var message =
+                    $"I couldn't add {participant.Mention} to the roleplay ({addParticipantAsync.ErrorReason}. " +
+                    $"Please try to invite them manually.";
+
+                await _feedback.SendWarningAsync
+                (
+                    this.Context,
+                    message
+                );
+            }
+
+            var participantMessages = new List<IMessage>();
+
+            // Copy the last messages from the participants
+            foreach (var participant in participants)
+            {
+                // Find the last message in the current channel from the user
+                var channel = this.Context.Channel;
+                var messageBatch = await channel.GetMessagesAsync(this.Context.Message, Direction.Before)
+                    .FlattenAsync();
+
+                foreach (var message in messageBatch)
+                {
+                    if (message.Author != participant)
+                    {
+                        continue;
+                    }
+
+                    participantMessages.Add(message);
+                    break;
+                }
+            }
+
+            foreach (var participantMessage in participantMessages.OrderByDescending(m => m.Timestamp))
+            {
+                var messageLink = participantMessage.GetJumpUrl();
+                await dedicatedChannel.SendMessageAsync(messageLink);
+            }
+
+            var startRoleplayAsync = await _roleplays.StartRoleplayAsync(this.Context, roleplay);
+            if (!startRoleplayAsync.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, createChannelAsync.ErrorReason);
+                return;
+            }
+
+            // Make the channel visible for all participants
+            foreach (var participant in roleplay.ParticipatingUsers)
+            {
+                var user = await this.Context.Guild.GetUserAsync((ulong)participant.User.DiscordID);
+                if (user is null)
+                {
+                    continue;
+                }
+
+                await _roleplays.SetDedicatedChannelWritabilityForUserAsync
+                (
+                    dedicatedChannel,
+                    user,
+                    true
+                );
+
+                await _roleplays.SetDedicatedChannelVisibilityForUserAsync
+                (
+                    dedicatedChannel,
+                    user,
+                    true
+                );
+            }
+
+            if (roleplay.IsPublic)
+            {
+                var everyoneRole = this.Context.Guild.EveryoneRole;
+                await _roleplays.SetDedicatedChannelVisibilityForRoleAsync
+                (
+                    dedicatedChannel,
+                    everyoneRole,
+                    true
+                );
+            }
+
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                $"All done! Your roleplay is now available in {MentionUtils.MentionChannel(dedicatedChannel.Id)}."
+            );
+
+            var joinedUsers = roleplay.JoinedUsers.Select(async p => await this.Context.Client.GetUserAsync((ulong)p.User.DiscordID));
+            var joinedMentions = joinedUsers.Select(async u => (await u).Mention);
+
+            var participantList = (await Task.WhenAll(joinedMentions)).Humanize();
+            await dedicatedChannel.SendMessageAsync($"Calling {participantList}!");
         }
     }
 }
