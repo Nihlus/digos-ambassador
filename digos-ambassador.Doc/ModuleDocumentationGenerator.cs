@@ -20,17 +20,20 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Doc.Data;
 using DIGOS.Ambassador.Doc.Extensions;
 using DIGOS.Ambassador.Doc.Reflection;
 using Humanizer;
 using JetBrains.Annotations;
 using Mono.Cecil;
+using Mono.Cecil.Rocks;
 using Remora.Markdown;
 using static Remora.Markdown.EmphasisType;
 
@@ -41,6 +44,7 @@ namespace DIGOS.Ambassador.Doc
     /// </summary>
     public class ModuleDocumentationGenerator : IDocumentationGenerator
     {
+        private readonly PlaceholderData _placeholderData;
         private readonly IEnumerable<ModuleDefinition> _commandAssemblyModules;
         private readonly string _outputPath;
 
@@ -49,10 +53,17 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="commandAssemblyModules">The assembly containing the commands.</param>
         /// <param name="outputPath">The output path where documentation files should be written.</param>
-        public ModuleDocumentationGenerator(IEnumerable<ModuleDefinition> commandAssemblyModules, string outputPath)
+        /// <param name="placeholderData">The placeholder repository.</param>
+        public ModuleDocumentationGenerator
+        (
+            [NotNull] IEnumerable<ModuleDefinition> commandAssemblyModules,
+            [NotNull] string outputPath,
+            [NotNull] PlaceholderData placeholderData
+        )
         {
             _commandAssemblyModules = commandAssemblyModules;
             _outputPath = outputPath;
+            _placeholderData = placeholderData;
         }
 
         /// <inheritdoc />
@@ -268,6 +279,7 @@ namespace DIGOS.Ambassador.Doc
         {
             var moduleCommandsSection = new MarkdownSection("Commands", 2);
             var commandGroups = module.Commands.GroupBy(c => c.Name).ToList();
+
             foreach (var commandGroup in commandGroups)
             {
                 if (commandGroup != commandGroups.First())
@@ -296,6 +308,73 @@ namespace DIGOS.Ambassador.Doc
         }
 
         /// <summary>
+        /// Generates an example of command usage, based on the signature of the command.
+        /// </summary>
+        /// <param name="command">The command.</param>
+        /// <returns>The example usage.</returns>
+        [NotNull]
+        protected virtual string GenerateCommandExample([NotNull] CommandInformation command)
+        {
+            var exampleBuilder = new StringBuilder();
+            exampleBuilder.Append('!');
+            exampleBuilder.Append(GetInvokableCommands(command).First());
+
+            foreach (var parameter in command.Parameters)
+            {
+                exampleBuilder.Append(" ");
+
+                var typeDefinition = parameter.ParameterType.Resolve();
+                if (typeDefinition.Name.StartsWith("Nullable") && typeDefinition.HasGenericParameters)
+                {
+                    var genericInstance = (GenericInstanceType)parameter.ParameterType;
+                    typeDefinition = genericInstance.GenericArguments.First().Resolve();
+                }
+
+                if (typeDefinition.IsEnum)
+                {
+                    var firstOption = typeDefinition.Fields.First
+                    (
+                        f => !(f.Name.EndsWith("_") || f.Name.StartsWith('_'))
+                    );
+
+                    var humanizedOption = firstOption.Name.Humanize();
+                    exampleBuilder.Append
+                    (
+                        humanizedOption.Contains(' ')
+                            ? $"\"{humanizedOption}\""
+                            : $"{humanizedOption}"
+                    );
+
+                    continue;
+                }
+
+                if (_placeholderData.HasPlaceholders(typeDefinition))
+                {
+                    if (typeDefinition.IsArray)
+                    {
+                        // Get two examples
+                        var placeholder = _placeholderData.GetPlaceholders(typeDefinition).Take(2);
+                        exampleBuilder.Append(string.Join(" ", placeholder));
+                    }
+                    else
+                    {
+                        var placeholder = _placeholderData.GetPlaceholders(typeDefinition).First();
+                        exampleBuilder.Append(placeholder);
+                    }
+
+                    continue;
+                }
+
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"No placeholder data available for type {typeDefinition.Name}.");
+
+                exampleBuilder.Append("\"placeholder\"");
+            }
+
+            return exampleBuilder.ToString();
+        }
+
+        /// <summary>
         /// Generates the Markdown content of a command overload.
         /// </summary>
         /// <param name="command">The command.</param>
@@ -312,7 +391,8 @@ namespace DIGOS.Ambassador.Doc
                 ? $"({prefix} {invokableCommands.Skip(1).Select(a => new MarkdownInlineCode(a).Compile()).Humanize("or")})"
                 : string.Empty;
 
-            var commandDisplayAliases = $"{new MarkdownInlineCode(invokableCommands.First()).Compile()} {commandExtraAliases}".Trim();
+            var commandDisplayAliases =
+                $"{new MarkdownInlineCode(GenerateCommandExample(command)).Compile()} {commandExtraAliases}".Trim();
 
             yield return new MarkdownParagraph()
             .AppendLine

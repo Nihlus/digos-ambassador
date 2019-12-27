@@ -20,9 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
+using DIGOS.Ambassador.Doc.Data;
 using Mono.Cecil;
 
 namespace DIGOS.Ambassador.Doc
@@ -44,8 +46,21 @@ namespace DIGOS.Ambassador.Doc
                 return;
             }
 
-            var modules = _options.AssemblyPaths.Select(ModuleDefinition.ReadModule);
-            var generator = new ModuleDocumentationGenerator(modules, _options.OutputPath);
+            // Set up the assembly resolver
+            var additionalResolverPaths = _options.AssemblyPaths.Select(Path.GetDirectoryName).Distinct();
+            var resolver = new DefaultAssemblyResolver();
+            foreach (var additionalResolverPath in additionalResolverPaths)
+            {
+                resolver.AddSearchDirectory(additionalResolverPath);
+            }
+
+            var placeholderData = new PlaceholderData();
+
+            var modules = _options.AssemblyPaths.Select
+            (
+                ap => ModuleDefinition.ReadModule(ap, new ReaderParameters { AssemblyResolver = resolver })
+            );
+            var generator = new ModuleDocumentationGenerator(modules, _options.OutputPath, placeholderData);
             await generator.GenerateDocumentationAsync();
         }
     }
