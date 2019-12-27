@@ -247,3 +247,6 @@ database-dev.credentials
 
 # Annotations
 *.ExternalAnnotations.xml
+
+# Crash dumps
+mono_crash.*
