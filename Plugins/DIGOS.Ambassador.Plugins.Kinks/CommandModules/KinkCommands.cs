@@ -75,13 +75,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// <summary>
         /// Shows information about the named kink.
         /// </summary>
-        /// <param name="name">The name of the kink.</param>
+        /// <param name="kinkName">The name of the kink.</param>
         [UsedImplicitly]
         [Command("info")]
         [Summary("Shows information about the named kink.")]
-        public async Task ShowKinkAsync([NotNull] string name)
+        public async Task ShowKinkAsync([NotNull] string kinkName)
         {
-            var getKinkInfoResult = await _kinks.GetKinkByNameAsync(name);
+            var getKinkInfoResult = await _kinks.GetKinkByNameAsync(kinkName);
             if (!getKinkInfoResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getKinkInfoResult.ErrorReason);
@@ -97,25 +97,26 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// <summary>
         /// Shows your preference for the named kink.
         /// </summary>
-        /// <param name="name">The name of the kink.</param>
+        /// <param name="kinkName">The name of the kink.</param>
         [UsedImplicitly]
         [Alias("show", "preference")]
         [Command("show")]
         [Summary("Shows your preference for the named kink.")]
-        public async Task ShowKinkPreferenceAsync([NotNull] string name) => await ShowKinkPreferenceAsync(this.Context.User, name);
+        public async Task ShowKinkPreferenceAsync([NotNull] string kinkName)
+            => await ShowKinkPreferenceAsync(this.Context.User, kinkName);
 
         /// <summary>
         /// Shows the user's preference for the named kink.
         /// </summary>
         /// <param name="user">The user.</param>
-        /// <param name="name">The name of the kink.</param>
+        /// <param name="kinkName">The name of the kink.</param>
         [UsedImplicitly]
         [Alias("show", "preference")]
         [Command("show")]
         [Summary("Shows the user's preference for the named kink.")]
-        public async Task ShowKinkPreferenceAsync([NotNull] IUser user, [NotNull] string name)
+        public async Task ShowKinkPreferenceAsync([NotNull] IUser user, [NotNull] string kinkName)
         {
-            var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(user, name);
+            var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(user, kinkName);
             if (!getUserKinkResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getUserKinkResult.ErrorReason);
@@ -227,7 +228,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// <summary>
         /// Sets your preference for the given kink.
         /// </summary>
-        /// <param name="name">The name of the kink.</param>
+        /// <param name="kinkName">The name of the kink.</param>
         /// <param name="preference">The preference for the kink.</param>
         [UsedImplicitly]
         [Command("preference")]
@@ -235,12 +236,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         public async Task SetKinkPreferenceAsync
         (
             [NotNull]
-            string name,
+            string kinkName,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
             KinkPreference preference
         )
         {
-            var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(this.Context.User, name);
+            var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(this.Context.User, kinkName);
             if (!getUserKinkResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getUserKinkResult.ErrorReason);
