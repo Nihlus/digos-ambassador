@@ -321,7 +321,10 @@ namespace DIGOS.Ambassador.Doc
 
             foreach (var parameter in command.Parameters)
             {
-                exampleBuilder.Append(" ");
+                if (exampleBuilder[^1] != ' ')
+                {
+                    exampleBuilder.Append(" ");
+                }
 
                 var typeDefinition = parameter.ParameterType.Resolve();
                 if (parameter.ParameterType.Name.StartsWith("Nullable") && parameter.ParameterType.IsGenericInstance)
@@ -350,15 +353,25 @@ namespace DIGOS.Ambassador.Doc
 
                 if (_placeholderData.HasPlaceholders(typeDefinition))
                 {
-                    if (typeDefinition.IsArray)
+                    if (parameter.ParameterType.IsArray)
                     {
                         // Get two examples
-                        var placeholder = _placeholderData.GetPlaceholders(typeDefinition).Take(2);
-                        exampleBuilder.Append(string.Join(" ", placeholder));
+                        var placeholders = _placeholderData.GetPlaceholders(typeDefinition, 2);
+
+                        foreach (var placeholder in placeholders)
+                        {
+                            exampleBuilder.Append(placeholder.Contains(' ') ? placeholder.Quote() : placeholder);
+                            exampleBuilder.Append(' ');
+                        }
                     }
                     else
                     {
                         var placeholder = _placeholderData.GetPlaceholders(typeDefinition).First();
+                        if (placeholder.Contains(' '))
+                        {
+                            placeholder = placeholder.Quote();
+                        }
+
                         exampleBuilder.Append(placeholder);
                     }
 
@@ -371,7 +384,7 @@ namespace DIGOS.Ambassador.Doc
                 exampleBuilder.Append("\"placeholder\"");
             }
 
-            return exampleBuilder.ToString();
+            return exampleBuilder.ToString().Trim();
         }
 
         /// <summary>
