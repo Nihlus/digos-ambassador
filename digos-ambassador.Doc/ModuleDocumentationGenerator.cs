@@ -378,8 +378,105 @@ namespace DIGOS.Ambassador.Doc
                     continue;
                 }
 
+                if (typeDefinition.FullName == typeof(string).FullName)
+                {
+                    // Ugh, strings. Let's perform some simple heuristics...
+                    // TODO: Improve this crap
+                    if (parameter.Name.Contains("Nickname", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("John Doe".Quote());
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Title", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("My cool title".Quote());
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Name", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("John");
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Summary", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("My short summary".Quote());
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Description", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("My detailed description".Quote());
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Reason", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("My good reason".Quote());
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Caption", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("My sweet caption".Quote());
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Message", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("My message".Quote());
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Pronoun", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("Feminine");
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Species", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("shark");
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Content", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("My content".Quote());
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Bio", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("My long biography".Quote());
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Search", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("My search text".Quote());
+                        continue;
+                    }
+
+                    if
+                    (
+                        parameter.Name.Contains("Url", StringComparison.OrdinalIgnoreCase) ||
+                        parameter.Name.Contains("Uri", StringComparison.OrdinalIgnoreCase)
+                    )
+                    {
+                        exampleBuilder.Append("https://www.example.com");
+                        continue;
+                    }
+                }
+
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine($"No placeholder data available for type {typeDefinition.Name}.");
+                Console.WriteLine
+                (
+                    $"No placeholder data available for parameter \"{typeDefinition.Name} {parameter.Name}\" " +
+                    $"in \"!{GetInvokableCommands(command).First()}\"."
+                );
 
                 exampleBuilder.Append("\"placeholder\"");
             }
