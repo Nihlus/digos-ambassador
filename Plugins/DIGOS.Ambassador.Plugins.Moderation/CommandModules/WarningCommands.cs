@@ -149,7 +149,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// Adds a warning to the given user.
         /// </summary>
         /// <param name="user">The user to add the warning to.</param>
-        /// <param name="content">The contents of the warning.</param>
+        /// <param name="reason">The reason for the warning.</param>
         /// <param name="expiresAfter">The duration of the warning, if any.</param>
         [Command]
         [Summary("Adds a warning to the given user.")]
@@ -159,7 +159,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         public async Task AddWarningAsync
         (
             [NotNull] IGuildUser user,
-            [NotNull] string content,
+            [NotNull] string reason,
             TimeSpan? expiresAfter = null
         )
         {
@@ -169,7 +169,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 expiresOn = DateTime.Now.Add(expiresAfter.Value);
             }
 
-            var addWarning = await _warnings.CreateWarningAsync(this.Context.User, user, content, expiresOn: expiresOn);
+            var addWarning = await _warnings.CreateWarningAsync(this.Context.User, user, reason, expiresOn: expiresOn);
             if (!addWarning.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, addWarning.ErrorReason);
