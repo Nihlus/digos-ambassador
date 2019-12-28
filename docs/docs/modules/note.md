@@ -23,7 +23,7 @@ Lists the notes attached to the given user.
 
 ### *add*
 #### Overloads
-**`!note add @Ada "placeholder"`**
+**`!note add @Ada "My content"`**
 
 Adds a note to the given user.
 

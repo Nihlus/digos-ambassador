@@ -72,7 +72,7 @@ Baps the user.
 
 ### *jumbo*
 #### Overloads
-**`!jumbo "placeholder"`**
+**`!jumbo :thinking:`**
 
 Sends a jumbo version of the given emote to the chat, if available.
 

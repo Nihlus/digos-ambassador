@@ -6,7 +6,7 @@ These commands are prefixed with `user set`.
 ## Commands
 ### *bio*
 #### Overloads
-**`!user set bio "placeholder"`**
+**`!user set bio "My long biography"`**
 
 Sets the invoking user's bio.
 
@@ -14,7 +14,7 @@ Sets the invoking user's bio.
 | --- | --- | --- |
 | bio | string | `no` |
 
-**`!user set bio @Ada "placeholder"`**
+**`!user set bio @Ada "My long biography"`**
 
 Sets the target user's bio.
 

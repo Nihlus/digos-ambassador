@@ -23,7 +23,7 @@ Lists the bans attached to the given user.
 
 ### *ban*
 #### Overloads
-**`!ban @Ada "placeholder" 5m`**
+**`!ban @Ada "My good reason" 5m`**
 
 Bans the given user.
 

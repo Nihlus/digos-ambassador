@@ -6,7 +6,7 @@ These commands are prefixed with `ban set`. You can also use `warn set` instead 
 ## Commands
 ### *reason*
 #### Overloads
-**`!ban set reason 10 "placeholder"`**
+**`!ban set reason 10 "My good reason"`**
 
 Sets the reason for the ban.
 

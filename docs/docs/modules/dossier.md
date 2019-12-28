@@ -19,7 +19,7 @@ Lists the available dossiers.
 
 ### *view*
 #### Overloads
-**`!dossier view "placeholder"` (or `dossier show`)**
+**`!dossier view "My cool title"` (or `dossier show`)**
 
 Views the named dossier.
 
@@ -31,7 +31,7 @@ Views the named dossier.
 
 ### *add*
 #### Overloads
-**`!dossier add "placeholder" "placeholder"` (or `dossier create`)**
+**`!dossier add "My cool title" "My short summary"` (or `dossier create`)**
 
 Adds a new dossier with the given title and summary. A PDF with the full dossier can be attached.
 
@@ -44,7 +44,7 @@ Adds a new dossier with the given title and summary. A PDF with the full dossier
 
 ### *remove*
 #### Overloads
-**`!dossier remove "placeholder"` (or `dossier delete`)**
+**`!dossier remove "My cool title"` (or `dossier delete`)**
 
 Removes the dossier with the given title.
 

@@ -6,7 +6,7 @@ These commands are prefixed with `permission grant`.
 ## Commands
 ### *permission grant*
 #### Overloads
-**`!permission grant "placeholder" Self`**
+**`!permission grant DoTheThing Self`**
 
 Grant yourself the given permission.
 
@@ -15,7 +15,7 @@ Grant yourself the given permission.
 | permissionName | string | `no` |
 | revokedTarget | PermissionTarget | `yes` |
 
-**`!permission grant @Ada "placeholder" Self`**
+**`!permission grant @Ada DoTheThing Self`**
 
 Grant the targeted user the given permission.
 
@@ -25,7 +25,7 @@ Grant the targeted user the given permission.
 | permissionName | string | `no` |
 | grantedTarget | PermissionTarget | `yes` |
 
-**`!permission grant @Moderators "placeholder" Self`**
+**`!permission grant @Moderators DoTheThing Self`**
 
 Grant the targeted role the given permission.
 

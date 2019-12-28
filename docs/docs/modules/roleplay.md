@@ -48,7 +48,7 @@ Lists the roleplays that the given user owns.
 
 ### *create*
 #### Overloads
-**`!roleplay create "placeholder" "placeholder" true true`**
+**`!roleplay create John "My short summary" true true`**
 
 Creates a new roleplay with the specified name.
 
@@ -259,7 +259,7 @@ Manually refreshes the given roleplay, resetting its last-updated time to now.
 
 ### *move-to*
 #### Overloads
-**`!roleplay move-to "placeholder" @Ada @Bea` (as well as `roleplay copy-to` or `roleplay move`)**
+**`!roleplay move-to John @Ada @Bea` (as well as `roleplay copy-to` or `roleplay move`)**
 
 Moves an ongoing roleplay outside of the bot's systems into a channel with the given name.
 

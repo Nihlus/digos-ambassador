@@ -23,14 +23,14 @@ Lists the warnings attached to the given user.
 
 ### *warning*
 #### Overloads
-**`!warning @Ada "placeholder" 5m`**
+**`!warning @Ada "My good reason" 5m`**
 
 Adds a warning to the given user.
 
 | Name | Type | Optional |
 | --- | --- | --- |
 | user | IGuildUser | `no` |
-| content | string | `no` |
+| reason | string | `no` |
 | expiresAfter | TimeSpan | `yes` |
 
 ---

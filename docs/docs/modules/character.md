@@ -52,7 +52,7 @@ Shows a gallery of all the user's characters.
 
 ### *create*
 #### Overloads
-**`!character create "placeholder" "placeholder" "placeholder" "placeholder" "placeholder"`**
+**`!character create John "John Doe" "My short summary" "My detailed description" https://www.example.com`**
 
 Creates a new character.
 
@@ -152,7 +152,7 @@ Lists the images in a character's gallery.
 
 ### *add-image*
 #### Overloads
-**`!character add-image mickey "placeholder" "placeholder" true`**
+**`!character add-image mickey John "My sweet caption" true`**
 
 Adds an attached image to a character's gallery.
 
@@ -163,7 +163,7 @@ Adds an attached image to a character's gallery.
 | imageCaption | string | `yes` |
 | isNSFW | bool | `yes` |
 
-**`!character add-image mickey "placeholder" "placeholder" "placeholder" true`**
+**`!character add-image mickey John https://www.example.com "My sweet caption" true`**
 
 Adds a linked image to a character's gallery.
 
@@ -179,7 +179,7 @@ Adds a linked image to a character's gallery.
 
 ### *remove-image*
 #### Overloads
-**`!character remove-image mickey "placeholder"` (or `character delete-image`)**
+**`!character remove-image mickey John` (or `character delete-image`)**
 
 Removes an image from a character's gallery.
 

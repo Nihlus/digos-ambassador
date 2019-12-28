@@ -8,34 +8,34 @@ Commands for viewing and configuring user kinks.
 ## Commands
 ### *info*
 #### Overloads
-**`!kink info "placeholder"`**
+**`!kink info Doinking`**
 
 Shows information about the named kink.
 
 | Name | Type | Optional |
 | --- | --- | --- |
-| name | string | `no` |
+| kinkName | string | `no` |
 
 ---
 
 ### *show*
 #### Overloads
-**`!kink show "placeholder"` (or `kink preference`)**
+**`!kink show Doinking` (or `kink preference`)**
 
 Shows your preference for the named kink.
 
 | Name | Type | Optional |
 | --- | --- | --- |
-| name | string | `no` |
+| kinkName | string | `no` |
 
-**`!kink show @Ada "placeholder"` (or `kink preference`)**
+**`!kink show @Ada Doinking` (or `kink preference`)**
 
 Shows the user's preference for the named kink.
 
 | Name | Type | Optional |
 | --- | --- | --- |
 | user | IUser | `no` |
-| name | string | `no` |
+| kinkName | string | `no` |
 
 ---
 
@@ -74,13 +74,13 @@ Shows the given user's kinks with the given preference.
 
 ### *preference*
 #### Overloads
-**`!kink preference "placeholder" "No preference"`**
+**`!kink preference Doinking "No preference"`**
 
 Sets your preference for the given kink.
 
 | Name | Type | Optional |
 | --- | --- | --- |
-| name | string | `no` |
+| kinkName | string | `no` |
 | preference | KinkPreference | `no` |
 
 ---

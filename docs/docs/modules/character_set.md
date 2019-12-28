@@ -6,7 +6,7 @@ These commands are prefixed with `character set`. You can also use `char set` or
 ## Commands
 ### *name*
 #### Overloads
-**`!character set name mickey "placeholder"`**
+**`!character set name mickey John`**
 
 Sets the name of a character.
 
@@ -19,7 +19,7 @@ Sets the name of a character.
 
 ### *avatar*
 #### Overloads
-**`!character set avatar mickey "placeholder"`**
+**`!character set avatar mickey https://www.example.com`**
 
 Sets the avatar of a character. You can attach an image instead of passing a url as a parameter.
 
@@ -32,7 +32,7 @@ Sets the avatar of a character. You can attach an image instead of passing a url
 
 ### *nickname*
 #### Overloads
-**`!character set nickname mickey "placeholder"` (or `character set nick`)**
+**`!character set nickname mickey "John Doe"` (or `character set nick`)**
 
 Sets the nickname that the user should have when the character is active.
 
@@ -45,7 +45,7 @@ Sets the nickname that the user should have when the character is active.
 
 ### *summary*
 #### Overloads
-**`!character set summary mickey "placeholder"`**
+**`!character set summary mickey "My short summary"`**
 
 Sets the summary of a character.
 
@@ -58,7 +58,7 @@ Sets the summary of a character.
 
 ### *description*
 #### Overloads
-**`!character set description mickey "placeholder"` (or `character set desc`)**
+**`!character set description mickey "My detailed description"` (or `character set desc`)**
 
 Sets the description of a character. You can attach a plaintext document instead of passing the contents as a parameter.
 
@@ -84,7 +84,7 @@ Sets whether or not a character is NSFW.
 
 ### *pronoun*
 #### Overloads
-**`!character set pronoun mickey "placeholder"` (or `character set pronouns`)**
+**`!character set pronoun mickey Feminine` (or `character set pronouns`)**
 
 Sets the preferred pronoun of a character.
 

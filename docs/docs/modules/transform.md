@@ -8,7 +8,7 @@ Transformation-related commands, such as transforming certain body parts or savi
 ## Commands
 ### *transform*
 #### Overloads
-**`!transform Center Hair "placeholder"`**
+**`!transform Center Hair shark`**
 
 Transforms the given bodypart into the given species on yourself.
 
@@ -18,7 +18,7 @@ Transforms the given bodypart into the given species on yourself.
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
-**`!transform Hair "placeholder"`**
+**`!transform Hair shark`**
 
 Transforms the given bodypart into the given species on yourself.
 
@@ -27,7 +27,7 @@ Transforms the given bodypart into the given species on yourself.
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
-**`!transform @Ada Hair "placeholder"`**
+**`!transform @Ada Hair shark`**
 
 Transforms the given bodypart of the target user into the given species.
 
@@ -37,7 +37,7 @@ Transforms the given bodypart of the target user into the given species.
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
-**`!transform @Ada Center Hair "placeholder"`**
+**`!transform @Ada Center Hair shark`**
 
 Transforms the given bodypart of the target user into the given species.
 

@@ -12,7 +12,7 @@ Help-related commands that explain other commands or modules.
 
 Lists available command modules.
 
-**`!help "placeholder"`**
+**`!help "My search text"`**
 
 Lists available commands that match the given search text.
 

@@ -6,7 +6,7 @@ These commands are prefixed with `warning set`. You can also use `warn set` inst
 ## Commands
 ### *reason*
 #### Overloads
-**`!warning set reason 10 "placeholder"`**
+**`!warning set reason 10 "My good reason"`**
 
 Sets the reason for the warning.
 

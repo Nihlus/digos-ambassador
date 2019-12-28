@@ -6,7 +6,7 @@ These commands are prefixed with `roleplay set`. You can also use `rp set` inste
 ## Commands
 ### *name*
 #### Overloads
-**`!roleplay set name "placeholder" a-walk-in-the-park`**
+**`!roleplay set name John a-walk-in-the-park`**
 
 Sets the new name of the named roleplay.
 
@@ -19,7 +19,7 @@ Sets the new name of the named roleplay.
 
 ### *summary*
 #### Overloads
-**`!roleplay set summary "placeholder" a-walk-in-the-park`**
+**`!roleplay set summary "My short summary" a-walk-in-the-park`**
 
 Sets the summary of the named roleplay.
 

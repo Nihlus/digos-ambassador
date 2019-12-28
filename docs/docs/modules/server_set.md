@@ -6,7 +6,7 @@ These commands are prefixed with `server set`. You can also use `guild set` inst
 ## Commands
 ### *description*
 #### Overloads
-**`!server set description "placeholder"`**
+**`!server set description "My detailed description"`**
 
 Sets the server's description.
 
@@ -18,7 +18,7 @@ Sets the server's description.
 
 ### *join-message*
 #### Overloads
-**`!server set join-message "placeholder"`**
+**`!server set join-message "My message"`**
 
 Sets the server's first-join message.
 
