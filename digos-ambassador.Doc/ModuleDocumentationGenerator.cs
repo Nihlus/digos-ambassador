@@ -382,6 +382,28 @@ namespace DIGOS.Ambassador.Doc
                 {
                     // Ugh, strings. Let's perform some simple heuristics...
                     // TODO: Improve this crap
+                    if (parameter.Name.Contains("Permission", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("DoTheThing");
+                        continue;
+                    }
+
+                    if
+                    (
+                        parameter.Name.Contains("Emote", StringComparison.OrdinalIgnoreCase) ||
+                        parameter.Name.Contains("Emoji", StringComparison.OrdinalIgnoreCase)
+                    )
+                    {
+                        exampleBuilder.Append(":thinking:");
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Kink", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("Doinking");
+                        continue;
+                    }
+
                     if (parameter.Name.Contains("Nickname", StringComparison.OrdinalIgnoreCase))
                     {
                         exampleBuilder.Append("John Doe".Quote());
@@ -391,12 +413,6 @@ namespace DIGOS.Ambassador.Doc
                     if (parameter.Name.Contains("Title", StringComparison.OrdinalIgnoreCase))
                     {
                         exampleBuilder.Append("My cool title".Quote());
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Name", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("John");
                         continue;
                     }
 
@@ -467,6 +483,12 @@ namespace DIGOS.Ambassador.Doc
                     )
                     {
                         exampleBuilder.Append("https://www.example.com");
+                        continue;
+                    }
+
+                    if (parameter.Name.Contains("Name", StringComparison.OrdinalIgnoreCase))
+                    {
+                        exampleBuilder.Append("John");
                         continue;
                     }
                 }
