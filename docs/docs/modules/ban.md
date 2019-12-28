@@ -11,7 +11,7 @@ Ban-related commands, such as viewing or editing info about a specific ban.
 ## Commands
 ### *list*
 #### Overloads
-**`!ban list "placeholder"`**
+**`!ban list @Ada`**
 
 Lists the bans attached to the given user.
 
@@ -23,7 +23,7 @@ Lists the bans attached to the given user.
 
 ### *ban*
 #### Overloads
-**`!ban "placeholder" "placeholder" 5m`**
+**`!ban @Ada "placeholder" 5m`**
 
 Bans the given user.
 

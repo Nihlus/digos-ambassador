@@ -15,7 +15,7 @@ Grant yourself the given permission.
 | permissionName | string | `no` |
 | revokedTarget | PermissionTarget | `yes` |
 
-**`!permission grant "placeholder" "placeholder" Self`**
+**`!permission grant @Ada "placeholder" Self`**
 
 Grant the targeted user the given permission.
 
@@ -25,7 +25,7 @@ Grant the targeted user the given permission.
 | permissionName | string | `no` |
 | grantedTarget | PermissionTarget | `yes` |
 
-**`!permission grant "placeholder" "placeholder" Self`**
+**`!permission grant @Moderators "placeholder" Self`**
 
 Grant the targeted role the given permission.
 

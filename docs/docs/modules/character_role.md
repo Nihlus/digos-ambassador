@@ -12,7 +12,7 @@ These commands are prefixed with `character role`. You can also use `char role` 
 
 ### *create*
 #### Overloads
-**`!character role create "placeholder" Open`**
+**`!character role create @Moderators Open`**
 
 Creates a new character role linked to a Discord role.
 
@@ -25,7 +25,7 @@ Creates a new character role linked to a Discord role.
 
 ### *delete*
 #### Overloads
-**`!character role delete "placeholder"` (as well as `character role remove` or `character role erase`)**
+**`!character role delete @Moderators` (as well as `character role remove` or `character role erase`)**
 
 Deletes the character role for a given discord role.
 
@@ -37,7 +37,7 @@ Deletes the character role for a given discord role.
 
 ### *access*
 #### Overloads
-**`!character role access "placeholder" Open`**
+**`!character role access @Moderators Open`**
 
 Sets the access conditions for the given role.
 
@@ -50,7 +50,7 @@ Sets the access conditions for the given role.
 
 ### *clear*
 #### Overloads
-**`!character role clear "placeholder"`**
+**`!character role clear mickey`**
 
 Clears the role from a character.
 

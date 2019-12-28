@@ -15,7 +15,7 @@ User-related commands, such as viewing or editing info about a specific user.
 
 Shows known information about the invoking user.
 
-**`!user info "placeholder"`**
+**`!user info @Ada`**
 
 Shows known information about the target user.
 

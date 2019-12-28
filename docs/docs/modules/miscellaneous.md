@@ -12,7 +12,7 @@ Assorted commands that don't really fit anywhere - just for fun, testing, etc.
 
 Instructs Amby to contact you over DM.
 
-**`!contact "placeholder"`**
+**`!contact @Ada`**
 
 Instructs Amby to contact a user over DM.
 
@@ -44,7 +44,7 @@ Bweh!
 
 Boops you.
 
-**`!boop "placeholder"`**
+**`!boop @Ada`**
 
 Boops the user.
 
@@ -60,7 +60,7 @@ Boops the user.
 
 Baps you.
 
-**`!bap "placeholder"`**
+**`!bap @Ada`**
 
 Baps the user.
 

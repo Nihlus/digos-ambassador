@@ -14,7 +14,7 @@ Sets the invoking user's bio.
 | --- | --- | --- |
 | bio | string | `no` |
 
-**`!user set bio "placeholder" "placeholder"`**
+**`!user set bio @Ada "placeholder"`**
 
 Sets the target user's bio.
 
@@ -35,7 +35,7 @@ Sets the invoking user's UTC timezone hour offset.
 | --- | --- | --- |
 | timezone | int | `no` |
 
-**`!user set timezone "placeholder" 10`**
+**`!user set timezone @Ada 10`**
 
 Sets the target user's UTC timezone hour offset.
 

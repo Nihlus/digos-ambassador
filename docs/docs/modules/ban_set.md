@@ -19,7 +19,7 @@ Sets the reason for the ban.
 
 ### *context-message*
 #### Overloads
-**`!ban set context-message 10 "placeholder"`**
+**`!ban set context-message 10 660204034829058070`**
 
 Sets the contextually relevant message for the ban.
 

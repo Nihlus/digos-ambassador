@@ -16,7 +16,7 @@ Commands for interacting with and managing channel roleplays.
 
 Shows information about the current roleplay.
 
-**`!roleplay show "placeholder"` (or `roleplay info`)**
+**`!roleplay show a-walk-in-the-park` (or `roleplay info`)**
 
 Shows information about the specified roleplay.
 
@@ -36,7 +36,7 @@ Lists all available roleplays in the server.
 
 ### *list-owned*
 #### Overloads
-**`!roleplay list-owned "placeholder"`**
+**`!roleplay list-owned @Ada`**
 
 Lists the roleplays that the given user owns.
 
@@ -63,7 +63,7 @@ Creates a new roleplay with the specified name.
 
 ### *delete*
 #### Overloads
-**`!roleplay delete "placeholder"`**
+**`!roleplay delete a-walk-in-the-park`**
 
 Deletes the specified roleplay.
 
@@ -75,7 +75,7 @@ Deletes the specified roleplay.
 
 ### *join*
 #### Overloads
-**`!roleplay join "placeholder"`**
+**`!roleplay join a-walk-in-the-park`**
 
 Joins the roleplay owned by the given person with the given name.
 
@@ -87,7 +87,7 @@ Joins the roleplay owned by the given person with the given name.
 
 ### *invite*
 #### Overloads
-**`!roleplay invite "placeholder" "placeholder"`**
+**`!roleplay invite @Ada a-walk-in-the-park`**
 
 Invites the specified user to the given roleplay.
 
@@ -100,7 +100,7 @@ Invites the specified user to the given roleplay.
 
 ### *leave*
 #### Overloads
-**`!roleplay leave "placeholder"`**
+**`!roleplay leave a-walk-in-the-park`**
 
 Leaves the roleplay owned by the given person with the given name.
 
@@ -112,7 +112,7 @@ Leaves the roleplay owned by the given person with the given name.
 
 ### *kick*
 #### Overloads
-**`!roleplay kick "placeholder" "placeholder"`**
+**`!roleplay kick @Ada a-walk-in-the-park`**
 
 Kicks the given user from the named roleplay.
 
@@ -125,7 +125,7 @@ Kicks the given user from the named roleplay.
 
 ### *channel*
 #### Overloads
-**`!roleplay channel "placeholder"`**
+**`!roleplay channel a-walk-in-the-park`**
 
 Makes the roleplay with the given name current in the current channel.
 
@@ -137,7 +137,7 @@ Makes the roleplay with the given name current in the current channel.
 
 ### *start*
 #### Overloads
-**`!roleplay start "placeholder"`**
+**`!roleplay start a-walk-in-the-park`**
 
 Starts the roleplay with the given name.
 
@@ -149,7 +149,7 @@ Starts the roleplay with the given name.
 
 ### *stop*
 #### Overloads
-**`!roleplay stop "placeholder"`**
+**`!roleplay stop a-walk-in-the-park`**
 
 Stops the given roleplay.
 
@@ -161,7 +161,7 @@ Stops the given roleplay.
 
 ### *include-previous*
 #### Overloads
-**`!roleplay include-previous "placeholder" "placeholder" "placeholder"`**
+**`!roleplay include-previous a-walk-in-the-park 660204034829058070 660204034829058070`**
 
 Includes previous messages into the roleplay, starting at the given message.
 
@@ -175,7 +175,7 @@ Includes previous messages into the roleplay, starting at the given message.
 
 ### *transfer-ownership*
 #### Overloads
-**`!roleplay transfer-ownership "placeholder" "placeholder"`**
+**`!roleplay transfer-ownership @Ada a-walk-in-the-park`**
 
 Transfers ownership of the named roleplay to the specified user.
 
@@ -188,7 +188,7 @@ Transfers ownership of the named roleplay to the specified user.
 
 ### *export*
 #### Overloads
-**`!roleplay export "placeholder" PDF`**
+**`!roleplay export a-walk-in-the-park PDF`**
 
  Exports the named roleplay owned by the given user, sending you a file with the contents.
 
@@ -201,7 +201,7 @@ Transfers ownership of the named roleplay to the specified user.
 
 ### *replay*
 #### Overloads
-**`!roleplay replay "placeholder" 5m 5m`**
+**`!roleplay replay a-walk-in-the-park 5m 5m`**
 
 Replays the named roleplay owned by the given user to you.
 
@@ -215,7 +215,7 @@ Replays the named roleplay owned by the given user to you.
 
 ### *view*
 #### Overloads
-**`!roleplay view "placeholder"`**
+**`!roleplay view a-walk-in-the-park`**
 
 Views the given roleplay, allowing you to read the channel.
 
@@ -227,7 +227,7 @@ Views the given roleplay, allowing you to read the channel.
 
 ### *hide*
 #### Overloads
-**`!roleplay hide "placeholder"`**
+**`!roleplay hide a-walk-in-the-park`**
 
 Hides the given roleplay.
 
@@ -247,7 +247,7 @@ Hides all roleplays in the server for the user.
 
 ### *refresh*
 #### Overloads
-**`!roleplay refresh "placeholder"`**
+**`!roleplay refresh a-walk-in-the-park`**
 
 Manually refreshes the given roleplay, resetting its last-updated time to now.
 
@@ -259,7 +259,7 @@ Manually refreshes the given roleplay, resetting its last-updated time to now.
 
 ### *move-to*
 #### Overloads
-**`!roleplay move-to "placeholder" "placeholder"` (as well as `roleplay copy-to` or `roleplay move`)**
+**`!roleplay move-to "placeholder" @Ada @Bea` (as well as `roleplay copy-to` or `roleplay move`)**
 
 Moves an ongoing roleplay outside of the bot's systems into a channel with the given name.
 

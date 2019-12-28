@@ -15,7 +15,7 @@ Revoke the given permission from yourself.
 | permissionName | string | `no` |
 | revokedTarget | PermissionTarget | `yes` |
 
-**`!permission revoke "placeholder" "placeholder" Self`**
+**`!permission revoke @Ada "placeholder" Self`**
 
 Revoke the given permission from the targeted user.
 
@@ -25,7 +25,7 @@ Revoke the given permission from the targeted user.
 | permissionName | string | `no` |
 | revokedTarget | PermissionTarget | `yes` |
 
-**`!permission revoke "placeholder" "placeholder" Self`**
+**`!permission revoke @Moderators "placeholder" Self`**
 
 Revoke the given permission from the targeted role.
 

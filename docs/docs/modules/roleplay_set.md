@@ -6,7 +6,7 @@ These commands are prefixed with `roleplay set`. You can also use `rp set` inste
 ## Commands
 ### *name*
 #### Overloads
-**`!roleplay set name "placeholder" "placeholder"`**
+**`!roleplay set name "placeholder" a-walk-in-the-park`**
 
 Sets the new name of the named roleplay.
 
@@ -19,7 +19,7 @@ Sets the new name of the named roleplay.
 
 ### *summary*
 #### Overloads
-**`!roleplay set summary "placeholder" "placeholder"`**
+**`!roleplay set summary "placeholder" a-walk-in-the-park`**
 
 Sets the summary of the named roleplay.
 
@@ -32,7 +32,7 @@ Sets the summary of the named roleplay.
 
 ### *nsfw*
 #### Overloads
-**`!roleplay set nsfw true "placeholder"`**
+**`!roleplay set nsfw true a-walk-in-the-park`**
 
 Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.
 
@@ -45,7 +45,7 @@ Sets a value indicating whether or not the named roleplay is NSFW. This restrict
 
 ### *private*
 #### Overloads
-**`!roleplay set private true "placeholder"`**
+**`!roleplay set private true a-walk-in-the-park`**
 
 Sets a value indicating whether or not the named roleplay is private. This restricts replays to participants.
 
@@ -58,7 +58,7 @@ Sets a value indicating whether or not the named roleplay is private. This restr
 
 ### *public*
 #### Overloads
-**`!roleplay set public true "placeholder"`**
+**`!roleplay set public true a-walk-in-the-park`**
 
 Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.
 

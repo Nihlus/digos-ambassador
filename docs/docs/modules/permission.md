@@ -24,7 +24,7 @@ Lists all available permissions.
 
 Lists all permissions that have been granted to the invoking user.
 
-**`!permission list-granted "placeholder"`**
+**`!permission list-granted @Ada`**
 
 Lists all permissions that have been granted to target user.
 

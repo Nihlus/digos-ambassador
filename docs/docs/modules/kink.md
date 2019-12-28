@@ -28,7 +28,7 @@ Shows your preference for the named kink.
 | --- | --- | --- |
 | name | string | `no` |
 
-**`!kink show "placeholder" "placeholder"` (or `kink preference`)**
+**`!kink show @Ada "placeholder"` (or `kink preference`)**
 
 Shows the user's preference for the named kink.
 
@@ -41,7 +41,7 @@ Shows the user's preference for the named kink.
 
 ### *overlap*
 #### Overloads
-**`!kink overlap "placeholder"`**
+**`!kink overlap @Ada`**
 
 Shows the kinks which overlap between you and the given user.
 
@@ -61,7 +61,7 @@ Shows your kinks with the given preference.
 | --- | --- | --- |
 | preference | KinkPreference | `no` |
 
-**`!kink by-preference "placeholder" "No preference"`**
+**`!kink by-preference @Ada "No preference"`**
 
 Shows the given user's kinks with the given preference.
 

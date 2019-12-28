@@ -24,7 +24,7 @@ Shows available pronoun families that can be used with characters.
 
 Shows quick information about your current character.
 
-**`!character show "placeholder"` (or `character info`)**
+**`!character show mickey` (or `character info`)**
 
 Shows quick information about a character.
 
@@ -40,7 +40,7 @@ Shows quick information about a character.
 
 Shows a gallery of all your characters.
 
-**`!character view-characters "placeholder"` (or `character view-char`)**
+**`!character view-characters @Ada` (or `character view-char`)**
 
 Shows a gallery of all the user's characters.
 
@@ -68,7 +68,7 @@ Creates a new character.
 
 ### *delete*
 #### Overloads
-**`!character delete "placeholder"`**
+**`!character delete mickey`**
 
 Deletes the named character.
 
@@ -80,7 +80,7 @@ Deletes the named character.
 
 ### *list-owned*
 #### Overloads
-**`!character list-owned "placeholder"` (as well as `character list` or `character owned`)**
+**`!character list-owned @Ada` (as well as `character list` or `character owned`)**
 
 Lists the characters owned by a given user.
 
@@ -100,7 +100,7 @@ Switches the user's current character to a different one, picked at random.
 
 ### *assume*
 #### Overloads
-**`!character assume "placeholder"` (as well as `character become`, `character transform`, or `character active`)**
+**`!character assume mickey` (as well as `character become`, `character transform`, or `character active`)**
 
 Sets the named character as the user's current character.
 
@@ -128,7 +128,7 @@ Clears any active characters from you, restoring your default form.
 
 ### *view-gallery*
 #### Overloads
-**`!character view-gallery "placeholder"` (or `character gallery`)**
+**`!character view-gallery mickey` (or `character gallery`)**
 
 View the images in a character's gallery.
 
@@ -140,7 +140,7 @@ View the images in a character's gallery.
 
 ### *list-images*
 #### Overloads
-**`!character list-images "placeholder"`**
+**`!character list-images mickey`**
 
 Lists the images in a character's gallery.
 
@@ -152,7 +152,7 @@ Lists the images in a character's gallery.
 
 ### *add-image*
 #### Overloads
-**`!character add-image "placeholder" "placeholder" "placeholder" true`**
+**`!character add-image mickey "placeholder" "placeholder" true`**
 
 Adds an attached image to a character's gallery.
 
@@ -163,7 +163,7 @@ Adds an attached image to a character's gallery.
 | imageCaption | string | `yes` |
 | isNSFW | bool | `yes` |
 
-**`!character add-image "placeholder" "placeholder" "placeholder" "placeholder" true`**
+**`!character add-image mickey "placeholder" "placeholder" "placeholder" true`**
 
 Adds a linked image to a character's gallery.
 
@@ -179,7 +179,7 @@ Adds a linked image to a character's gallery.
 
 ### *remove-image*
 #### Overloads
-**`!character remove-image "placeholder" "placeholder"` (or `character delete-image`)**
+**`!character remove-image mickey "placeholder"` (or `character delete-image`)**
 
 Removes an image from a character's gallery.
 
@@ -192,7 +192,7 @@ Removes an image from a character's gallery.
 
 ### *transfer-ownership*
 #### Overloads
-**`!character transfer-ownership "placeholder" "placeholder"` (or `character transfer`)**
+**`!character transfer-ownership @Ada mickey` (or `character transfer`)**
 
 Transfers ownership of the named character to another user.
 

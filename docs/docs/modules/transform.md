@@ -27,7 +27,7 @@ Transforms the given bodypart into the given species on yourself.
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
-**`!transform "placeholder" Hair "placeholder"`**
+**`!transform @Ada Hair "placeholder"`**
 
 Transforms the given bodypart of the target user into the given species.
 
@@ -37,7 +37,7 @@ Transforms the given bodypart of the target user into the given species.
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
-**`!transform "placeholder" Center Hair "placeholder"`**
+**`!transform @Ada Center Hair "placeholder"`**
 
 Transforms the given bodypart of the target user into the given species.
 
@@ -52,7 +52,7 @@ Transforms the given bodypart of the target user into the given species.
 
 ### *colour*
 #### Overloads
-**`!transform colour Center Hair "placeholder"`**
+**`!transform colour Center Hair "deep purple"`**
 
 Transforms the base colour of the given bodypart on yourself into the given colour.
 
@@ -62,7 +62,7 @@ Transforms the base colour of the given bodypart on yourself into the given colo
 | bodypart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-**`!transform colour Hair "placeholder"`**
+**`!transform colour Hair "deep purple"`**
 
 Transforms the base colour of the given bodypart on yourself into the given colour.
 
@@ -71,7 +71,7 @@ Transforms the base colour of the given bodypart on yourself into the given colo
 | bodypart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-**`!transform colour "placeholder" Hair "placeholder"`**
+**`!transform colour @Ada Hair "deep purple"`**
 
 Transforms the base colour of the given bodypart on the target user into the given colour.
 
@@ -81,7 +81,7 @@ Transforms the base colour of the given bodypart on the target user into the giv
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-**`!transform colour "placeholder" Center Hair "placeholder"`**
+**`!transform colour @Ada Center Hair "deep purple"`**
 
 Transforms the base colour of the given bodypart on the target user into the given colour.
 
@@ -96,7 +96,7 @@ Transforms the base colour of the given bodypart on the target user into the giv
 
 ### *pattern*
 #### Overloads
-**`!transform pattern Hair Striped "placeholder"`**
+**`!transform pattern Hair Striped "deep purple"`**
 
 Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.
 
@@ -106,7 +106,7 @@ Transforms the pattern on the given bodypart on yourself into the given pattern 
 | pattern | Pattern | `no` |
 | colour | Colour | `no` |
 
-**`!transform pattern Center Hair Striped "placeholder"`**
+**`!transform pattern Center Hair Striped "deep purple"`**
 
 Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.
 
@@ -117,7 +117,7 @@ Transforms the pattern on the given bodypart on yourself into the given pattern 
 | pattern | Pattern | `no` |
 | colour | Colour | `no` |
 
-**`!transform pattern "placeholder" Hair Striped "placeholder"`**
+**`!transform pattern @Ada Hair Striped "deep purple"`**
 
 Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
 
@@ -128,7 +128,7 @@ Transforms the pattern on the given bodypart on the target user into the given p
 | pattern | Pattern | `no` |
 | colour | Colour | `no` |
 
-**`!transform pattern "placeholder" Center Hair Striped "placeholder"`**
+**`!transform pattern @Ada Center Hair Striped "deep purple"`**
 
 Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
 
@@ -144,7 +144,7 @@ Transforms the pattern on the given bodypart on the target user into the given p
 
 ### *pattern-colour*
 #### Overloads
-**`!transform pattern-colour Center Hair "placeholder"`**
+**`!transform pattern-colour Center Hair "deep purple"`**
 
 Transforms the colour of the pattern on the given bodypart on yourself to the given colour.
 
@@ -154,7 +154,7 @@ Transforms the colour of the pattern on the given bodypart on yourself to the gi
 | bodypart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-**`!transform pattern-colour Hair "placeholder"`**
+**`!transform pattern-colour Hair "deep purple"`**
 
 Transforms the colour of the pattern on the given bodypart on yourself to the given colour.
 
@@ -163,7 +163,7 @@ Transforms the colour of the pattern on the given bodypart on yourself to the gi
 | bodypart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-**`!transform pattern-colour "placeholder" Hair "placeholder"`**
+**`!transform pattern-colour @Ada Hair "deep purple"`**
 
 Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
 
@@ -173,7 +173,7 @@ Transforms the colour of the pattern on the given bodypart on the target user to
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
 
-**`!transform pattern-colour "placeholder" Center Hair "placeholder"`**
+**`!transform pattern-colour @Ada Center Hair "deep purple"`**
 
 Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
 
@@ -240,7 +240,7 @@ Lists the available patterns.
 
 Describes the current physical appearance of the current character.
 
-**`!transform describe "placeholder"`**
+**`!transform describe mickey`**
 
 Describes the current physical appearance of a character.
 
@@ -320,7 +320,7 @@ Sets your protection type for transformations. Available types are Whitelist and
 
 ### *whitelist*
 #### Overloads
-**`!transform whitelist "placeholder"`**
+**`!transform whitelist @Ada`**
 
 Whitelists a user, allowing them to transform you.
 
@@ -332,7 +332,7 @@ Whitelists a user, allowing them to transform you.
 
 ### *blacklist*
 #### Overloads
-**`!transform blacklist "placeholder"`**
+**`!transform blacklist @Ada`**
 
 Blacklists a user, preventing them from transforming you.
 

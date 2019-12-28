@@ -11,7 +11,7 @@ Warning-related commands, such as viewing or editing info about a specific warni
 ## Commands
 ### *list*
 #### Overloads
-**`!warning list "placeholder"`**
+**`!warning list @Ada`**
 
 Lists the warnings attached to the given user.
 
@@ -23,7 +23,7 @@ Lists the warnings attached to the given user.
 
 ### *warning*
 #### Overloads
-**`!warning "placeholder" "placeholder" 5m`**
+**`!warning @Ada "placeholder" 5m`**
 
 Adds a warning to the given user.
 
