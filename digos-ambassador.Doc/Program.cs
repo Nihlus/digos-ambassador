@@ -24,6 +24,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
+using DIGOS.Ambassador.Doc.Abstractions;
 using DIGOS.Ambassador.Doc.Data;
 using Mono.Cecil;
 
@@ -59,7 +60,22 @@ namespace DIGOS.Ambassador.Doc
             var modules = _options.AssemblyPaths.Select
             (
                 ap => ModuleDefinition.ReadModule(ap, new ReaderParameters { AssemblyResolver = resolver })
-            );
+            ).ToArray();
+
+            var placeholderDataAttributes = modules
+                .Where(m => m.Assembly.HasCustomAttributes)
+                .SelectMany(m => m.Assembly.CustomAttributes)
+                .Where(c => c.AttributeType.FullName == typeof(PlaceholderDataAttribute).FullName);
+
+            foreach (var placeholderDataAttribute in placeholderDataAttributes)
+            {
+                var dataType = ((TypeReference)placeholderDataAttribute.ConstructorArguments[0].Value).Resolve();
+                var placeholders = ((CustomAttributeArgument[])placeholderDataAttribute.ConstructorArguments[1].Value)
+                    .Select(a => (string)a.Value).ToArray();
+
+                placeholderData.RegisterPlaceholderData(dataType, placeholders);
+            }
+
             var generator = new ModuleDocumentationGenerator(modules, _options.OutputPath, placeholderData);
             await generator.GenerateDocumentationAsync();
         }

@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
+    <ProjectReference Include="..\DIGOS.Ambassador.Doc.Abstractions\DIGOS.Ambassador.Doc.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>
