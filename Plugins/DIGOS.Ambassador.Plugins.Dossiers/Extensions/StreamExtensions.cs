@@ -26,7 +26,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Core.Extensions
+namespace DIGOS.Ambassador.Plugins.Dossiers.Extensions
 {
     /// <summary>
     /// Extension methods for streams.

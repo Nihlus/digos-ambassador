@@ -10,4 +10,8 @@
         <PackageReference Include="Zio" Version="0.7.4" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Utility" />
+    </ItemGroup>
+
 </Project>

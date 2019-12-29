@@ -23,7 +23,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DIGOS.Ambassador.Core.Utility
+namespace DIGOS.Ambassador.Plugins.Characters.Utility
 {
     /// <summary>
     /// Compares strings on a case-insensitive basis.
