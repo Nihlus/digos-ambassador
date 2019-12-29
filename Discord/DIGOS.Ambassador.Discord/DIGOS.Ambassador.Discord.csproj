@@ -7,6 +7,7 @@
 
     <ItemGroup>
         <PackageReference Include="Discord.Net.Core" Version="2.1.1" />
+        <PackageReference Include="Remora.Results" Version="1.0.3" />
     </ItemGroup>
 
 </Project>
