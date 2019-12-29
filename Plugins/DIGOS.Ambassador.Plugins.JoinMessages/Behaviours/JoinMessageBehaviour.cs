@@ -114,7 +114,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Behaviours
 
                 try
                 {
-                    await _feedback.SendEmbedAsync(user.Guild.DefaultChannel, welcomeMessage);
+                    await _feedback.SendEmbedAsync(user.Guild.SystemChannel, welcomeMessage);
                 }
                 catch (HttpException pex)
                 {
