@@ -30,7 +30,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using YamlDotNet.Serialization.NodeDeserializers;
 
-namespace DIGOS.Ambassador.Tools
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
     /// <summary>
     /// Verifies transformation content files.

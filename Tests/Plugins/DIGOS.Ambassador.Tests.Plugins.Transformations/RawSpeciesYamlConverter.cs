@@ -27,7 +27,7 @@ using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;
 
-namespace DIGOS.Ambassador.Tools
+namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 {
     /// <summary>
     /// YAML deserialization converter for species objects. This just reads a dummy type to allow file verification.
