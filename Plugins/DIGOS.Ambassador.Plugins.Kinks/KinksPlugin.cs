@@ -23,7 +23,6 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.TypeReaders.Extensions;
 using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Kinks;
