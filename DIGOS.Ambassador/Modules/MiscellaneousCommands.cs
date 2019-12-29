@@ -307,7 +307,7 @@ namespace DIGOS.Ambassador.Modules
                 "namely, roleplaying, transformation, weird and wonderful sexual kinks, and much more.\n" +
                 "\n" +
                 "Amby is free and open source software, licensed under the AGPLv3. All of her source code can be freely " +
-                "viewed and improved on Github at https://github.com/Nihlus/digos-ambassador. You are free to " +
+                "viewed and improved on Github at https://github.com/Nihlus/DIGOS.Ambassador. You are free to " +
                 "run your own instance of Amby, redistribute her code, and modify it to your heart's content. If you're " +
                 "not familiar with the AGPL, an excellent summary is available here: " +
                 "https://choosealicense.com/licenses/agpl-3.0/.\n" +

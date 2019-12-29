@@ -31,10 +31,10 @@
         <IncludeSymbols>true</IncludeSymbols>
         <IncludeSource>true</IncludeSource>
 
-        <RepositoryUrl>https://github.com/Nihlus/digos-ambassador</RepositoryUrl>
+        <RepositoryUrl>https://github.com/Nihlus/DIGOS.Ambassador</RepositoryUrl>
         <RepositoryBranch>master</RepositoryBranch>
         <PackageOutputPath>$(SolutionDir)/nuget</PackageOutputPath>
-        <PackageProjectUrl>https://github.com/Nihlus/digos-ambassador</PackageProjectUrl>
+        <PackageProjectUrl>https://github.com/Nihlus/DIGOS.Ambassador</PackageProjectUrl>
         <PackageTags>digos;discord;bot;lewd;modular;</PackageTags>
     </PropertyGroup>
 

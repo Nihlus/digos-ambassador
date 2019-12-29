@@ -98,12 +98,12 @@ namespace DIGOS.Ambassador.Core.Services
 
             this.FileSystem = fileSystem;
 
-            this.BaseRemoteUri = new Uri("https://raw.githubusercontent.com/Nihlus/digos-ambassador/master/");
-            this.BaseRemoteContentUri = new Uri(this.BaseRemoteUri, "digos-ambassador/Content/");
+            this.BaseRemoteUri = new Uri("https://raw.githubusercontent.com/Nihlus/DIGOS.Ambassador/master/");
+            this.BaseRemoteContentUri = new Uri(this.BaseRemoteUri, "DIGOS.Ambassador/Content/");
 
             this.AutomaticBugReportCreationUri = new Uri
             (
-                "https://github.com/Nihlus/digos-ambassador/issues/new?template=automated-bug-report.md"
+                "https://github.com/Nihlus/DIGOS.Ambassador/issues/new?template=automated-bug-report.md"
             );
 
             this.AmbyPortraitUri = new Uri(this.BaseRemoteContentUri, "Portraits/amby-irbynx-3.png");

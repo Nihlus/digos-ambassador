@@ -7,8 +7,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.0;netstandard2.1</TargetFrameworks>
-    <RootNamespace>DIGOS.Ambassador.Doc</RootNamespace>
-    <AssemblyName>DIGOS.Ambassador.Doc</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

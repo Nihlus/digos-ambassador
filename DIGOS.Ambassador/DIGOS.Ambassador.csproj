@@ -7,8 +7,6 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <RootNamespace>DIGOS.Ambassador</RootNamespace>
-    <AssemblyName>DIGOS.Ambassador</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -49,7 +47,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <DocGeneratorAssembly>$(SolutionDir)\digos-ambassador.Doc\bin\Debug\netcoreapp3.0\DIGOS.Ambassador.Doc.dll</DocGeneratorAssembly>
+    <DocGeneratorAssembly>$(SolutionDir)\DIGOS.Ambassador.Doc\bin\Debug\netcoreapp3.0\DIGOS.Ambassador.Doc.dll</DocGeneratorAssembly>
     <DocGenerator>dotnet $(DocGeneratorAssembly)</DocGenerator>
   </PropertyGroup>
 
