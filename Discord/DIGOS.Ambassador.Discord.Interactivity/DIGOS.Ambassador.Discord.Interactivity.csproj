@@ -8,10 +8,10 @@
     <ItemGroup>
         <PackageReference Include="Discord.Net.Core" Version="2.1.1" />
         <PackageReference Include="Remora.Discord.Behaviours" Version="1.0.0" />
+        <PackageReference Include="Remora.Results" Version="1.0.3" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
       <ProjectReference Include="..\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />
       <ProjectReference Include="..\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
     </ItemGroup>
