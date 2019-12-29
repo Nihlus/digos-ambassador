@@ -47,6 +47,7 @@
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Permissions\DIGOS.Ambassador.Plugins.Permissions.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Quotes\DIGOS.Ambassador.Plugins.Quotes.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Roleplaying\DIGOS.Ambassador.Plugins.Roleplaying.csproj" />
+    <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Statistics\DIGOS.Ambassador.Plugins.Statistics.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Transformations\DIGOS.Ambassador.Plugins.Transformations.csproj" />
   </ItemGroup>
 

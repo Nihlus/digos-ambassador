@@ -1,5 +1,5 @@
 //
-//  JumboEmotesPlugin.cs
+//  StatisticsPlugin.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -22,35 +22,35 @@
 
 using System;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.JumboEmotes;
-using DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules;
+using DIGOS.Ambassador.Plugins.Statistics;
+using DIGOS.Ambassador.Plugins.Statistics.CommandModules;
 using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 
-[assembly: RemoraPlugin(typeof(JumboEmotesPlugin))]
+[assembly: RemoraPlugin(typeof(StatisticsPlugin))]
 
-namespace DIGOS.Ambassador.Plugins.JumboEmotes
+namespace DIGOS.Ambassador.Plugins.Statistics
 {
     /// <summary>
-    /// Describes the JumboEmotes plugin.
+    /// Describes the Statistics plugin.
     /// </summary>
     [PublicAPI]
-    public sealed class JumboEmotesPlugin : PluginDescriptor
+    public sealed class StatisticsPlugin : PluginDescriptor
     {
         /// <inheritdoc />
-        public override string Name => "JumboEmotes";
+        public override string Name => "Statistics";
 
         /// <inheritdoc />
-        public override string Description => "Provides a command for jumbofying emotes.";
+        public override string Description => "Provides various commands for view statistics about the bot.";
 
         /// <inheritdoc />
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
-            await commands.AddModuleAsync<JumboCommands>(serviceProvider);
+            await commands.AddModuleAsync<StatCommands>(serviceProvider);
 
             return true;
         }

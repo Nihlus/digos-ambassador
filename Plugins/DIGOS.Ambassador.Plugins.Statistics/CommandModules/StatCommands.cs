@@ -28,13 +28,12 @@ using DIGOS.Ambassador.Discord.Pagination;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
 using JetBrains.Annotations;
 using static Discord.Commands.ContextType;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Modules
+namespace DIGOS.Ambassador.Plugins.Statistics.CommandModules
 {
     /// <summary>
     /// Various statistics-related commands.
