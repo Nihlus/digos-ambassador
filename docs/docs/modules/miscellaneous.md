@@ -70,18 +70,6 @@ Baps the user.
 
 ---
 
-### *jumbo*
-#### Overloads
-**`!jumbo :thinking:`**
-
-Sends a jumbo version of the given emote to the chat, if available.
-
-| Name | Type | Optional |
-| --- | --- | --- |
-| emoteName | string | `no` |
-
----
-
 ### *info*
 #### Overloads
 **`!info` (as well as `information` or `about`)**

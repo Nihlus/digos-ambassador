@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Version>1.0.0</Version>
+        <Description>Provides a command for jumbofying emotes.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
+      <PackageReference Include="Remora.Plugins.Abstractions" Version="1.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
+    </ItemGroup>
+
+</Project>

@@ -20,15 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.EmojiTools;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -173,76 +168,6 @@ namespace DIGOS.Ambassador.Modules
         public async Task BapAsync()
         {
             await _feedback.SendConfirmationAsync(this.Context, "**baps**");
-        }
-
-        /// <summary>
-        /// Sends a jumbo version of the given emote to the chat, if available.
-        /// </summary>
-        /// <param name="emoteName">The emote.</param>
-        [UsedImplicitly]
-        [Command("jumbo")]
-        [Summary("Sends a jumbo version of the given emote to the chat, if available.")]
-        public async Task JumboAsync(string emoteName)
-        {
-            string emoteUrl;
-
-            var guildEmote = this.Context.Guild?.Emotes.FirstOrDefault
-            (
-                e => e.Name.Equals(emoteName, StringComparison.OrdinalIgnoreCase)
-            );
-
-            if (!(guildEmote is null))
-            {
-                emoteUrl = guildEmote.Url;
-            }
-            else if (Emote.TryParse(emoteName, out var emote))
-            {
-                emoteUrl = emote.Url;
-            }
-            else
-            {
-                if (EmojiMap.Map.TryGetValue(emoteName, out var mappedEmote))
-                {
-                    emoteName = mappedEmote;
-                }
-
-                var hexValues = new List<string>();
-                for (var i = 0; i < emoteName.Length; ++i)
-                {
-                    var codepoint = char.ConvertToUtf32(emoteName, i);
-                    var codepointHex = codepoint.ToString("x");
-
-                    hexValues.Add(codepointHex);
-
-                    // ConvertToUtf32() might have parsed an extra character as some characters are combinations of two
-                    // 16-bit characters which start at 0x00d800 and end at 0x00dfff (Called surrogate low and surrogate
-                    // high)
-                    //
-                    // If the character is in this span, we have already essentially parsed the next index of the string
-                    // as well. Therefore we make sure to skip the next one.
-                    if (char.IsSurrogate(emoteName, i))
-                    {
-                        ++i;
-                    }
-                }
-
-                var emojiCode = string.Join("-", hexValues);
-                emoteUrl = $"https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/{emojiCode}.png";
-            }
-
-            using var client = new HttpClient();
-            var response = await client.GetAsync(emoteUrl, HttpCompletionOption.ResponseHeadersRead);
-            if (response.IsSuccessStatusCode)
-            {
-                var eb = _feedback.CreateEmbedBase();
-                eb.WithImageUrl(emoteUrl);
-
-                await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
-            }
-            else
-            {
-                await _feedback.SendWarningAsync(this.Context, "Sorry, I couldn't find that emote.");
-            }
         }
 
         /// <summary>

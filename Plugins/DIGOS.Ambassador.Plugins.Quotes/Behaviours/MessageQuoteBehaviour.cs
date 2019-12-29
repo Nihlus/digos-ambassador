@@ -30,14 +30,13 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
-
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
 
-namespace DIGOS.Ambassador.Behaviours
+namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
 {
     /// <summary>
     /// Generates quotes from message links. Based on code from MODiX.

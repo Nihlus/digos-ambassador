@@ -32,7 +32,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
 
-namespace DIGOS.Ambassador.Behaviours
+namespace DIGOS.Ambassador.Plugins.JoinMessages.Behaviours
 {
     /// <summary>
     /// Acts on user joins, sending them the server's join message.

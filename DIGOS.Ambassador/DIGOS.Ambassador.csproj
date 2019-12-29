@@ -40,9 +40,12 @@
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Dossiers\DIGOS.Ambassador.Plugins.Dossiers.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Help\DIGOS.Ambassador.Plugins.Help.csproj" />
+    <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.JoinMessages\DIGOS.Ambassador.Plugins.JoinMessages.csproj" />
+    <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.JumboEmotes\DIGOS.Ambassador.Plugins.JumboEmotes.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Kinks\DIGOS.Ambassador.Plugins.Kinks.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Moderation\DIGOS.Ambassador.Plugins.Moderation.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Permissions\DIGOS.Ambassador.Plugins.Permissions.csproj" />
+    <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Quotes\DIGOS.Ambassador.Plugins.Quotes.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Roleplaying\DIGOS.Ambassador.Plugins.Roleplaying.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Transformations\DIGOS.Ambassador.Plugins.Transformations.csproj" />
   </ItemGroup>

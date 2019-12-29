@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Version>1.0.0</Version>
+        <Description>Provides automatic sending of messages to new users.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Remora.Behaviours" Version="1.2.0" />
+      <PackageReference Include="Remora.Discord.Behaviours" Version="1.0.0" />
+      <PackageReference Include="Remora.Plugins.Abstractions" Version="1.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />
+      <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
+      <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
+    </ItemGroup>
+
+</Project>

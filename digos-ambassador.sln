@@ -85,6 +85,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Doc.Abstra
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Plugins.Help", "Plugins\DIGOS.Ambassador.Plugins.Help\DIGOS.Ambassador.Plugins.Help.csproj", "{59E8A63B-7AE4-4D1B-8203-B3B42D4517D7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Plugins.Quotes", "Plugins\DIGOS.Ambassador.Plugins.Quotes\DIGOS.Ambassador.Plugins.Quotes.csproj", "{62716278-3A04-4520-8B12-FE86A4D9EC06}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Plugins.JoinMessages", "Plugins\DIGOS.Ambassador.Plugins.JoinMessages\DIGOS.Ambassador.Plugins.JoinMessages.csproj", "{EAB41C3C-5800-4CA6-B17B-46AF4ACA4FBB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Plugins.JumboEmotes", "Plugins\DIGOS.Ambassador.Plugins.JumboEmotes\DIGOS.Ambassador.Plugins.JumboEmotes.csproj", "{41E009B9-DAE7-4B12-99CC-D73CD528D7FA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -207,6 +213,18 @@ Global
 		{59E8A63B-7AE4-4D1B-8203-B3B42D4517D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59E8A63B-7AE4-4D1B-8203-B3B42D4517D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59E8A63B-7AE4-4D1B-8203-B3B42D4517D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62716278-3A04-4520-8B12-FE86A4D9EC06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62716278-3A04-4520-8B12-FE86A4D9EC06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62716278-3A04-4520-8B12-FE86A4D9EC06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62716278-3A04-4520-8B12-FE86A4D9EC06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAB41C3C-5800-4CA6-B17B-46AF4ACA4FBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAB41C3C-5800-4CA6-B17B-46AF4ACA4FBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAB41C3C-5800-4CA6-B17B-46AF4ACA4FBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAB41C3C-5800-4CA6-B17B-46AF4ACA4FBB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41E009B9-DAE7-4B12-99CC-D73CD528D7FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41E009B9-DAE7-4B12-99CC-D73CD528D7FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41E009B9-DAE7-4B12-99CC-D73CD528D7FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41E009B9-DAE7-4B12-99CC-D73CD528D7FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -240,5 +258,8 @@ Global
 		{7CE2854B-3903-46E5-B5F9-E96E9C307E47} = {4A182B87-C1AD-49B5-A162-86AEFACCE002}
 		{044207BC-7742-4157-B619-0DF631285F7F} = {D01849C4-E9C7-4BB8-BFDF-970FE307C82A}
 		{59E8A63B-7AE4-4D1B-8203-B3B42D4517D7} = {4A182B87-C1AD-49B5-A162-86AEFACCE002}
+		{62716278-3A04-4520-8B12-FE86A4D9EC06} = {4A182B87-C1AD-49B5-A162-86AEFACCE002}
+		{EAB41C3C-5800-4CA6-B17B-46AF4ACA4FBB} = {4A182B87-C1AD-49B5-A162-86AEFACCE002}
+		{41E009B9-DAE7-4B12-99CC-D73CD528D7FA} = {4A182B87-C1AD-49B5-A162-86AEFACCE002}
 	EndGlobalSection
 EndGlobal
