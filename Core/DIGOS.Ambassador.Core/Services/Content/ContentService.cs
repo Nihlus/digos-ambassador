@@ -55,12 +55,7 @@ namespace DIGOS.Ambassador.Core.Services
         /// <summary>
         /// Gets the base remote content URI.
         /// </summary>
-        public Uri BaseRemoteUri { get; }
-
-        /// <summary>
-        /// Gets the base remote content URI.
-        /// </summary>
-        public Uri BaseRemoteContentUri { get; }
+        public Uri BaseCDNUri { get; }
 
         /// <summary>
         /// Gets the <see cref="Uri"/> pointing to a portrait of Amby.
@@ -98,18 +93,17 @@ namespace DIGOS.Ambassador.Core.Services
 
             this.FileSystem = fileSystem;
 
-            this.BaseRemoteUri = new Uri("https://raw.githubusercontent.com/Nihlus/DIGOS.Ambassador/master/");
-            this.BaseRemoteContentUri = new Uri(this.BaseRemoteUri, "DIGOS.Ambassador/Content/");
+            this.BaseCDNUri = new Uri("https://cdn.gullberg.tk/amby/");
 
             this.AutomaticBugReportCreationUri = new Uri
             (
                 "https://github.com/Nihlus/DIGOS.Ambassador/issues/new?template=automated-bug-report.md"
             );
 
-            this.AmbyPortraitUri = new Uri(this.BaseRemoteContentUri, "Portraits/amby-irbynx-3.png");
-            this.BrokenAmbyUri = new Uri(this.BaseRemoteContentUri, "Portraits/maintenance.png");
-            this.BwehUri = new Uri(this.BaseRemoteContentUri, "Portraits/bweh.png");
-            this.PrivacyPolicyUri = new Uri(this.BaseRemoteContentUri, "Privacy/PrivacyPolicy.pdf");
+            this.AmbyPortraitUri = new Uri(this.BaseCDNUri, "portraits/amby-irbynx-3.png");
+            this.BrokenAmbyUri = new Uri(this.BaseCDNUri, "portraits/maintenance.png");
+            this.BwehUri = new Uri(this.BaseCDNUri, "portraits/bweh.png");
+            this.PrivacyPolicyUri = new Uri(this.BaseCDNUri, "privacy/PrivacyPolicy.pdf");
 
             this.DatabaseCredentialsPath = UPath.Combine(UPath.Root, "Database", "database.credentials");
         }

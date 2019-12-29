@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Extensions
     [PublicAPI]
     public static class ContentServiceExtensions
     {
-        private static string DefaultAvatar { get; } = "Avatars/Discord_DIGOS.png";
+        private static string DefaultAvatar { get; } = "avatars/Discord_DIGOS.png";
 
         /// <summary>
         /// Gets the default avatar URI for characters.
@@ -41,7 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Extensions
         /// <returns>The default avatar URI.</returns>
         public static Uri GetDefaultAvatarUri(this ContentService @this)
         {
-            return new Uri(@this.BaseRemoteUri, $"Plugins/DIGOS.Ambassador.Characters/Content/{DefaultAvatar}");
+            return new Uri(@this.BaseCDNUri, $"plugins/characters/{DefaultAvatar}");
         }
     }
 }
