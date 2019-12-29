@@ -32,7 +32,7 @@ using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Plugins.Help.Services;
 using Discord;
 using Discord.Commands;
 using Discord.Net;

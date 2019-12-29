@@ -31,7 +31,6 @@ using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Plugins.Abstractions.Database;
-using DIGOS.Ambassador.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -109,7 +108,6 @@ namespace DIGOS.Ambassador
                 .AddSingleton<UserFeedbackService>()
                 .AddSingleton<InteractivityService>()
                 .AddSingleton<DelayedActionService>()
-                .AddSingleton<HelpService>()
                 .AddSingleton<Random>()
                 .AddSingleton(pluginService)
                 .AddSingleton<SchemaAwareDbContextService>()

@@ -28,13 +28,12 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Plugins.Kinks.Extensions;
-using DIGOS.Ambassador.Services;
-using DIGOS.Ambassador.Wizards;
+using DIGOS.Ambassador.Plugins.Help.Services;
+using DIGOS.Ambassador.Plugins.Help.Wizards;
 using Discord.Commands;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Modules
+namespace DIGOS.Ambassador.Plugins.Help.CommandModules
 {
     /// <summary>
     /// Help-related commands that explain other commands or modules.

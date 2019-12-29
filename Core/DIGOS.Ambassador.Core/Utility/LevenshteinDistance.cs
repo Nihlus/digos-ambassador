@@ -23,7 +23,7 @@
 using System;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Kinks.Utility
+namespace DIGOS.Ambassador.Core.Utility
 {
     /// <summary>
     /// Contains approximate string matching functions.

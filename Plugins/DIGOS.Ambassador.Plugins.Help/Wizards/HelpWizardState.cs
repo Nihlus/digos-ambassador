@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Wizards
+namespace DIGOS.Ambassador.Plugins.Help.Wizards
 {
     /// <summary>
     /// Defines the various states the help wizard can be in.

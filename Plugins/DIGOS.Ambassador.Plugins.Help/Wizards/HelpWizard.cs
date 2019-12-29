@@ -25,23 +25,21 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Plugins.Kinks.Extensions;
-using DIGOS.Ambassador.Services;
+using DIGOS.Ambassador.Plugins.Help.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
 using JetBrains.Annotations;
 using Remora.Results;
-
 using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
-namespace DIGOS.Ambassador.Wizards
+namespace DIGOS.Ambassador.Plugins.Help.Wizards
 {
     /// <summary>
     /// Acts as an interactive help page.

@@ -39,6 +39,7 @@
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Characters\DIGOS.Ambassador.Plugins.Characters.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Dossiers\DIGOS.Ambassador.Plugins.Dossiers.csproj" />
+    <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Help\DIGOS.Ambassador.Plugins.Help.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Kinks\DIGOS.Ambassador.Plugins.Kinks.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Moderation\DIGOS.Ambassador.Plugins.Moderation.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Permissions\DIGOS.Ambassador.Plugins.Permissions.csproj" />

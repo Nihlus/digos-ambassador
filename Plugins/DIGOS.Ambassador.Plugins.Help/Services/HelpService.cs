@@ -30,7 +30,7 @@ using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Services
+namespace DIGOS.Ambassador.Plugins.Help.Services
 {
     /// <summary>
     /// Provides helper methods for building help output.

@@ -1,5 +1,5 @@
 ﻿//
-//  EnumerableExtensions.cs
+//  LevenshteinExtensions.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -25,20 +25,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Utility;
-using DIGOS.Ambassador.Plugins.Kinks.Utility;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using MoreLinq;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
 {
     /// <summary>
-    /// Extensions for enumerables.
+    /// Extensions for levenshtein distances.
     /// </summary>
     [PublicAPI]
-    public static class EnumerableExtensions
+    public static class LevenshteinExtensions
     {
         /// <summary>
         /// Selects an object from the queryable by the best Levenshtein match.
@@ -164,48 +163,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
 
             var best = await candidates.OrderBy(x => x.Item2).FirstAsync();
             return RetrieveEntityResult<string>.FromSuccess(best.Item1);
-        }
-
-        /// <summary>
-        /// Selects the closest match in the sequence using the levenshtein algorithm.
-        /// </summary>
-        /// <param name="this">The sequence to search.</param>
-        /// <param name="search">The value to search for.</param>
-        /// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull]
-        public static RetrieveEntityResult<string> BestLevenshteinMatch
-        (
-            [NotNull, ItemNotNull] this IEnumerable<string> @this,
-            [NotNull] string search,
-            double tolerance = 0.25
-        )
-        {
-            var candidates = @this.Select
-            (
-                s =>
-                {
-                    var distance = LevenshteinDistance.Compute
-                    (
-                        s.ToLowerInvariant(),
-                        search.ToLowerInvariant()
-                    );
-
-                    var maxDistance = Math.Max(s.Length, search.Length);
-                    var percentile = distance / (float)maxDistance;
-
-                    return (value: s, distance, percentile);
-                }
-            );
-
-            var passing = candidates.Where(c => c.percentile <= tolerance).ToList();
-            if (!passing.Any())
-            {
-                return RetrieveEntityResult<string>.FromError("No sufficiently close match found.");
-            }
-
-            var best = passing.MinBy(c => c.distance).First();
-            return RetrieveEntityResult<string>.FromSuccess(best.value);
         }
     }
 }
