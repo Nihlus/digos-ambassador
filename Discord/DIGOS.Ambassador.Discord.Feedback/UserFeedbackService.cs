@@ -24,12 +24,12 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Services;
 using Discord;
 using Discord.Commands;
 using Humanizer;
 using Humanizer.Bytes;
 using JetBrains.Annotations;
+using Remora.Behaviours.Services;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 

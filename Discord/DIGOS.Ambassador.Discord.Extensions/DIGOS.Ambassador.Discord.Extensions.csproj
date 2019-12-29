@@ -9,8 +9,5 @@
         <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\DIGOS.Ambassador.Discord.TypeReaders\DIGOS.Ambassador.Discord.TypeReaders.csproj" />
-    </ItemGroup>
 
 </Project>

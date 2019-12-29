@@ -37,6 +37,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using Remora.Behaviours.Services;
 using Xunit;
 
 #pragma warning disable SA1600

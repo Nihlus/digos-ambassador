@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours.Services;
 using Xunit;
 
 #pragma warning disable SA1648

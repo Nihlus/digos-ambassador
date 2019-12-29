@@ -20,10 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Discord.TypeReaders;
 using Discord.Commands;
 
-namespace DIGOS.Ambassador.Discord.Extensions
+namespace DIGOS.Ambassador.Discord.TypeReaders.Extensions
 {
     /// <summary>
     /// Extensions to the <see cref="CommandService"/> class.

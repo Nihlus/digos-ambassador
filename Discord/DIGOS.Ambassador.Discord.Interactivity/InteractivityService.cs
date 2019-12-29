@@ -24,11 +24,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Discord;
 using Discord.WebSocket;
+using Remora.Behaviours.Services;
 using Remora.Results;
 
 using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;

@@ -14,6 +14,7 @@
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
+      <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.TypeReaders\DIGOS.Ambassador.Discord.TypeReaders.csproj" />
       <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Abstractions.Database\DIGOS.Ambassador.Plugins.Abstractions.Database.csproj" />
     </ItemGroup>
 
