@@ -51,6 +51,10 @@
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Transformations\DIGOS.Ambassador.Plugins.Transformations.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Content\Privacy" />
+  </ItemGroup>
+
   <PropertyGroup>
     <DocGeneratorAssembly>$(SolutionDir)\DIGOS.Ambassador.Doc\bin\Debug\netcoreapp3.0\DIGOS.Ambassador.Doc.dll</DocGeneratorAssembly>
     <DocGenerator>dotnet $(DocGeneratorAssembly)</DocGenerator>
