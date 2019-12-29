@@ -3,6 +3,7 @@
 // ReSharper disable RedundantArgumentDefaultValue
 // ReSharper disable PartialTypeWithSinglePart
 // ReSharper disable RedundantUsingDirective
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;

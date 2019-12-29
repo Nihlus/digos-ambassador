@@ -3,11 +3,13 @@
 // ReSharper disable RedundantArgumentDefaultValue
 // ReSharper disable PartialTypeWithSinglePart
 // ReSharper disable RedundantUsingDirective
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
 {
+    [ExcludeFromCodeCoverage]
     public partial class AddServerSettings : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)

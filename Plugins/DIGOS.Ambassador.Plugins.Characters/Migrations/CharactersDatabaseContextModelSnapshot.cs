@@ -3,6 +3,7 @@
 // ReSharper disable RedundantArgumentDefaultValue
 // ReSharper disable PartialTypeWithSinglePart
 // ReSharper disable RedundantUsingDirective
+using System.Diagnostics.CodeAnalysis;
 using System;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DIGOS.Ambassador.Plugins.Characters.Migrations
 {
     [DbContext(typeof(CharactersDatabaseContext))]
+    [ExcludeFromCodeCoverage]
     partial class CharactersDatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

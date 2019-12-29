@@ -3,6 +3,7 @@
 // ReSharper disable RedundantArgumentDefaultValue
 // ReSharper disable PartialTypeWithSinglePart
 // ReSharper disable RedundantUsingDirective
+using System.Diagnostics.CodeAnalysis;
 using System;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DIGOS.Ambassador.Plugins.Moderation.Migrations
 {
     [DbContext(typeof(ModerationDatabaseContext))]
+    [ExcludeFromCodeCoverage]
     partial class ModerationDatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
