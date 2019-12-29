@@ -63,10 +63,17 @@ namespace DIGOS.Ambassador.Core.Async
 
             // Open the FileStream with the same FileMode, FileAccess
             // and FileShare as a call to File.OpenText would've done.
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
-            {
-                return await ReadAllLinesAsync(stream, encoding);
-            }
+            using var stream = new FileStream
+            (
+                path,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                DefaultBufferSize,
+                DefaultOptions
+            );
+
+            return await ReadAllLinesAsync(stream, encoding);
         }
 
         /// <summary>
@@ -111,10 +118,17 @@ namespace DIGOS.Ambassador.Core.Async
 
             // Open the FileStream with the same FileMode, FileAccess
             // and FileShare as a call to File.OpenText would've done.
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, DefaultOptions))
-            {
-                return await ReadAllTextAsync(stream, encoding);
-            }
+            using var stream = new FileStream
+            (
+                path,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                DefaultBufferSize,
+                DefaultOptions
+            );
+
+            return await ReadAllTextAsync(stream, encoding);
         }
 
         /// <summary>
@@ -133,10 +147,8 @@ namespace DIGOS.Ambassador.Core.Async
         {
             encoding ??= Encoding.UTF8;
 
-            using (var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen))
-            {
-                return await reader.ReadToEndAsync();
-            }
+            using var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen);
+            return await reader.ReadToEndAsync();
         }
     }
 }

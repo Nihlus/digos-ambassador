@@ -48,24 +48,22 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         /// <returns>The object.</returns>
         protected T Deserialize<T>(string file)
         {
-            using (var sr = new StreamReader(File.OpenRead(file)))
+            using var sr = new StreamReader(File.OpenRead(file));
+            var deserB = new DeserializerBuilder()
+                .WithTypeConverter(new ColourYamlConverter())
+                .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
+                .WithNamingConvention(UnderscoredNamingConvention.Instance);
+
+            if (typeof(T) != typeof(Species))
             {
-                var deserB = new DeserializerBuilder()
-                    .WithTypeConverter(new ColourYamlConverter())
-                    .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-                    .WithNamingConvention(UnderscoredNamingConvention.Instance);
-
-                if (typeof(T) != typeof(Species))
-                {
-                    deserB = deserB.WithTypeConverter(new RawSpeciesYamlConverter());
-                }
-
-                var deser = deserB.Build();
-
-                var content = sr.ReadToEnd();
-
-                return deser.Deserialize<T>(content);
+                deserB = deserB.WithTypeConverter(new RawSpeciesYamlConverter());
             }
+
+            var deser = deserB.Build();
+
+            var content = sr.ReadToEnd();
+
+            return deser.Deserialize<T>(content);
         }
     }
 }

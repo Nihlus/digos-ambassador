@@ -230,20 +230,18 @@ namespace DIGOS.Ambassador.Modules
                 emoteUrl = $"https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/{emojiCode}.png";
             }
 
-            using (var client = new HttpClient())
+            using var client = new HttpClient();
+            var response = await client.GetAsync(emoteUrl, HttpCompletionOption.ResponseHeadersRead);
+            if (response.IsSuccessStatusCode)
             {
-                var response = await client.GetAsync(emoteUrl, HttpCompletionOption.ResponseHeadersRead);
-                if (response.IsSuccessStatusCode)
-                {
-                    var eb = _feedback.CreateEmbedBase();
-                    eb.WithImageUrl(emoteUrl);
+                var eb = _feedback.CreateEmbedBase();
+                eb.WithImageUrl(emoteUrl);
 
-                    await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
-                }
-                else
-                {
-                    await _feedback.SendWarningAsync(this.Context, "Sorry, I couldn't find that emote.");
-                }
+                await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            }
+            else
+            {
+                await _feedback.SendWarningAsync(this.Context, "Sorry, I couldn't find that emote.");
             }
         }
 

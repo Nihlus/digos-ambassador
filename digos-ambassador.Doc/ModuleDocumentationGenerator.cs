@@ -33,7 +33,6 @@ using DIGOS.Ambassador.Doc.Reflection;
 using Humanizer;
 using JetBrains.Annotations;
 using Mono.Cecil;
-using Mono.Cecil.Rocks;
 using Remora.Markdown;
 using static Remora.Markdown.EmphasisType;
 

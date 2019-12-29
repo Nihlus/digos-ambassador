@@ -135,10 +135,8 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
                 return;
             }
 
-            using (var dossierData = dossierDataResult.Entity)
-            {
-                await this.Context.Channel.SendFileAsync(dossierData, $"{dossier.Title}.pdf");
-            }
+            using var dossierData = dossierDataResult.Entity;
+            await this.Context.Channel.SendFileAsync(dossierData, $"{dossier.Title}.pdf");
         }
 
         [NotNull]

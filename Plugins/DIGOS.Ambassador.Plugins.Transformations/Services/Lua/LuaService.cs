@@ -216,40 +216,39 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
             (
                 () =>
                 {
-                    using (var lua = GetState(variables))
+                    using var lua = GetState(variables);
+
+                    lua.DoString($"status, result = run [[{snippet}]]");
+                    lua.DoString("output = tostring(result)");
+
+                    var result = lua["output"] as string;
+                    var ranSuccessfully = lua["status"] is bool b && b;
+                    if (!(result is null) && ranSuccessfully)
                     {
-                        lua.DoString($"status, result = run [[{snippet}]]");
-                        lua.DoString("output = tostring(result)");
+                        return RetrieveEntityResult<string>.FromSuccess(result);
+                    }
 
-                        var result = lua["output"] as string;
-                        var ranSuccessfully = lua["status"] is bool b && b;
-                        if (!(result is null) && ranSuccessfully)
-                        {
-                            return RetrieveEntityResult<string>.FromSuccess(result);
-                        }
-
-                        if (!(result is null) && result.EndsWith("timeout!"))
-                        {
-                            return RetrieveEntityResult<string>.FromError
-                            (
-                                "Timed out while waiting for the script to complete."
-                            );
-                        }
-
-                        var erroringFunction = _getErroringFunctionRegex.Match(result ?? string.Empty).Value;
-                        if (!_functionWhitelist.Contains(erroringFunction))
-                        {
-                            return RetrieveEntityResult<string>.FromError
-                            (
-                                $"Usage of {erroringFunction} is prohibited."
-                            );
-                        }
-
+                    if (!(result is null) && result.EndsWith("timeout!"))
+                    {
                         return RetrieveEntityResult<string>.FromError
                         (
-                            $"Lua error: {result}"
+                            "Timed out while waiting for the script to complete."
                         );
                     }
+
+                    var erroringFunction = _getErroringFunctionRegex.Match(result ?? string.Empty).Value;
+                    if (!_functionWhitelist.Contains(erroringFunction))
+                    {
+                        return RetrieveEntityResult<string>.FromError
+                        (
+                            $"Usage of {erroringFunction} is prohibited."
+                        );
+                    }
+
+                    return RetrieveEntityResult<string>.FromError
+                    (
+                        $"Lua error: {result}"
+                    );
                 }
             );
         }

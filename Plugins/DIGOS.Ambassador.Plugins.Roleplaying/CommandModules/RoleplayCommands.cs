@@ -882,10 +882,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Compiling the roleplay...");
-            using (var output = await exporter.ExportAsync(roleplay))
-            {
-                await this.Context.Channel.SendFileAsync(output.Data, $"{output.Title}.{output.Format.GetFileExtension()}");
-            }
+            using var output = await exporter.ExportAsync(roleplay);
+
+            await this.Context.Channel.SendFileAsync(output.Data, $"{output.Title}.{output.Format.GetFileExtension()}");
         }
 
         /// <summary>

@@ -358,30 +358,27 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
                 try
                 {
                     var dossierPath = GetDossierDataPath(dossier);
-                    using (var dataStream = await client.GetStreamAsync(dossierAttachment.Url))
+                    using var dataStream = await client.GetStreamAsync(dossierAttachment.Url);
+
+                    try
                     {
-                        try
-                        {
-                            using (var dataFile = _content.FileSystem.CreateFile(dossierPath))
-                            {
-                                await dataStream.CopyToAsync(dataFile);
+                        using var dataFile = _content.FileSystem.CreateFile(dossierPath);
+                        await dataStream.CopyToAsync(dataFile);
 
-                                if (!await dataFile.HasSignatureAsync(FileSignatures.PDF))
-                                {
-                                    return ModifyEntityResult.FromError
-                                    (
-                                        "Invalid dossier format. PDF files are accepted."
-                                    );
-                                }
-                            }
-                        }
-                        catch (Exception e)
+                        if (!await dataFile.HasSignatureAsync(FileSignatures.PDF))
                         {
-                            return ModifyEntityResult.FromError(e);
+                            return ModifyEntityResult.FromError
+                            (
+                                "Invalid dossier format. PDF files are accepted."
+                            );
                         }
-
-                        await _database.SaveChangesAsync();
                     }
+                    catch (Exception e)
+                    {
+                        return ModifyEntityResult.FromError(e);
+                    }
+
+                    await _database.SaveChangesAsync();
                 }
                 catch (TaskCanceledException)
                 {

@@ -51,28 +51,26 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
             var filePath = Path.GetTempFileName();
             using (var of = File.Create(filePath))
             {
-                using (var ofw = new StreamWriter(of))
+                using var ofw = new StreamWriter(of);
+                await ofw.WriteLineAsync($"Roleplay name: {roleplay.Name}");
+                await ofw.WriteLineAsync($"Owner: {owner.Username}");
+
+                var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Guild.GetUserAsync((ulong)p.User.DiscordID)));
+
+                await ofw.WriteLineAsync("Participants:");
+                foreach (var participant in joinedUsers)
                 {
-                    await ofw.WriteLineAsync($"Roleplay name: {roleplay.Name}");
-                    await ofw.WriteLineAsync($"Owner: {owner.Username}");
+                    await ofw.WriteLineAsync(participant.Username);
+                }
 
-                    var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Guild.GetUserAsync((ulong)p.User.DiscordID)));
+                await ofw.WriteLineAsync();
+                await ofw.WriteLineAsync();
 
-                    await ofw.WriteLineAsync("Participants:");
-                    foreach (var participant in joinedUsers)
-                    {
-                        await ofw.WriteLineAsync(participant.Username);
-                    }
-
+                var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
+                foreach (var message in messages)
+                {
+                    await ofw.WriteLineAsync($"{message.AuthorNickname}: \n{message.Contents}");
                     await ofw.WriteLineAsync();
-                    await ofw.WriteLineAsync();
-
-                    var messages = roleplay.Messages.OrderBy(m => m.Timestamp).DistinctBy(m => m.Contents);
-                    foreach (var message in messages)
-                    {
-                        await ofw.WriteLineAsync($"{message.AuthorNickname}: \n{message.Contents}");
-                        await ofw.WriteLineAsync();
-                    }
                 }
             }
 

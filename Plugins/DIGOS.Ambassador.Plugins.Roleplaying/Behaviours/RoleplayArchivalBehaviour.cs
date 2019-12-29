@@ -184,21 +184,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             }
 
             var exporter = new PDFRoleplayExporter(guild);
-            using (var exportedRoleplay = await exporter.ExportAsync(roleplay))
-            {
-                var eb = _feedback.CreateEmbedBase();
-                eb.WithTitle($"{exportedRoleplay.Title} - Archived");
-                eb.WithDescription(roleplay.Summary);
-                eb.WithFooter($"Archived on {DateTime.Now:d}.");
+            using var exportedRoleplay = await exporter.ExportAsync(roleplay);
 
-                await archiveChannel.SendFileAsync
-                (
-                    exportedRoleplay.Data,
-                    $"{exportedRoleplay.Title}.{exportedRoleplay.Format.GetFileExtension()}",
-                    string.Empty,
-                    embed: eb.Build()
-                );
-            }
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithTitle($"{exportedRoleplay.Title} - Archived");
+            eb.WithDescription(roleplay.Summary);
+            eb.WithFooter($"Archived on {DateTime.Now:d}.");
+
+            await archiveChannel.SendFileAsync
+            (
+                exportedRoleplay.Data,
+                $"{exportedRoleplay.Title}.{exportedRoleplay.Format.GetFileExtension()}",
+                string.Empty,
+                embed: eb.Build()
+            );
         }
 
         /// <summary>

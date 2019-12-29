@@ -143,19 +143,15 @@ namespace DIGOS.Ambassador.Core.Services
             var getSassStream = OpenLocalStream(sassPath);
             if (getSassStream.IsSuccess)
             {
-                using (var sassStream = getSassStream.Entity)
-                {
-                    _sass = (await AsyncIO.ReadAllLinesAsync(sassStream)).ToList();
-                }
+                using var sassStream = getSassStream.Entity;
+                _sass = (await AsyncIO.ReadAllLinesAsync(sassStream)).ToList();
             }
 
             var getNSFWSassStream = OpenLocalStream(sassNSFWPath);
             if (getNSFWSassStream.IsSuccess)
             {
-                using (var nsfwSassStream = getNSFWSassStream.Entity)
-                {
-                    _sassNSFW = (await AsyncIO.ReadAllLinesAsync(nsfwSassStream)).ToList();
-                }
+                using var nsfwSassStream = getNSFWSassStream.Entity;
+                _sassNSFW = (await AsyncIO.ReadAllLinesAsync(nsfwSassStream)).ToList();
             }
         }
 
@@ -180,17 +176,15 @@ namespace DIGOS.Ambassador.Core.Services
                 return RetrieveEntityResult<string>.FromError("The token file could not be opened.");
             }
 
-            using (var tokenStream = getTokenStream.Entity)
+            using var tokenStream = getTokenStream.Entity;
+            var token = await AsyncIO.ReadAllTextAsync(tokenStream);
+
+            if (string.IsNullOrEmpty(token))
             {
-                var token = await AsyncIO.ReadAllTextAsync(tokenStream);
-
-                if (string.IsNullOrEmpty(token))
-                {
-                    return RetrieveEntityResult<string>.FromError("The token file did not contain a valid token.");
-                }
-
-                return RetrieveEntityResult<string>.FromSuccess(token);
+                return RetrieveEntityResult<string>.FromError("The token file did not contain a valid token.");
             }
+
+            return RetrieveEntityResult<string>.FromSuccess(token);
         }
 
         /// <summary>

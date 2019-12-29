@@ -21,7 +21,6 @@
 //
 
 using DIGOS.Ambassador.Doc.Abstractions;
-using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 
 [assembly: PlaceholderData(typeof(Colour), "deep purple", "dark blue")]

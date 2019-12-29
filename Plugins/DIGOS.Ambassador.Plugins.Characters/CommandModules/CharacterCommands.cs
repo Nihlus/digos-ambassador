@@ -1551,13 +1551,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                         return;
                     }
 
-                    using (var s = getAttachmentStreamResult.Entity)
-                    {
-                        using (var sr = new StreamReader(s))
-                        {
-                            newCharacterDescription = sr.ReadToEnd();
-                        }
-                    }
+                    using var sr = new StreamReader(getAttachmentStreamResult.Entity);
+                    newCharacterDescription = sr.ReadToEnd();
                 }
 
                 var setDescriptionResult = await _characters.SetCharacterDescriptionAsync(character, newCharacterDescription);

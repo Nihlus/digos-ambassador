@@ -43,13 +43,12 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
 
                 fileSystem.CreateDirectory(databaseDirectory);
 
-                using
+                using var sw = new StreamWriter
                 (
-                    var sw = new StreamWriter(fileSystem.OpenFile(credentialsPath, FileMode.Create, FileAccess.Write))
-                )
-                {
-                    await sw.WriteLineAsync("DATABASE CREDENTIALS");
-                }
+                    fileSystem.OpenFile(credentialsPath, FileMode.Create, FileAccess.Write)
+                );
+
+                await sw.WriteLineAsync("DATABASE CREDENTIALS");
             }
 
             [Fact]
@@ -65,12 +64,10 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
             {
                 var result = this.ContentService.GetDatabaseCredentialStream();
 
-                using (var stream = new StreamReader(result.Entity))
-                {
-                    var content = stream.ReadToEnd();
+                using var stream = new StreamReader(result.Entity);
+                var content = stream.ReadToEnd();
 
-                    Assert.Equal("DATABASE CREDENTIALS\n", content);
-                }
+                Assert.Equal("DATABASE CREDENTIALS\n", content);
             }
         }
 

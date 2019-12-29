@@ -82,28 +82,24 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                 return RetrieveEntityResult<TransformationText>.FromError("Transformation messages not found.");
             }
 
-            using
+            using var reader = new StreamReader
             (
-                var reader = new StreamReader
+                @this.FileSystem.OpenFile
                 (
-                    @this.FileSystem.OpenFile
-                    (
-                        TransformationMessagesPath,
-                        FileMode.Open,
-                        FileAccess.Read,
-                        FileShare.Read
-                    )
+                    TransformationMessagesPath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read
                 )
-            )
-            {
-                var content = reader.ReadToEnd();
-                if (!TransformationText.TryDeserialize(content, out var text))
-                {
-                    return RetrieveEntityResult<TransformationText>.FromError("Failed to parse the messages.");
-                }
+            );
 
-                return RetrieveEntityResult<TransformationText>.FromSuccess(text);
+            var content = reader.ReadToEnd();
+            if (!TransformationText.TryDeserialize(content, out var text))
+            {
+                return RetrieveEntityResult<TransformationText>.FromError("Failed to parse the messages.");
             }
+
+            return RetrieveEntityResult<TransformationText>.FromSuccess(text);
         }
 
         /// <summary>
@@ -144,23 +140,21 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                     return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(openStreamResult);
                 }
 
-                using (var speciesFile = openStreamResult.Entity)
+                using var speciesFile = openStreamResult.Entity;
+                var content = await AsyncIO.ReadAllTextAsync(speciesFile, Encoding.UTF8);
+
+                try
                 {
-                    var content = await AsyncIO.ReadAllTextAsync(speciesFile, Encoding.UTF8);
-
-                    try
+                    species.Add(deser.Deserialize<Species>(content));
+                }
+                catch (YamlException yex)
+                {
+                    if (yex.InnerException is SerializationException sex)
                     {
-                        species.Add(deser.Deserialize<Species>(content));
+                        return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(sex);
                     }
-                    catch (YamlException yex)
-                    {
-                        if (yex.InnerException is SerializationException sex)
-                        {
-                            return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(sex);
-                        }
 
-                        return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(yex);
-                    }
+                    return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(yex);
                 }
             }
 

@@ -46,18 +46,14 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
 
                 using (var sassFile = fileSystem.OpenFile(sfwSass, FileMode.Create, FileAccess.Write))
                 {
-                    using (var sw = new StreamWriter(sassFile))
-                    {
-                        await sw.WriteLineAsync("SFW Sass");
-                    }
+                    using var sw = new StreamWriter(sassFile);
+                    await sw.WriteLineAsync("SFW Sass");
                 }
 
                 using (var sassFile = fileSystem.OpenFile(nsfwSass, FileMode.Create, FileAccess.Write))
                 {
-                    using (var sw = new StreamWriter(sassFile))
-                    {
-                        await sw.WriteLineAsync("NSFW Sass");
-                    }
+                    using var sw = new StreamWriter(sassFile);
+                    await sw.WriteLineAsync("NSFW Sass");
                 }
             }
 

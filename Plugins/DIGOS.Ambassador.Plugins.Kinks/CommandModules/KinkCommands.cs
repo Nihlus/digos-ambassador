@@ -304,10 +304,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
 
                 try
                 {
-                    using (var response = await web.GetAsync(new Uri("https://www.f-list.net/json/api/kink-list.php"), cts.Token))
-                    {
-                        json = await response.Content.ReadAsStringAsync();
-                    }
+                    using var response = await web.GetAsync
+                    (
+                        new Uri("https://www.f-list.net/json/api/kink-list.php"),
+                        cts.Token
+                    );
+
+                    json = await response.Content.ReadAsStringAsync();
                 }
                 catch (OperationCanceledException)
                 {
