@@ -22,12 +22,16 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Plugins.Help;
 using DIGOS.Ambassador.Plugins.Help.CommandModules;
 using DIGOS.Ambassador.Plugins.Help.Services;
 using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Plugins.Abstractions;
+using Remora.Plugins.Abstractions.Attributes;
+
+[assembly: RemoraPlugin(typeof(HelpPlugin))]
 
 namespace DIGOS.Ambassador.Plugins.Help
 {
