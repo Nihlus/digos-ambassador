@@ -9,6 +9,11 @@
         <PackageReference Include="Discord.Net" Version="2.1.1" />
     </ItemGroup>
 
+    <!-- Workaround for https://github.com/aspnet/EntityFrameworkCore/issues/19426 -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.6" />
+    </ItemGroup>
+
     <ItemGroup>
         <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
         <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />

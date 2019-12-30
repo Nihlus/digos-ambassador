@@ -10,6 +10,11 @@
       <PackageReference Include="Remora.Plugins.Abstractions" Version="2.0.0" />
     </ItemGroup>
 
+    <!-- Workaround for https://github.com/aspnet/EntityFrameworkCore/issues/19426 -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.6" />
+    </ItemGroup>
+
     <ItemGroup>
       <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />

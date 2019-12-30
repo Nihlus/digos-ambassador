@@ -11,6 +11,11 @@
         <PackageReference Include="NLua" Version="1.4.26" />
     </ItemGroup>
 
+    <!-- Workaround for https://github.com/aspnet/EntityFrameworkCore/issues/19426 -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.6" />
+    </ItemGroup>
+
     <ItemGroup>
         <Content Include="Content\**\*.*">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
