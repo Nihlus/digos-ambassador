@@ -79,12 +79,10 @@ namespace DIGOS.Ambassador
             };
 
             _client = new DiscordSocketClient(config);
-
             _client.Log += OnDiscordLogEvent;
 
             _commands = new CommandService();
             _commands.Log += OnDiscordLogEvent;
-            _commands = new CommandService();
 
             _behaviours = new BehaviourService();
         }
@@ -143,9 +141,6 @@ namespace DIGOS.Ambassador
             }
 
             _services = serviceCollection.BuildServiceProvider();
-
-            var contentService = _services.GetRequiredService<ContentService>();
-            await contentService.InitializeAsync();
 
             // Create plugin databases
             foreach (var plugin in successfullyRegisteredPlugins)

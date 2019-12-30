@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Version>1.0.0</Version>
+        <Description>Contains various Amby-specific commands.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
+      <PackageReference Include="Remora.Discord.Commands.Behaviours" Version="3.0.1" />
+      <PackageReference Include="Remora.Plugins.Abstractions" Version="1.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
+      <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />
+      <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
+      <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
+      <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Help\DIGOS.Ambassador.Plugins.Help.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="Content\**\*.*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+</Project>

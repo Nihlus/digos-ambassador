@@ -30,6 +30,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Plugins.Amby.Services;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Help.Services;
@@ -37,13 +38,12 @@ using Discord;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
-
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Commands.Behaviours;
 
-namespace DIGOS.Ambassador.Behaviours
+namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
 {
     /// <summary>
     /// Acts as a behaviour for invoking commands, and logging their results.
@@ -53,6 +53,7 @@ namespace DIGOS.Ambassador.Behaviours
         private readonly UserFeedbackService _feedback;
         private readonly PrivacyService _privacy;
         private readonly ContentService _content;
+        private readonly PortraitService _portraits;
         private readonly HelpService _help;
 
         /// <summary>
@@ -66,6 +67,7 @@ namespace DIGOS.Ambassador.Behaviours
         /// <param name="content">The content service.</param>
         /// <param name="commands">The command service.</param>
         /// <param name="help">The help service.</param>
+        /// <param name="portraits">The portrait service.</param>
         public AmbassadorCommandBehaviour
         (
             DiscordSocketClient client,
@@ -75,7 +77,8 @@ namespace DIGOS.Ambassador.Behaviours
             PrivacyService privacy,
             ContentService content,
             CommandService commands,
-            HelpService help
+            HelpService help,
+            PortraitService portraits
         )
             : base(client, serviceScope, logger, commands)
         {
@@ -83,6 +86,7 @@ namespace DIGOS.Ambassador.Behaviours
             _privacy = privacy;
             _content = content;
             _help = help;
+            _portraits = portraits;
         }
 
         /// <inheritdoc />
@@ -266,7 +270,7 @@ namespace DIGOS.Ambassador.Behaviours
                     "If you don't have an account on github, you can also send a DM to Jax#7487, who is the main" +
                     " developer of the bot."
                 );
-                eb.WithThumbnailUrl(_content.BrokenAmbyUri.ToString());
+                eb.WithThumbnailUrl(_portraits.BrokenAmbyUri.ToString());
 
                 var reportEmbed = _feedback.CreateEmbedBase(Color.Red);
                 reportEmbed.WithTitle("Click here to create a new issue");

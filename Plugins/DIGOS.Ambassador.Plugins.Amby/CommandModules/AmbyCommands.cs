@@ -1,5 +1,5 @@
 ﻿//
-//  MiscellaneousCommands.cs
+//  AmbyCommands.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -24,37 +24,51 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Plugins.Amby.Services;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
 using JetBrains.Annotations;
+
 using static Discord.Commands.ContextType;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
-namespace DIGOS.Ambassador.Modules
+namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
 {
     /// <summary>
     /// Assorted commands that don't really fit anywhere - just for fun, testing, etc.
     /// </summary>
     [UsedImplicitly]
-    [Name("miscellaneous")]
+    [Name("amby")]
     [Summary("Assorted commands that don't really fit anywhere - just for fun, testing, etc.")]
-    public class MiscellaneousCommands : ModuleBase
+    public class AmbyCommands : ModuleBase
     {
         private readonly ContentService _content;
+        private readonly PortraitService _portraits;
+        private readonly SassService _sass;
 
         private readonly UserFeedbackService _feedback;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MiscellaneousCommands"/> class.
+        /// Initializes a new instance of the <see cref="AmbyCommands"/> class.
         /// </summary>
         /// <param name="content">The content service.</param>
         /// <param name="feedback">The user feedback service.</param>
-        public MiscellaneousCommands(ContentService content, UserFeedbackService feedback)
+        /// <param name="sass">The sass service.</param>
+        /// <param name="portraits">The portrait service.</param>
+        public AmbyCommands
+        (
+            [NotNull] ContentService content,
+            [NotNull] UserFeedbackService feedback,
+            [NotNull] SassService sass,
+            [NotNull] PortraitService portraits
+        )
         {
             _content = content;
             _feedback = feedback;
+            _sass = sass;
+            _portraits = portraits;
         }
 
         /// <summary>
@@ -122,7 +136,7 @@ namespace DIGOS.Ambassador.Modules
         public async Task SassAsync()
         {
             var isNsfwChannel = this.Context.Channel is ITextChannel textChannel && textChannel.IsNsfw;
-            var getSassResult = _content.GetSass(isNsfwChannel);
+            var getSassResult = await _sass.GetSassAsync(isNsfwChannel);
             if (!getSassResult.IsSuccess)
             {
                 await _feedback.SendConfirmationAsync(this.Context, getSassResult.ErrorReason);
@@ -143,7 +157,7 @@ namespace DIGOS.Ambassador.Modules
         public async Task BwehAsync()
         {
             var eb = _feedback.CreateEmbedBase();
-            eb.WithImageUrl(_content.BwehUri.ToString());
+            eb.WithImageUrl(_portraits.BwehUri.ToString());
 
             await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
         }
@@ -223,7 +237,7 @@ namespace DIGOS.Ambassador.Modules
 
             eb.WithAuthor(this.Context.Client.CurrentUser);
             eb.WithTitle("The DIGOS Ambassador (\"Amby\")");
-            eb.WithImageUrl(_content.AmbyPortraitUri.ToString());
+            eb.WithImageUrl(_portraits.AmbyPortraitUri.ToString());
 
             eb.WithDescription
             (

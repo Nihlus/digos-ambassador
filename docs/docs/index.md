@@ -1,13 +1,13 @@
 ﻿Index
 =====
 ### Available Command Modules
-1. [Ban Commands](modules/ban.md)
-2. [Character Commands](modules/character.md)
-3. [Dossier Commands](modules/dossier.md)
-4. [Help Commands](modules/help.md)
-5. [Jumbo Commands](modules/jumbo.md)
-6. [Kink Commands](modules/kink.md)
-7. [Miscellaneous Commands](modules/miscellaneous.md)
+1. [Amby Commands](modules/amby.md)
+2. [Ban Commands](modules/ban.md)
+3. [Character Commands](modules/character.md)
+4. [Dossier Commands](modules/dossier.md)
+5. [Help Commands](modules/help.md)
+6. [Jumbo Commands](modules/jumbo.md)
+7. [Kink Commands](modules/kink.md)
 8. [Moderation Commands](modules/moderation.md)
 9. [Note Commands](modules/note.md)
 10. [Permission Commands](modules/permission.md)

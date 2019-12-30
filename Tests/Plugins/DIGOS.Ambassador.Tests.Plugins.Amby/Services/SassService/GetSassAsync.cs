@@ -1,5 +1,5 @@
 //
-//  GetSass.cs
+//  GetSassAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -22,7 +22,7 @@
 
 using System.IO;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Tests.Bases;
+using DIGOS.Ambassador.Tests.Plugins.Amby.Bases;
 using Xunit;
 using Zio;
 
@@ -30,19 +30,12 @@ using Zio;
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
-namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
+namespace DIGOS.Ambassador.Tests.Plugins.Amby.Services.SassService
 {
-    public static partial class ContentServiceTests
+    public static partial class SassServiceTests
     {
-        public class GetSass : ContentServiceTestBase
+        public class GetSassAsync : SassServiceTestBase
         {
-            // ReSharper disable once MemberHidesStaticFromOuterClass
-            public override async Task InitializeAsync()
-            {
-                await base.InitializeAsync();
-                await this.ContentService.InitializeAsync();
-            }
-
             protected override async Task ConfigureFileSystemAsync(IFileSystem fileSystem)
             {
                 var sassDirectory = UPath.Combine(UPath.Root, "Sass");
@@ -65,39 +58,32 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
             }
 
             [Fact]
-            public void ReturnsTrueWhenSassIsAvailable()
+            public async Task ReturnsTrueWhenSassIsAvailable()
             {
-                var result = this.ContentService.GetSass();
+                var result = await this.SassService.GetSassAsync();
 
                 Assert.True(result.IsSuccess);
             }
 
             [Fact]
-            public void ReturnsTrueWhenSassIsAvailableIncludingNSFWSass()
+            public async Task ReturnsTrueWhenSassIsAvailableIncludingNSFWSass()
             {
-                var result = this.ContentService.GetSass(true);
+                var result = await this.SassService.GetSassAsync(true);
 
                 Assert.True(result.IsSuccess);
             }
 
             [Fact]
-            public void ActuallyReturnsSomeSass()
+            public async Task ActuallyReturnsSomeSass()
             {
-                var result = this.ContentService.GetSass();
+                var result = await this.SassService.GetSassAsync();
 
                 Assert.NotEmpty(result.Entity);
             }
         }
 
-        public class GetSassWithOnlySFW : ContentServiceTestBase
+        public class GetSassWithOnlySFW : SassServiceTestBase
         {
-            // ReSharper disable once MemberHidesStaticFromOuterClass
-            public override async Task InitializeAsync()
-            {
-                await base.InitializeAsync();
-                await this.ContentService.InitializeAsync();
-            }
-
             protected override async Task ConfigureFileSystemAsync(IFileSystem fileSystem)
             {
                 var sassDirectory = UPath.Combine(UPath.Root, "Sass");
@@ -110,39 +96,32 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
             }
 
             [Fact]
-            public void ReturnsTrueWhenSassIsAvailable()
+            public async Task ReturnsTrueWhenSassIsAvailable()
             {
-                var result = this.ContentService.GetSass();
+                var result = await this.SassService.GetSassAsync();
 
                 Assert.True(result.IsSuccess);
             }
 
             [Fact]
-            public void ReturnsTrueWhenSFWSassIsAvailableButNotNSFWSass()
+            public async Task ReturnsTrueWhenSFWSassIsAvailableButNotNSFWSass()
             {
-                var result = this.ContentService.GetSass(true);
+                var result = await this.SassService.GetSassAsync(true);
 
                 Assert.True(result.IsSuccess);
             }
 
             [Fact]
-            public void ActuallyReturnsSomeSass()
+            public async Task ActuallyReturnsSomeSass()
             {
-                var result = this.ContentService.GetSass();
+                var result = await this.SassService.GetSassAsync();
 
                 Assert.NotEmpty(result.Entity);
             }
         }
 
-        public class GetSassWithOnlyNSFW : ContentServiceTestBase
+        public class GetSassWithOnlyNSFW : SassServiceTestBase
         {
-            // ReSharper disable once MemberHidesStaticFromOuterClass
-            public override async Task InitializeAsync()
-            {
-                await base.InitializeAsync();
-                await this.ContentService.InitializeAsync();
-            }
-
             protected override async Task ConfigureFileSystemAsync(IFileSystem fileSystem)
             {
                 var sassDirectory = UPath.Combine(UPath.Root, "Sass");
@@ -155,44 +134,44 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
             }
 
             [Fact]
-            public void ReturnsTrueWhenSassIsAvailable()
+            public async Task ReturnsTrueWhenSassIsAvailable()
             {
-                var result = this.ContentService.GetSass();
+                var result = await this.SassService.GetSassAsync();
 
                 Assert.True(result.IsSuccess);
             }
 
             [Fact]
-            public void ReturnsTrueWhenNoSFWSassIsAvailableButNSFWSassIs()
+            public async Task ReturnsTrueWhenNoSFWSassIsAvailableButNSFWSassIs()
             {
-                var result = this.ContentService.GetSass(true);
+                var result = await this.SassService.GetSassAsync(true);
 
                 Assert.True(result.IsSuccess);
             }
 
             [Fact]
-            public void ActuallyReturnsSomeSass()
+            public async Task ActuallyReturnsSomeSass()
             {
-                var result = this.ContentService.GetSass();
+                var result = await this.SassService.GetSassAsync();
 
                 Assert.NotEmpty(result.Entity);
             }
         }
 
-        public class GetSassWithoutContent : ContentServiceTestBase
+        public class GetSassWithoutContent : SassServiceTestBase
         {
             [Fact]
-            public void ReturnsFalseIfNoSassIsAvailable()
+            public async Task ReturnsFalseIfNoSassIsAvailable()
             {
-                var result = this.ContentService.GetSass();
+                var result = await this.SassService.GetSassAsync();
 
                 Assert.False(result.IsSuccess);
             }
 
             [Fact]
-            public void ReturnsFalseIfNoSassIsAvailableIncludingNSFWSass()
+            public async Task ReturnsFalseIfNoSassIsAvailableIncludingNSFWSass()
             {
-                var result = this.ContentService.GetSass();
+                var result = await this.SassService.GetSassAsync();
 
                 Assert.False(result.IsSuccess);
             }

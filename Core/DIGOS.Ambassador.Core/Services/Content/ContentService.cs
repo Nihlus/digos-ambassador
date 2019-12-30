@@ -21,12 +21,9 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Async;
-using DIGOS.Ambassador.Core.Extensions;
 using JetBrains.Annotations;
 using Remora.Results;
 using Zio;
@@ -39,9 +36,6 @@ namespace DIGOS.Ambassador.Core.Services
     /// </summary>
     public class ContentService
     {
-        private List<string> _sass;
-        private List<string> _sassNSFW;
-
         /// <summary>
         /// Gets the virtual filesystem that encapsulates the content.
         /// </summary>
@@ -58,16 +52,6 @@ namespace DIGOS.Ambassador.Core.Services
         public Uri BaseCDNUri { get; }
 
         /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to a portrait of Amby.
-        /// </summary>
-        public Uri AmbyPortraitUri { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to a broken Ambybot portrait.
-        /// </summary>
-        public Uri BrokenAmbyUri { get; }
-
-        /// <summary>
         /// Gets the <see cref="Uri"/> pointing to a templated issue creator on github.
         /// </summary>
         public Uri AutomaticBugReportCreationUri { get; }
@@ -78,19 +62,11 @@ namespace DIGOS.Ambassador.Core.Services
         public Uri PrivacyPolicyUri { get; }
 
         /// <summary>
-        /// Gets the <see cref="Uri"/> pointing to a proper bweh.
-        /// </summary>
-        public Uri BwehUri { get; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ContentService"/> class.
         /// </summary>
         /// <param name="fileSystem">The filesystem abstraction.</param>
         public ContentService(IFileSystem fileSystem)
         {
-            _sass = new List<string>();
-            _sassNSFW = new List<string>();
-
             this.FileSystem = fileSystem;
 
             this.BaseCDNUri = new Uri("https://cdn.gullberg.tk/amby/");
@@ -99,22 +75,9 @@ namespace DIGOS.Ambassador.Core.Services
             (
                 "https://github.com/Nihlus/DIGOS.Ambassador/issues/new?template=automated-bug-report.md"
             );
-
-            this.AmbyPortraitUri = new Uri(this.BaseCDNUri, "portraits/amby-irbynx-3.png");
-            this.BrokenAmbyUri = new Uri(this.BaseCDNUri, "portraits/maintenance.png");
-            this.BwehUri = new Uri(this.BaseCDNUri, "portraits/bweh.png");
             this.PrivacyPolicyUri = new Uri(this.BaseCDNUri, "privacy/PrivacyPolicy.pdf");
 
             this.DatabaseCredentialsPath = UPath.Combine(UPath.Root, "Database", "database.credentials");
-        }
-
-        /// <summary>
-        /// Loads the default content.
-        /// </summary>
-        /// <returns>A task wrapping the content load operation.</returns>
-        public async Task InitializeAsync()
-        {
-            await LoadSassAsync();
         }
 
         /// <summary>
@@ -124,29 +87,6 @@ namespace DIGOS.Ambassador.Core.Services
         public RetrieveEntityResult<Stream> GetDatabaseCredentialStream()
         {
             return OpenLocalStream(this.DatabaseCredentialsPath);
-        }
-
-        /// <summary>
-        /// Loads the sass from disk.
-        /// </summary>
-        private async Task LoadSassAsync()
-        {
-            var sassPath = UPath.Combine(UPath.Root, "Sass", "sass.txt");
-            var sassNSFWPath = UPath.Combine(UPath.Root, "Sass", "sass-nsfw.txt");
-
-            var getSassStream = OpenLocalStream(sassPath);
-            if (getSassStream.IsSuccess)
-            {
-                using var sassStream = getSassStream.Entity;
-                _sass = (await AsyncIO.ReadAllLinesAsync(sassStream)).ToList();
-            }
-
-            var getNSFWSassStream = OpenLocalStream(sassNSFWPath);
-            if (getNSFWSassStream.IsSuccess)
-            {
-                using var nsfwSassStream = getNSFWSassStream.Entity;
-                _sassNSFW = (await AsyncIO.ReadAllLinesAsync(nsfwSassStream)).ToList();
-            }
         }
 
         /// <summary>
@@ -213,36 +153,6 @@ namespace DIGOS.Ambassador.Core.Services
             {
                 return RetrieveEntityResult<Stream>.FromError(iex);
             }
-        }
-
-        /// <summary>
-        /// Gets a sassy comment.
-        /// </summary>
-        /// <param name="includeNSFW">Whether or not to include NSFW sass.</param>
-        /// <returns>A sassy comment.</returns>
-        [Pure]
-        public RetrieveEntityResult<string> GetSass(bool includeNSFW = false)
-        {
-            List<string> availableSass;
-
-            if (includeNSFW)
-            {
-                availableSass = _sass.Union(_sassNSFW).ToList();
-            }
-            else
-            {
-                availableSass = _sass;
-            }
-
-            if (availableSass.Count == 0)
-            {
-                return RetrieveEntityResult<string>.FromError
-                (
-                    "There's no available sass. You'll just have to provide your own."
-                );
-            }
-
-            return RetrieveEntityResult<string>.FromSuccess(availableSass.PickRandom());
         }
     }
 }

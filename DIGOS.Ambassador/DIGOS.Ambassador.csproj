@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Discord\DIGOS.Ambassador.Discord\DIGOS.Ambassador.Discord.csproj" />
+    <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Amby\DIGOS.Ambassador.Plugins.Amby.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Characters\DIGOS.Ambassador.Plugins.Characters.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Dossiers\DIGOS.Ambassador.Plugins.Dossiers.csproj" />
