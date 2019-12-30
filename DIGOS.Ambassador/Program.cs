@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Globalization;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -33,7 +32,6 @@ using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using Discord.Commands;
 using Discord.WebSocket;
-using JetBrains.Annotations;
 using log4net;
 using log4net.Config;
 using log4net.Repository.Hierarchy;
@@ -62,6 +60,11 @@ namespace DIGOS.Ambassador
             var logConfig = new XmlDocument();
             using (var configStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(configurationName))
             {
+                if (configStream is null)
+                {
+                    throw new InvalidOperationException("The log4net configuration stream could not be found.");
+                }
+
                 logConfig.Load(configStream);
             }
 

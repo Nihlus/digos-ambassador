@@ -32,7 +32,7 @@ using Zio;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Amby.Services.SassService
 {
-    public static partial class SassServiceTests
+    public static class SassServiceTests
     {
         public class GetSassAsync : SassServiceTestBase
         {
