@@ -30,19 +30,15 @@ namespace DIGOS.Ambassador.Plugins.Amby.Services
     /// </summary>
     public class PortraitService
     {
-        private readonly ContentService _content;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PortraitService"/> class.
         /// </summary>
         /// <param name="content">The content service.</param>
         public PortraitService(ContentService content)
         {
-            _content = content;
-
-            this.AmbyPortraitUri = new Uri(_content.BaseCDNUri, "portraits/amby-irbynx-3.png");
-            this.BrokenAmbyUri = new Uri(_content.BaseCDNUri, "portraits/maintenance.png");
-            this.BwehUri = new Uri(_content.BaseCDNUri, "portraits/bweh.png");
+            this.AmbyPortraitUri = new Uri(content.BaseCDNUri, "portraits/amby-irbynx-3.png");
+            this.BrokenAmbyUri = new Uri(content.BaseCDNUri, "portraits/maintenance.png");
+            this.BwehUri = new Uri(content.BaseCDNUri, "portraits/bweh.png");
         }
 
         /// <summary>

@@ -21,7 +21,6 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Amby.Services;
@@ -44,7 +43,6 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
     [Summary("Assorted commands that don't really fit anywhere - just for fun, testing, etc.")]
     public class AmbyCommands : ModuleBase
     {
-        private readonly ContentService _content;
         private readonly PortraitService _portraits;
         private readonly SassService _sass;
 
@@ -53,19 +51,16 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbyCommands"/> class.
         /// </summary>
-        /// <param name="content">The content service.</param>
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="sass">The sass service.</param>
         /// <param name="portraits">The portrait service.</param>
         public AmbyCommands
         (
-            [NotNull] ContentService content,
             [NotNull] UserFeedbackService feedback,
             [NotNull] SassService sass,
             [NotNull] PortraitService portraits
         )
         {
-            _content = content;
             _feedback = feedback;
             _sass = sass;
             _portraits = portraits;

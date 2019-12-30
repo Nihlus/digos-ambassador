@@ -67,6 +67,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Amby.Bases
 
             serviceCollection
                 .AddSingleton(this.FileSystem)
+                .AddSingleton<SassService>()
                 .AddSingleton<ContentService>();
         }
 

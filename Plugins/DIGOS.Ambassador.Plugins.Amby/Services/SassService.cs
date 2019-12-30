@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.Services
             }
             else
             {
-                return DetermineConditionResult.FromError(getSassStream);
+                return DetermineConditionResult.FromError(getNSFWSassStream);
             }
 
             _isSassLoaded = true;
