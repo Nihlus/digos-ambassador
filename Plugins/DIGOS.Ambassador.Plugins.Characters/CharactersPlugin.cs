@@ -57,14 +57,12 @@ namespace DIGOS.Ambassador.Plugins.Characters
         public override string Description => "Provides user-managed character libraries.";
 
         /// <inheritdoc />
-        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
                 .AddSingleton<PronounService>()
                 .AddScoped<CharacterService>()
                 .AddConfiguredSchemaAwareDbContextPool<CharactersDatabaseContext>();
-
-            return Task.FromResult(true);
         }
 
         /// <inheritdoc />

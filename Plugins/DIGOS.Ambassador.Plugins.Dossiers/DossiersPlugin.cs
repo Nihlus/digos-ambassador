@@ -53,12 +53,10 @@ namespace DIGOS.Ambassador.Plugins.Dossiers
         public override string Description => "Provides a way to store and view dossiers about DIGOS units.";
 
         /// <inheritdoc/>
-        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddConfiguredSchemaAwareDbContextPool<DossiersDatabaseContext>();
             serviceCollection.AddSingleton<DossierService>();
-
-            return Task.FromResult(true);
         }
 
         /// <inheritdoc/>

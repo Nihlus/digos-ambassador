@@ -54,13 +54,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks
         public override string Description => "Provides user-managed kink libraries.";
 
         /// <inheritdoc />
-        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
                 .AddScoped<KinkService>()
                 .AddConfiguredSchemaAwareDbContextPool<KinksDatabaseContext>();
-
-            return Task.FromResult(true);
         }
 
         /// <inheritdoc />

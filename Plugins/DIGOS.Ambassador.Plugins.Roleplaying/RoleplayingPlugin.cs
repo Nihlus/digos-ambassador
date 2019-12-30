@@ -59,13 +59,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
         public override string Description => "Provides user-managed roleplay libraries.";
 
         /// <inheritdoc />
-        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
                 .AddScoped<RoleplayService>()
                 .AddConfiguredSchemaAwareDbContextPool<RoleplayingDatabaseContext>();
-
-            return Task.FromResult(true);
         }
 
         /// <inheritdoc />

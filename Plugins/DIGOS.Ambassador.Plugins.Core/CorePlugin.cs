@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Core
         public override string Description => "Provides core functionality related to users and servers.";
 
         /// <inheritdoc/>
-        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
                 .AddScoped<ServerService>()
@@ -67,8 +67,6 @@ namespace DIGOS.Ambassador.Plugins.Core
                 .AddScoped<PrivacyService>()
                 .AddScoped<OwnedEntityService>()
                 .AddConfiguredSchemaAwareDbContextPool<CoreDatabaseContext>();
-
-            return Task.FromResult(true);
         }
 
         /// <inheritdoc />

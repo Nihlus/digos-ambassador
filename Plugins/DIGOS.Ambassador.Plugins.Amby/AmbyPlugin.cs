@@ -50,13 +50,11 @@ namespace DIGOS.Ambassador.Plugins.Amby
         public override string Description => "Contains various Amby-specific commands.";
 
         /// <inheritdoc/>
-        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
                 .AddSingleton<PortraitService>()
                 .AddSingleton<SassService>();
-
-            return Task.FromResult(true);
         }
 
         /// <inheritdoc />

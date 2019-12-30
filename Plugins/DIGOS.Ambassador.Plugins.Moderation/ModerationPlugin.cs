@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation
         public override string Description => "Provides simple moderation tools.";
 
         /// <inheritdoc />
-        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
                 .AddConfiguredSchemaAwareDbContextPool<ModerationDatabaseContext>();
@@ -65,8 +65,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation
                 .AddScoped<WarningService>()
                 .AddScoped<BanService>()
                 .AddScoped<ChannelLoggingService>();
-
-            return Task.FromResult(true);
         }
 
         /// <inheritdoc />

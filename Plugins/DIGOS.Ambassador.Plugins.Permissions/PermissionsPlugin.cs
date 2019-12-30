@@ -55,14 +55,12 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         public override string Description => "Provides granular permissions for commands and functionality.";
 
         /// <inheritdoc />
-        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
                 .AddSingleton<PermissionRegistryService>()
                 .AddScoped<PermissionService>()
                 .AddConfiguredSchemaAwareDbContextPool<PermissionsDatabaseContext>();
-
-            return Task.FromResult(true);
         }
 
         /// <inheritdoc />

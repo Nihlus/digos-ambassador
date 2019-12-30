@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations
         public override string Description => "Provides user-managed transformation services.";
 
         /// <inheritdoc />
-        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
                 .AddSingleton<TransformationDescriptionBuilder>()
@@ -79,8 +79,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations
                 .AddScoped<LuaService>()
                 .AddScoped<TransformationService>()
                 .AddConfiguredSchemaAwareDbContextPool<TransformationsDatabaseContext>();
-
-            return Task.FromResult(true);
         }
 
         /// <inheritdoc />

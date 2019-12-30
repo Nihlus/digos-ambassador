@@ -48,11 +48,9 @@ namespace DIGOS.Ambassador.Plugins.Help
         public override string Description => "Provides an interactive manual.";
 
         /// <inheritdoc />
-        public override Task<bool> RegisterServicesAsync(IServiceCollection serviceCollection)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddSingleton<HelpService>();
-
-            return Task.FromResult(true);
         }
 
         /// <inheritdoc />
