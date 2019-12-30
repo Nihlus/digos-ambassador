@@ -69,6 +69,7 @@ namespace DIGOS.Ambassador
             XmlConfigurator.Configure(repo, logConfig["log4net"]);
 
             var hostBuilder = Host.CreateDefaultBuilder()
+                .UseSystemd()
                 .UseConsoleLifetime(c => c.SuppressStatusMessages = true)
                 .ConfigureServices(services =>
                 {
@@ -110,10 +111,6 @@ namespace DIGOS.Ambassador
                         .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
                         .AddFilter("Microsoft.EntityFrameworkCore.Migrations", LogLevel.Warning);
                 });
-
-        #if HAS_SYSTEMD_SUPPORT
-            hostBuilder.UseSystemd();
-        #endif
 
             var host = hostBuilder.Build();
 
