@@ -73,7 +73,6 @@ namespace DIGOS.Ambassador
 
             var hostBuilder = Host.CreateDefaultBuilder()
                 .UseSystemd()
-                .UseConsoleLifetime(c => c.SuppressStatusMessages = true)
                 .ConfigureServices(services =>
                 {
                     var pluginService = new PluginService();
