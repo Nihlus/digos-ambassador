@@ -49,13 +49,8 @@ namespace DIGOS.Ambassador
     /// <summary>
     /// The main entry point class of the program.
     /// </summary>
-    internal static class Program
+    internal class Program
     {
-        /// <summary>
-        /// Logger instance for this class.
-        /// </summary>
-        private static readonly ILog Log = LogManager.GetLogger(typeof(Program));
-
         /// <summary>
         /// The main entry point of the program.
         /// </summary>
@@ -73,10 +68,8 @@ namespace DIGOS.Ambassador
             var repo = LogManager.CreateRepository(Assembly.GetEntryAssembly(), typeof(Hierarchy));
             XmlConfigurator.Configure(repo, logConfig["log4net"]);
 
-            Log.Debug($"Running on {RuntimeInformation.FrameworkDescription}");
-
-            var host = Host.CreateDefaultBuilder()
-                .UseConsoleLifetime()
+            var hostBuilder = Host.CreateDefaultBuilder()
+                .UseConsoleLifetime(c => c.SuppressStatusMessages = true)
                 .ConfigureServices(services =>
                 {
                     var pluginService = new PluginService();
@@ -116,8 +109,16 @@ namespace DIGOS.Ambassador
                         .AddFilter("Microsoft.EntityFrameworkCore.Query", LogLevel.Error)
                         .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
                         .AddFilter("Microsoft.EntityFrameworkCore.Migrations", LogLevel.Warning);
-                })
-                .Build();
+                });
+
+        #if HAS_SYSTEMD_SUPPORT
+            hostBuilder.UseSystemd();
+        #endif
+
+            var host = hostBuilder.Build();
+
+            var logger = host.Services.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation($"Running on {RuntimeInformation.FrameworkDescription}");
 
             await host.RunAsync();
         }
