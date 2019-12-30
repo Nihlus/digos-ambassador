@@ -26,10 +26,23 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Xml;
+using DIGOS.Ambassador.Core.Database.Services;
+using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
+using Discord.Commands;
+using Discord.WebSocket;
 using JetBrains.Annotations;
 using log4net;
 using log4net.Config;
 using log4net.Repository.Hierarchy;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Remora.Behaviours.Services;
+using Remora.EntityFrameworkCore.Modular.Services;
+using Remora.Plugins.Services;
 
 namespace DIGOS.Ambassador
 {
@@ -49,9 +62,6 @@ namespace DIGOS.Ambassador
         /// <returns>A task.</returns>
         public static async Task Main()
         {
-            // Connect to uncaught exceptions for logging
-            AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
-
             // Configure logging
             const string configurationName = "DIGOS.Ambassador.log4net.config";
             var logConfig = new XmlDocument();
@@ -65,61 +75,51 @@ namespace DIGOS.Ambassador
 
             Log.Debug($"Running on {RuntimeInformation.FrameworkDescription}");
 
-            // Initialize
-            var ambassadorClient = new AmbassadorClient();
-            await ambassadorClient.InitializeAsync();
+            var host = Host.CreateDefaultBuilder()
+                .UseConsoleLifetime()
+                .ConfigureServices(services =>
+                {
+                    var pluginService = new PluginService();
 
-            var loginResult = await ambassadorClient.LoginAsync();
-            if (!loginResult.IsSuccess)
-            {
-                Log.Error(loginResult.ErrorReason);
-                return;
-            }
+                    services
+                        .AddHostedService<AmbassadorBotService>()
+                        .AddSingleton(pluginService)
+                        .AddSingleton
+                        (
+                            provider => new DiscordSocketClient(new DiscordSocketConfig { MessageCacheSize = 100 })
+                        )
+                        .AddSingleton<BaseSocketClient>(s => s.GetRequiredService<DiscordSocketClient>())
+                        .AddSingleton<CommandService>()
+                        .AddSingleton<BehaviourService>()
+                        .AddSingleton<ContentService>()
+                        .AddSingleton<DiscordService>()
+                        .AddSingleton<UserFeedbackService>()
+                        .AddSingleton<InteractivityService>()
+                        .AddSingleton<DelayedActionService>()
+                        .AddSingleton<SchemaAwareDbContextService>()
+                        .AddSingleton<ContextConfigurationService>()
+                        .AddSingleton(FileSystemFactory.CreateContentFileSystem())
+                        .AddSingleton<Random>();
 
-            await ambassadorClient.StartAsync();
+                    var plugins = pluginService.LoadAvailablePlugins();
+                    foreach (var plugin in plugins)
+                    {
+                        plugin.ConfigureServices(services);
+                    }
+                })
+                .ConfigureLogging(l =>
+                {
+                    l.ClearProviders();
 
-            // Wait for shutdown
-            await Task.Delay(-1);
-        }
+                    l.AddLog4Net()
+                        .AddFilter("Microsoft.EntityFrameworkCore.Infrastructure", LogLevel.Warning)
+                        .AddFilter("Microsoft.EntityFrameworkCore.Query", LogLevel.Error)
+                        .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
+                        .AddFilter("Microsoft.EntityFrameworkCore.Migrations", LogLevel.Warning);
+                })
+                .Build();
 
-        /// <summary>
-        /// Event handler for all unhandled exceptions that may be encountered during runtime. While there should never
-        /// be any unhandled exceptions in an ideal program, unexpected issues can and will arise. This handler logs
-        /// the exception and all relevant information to a logfile and prints it to the console for debugging purposes.
-        /// </summary>
-        /// <param name="sender">The sending object.</param>
-        /// <param name="unhandledExceptionEventArgs">The event object containing the information about the exception.</param>
-        private static void OnUnhandledException(object sender, [NotNull] UnhandledExceptionEventArgs unhandledExceptionEventArgs)
-        {
-            // Force english exception output
-            System.Threading.Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            System.Threading.Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-
-            Log.Fatal("----------------");
-            Log.Fatal("FATAL UNHANDLED EXCEPTION!");
-            Log.Fatal("Something has gone terribly, terribly wrong during runtime.");
-            Log.Fatal("The following is what information could be gathered by the program before crashing.");
-            Log.Fatal("Please report this to <jarl.gullberg@gmail.com> or via GitHub. Include the full log and a " +
-                      "description of what you were doing when it happened.");
-
-            if (!(unhandledExceptionEventArgs.ExceptionObject is Exception unhandledException))
-            {
-                Log.Fatal("The unhandled exception was null. Call a priest.");
-                return;
-            }
-
-            Log.Fatal($"Exception type: {unhandledException.GetType().FullName}");
-            Log.Fatal($"Exception Message: {unhandledException.Message}");
-            Log.Fatal($"Exception Stacktrace: {unhandledException.StackTrace}");
-
-            if (unhandledException.InnerException is null)
-            {
-                return;
-            }
-
-            Log.Fatal($"Inner exception type: {unhandledException.InnerException.GetType().FullName}");
-            Log.Fatal($"Inner exception Message: {unhandledException.InnerException.Message}");
-            Log.Fatal($"Inner exception Stacktrace: {unhandledException.InnerException.StackTrace}");
+            await host.RunAsync();
         }
     }
 }

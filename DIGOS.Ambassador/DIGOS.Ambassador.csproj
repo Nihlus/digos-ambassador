@@ -26,9 +26,10 @@
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
     <PackageReference Include="Humanizer.Core" Version="2.7.9" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="3.0.3" />
     <PackageReference Include="Remora.Discord.Commands.Behaviours" Version="3.0.1" />
-    <PackageReference Include="Remora.Plugins" Version="1.0.1" />
+    <PackageReference Include="Remora.Plugins" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,6 +48,10 @@
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Roleplaying\DIGOS.Ambassador.Plugins.Roleplaying.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Statistics\DIGOS.Ambassador.Plugins.Statistics.csproj" />
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Transformations\DIGOS.Ambassador.Plugins.Transformations.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+    <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="3.1.0" />
   </ItemGroup>
 
   <PropertyGroup>
