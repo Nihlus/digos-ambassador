@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Extensions
         /// <param name="facade">The database.</param>
         public static void Create([NotNull] this DatabaseFacade facade)
         {
-            facade.ExecuteSqlCommand(facade.GenerateCreateScript());
+            facade.ExecuteSqlRaw(facade.GenerateCreateScript());
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Tests.Extensions
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public static Task CreateAsync([NotNull] this DatabaseFacade facade)
         {
-            return facade.ExecuteSqlCommandAsync(facade.GenerateCreateScript());
+            return facade.ExecuteSqlRawAsync(facade.GenerateCreateScript());
         }
     }
 }

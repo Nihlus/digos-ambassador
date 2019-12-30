@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.TypeReaders.Extensions;
@@ -32,7 +33,6 @@ using DIGOS.Ambassador.Plugins.Kinks.Services;
 using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;

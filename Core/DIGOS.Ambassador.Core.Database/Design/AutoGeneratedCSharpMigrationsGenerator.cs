@@ -29,6 +29,8 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations.Design;
 using Microsoft.EntityFrameworkCore.Migrations.Operations;
 
+#pragma warning disable EF1001 // Internal EF API
+
 namespace DIGOS.Ambassador.Core.Database.Design
 {
     /// <inheritdoc />
