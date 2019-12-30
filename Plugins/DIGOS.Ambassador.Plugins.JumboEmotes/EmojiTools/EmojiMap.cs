@@ -22,7 +22,7 @@
 
 using System.Collections.Generic;
 
-namespace DIGOS.Ambassador.EmojiTools
+namespace DIGOS.Ambassador.Plugins.JumboEmotes.EmojiTools
 {
     /// <summary>
     /// Contains a mapping of emoji names to unicode codepoints. Taken from Discord.Addons.EmojiTools.

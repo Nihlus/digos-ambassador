@@ -26,7 +26,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.EmojiTools;
+using DIGOS.Ambassador.Plugins.JumboEmotes.EmojiTools;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
