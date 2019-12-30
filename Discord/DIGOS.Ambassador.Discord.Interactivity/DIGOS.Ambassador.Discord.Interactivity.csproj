@@ -7,8 +7,8 @@
 
     <ItemGroup>
         <PackageReference Include="Discord.Net.Core" Version="2.1.1" />
-        <PackageReference Include="Remora.Discord.Behaviours" Version="1.0.1" />
-        <PackageReference Include="Remora.Results" Version="1.0.3" />
+        <PackageReference Include="Remora.Discord.Behaviours" Version="1.0.2" />
+        <PackageReference Include="Remora.Results" Version="1.0.4" />
     </ItemGroup>
 
     <ItemGroup>

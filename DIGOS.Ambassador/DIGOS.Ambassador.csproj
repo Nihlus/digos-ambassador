@@ -26,12 +26,15 @@
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
     <PackageReference Include="Humanizer.Core" Version="2.7.9" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="3.0.3" />
-    <PackageReference Include="Remora.Discord.Commands.Behaviours" Version="3.0.2" />
-    <PackageReference Include="Remora.Plugins" Version="1.1.0" />
+    <PackageReference Include="Remora.Discord.Commands.Behaviours" Version="3.0.3" />
+    <PackageReference Include="Remora.Plugins" Version="1.1.1" />
   </ItemGroup>
 
   <ItemGroup>
