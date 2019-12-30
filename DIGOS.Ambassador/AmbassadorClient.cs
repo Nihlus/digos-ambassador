@@ -35,7 +35,6 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using JetBrains.Annotations;
-using log4net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Behaviours;
@@ -55,18 +54,12 @@ namespace DIGOS.Ambassador
     /// </summary>
     public class AmbassadorClient
     {
-        /// <summary>
-        /// Logger instance for this class.
-        /// </summary>
-        private static readonly ILog Log = LogManager.GetLogger(typeof(AmbassadorClient));
-
         private readonly DiscordSocketClient _client;
-
         private readonly CommandService _commands;
-
         private readonly BehaviourService _behaviours;
 
         private IServiceProvider _services = null!;
+        private ILogger _log = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorClient"/> class.
@@ -121,6 +114,13 @@ namespace DIGOS.Ambassador
                         .AddFilter("Microsoft.EntityFrameworkCore.Migrations", LogLevel.Warning)
                 );
 
+            // Initialize logging before the services are fully instantiated
+            var loggingProvider = (ILoggerProvider)serviceCollection
+                .First(s => s.ServiceType == typeof(ILoggerProvider))
+                .ImplementationInstance;
+
+            _log = loggingProvider.CreateLogger(nameof(AmbassadorClient));
+
             var successfullyRegisteredPlugins = new List<IPluginDescriptor>();
 
             var availablePlugins = pluginService.LoadAvailablePlugins();
@@ -128,7 +128,7 @@ namespace DIGOS.Ambassador
             {
                 if (!await availablePlugin.RegisterServicesAsync(serviceCollection))
                 {
-                    Log.Warn
+                    _log.LogWarning
                     (
                         $"The plugin \"{availablePlugin.Name}\" (v{availablePlugin.Version}) failed to " +
                         "register its services. It will not be loaded."
@@ -157,7 +157,7 @@ namespace DIGOS.Ambassador
 
                 if (!await migratablePlugin.MigratePluginAsync(_services))
                 {
-                    Log.Warn
+                    _log.LogWarning
                     (
                         $"The plugin \"{plugin.Name}\"" +
                         $" (v{plugin.Version}) failed to migrate its database. It may not " +
@@ -176,7 +176,7 @@ namespace DIGOS.Ambassador
 
                 if (!await migratablePlugin.MigratePluginAsync(_services))
                 {
-                    Log.Warn
+                    _log.LogWarning
                     (
                         $"The plugin \"{plugin.Name}\"" +
                         $" (v{plugin.Version}) failed to migrate its database. It may not " +
@@ -189,7 +189,7 @@ namespace DIGOS.Ambassador
             {
                 if (!await plugin.InitializeAsync(_services))
                 {
-                    Log.Warn
+                    _log.LogWarning
                     (
                         $"The plugin \"{plugin.Name}\"" +
                         $" (v{plugin.Version}) failed to initialize. It may not be functional."
@@ -265,35 +265,35 @@ namespace DIGOS.Ambassador
         /// <returns>A completed task.</returns>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if the log severity is not recognized.</exception>
         [NotNull]
-        private static Task OnDiscordLogEvent(LogMessage arg)
+        private Task OnDiscordLogEvent(LogMessage arg)
         {
             var content = $"Discord log event: {arg.Message}";
             switch (arg.Severity)
             {
                 case LogSeverity.Critical:
                 {
-                    Log.Fatal(content, arg.Exception);
+                    _log.LogCritical(content, arg.Exception);
                     break;
                 }
                 case LogSeverity.Error:
                 {
-                    Log.Error(content, arg.Exception);
+                    _log.LogError(content, arg.Exception);
                     break;
                 }
                 case LogSeverity.Warning:
                 {
-                    Log.Warn(content, arg.Exception);
+                    _log.LogWarning(content, arg.Exception);
                     break;
                 }
                 case LogSeverity.Verbose:
                 case LogSeverity.Info:
                 {
-                    Log.Info(content, arg.Exception);
+                    _log.LogInformation(content, arg.Exception);
                     break;
                 }
                 case LogSeverity.Debug:
                 {
-                    Log.Debug(content, arg.Exception);
+                    _log.LogDebug(content, arg.Exception);
                     break;
                 }
                 default:

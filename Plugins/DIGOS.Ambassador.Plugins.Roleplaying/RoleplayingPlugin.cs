@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
 
             var commands = serviceProvider.GetRequiredService<CommandService>();
 
-            commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>());
+            commands.AddTypeReader<IMessage>(new UncachedMessageTypeReader<IMessage>(), true);
             commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
 
             await commands.AddModuleAsync<RoleplayCommands>(serviceProvider);

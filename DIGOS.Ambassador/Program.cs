@@ -30,6 +30,7 @@ using JetBrains.Annotations;
 using log4net;
 using log4net.Config;
 using log4net.Repository.Hierarchy;
+using Microsoft.Extensions.Logging;
 
 namespace DIGOS.Ambassador
 {
