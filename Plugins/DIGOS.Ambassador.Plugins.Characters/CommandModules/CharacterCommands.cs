@@ -1409,7 +1409,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
                 var galleryImage = character.Images.FirstOrDefault
                 (
-                    i => i.Name.Equals(newCharacterAvatarUrl, StringComparison.OrdinalIgnoreCase)
+                    i => i.Name.ToLower().Equals(newCharacterAvatarUrl.ToLower())
                 );
 
                 if (!(galleryImage is null))

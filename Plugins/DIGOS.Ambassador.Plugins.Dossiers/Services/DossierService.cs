@@ -195,7 +195,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             return await _database.Dossiers.Select(d => d.Title)
             .AllAsync
             (
-                p => !p.Equals(dossierTitle, StringComparison.OrdinalIgnoreCase)
+                p => !p.ToLower().Equals(dossierTitle.ToLower())
             );
         }
 
@@ -209,7 +209,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         {
             var dossier = await _database.Dossiers.FirstOrDefaultAsync
             (
-                d => string.Equals(d.Title, title, StringComparison.OrdinalIgnoreCase)
+                d => string.Equals(d.Title.ToLower(), title.ToLower())
             );
 
             if (dossier is null)

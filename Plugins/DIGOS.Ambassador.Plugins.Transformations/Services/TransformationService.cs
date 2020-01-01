@@ -1157,7 +1157,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         {
             var species = await _database.Species.FirstOrDefaultAsync
             (
-                s => string.Equals(s.Name, speciesName, StringComparison.OrdinalIgnoreCase)
+                s => string.Equals(s.Name.ToLower(), speciesName.ToLower())
             );
 
             if (species is null)
@@ -1181,7 +1181,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         {
             return !await _database.Species.AnyAsync
             (
-                s => string.Equals(s.Name, speciesName, StringComparison.OrdinalIgnoreCase)
+                s => string.Equals(s.Name.ToLower(), speciesName.ToLower())
             );
         }
 

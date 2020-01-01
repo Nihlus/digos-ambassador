@@ -356,7 +356,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             [NotNull] IGuild guild
         )
         {
-            if (await _database.Roleplays.CountAsync(rp => string.Equals(rp.Name, roleplayName, StringComparison.OrdinalIgnoreCase)) > 1)
+            if (await _database.Roleplays.CountAsync(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower())) > 1)
             {
                 return RetrieveEntityResult<Roleplay>.FromError
                 (
@@ -365,7 +365,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             var roleplay = GetRoleplays(guild)
-                .FirstOrDefault(rp => string.Equals(rp.Name, roleplayName, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower()));
 
             if (roleplay is null)
             {
@@ -488,7 +488,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             .FirstOrDefaultAsync
             (
                 rp =>
-                    rp.Name.Equals(roleplayName, StringComparison.OrdinalIgnoreCase) &&
+                    rp.Name.ToLower().Equals(roleplayName.ToLower()) &&
                     rp.Owner.DiscordID == (long)roleplayOwner.Id
             );
 

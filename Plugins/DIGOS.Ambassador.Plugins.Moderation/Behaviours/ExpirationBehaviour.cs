@@ -88,7 +88,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 
             foreach (var guild in this.Client.Guilds)
             {
-                var warnings = _warnings.GetWarnings(guild).Where(w => w.IsTemporary);
+                // Using .HasValue instead of .IsTemporary here to allow server-side evaluation
+                var warnings = _warnings.GetWarnings(guild).Where(w => w.ExpiresOn.HasValue);
                 foreach (var warning in warnings)
                 {
                     if (warning.ExpiresOn <= now)
@@ -106,7 +107,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     continue;
                 }
 
-                var bans = _bans.GetBans(guild).Where(b => b.IsTemporary);
+                // Using .HasValue instead of .IsTemporary here to allow server-side evaluation
+                var bans = _bans.GetBans(guild).Where(b => b.ExpiresOn.HasValue);
                 foreach (var ban in bans)
                 {
                     if (ban.ExpiresOn <= now)

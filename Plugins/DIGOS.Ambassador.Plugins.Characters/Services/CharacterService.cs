@@ -219,7 +219,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         )
         {
             var guildCharacters = _database.Characters.Where(ch => ch.ServerID == (long)guild.Id);
-            if (await guildCharacters.CountAsync(ch => string.Equals(ch.Name, characterName, StringComparison.OrdinalIgnoreCase)) > 1)
+            if (await guildCharacters.CountAsync(ch => string.Equals(ch.Name.ToLower(), characterName.ToLower())) > 1)
             {
                 return RetrieveEntityResult<Character>.FromError
                 (
@@ -227,7 +227,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 );
             }
 
-            var character = GetCharacters(guild).FirstOrDefault(ch => string.Equals(ch.Name, characterName, StringComparison.OrdinalIgnoreCase));
+            var character = GetCharacters(guild)
+                .FirstOrDefault(ch => string.Equals(ch.Name.ToLower(), characterName.ToLower()));
 
             if (character is null)
             {
@@ -268,7 +269,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var character = await GetUserCharacters(characterOwner, context.Guild)
             .FirstOrDefaultAsync
             (
-                ch => string.Equals(ch.Name, characterName, StringComparison.OrdinalIgnoreCase)
+                ch => string.Equals(ch.Name.ToLower(), characterName.ToLower())
             );
 
             if (character is null)
@@ -879,7 +880,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             bool isNSFW = false
         )
         {
-            var isImageNameUnique = !character.Images.Any(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
+            var isImageNameUnique = !character.Images.Any(i => string.Equals(i.Name.ToLower(), imageName.ToLower()));
             if (!isImageNameUnique)
             {
                 return ModifyEntityResult.FromError("The character already has an image with that name.");
@@ -927,13 +928,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             [NotNull] string imageName
         )
         {
-            var hasNamedImage = character.Images.Any(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
+            var hasNamedImage = character.Images.Any(i => string.Equals(i.Name.ToLower(), imageName.ToLower()));
             if (!hasNamedImage)
             {
                 return ModifyEntityResult.FromError("The character has no image with that name.");
             }
 
-            character.Images.RemoveAll(i => string.Equals(i.Name, imageName, StringComparison.OrdinalIgnoreCase));
+            character.Images.RemoveAll(i => string.Equals(i.Name.ToLower(), imageName.ToLower()));
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
