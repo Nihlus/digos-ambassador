@@ -24,6 +24,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
@@ -121,7 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
                 return false;
             }
 
-            return string.Equals(this.Name, species.Name, StringComparison.OrdinalIgnoreCase);
+            return string.Equals(this.Name.ToLower(), species.Name.ToLower());
         }
 
         /// <inheritdoc />

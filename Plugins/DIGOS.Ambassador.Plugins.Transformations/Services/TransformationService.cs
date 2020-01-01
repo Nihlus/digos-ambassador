@@ -1097,7 +1097,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             }
 
             var transformations = await _database.Transformations
-                .Where(tf => bodyparts.Contains(tf.Part) && tf.Species.IsSameSpeciesAs(species))
+                .Where(tf => bodyparts.Contains(tf.Part) && tf.Species.Name.ToLower().Equals(species.Name.ToLower()))
                 .ToListAsync();
 
             if (!transformations.Any())
@@ -1126,7 +1126,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         {
             return !await _database.Transformations.AnyAsync
             (
-                tf => tf.Part == bodypart && tf.Species.IsSameSpeciesAs(species)
+                tf => tf.Part == bodypart && string.Equals(tf.Species.Name.ToLower(), species.Name.ToLower())
             );
         }
 

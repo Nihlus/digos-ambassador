@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
@@ -383,8 +384,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             var hasPermission = false;
 
             // Check if the user is part of any roles which this permission applies to
-            var rolePermission = await GetApplicableRolePermissions(discordUser)
-                .FirstOrDefaultAsync
+            var rolePermission = GetApplicableRolePermissions(discordUser)
+                .FirstOrDefault
                 (
                     p =>
                         p.Permission == requiredPermission.UniqueIdentifier &&
@@ -448,7 +449,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="discordUser">The user.</param>
         /// <returns>An object representing the query.</returns>
         [NotNull, ItemNotNull]
-        public IOrderedQueryable<RolePermission> GetApplicableRolePermissions
+        public IEnumerable<RolePermission> GetApplicableRolePermissions
         (
             [NotNull] IGuildUser discordUser
         )
@@ -457,6 +458,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             return _database.RolePermissions
                 .Where(p => userRoles.Any(r => r == (ulong)p.RoleID))
+                .ToList()
                 .OrderBy(p => userRoles.IndexOf(userRoles.First(r => r == (ulong)p.RoleID)));
         }
 
