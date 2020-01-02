@@ -32,7 +32,6 @@ using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
@@ -45,12 +44,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     [UsedImplicitly]
     internal sealed class RoleplayTimeoutBehaviour : ContinuousDiscordBehaviour<RoleplayTimeoutBehaviour>
     {
-        /// <summary>
-        /// Gets the database context.
-        /// </summary>
-        [NotNull, ProvidesContext]
-        private RoleplayingDatabaseContext Database { get; }
-
         /// <summary>
         /// Gets the roleplay service.
         /// </summary>
@@ -69,7 +62,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <param name="client">The discord client.</param>
         /// <param name="serviceScope">The service scope in use.</param>
         /// <param name="logger">The logging instance for this type.</param>
-        /// <param name="database">The database.</param>
         /// <param name="roleplays">The roleplay service.</param>
         /// <param name="feedback">The feedback service.</param>
         public RoleplayTimeoutBehaviour
@@ -77,13 +69,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             DiscordSocketClient client,
             [NotNull] IServiceScope serviceScope,
             [NotNull] ILogger<RoleplayTimeoutBehaviour> logger,
-            RoleplayingDatabaseContext database,
             RoleplayService roleplays,
             [NotNull] UserFeedbackService feedback
         )
             : base(client, serviceScope, logger)
         {
-            this.Database = database;
             this.Roleplays = roleplays;
             this.Feedback = feedback;
         }
@@ -98,20 +88,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 return;
             }
 
-            var roleplays = await this.Database.Roleplays.ToListAsync(ct);
+            var roleplays = this.Roleplays.GetRoleplays()
+                .Where(r => r.IsActive)
+                .Where(r => r.LastUpdated.HasValue);
+
             foreach (var roleplay in roleplays)
             {
-                if (!roleplay.IsActive)
-                {
-                    continue;
-                }
-
-                if (roleplay.LastUpdated is null)
-                {
-                    continue;
-                }
-
-                var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated.Value;
+                // ReSharper disable once PossibleInvalidOperationException
+                var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated!.Value;
                 if (timeSinceLastActivity > TimeSpan.FromHours(72))
                 {
                     await StopRoleplayAsync(roleplay);
@@ -163,10 +147,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task StopRoleplayAsync(Roleplay roleplay)
         {
-            roleplay.IsActive = false;
-            roleplay.ActiveChannelID = null;
-
-            await this.Database.SaveChangesAsync();
+            var stopRoleplayAsync = await this.Roleplays.StopRoleplayAsync(roleplay);
+            if (!stopRoleplayAsync.IsSuccess)
+            {
+                this.Log.LogWarning($"Failed to stop the roleplay {roleplay.Name}: {stopRoleplayAsync.ErrorReason}");
+                return;
+            }
 
             if (!(roleplay.DedicatedChannelID is null))
             {
@@ -226,13 +212,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     }
                 }
             }
-        }
-
-        /// <inheritdoc/>
-        public override void Dispose()
-        {
-            base.Dispose();
-            this.Database.Dispose();
         }
     }
 }

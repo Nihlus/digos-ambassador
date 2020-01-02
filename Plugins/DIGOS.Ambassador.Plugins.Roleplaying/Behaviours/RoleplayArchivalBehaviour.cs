@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
@@ -92,20 +93,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
             foreach (var guild in this.Client.Guilds)
             {
-                var roleplays = _roleplays.GetRoleplays(guild);
+                var roleplays = _roleplays.GetRoleplays(guild)
+                    .Where(r => r.DedicatedChannelID.HasValue)
+                    .Where(r => r.LastUpdated.HasValue);
+
                 foreach (var roleplay in roleplays)
                 {
-                    if (roleplay.DedicatedChannelID is null)
-                    {
-                        continue;
-                    }
-
-                    if (roleplay.LastUpdated is null)
-                    {
-                        continue;
-                    }
-
-                    var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated.Value;
+                    // ReSharper disable once PossibleInvalidOperationException
+                    var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated!.Value;
                     if (timeSinceLastActivity > TimeSpan.FromDays(28))
                     {
                         await ArchiveRoleplayAsync(guild, roleplay);

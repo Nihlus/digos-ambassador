@@ -1237,5 +1237,25 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             return ModifyEntityResult.FromSuccess();
         }
+
+        /// <summary>
+        /// Stops the given roleplay.
+        /// </summary>
+        /// <param name="roleplay">The roleplay to stop.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<ModifyEntityResult> StopRoleplayAsync(Roleplay roleplay)
+        {
+            if (!roleplay.IsActive)
+            {
+                return ModifyEntityResult.FromError("The roleplay is not active.");
+            }
+
+            roleplay.IsActive = false;
+            roleplay.ActiveChannelID = null;
+
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
     }
 }

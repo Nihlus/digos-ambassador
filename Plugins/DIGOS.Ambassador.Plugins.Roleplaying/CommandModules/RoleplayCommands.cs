@@ -702,8 +702,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             Roleplay roleplay
         )
         {
-            roleplay.IsActive = false;
-            roleplay.ActiveChannelID = null;
+            var stopRoleplayAsync = await _roleplays.StopRoleplayAsync(roleplay);
+            if (!stopRoleplayAsync.IsSuccess)
+            {
+                await _feedback.SendErrorAsync
+                (
+                    this.Context,
+                    stopRoleplayAsync.ErrorReason
+                );
+
+                return;
+            }
 
             var getDedicatedChannelResult = await _roleplays.GetDedicatedRoleplayChannelAsync
             (
