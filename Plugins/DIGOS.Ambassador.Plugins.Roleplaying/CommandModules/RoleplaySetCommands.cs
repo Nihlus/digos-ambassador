@@ -78,7 +78,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 Roleplay roleplay
             )
             {
-                var result = await _roleplays.SetRoleplayNameAsync(this.Context, roleplay, newRoleplayName);
+                var result = await _roleplays.SetRoleplayNameAsync(this.Context.Guild, roleplay, newRoleplayName);
                 if (!result.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, result.ErrorReason);

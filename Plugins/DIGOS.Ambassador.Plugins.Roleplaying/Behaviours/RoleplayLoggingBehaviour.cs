@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 return;
             }
 
-            await _roleplays.ConsumeMessageAsync(new SocketCommandContext(this.Client, message));
+            await _roleplays.ConsumeMessageAsync(message);
         }
 
         /// <inheritdoc />

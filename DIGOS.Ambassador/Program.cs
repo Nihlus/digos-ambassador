@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
+using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using log4net;
@@ -84,6 +85,7 @@ namespace DIGOS.Ambassador
                         (
                             provider => new DiscordSocketClient(new DiscordSocketConfig { MessageCacheSize = 100 })
                         )
+                        .AddSingleton<IDiscordClient>(s => s.GetRequiredService<DiscordSocketClient>())
                         .AddSingleton<BaseSocketClient>(s => s.GetRequiredService<DiscordSocketClient>())
                         .AddSingleton<CommandService>()
                         .AddSingleton<BehaviourService>()

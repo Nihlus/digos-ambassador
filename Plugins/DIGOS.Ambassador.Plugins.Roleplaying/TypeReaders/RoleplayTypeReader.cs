@@ -57,7 +57,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
                 return await roleplayService.GetActiveRoleplayAsync(context.Channel);
             }
 
-            return await roleplayService.GetBestMatchingRoleplayAsync(context, entityOwner, entityName);
+            return await roleplayService.GetBestMatchingRoleplayAsync
+            (
+                (ITextChannel)context.Channel,
+                context.Guild,
+                entityOwner,
+                entityName
+            );
         }
     }
 }

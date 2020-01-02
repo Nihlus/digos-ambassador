@@ -345,7 +345,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(JoinRoleplay), PermissionTarget.Self)]
         public async Task JoinRoleplayAsync([NotNull] Roleplay roleplay)
         {
-            var addUserResult = await _roleplays.AddUserToRoleplayAsync(this.Context, roleplay, this.Context.Message.Author);
+            var addUserResult = await _roleplays.AddUserToRoleplayAsync(roleplay, this.Context.Message.Author);
             if (!addUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, addUserResult.ErrorReason);
@@ -437,7 +437,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task LeaveRoleplayAsync([NotNull] Roleplay roleplay)
         {
-            var removeUserResult = await _roleplays.RemoveUserFromRoleplayAsync(this.Context, roleplay, this.Context.Message.Author);
+            var removeUserResult = await _roleplays.RemoveUserFromRoleplayAsync(roleplay, this.Context.Message.Author);
             if (!removeUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, removeUserResult.ErrorReason);
@@ -452,7 +452,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 var grantPermissionResult = await _roleplays.RevokeUserDedicatedChannelAccessAsync
                 (
-                    this.Context,
+                    this.Context.Guild,
                     dedicatedChannel,
                     this.Context.User
                 );
@@ -486,7 +486,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             Roleplay roleplay
         )
         {
-            var kickUserResult = await _roleplays.KickUserFromRoleplayAsync(this.Context, roleplay, discordUser);
+            var kickUserResult = await _roleplays.KickUserFromRoleplayAsync(roleplay, discordUser);
             if (!kickUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, kickUserResult.ErrorReason);
@@ -501,7 +501,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 var grantPermissionResult = await _roleplays.RevokeUserDedicatedChannelAccessAsync
                 (
-                    this.Context,
+                    this.Context.Guild,
                     dedicatedChannel,
                     discordUser
                 );
@@ -568,7 +568,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             // The roleplay either doesn't have a channel, or the one it has has been deleted or is otherwise invalid.
             var result = await _roleplays.CreateDedicatedRoleplayChannelAsync
             (
-                this.Context,
+                this.Context.Guild,
                 roleplay
             );
 
@@ -608,7 +608,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             Roleplay roleplay
         )
         {
-            var startRoleplayResult = await _roleplays.StartRoleplayAsync(this.Context, roleplay);
+            var startRoleplayResult = await _roleplays.StartRoleplayAsync
+            (
+                (ITextChannel)this.Context.Channel,
+                this.Context.Guild,
+                roleplay
+            );
+
             if (!startRoleplayResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, startRoleplayResult.ErrorReason);
@@ -1169,7 +1175,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
             var roleplay = createRoleplayAsync.Entity;
 
-            var createChannelAsync = await _roleplays.CreateDedicatedRoleplayChannelAsync(this.Context, roleplay);
+            var createChannelAsync = await _roleplays.CreateDedicatedRoleplayChannelAsync(this.Context.Guild, roleplay);
             if (!createChannelAsync.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, createChannelAsync.ErrorReason);
@@ -1186,7 +1192,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     continue;
                 }
 
-                var addParticipantAsync = await _roleplays.AddUserToRoleplayAsync(this.Context, roleplay, participant);
+                var addParticipantAsync = await _roleplays.AddUserToRoleplayAsync(roleplay, participant);
                 if (addParticipantAsync.IsSuccess)
                 {
                     continue;
@@ -1231,7 +1237,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 await dedicatedChannel.SendMessageAsync(messageLink);
             }
 
-            var startRoleplayAsync = await _roleplays.StartRoleplayAsync(this.Context, roleplay);
+            var startRoleplayAsync = await _roleplays.StartRoleplayAsync
+            (
+                (ITextChannel)this.Context.Channel,
+                this.Context.Guild,
+                roleplay
+            );
+
             if (!startRoleplayAsync.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, createChannelAsync.ErrorReason);
