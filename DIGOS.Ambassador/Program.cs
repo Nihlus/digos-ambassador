@@ -111,7 +111,6 @@ namespace DIGOS.Ambassador
 
                     l.AddLog4Net()
                         .AddFilter("Microsoft.EntityFrameworkCore.Infrastructure", LogLevel.Warning)
-                        .AddFilter("Microsoft.EntityFrameworkCore.Query", LogLevel.Error)
                         .AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Warning)
                         .AddFilter("Microsoft.EntityFrameworkCore.Migrations", LogLevel.Warning);
                 });
