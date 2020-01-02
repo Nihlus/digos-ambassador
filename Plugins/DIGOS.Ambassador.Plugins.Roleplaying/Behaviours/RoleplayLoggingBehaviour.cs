@@ -29,6 +29,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
@@ -69,8 +70,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected override async Task Connected()
         {
-            var activeRoleplays = _roleplays.GetRoleplays()
-                .Where(r => r.DedicatedChannelID.HasValue);
+            var activeRoleplays = await _roleplays.GetRoleplays()
+                .Where(r => r.DedicatedChannelID.HasValue)
+                .ToListAsync();
 
             foreach (var activeRoleplay in activeRoleplays)
             {
