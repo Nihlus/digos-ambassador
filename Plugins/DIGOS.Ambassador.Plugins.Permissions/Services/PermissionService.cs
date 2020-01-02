@@ -28,7 +28,6 @@ using DIGOS.Ambassador.Plugins.Permissions.Model;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -454,7 +453,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             [NotNull] IGuildUser discordUser
         )
         {
-            var userRoles = discordUser.RoleIds;
+            var userRoles = discordUser.RoleIds.ToList();
 
             return _database.RolePermissions
                 .Where(p => userRoles.Any(r => r == (ulong)p.RoleID))

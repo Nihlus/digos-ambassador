@@ -20,11 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
 using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
