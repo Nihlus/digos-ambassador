@@ -32,6 +32,7 @@ using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
@@ -88,9 +89,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 return;
             }
 
-            var roleplays = this.Roleplays.GetRoleplays()
+            var roleplays = await this.Roleplays.GetRoleplays()
                 .Where(r => r.IsActive)
-                .Where(r => r.LastUpdated.HasValue);
+                .Where(r => r.LastUpdated.HasValue)
+                .ToListAsync(ct);
 
             foreach (var roleplay in roleplays)
             {
