@@ -563,19 +563,19 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             var invoker = getInvokerResult.Entity;
 
-            var userCharacters = _characters.GetUserCharacters
+            var userCharacters = await _characters.GetUserCharacters
             (
                 invoker,
                 this.Context.Guild
-            );
+            ).ToListAsync();
 
-            if (!await userCharacters.AnyAsync())
+            if (userCharacters.Count <= 0)
             {
                 await _feedback.SendErrorAsync(this.Context, "You don't have any characters.");
                 return;
             }
 
-            if (await userCharacters.CountAsync() == 1)
+            if (userCharacters.Count == 1)
             {
                 await _feedback.SendErrorAsync(this.Context, "You only have one character.");
                 return;
@@ -590,13 +590,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             // Filter out the current character, so becoming the same character isn't possible
             if (getCurrentCharacterResult.IsSuccess)
             {
-                userCharacters = userCharacters.Except(new[] { getCurrentCharacterResult.Entity });
+                userCharacters = userCharacters.Except(new[] { getCurrentCharacterResult.Entity }).ToList();
             }
 
-            var characterCount = await userCharacters.CountAsync();
-            var randomIndex = _random.Next(0, characterCount);
+            var randomIndex = _random.Next(0, userCharacters.Count);
 
-            var randomCharacter = userCharacters.ToList()[randomIndex];
+            var randomCharacter = userCharacters[randomIndex];
             await AssumeCharacterFormAsync(randomCharacter);
         }
 
