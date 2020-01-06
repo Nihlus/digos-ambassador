@@ -25,8 +25,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Discord.TypeReaders;
-using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying;
 using DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
@@ -38,6 +38,7 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -90,6 +91,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
 
             var behaviours = serviceProvider.GetRequiredService<BehaviourService>();
             await behaviours.AddBehavioursAsync(Assembly.GetExecutingAssembly(), serviceProvider);
+            await behaviours.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
+            await behaviours.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }
@@ -105,7 +108,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<RoleplayingDatabaseContext>();
             var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();

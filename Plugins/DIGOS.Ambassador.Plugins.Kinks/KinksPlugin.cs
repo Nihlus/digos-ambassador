@@ -24,8 +24,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Discord.TypeReaders.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Kinks;
 using DIGOS.Ambassador.Plugins.Kinks.CommandModules;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
@@ -34,6 +34,8 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours;
+using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 
@@ -65,10 +67,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
-
             commands.AddEnumReader<KinkPreference>();
-
             await commands.AddModuleAsync<KinkCommands>(serviceProvider);
+
+            var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
+            await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
+            await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }
@@ -84,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<KinksDatabaseContext>();
             var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();

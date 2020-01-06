@@ -26,7 +26,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions.Database;
+using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Plugins.Characters;
 using DIGOS.Ambassador.Plugins.Characters.CommandModules;
 using DIGOS.Ambassador.Plugins.Characters.Model;
@@ -37,6 +37,8 @@ using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours;
+using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 
@@ -88,6 +90,10 @@ namespace DIGOS.Ambassador.Plugins.Characters
             var pronounService = serviceProvider.GetRequiredService<PronounService>();
             pronounService.DiscoverPronounProviders();
 
+            var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
+            await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
+            await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
+
             return true;
         }
 
@@ -102,7 +108,7 @@ namespace DIGOS.Ambassador.Plugins.Characters
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
             var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();

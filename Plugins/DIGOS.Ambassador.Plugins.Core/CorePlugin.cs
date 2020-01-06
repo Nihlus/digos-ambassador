@@ -26,7 +26,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Core;
 using DIGOS.Ambassador.Plugins.Core.CommandModules;
 using DIGOS.Ambassador.Plugins.Core.Model;
@@ -104,7 +103,7 @@ namespace DIGOS.Ambassador.Plugins.Core
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<CoreDatabaseContext>();
             var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();

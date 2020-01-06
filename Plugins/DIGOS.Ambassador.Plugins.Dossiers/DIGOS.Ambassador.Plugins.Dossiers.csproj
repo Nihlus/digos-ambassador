@@ -8,6 +8,7 @@
     <ItemGroup>
         <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
         <PackageReference Include="Humanizer.Core" Version="2.7.9" />
+        <PackageReference Include="Remora.Plugins.Abstractions" Version="2.1.0" />
     </ItemGroup>
 
     <!-- Workaround for https://github.com/aspnet/EntityFrameworkCore/issues/19426 -->

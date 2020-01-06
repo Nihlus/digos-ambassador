@@ -22,11 +22,14 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Plugins.Statistics;
 using DIGOS.Ambassador.Plugins.Statistics.CommandModules;
 using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours;
+using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 
@@ -51,6 +54,10 @@ namespace DIGOS.Ambassador.Plugins.Statistics
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
             await commands.AddModuleAsync<StatCommands>(serviceProvider);
+
+            var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
+            await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
+            await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }

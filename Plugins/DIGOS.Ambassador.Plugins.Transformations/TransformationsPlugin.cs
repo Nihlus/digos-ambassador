@@ -26,8 +26,8 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Discord.TypeReaders.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Transformations;
 using DIGOS.Ambassador.Plugins.Transformations.CommandModules;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
@@ -40,6 +40,8 @@ using DIGOS.Ambassador.Plugins.Transformations.TypeReaders;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours;
+using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 
@@ -93,6 +95,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations
 
             await commands.AddModuleAsync<TransformationCommands>(serviceProvider);
 
+            var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
+            await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
+            await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
+
             return true;
         }
 
@@ -107,7 +113,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<TransformationsDatabaseContext>();
             var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();

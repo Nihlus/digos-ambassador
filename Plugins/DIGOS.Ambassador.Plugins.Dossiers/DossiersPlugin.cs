@@ -24,7 +24,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Dossiers;
 using DIGOS.Ambassador.Plugins.Dossiers.CommandModules;
 using DIGOS.Ambassador.Plugins.Dossiers.Model;
@@ -79,7 +78,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<DossiersDatabaseContext>();
             var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();

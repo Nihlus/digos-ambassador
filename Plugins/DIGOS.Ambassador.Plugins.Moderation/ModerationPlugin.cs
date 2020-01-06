@@ -25,7 +25,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions.Database;
+using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Plugins.Moderation;
 using DIGOS.Ambassador.Plugins.Moderation.CommandModules;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -90,6 +91,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation
 
             var behaviours = serviceProvider.GetRequiredService<BehaviourService>();
             await behaviours.AddBehavioursAsync(Assembly.GetExecutingAssembly(), serviceProvider);
+            await behaviours.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
+            await behaviours.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }
@@ -105,7 +108,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<ModerationDatabaseContext>();
             var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();

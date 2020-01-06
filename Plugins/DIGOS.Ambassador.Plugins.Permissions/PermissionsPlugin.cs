@@ -25,8 +25,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Discord.TypeReaders.Extensions;
-using DIGOS.Ambassador.Plugins.Abstractions.Database;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.CommandModules;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
@@ -35,6 +35,8 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours;
+using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 
@@ -79,9 +81,12 @@ namespace DIGOS.Ambassador.Plugins.Permissions
             }
 
             var commands = serviceProvider.GetRequiredService<CommandService>();
-
             commands.AddEnumReader<PermissionTarget>();
             await commands.AddModuleAsync<PermissionCommands>(serviceProvider);
+
+            var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
+            await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
+            await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }
@@ -97,7 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         }
 
         /// <inheritdoc />
-        public async Task<bool> IsDatabaseCreatedAsync(IServiceProvider serviceProvider)
+        public async Task<bool> HasCreatedPersistentStoreAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<PermissionsDatabaseContext>();
             var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
