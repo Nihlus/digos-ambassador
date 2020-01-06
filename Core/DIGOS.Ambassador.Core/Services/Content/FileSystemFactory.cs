@@ -44,13 +44,14 @@ namespace DIGOS.Ambassador.Core.Services
             var executingAssemblyDirectory = Directory.GetParent(executingAssemblyLocation).FullName;
 
             var realContentPath = Path.GetFullPath(Path.Combine(executingAssemblyDirectory, "Content"));
+            var zioContentPath = realFileSystem.ConvertPathFromInternal(realContentPath);
 
-            if (!Directory.Exists(realContentPath))
+            if (!realFileSystem.DirectoryExists(zioContentPath))
             {
-                Directory.CreateDirectory(realContentPath);
+                realFileSystem.CreateDirectory(zioContentPath);
             }
 
-            return new SubFileSystem(realFileSystem, new UPath(realContentPath));
+            return new SubFileSystem(realFileSystem, zioContentPath);
         }
     }
 }
