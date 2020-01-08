@@ -25,7 +25,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Plugins.Quotes.Services;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
@@ -49,7 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
         );
 
-        private readonly UserFeedbackService _feedback;
+        private readonly QuoteService _quotes;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageQuoteBehaviour"/> class.
@@ -57,17 +57,17 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
         /// <param name="client">The discord client.</param>
         /// <param name="serviceScope">The service scope in use.</param>
         /// <param name="logger">The logging instance for this type.</param>
-        /// <param name="feedback">The feedback service.</param>
+        /// <param name="quotes">The feedback service.</param>
         public MessageQuoteBehaviour
         (
-            DiscordSocketClient client,
+            [NotNull] DiscordSocketClient client,
             [NotNull] IServiceScope serviceScope,
             [NotNull] ILogger<MessageQuoteBehaviour> logger,
-            UserFeedbackService feedback
+            [NotNull] QuoteService quotes
         )
             : base(client, serviceScope, logger)
         {
-            _feedback = feedback;
+            _quotes = quotes;
         }
 
         /// <inheritdoc />
@@ -162,7 +162,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
                     }
                 }
 
-                var embed = _feedback.CreateMessageQuote(quotedMessage, guildUser);
+                var embed = _quotes.CreateMessageQuote(quotedMessage, guildUser);
                 embed.WithTimestamp(quotedMessage.Timestamp);
 
                 try

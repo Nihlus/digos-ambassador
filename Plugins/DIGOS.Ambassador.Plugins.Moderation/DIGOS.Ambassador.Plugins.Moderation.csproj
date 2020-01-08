@@ -21,6 +21,7 @@
         <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Abstractions.Database\DIGOS.Ambassador.Plugins.Abstractions.Database.csproj" />
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
+        <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Quotes\DIGOS.Ambassador.Plugins.Quotes.csproj" />
     </ItemGroup>
 
     <ItemGroup>

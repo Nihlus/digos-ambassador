@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
+using DIGOS.Ambassador.Plugins.Quotes.Services;
 using Discord;
 using Discord.WebSocket;
 using JetBrains.Annotations;
@@ -39,6 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         private readonly ModerationService _moderation;
         private readonly DiscordSocketClient _client;
 
+        private readonly QuoteService _quotes;
         private readonly UserFeedbackService _feedback;
 
         /// <summary>
@@ -47,16 +49,19 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="moderation">The moderation service.</param>
         /// <param name="client">The Discord client in use.</param>
         /// <param name="feedback">The feedback service.</param>
+        /// <param name="quotes">The quote service.</param>
         public ChannelLoggingService
         (
             [NotNull] ModerationService moderation,
             [NotNull] DiscordSocketClient client,
-            [NotNull] UserFeedbackService feedback
+            [NotNull] UserFeedbackService feedback,
+            [NotNull] QuoteService quotes
         )
         {
             _moderation = moderation;
             _client = client;
             _feedback = feedback;
+            _quotes = quotes;
         }
 
         /// <summary>
@@ -381,7 +386,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 $"A message was deleted from {MentionUtils.MentionChannel(textChannel.Id)} {extra}"
             );
 
-            var quote = _feedback.CreateMessageQuote(message, _client.CurrentUser);
+            var quote = _quotes.CreateMessageQuote(message, _client.CurrentUser);
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
             await _feedback.SendEmbedAsync(channel, quote.Build());

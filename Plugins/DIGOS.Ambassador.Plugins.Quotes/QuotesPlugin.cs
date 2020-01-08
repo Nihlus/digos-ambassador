@@ -24,6 +24,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Quotes;
+using DIGOS.Ambassador.Plugins.Quotes.Services;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours.Services;
@@ -45,6 +46,12 @@ namespace DIGOS.Ambassador.Plugins.Quotes
 
         /// <inheritdoc />
         public override string Description => "Provides automatic conversion of message links to quotes.";
+
+        /// <inheritdoc/>
+        public override void ConfigureServices(IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddSingleton<QuoteService>();
+        }
 
         /// <inheritdoc />
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
