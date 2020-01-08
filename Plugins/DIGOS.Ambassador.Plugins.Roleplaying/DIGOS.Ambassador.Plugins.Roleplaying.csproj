@@ -8,14 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Discord.Net" Version="2.1.1" />
         <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.6.1" />
     </ItemGroup>
 
     <!-- Workaround for https://github.com/aspnet/EntityFrameworkCore/issues/19426 -->
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.0" />
-    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />

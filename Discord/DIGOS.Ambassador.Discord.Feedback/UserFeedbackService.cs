@@ -261,12 +261,9 @@ namespace DIGOS.Ambassador.Discord.Feedback
         {
             await user.SendMessageAsync(string.Empty, false, eb);
 
-            if (context is SocketCommandContext socketContext)
+            if (!(context.Channel is IDMChannel) && notify)
             {
-                if (!socketContext.IsPrivate && notify)
-                {
-                    await SendConfirmationAsync(context, "Please check your private messages.");
-                }
+                await SendConfirmationAsync(context, "Please check your private messages.");
             }
         }
 

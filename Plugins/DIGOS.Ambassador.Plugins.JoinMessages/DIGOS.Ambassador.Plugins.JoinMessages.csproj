@@ -12,9 +12,6 @@
     </ItemGroup>
 
     <!-- Workaround for https://github.com/aspnet/EntityFrameworkCore/issues/19426 -->
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.0" />
-    </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />
