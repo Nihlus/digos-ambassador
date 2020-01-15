@@ -93,9 +93,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
             foreach (var guild in this.Client.Guilds)
             {
-                var roleplays = _roleplays.GetRoleplays(guild)
+                var roleplays = await _roleplays.GetRoleplays(guild)
                     .Where(r => r.DedicatedChannelID.HasValue)
-                    .Where(r => r.LastUpdated.HasValue);
+                    .Where(r => r.LastUpdated.HasValue)
+                    .ToListAsync(ct);
 
                 foreach (var roleplay in roleplays)
                 {
