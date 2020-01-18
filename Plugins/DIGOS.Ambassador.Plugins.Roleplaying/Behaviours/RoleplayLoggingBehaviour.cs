@@ -42,26 +42,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     [UsedImplicitly]
     internal sealed class RoleplayLoggingBehaviour : ClientEventBehaviour<RoleplayLoggingBehaviour>
     {
-        [NotNull]
-        private readonly RoleplayService _roleplays;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayLoggingBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
         /// <param name="serviceScope">The service scope in use.</param>
         /// <param name="logger">The logging instance for this type.</param>
-        /// <param name="roleplays">The roleplay service.</param>
         public RoleplayLoggingBehaviour
         (
             [NotNull] DiscordSocketClient client,
             [NotNull] IServiceScope serviceScope,
-            [NotNull] ILogger<RoleplayLoggingBehaviour> logger,
-            [NotNull] RoleplayService roleplays
+            [NotNull] ILogger<RoleplayLoggingBehaviour> logger
         )
             : base(client, serviceScope, logger)
         {
-            _roleplays = roleplays;
         }
 
         /// <summary>
@@ -70,7 +64,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         protected override async Task Connected()
         {
-            var activeRoleplays = await _roleplays.GetRoleplays()
+            using var connectionScope = this.Services.CreateScope();
+            var roleplayService = connectionScope.ServiceProvider.GetRequiredService<RoleplayService>();
+
+            var activeRoleplays = await roleplayService.GetRoleplays()
                 .Where(r => r.DedicatedChannelID.HasValue)
                 .ToListAsync();
 
@@ -89,7 +86,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 foreach (var message in await channel.GetMessagesAsync().FlattenAsync())
                 {
                     // We don't care about the results here.
-                    var updateResult = await _roleplays.AddToOrUpdateMessageInRoleplayAsync(activeRoleplay, message);
+                    var updateResult = await roleplayService.AddToOrUpdateMessageInRoleplayAsync(activeRoleplay, message);
                     if (updateResult.IsSuccess)
                     {
                         ++updatedMessages;
@@ -132,7 +129,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 return;
             }
 
-            await _roleplays.ConsumeMessageAsync(message);
+            using var messageScope = this.Services.CreateScope();
+            var roleplayService = messageScope.ServiceProvider.GetRequiredService<RoleplayService>();
+
+            await roleplayService.ConsumeMessageAsync(message);
         }
 
         /// <inheritdoc />

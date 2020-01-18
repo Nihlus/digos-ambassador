@@ -49,13 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     public class RoleplayArchivalBehaviour : ContinuousDiscordBehaviour<RoleplayArchivalBehaviour>
     {
         [NotNull]
-        private readonly RoleplayService _roleplays;
-
-        [NotNull]
         private readonly UserFeedbackService _feedback;
-
-        [NotNull]
-        private readonly ServerService _servers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayArchivalBehaviour"/> class.
@@ -63,23 +57,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <param name="client">The Discord client.</param>
         /// <param name="serviceScope">The service scope in use.</param>
         /// <param name="logger">The logging instance for this type.</param>
-        /// <param name="roleplays">The roleplaying service.</param>
         /// <param name="feedback">The feedback service.</param>
-        /// <param name="servers">The server service.</param>
         public RoleplayArchivalBehaviour
         (
             [NotNull] DiscordSocketClient client,
             [NotNull] IServiceScope serviceScope,
             [NotNull] ILogger<RoleplayArchivalBehaviour> logger,
-            [NotNull] RoleplayService roleplays,
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] ServerService servers
+            [NotNull] UserFeedbackService feedback
         )
             : base(client, serviceScope, logger)
         {
-            _roleplays = roleplays;
             _feedback = feedback;
-            _servers = servers;
         }
 
         /// <inheritdoc />
@@ -92,9 +80,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 return;
             }
 
+            using var tickScope = this.Services.CreateScope();
+            var roleplayService = tickScope.ServiceProvider.GetRequiredService<RoleplayService>();
+            var serverService = tickScope.ServiceProvider.GetRequiredService<ServerService>();
+
             foreach (var guild in this.Client.Guilds)
             {
-                var roleplays = await _roleplays.GetRoleplays(guild)
+                var roleplays = await roleplayService.GetRoleplays(guild)
                     .Where(r => r.DedicatedChannelID.HasValue)
                     .Where(r => r.LastUpdated.HasValue)
                     .ToListAsync(ct);
@@ -105,7 +97,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated!.Value;
                     if (timeSinceLastActivity > TimeSpan.FromDays(28))
                     {
-                        await ArchiveRoleplayAsync(guild, roleplay);
+                        await ArchiveRoleplayAsync(guild, serverService, roleplayService, roleplay);
                         await NotifyOwnerAsync(roleplay);
                     }
                 }
@@ -114,7 +106,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             await Task.Delay(TimeSpan.FromHours(1), ct);
         }
 
-        private async Task ArchiveRoleplayAsync(SocketGuild guild, Roleplay roleplay)
+        private async Task ArchiveRoleplayAsync
+        (
+            SocketGuild guild,
+            ServerService serverService,
+            RoleplayService roleplayService,
+            Roleplay roleplay
+        )
         {
             if (roleplay.DedicatedChannelID is null)
             {
@@ -123,7 +121,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
             if (roleplay.IsPublic)
             {
-                await PostArchivedRoleplayAsync(guild, roleplay);
+                await PostArchivedRoleplayAsync(guild, serverService, roleplayService, roleplay);
             }
 
             var dedicatedChannel = guild.GetTextChannel((ulong)roleplay.DedicatedChannelID);
@@ -136,21 +134,29 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             foreach (var message in await dedicatedChannel.GetMessagesAsync().FlattenAsync())
             {
                 // We don't care about the results here.
-                await _roleplays.AddToOrUpdateMessageInRoleplayAsync(roleplay, message);
+                await roleplayService.AddToOrUpdateMessageInRoleplayAsync(roleplay, message);
             }
 
-            await _roleplays.DeleteDedicatedRoleplayChannelAsync(guild, roleplay);
+            await roleplayService.DeleteDedicatedRoleplayChannelAsync(guild, roleplay);
         }
 
         /// <summary>
         /// Posts the archived roleplay to the guild's archive channel, if it has one.
         /// </summary>
         /// <param name="guild">The guild.</param>
+        /// <param name="serverService">The server service.</param>
+        /// <param name="roleplayService">The roleplay service.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task PostArchivedRoleplayAsync(SocketGuild guild, Roleplay roleplay)
+        private async Task PostArchivedRoleplayAsync
+        (
+            SocketGuild guild,
+            ServerService serverService,
+            RoleplayService roleplayService,
+            Roleplay roleplay
+        )
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(guild);
+            var getServer = await serverService.GetOrRegisterServerAsync(guild);
             if (!getServer.IsSuccess)
             {
                 this.Log.LogWarning("Failed to get the server for the current guild. Bug?");
@@ -159,7 +165,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
             var server = getServer.Entity;
 
-            var getSettings = await _roleplays.GetOrCreateServerRoleplaySettingsAsync(server);
+            var getSettings = await roleplayService.GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettings.IsSuccess)
             {
                 this.Log.LogWarning("Failed to get the server settings for the current guild. Bug?");

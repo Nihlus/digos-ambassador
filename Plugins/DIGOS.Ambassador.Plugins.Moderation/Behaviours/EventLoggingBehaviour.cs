@@ -37,44 +37,45 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
     [UsedImplicitly]
     public class EventLoggingBehaviour : ClientEventBehaviour<EventLoggingBehaviour>
     {
-        private readonly ChannelLoggingService _logging;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="EventLoggingBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client in use.</param>
         /// <param name="serviceScope">The service scope in use.</param>
         /// <param name="logger">The logging instance for this type.</param>
-        /// <param name="logging">The logging service.</param>
         public EventLoggingBehaviour
         (
             [NotNull] DiscordSocketClient client,
             [NotNull] IServiceScope serviceScope,
-            [NotNull] ILogger<EventLoggingBehaviour> logger,
-            [NotNull] ChannelLoggingService logging
+            [NotNull] ILogger<EventLoggingBehaviour> logger
         )
             : base(client, serviceScope, logger)
         {
-            _logging = logging;
         }
 
         /// <inheritdoc />
         protected override async Task UserLeft(SocketGuildUser user)
         {
-            await _logging.NotifyUserLeft(user);
+            using var scope = this.Services.CreateScope();
+            var loggingService = scope.ServiceProvider.GetRequiredService<ChannelLoggingService>();
+
+            await loggingService.NotifyUserLeft(user);
         }
 
         /// <inheritdoc />
         protected override async Task GuildMemberUpdated(SocketGuildUser oldMember, SocketGuildUser newMember)
         {
+            using var scope = this.Services.CreateScope();
+            var loggingService = scope.ServiceProvider.GetRequiredService<ChannelLoggingService>();
+
             if (oldMember.Username != newMember.Username)
             {
-                await _logging.NotifyUserUsernameChanged(newMember, oldMember.Username, newMember.Username);
+                await loggingService.NotifyUserUsernameChanged(newMember, oldMember.Username, newMember.Username);
             }
 
             if (oldMember.Discriminator != newMember.Discriminator)
             {
-                await _logging.NotifyUserDiscriminatorChanged
+                await loggingService.NotifyUserDiscriminatorChanged
                 (
                     newMember,
                     oldMember.Discriminator,
@@ -91,7 +92,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 return;
             }
 
-            await _logging.NotifyMessageDeleted(message.Value, channel);
+            using var scope = this.Services.CreateScope();
+            var loggingService = scope.ServiceProvider.GetRequiredService<ChannelLoggingService>();
+
+            await loggingService.NotifyMessageDeleted(message.Value, channel);
         }
     }
 }

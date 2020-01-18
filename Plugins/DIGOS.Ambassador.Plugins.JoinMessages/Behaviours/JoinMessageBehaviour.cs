@@ -40,7 +40,6 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Behaviours
     public class JoinMessageBehaviour : ClientEventBehaviour<JoinMessageBehaviour>
     {
         private readonly UserFeedbackService _feedback;
-        private readonly ServerService _servers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JoinMessageBehaviour"/> class.
@@ -49,25 +48,25 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Behaviours
         /// <param name="serviceScope">The service scope in use.</param>
         /// <param name="logger">The logging instance for this type.</param>
         /// <param name="feedback">The feedback service.</param>
-        /// <param name="servers">The server service.</param>
         public JoinMessageBehaviour
         (
             DiscordSocketClient client,
             [NotNull] IServiceScope serviceScope,
             [NotNull] ILogger<JoinMessageBehaviour> logger,
-            UserFeedbackService feedback,
-            ServerService servers
+            UserFeedbackService feedback
         )
             : base(client, serviceScope, logger)
         {
             _feedback = feedback;
-            _servers = servers;
         }
 
         /// <inheritdoc />
         protected override async Task UserJoined(SocketGuildUser user)
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(user.Guild);
+            using var scope = this.Services.CreateScope();
+            var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
+
+            var getServerResult = await serverService.GetOrRegisterServerAsync(user.Guild);
             if (!getServerResult.IsSuccess)
             {
                 return;
@@ -80,7 +79,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Behaviours
                 return;
             }
 
-            var getJoinMessageResult = _servers.GetJoinMessage(server);
+            var getJoinMessageResult = serverService.GetJoinMessage(server);
             if (!getJoinMessageResult.IsSuccess)
             {
                 return;

@@ -40,38 +40,20 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
     [UsedImplicitly]
     internal sealed class ExpirationBehaviour : ContinuousDiscordBehaviour<ExpirationBehaviour>
     {
-        [NotNull]
-        private readonly WarningService _warnings;
-
-        [NotNull]
-        private readonly BanService _bans;
-
-        [NotNull]
-        private readonly ChannelLoggingService _logging;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ExpirationBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client.</param>
         /// <param name="serviceScope">The service scope in use.</param>
         /// <param name="logger">The logging instance for this type.</param>
-        /// <param name="warnings">The warning service.</param>
-        /// <param name="bans">The ban service.</param>
-        /// <param name="logging">The channel logging service.</param>
         public ExpirationBehaviour
         (
             [NotNull] DiscordSocketClient client,
             [NotNull] IServiceScope serviceScope,
-            [NotNull] ILogger<ExpirationBehaviour> logger,
-            [NotNull] WarningService warnings,
-            [NotNull] BanService bans,
-            [NotNull] ChannelLoggingService logging
+            [NotNull] ILogger<ExpirationBehaviour> logger
         )
             : base(client, serviceScope, logger)
         {
-            _warnings = warnings;
-            _bans = bans;
-            _logging = logging;
         }
 
         /// <inheritdoc/>
@@ -84,20 +66,25 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 return;
             }
 
+            using var tickScope = this.Services.CreateScope();
+            var warningService = tickScope.ServiceProvider.GetRequiredService<WarningService>();
+            var banService = tickScope.ServiceProvider.GetRequiredService<BanService>();
+            var loggingService = tickScope.ServiceProvider.GetRequiredService<ChannelLoggingService>();
+
             var now = DateTime.UtcNow;
 
             foreach (var guild in this.Client.Guilds)
             {
                 // Using .HasValue instead of .IsTemporary here to allow server-side evaluation
-                var warnings = _warnings.GetWarnings(guild).Where(w => w.ExpiresOn.HasValue);
+                var warnings = warningService.GetWarnings(guild).Where(w => w.ExpiresOn.HasValue);
                 foreach (var warning in warnings)
                 {
                     if (warning.ExpiresOn <= now)
                     {
                         var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
-                        await _logging.NotifyUserWarningRemoved(warning, rescinder);
+                        await loggingService.NotifyUserWarningRemoved(warning, rescinder);
 
-                        await _warnings.DeleteWarningAsync(warning);
+                        await warningService.DeleteWarningAsync(warning);
                     }
                 }
 
@@ -108,15 +95,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 }
 
                 // Using .HasValue instead of .IsTemporary here to allow server-side evaluation
-                var bans = _bans.GetBans(guild).Where(b => b.ExpiresOn.HasValue);
+                var bans = banService.GetBans(guild).Where(b => b.ExpiresOn.HasValue);
                 foreach (var ban in bans)
                 {
                     if (ban.ExpiresOn <= now)
                     {
                         var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
-                        await _logging.NotifyUserUnbanned(ban, rescinder);
+                        await loggingService.NotifyUserUnbanned(ban, rescinder);
 
-                        await _bans.DeleteBanAsync(ban);
+                        await banService.DeleteBanAsync(ban);
                         await guild.RemoveBanAsync((ulong)ban.User.DiscordID);
                     }
                 }
