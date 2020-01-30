@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -348,8 +349,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure, NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<IEnumerable<Kink>>> GetKinksByCategoryAsync(KinkCategory category)
         {
-            var group = await _database.Kinks.GroupBy(k => k.Category).FirstOrDefaultAsync(g => g.Key == category);
-            if (group is null)
+            var group = await _database.Kinks.Where(k => k.Category == category).ToListAsync();
+            if (group is null || !group.Any())
             {
                 return RetrieveEntityResult<IEnumerable<Kink>>.FromError
                 (
@@ -381,15 +382,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
 
             var userKinks = getUserKinksResult.Entity;
 
-            var groups = userKinks.GroupBy(k => k.Kink.Category).ToList();
-            var first = groups.FirstOrDefault(g => g.Key == category);
-
-            if (first is null)
+            var group = await userKinks.Where(k => k.Kink.Category == category).ToListAsync();
+            if (group is null || !group.Any())
             {
                 return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess(new UserKink[] { });
             }
 
-            return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess(first.OrderBy(uk => uk.Kink.ToString()));
+            return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess(group.OrderBy(uk => uk.Kink.ToString()));
         }
 
         /// <summary>
