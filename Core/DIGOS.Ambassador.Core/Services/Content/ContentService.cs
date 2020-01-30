@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Core.Services
 
             this.AutomaticBugReportCreationUri = new Uri
             (
-                "https://github.com/Nihlus/DIGOS.Ambassador/issues/new?template=automated-bug-report.md"
+                "https://github.com/Nihlus/digos-ambassador/issues/new?template=automated-bug-report.md"
             );
             this.PrivacyPolicyUri = new Uri(this.BaseCDNUri, "privacy/PrivacyPolicy.pdf");
 
