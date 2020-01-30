@@ -64,7 +64,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
             where TResult : class
             where TSource : class
         {
-            var matchResult = await @this.Select(stringSelector).BestLevenshteinMatchAsync(search, tolerance);
+            var matchResult = (await @this.Select(stringSelector).ToListAsync()).BestLevenshteinMatch(search, tolerance);
             if (!matchResult.IsSuccess)
             {
                 return RetrieveEntityResult<TResult>.FromError(matchResult);
@@ -127,42 +127,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
             var result = selector(selectedObject);
 
             return RetrieveEntityResult<TResult>.FromSuccess(result);
-        }
-
-        /// <summary>
-        /// Selects the closest match in the sequence using the levenshtein algorithm.
-        /// </summary>
-        /// <param name="this">The sequence to search.</param>
-        /// <param name="search">The value to search for.</param>
-        /// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
-        public static async Task<RetrieveEntityResult<string>> BestLevenshteinMatchAsync
-        (
-            [NotNull, ItemNotNull] this IQueryable<string> @this,
-            [NotNull] string search,
-            double tolerance = 0.25
-        )
-        {
-            var candidates =
-                from candidate in @this
-                    let distance = LevenshteinDistance.Compute
-                    (
-                        candidate.ToLowerInvariant(),
-                        search.ToLowerInvariant()
-                    )
-                    let maxDistance = Math.Max(candidate.Length, search.Length)
-                    let percentile = distance / (float)maxDistance
-                select new Tuple<string, int, double>(candidate, distance, percentile);
-
-            var hasAnyPassing = await candidates.Where(c => c.Item3 <= tolerance).AnyAsync();
-            if (!hasAnyPassing)
-            {
-                return RetrieveEntityResult<string>.FromError("No sufficiently close match found.");
-            }
-
-            var best = await candidates.OrderBy(x => x.Item2).FirstAsync();
-            return RetrieveEntityResult<string>.FromSuccess(best.Item1);
         }
     }
 }

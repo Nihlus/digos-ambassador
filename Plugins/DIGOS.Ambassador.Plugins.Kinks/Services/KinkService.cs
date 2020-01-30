@@ -316,9 +316,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <returns>A list of kink categories.</returns>
         [Pure, NotNull, ItemNotNull]
-        public Task<IQueryable<KinkCategory>> GetKinkCategoriesAsync()
+        public async Task<IEnumerable<KinkCategory>> GetKinkCategoriesAsync()
         {
-            return Task.FromResult(_database.Kinks.Select(k => k.Category).OrderBy(k => k.ToString()).Distinct());
+            return (await _database.Kinks.Select(k => k.Category).ToListAsync())
+                .OrderBy(k => k.ToString())
+                .Distinct();
         }
 
         /// <summary>
