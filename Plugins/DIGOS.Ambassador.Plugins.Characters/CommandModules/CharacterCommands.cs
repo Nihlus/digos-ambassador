@@ -265,7 +265,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             var user = getUserResult.Entity;
-            var characters = _characters.GetUserCharacters(user, this.Context.Guild);
+            var characters = await _characters.GetUserCharacters(user, this.Context.Guild).ToListAsync();
 
             var embeds = new List<EmbedBuilder>();
             foreach (var character in characters)
