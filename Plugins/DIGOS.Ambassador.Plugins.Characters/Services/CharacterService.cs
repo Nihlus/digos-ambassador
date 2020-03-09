@@ -934,7 +934,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError("The character has no image with that name.");
             }
 
-            character.Images.RemoveAll(i => string.Equals(i.Name.ToLower(), imageName.ToLower()));
+            var deletedImages = character.Images
+                .Where(i => string.Equals(i.Name.ToLower(), imageName.ToLower()))
+                .ToList();
+
+            character.Images = character.Images.Except(deletedImages).ToList();
+            foreach (var deletedImage in deletedImages)
+            {
+                _database.Remove(deletedImage);
+            }
+
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
