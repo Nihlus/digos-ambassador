@@ -2,12 +2,9 @@
 Travis CI: ![Travis](https://api.travis-ci.org/Nihlus/digos-ambassador.svg?branch=master)
 
 This readme is under construction. The DIGOS Ambassador is a utility Discord bot originally created for the DIGOS / 
-Transformation Discord chat for use with kink tracking, RP synchronization, games, character recordkeeping and other
-stuff of varying lewdness.
+Transformation Discord chat for use with kink tracking, RP synchronization, games, character recordkeeping, et cetera.
 
-If it's not already obvious, yes, this is a NSFW bot. There will be weird and wonderful sexual stuff going on. Have fun!
-
-// sharkdronie @.=.@
+Some of the portions of this bot may contain explicit content, due to the nature of the community it was written for. Please be aware of this while browsing the source code.
 
 ### Usage
 Amby can be added to your Discord server by clicking this badge, or by hosting your own instance and adding her 
