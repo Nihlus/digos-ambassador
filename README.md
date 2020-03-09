@@ -2,7 +2,7 @@
 Travis CI: ![Travis](https://api.travis-ci.org/Nihlus/digos-ambassador.svg?branch=master)
 
 This readme is under construction. The DIGOS Ambassador is a utility Discord bot originally created for the DIGOS / 
-Transformation Discord chat for use with kink tracking, RP synchronization, games, character recordkeeping, et cetera.
+Transformation Discord chat for use with preference tracking, RP synchronization, games, character recordkeeping, et cetera.
 
 Some of the portions of this bot may contain explicit content, due to the nature of the community it was written for. Please be aware of this while browsing the source code.
 
