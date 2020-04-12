@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Plugins.Moderation.Services;
 using Discord;
 using Discord.WebSocket;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
@@ -76,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
             foreach (var guild in this.Client.Guilds)
             {
                 // Using .HasValue instead of .IsTemporary here to allow server-side evaluation
-                var warnings = warningService.GetWarnings(guild).Where(w => w.ExpiresOn.HasValue);
+                var warnings = await warningService.GetWarnings(guild).Where(w => w.ExpiresOn.HasValue).ToListAsync(ct);
                 foreach (var warning in warnings)
                 {
                     if (warning.ExpiresOn <= now)
@@ -95,7 +96,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 }
 
                 // Using .HasValue instead of .IsTemporary here to allow server-side evaluation
-                var bans = banService.GetBans(guild).Where(b => b.ExpiresOn.HasValue);
+                var bans = await banService.GetBans(guild).Where(b => b.ExpiresOn.HasValue).ToListAsync(ct);
                 foreach (var ban in bans)
                 {
                     if (ban.ExpiresOn <= now)
