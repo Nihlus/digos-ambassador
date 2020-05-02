@@ -47,19 +47,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
     [Summary("Warning-related commands, such as viewing or editing info about a specific warning.")]
     public partial class WarningCommands : ModuleBase
     {
-        [NotNull]
         private readonly ModerationService _moderation;
 
-        [NotNull]
         private readonly WarningService _warnings;
 
-        [NotNull]
         private readonly UserFeedbackService _feedback;
 
-        [NotNull]
         private readonly InteractivityService _interactivity;
 
-        [NotNull]
         private readonly ChannelLoggingService _logging;
 
         /// <summary>
@@ -72,11 +67,11 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// <param name="logging">The logging service.</param>
         public WarningCommands
         (
-            [NotNull] ModerationService moderation,
-            [NotNull] WarningService warnings,
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] InteractivityService interactivity,
-            [NotNull] ChannelLoggingService logging
+            ModerationService moderation,
+            WarningService warnings,
+            UserFeedbackService feedback,
+            InteractivityService interactivity,
+            ChannelLoggingService logging
         )
         {
             _moderation = moderation;
@@ -94,7 +89,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Lists the warnings attached to the given user.")]
         [RequirePermission(typeof(ManageWarnings), PermissionTarget.Other)]
         [RequireContext(ContextType.Guild)]
-        public async Task ListWarningsAsync([NotNull] IGuildUser user)
+        public async Task ListWarningsAsync(IGuildUser user)
         {
             var warnings = _warnings.GetWarnings(user);
 
@@ -158,8 +153,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task AddWarningAsync
         (
-            [NotNull] IGuildUser user,
-            [NotNull] string reason,
+            IGuildUser user,
+            string reason,
             TimeSpan? expiresAfter = null
         )
         {

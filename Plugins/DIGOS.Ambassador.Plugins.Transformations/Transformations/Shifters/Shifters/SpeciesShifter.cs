@@ -37,13 +37,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// </summary>
     internal sealed class SpeciesShifter : AppearanceShifter
     {
-        [NotNull]
         private readonly Species _species;
 
-        [NotNull]
         private readonly TransformationService _transformations;
 
-        [NotNull]
         private readonly TransformationDescriptionBuilder _descriptionBuilder;
 
         /// <summary>
@@ -55,10 +52,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="descriptionBuilder">The description builder.</param>
         public SpeciesShifter
         (
-            [NotNull] Appearance appearance,
-            [NotNull] Species species,
-            [NotNull] TransformationService transformations,
-            [NotNull] TransformationDescriptionBuilder descriptionBuilder
+            Appearance appearance,
+            Species species,
+            TransformationService transformations,
+            TransformationDescriptionBuilder descriptionBuilder
         )
             : base(appearance)
         {

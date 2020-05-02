@@ -35,7 +35,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Preconditions
     public class RequireEntityOwnerAttribute : ParameterPreconditionAttribute
     {
         /// <inheritdoc />
-        [NotNull]
         public override Task<PreconditionResult> CheckPermissionsAsync
         (
             ICommandContext context,

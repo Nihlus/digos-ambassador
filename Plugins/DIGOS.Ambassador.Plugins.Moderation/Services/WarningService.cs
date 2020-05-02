@@ -40,9 +40,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     [PublicAPI]
     public sealed class WarningService
     {
-        [NotNull] private readonly ModerationDatabaseContext _database;
-        [NotNull] private readonly ServerService _servers;
-        [NotNull] private readonly UserService _users;
+        private readonly ModerationDatabaseContext _database;
+        private readonly ServerService _servers;
+        private readonly UserService _users;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WarningService"/> class.
@@ -52,9 +52,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="users">The user service.</param>
         public WarningService
         (
-            [NotNull] ModerationDatabaseContext database,
-            [NotNull] ServerService servers,
-            [NotNull] UserService users
+            ModerationDatabaseContext database,
+            ServerService servers,
+            UserService users
         )
         {
             _database = database;
@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="guild">The guild.</param>
         /// <returns>The warnings.</returns>
-        public IQueryable<UserWarning> GetWarnings([NotNull] IGuild guild)
+        public IQueryable<UserWarning> GetWarnings(IGuild guild)
         {
             return _database.UserWarnings.AsQueryable().Where
             (
@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="user">The user.</param>
         /// <returns>The warnings.</returns>
-        public IQueryable<UserWarning> GetWarnings([NotNull] IGuildUser user)
+        public IQueryable<UserWarning> GetWarnings(IGuildUser user)
         {
             return _database.UserWarnings.AsQueryable().Where
             (
@@ -94,7 +94,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="server">The server the warning is on.</param>
         /// <param name="warningID">The warning ID.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<UserWarning>> GetWarningAsync([NotNull] IGuild server, long warningID)
+        public async Task<RetrieveEntityResult<UserWarning>> GetWarningAsync(IGuild server, long warningID)
         {
             // The server isn't strictly required here, but it prevents leaking warnings between servers.
             var warning = await _database.UserWarnings.AsQueryable().FirstOrDefaultAsync
@@ -122,9 +122,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<UserWarning>> CreateWarningAsync
         (
-            [NotNull] IUser authorUser,
-            [NotNull] IGuildUser guildUser,
-            [NotNull] string reason,
+            IUser authorUser,
+            IGuildUser guildUser,
+            string reason,
             long? messageID = null,
             DateTime? expiresOn = null
         )
@@ -199,7 +199,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="warning">The warning.</param>
         /// <param name="reason">The reason.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetWarningReasonAsync([NotNull] UserWarning warning, [NotNull] string reason)
+        public async Task<ModifyEntityResult> SetWarningReasonAsync(UserWarning warning, string reason)
         {
             if (reason.IsNullOrWhitespace())
             {
@@ -235,7 +235,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetWarningContextMessageAsync
         (
-            [NotNull] UserWarning warning,
+            UserWarning warning,
             long messageID
         )
         {
@@ -260,7 +260,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetWarningExpiryDateAsync
         (
-            [NotNull] UserWarning warning,
+            UserWarning warning,
             DateTime expiresOn
         )
         {
@@ -287,7 +287,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="warning">The warning to delete.</param>
         /// <returns>A deletion result which may or may warning have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteWarningAsync([NotNull] UserWarning warning)
+        public async Task<DeleteEntityResult> DeleteWarningAsync(UserWarning warning)
         {
             if (!_database.UserWarnings.Any(n => n.ID == warning.ID))
             {

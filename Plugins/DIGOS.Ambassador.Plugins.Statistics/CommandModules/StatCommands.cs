@@ -103,8 +103,7 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandModules
         /// </summary>
         /// <param name="guild">The guild.</param>
         /// <returns>The embed.</returns>
-        [NotNull]
-        private EmbedBuilder CreateGuildInfoEmbed([NotNull] IGuild guild)
+        private EmbedBuilder CreateGuildInfoEmbed(IGuild guild)
         {
             var eb = _feedback.CreateEmbedBase();
 

@@ -92,7 +92,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         public abstract Embed BuildEmbed(int page);
 
         /// <inheritdoc/>
-        protected override async Task<IUserMessage> OnDisplayAsync([NotNull] IMessageChannel channel)
+        protected override async Task<IUserMessage> OnDisplayAsync(IMessageChannel channel)
         {
             if (!this.Pages.Any())
             {

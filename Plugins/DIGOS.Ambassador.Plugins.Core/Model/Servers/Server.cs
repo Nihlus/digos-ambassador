@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// <summary>
         /// Gets the users known to the bot on this server.
         /// </summary>
-        [Required, NotNull]
+        [Required]
         public virtual List<ServerUser> KnownUsers { get; internal set; } = new List<ServerUser>();
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// </summary>
         /// <param name="user">The user.</param>
         /// <returns>true if the user is known; otherwise, false.</returns>
-        public bool IsUserKnown([NotNull] IUser user)
+        public bool IsUserKnown(IUser user)
         {
             return this.KnownUsers.Any(su => su.User.DiscordID == (long)user.Id);
         }
@@ -100,8 +100,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// <param name="discordServer">The Discord server.</param>
         /// <returns>A default server entity with some information filled in.</returns>
         [Pure]
-        [NotNull]
-        public static Server CreateDefault([NotNull] IGuild discordServer)
+        public static Server CreateDefault(IGuild discordServer)
         {
             return new Server((long)discordServer.Id)
             {

@@ -38,7 +38,6 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// </summary>
         /// <param name="id">The ID of the object.</param>
         /// <returns>A mocked object.</returns>
-        [NotNull]
         public static IUser CreateDiscordUser(ulong id) => CreateDiscordEntity<IUser>(id);
 
         /// <summary>
@@ -46,7 +45,6 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// </summary>
         /// <param name="id">The ID of the object.</param>
         /// <returns>A mocked object.</returns>
-        [NotNull]
         public static IGuildUser CreateDiscordGuildUser(ulong id) => CreateDiscordEntity<IGuildUser>(id);
 
         /// <summary>
@@ -55,7 +53,6 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// <param name="id">The ID of the object.</param>
         /// <param name="ownerId">The ID of the guild owner.</param>
         /// <returns>A mocked object.</returns>
-        [NotNull]
         public static IGuild CreateDiscordGuild(long id, long? ownerId = null)
         {
             var mock = new Mock<IGuild>();
@@ -75,7 +72,6 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// <param name="id">The ID of the object.</param>
         /// <param name="guild">The guild of the role.</param>
         /// <returns>A mocked object.</returns>
-        [NotNull]
         public static IRole CreateDiscordRole(int id, IGuild? guild = null)
         {
             var mock = new Mock<IRole>();
@@ -94,7 +90,6 @@ namespace DIGOS.Ambassador.Tests.Utility
         /// </summary>
         /// <param name="id">The ID of the object.</param>
         /// <returns>A mocked object.</returns>
-        [NotNull]
         public static ITextChannel CreateDiscordTextChannel(ulong id) => CreateDiscordEntity<ITextChannel>(id);
 
         /// <summary>

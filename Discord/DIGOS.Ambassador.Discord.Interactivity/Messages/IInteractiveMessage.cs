@@ -48,14 +48,12 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// <param name="service">The interactivity service that manages this message.</param>
         /// <param name="channel">The channel.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
-        Task SendAsync([NotNull] InteractivityService service, [NotNull] IMessageChannel channel);
+        Task SendAsync(InteractivityService service, IMessageChannel channel);
 
         /// <summary>
         /// Deletes the interactive message.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
         Task DeleteAsync();
 
         /// <summary>
@@ -63,15 +61,13 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// </summary>
         /// <param name="reaction">The added interaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
-        Task HandleAddedInteractionAsync([NotNull] SocketReaction reaction);
+        Task HandleAddedInteractionAsync(SocketReaction reaction);
 
         /// <summary>
         /// Handles a removed interaction, performing tasks as needed.
         /// </summary>
         /// <param name="reaction">The removed interaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
-        Task HandleRemovedInteractionAsync([NotNull] SocketReaction reaction);
+        Task HandleRemovedInteractionAsync(SocketReaction reaction);
     }
 }

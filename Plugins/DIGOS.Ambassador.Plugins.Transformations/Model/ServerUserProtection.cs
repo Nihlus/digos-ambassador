@@ -89,11 +89,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <param name="globalProtection">The global protection data.</param>
         /// <param name="server">The server that the protection should be valid for.</param>
         /// <returns>A server-specific protection object.</returns>
-        [Pure, NotNull]
+        [Pure]
         public static ServerUserProtection CreateDefault
         (
-            [NotNull] GlobalUserProtection globalProtection,
-            [NotNull] Server server
+            GlobalUserProtection globalProtection,
+            Server server
         )
         {
             return new ServerUserProtection(server, globalProtection.User)

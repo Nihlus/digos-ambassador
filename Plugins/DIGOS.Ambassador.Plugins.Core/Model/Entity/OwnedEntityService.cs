@@ -42,13 +42,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <summary>
         /// Holds reserved characters which may not appear in names.
         /// </summary>
-        [NotNull]
         private readonly char[] _reservedNameCharacters = { ':' };
 
         /// <summary>
         /// Holds reserved names which entities may not have.
         /// </summary>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         private readonly string[] _reservedNames = { "current" };
 
         /// <summary>
@@ -57,11 +56,11 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="userEntities">The entities to check.</param>
         /// <param name="entityName">The entity name to check.</param>
         /// <returns>true if the name is unique; otherwise, false.</returns>
-        [Pure, NotNull]
+        [Pure]
         public async Task<bool> IsEntityNameUniqueForUserAsync
         (
-            [NotNull] IQueryable<IOwnedNamedEntity> userEntities,
-            [NotNull] string entityName
+            IQueryable<IOwnedNamedEntity> userEntities,
+            string entityName
         )
         {
             if (await userEntities.CountAsync() <= 0)
@@ -81,13 +80,13 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="entity">The entity to transfer.</param>
         /// <typeparam name="TContext">The database context to use.</typeparam>
         /// <returns>An entity modification result, which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> TransferEntityOwnershipAsync<TContext>
         (
-            [NotNull] TContext db,
-            [NotNull] User newOwner,
-            [NotNull] IQueryable<IOwnedNamedEntity> newOwnerEntities,
-            [NotNull] IOwnedNamedEntity entity
+            TContext db,
+            User newOwner,
+            IQueryable<IOwnedNamedEntity> newOwnerEntities,
+            IOwnedNamedEntity entity
         )
             where TContext : DbContext
         {
@@ -122,11 +121,10 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="commandNames">The command names.</param>
         /// <param name="entityName">The name of the entity.</param>
         /// <returns>true if the name is valid; otherwise, false.</returns>
-        [Pure, NotNull]
-        [ContractAnnotation("entityName:null => false")]
+        [Pure]
         public DetermineConditionResult IsEntityNameValid
         (
-            [NotNull] IEnumerable<string> commandNames,
+            IEnumerable<string> commandNames,
             string? entityName
         )
         {

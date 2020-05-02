@@ -38,14 +38,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <summary>
         /// Gets the appearance that is being shifted.
         /// </summary>
-        [NotNull]
         protected Appearance Appearance { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AppearanceRemover"/> class.
         /// </summary>
         /// <param name="appearance">The appearance that is being shifted.</param>
-        protected AppearanceRemover([NotNull] Appearance appearance)
+        protected AppearanceRemover(Appearance appearance)
         {
             this.Appearance = appearance;
         }
@@ -56,7 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="bodypart">The bodypart.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         protected abstract Task<ShiftBodypartResult> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality);
 
         /// <summary>
@@ -64,7 +63,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// </summary>
         /// <param name="bodypart">The bodypart.</param>
         /// <returns>The removal message.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         protected abstract Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart);
 
         /// <summary>
@@ -73,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="bodypart">The bodypart.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>The removal message.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         protected abstract Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality);
 
         /// <summary>
@@ -81,7 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// </summary>
         /// <param name="bodypart">The bodypart.</param>
         /// <returns>The no-change message.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         protected abstract Task<string> GetNoChangeMessageAsync(Bodypart bodypart);
 
         /// <inheritdoc />
@@ -105,7 +104,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// </summary>
         /// <param name="bodypart">The bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         private async Task<ShiftBodypartResult> RemoveCompositeBodypartAsync(Bodypart bodypart)
         {
             var composingParts = bodypart.GetComposingParts();
@@ -214,10 +213,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
             return ShiftBodypartResult.FromSuccess(messageBuilder.ToString(), ShiftBodypartAction.Shift);
         }
 
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         private Task<string> BuildMessageFromResultAsync
         (
-            [NotNull] ShiftBodypartResult result,
+            ShiftBodypartResult result,
             Bodypart bodypart,
             Chirality chirality
         )

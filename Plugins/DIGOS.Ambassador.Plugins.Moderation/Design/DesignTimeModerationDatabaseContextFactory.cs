@@ -40,7 +40,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Design
     public class DesignTimeModerationDatabaseContextFactory : IDesignTimeDbContextFactory<ModerationDatabaseContext>
     {
         /// <inheritdoc />
-        [NotNull]
         public ModerationDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<ModerationDatabaseContext>();

@@ -53,8 +53,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Services
         /// </summary>
         /// <param name="command">The command.</param>
         /// <returns>The field builder.</returns>
-        [NotNull]
-        public EmbedFieldBuilder CreateCommandInfoEmbedField([NotNull] CommandInfo command)
+        public EmbedFieldBuilder CreateCommandInfoEmbedField(CommandInfo command)
         {
             var fieldBuilder = new EmbedFieldBuilder();
 
@@ -69,8 +68,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Services
         /// </summary>
         /// <param name="commandGroup">The command.</param>
         /// <returns>The embed field.</returns>
-        [NotNull]
-        public EmbedBuilder CreateDetailedCommandInfoEmbed([NotNull] IGrouping<string, CommandInfo> commandGroup)
+        public EmbedBuilder CreateDetailedCommandInfoEmbed(IGrouping<string, CommandInfo> commandGroup)
         {
             var eb = _feedback.CreateEmbedBase();
 
@@ -149,8 +147,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Services
         /// <param name="matchingCommands">A set of commands that should be included in the embed.</param>
         /// <returns>An embed.</returns>
         [Pure]
-        [NotNull]
-        public Embed CreateCommandUsageEmbed([NotNull] IEnumerable<CommandMatch> matchingCommands)
+        public Embed CreateCommandUsageEmbed(IEnumerable<CommandMatch> matchingCommands)
         {
             var eb = _feedback.CreateEmbedBase();
             eb.WithTitle("Perhaps you meant one of the following?");
@@ -189,8 +186,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Services
         /// <param name="command">The command to get the parameters from.</param>
         /// <returns>A humanized parameter list.</returns>
         [Pure]
-        [NotNull]
-        private string BuildParameterList([NotNull] CommandInfo command)
+        private string BuildParameterList(CommandInfo command)
         {
             if (!command.Parameters.Any())
             {
@@ -224,8 +220,8 @@ namespace DIGOS.Ambassador.Plugins.Help.Services
         /// <param name="command">The command to get the parameters from.</param>
         /// <returns>A humanized parameter list.</returns>
         [Pure]
-        [NotNull, ItemNotNull]
-        private IEnumerable<string> BuildDetailedParameterList([NotNull] CommandInfo command)
+        [ItemNotNull]
+        private IEnumerable<string> BuildDetailedParameterList(CommandInfo command)
         {
             if (!command.Parameters.Any())
             {

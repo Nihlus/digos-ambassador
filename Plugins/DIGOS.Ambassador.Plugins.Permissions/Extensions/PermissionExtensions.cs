@@ -35,8 +35,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Extensions
         /// </summary>
         /// <param name="permission">The permission to format.</param>
         /// <returns>The formatted title.</returns>
-        [NotNull, Pure]
-        public static string FormatTitle([NotNull] this IPermission permission)
+        [Pure]
+        public static string FormatTitle(this IPermission permission)
         {
             if (!permission.IsGrantedByDefaultToSelf && !permission.IsGrantedByDefaultToOthers)
             {

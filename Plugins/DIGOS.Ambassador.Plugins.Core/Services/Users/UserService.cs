@@ -38,14 +38,13 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
     [PublicAPI]
     public sealed class UserService
     {
-        [NotNull]
         private readonly CoreDatabaseContext _database;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserService"/> class.
         /// </summary>
         /// <param name="database">The core database.</param>
-        public UserService([NotNull] CoreDatabaseContext database)
+        public UserService(CoreDatabaseContext database)
         {
             _database = database;
         }
@@ -55,8 +54,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
         /// <returns><value>true</value> if the user is stored; otherwise, <value>false</value>.</returns>
-        [Pure, NotNull]
-        public async Task<bool> IsUserKnownAsync([NotNull] IUser discordUser)
+        [Pure]
+        public async Task<bool> IsUserKnownAsync(IUser discordUser)
         {
             return await _database.Users.AnyAsync(u => u.DiscordID == (long)discordUser.Id);
         }
@@ -66,10 +65,10 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>Stored information about the user.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<RetrieveEntityResult<User>> GetOrRegisterUserAsync
         (
-            [NotNull] IUser discordUser
+            IUser discordUser
         )
         {
             if (!await IsUserKnownAsync(discordUser))
@@ -85,8 +84,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>Stored information about the user.</returns>
-        [Pure, NotNull, ItemNotNull]
-        public async Task<RetrieveEntityResult<User>> GetUserAsync([NotNull] IUser discordUser)
+        [Pure, ItemNotNull]
+        public async Task<RetrieveEntityResult<User>> GetUserAsync(IUser discordUser)
         {
             var user = await _database.Users.FirstOrDefaultAsync
             (
@@ -108,8 +107,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>The freshly created information about the user.</returns>
         /// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
-        [NotNull, ItemNotNull]
-        public async Task<RetrieveEntityResult<User>> AddUserAsync([NotNull] IUser discordUser)
+        [ItemNotNull]
+        public async Task<RetrieveEntityResult<User>> AddUserAsync(IUser discordUser)
         {
             if (discordUser.IsBot || discordUser.IsWebhook)
             {
@@ -143,8 +142,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="user">The user.</param>
         /// <param name="timezoneOffset">The timezone.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull, ItemNotNull]
-        public async Task<ModifyEntityResult> SetUserTimezoneAsync([NotNull] User user, int timezoneOffset)
+        [ItemNotNull]
+        public async Task<ModifyEntityResult> SetUserTimezoneAsync(User user, int timezoneOffset)
         {
             if (timezoneOffset < -12 || timezoneOffset > 14)
             {
@@ -169,8 +168,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="user">The user.</param>
         /// <param name="bio">The bio.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull, ItemNotNull]
-        public async Task<ModifyEntityResult> SetUserBioAsync([NotNull] User user, [NotNull] string bio)
+        [ItemNotNull]
+        public async Task<ModifyEntityResult> SetUserBioAsync(User user, string bio)
         {
             if (bio.IsNullOrWhitespace())
             {

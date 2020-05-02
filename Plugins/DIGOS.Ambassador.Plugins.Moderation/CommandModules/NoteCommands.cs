@@ -45,16 +45,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
     [Summary("Note-related commands, such as viewing or editing info about a specific note.")]
     public partial class NoteCommands : ModuleBase
     {
-        [NotNull]
         private readonly NoteService _notes;
 
-        [NotNull]
         private readonly UserFeedbackService _feedback;
 
-        [NotNull]
         private readonly InteractivityService _interactivity;
 
-        [NotNull]
         private readonly ChannelLoggingService _logging;
 
         /// <summary>
@@ -66,10 +62,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// <param name="logging">The logging service.</param>
         public NoteCommands
         (
-            [NotNull] NoteService notes,
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] InteractivityService interactivity,
-            [NotNull] ChannelLoggingService logging
+            NoteService notes,
+            UserFeedbackService feedback,
+            InteractivityService interactivity,
+            ChannelLoggingService logging
         )
         {
             _notes = notes;
@@ -86,7 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Lists the notes attached to the given user.")]
         [RequirePermission(typeof(ManageNotes), PermissionTarget.Other)]
         [RequireContext(ContextType.Guild)]
-        public async Task ListNotesAsync([NotNull] IGuildUser user)
+        public async Task ListNotesAsync(IGuildUser user)
         {
             var notes = _notes.GetNotes(user);
 
@@ -136,7 +132,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Adds a note to the given user.")]
         [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
         [RequireContext(ContextType.Guild)]
-        public async Task AddNoteAsync([NotNull] IGuildUser user, [NotNull] string content)
+        public async Task AddNoteAsync(IGuildUser user, string content)
         {
             var addNote = await _notes.CreateNoteAsync(this.Context.User, user, content);
             if (!addNote.IsSuccess)

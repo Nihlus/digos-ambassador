@@ -41,7 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <returns>true if the attribute was successfully retrieved; otherwise, false.</returns>
         public static bool TryGetCustomAttribute<T>
         (
-            [NotNull] this Enum value,
+            this Enum value,
             [NotNullWhen(true)] out T? customAttribute
         ) where T : Attribute
         {
@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <param name="value">The value.</param>
         /// <typeparam name="T">The attribute type.</typeparam>
         /// <returns>The attribute.</returns>
-        public static T? GetCustomAttribute<T>([NotNull] this Enum value) where T : Attribute
+        public static T? GetCustomAttribute<T>(this Enum value) where T : Attribute
         {
             var enumType = value.GetType();
             var name = Enum.GetName(enumType, value);
@@ -78,7 +78,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <param name="value">The value.</param>
         /// <typeparam name="T">The type.</typeparam>
         /// <returns>true if the value has an attribute; otherwise, false.</returns>
-        public static bool HasCustomAttribute<T>([NotNull] this Enum value) where T : Attribute
+        public static bool HasCustomAttribute<T>(this Enum value) where T : Attribute
         {
             return !(value.GetCustomAttribute<T>() is null);
         }

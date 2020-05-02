@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             [Theory]
             [InlineData("asadasdas")]
             [InlineData("yeee ewwah")]
-            public async Task ReturnsTrueForUniqueName([NotNull] string name)
+            public async Task ReturnsTrueForUniqueName(string name)
             {
                 var result = await this.Transformations.IsSpeciesNameUniqueAsync(name);
 
@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             [Theory]
             [InlineData("template")]
-            public async Task ReturnsFalseForNonUniqueName([NotNull] string name)
+            public async Task ReturnsFalseForNonUniqueName(string name)
             {
                 var result = await this.Transformations.IsSpeciesNameUniqueAsync(name);
 
@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             [Theory]
             [InlineData("TEMPLATE")]
-            public async Task IsCaseInsensitive([NotNull] string name)
+            public async Task IsCaseInsensitive(string name)
             {
                 var result = await this.Transformations.IsSpeciesNameUniqueAsync(name);
 

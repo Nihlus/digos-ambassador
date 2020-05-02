@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Core.Utility
         /// <param name="s">The first string.</param>
         /// <param name="t">The second string.</param>
         /// <returns>The operation distance between the strings.</returns>
-        public static int Compute([NotNull] string s, [NotNull] string t)
+        public static int Compute(string s, string t)
         {
             var n = s.Length;
             var m = t.Length;

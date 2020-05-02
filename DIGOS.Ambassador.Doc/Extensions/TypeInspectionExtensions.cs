@@ -43,10 +43,10 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="provider">The attribute provider.</param>
         /// <param name="name">The name.</param>
         /// <returns>true if the name was successfully retrieved; otherwise, false.</returns>
-        [Pure, ContractAnnotation("=> false, name : null; => true, name : notnull")]
+        [Pure]
         public static bool TryGetModuleName
         (
-            [NotNull] this TypeDefinition provider,
+            this TypeDefinition provider,
             [NotNullWhen(true)] out string? name
         )
         {
@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="provider">The attribute provider.</param>
         /// <param name="group">The group.</param>
         /// <returns>true if the group was successfully retrieved; otherwise, false.</returns>
-        [Pure, ContractAnnotation("=> false, group : null; => true, group : notnull")]
+        [Pure]
         public static bool TryGetGroup(this TypeDefinition provider, [NotNullWhen(true)] out string? group)
         {
             group = null;
@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="provider">The attribute provider.</param>
         /// <param name="name">The name.</param>
         /// <returns>true if the name was successfully retrieved; otherwise, false.</returns>
-        [Pure, ContractAnnotation("=> false, name : null; => true, name : notnull")]
+        [Pure]
         public static bool TryGetName(this ICustomAttributeProvider provider, [NotNullWhen(true)] out string? name)
         {
             name = null;
@@ -123,7 +123,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="provider">The attribute provider.</param>
         /// <param name="name">The name.</param>
         /// <returns>true if the name was successfully retrieved; otherwise, false.</returns>
-        [Pure, ContractAnnotation("=> false, name : null; => true, name : notnull")]
+        [Pure]
         public static bool TryGetCommandName(this MethodDefinition provider, [NotNullWhen(true)] out string? name)
         {
             name = null;
@@ -154,10 +154,10 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="provider">The attribute provider.</param>
         /// <param name="summary">The summary.</param>
         /// <returns>true if the summary was successfully retrieved; otherwise, false.</returns>
-        [Pure, ContractAnnotation("=> false, summary : null; => true, summary : notnull")]
+        [Pure]
         public static bool TryGetSummary
         (
-            [NotNull] this ICustomAttributeProvider provider,
+            this ICustomAttributeProvider provider,
             [NotNullWhen(true)] out string? summary
         )
         {
@@ -189,10 +189,10 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="provider">The attribute provider.</param>
         /// <param name="aliases">The aliases.</param>
         /// <returns>true if the aliases were successfully retrieved; otherwise, false.</returns>
-        [Pure, ContractAnnotation("=> false, aliases : null; => true, aliases : notnull")]
+        [Pure]
         public static bool TryGetAliases
         (
-            [NotNull] this ICustomAttributeProvider provider,
+            this ICustomAttributeProvider provider,
             [NotNullWhen(true)] out string[]? aliases
         )
         {
@@ -225,10 +225,10 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="parentModule">The module that's being loaded.</param>
         /// <param name="commands">The commands.</param>
         /// <returns>true if the commands were successfully retrieved; otherwise, false.</returns>
-        [Pure, ContractAnnotation("=> false, commands : null; => true, commands : notnull")]
+        [Pure]
         public static bool TryGetCommands
         (
-            [NotNull] this TypeDefinition module,
+            this TypeDefinition module,
             ModuleInformation parentModule,
             [NotNullWhen(true)] out CommandInformation[]? commands
         )
@@ -262,10 +262,10 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="parentModule">The module that's being loaded.</param>
         /// <param name="submodules">The submodules.</param>
         /// <returns>true if the submodules were successfully retrieved; otherwise, false.</returns>
-        [Pure, ContractAnnotation("=> false, submodules : null; => true, submodules : notnull")]
+        [Pure]
         public static bool TryGetSubmodules
         (
-            [NotNull] this TypeDefinition module,
+            this TypeDefinition module,
             ModuleInformation parentModule,
             [NotNullWhen(true)] out ModuleInformation[]? submodules
         )

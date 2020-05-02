@@ -56,9 +56,9 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         /// <param name="portraits">The portrait service.</param>
         public AmbyCommands
         (
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] SassService sass,
-            [NotNull] PortraitService portraits
+            UserFeedbackService feedback,
+            SassService sass,
+            PortraitService portraits
         )
         {
             _feedback = feedback;
@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [Summary("Instructs Amby to contact a user over DM.")]
         [RequireContext(Guild)]
         [RequireUserPermission(GuildPermission.MentionEveryone)]
-        public async Task ContactUserAsync([NotNull] IUser discordUser)
+        public async Task ContactUserAsync(IUser discordUser)
         {
             if (discordUser.Id == this.Context.Client.CurrentUser.Id)
             {
@@ -186,7 +186,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("boop")]
         [Summary("Boops the user.")]
-        public async Task BoopAsync([NotNull] IUser target)
+        public async Task BoopAsync(IUser target)
         {
             if (target.IsMe(this.Context.Client))
             {
@@ -206,7 +206,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("bap")]
         [Summary("Baps the user.")]
-        public async Task BapAsync([NotNull] IUser target)
+        public async Task BapAsync(IUser target)
         {
             if (target.IsMe(this.Context.Client))
             {

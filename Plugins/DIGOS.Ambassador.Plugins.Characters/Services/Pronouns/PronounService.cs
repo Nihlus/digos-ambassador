@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     [PublicAPI]
     public sealed class PronounService
     {
-        [NotNull] private readonly Dictionary<string, IPronounProvider> _pronounProviders;
+        private readonly Dictionary<string, IPronounProvider> _pronounProviders;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PronounService"/> class.
@@ -79,8 +79,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// </summary>
         /// <param name="pronounProvider">The pronoun provider to add.</param>
         /// <returns>The service with the provider.</returns>
-        [NotNull]
-        public PronounService WithPronounProvider([NotNull] IPronounProvider pronounProvider)
+        public PronounService WithPronounProvider(IPronounProvider pronounProvider)
         {
             _pronounProviders.Add(pronounProvider.Family, pronounProvider);
             return this;
@@ -92,8 +91,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// <param name="character">The character.</param>
         /// <returns>A pronoun provider.</returns>
         /// <exception cref="ArgumentException">Thrown if no pronoun provider exists for the character's preference.</exception>
-        [NotNull]
-        public IPronounProvider GetPronounProvider([NotNull] Character character)
+        public IPronounProvider GetPronounProvider(Character character)
         {
             if (_pronounProviders.ContainsKey(character.PronounProviderFamily))
             {
@@ -107,7 +105,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// Gets the available pronoun providers.
         /// </summary>
         /// <returns>An enumerator over the available pronouns.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public IEnumerable<IPronounProvider> GetAvailablePronounProviders()
         {
             return _pronounProviders.Values;
@@ -118,8 +116,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// </summary>
         /// <param name="pronounFamily">The family.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [NotNull]
-        public RetrieveEntityResult<IPronounProvider> GetPronounProvider([NotNull] string pronounFamily)
+        public RetrieveEntityResult<IPronounProvider> GetPronounProvider(string pronounFamily)
         {
             if (!_pronounProviders.TryGetValue(pronounFamily, out var provider))
             {

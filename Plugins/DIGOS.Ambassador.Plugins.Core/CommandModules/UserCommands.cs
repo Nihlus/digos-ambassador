@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Command("info")]
         [Summary("Shows known information about the target user.")]
         [RequirePermission(typeof(ShowUserInfo), PermissionTarget.Other)]
-        public async Task ShowInfoAsync([NotNull] IUser discordUser)
+        public async Task ShowInfoAsync(IUser discordUser)
         {
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
@@ -99,7 +99,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         /// <param name="discordUser">The Discord user to show the info of.</param>
         /// <param name="user">The stored information about the user.</param>
-        private async Task ShowUserInfoAsync([NotNull] IUser discordUser, [NotNull] User user)
+        private async Task ShowUserInfoAsync(IUser discordUser, User user)
         {
             var eb = new EmbedBuilder();
 
@@ -198,7 +198,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Command("bio")]
             [Summary("Sets the invoking user's bio.")]
             [RequirePermission(typeof(EditUserInfo), PermissionTarget.Self)]
-            public async Task SetUserBioAsync([NotNull] string bio) => await SetUserBioAsync(this.Context.User, bio);
+            public async Task SetUserBioAsync(string bio) => await SetUserBioAsync(this.Context.User, bio);
 
             /// <summary>
             /// Sets the target user's bio.
@@ -210,7 +210,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Summary("Sets the target user's bio.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditUserInfo), PermissionTarget.Other)]
-            public async Task SetUserBioAsync([NotNull] IUser discordUser, [NotNull] string bio)
+            public async Task SetUserBioAsync(IUser discordUser, string bio)
             {
                 // Add the user to the user database if they're not already in it
                 var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
@@ -253,7 +253,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Summary("Sets the target user's UTC timezone hour offset.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditUserInfo), PermissionTarget.Other)]
-            public async Task SetUserTimezoneAsync([NotNull] IUser discordUser, int timezone)
+            public async Task SetUserTimezoneAsync(IUser discordUser, int timezone)
             {
                 // Add the user to the user database if they're not already in it
                 var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);

@@ -40,31 +40,29 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// <summary>
         /// Gets the name of the module.
         /// </summary>
-        [NotNull]
         public string Name { get; }
 
         /// <summary>
         /// Gets the summary of the module.
         /// </summary>
-        [NotNull]
         public string Summary { get; }
 
         /// <summary>
         /// Gets the aliases of the module, if any.
         /// </summary>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public IReadOnlyCollection<string> Aliases { get; }
 
         /// <summary>
         /// Gets the commands defined in the module.
         /// </summary>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public IReadOnlyCollection<CommandInformation> Commands { get; private set; }
 
         /// <summary>
         /// Gets the submodules defined in the module.
         /// </summary>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public IReadOnlyCollection<ModuleInformation> Submodules { get; private set; }
 
         /// <summary>
@@ -108,10 +106,10 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// <param name="information">The created information.</param>
         /// <param name="parentModule">The parent module.</param>
         /// <returns>true if the information was successfully created; otherwise, false.</returns>
-        [Pure, ContractAnnotation("=> true, information : notnull; => false, information : null")]
+        [Pure]
         public static bool TryCreate
         (
-            [NotNull] TypeDefinition moduleType,
+            TypeDefinition moduleType,
             [NotNullWhen(true)] out ModuleInformation? information,
             ModuleInformation? parentModule = null
         )

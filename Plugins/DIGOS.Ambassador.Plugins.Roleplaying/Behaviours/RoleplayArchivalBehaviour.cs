@@ -48,7 +48,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     [UsedImplicitly]
     public class RoleplayArchivalBehaviour : ContinuousDiscordBehaviour<RoleplayArchivalBehaviour>
     {
-        [NotNull]
         private readonly UserFeedbackService _feedback;
 
         /// <summary>
@@ -60,10 +59,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <param name="feedback">The feedback service.</param>
         public RoleplayArchivalBehaviour
         (
-            [NotNull] DiscordSocketClient client,
-            [NotNull] IServiceScope serviceScope,
-            [NotNull] ILogger<RoleplayArchivalBehaviour> logger,
-            [NotNull] UserFeedbackService feedback
+            DiscordSocketClient client,
+            IServiceScope serviceScope,
+            ILogger<RoleplayArchivalBehaviour> logger,
+            UserFeedbackService feedback
         )
             : base(client, serviceScope, logger)
         {

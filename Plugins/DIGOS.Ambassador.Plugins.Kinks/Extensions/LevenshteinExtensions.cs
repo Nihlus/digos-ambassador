@@ -52,13 +52,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
         /// <typeparam name="TSource">The source type of the enumerable.</typeparam>
         /// <typeparam name="TResult">The resulting type.</typeparam>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public static async Task<RetrieveEntityResult<TResult>> SelectFromBestLevenshteinMatchAsync<TSource, TResult>
         (
-            [NotNull] this IQueryable<TSource> @this,
-            [NotNull] Func<TSource, TResult> selector,
-            [NotNull] Expression<Func<TSource, string>> stringSelector,
-            [NotNull] string search,
+            this IQueryable<TSource> @this,
+            Func<TSource, TResult> selector,
+            Expression<Func<TSource, string>> stringSelector,
+            string search,
             double tolerance = 0.25
         )
             where TResult : class
@@ -96,13 +96,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
         /// <typeparam name="TSource">The source type of the enumerable.</typeparam>
         /// <typeparam name="TResult">The resulting type.</typeparam>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull]
+        [Pure]
         public static RetrieveEntityResult<TResult> SelectFromBestLevenshteinMatch<TSource, TResult>
         (
-            [NotNull, ItemNotNull] this IEnumerable<TSource> @this,
-            [NotNull] Func<TSource, TResult> selector,
-            [NotNull] Func<TSource, string> stringSelector,
-            [NotNull] string search,
+            [ItemNotNull] this IEnumerable<TSource> @this,
+            Func<TSource, TResult> selector,
+            Func<TSource, string> stringSelector,
+            string search,
             double tolerance = 0.25
         )
             where TResult : class

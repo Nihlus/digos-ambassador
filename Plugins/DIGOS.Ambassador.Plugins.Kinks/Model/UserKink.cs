@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         /// </summary>
         /// <param name="user">The user.</param>
         /// <param name="kink">The user's kink.</param>
-        public UserKink([NotNull] User user, [NotNull] Kink kink)
+        public UserKink(User user, Kink kink)
         {
             this.User = user;
             this.Kink = kink;

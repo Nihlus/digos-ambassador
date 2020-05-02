@@ -51,8 +51,8 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Behaviours
         public JoinMessageBehaviour
         (
             DiscordSocketClient client,
-            [NotNull] IServiceScope serviceScope,
-            [NotNull] ILogger<JoinMessageBehaviour> logger,
+            IServiceScope serviceScope,
+            ILogger<JoinMessageBehaviour> logger,
             UserFeedbackService feedback
         )
             : base(client, serviceScope, logger)

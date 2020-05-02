@@ -98,7 +98,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// </summary>
         /// <param name="this">The body part to decompose.</param>
         /// <returns>An iterator over the bodyparts in the given bodypart.</returns>
-        [Pure, NotNull]
+        [Pure]
         public static IEnumerable<Bodypart> GetComposingParts(this Bodypart @this)
         {
             if (!IsComposite(@this))

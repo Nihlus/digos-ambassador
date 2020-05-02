@@ -46,19 +46,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
     [Summary("Ban-related commands, such as viewing or editing info about a specific ban.")]
     public partial class BanCommands : ModuleBase
     {
-        [NotNull]
         private readonly ModerationService _moderation;
 
-        [NotNull]
         private readonly BanService _bans;
 
-        [NotNull]
         private readonly UserFeedbackService _feedback;
 
-        [NotNull]
         private readonly InteractivityService _interactivity;
 
-        [NotNull]
         private readonly ChannelLoggingService _logging;
 
         /// <summary>
@@ -71,11 +66,11 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// <param name="logging">The logging service.</param>
         public BanCommands
         (
-            [NotNull] ModerationService moderation,
-            [NotNull] BanService bans,
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] InteractivityService interactivity,
-            [NotNull] ChannelLoggingService logging
+            ModerationService moderation,
+            BanService bans,
+            UserFeedbackService feedback,
+            InteractivityService interactivity,
+            ChannelLoggingService logging
         )
         {
             _moderation = moderation;
@@ -93,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Lists the bans attached to the given user.")]
         [RequirePermission(typeof(ManageBans), PermissionTarget.Other)]
         [RequireContext(ContextType.Guild)]
-        public async Task ListBansAsync([NotNull] IGuildUser user)
+        public async Task ListBansAsync(IGuildUser user)
         {
             var bans = _bans.GetBans(user);
 
@@ -158,8 +153,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task AddBanAsync
         (
-            [NotNull] IGuildUser user,
-            [NotNull] string reason,
+            IGuildUser user,
+            string reason,
             TimeSpan? expiresAfter = null
         )
         {

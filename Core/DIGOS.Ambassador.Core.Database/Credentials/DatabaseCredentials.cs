@@ -92,7 +92,6 @@ namespace DIGOS.Ambassador.Core.Database.Credentials
         /// <param name="value">The string to parse.</param>
         /// <param name="credentials">The resulting credentials.</param>
         /// <returns>true if the credentials were successfully parsed; otherwise, false.</returns>
-        [ContractAnnotation("=> true, credentials : notnull; => false, credentials : null")]
         public static bool TryParse(string value, [NotNullWhen(true)] out DatabaseCredentials? credentials)
         {
             credentials = null;

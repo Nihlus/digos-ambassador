@@ -32,7 +32,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// </summary>
     internal sealed class BodypartRemover : AppearanceRemover
     {
-        [NotNull]
         private readonly TransformationDescriptionBuilder _descriptionBuilder;
 
         /// <summary>
@@ -42,8 +41,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="descriptionBuilder">The description builder.</param>
         public BodypartRemover
         (
-            [NotNull] Appearance appearance,
-            [NotNull] TransformationDescriptionBuilder descriptionBuilder
+            Appearance appearance,
+            TransformationDescriptionBuilder descriptionBuilder
         )
             : base(appearance)
         {

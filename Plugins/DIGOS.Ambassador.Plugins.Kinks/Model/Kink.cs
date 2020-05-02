@@ -51,13 +51,13 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         /// <summary>
         /// Gets the name of the kink.
         /// </summary>
-        [Required, NotNull]
+        [Required]
         public string Name { get; private set; }
 
         /// <summary>
         /// Gets the full description of the kink.
         /// </summary>
-        [Required, NotNull]
+        [Required]
         public string Description { get; private set; }
 
         /// <summary>

@@ -52,16 +52,12 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
     [Summary("Permission-related commands for granting, revoking and checking user permissions.")]
     public class PermissionCommands : ModuleBase
     {
-        [NotNull]
         private readonly UserFeedbackService _feedback;
 
-        [NotNull]
         private readonly InteractivityService _interactivity;
 
-        [NotNull]
         private readonly PermissionService _permissions;
 
-        [NotNull]
         private readonly PermissionRegistryService _permissionRegistry;
 
         /// <summary>
@@ -74,11 +70,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// <param name="permissionRegistry">The permission registry service.</param>
         public PermissionCommands
         (
-            [NotNull] PermissionsDatabaseContext database,
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] PermissionService permissions,
-            [NotNull] InteractivityService interactivity,
-            [NotNull] PermissionRegistryService permissionRegistry
+            PermissionsDatabaseContext database,
+            UserFeedbackService feedback,
+            PermissionService permissions,
+            InteractivityService interactivity,
+            PermissionRegistryService permissionRegistry
         )
         {
             _feedback = feedback;
@@ -138,7 +134,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [Command("list-granted")]
         [Summary("Lists all permissions that have been granted to target user.")]
         [RequireContext(Guild)]
-        public async Task ListGrantedPermissionsAsync([NotNull] IUser discordUser)
+        public async Task ListGrantedPermissionsAsync(IUser discordUser)
         {
             var userPermissions = _permissions.GetApplicableUserPermissions(this.Context.Guild, discordUser);
 
@@ -199,13 +195,10 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [Group("grant")]
         public class GrantCommands : ModuleBase
         {
-            [NotNull]
             private readonly UserFeedbackService _feedback;
 
-            [NotNull]
             private readonly PermissionService _permissions;
 
-            [NotNull]
             private readonly PermissionRegistryService _permissionRegistry;
 
             /// <summary>
@@ -216,9 +209,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             /// <param name="permissionRegistry">The permission registry service.</param>
             public GrantCommands
             (
-                [NotNull] UserFeedbackService feedback,
-                [NotNull] PermissionService permissions,
-                [NotNull] PermissionRegistryService permissionRegistry
+                UserFeedbackService feedback,
+                PermissionService permissions,
+                PermissionRegistryService permissionRegistry
             )
             {
                 _feedback = feedback;
@@ -253,8 +246,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
             public async Task Default
             (
-                [NotNull] IUser discordUser,
-                [NotNull] string permissionName,
+                IUser discordUser,
+                string permissionName,
                 [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
                 PermissionTarget grantedTarget = PermissionTarget.Self
             )
@@ -299,8 +292,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
             public async Task Default
             (
-                [NotNull] IRole discordRole,
-                [NotNull] string permissionName,
+                IRole discordRole,
+                string permissionName,
                 [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
                 PermissionTarget grantedTarget = PermissionTarget.Self
             )
@@ -341,13 +334,10 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [Group("revoke")]
         public class RevokeCommands : ModuleBase
         {
-            [NotNull]
             private readonly UserFeedbackService _feedback;
 
-            [NotNull]
             private readonly PermissionService _permissions;
 
-            [NotNull]
             private readonly PermissionRegistryService _permissionRegistry;
 
             /// <summary>
@@ -358,9 +348,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             /// <param name="permissionRegistry">The permission registry service.</param>
             public RevokeCommands
             (
-                [NotNull] UserFeedbackService feedback,
-                [NotNull] PermissionService permissions,
-                [NotNull] PermissionRegistryService permissionRegistry
+                UserFeedbackService feedback,
+                PermissionService permissions,
+                PermissionRegistryService permissionRegistry
             )
             {
                 _feedback = feedback;
@@ -395,7 +385,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]
             public async Task Default
             (
-                [NotNull] IUser discordUser,
+                IUser discordUser,
                 string permissionName,
                 [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
                 PermissionTarget revokedTarget = PermissionTarget.Self
@@ -441,7 +431,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]
             public async Task Default
             (
-                [NotNull] IRole discordRole,
+                IRole discordRole,
                 string permissionName,
                 [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
                 PermissionTarget revokedTarget = PermissionTarget.Self

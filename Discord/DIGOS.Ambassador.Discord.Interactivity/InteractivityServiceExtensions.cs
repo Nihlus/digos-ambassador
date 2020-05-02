@@ -48,10 +48,10 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <returns>The message that was sent.</returns>
         public static async Task SendPrivateInteractiveMessageAsync
         (
-            [NotNull] this InteractivityService @this,
-            [NotNull] ICommandContext context,
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] InteractiveMessage message
+            this InteractivityService @this,
+            ICommandContext context,
+            UserFeedbackService feedback,
+            InteractiveMessage message
         )
         {
             var userChannel = await context.User.GetOrCreateDMChannelAsync();
@@ -94,10 +94,10 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <returns>The message that was sent.</returns>
         public static async Task SendPrivateInteractiveMessageAndDeleteAsync
         (
-            [NotNull] this InteractivityService @this,
-            [NotNull] ICommandContext context,
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] InteractiveMessage message,
+            this InteractivityService @this,
+            ICommandContext context,
+            UserFeedbackService feedback,
+            InteractiveMessage message,
             TimeSpan? timeout = null
         )
         {

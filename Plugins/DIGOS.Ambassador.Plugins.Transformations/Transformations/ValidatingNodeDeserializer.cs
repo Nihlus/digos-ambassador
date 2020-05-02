@@ -33,14 +33,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// </summary>
     public sealed class ValidatingNodeDeserializer : INodeDeserializer
     {
-        [NotNull]
         private readonly INodeDeserializer _nodeDeserializer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidatingNodeDeserializer"/> class.
         /// </summary>
         /// <param name="nodeDeserializer">The node deserializer.</param>
-        public ValidatingNodeDeserializer([NotNull] INodeDeserializer nodeDeserializer)
+        public ValidatingNodeDeserializer(INodeDeserializer nodeDeserializer)
         {
             _nodeDeserializer = nodeDeserializer;
         }

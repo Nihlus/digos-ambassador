@@ -142,13 +142,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         public Character
         (
             long serverID,
-            [NotNull] User owner,
-            [NotNull] string name,
-            [NotNull] string avatarUrl = "https://www.example.com/avatar.png",
+            User owner,
+            string name,
+            string avatarUrl = "https://www.example.com/avatar.png",
             string? nickname = null,
-            [NotNull] string summary = "No summary set.",
-            [NotNull] string description = "No description set.",
-            [NotNull] string pronounProviderFamily = "They"
+            string summary = "No summary set.",
+            string description = "No description set.",
+            string pronounProviderFamily = "They"
         )
         {
             this.ServerID = serverID;

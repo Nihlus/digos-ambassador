@@ -56,22 +56,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
     [Summary("Transformation-related commands, such as transforming certain body parts or saving transforms as characters.")]
     public class TransformationCommands : ModuleBase
     {
-        [NotNull]
         private readonly UserService _users;
 
-        [NotNull]
         private readonly UserFeedbackService _feedback;
 
-        [NotNull]
         private readonly ContentService _content;
 
-        [NotNull]
         private readonly CharacterService _characters;
 
-        [NotNull]
         private readonly TransformationService _transformation;
 
-        [NotNull]
         private readonly InteractivityService _interactivity;
 
         /// <summary>
@@ -85,12 +79,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <param name="content">The content service.</param>
         public TransformationCommands
         (
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] CharacterService characters,
-            [NotNull] TransformationService transformation,
-            [NotNull] InteractivityService interactivity,
-            [NotNull] UserService users,
-            [NotNull] ContentService content
+            UserFeedbackService feedback,
+            CharacterService characters,
+            TransformationService transformation,
+            InteractivityService interactivity,
+            UserService users,
+            ContentService content
         )
         {
             _feedback = feedback;
@@ -117,7 +111,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Chirality chirality,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
-            [NotNull]
             string species
         )
         => await ShiftAsync(this.Context.User, chirality, bodyPart, species);
@@ -135,7 +128,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
-            [NotNull]
             string species
         )
         => await ShiftAsync(this.Context.User, Chirality.Center, bodyPart, species);
@@ -153,11 +145,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftAsync
         (
-            [NotNull]
             IUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
-            [NotNull]
             string species
         )
         => await ShiftAsync(target, Chirality.Center, bodyPart, species);
@@ -176,13 +166,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftAsync
         (
-            [NotNull]
             IUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
-            [NotNull] string species
+            string species
         )
         {
             var getTargetUserResult = await _users.GetOrRegisterUserAsync(target);
@@ -237,7 +226,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Chirality chirality,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodypart,
-            [NotNull]
             Colour colour
         )
         => await ShiftColourAsync(this.Context.User, chirality, bodypart, colour);
@@ -254,7 +242,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodypart,
-            [NotNull]
             Colour colour
         )
         => await ShiftColourAsync(this.Context.User, Chirality.Center, bodypart, colour);
@@ -271,10 +258,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftColourAsync
         (
-            [NotNull] IUser target,
+            IUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
-            [NotNull] Colour colour
+            Colour colour
         )
         => await ShiftColourAsync(target, Chirality.Center, bodyPart, colour);
 
@@ -291,12 +278,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftColourAsync
         (
-            [NotNull] IUser target,
+            IUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
-            [NotNull] Colour colour
+            Colour colour
         )
         {
             var getTargetUserResult = await _users.GetOrRegisterUserAsync(target);
@@ -350,7 +337,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Bodypart bodypart,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
             Pattern pattern,
-            [NotNull]
             Colour colour
         )
         => await ShiftPatternAsync(this.Context.User, Chirality.Center, bodypart, pattern, colour);
@@ -373,7 +359,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Bodypart bodypart,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
             Pattern pattern,
-            [NotNull]
             Colour colour
         )
         => await ShiftPatternAsync(this.Context.User, chirality, bodypart, pattern, colour);
@@ -391,12 +376,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftPatternAsync
         (
-            [NotNull] IUser target,
+            IUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
             Pattern pattern,
-            [NotNull] Colour colour
+            Colour colour
         )
         => await ShiftPatternAsync(target, Chirality.Center, bodyPart, pattern, colour);
 
@@ -414,7 +399,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftPatternAsync
         (
-            [NotNull]
             IUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
@@ -422,7 +406,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Bodypart bodyPart,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
             Pattern pattern,
-            [NotNull]
             Colour colour
         )
         {
@@ -478,7 +461,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Chirality chirality,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodypart,
-            [NotNull]
             Colour colour
         )
         => await ShiftPatternColourAsync(this.Context.User, chirality, bodypart, colour);
@@ -495,7 +477,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodypart,
-            [NotNull]
             Colour colour
         )
             => await ShiftPatternColourAsync(this.Context.User, Chirality.Center, bodypart, colour);
@@ -512,10 +493,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftPatternColourAsync
         (
-            [NotNull] IUser target,
+            IUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
-            [NotNull] Colour colour
+            Colour colour
         )
         => await ShiftPatternColourAsync(target, Chirality.Center, bodyPart, colour);
 
@@ -532,13 +513,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftPatternColourAsync
         (
-            [NotNull]
             IUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
-            [NotNull]
             Colour colour
         )
         {
@@ -833,7 +812,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("describe")]
         [Summary("Describes the current physical appearance of a character.")]
-        public async Task DescribeCharacterAsync([NotNull] Character character)
+        public async Task DescribeCharacterAsync(Character character)
         {
             var generateDescriptionAsync = await _transformation.GenerateCharacterDescriptionAsync
             (character
@@ -1056,7 +1035,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("whitelist")]
         [Summary("Whitelists a user, allowing them to transform you.")]
-        public async Task WhitelistUserAsync([NotNull] IUser user)
+        public async Task WhitelistUserAsync(IUser user)
         {
             var whitelistUserResult = await _transformation.WhitelistUserAsync(this.Context.User, user);
             if (!whitelistUserResult.IsSuccess)
@@ -1075,7 +1054,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("blacklist")]
         [Summary("Blacklists a user, preventing them from transforming you.")]
-        public async Task BlacklistUserAsync([NotNull] IUser user)
+        public async Task BlacklistUserAsync(IUser user)
         {
             var blacklistUserResult = await _transformation.BlacklistUserAsync(this.Context.User, user);
             if (!blacklistUserResult.IsSuccess)

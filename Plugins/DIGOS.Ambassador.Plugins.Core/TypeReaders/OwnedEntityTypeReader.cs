@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
         /// <inheritdoc />
         public sealed override async Task<TypeReaderResult> ReadAsync
         (
-            [NotNull] ICommandContext context,
+            ICommandContext context,
             string input,
             IServiceProvider services
         )
@@ -140,15 +140,15 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
         (
             IUser? entityOwner,
             string? entityName,
-            [NotNull] ICommandContext context,
-            [NotNull] IServiceProvider services
+            ICommandContext context,
+            IServiceProvider services
         );
 
         private RetrieveEntityResult<TUser> FindBestMatchingUserBy<TUser>
         (
-            [NotNull] IEnumerable<TUser> users,
-            [NotNull] Func<TUser, string> selector,
-            [NotNull] string value
+            IEnumerable<TUser> users,
+            Func<TUser, string> selector,
+            string value
         )
             where TUser : class, IUser
         {
@@ -174,7 +174,7 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
             return RetrieveEntityResult<TUser>.FromError("No matching user found.");
         }
 
-        private async Task<RetrieveEntityResult<IUser>> GetUserByIdAsync([NotNull] ICommandContext context, ulong id)
+        private async Task<RetrieveEntityResult<IUser>> GetUserByIdAsync(ICommandContext context, ulong id)
         {
             IUser user;
             if (context.Guild != null)
@@ -197,7 +197,7 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
             return RetrieveEntityResult<IUser>.FromSuccess(user);
         }
 
-        private async Task<RetrieveEntityResult<IUser>> ReadUserAsync([NotNull] ICommandContext context, string input)
+        private async Task<RetrieveEntityResult<IUser>> ReadUserAsync(ICommandContext context, string input)
         {
             // By Mention
             if (!MentionUtils.TryParseUser(input, out var id))
@@ -224,8 +224,8 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
 
         private async Task<RetrieveEntityResult<IUser>> FindBestMatchingUserAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] string input
+            ICommandContext context,
+            string input
         )
         {
             var channelUsers = (await context.Channel.GetUsersAsync(CacheMode.CacheOnly).FlattenAsync())

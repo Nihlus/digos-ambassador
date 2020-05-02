@@ -40,31 +40,26 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// <summary>
         /// Gets the name of the command.
         /// </summary>
-        [NotNull]
         public string Name { get; }
 
         /// <summary>
         /// Gets the summary of the command.
         /// </summary>
-        [NotNull]
         public string Summary { get; }
 
         /// <summary>
         /// Gets the aliases of the command, if any.
         /// </summary>
-        [NotNull]
         public IReadOnlyCollection<string> Aliases { get; }
 
         /// <summary>
         /// Gets the parameters of the command, if any.
         /// </summary>
-        [NotNull]
         public IReadOnlyCollection<ParameterDefinition> Parameters { get; }
 
         /// <summary>
         /// Gets the module that the command is defined in.
         /// </summary>
-        [NotNull]
         public ModuleInformation Module { get; }
 
         /// <summary>
@@ -98,11 +93,11 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// <param name="module">The module the command is defined in.</param>
         /// <param name="information">The created information.</param>
         /// <returns>true if the information was successfully created; otherwise, false.</returns>
-        [Pure, ContractAnnotation("=> true, information : notnull; => false, information : null")]
+        [Pure]
         public static bool TryCreate
         (
-            [NotNull] MethodDefinition commandMethod,
-            [NotNull] ModuleInformation module,
+            MethodDefinition commandMethod,
+            ModuleInformation module,
             [NotNullWhen(true)] out CommandInformation? information
         )
         {

@@ -35,17 +35,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// </summary>
     public sealed class TransformationTextTokenizer
     {
-        [NotNull]
         private readonly Dictionary<string, Type> _availableTokens = new Dictionary<string, Type>();
 
-        [NotNull]
         private readonly IServiceProvider _services;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransformationTextTokenizer"/> class.
         /// </summary>
         /// <param name="services">The services to make available to tokens via dependency injection.</param>
-        public TransformationTextTokenizer([NotNull] IServiceProvider services)
+        public TransformationTextTokenizer(IServiceProvider services)
         {
             _services = services;
         }
@@ -80,7 +78,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             AddAvailableTokenType(typeof(T));
         }
 
-        private void AddAvailableTokenType([NotNull] Type tokenType)
+        private void AddAvailableTokenType(Type tokenType)
         {
             var tokenIdentifier = tokenType.GetCustomAttribute<TokenIdentifierAttribute>();
             if (tokenIdentifier is null)
@@ -104,7 +102,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// </summary>
         /// <typeparam name="T">A valid token type.</typeparam>
         /// <returns>The tokenizer.</returns>
-        [NotNull]
         public TransformationTextTokenizer WithTokenType<T>() where T : ReplacableTextToken<T>
         {
             AddAvailableTokenType<T>();
@@ -116,8 +113,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// </summary>
         /// <param name="text">The text to tokenize.</param>
         /// <returns>A list of recognized tokens in the text.</returns>
-        [NotNull, ItemNotNull]
-        public IReadOnlyList<IReplaceableTextToken> GetTokens([NotNull] string text)
+        [ItemNotNull]
+        public IReadOnlyList<IReplaceableTextToken> GetTokens(string text)
         {
             var tokens = new List<IReplaceableTextToken>();
             var position = 0;
@@ -160,7 +157,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="start">The start index of the token.</param>
         /// <param name="tokenText">The raw text of the token.</param>
         /// <returns>A token object.</returns>
-        public IReplaceableTextToken? ParseToken(int start, [NotNull] string tokenText)
+        public IReplaceableTextToken? ParseToken(int start, string tokenText)
         {
             // Tokens are of the format @<tag>|<data>
             if (tokenText.Length <= 1)

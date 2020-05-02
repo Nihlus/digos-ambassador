@@ -37,7 +37,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Extensions
         /// <param name="format">The format.</param>
         /// <returns>The extension.</returns>
         /// <exception cref="NotImplementedException">Thrown if the format has not been implemented.</exception>
-        [NotNull]
         public static string GetFileExtension(this ExportFormat format)
         {
             switch (format)

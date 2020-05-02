@@ -41,7 +41,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Design
     public class DesignTimeRoleplayingDatabaseContextFactory : IDesignTimeDbContextFactory<RoleplayingDatabaseContext>
     {
         /// <inheritdoc />
-        [NotNull]
         public RoleplayingDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<RoleplayingDatabaseContext>();

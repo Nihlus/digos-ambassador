@@ -174,7 +174,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="user">The user.</param>
         /// <returns>true if the user is a participant; otherwise, false.</returns>
         [Pure]
-        public bool HasJoined([NotNull] User user)
+        public bool HasJoined(User user)
         {
             return HasJoined(user.DiscordID);
         }
@@ -185,7 +185,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="user">The user.</param>
         /// <returns>true if the user is a participant; otherwise, false.</returns>
         [Pure]
-        public bool HasJoined([NotNull] IUser user)
+        public bool HasJoined(IUser user)
         {
             return HasJoined((long)user.Id);
         }
@@ -207,7 +207,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="user">The user.</param>
         /// <returns>true if the user is invited; otherwise, false.</returns>
         [Pure]
-        public bool IsInvited([NotNull] User user)
+        public bool IsInvited(User user)
         {
             return IsInvited(user.DiscordID);
         }
@@ -218,7 +218,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="user">The user.</param>
         /// <returns>true if the user is invited; otherwise, false.</returns>
         [Pure]
-        public bool IsInvited([NotNull] IUser user)
+        public bool IsInvited(IUser user)
         {
             return IsInvited((long)user.Id);
         }
@@ -240,7 +240,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="user">The user.</param>
         /// <returns>true if the user is kicked; otherwise, false.</returns>
         [Pure]
-        public bool IsKicked([NotNull] User user)
+        public bool IsKicked(User user)
         {
             return IsKicked(user.DiscordID);
         }
@@ -251,7 +251,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="user">The user.</param>
         /// <returns>true if the user is kicked; otherwise, false.</returns>
         [Pure]
-        public bool IsKicked([NotNull] IUser user)
+        public bool IsKicked(IUser user)
         {
             return IsKicked((long)user.Id);
         }

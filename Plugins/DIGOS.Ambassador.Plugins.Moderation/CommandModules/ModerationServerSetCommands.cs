@@ -45,10 +45,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Group("set")]
             public class ModerationServerSetCommands : ModuleBase
             {
-                [NotNull]
                 private readonly ModerationService _moderation;
 
-                [NotNull]
                 private readonly UserFeedbackService _feedback;
 
                 /// <summary>
@@ -58,8 +56,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 /// <param name="feedback">The feedback service.</param>
                 public ModerationServerSetCommands
                 (
-                    [NotNull] ModerationService moderation,
-                    [NotNull] UserFeedbackService feedback
+                    ModerationService moderation,
+                    UserFeedbackService feedback
                 )
                 {
                     _moderation = moderation;
@@ -74,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 [Summary("Sets the moderation log channel.")]
                 [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
                 [RequireContext(ContextType.Guild)]
-                public async Task SetModerationLogChannelAsync([NotNull] ITextChannel channel)
+                public async Task SetModerationLogChannelAsync(ITextChannel channel)
                 {
                     var setChannel = await _moderation.SetModerationLogChannelAsync(this.Context.Guild, channel);
                     if (!setChannel.IsSuccess)
@@ -94,7 +92,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 [Summary("Sets the event monitoring channel.")]
                 [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
                 [RequireContext(ContextType.Guild)]
-                public async Task SetMonitoringChannelAsync([NotNull] ITextChannel channel)
+                public async Task SetMonitoringChannelAsync(ITextChannel channel)
                 {
                     var setChannel = await _moderation.SetMonitoringChannelAsync(this.Context.Guild, channel);
                     if (!setChannel.IsSuccess)

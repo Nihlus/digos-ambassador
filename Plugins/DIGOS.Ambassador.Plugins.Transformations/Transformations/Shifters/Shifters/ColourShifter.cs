@@ -34,10 +34,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// </summary>
     internal sealed class ColourShifter : AppearanceShifter
     {
-        [NotNull]
         private readonly TransformationDescriptionBuilder _descriptionBuilder;
 
-        [NotNull]
         private readonly Colour _colour;
 
         /// <summary>
@@ -48,9 +46,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="descriptionBuilder">The description builder.</param>
         public ColourShifter
         (
-            [NotNull] Appearance appearance,
-            [NotNull] Colour colour,
-            [NotNull] TransformationDescriptionBuilder descriptionBuilder
+            Appearance appearance,
+            Colour colour,
+            TransformationDescriptionBuilder descriptionBuilder
         )
             : base(appearance)
         {

@@ -39,14 +39,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
     [PublicAPI]
     public sealed class PermissionService
     {
-        [NotNull]
         private readonly PermissionsDatabaseContext _database;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PermissionService"/> class.
         /// </summary>
         /// <param name="database">The database.</param>
-        public PermissionService([NotNull] PermissionsDatabaseContext database)
+        public PermissionService(PermissionsDatabaseContext database)
         {
             _database = database;
         }
@@ -62,9 +61,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         [ItemNotNull]
         public async Task<ModifyEntityResult> GrantPermissionAsync
         (
-            [NotNull] IGuild discordServer,
-            [NotNull] IUser discordUser,
-            [NotNull] IPermission grantedPermission,
+            IGuild discordServer,
+            IUser discordUser,
+            IPermission grantedPermission,
             PermissionTarget target
         )
         {
@@ -132,8 +131,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         [ItemNotNull]
         public async Task<ModifyEntityResult> GrantPermissionAsync
         (
-            [NotNull] IRole discordRole,
-            [NotNull] IPermission grantedPermission,
+            IRole discordRole,
+            IPermission grantedPermission,
             PermissionTarget target
         )
         {
@@ -200,9 +199,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         [ItemNotNull]
         public async Task<ModifyEntityResult> RevokePermissionAsync
         (
-            [NotNull] IGuild discordServer,
-            [NotNull] IUser discordUser,
-            [NotNull] IPermission revokedPermission,
+            IGuild discordServer,
+            IUser discordUser,
+            IPermission revokedPermission,
             PermissionTarget target
         )
         {
@@ -270,8 +269,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         [ItemNotNull]
         public async Task<ModifyEntityResult> RevokePermissionAsync
         (
-            [NotNull] IRole discordRole,
-            [NotNull] IPermission revokedPermission,
+            IRole discordRole,
+            IPermission revokedPermission,
             PermissionTarget target
         )
         {
@@ -341,8 +340,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         [Pure, ItemNotNull]
         public async Task<DetermineConditionResult> HasPermissionAsync
         (
-            [NotNull] IGuild discordServer,
-            [NotNull] IGuildUser discordUser,
+            IGuild discordServer,
+            IGuildUser discordUser,
             IPermission requiredPermission,
             PermissionTarget target
         )
@@ -430,11 +429,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="discordServer">The server the user is on.</param>
         /// <param name="discordUser">The user.</param>
         /// <returns>An object representing the query.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public IQueryable<UserPermission> GetApplicableUserPermissions
         (
-            [NotNull] IGuild discordServer,
-            [NotNull] IUser discordUser
+            IGuild discordServer,
+            IUser discordUser
         )
         {
             return _database.UserPermissions.AsQueryable()
@@ -447,10 +446,10 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// </summary>
         /// <param name="discordUser">The user.</param>
         /// <returns>An object representing the query.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public IEnumerable<RolePermission> GetApplicableRolePermissions
         (
-            [NotNull] IGuildUser discordUser
+            IGuildUser discordUser
         )
         {
             var userRoles = discordUser.RoleIds.ToList();
@@ -471,8 +470,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         [ItemNotNull]
         private async Task<RetrieveEntityResult<RolePermission>> GetOrCreateRolePermissionAsync
         (
-            [NotNull] IRole discordRole,
-            [NotNull] IPermission permission,
+            IRole discordRole,
+            IPermission permission,
             PermissionTarget target
         )
         {
@@ -518,9 +517,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         [ItemNotNull]
         private async Task<RetrieveEntityResult<UserPermission>> GetOrCreateUserPermissionAsync
         (
-            [NotNull] IGuild discordGuild,
-            [NotNull] IUser discordUser,
-            [NotNull] IPermission permission,
+            IGuild discordGuild,
+            IUser discordUser,
+            IPermission permission,
             PermissionTarget target
         )
         {

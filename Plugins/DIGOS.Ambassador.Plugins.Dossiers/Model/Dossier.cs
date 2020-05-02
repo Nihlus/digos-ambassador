@@ -37,13 +37,13 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Model
         /// <summary>
         /// Gets the title of the dossier.
         /// </summary>
-        [Required, NotNull]
+        [Required]
         public string Title { get; internal set; }
 
         /// <summary>
         /// Gets the summary of the dossier.
         /// </summary>
-        [Required, NotNull]
+        [Required]
         public string Summary { get; internal set; }
 
         /// <summary>

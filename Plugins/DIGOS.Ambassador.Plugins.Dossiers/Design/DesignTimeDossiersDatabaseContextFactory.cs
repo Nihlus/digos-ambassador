@@ -40,7 +40,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Design
     public class DesignTimeDossiersDatabaseContextFactory : IDesignTimeDbContextFactory<DossiersDatabaseContext>
     {
         /// <inheritdoc />
-        [NotNull]
         public DossiersDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<DossiersDatabaseContext>();

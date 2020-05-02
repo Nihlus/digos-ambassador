@@ -34,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     [TokenIdentifier("fluent", "f")]
     public sealed class FluentPronounToken : ReplacableTextToken<FluentPronounToken>
     {
-        [NotNull]
         private readonly PronounService _pronouns;
 
         /// <summary>
@@ -46,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// Initializes a new instance of the <see cref="FluentPronounToken"/> class.
         /// </summary>
         /// <param name="pronouns">The pronoun service.</param>
-        public FluentPronounToken([NotNull] PronounService pronouns)
+        public FluentPronounToken(PronounService pronouns)
         {
             _pronouns = pronouns;
         }

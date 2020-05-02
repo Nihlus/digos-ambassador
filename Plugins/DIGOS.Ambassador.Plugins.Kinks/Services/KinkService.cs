@@ -43,13 +43,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
     [PublicAPI]
     public sealed class KinkService
     {
-        [NotNull]
         private readonly KinksDatabaseContext _database;
 
-        [NotNull]
         private readonly UserService _users;
 
-        [NotNull]
         private readonly UserFeedbackService _feedback;
 
         /// <summary>
@@ -60,9 +57,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="database">The database.</param>
         public KinkService
         (
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] UserService users,
-            [NotNull] KinksDatabaseContext database
+            UserFeedbackService feedback,
+            UserService users,
+            KinksDatabaseContext database
         )
         {
             _feedback = feedback;
@@ -75,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <param name="name">The name of the kink.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<Kink>> GetKinkByNameAsync(string name)
         {
             return await _database.Kinks.SelectFromBestLevenshteinMatchAsync(x => x, k => k.Name, name);
@@ -86,8 +83,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <param name="kink">The kink.</param>
         /// <returns>An embed.</returns>
-        [Pure, NotNull]
-        public Embed BuildKinkInfoEmbed([NotNull] Kink kink)
+        [Pure]
+        public Embed BuildKinkInfoEmbed(Kink kink)
         {
             var eb = _feedback.CreateEmbedBase();
 
@@ -103,11 +100,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="discordUser">The user.</param>
         /// <param name="name">The kink name.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByNameAsync
         (
-            [NotNull] IUser discordUser,
-            [NotNull] string name
+            IUser discordUser,
+            string name
         )
         {
             var getUserKinksResult = await GetUserKinksAsync(discordUser);
@@ -126,8 +123,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <param name="userKink">The kink.</param>
         /// <returns>An embed.</returns>
-        [Pure, NotNull]
-        public EmbedBuilder BuildUserKinkInfoEmbedBase([NotNull] UserKink userKink)
+        [Pure]
+        public EmbedBuilder BuildUserKinkInfoEmbedBase(UserKink userKink)
         {
             var eb = _feedback.CreateEmbedBase();
 
@@ -142,8 +139,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <param name="discordUser">The user.</param>
         /// <returns>The user's kinks.</returns>
-        [Pure, NotNull, ItemNotNull]
-        public async Task<RetrieveEntityResult<IQueryable<UserKink>>> GetUserKinksAsync([NotNull] IUser discordUser)
+        [Pure, ItemNotNull]
+        public async Task<RetrieveEntityResult<IQueryable<UserKink>>> GetUserKinksAsync(IUser discordUser)
         {
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
@@ -164,12 +161,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="secondUser">The second user.</param>
         /// <param name="kinks">The kinks.</param>
         /// <returns>A paginated embed.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public IEnumerable<EmbedBuilder> BuildKinkOverlapEmbeds
         (
-            [NotNull] IUser firstUser,
-            [NotNull] IUser secondUser,
-            [NotNull, ItemNotNull] IEnumerable<UserKink> kinks
+            IUser firstUser,
+            IUser secondUser,
+            [ItemNotNull] IEnumerable<UserKink> kinks
         )
         {
             var pages =
@@ -191,10 +188,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <param name="kinks">The kinks.</param>
         /// <returns>A paginated embed.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public IEnumerable<EmbedBuilder> BuildPaginatedUserKinkEmbeds
         (
-            [NotNull, ItemNotNull] IEnumerable<UserKink> kinks
+            [ItemNotNull] IEnumerable<UserKink> kinks
         )
         {
             var pages =
@@ -214,10 +211,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="userKink">The user's kink.</param>
         /// <param name="preference">The new preference.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> SetKinkPreferenceAsync
         (
-            [NotNull] UserKink userKink,
+            UserKink userKink,
             KinkPreference preference
         )
         {
@@ -233,10 +230,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="discordUser">The discord user.</param>
         /// <param name="onlineKinkID">The F-List kink ID.</param>
         /// <returns>The user's kink preference.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<UserKink>> GetUserKinkByFListIDAsync
         (
-            [NotNull] IUser discordUser,
+            IUser discordUser,
             int onlineKinkID
         )
         {
@@ -276,11 +273,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="discordUser">The user.</param>
         /// <param name="kink">The kink.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<CreateEntityResult<UserKink>> AddUserKinkAsync
         (
-            [NotNull] IUser discordUser,
-            [NotNull] Kink kink
+            IUser discordUser,
+            Kink kink
         )
         {
             var getUserKinksResult = await GetUserKinksAsync(discordUser);
@@ -316,7 +313,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// Gets all available kink categories from the database.
         /// </summary>
         /// <returns>A list of kink categories.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<IEnumerable<KinkCategory>> GetKinkCategoriesAsync()
         {
             return (await _database.Kinks.AsQueryable().Select(k => k.Category).ToListAsync())
@@ -329,7 +326,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <param name="onlineKinkID">The F-List kink ID.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<Kink>> GetKinkByFListIDAsync(int onlineKinkID)
         {
             var kink = await _database.Kinks.AsQueryable().FirstOrDefaultAsync(k => k.FListID == onlineKinkID);
@@ -346,7 +343,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <param name="category">The category.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<IEnumerable<Kink>>> GetKinksByCategoryAsync(KinkCategory category)
         {
             var group = await _database.Kinks.AsQueryable().Where(k => k.Category == category).ToListAsync();
@@ -367,10 +364,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="user">The user.</param>
         /// <param name="category">The category.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<IEnumerable<UserKink>>> GetUserKinksByCategoryAsync
         (
-            [NotNull] IUser user,
+            IUser user,
             KinkCategory category
         )
         {
@@ -396,8 +393,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <param name="discordUser">The user.</param>
         /// <returns>A task that must be awaited.</returns>
-        [NotNull, ItemNotNull]
-        public async Task<ModifyEntityResult> ResetUserKinksAsync([NotNull] IUser discordUser)
+        [ItemNotNull]
+        public async Task<ModifyEntityResult> ResetUserKinksAsync(IUser discordUser)
         {
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
@@ -420,10 +417,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="user">The user.</param>
         /// <param name="category">The category.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<Kink>> GetFirstKinkWithoutPreferenceInCategoryAsync
         (
-            [NotNull] IUser user,
+            IUser user,
             KinkCategory category
         )
         {
@@ -473,7 +470,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <param name="category">The category.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<Kink>> GetFirstKinkInCategoryAsync(KinkCategory category)
         {
             var getKinksResult = await GetKinksByCategoryAsync(category);
@@ -490,7 +487,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <param name="precedingFListID">The F-List ID of the preceding kink.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<Kink>> GetNextKinkByCurrentFListIDAsync(int precedingFListID)
         {
             var getKinkResult = await GetKinkByFListIDAsync(precedingFListID);
@@ -522,8 +519,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// </summary>
         /// <param name="newKinks">The new kinks.</param>
         /// <returns>The number of updated kinks.</returns>
-        [NotNull]
-        public async Task<int> UpdateKinksAsync([NotNull, ItemNotNull] IEnumerable<Kink> newKinks)
+        public async Task<int> UpdateKinksAsync([ItemNotNull] IEnumerable<Kink> newKinks)
         {
             foreach (var kink in newKinks)
             {

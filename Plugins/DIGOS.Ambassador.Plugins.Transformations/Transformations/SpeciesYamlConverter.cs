@@ -35,14 +35,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// </summary>
     internal class SpeciesYamlConverter : IYamlTypeConverter
     {
-        [NotNull]
         private TransformationService Transformation { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SpeciesYamlConverter"/> class.
         /// </summary>
         /// <param name="transformation">The transformation service.</param>
-        public SpeciesYamlConverter([NotNull] TransformationService transformation)
+        public SpeciesYamlConverter(TransformationService transformation)
         {
             this.Transformation = transformation;
         }
@@ -71,7 +70,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         }
 
         /// <inheritdoc />
-        public void WriteYaml([NotNull] IEmitter emitter, object? value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type)
         {
             if (value is null)
             {

@@ -45,10 +45,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Group("set")]
         public class BanSetCommands : ModuleBase
         {
-            [NotNull]
             private readonly BanService _bans;
 
-            [NotNull]
             private readonly UserFeedbackService _feedback;
 
             /// <summary>
@@ -58,8 +56,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             /// <param name="feedback">The feedback service.</param>
             public BanSetCommands
             (
-                [NotNull] BanService bans,
-                [NotNull] UserFeedbackService feedback
+                BanService bans,
+                UserFeedbackService feedback
             )
             {
                 _bans = bans;

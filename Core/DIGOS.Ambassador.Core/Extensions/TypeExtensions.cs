@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="this">The type to humanize.</param>
         /// <returns>A humanized string.</returns>
         [Pure]
-        public static string Humanize([NotNull] this Type @this)
+        public static string Humanize(this Type @this)
         {
             return TypeAliases.ContainsKey(@this) ? TypeAliases[@this] : @this.Name;
         }

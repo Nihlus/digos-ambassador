@@ -128,7 +128,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
         /// </summary>
         /// <param name="title">The title.</param>
         /// <returns>The resulting paragraph.</returns>
-        [NotNull]
         private Paragraph CreateTitle(string title)
         {
             var chunk = new Chunk(title, TitleFont);
@@ -141,8 +140,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
             return para;
         }
 
-        [NotNull]
-        private Paragraph CreateParticipantList([NotNull] IEnumerable<string> participantNames)
+        private Paragraph CreateParticipantList(IEnumerable<string> participantNames)
         {
             var paragraph = new Paragraph
             {
@@ -163,8 +161,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
             return paragraph;
         }
 
-        [NotNull]
-        private Paragraph CreateMessage([NotNull] string author, [NotNull] string contents)
+        private Paragraph CreateMessage(string author, string contents)
         {
             var authorChunk = new Chunk($"{author} \n", ItalicFont);
 
@@ -181,8 +178,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
             return para;
         }
 
-        [NotNull]
-        private Paragraph FormatContentString([NotNull] string contents)
+        private Paragraph FormatContentString(string contents)
         {
             var splits = contents.Split(new[] { "```" }, StringSplitOptions.None).Select(s => s.TrimStart('\n')).ToList();
             var paragraph = new Paragraph();

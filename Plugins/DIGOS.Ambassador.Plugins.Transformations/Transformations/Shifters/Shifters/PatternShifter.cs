@@ -33,12 +33,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
     /// </summary>
     internal sealed class PatternShifter : AppearanceShifter
     {
-        [NotNull]
         private readonly TransformationDescriptionBuilder _descriptionBuilder;
 
         private readonly Pattern _pattern;
 
-        [NotNull]
         private readonly Colour _patternColour;
 
         /// <summary>
@@ -50,10 +48,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="descriptionBuilder">The description builder.</param>
         public PatternShifter
         (
-            [NotNull] Appearance appearance,
+            Appearance appearance,
             Pattern pattern,
-            [NotNull] Colour patternColour,
-            [NotNull] TransformationDescriptionBuilder descriptionBuilder
+            Colour patternColour,
+            TransformationDescriptionBuilder descriptionBuilder
         )
             : base(appearance)
         {

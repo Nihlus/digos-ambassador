@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
         /// </summary>
         /// <param name="roleplay">The roleplay to export.</param>
         /// <returns>An exported roleplay.</returns>
-        [Pure, NotNull, ItemNotNull]
-        Task<ExportedRoleplay> ExportAsync([NotNull] Roleplay roleplay);
+        [Pure, ItemNotNull]
+        Task<ExportedRoleplay> ExportAsync(Roleplay roleplay);
     }
 }

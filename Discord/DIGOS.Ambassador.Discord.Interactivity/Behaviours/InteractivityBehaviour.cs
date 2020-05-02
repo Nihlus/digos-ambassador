@@ -47,8 +47,8 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Behaviours
         public InteractivityBehaviour
         (
             DiscordSocketClient client,
-            [NotNull] IServiceScope serviceScope,
-            [NotNull] ILogger<InteractivityBehaviour> logger,
+            IServiceScope serviceScope,
+            ILogger<InteractivityBehaviour> logger,
             InteractivityService interactivity
         )
             : base(client, serviceScope, logger)

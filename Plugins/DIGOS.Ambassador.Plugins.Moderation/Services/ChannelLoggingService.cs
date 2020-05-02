@@ -52,10 +52,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="quotes">The quote service.</param>
         public ChannelLoggingService
         (
-            [NotNull] ModerationService moderation,
-            [NotNull] DiscordSocketClient client,
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] QuoteService quotes
+            ModerationService moderation,
+            DiscordSocketClient client,
+            UserFeedbackService feedback,
+            QuoteService quotes
         )
         {
             _moderation = moderation;
@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="ban">The ban.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserBanned([NotNull] UserBan ban)
+        public async Task NotifyUserBanned(UserBan ban)
         {
             var guild = _client.GetGuild((ulong)ban.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
@@ -102,7 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="ban">The ban.</param>
         /// <param name="rescinder">The person who rescinded the ban.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserUnbanned([NotNull] UserBan ban, IGuildUser rescinder)
+        public async Task NotifyUserUnbanned(UserBan ban, IGuildUser rescinder)
         {
             var guild = _client.GetGuild((ulong)ban.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
@@ -132,7 +132,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="warning">The warning.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserWarningAdded([NotNull] UserWarning warning)
+        public async Task NotifyUserWarningAdded(UserWarning warning)
         {
             var guild = _client.GetGuild((ulong)warning.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
@@ -165,7 +165,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="warning">The warning.</param>
         /// <param name="rescinder">The person who rescinded the warning.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserWarningRemoved([NotNull] UserWarning warning, [NotNull] IGuildUser rescinder)
+        public async Task NotifyUserWarningRemoved(UserWarning warning, IGuildUser rescinder)
         {
             var guild = _client.GetGuild((ulong)warning.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
@@ -198,7 +198,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="note">The note.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserNoteAdded([NotNull] UserNote note)
+        public async Task NotifyUserNoteAdded(UserNote note)
         {
             var guild = _client.GetGuild((ulong)note.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
@@ -231,7 +231,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="note">The note.</param>
         /// <param name="remover">The person that removed the note.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserNoteRemoved([NotNull] UserNote note, [NotNull] IGuildUser remover)
+        public async Task NotifyUserNoteRemoved(UserNote note, IGuildUser remover)
         {
             var guild = _client.GetGuild((ulong)note.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
@@ -260,7 +260,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="user">The user that left.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserLeft([NotNull] IGuildUser user)
+        public async Task NotifyUserLeft(IGuildUser user)
         {
             var getChannel = await GetMonitoringChannelAsync(user.Guild);
             if (!getChannel.IsSuccess)
@@ -287,9 +287,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task NotifyUserUsernameChanged
         (
-            [NotNull] IGuildUser user,
-            [NotNull] string oldUsername,
-            [NotNull] string newUsername
+            IGuildUser user,
+            string oldUsername,
+            string newUsername
         )
         {
             var getChannel = await GetMonitoringChannelAsync(user.Guild);
@@ -317,9 +317,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task NotifyUserDiscriminatorChanged
         (
-            [NotNull] IGuildUser user,
-            [NotNull] string oldDiscriminator,
-            [NotNull] string newDiscriminator
+            IGuildUser user,
+            string oldDiscriminator,
+            string newDiscriminator
         )
         {
             var getChannel = await GetMonitoringChannelAsync(user.Guild);
@@ -397,7 +397,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="guild">The guild to grab the channel from.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        private async Task<RetrieveEntityResult<ITextChannel>> GetModerationLogChannelAsync([NotNull] IGuild guild)
+        private async Task<RetrieveEntityResult<ITextChannel>> GetModerationLogChannelAsync(IGuild guild)
         {
             var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guild);
             if (!getSettings.IsSuccess)
@@ -431,7 +431,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="guild">The guild to grab the channel from.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        private async Task<RetrieveEntityResult<ITextChannel>> GetMonitoringChannelAsync([NotNull] IGuild guild)
+        private async Task<RetrieveEntityResult<ITextChannel>> GetMonitoringChannelAsync(IGuild guild)
         {
             var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guild);
             if (!getSettings.IsSuccess)

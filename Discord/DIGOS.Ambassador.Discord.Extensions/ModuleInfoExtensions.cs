@@ -38,8 +38,7 @@ namespace DIGOS.Ambassador.Discord.Extensions
         /// </summary>
         /// <param name="this">The module.</param>
         /// <returns>The top-level module.</returns>
-        [NotNull]
-        public static ModuleInfo GetTopLevelModule([NotNull] this ModuleInfo @this)
+        public static ModuleInfo GetTopLevelModule(this ModuleInfo @this)
         {
             var currentModule = @this;
             while (currentModule.IsSubmodule)
@@ -55,7 +54,7 @@ namespace DIGOS.Ambassador.Discord.Extensions
         /// </summary>
         /// <param name="module">The module.</param>
         /// <returns>The commands.</returns>
-        public static IEnumerable<CommandInfo> GetAllCommands([NotNull] this ModuleInfo module)
+        public static IEnumerable<CommandInfo> GetAllCommands(this ModuleInfo module)
         {
             var currentCommands = new List<CommandInfo>();
 
@@ -74,7 +73,7 @@ namespace DIGOS.Ambassador.Discord.Extensions
         /// </summary>
         /// <param name="module">The module.</param>
         /// <returns>The full prefix.</returns>
-        public static string GetFullPrefix([NotNull] this ModuleInfo module)
+        public static string GetFullPrefix(this ModuleInfo module)
         {
             var sb = new StringBuilder();
 
@@ -94,7 +93,7 @@ namespace DIGOS.Ambassador.Discord.Extensions
         /// </summary>
         /// <param name="module">The module to scan.</param>
         /// <returns>The names.</returns>
-        public static IEnumerable<string> GetAllCommandNames([NotNull] this ModuleInfo module)
+        public static IEnumerable<string> GetAllCommandNames(this ModuleInfo module)
         {
             var allCommands = module.GetAllCommands().ToList();
             return allCommands.SelectMany(c => c.Aliases).Union(allCommands.Select(c => c.Name));

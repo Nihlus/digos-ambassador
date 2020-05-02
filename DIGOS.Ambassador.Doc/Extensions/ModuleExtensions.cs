@@ -37,8 +37,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="this">The module to get the chain of.</param>
         /// <param name="onlyPrefixes">Whether to only include prefixes in the chain.</param>
         /// <returns>A name chain in the form of "[parentName] [childName]".</returns>
-        [NotNull]
-        public static string GetNameChain([NotNull] this ModuleInformation @this, bool onlyPrefixes = false)
+        public static string GetNameChain(this ModuleInformation @this, bool onlyPrefixes = false)
         {
             string thisPrefix;
             if (onlyPrefixes)
@@ -59,7 +58,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// </summary>
         /// <param name="this">The module to get the chain of.</param>
         /// <returns>A name chain in the form of "[parentName] [childName]".</returns>
-        public static IEnumerable<string> GetAliasChains([NotNull] this ModuleInformation @this)
+        public static IEnumerable<string> GetAliasChains(this ModuleInformation @this)
         {
             foreach (var alias in @this.Aliases)
             {

@@ -39,55 +39,46 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <summary>
         /// Gets or sets the emote that takes the user back to the first page.
         /// </summary>
-        [NotNull]
         public IEmote First { get; set; } = new Emoji("⏮");
 
         /// <summary>
         /// Gets or sets the emote that takes the user back one page.
         /// </summary>
-        [NotNull]
         public IEmote Back { get; set; } = new Emoji("◀");
 
         /// <summary>
         /// Gets or sets the emote that takes the user forward one page.
         /// </summary>
-        [NotNull]
         public IEmote Next { get; set; } = new Emoji("▶");
 
         /// <summary>
         /// Gets or sets the emote that takes the user to the last page.
         /// </summary>
-        [NotNull]
         public IEmote Last { get; set; } = new Emoji("⏭");
 
         /// <summary>
         /// Gets or sets the emote that closes the paginated message.
         /// </summary>
-        [NotNull]
         public IEmote Stop { get; set; } = new Emoji("\x23F9");
 
         /// <summary>
         /// Gets or sets the emote that the user can use to jump to a specific page.
         /// </summary>
-        [NotNull]
         public IEmote Jump { get; set; } = new Emoji("\xD83D\xDD22");
 
         /// <summary>
         /// Gets or sets the emote that the user can use to display a help message.
         /// </summary>
-        [NotNull]
         public IEmote Help { get; set; } = new Emoji("ℹ");
 
         /// <summary>
         /// Gets or sets the format string of the footer.
         /// </summary>
-        [NotNull]
         public string FooterFormat { get; set; } = "Page {0}/{1}";
 
         /// <summary>
         /// Gets or sets the help message.
         /// </summary>
-        [NotNull]
         public string HelpText { get; set; } = "This is a paginator. React with the respective icons to change page.";
 
         /// <summary>
@@ -118,14 +109,12 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <summary>
         /// Gets or sets the title of the paginated message.
         /// </summary>
-        [NotNull]
         public string Title { get; set; } = string.Empty;
 
         /// <summary>
         /// Creates a new embed based on the appearance settings.
         /// </summary>
         /// <returns>The embed.</returns>
-        [NotNull]
         public EmbedBuilder CreateEmbedBase()
         {
             var eb = new EmbedBuilder();

@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <returns>A result that may contain the message.</returns>
         public async Task<RetrieveEntityResult<IUserMessage>> GetNextMessageAsync
         (
-            [NotNull] IMessageChannel channel,
+            IMessageChannel channel,
             Func<IUserMessage, bool>? filter = null,
             TimeSpan? timeout = null
         )
@@ -126,11 +126,10 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <param name="channel">The channel to send the message to.</param>
         /// <param name="message">The message to send.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
         public async Task SendInteractiveMessageAsync
         (
-            [NotNull] IMessageChannel channel,
-            [NotNull] IInteractiveMessage message
+            IMessageChannel channel,
+            IInteractiveMessage message
         )
         {
             _trackedMessages.Add(message);
@@ -151,8 +150,8 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task SendInteractiveMessageAndDeleteAsync
         (
-            [NotNull] IMessageChannel channel,
-            [NotNull] IInteractiveMessage message,
+            IMessageChannel channel,
+            IInteractiveMessage message,
             TimeSpan? timeout = null
         )
         {
@@ -169,8 +168,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// </summary>
         /// <param name="message">The message to delete.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
-        public Task DeleteInteractiveMessageAsync([NotNull] IInteractiveMessage message)
+        public Task DeleteInteractiveMessageAsync(IInteractiveMessage message)
         {
             _trackedMessages.Remove(message);
             return message.DeleteAsync();
@@ -181,7 +179,6 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// </summary>
         /// <param name="message">The deleted message.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
         internal async Task OnMessageDeleted
         (
             Cacheable<IMessage, ulong> message
@@ -216,11 +213,10 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <param name="message">The message the reaction was removed to.</param>
         /// <param name="reaction">The removed reaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
         internal async Task OnReactionRemoved
         (
             Cacheable<IUserMessage, ulong> message,
-            [NotNull] SocketReaction reaction
+            SocketReaction reaction
         )
         {
             if (reaction.User.IsSpecified && reaction.User.Value.IsMe(this.Client))
@@ -247,11 +243,10 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <param name="message">The message the reaction was added to.</param>
         /// <param name="reaction">The added reaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
         internal async Task OnReactionAdded
         (
             Cacheable<IUserMessage, ulong> message,
-            [NotNull] SocketReaction reaction
+            SocketReaction reaction
         )
         {
             if (reaction.User.IsSpecified && reaction.User.Value.IsMe(this.Client))

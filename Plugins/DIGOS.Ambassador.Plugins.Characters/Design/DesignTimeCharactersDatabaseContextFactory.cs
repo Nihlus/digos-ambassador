@@ -41,7 +41,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Design
     public class DesignTimeCharactersDatabaseContextFactory : IDesignTimeDbContextFactory<CharactersDatabaseContext>
     {
         /// <inheritdoc />
-        [NotNull]
         public CharactersDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<CharactersDatabaseContext>();

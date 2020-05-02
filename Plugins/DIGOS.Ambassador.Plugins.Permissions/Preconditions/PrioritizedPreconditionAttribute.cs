@@ -43,9 +43,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Preconditions
         /// <inheritdoc />
         public sealed override async Task<PreconditionResult> CheckPermissionsAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] CommandInfo command,
-            [NotNull] IServiceProvider services
+            ICommandContext context,
+            CommandInfo command,
+            IServiceProvider services
         )
         {
             var prioPreconditions = command.Preconditions.Where

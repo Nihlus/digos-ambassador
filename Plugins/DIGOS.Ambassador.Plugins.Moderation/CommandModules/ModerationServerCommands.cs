@@ -41,10 +41,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Server-related commands, such as viewing or editing info about a specific server.")]
         public partial class ModerationServerCommands : ModuleBase
         {
-            [NotNull]
             private readonly ModerationService _moderation;
 
-            [NotNull]
             private readonly UserFeedbackService _feedback;
 
             /// <summary>
@@ -54,8 +52,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             /// <param name="feedback">The feedback service.</param>
             public ModerationServerCommands
             (
-                [NotNull] ModerationService moderation,
-                [NotNull] UserFeedbackService feedback
+                ModerationService moderation,
+                UserFeedbackService feedback
             )
             {
                 _moderation = moderation;

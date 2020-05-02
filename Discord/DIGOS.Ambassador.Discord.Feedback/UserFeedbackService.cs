@@ -55,11 +55,10 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="context">The context.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
-        [NotNull]
         public async Task SendErrorAndDeleteAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] string contents,
+            ICommandContext context,
+            string contents,
             TimeSpan? timeout = null
         )
         {
@@ -72,11 +71,10 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="context">The context.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
-        [NotNull]
         public async Task SendWarningAndDeleteAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] string contents,
+            ICommandContext context,
+            string contents,
             TimeSpan? timeout = null
         )
         {
@@ -89,11 +87,10 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="context">The context.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
-        [NotNull]
         public async Task SendConfirmationAndDeleteAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] string contents,
+            ICommandContext context,
+            string contents,
             TimeSpan? timeout = null
         )
         {
@@ -107,12 +104,11 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="colour">The colour of the embed.</param>
         /// <param name="contents">The contents of the message.</param>
         /// <param name="timeout">The timeout after which the message should be deleted.</param>
-        [NotNull]
         public async Task SendEmbedAndDeleteAsync
         (
-            [NotNull] ICommandContext context,
+            ICommandContext context,
             Color colour,
-            [NotNull] string contents,
+            string contents,
             TimeSpan? timeout = null
         )
         {
@@ -125,8 +121,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
-        [NotNull]
-        public async Task SendConfirmationAsync([NotNull] ICommandContext context, [NotNull] string contents)
+        public async Task SendConfirmationAsync(ICommandContext context, string contents)
         {
             await SendEmbedAsync(context, Color.DarkPurple, contents);
         }
@@ -136,8 +131,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
-        [NotNull]
-        public async Task SendErrorAsync([NotNull] ICommandContext context, [NotNull] string contents)
+        public async Task SendErrorAsync(ICommandContext context, string contents)
         {
             await SendEmbedAsync(context, Color.Red, contents);
         }
@@ -147,8 +141,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
-        [NotNull]
-        public async Task SendWarningAsync([NotNull] ICommandContext context, [NotNull] string contents)
+        public async Task SendWarningAsync(ICommandContext context, string contents)
         {
             await SendEmbedAsync(context, Color.Orange, contents);
         }
@@ -158,8 +151,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="context">The context to send to.</param>
         /// <param name="contents">The contents of the message.</param>
-        [NotNull]
-        public async Task SendInfoAsync([NotNull] ICommandContext context, [NotNull] string contents)
+        public async Task SendInfoAsync(ICommandContext context, string contents)
         {
             await SendEmbedAsync(context, Color.Blue, contents);
         }
@@ -169,8 +161,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// </summary>
         /// <param name="channel">The context of the send operation.</param>
         /// <param name="eb">The embed to send.</param>
-        [NotNull]
-        public async Task SendEmbedAsync([NotNull] IMessageChannel channel, [NotNull] Embed eb)
+        public async Task SendEmbedAsync(IMessageChannel channel, Embed eb)
         {
             await channel.SendMessageAsync(string.Empty, false, eb);
         }
@@ -182,11 +173,10 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="eb">The embed.</param>
         /// <param name="timeout">The timeout after which the embed will be deleted. Defaults to 15 seconds.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
         public async Task SendEmbedAndDeleteAsync
         (
-            [NotNull] IMessageChannel channel,
-            [NotNull] Embed eb,
+            IMessageChannel channel,
+            Embed eb,
             TimeSpan? timeout = null
         )
         {
@@ -204,8 +194,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="color">The embed colour.</param>
         /// <param name="contents">The contents to send.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
-        private async Task SendEmbedAsync([NotNull] ICommandContext context, Color color, [NotNull] string contents)
+        private async Task SendEmbedAsync(ICommandContext context, Color color, string contents)
         {
             // Sometimes the content is > 2048 in length. We'll chunk it into embeds of 1024 here.
             if (contents.Length < 1024)
@@ -247,12 +236,11 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="user">The user to send the embed to.</param>
         /// <param name="eb">The embed to send.</param>
         /// <param name="notify">Whether or not to notify the user that they've been sent a message.</param>
-        [NotNull]
         public async Task SendPrivateEmbedAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] IUser user,
-            [NotNull] Embed eb,
+            ICommandContext context,
+            IUser user,
+            Embed eb,
             bool notify = true
         )
         {
@@ -273,13 +261,12 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="color">The color of the embed.</param>
         /// <param name="contents">The contents of the embed to send.</param>
         /// <param name="notify">Whether or not to notify the user that they've been sent a message.</param>
-        [NotNull]
         public async Task SendPrivateEmbedAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] IUser user,
+            ICommandContext context,
+            IUser user,
             Color color,
-            [NotNull] string contents,
+            string contents,
             bool notify = true
         )
         {
@@ -328,8 +315,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="contents">The contents of the embed.</param>
         /// <returns>A feedback embed.</returns>
         [Pure]
-        [NotNull]
-        public Embed CreateFeedbackEmbed([NotNull] IMentionable invoker, Color color, [NotNull] string contents)
+        public Embed CreateFeedbackEmbed(IMentionable invoker, Color color, string contents)
         {
             var eb = CreateEmbedBase(color);
             eb.WithDescription($"{invoker.Mention} | {contents}");
@@ -343,7 +329,6 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="color">The colour of the embed. Optional.</param>
         /// <returns>A basic embed.</returns>
         [Pure]
-        [NotNull]
         public EmbedBuilder CreateEmbedBase(Color? color = null)
         {
             color ??= Color.DarkPurple;

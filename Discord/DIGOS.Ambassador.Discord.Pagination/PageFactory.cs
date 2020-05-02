@@ -39,12 +39,11 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <param name="maxFieldsPerPage">The maximum number of embed fields per page.</param>
         /// <param name="description">The description to display on each page.</param>
         /// <returns>The paginated embed.</returns>
-        [NotNull]
         public static IEnumerable<EmbedBuilder> FromFields
         (
-            [NotNull, ItemNotNull] IEnumerable<EmbedFieldBuilder> fields,
+            [ItemNotNull] IEnumerable<EmbedFieldBuilder> fields,
             uint maxFieldsPerPage = 5,
-            [NotNull] string description = ""
+            string description = ""
         )
         {
             var enumeratedFields = fields.ToList();

@@ -58,10 +58,10 @@ namespace DIGOS.Ambassador.Plugins.Help.CommandModules
         /// <param name="help">The help service.</param>
         public HelpCommands
         (
-            [NotNull] CommandService commands,
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] InteractivityService interactive,
-            [NotNull] HelpService help
+            CommandService commands,
+            UserFeedbackService feedback,
+            InteractivityService interactive,
+            HelpService help
         )
         {
             _commands = commands;
@@ -99,7 +99,7 @@ namespace DIGOS.Ambassador.Plugins.Help.CommandModules
         [UsedImplicitly]
         [Command]
         [Summary("Lists available commands that match the given search text.")]
-        public async Task HelpAsync([NotNull, Remainder] string searchText)
+        public async Task HelpAsync([Remainder] string searchText)
         {
             searchText = searchText.Unquote();
 

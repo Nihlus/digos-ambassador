@@ -72,10 +72,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <param name="content">The content of the note.</param>
         public UserNote
         (
-            [NotNull] Server server,
-            [NotNull] User user,
-            [NotNull] User author,
-            [NotNull] string content
+            Server server,
+            User user,
+            User author,
+            string content
         )
             : base(server, user, author)
         {

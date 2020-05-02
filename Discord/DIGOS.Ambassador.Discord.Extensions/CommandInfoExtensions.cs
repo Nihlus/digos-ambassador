@@ -36,8 +36,8 @@ namespace DIGOS.Ambassador.Discord.Extensions
         /// </summary>
         /// <param name="this">The command.</param>
         /// <returns>The actual name.</returns>
-        [NotNull, Pure]
-        public static string GetActualName([NotNull] this CommandInfo @this)
+        [Pure]
+        public static string GetActualName(this CommandInfo @this)
         {
             var commandName = @this.Name;
 
@@ -55,8 +55,7 @@ namespace DIGOS.Ambassador.Discord.Extensions
         /// </summary>
         /// <param name="this">The command.</param>
         /// <returns>The full command.</returns>
-        [NotNull]
-        public static string GetFullCommand([NotNull] this CommandInfo @this)
+        public static string GetFullCommand(this CommandInfo @this)
         {
             var prefix = @this.Module.GetFullPrefix();
 

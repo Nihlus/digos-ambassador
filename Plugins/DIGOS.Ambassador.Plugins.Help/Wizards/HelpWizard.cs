@@ -46,10 +46,8 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
     /// </summary>
     public class HelpWizard : InteractiveMessage, IWizard
     {
-        [NotNull]
         private readonly UserFeedbackService _feedback;
 
-        [NotNull]
         private readonly HelpService _help;
 
         private static readonly Emoji First = new Emoji("\x23EE");
@@ -65,23 +63,20 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
         /// <summary>
         /// Gets the currently accepted emotes.
         /// </summary>
-        [NotNull]
         private IReadOnlyCollection<IEmote> AcceptedEmotes => GetCurrentPageEmotes().ToList();
 
         /// <summary>
         /// Gets the emotes that are currently rejected by the wizard.
         /// </summary>
-        [NotNull]
         private IReadOnlyCollection<IEmote> CurrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
 
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         private readonly IReadOnlyList<ModuleInfo> _modules;
 
         private readonly IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>> _moduleListPages;
 
         private readonly IDictionary<ModuleInfo, IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>>> _commandListPages;
 
-        [NotNull]
         private readonly Embed _loadingEmbed;
 
         /*
@@ -114,11 +109,11 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
         /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
         public HelpWizard
         (
-            [NotNull, ItemNotNull] IReadOnlyList<ModuleInfo> modules,
-            [NotNull] InteractivityService interactivityService,
-            [NotNull] UserFeedbackService feedback,
-            [NotNull] HelpService help,
-            [NotNull] IUser sourceUser
+            [ItemNotNull] IReadOnlyList<ModuleInfo> modules,
+            InteractivityService interactivityService,
+            UserFeedbackService feedback,
+            HelpService help,
+            IUser sourceUser
         )
             : base(sourceUser, interactivityService)
         {
@@ -140,7 +135,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
         /// Builds a set of pre-formatted pages for the command modules.
         /// </summary>
         /// <returns>A list of pages, where each page is a list of embed fields.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         private IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>> BuildModuleListPages()
         {
             var pages = new List<IReadOnlyList<EmbedFieldBuilder>>();
@@ -177,7 +172,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
         /// </summary>
         /// <param name="module">The module that contains the commands.</param>
         /// <returns>A list of pages, where each page is a list of embed fields.</returns>
-        private IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>> BuildCommandListPages([NotNull] ModuleInfo module)
+        private IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>> BuildCommandListPages(ModuleInfo module)
         {
             var pages = new List<IReadOnlyList<EmbedFieldBuilder>>();
 
@@ -225,7 +220,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
         }
 
         /// <inheritdoc/>
-        protected override async Task<IUserMessage> OnDisplayAsync([NotNull] IMessageChannel channel)
+        protected override async Task<IUserMessage> OnDisplayAsync(IMessageChannel channel)
         {
             return await channel.SendMessageAsync(string.Empty, embed: _loadingEmbed);
         }
@@ -370,7 +365,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
             }
         }
 
-        private async Task ConsumeCommandListInteractionAsync([NotNull] SocketReaction reaction)
+        private async Task ConsumeCommandListInteractionAsync(SocketReaction reaction)
         {
             if (this.Message is null || this.Channel is null)
             {
@@ -506,7 +501,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
             await UpdateAsync();
         }
 
-        private async Task ConsumeModuleListInteractionAsync([NotNull] SocketReaction reaction)
+        private async Task ConsumeModuleListInteractionAsync(SocketReaction reaction)
         {
             if (this.Message is null || this.Channel is null)
             {
@@ -702,7 +697,6 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
             }
         }
 
-        [NotNull]
         private IEnumerable<IEmote> GetCurrentPageRejectedEmotes()
         {
             switch (_state)

@@ -112,7 +112,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// <param name="species">The species to compare with.</param>
         /// <returns>true if the species are the same; otherwise, false.</returns>
         [Pure]
-        [ContractAnnotation("species:null => false")]
         public bool IsSameSpeciesAs(Species? species)
         {
             if (species is null)

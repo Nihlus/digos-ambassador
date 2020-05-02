@@ -55,9 +55,9 @@ namespace DIGOS.Ambassador.Doc
         /// <param name="placeholderData">The placeholder repository.</param>
         public ModuleDocumentationGenerator
         (
-            [NotNull] IEnumerable<ModuleDefinition> commandAssemblyModules,
-            [NotNull] string outputPath,
-            [NotNull] PlaceholderData placeholderData
+            IEnumerable<ModuleDefinition> commandAssemblyModules,
+            string outputPath,
+            PlaceholderData placeholderData
         )
         {
             _commandAssemblyModules = commandAssemblyModules;
@@ -104,10 +104,9 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="modules">The modules to generate documentation pages for.</param>
         /// <returns>A set of paired <see cref="ModuleInformation"/> and <see cref="MarkdownPage"/> objects.</returns>
-        [NotNull]
         protected virtual Dictionary<ModuleInformation, MarkdownPage> GenerateDocumentationPages
         (
-            [NotNull, ItemNotNull] IEnumerable<ModuleInformation> modules
+            [ItemNotNull] IEnumerable<ModuleInformation> modules
         )
         {
             var modulePages = new Dictionary<ModuleInformation, MarkdownPage>();
@@ -156,8 +155,7 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="modulePages">The pages to include in the index.</param>
         /// <returns>A page with the index.</returns>
-        [NotNull]
-        protected virtual MarkdownPage GenerateDocumentationIndex([NotNull, ItemNotNull] IEnumerable<MarkdownPage> modulePages)
+        protected virtual MarkdownPage GenerateDocumentationIndex([ItemNotNull] IEnumerable<MarkdownPage> modulePages)
         {
             var moduleList = new MarkdownList();
             foreach (var modulePage in modulePages)
@@ -186,7 +184,7 @@ namespace DIGOS.Ambassador.Doc
         /// <param name="page">The page to save.</param>
         /// <param name="subdirectory">The subdirectory to save it in, if any.</param>
         /// <returns>A task that must be awaited.</returns>
-        private async Task SavePageAsync([NotNull] MarkdownPage page, string? subdirectory = null)
+        private async Task SavePageAsync(MarkdownPage page, string? subdirectory = null)
         {
             subdirectory ??= string.Empty;
 
@@ -203,8 +201,7 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="module">The module.</param>
         /// <returns>A Markdown page.</returns>
-        [NotNull]
-        protected virtual MarkdownPage GenerateModuleDocumentation([NotNull] ModuleInformation module)
+        protected virtual MarkdownPage GenerateModuleDocumentation(ModuleInformation module)
         {
             var page = new MarkdownPage
             (
@@ -234,8 +231,7 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="module">The module.</param>
         /// <returns>A Markdown section with the information.</returns>
-        [NotNull]
-        protected virtual MarkdownSection GenerateSummarySection([NotNull] ModuleInformation module)
+        protected virtual MarkdownSection GenerateSummarySection(ModuleInformation module)
         {
             string modulePrefixText;
             if (!module.HasPrefix)
@@ -273,8 +269,7 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="module">The module.</param>
         /// <returns>A Markdown section with the information.</returns>
-        [NotNull]
-        protected virtual MarkdownSection GenerateCommandsSection([NotNull] ModuleInformation module)
+        protected virtual MarkdownSection GenerateCommandsSection(ModuleInformation module)
         {
             var moduleCommandsSection = new MarkdownSection("Commands", 2);
             var commandGroups = module.Commands.GroupBy(c => c.Name).ToList();
@@ -311,8 +306,7 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="command">The command.</param>
         /// <returns>The example usage.</returns>
-        [NotNull]
-        protected virtual string GenerateCommandExample([NotNull] CommandInformation command)
+        protected virtual string GenerateCommandExample(CommandInformation command)
         {
             var exampleBuilder = new StringBuilder();
             exampleBuilder.Append('!');
@@ -510,8 +504,8 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="command">The command.</param>
         /// <returns>A list of Markdown content nodes.</returns>
-        [NotNull, ItemNotNull]
-        protected virtual IEnumerable<IMarkdownNode> GenerateCommandOverloadContent([NotNull] CommandInformation command)
+        [ItemNotNull]
+        protected virtual IEnumerable<IMarkdownNode> GenerateCommandOverloadContent(CommandInformation command)
         {
             var invokableCommands = GetInvokableCommands(command).ToList();
             var prefix = invokableCommands.Count > 2
@@ -546,8 +540,7 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="command">The command.</param>
         /// <returns>A Markdown table.</returns>
-        [NotNull]
-        protected virtual MarkdownTable GenerateCommandParameterTable([NotNull] CommandInformation command)
+        protected virtual MarkdownTable GenerateCommandParameterTable(CommandInformation command)
         {
             var parameterTable = new MarkdownTable();
             parameterTable.AppendColumn(new MarkdownTableColumn("Name"));
@@ -579,8 +572,7 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="module">The module.</param>
         /// <returns>A Markdown section with the submodules.</returns>
-        [NotNull]
-        protected virtual MarkdownSection GenerateSubmodulesSection([NotNull] ModuleInformation module)
+        protected virtual MarkdownSection GenerateSubmodulesSection(ModuleInformation module)
         {
             var submoduleSection = new MarkdownSection("Submodules", 2);
             var submoduleList = new MarkdownList

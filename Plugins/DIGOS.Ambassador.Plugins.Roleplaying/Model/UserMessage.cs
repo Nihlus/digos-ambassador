@@ -70,12 +70,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="message">The message to create from.</param>
         /// <param name="authorNickname">The current display name of the author.</param>
         /// <returns>A new UserMessage.</returns>
-        [NotNull]
         [Pure]
         public static UserMessage FromDiscordMessage
         (
-            [NotNull] IMessage message,
-            [NotNull] string authorNickname
+            IMessage message,
+            string authorNickname
         )
         {
             return new UserMessage

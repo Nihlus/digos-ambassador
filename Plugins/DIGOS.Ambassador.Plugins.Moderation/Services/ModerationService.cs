@@ -36,8 +36,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     [PublicAPI]
     public sealed class ModerationService
     {
-        [NotNull] private readonly ModerationDatabaseContext _database;
-        [NotNull] private readonly ServerService _servers;
+        private readonly ModerationDatabaseContext _database;
+        private readonly ServerService _servers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModerationService"/> class.
@@ -46,8 +46,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="servers">The server service.</param>
         public ModerationService
         (
-            [NotNull] ModerationDatabaseContext database,
-            [NotNull] ServerService servers
+            ModerationDatabaseContext database,
+            ServerService servers
         )
         {
             _database = database;
@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<ServerModerationSettings>> GetOrCreateServerSettingsAsync
         (
-            [NotNull] IGuild discordServer
+            IGuild discordServer
         )
         {
             var getExistingEntry = await GetServerSettingsAsync(discordServer);
@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<ServerModerationSettings>> GetServerSettingsAsync
         (
-            [NotNull] IGuild discordServer
+            IGuild discordServer
         )
         {
             var entity = await _database.ServerSettings.FirstOrDefaultAsync
@@ -112,7 +112,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<ServerModerationSettings>> CreateServerSettingsAsync
         (
-            [NotNull] IGuild discordServer
+            IGuild discordServer
         )
         {
             var existingEntity = await GetServerSettingsAsync(discordServer);
@@ -144,8 +144,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetModerationLogChannelAsync
         (
-            [NotNull] IGuild guild,
-            [NotNull] ITextChannel channel
+            IGuild guild,
+            ITextChannel channel
         )
         {
             var getSettings = await GetOrCreateServerSettingsAsync(guild);
@@ -175,8 +175,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetMonitoringChannelAsync
         (
-            [NotNull] IGuild guild,
-            [NotNull] ITextChannel channel
+            IGuild guild,
+            ITextChannel channel
         )
         {
             var getSettings = await GetOrCreateServerSettingsAsync(guild);
@@ -206,7 +206,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetWarningThresholdAsync
         (
-            [NotNull] IGuild guild,
+            IGuild guild,
             int warningThreshold
         )
         {

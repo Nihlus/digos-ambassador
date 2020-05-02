@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Doc.Extensions
         /// <param name="this">The type to humanize.</param>
         /// <returns>A humanized string.</returns>
         [Pure]
-        public static string Humanize([NotNull] this TypeReference @this)
+        public static string Humanize(this TypeReference @this)
         {
             if (@this.IsPrimitive || @this.Name == nameof(String))
             {

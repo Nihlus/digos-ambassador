@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
         }
 
         /// <inheritdoc />
-        public override async Task<PreconditionResult> CheckPermissionsAsync([NotNull] ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
             var roleplayService = services.GetRequiredService<RoleplayService>();
 

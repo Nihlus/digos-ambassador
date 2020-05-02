@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public static RetrieveEntityResult<TransformationText> GetTransformationMessages
         (
-            [NotNull] this ContentService @this
+            this ContentService @this
         )
         {
             if (!@this.FileSystem.FileExists(TransformationMessagesPath))
@@ -107,10 +107,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// </summary>
         /// <param name="this">The content service.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public static async Task<RetrieveEntityResult<IReadOnlyList<Species>>> DiscoverBundledSpeciesAsync
         (
-            [NotNull] this ContentService @this
+            this ContentService @this
         )
         {
             const string speciesFilename = "Species.yml";
@@ -169,12 +169,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <param name="transformation">The transformation service.</param>
         /// <param name="species">The species to discover transformations for.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public static async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync
         (
-            [NotNull] this ContentService @this,
-            [NotNull] TransformationService transformation,
-            [NotNull] Species species
+            this ContentService @this,
+            TransformationService transformation,
+            Species species
         )
         {
             const string speciesFilename = "Species.yml";
@@ -224,7 +224,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         }
 
         [Pure]
-        private static UPath GetSpeciesDirectory([NotNull] Species species)
+        private static UPath GetSpeciesDirectory(Species species)
         {
             return UPath.Combine(BaseTransformationSpeciesPath, species.Name);
         }
@@ -238,8 +238,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         [Pure]
         public static UPath GetLuaScriptPath
         (
-            [NotNull] Transformation transformation,
-            [NotNull] string scriptName
+            Transformation transformation,
+            string scriptName
         )
         {
             var scriptNameWithoutExtension = scriptName.EndsWith(".lua")

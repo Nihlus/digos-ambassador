@@ -188,7 +188,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Summary("Sets the server's description.")]
             [RequireContext(Guild)]
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task SetDescriptionAsync([NotNull] string newDescription)
+            public async Task SetDescriptionAsync(string newDescription)
             {
                 var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
                 if (!getServerResult.IsSuccess)
@@ -218,7 +218,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Summary("Sets the server's first-join message.")]
             [RequireContext(Guild)]
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task SetJoinMessageAsync([NotNull] string newJoinMessage)
+            public async Task SetJoinMessageAsync(string newJoinMessage)
             {
                 var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
                 if (!getServerResult.IsSuccess)

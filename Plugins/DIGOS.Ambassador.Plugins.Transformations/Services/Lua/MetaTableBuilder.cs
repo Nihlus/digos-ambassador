@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     /// </summary>
     public sealed class MetaTableBuilder
     {
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         private readonly List<string> _entries = new List<string>();
 
         /// <summary>
@@ -39,8 +39,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// </summary>
         /// <param name="entry">The entry.</param>
         /// <returns>The builder with the entry.</returns>
-        [NotNull]
-        public MetaTableBuilder WithEntry([NotNull] string entry)
+        public MetaTableBuilder WithEntry(string entry)
         {
             if (!_entries.Contains(entry))
             {
@@ -55,7 +54,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// </summary>
         /// <param name="pretty">Whether or not the output should be in a pretty format.</param>
         /// <returns>The metatable as a formatted string.</returns>
-        [NotNull]
         public string Build(bool pretty = false)
         {
             var metatable = new TableNode("env", new List<INode>());
@@ -70,9 +68,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
 
         private void PopulateSubNodes
         (
-            [NotNull] TableNode parent,
-            [NotNull] string value,
-            [NotNull] string originalValue
+            TableNode parent,
+            string value,
+            string originalValue
         )
         {
             var components = value.Split('.');

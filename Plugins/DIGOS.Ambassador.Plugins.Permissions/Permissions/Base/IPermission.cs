@@ -41,13 +41,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions
         /// <summary>
         /// Gets the permission's friendly name, such as "CreateUser", or "EditDescription".
         /// </summary>
-        [NotNull]
         string FriendlyName { get; }
 
         /// <summary>
         /// Gets the human-readable description of what the permission allows.
         /// </summary>
-        [NotNull]
         string Description { get; }
 
         /// <summary>

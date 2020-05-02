@@ -111,8 +111,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// </summary>
         /// <param name="other">The other component.</param>
         /// <returns>A new component with the same settings.</returns>
-        [Pure, NotNull]
-        public static AppearanceComponent CopyFrom([NotNull] AppearanceComponent other)
+        [Pure]
+        public static AppearanceComponent CopyFrom(AppearanceComponent other)
         {
             return new AppearanceComponent(other.Transformation, other.Chirality)
             {
@@ -128,8 +128,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="transformation">The transformation.</param>
         /// <param name="chirality">The chirality of the transformation, if any.</param>
         /// <returns>A new component.</returns>
-        [Pure, NotNull]
-        public static AppearanceComponent CreateFrom([NotNull] Transformation transformation, Chirality chirality = Center)
+        [Pure]
+        public static AppearanceComponent CreateFrom(Transformation transformation, Chirality chirality = Center)
         {
             if (transformation.Part.IsChiral() && chirality == Center)
             {
@@ -153,8 +153,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// </summary>
         /// <param name="transformation">The transformation.</param>
         /// <returns>A set of appearance components.</returns>
-        [Pure, NotNull, ItemNotNull]
-        public static IEnumerable<AppearanceComponent> CreateFromChiral([NotNull] Transformation transformation)
+        [Pure, ItemNotNull]
+        public static IEnumerable<AppearanceComponent> CreateFromChiral(Transformation transformation)
         {
             if (!transformation.Part.IsChiral())
             {

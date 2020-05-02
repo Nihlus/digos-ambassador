@@ -36,7 +36,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     [TokenIdentifier("script", "sc")]
     public sealed class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
     {
-        [NotNull]
         private readonly LuaService _lua;
 
         /// <summary>
@@ -48,7 +47,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// Initializes a new instance of the <see cref="LuaScriptToken"/> class.
         /// </summary>
         /// <param name="luaService">The lua execution service.</param>
-        public LuaScriptToken([NotNull] LuaService luaService)
+        public LuaScriptToken(LuaService luaService)
         {
             _lua = luaService;
         }

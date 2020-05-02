@@ -50,9 +50,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <param name="logger">The logging instance for this type.</param>
         public RoleplayLoggingBehaviour
         (
-            [NotNull] DiscordSocketClient client,
-            [NotNull] IServiceScope serviceScope,
-            [NotNull] ILogger<RoleplayLoggingBehaviour> logger
+            DiscordSocketClient client,
+            IServiceScope serviceScope,
+            ILogger<RoleplayLoggingBehaviour> logger
         )
             : base(client, serviceScope, logger)
         {

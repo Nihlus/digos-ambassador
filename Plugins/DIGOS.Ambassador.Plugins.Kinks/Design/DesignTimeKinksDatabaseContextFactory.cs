@@ -40,7 +40,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Design
     public class DesignTimeKinksDatabaseContextFactory : IDesignTimeDbContextFactory<KinksDatabaseContext>
     {
         /// <inheritdoc />
-        [NotNull]
         public KinksDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<KinksDatabaseContext>();

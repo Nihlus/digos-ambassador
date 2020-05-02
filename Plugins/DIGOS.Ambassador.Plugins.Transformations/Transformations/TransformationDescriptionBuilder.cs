@@ -40,16 +40,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     /// </summary>
     public sealed class TransformationDescriptionBuilder
     {
-        [NotNull]
         private readonly TransformationTextTokenizer _tokenizer;
 
-        [NotNull] private readonly Regex _sentenceSpacingRegex = new Regex
+        private readonly Regex _sentenceSpacingRegex = new Regex
         (
             "(?<=\\w)\\.(?=\\w)",
             RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.IgnoreCase
         );
 
-        [NotNull]
         private readonly TransformationText _transformationText;
 
         /// <summary>
@@ -59,8 +57,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="transformationText">The content service.</param>
         public TransformationDescriptionBuilder
         (
-            [NotNull] IServiceProvider services,
-            [NotNull] TransformationText transformationText
+            IServiceProvider services,
+            TransformationText transformationText
         )
         {
             _tokenizer = new TransformationTextTokenizer(services);
@@ -76,11 +74,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearance">The character and appearance for which the text should be valid.</param>
         /// <param name="component">The transformation that the text belongs to.</param>
         /// <returns>A string with no tokens in it.</returns>
-        [NotNull]
         public string ReplaceTokensWithContent
         (
-            [NotNull] string text,
-            [NotNull] Appearance appearance,
+            string text,
+            Appearance appearance,
             AppearanceComponent? component
         )
         {
@@ -112,8 +109,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// </summary>
         /// <param name="appearance">The appearance to describe.</param>
         /// <returns>A visual description of the character.</returns>
-        [Pure, NotNull]
-        public string BuildVisualDescription([NotNull] Appearance appearance)
+        [Pure]
+        public string BuildVisualDescription(Appearance appearance)
         {
             var sb = new StringBuilder();
 
@@ -241,8 +238,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <returns>true if the parts are the same species; otherwise, false.</returns>
         private bool AreChiralPartsTheSameSpecies
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent component
+            Appearance appearanceConfiguration,
+            AppearanceComponent component
         )
         {
             if
@@ -269,8 +266,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <returns>true if the parts have the same pattern; otherwise, false.</returns>
         private bool DoChiralPartsHaveTheSamePattern
         (
-            [NotNull] Appearance appearance,
-            [NotNull] AppearanceComponent component
+            Appearance appearance,
+            AppearanceComponent component
         )
         {
             if
@@ -310,11 +307,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The shift message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildShiftMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent component
+            Appearance appearanceConfiguration,
+            AppearanceComponent component
         )
         {
             var transformation = component.Transformation;
@@ -329,11 +326,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The uniform shift message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildUniformShiftMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent component
+            Appearance appearanceConfiguration,
+            AppearanceComponent component
         )
         {
             var transformation = component.Transformation;
@@ -352,11 +349,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The grow message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildGrowMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent component
+            Appearance appearanceConfiguration,
+            AppearanceComponent component
         )
         {
             var transformation = component.Transformation;
@@ -371,11 +368,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="component">The component to build the message from.</param>
         /// <returns>The uniform grow message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildUniformGrowMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent component
+            Appearance appearanceConfiguration,
+            AppearanceComponent component
         )
         {
             var transformation = component.Transformation;
@@ -394,7 +391,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="bodypart">The bodypart to build the message from.</param>
         /// <returns>The removal message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildRemoveMessage([NotNull]Appearance appearanceConfiguration, Bodypart bodypart)
         {
             string removalText;
@@ -480,7 +477,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="bodypart">The bodypart to build the message from.</param>
         /// <returns>The removal message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildUniformRemoveMessage([NotNull]Appearance appearanceConfiguration, Bodypart bodypart)
         {
             string removalText;
@@ -526,11 +523,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildPatternColourShiftMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
+            Appearance appearanceConfiguration,
+            AppearanceComponent currentComponent
         )
         {
             var shiftMessage = _transformationText.Messages.Shifting.Single.PatternColour.PickRandom();
@@ -543,11 +540,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildUniformPatternColourShiftMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
+            Appearance appearanceConfiguration,
+            AppearanceComponent currentComponent
         )
         {
             var shiftMessage = _transformationText.Messages.Shifting.Uniform.PatternColour.PickRandom();
@@ -560,11 +557,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildPatternShiftMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
+            Appearance appearanceConfiguration,
+            AppearanceComponent currentComponent
         )
         {
             var shiftMessage = _transformationText.Messages.Shifting.Single.Pattern.PickRandom();
@@ -577,11 +574,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildUniformPatternShiftMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
+            Appearance appearanceConfiguration,
+            AppearanceComponent currentComponent
         )
         {
             var shiftMessage = _transformationText.Messages.Shifting.Uniform.Pattern.PickRandom();
@@ -594,11 +591,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildPatternAddMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
+            Appearance appearanceConfiguration,
+            AppearanceComponent currentComponent
         )
         {
             var shiftMessage = _transformationText.Messages.Adding.Single.Pattern.PickRandom();
@@ -611,11 +608,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildUniformPatternAddMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
+            Appearance appearanceConfiguration,
+            AppearanceComponent currentComponent
         )
         {
             var shiftMessage = _transformationText.Messages.Adding.Uniform.Pattern.PickRandom();
@@ -628,11 +625,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildPatternRemoveMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
+            Appearance appearanceConfiguration,
+            AppearanceComponent currentComponent
         )
         {
             var shiftMessage = _transformationText.Messages.Removal.Single.Pattern.PickRandom();
@@ -645,11 +642,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildUniformPatternRemoveMessage
         (
             [NotNull]Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
+            AppearanceComponent currentComponent
         )
         {
             var shiftMessage = _transformationText.Messages.Removal.Uniform.Pattern.PickRandom();
@@ -662,11 +659,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildColourShiftMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
+            Appearance appearanceConfiguration,
+            AppearanceComponent currentComponent
         )
         {
             var shiftMessage = _transformationText.Messages.Shifting.Single.Colour.PickRandom();
@@ -679,11 +676,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearanceConfiguration">The appearance configuration to use as a base.</param>
         /// <param name="currentComponent">The current component.</param>
         /// <returns>The shifting message.</returns>
-        [Pure, NotNull]
+        [Pure]
         public string BuildUniformColourShiftMessage
         (
-            [NotNull] Appearance appearanceConfiguration,
-            [NotNull] AppearanceComponent currentComponent
+            Appearance appearanceConfiguration,
+            AppearanceComponent currentComponent
         )
         {
             var shiftMessage = _transformationText.Messages.Shifting.Uniform.Colour.PickRandom();

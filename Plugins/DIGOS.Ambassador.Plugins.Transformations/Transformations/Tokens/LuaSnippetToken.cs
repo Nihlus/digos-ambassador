@@ -35,7 +35,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     [TokenIdentifier("snippet", "lua", "sn")]
     public sealed class LuaSnippetToken : ReplacableTextToken<LuaSnippetToken>
     {
-        [NotNull]
         private readonly LuaService _lua;
 
         /// <summary>
@@ -47,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// Initializes a new instance of the <see cref="LuaSnippetToken"/> class.
         /// </summary>
         /// <param name="luaService">The lua execution service.</param>
-        public LuaSnippetToken([NotNull] LuaService luaService)
+        public LuaSnippetToken(LuaService luaService)
         {
             _lua = luaService;
         }

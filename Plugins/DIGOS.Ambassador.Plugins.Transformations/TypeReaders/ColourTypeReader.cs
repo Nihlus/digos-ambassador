@@ -34,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.TypeReaders
     public sealed class ColourTypeReader : TypeReader
     {
         /// <inheritdoc />
-        [NotNull]
         public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
             if (!Colour.TryParse(input, out var colour))

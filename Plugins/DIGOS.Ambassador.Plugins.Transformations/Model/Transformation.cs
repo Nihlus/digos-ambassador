@@ -152,12 +152,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
         public Transformation
         (
-            [NotNull] Species species,
-            [NotNull] string description,
-            [NotNull] Colour defaultBaseColour,
-            [NotNull] string shiftMessage,
-            [NotNull] string growMessage,
-            [NotNull] string singleDescription
+            Species species,
+            string description,
+            Colour defaultBaseColour,
+            string shiftMessage,
+            string growMessage,
+            string singleDescription
         )
         {
             this.Species = species;

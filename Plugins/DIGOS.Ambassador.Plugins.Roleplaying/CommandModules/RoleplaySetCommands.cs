@@ -71,9 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [RequireContext(ContextType.Guild)]
             public async Task SetRoleplayNameAsync
             (
-                [NotNull]
                 string newRoleplayName,
-                [NotNull]
                 [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
                 Roleplay roleplay
             )
@@ -112,9 +110,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [RequireContext(ContextType.Guild)]
             public async Task SetRoleplaySummaryAsync
             (
-                [NotNull]
                 string newRoleplaySummary,
-                [NotNull]
                 [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
                 Roleplay roleplay
             )
@@ -142,7 +138,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             public async Task SetRoleplayIsNSFW
             (
                 bool isNSFW,
-                [NotNull]
                 [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
                 Roleplay roleplay
             )
@@ -169,7 +164,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             public Task SetRoleplayIsPrivate
             (
                 bool isPrivate,
-                [NotNull]
                 [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
                 Roleplay roleplay
             )
@@ -187,7 +181,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             public async Task SetRoleplayIsPublic
             (
                 bool isPublic,
-                [NotNull]
                 [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
                 Roleplay roleplay
             )

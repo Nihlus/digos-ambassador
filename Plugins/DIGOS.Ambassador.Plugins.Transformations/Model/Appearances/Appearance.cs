@@ -129,7 +129,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="character">The character that the appearance is linked to.</param>
         /// <param name="transformations">The transformation service.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        [Pure, JetBrains.Annotations.NotNull, ItemNotNull]
+        [Pure, JetBrains.Annotations.ItemNotNull]
         public static async Task<CreateEntityResult<Appearance>> CreateDefaultAsync
         (
             [JetBrains.Annotations.NotNull] Character character,
@@ -247,7 +247,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="component">The component, or null.</param>
         /// <returns>True if a component could be retrieved, otherwise, false.</returns>
         [Pure]
-        [ContractAnnotation("=> true, component:notnull; => false, component:null")]
         public bool TryGetAppearanceComponent
         (
             Bodypart bodypart,

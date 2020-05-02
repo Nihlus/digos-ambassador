@@ -42,10 +42,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Group("set")]
         public class NoteSetCommands : ModuleBase
         {
-            [NotNull]
             private readonly NoteService _notes;
 
-            [NotNull]
             private readonly UserFeedbackService _feedback;
 
             /// <summary>
@@ -55,8 +53,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             /// <param name="feedback">The feedback service.</param>
             public NoteSetCommands
             (
-                [NotNull] NoteService notes,
-                [NotNull] UserFeedbackService feedback
+                NoteService notes,
+                UserFeedbackService feedback
             )
             {
                 _notes = notes;

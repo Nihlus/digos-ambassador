@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 Assert.True(result.IsSuccess);
             }
 
-            private async Task EnsureOptedInAsync([NotNull] IUser user)
+            private async Task EnsureOptedInAsync(IUser user)
             {
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (

@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Doc.Abstractions
         /// <param name="dataType">The data type the placeholder data is for.</param>
         /// <param name="placeholders">The placeholder data.</param>
         [PublicAPI]
-        public PlaceholderDataAttribute([NotNull] Type dataType, [NotNull] params string[] placeholders)
+        public PlaceholderDataAttribute(Type dataType, params string[] placeholders)
         {
             this.DataType = dataType;
             this.Placeholders = placeholders;

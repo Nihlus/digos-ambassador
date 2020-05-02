@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Results
         /// <param name="shiftMessage">The message to display to the user when shifting.</param>
         /// <param name="action">The action that was performed on the bodypart.</param>
         [Pure]
-        public static ShiftBodypartResult FromSuccess([NotNull] string shiftMessage, ShiftBodypartAction action)
+        public static ShiftBodypartResult FromSuccess(string shiftMessage, ShiftBodypartAction action)
         {
             return new ShiftBodypartResult(shiftMessage, action);
         }

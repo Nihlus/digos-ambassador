@@ -39,7 +39,6 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="source">The string to check.</param>
         /// <returns>true if the string is null or whitespace; otherwise, false.</returns>
         [Pure]
-        [ContractAnnotation("source:null => true")]
         public static bool IsNullOrWhitespace([NotNullWhen(false)] this string? source)
         {
             return string.IsNullOrWhiteSpace(source);
@@ -51,7 +50,6 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="source">The string to check.</param>
         /// <returns>true if the string is null or empty; otherwise, false.</returns>
         [Pure]
-        [ContractAnnotation("source:null => true")]
         public static bool IsNullOrEmpty([NotNullWhen(false)] this string? source)
         {
             return string.IsNullOrEmpty(source);
@@ -76,7 +74,6 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="this">The string.</param>
         /// <param name="quoteChars">The quote characters.</param>
         /// <returns>The unquoted string.</returns>
-        [ContractAnnotation("this : null => null; this : notnull => notnull")]
         [return: NotNullIfNotNull("this")]
         public static string? Unquote(this string? @this, IReadOnlyCollection<char>? quoteChars = null)
         {
@@ -106,7 +103,6 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="this">The string.</param>
         /// <param name="quoteChar">The quote character.</param>
         /// <returns>The quoted string.</returns>
-        [ContractAnnotation("this : null => null; this : notnull => notnull")]
         [return: NotNullIfNotNull("this")]
         public static string? Quote(this string? @this, char quoteChar = '"')
         {

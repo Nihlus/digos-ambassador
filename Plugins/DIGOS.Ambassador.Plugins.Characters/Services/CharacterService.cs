@@ -48,25 +48,18 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
     [PublicAPI]
     public sealed class CharacterService
     {
-        [NotNull]
         private readonly CharactersDatabaseContext _database;
 
-        [NotNull]
         private readonly ServerService _servers;
 
-        [NotNull]
         private readonly CommandService _commands;
 
-        [NotNull]
         private readonly OwnedEntityService _ownedEntities;
 
-        [NotNull]
         private readonly ContentService _content;
 
-        [NotNull]
         private readonly UserService _users;
 
-        [NotNull]
         private readonly PronounService _pronouns;
 
         /// <summary>
@@ -81,13 +74,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="pronouns">The pronoun service.</param>
         public CharacterService
         (
-            [NotNull] CommandService commands,
-            [NotNull] OwnedEntityService entityService,
-            [NotNull] ContentService content,
-            [NotNull] UserService users,
-            [NotNull] ServerService servers,
-            [NotNull] CharactersDatabaseContext database,
-            [NotNull] PronounService pronouns
+            CommandService commands,
+            OwnedEntityService entityService,
+            ContentService content,
+            UserService users,
+            ServerService servers,
+            CharactersDatabaseContext database,
+            PronounService pronouns
         )
         {
             _commands = commands;
@@ -104,8 +97,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="character">The character to delete.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
-        public async Task<DeleteEntityResult> DeleteCharacterAsync([NotNull] Character character)
+        [ItemNotNull]
+        public async Task<DeleteEntityResult> DeleteCharacterAsync(Character character)
         {
             _database.Characters.Remove(character);
             await _database.SaveChangesAsync();
@@ -121,10 +114,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="characterOwner">The owner of the character, if any.</param>
         /// <param name="characterName">The name of the character.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
         (
-            [NotNull] ICommandContext context,
+            ICommandContext context,
             User? characterOwner,
             string? characterName
         )
@@ -174,11 +167,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="context">The context of the user.</param>
         /// <param name="discordUser">The user to get the current character of.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] User discordUser
+            ICommandContext context,
+            User discordUser
         )
         {
             if (!await HasActiveCharacterOnServerAsync(discordUser, context.Guild))
@@ -211,11 +204,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="characterName">The name of the character.</param>
         /// <param name="guild">The guild that the character is on.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<Character>> GetNamedCharacterAsync
         (
-            [NotNull] string characterName,
-            [NotNull] IGuild guild
+            string characterName,
+            IGuild guild
         )
         {
             var guildCharacters = _database.Characters.AsQueryable().Where(ch => ch.ServerID == (long)guild.Id);
@@ -243,8 +236,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="guild">The guild where the characters are.</param>
         /// <returns>A queryable set of characters.</returns>
-        [Pure, NotNull, ItemNotNull]
-        public IQueryable<Character> GetCharacters([NotNull] IGuild guild)
+        [Pure, ItemNotNull]
+        public IQueryable<Character> GetCharacters(IGuild guild)
         {
             return _database.Characters.AsQueryable()
                 .Where(c => c.ServerID == (long)guild.Id)
@@ -258,12 +251,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="characterOwner">The user to get the character from.</param>
         /// <param name="characterName">The name of the character.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<Character>> GetUserCharacterByNameAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] User characterOwner,
-            [NotNull] string characterName
+            ICommandContext context,
+            User characterOwner,
+            string characterName
         )
         {
             var character = await GetUserCharacters(characterOwner, context.Guild)
@@ -292,12 +285,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="discordServer">The server to make the character current on.</param>
         /// <param name="character">The character to make current.</param>
         /// <returns>A task that must be awaited.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> MakeCharacterCurrentOnServerAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] IGuild discordServer,
-            [NotNull] Character character
+            ICommandContext context,
+            IGuild discordServer,
+            Character character
         )
         {
             var getInvokerResult = await _users.GetOrRegisterUserAsync(context.User);
@@ -328,11 +321,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="discordUser">The user to clear the characters from.</param>
         /// <param name="discordServer">The server to clear the characters on.</param>
         /// <returns>A task that must be awaited.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> ClearCurrentCharacterOnServerAsync
         (
-            [NotNull] User discordUser,
-            [NotNull] IGuild discordServer
+            User discordUser,
+            IGuild discordServer
         )
         {
             if (!await HasActiveCharacterOnServerAsync(discordUser, discordServer))
@@ -358,12 +351,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="discordUser">The user to check.</param>
         /// <param name="discordServer">The server to check.</param>
         /// <returns>true if the user has an active character on the server; otherwise, false.</returns>
-        [Pure, NotNull]
-        [ContractAnnotation("discordServer:null => false")]
+        [Pure]
         public async Task<bool> HasActiveCharacterOnServerAsync
         (
-            [NotNull] User discordUser,
-            [NotNull] IGuild discordServer
+            User discordUser,
+            IGuild discordServer
         )
         {
             var userCharacters = GetUserCharacters(discordUser, discordServer);
@@ -381,11 +373,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="context">The context of the command.</param>
         /// <param name="characterName">The name of the character.</param>
         /// <returns>A creation result which may or may not have been successful.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<CreateEntityResult<Character>> CreateCharacterAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] string characterName
+            ICommandContext context,
+            string characterName
         )
         {
             return await CreateCharacterAsync
@@ -409,12 +401,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="characterSummary">The summary of the character.</param>
         /// <param name="characterDescription">The full description of the character.</param>
         /// <returns>A creation result which may or may not have been successful.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<CreateEntityResult<Character>> CreateCharacterAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] string characterName,
-            [NotNull] string characterAvatarUrl,
+            ICommandContext context,
+            string characterName,
+            string characterAvatarUrl,
             string? characterNickname,
             string? characterSummary,
             string? characterDescription
@@ -483,12 +475,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="newDefaultCharacter">The new default character.</param>
         /// <param name="targetUser">The user to set the default character of.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> SetDefaultCharacterForUserAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] Character newDefaultCharacter,
-            [NotNull] User targetUser
+            ICommandContext context,
+            Character newDefaultCharacter,
+            User targetUser
         )
         {
             var getDefaultCharacterResult = await GetDefaultCharacterAsync(targetUser, context.Guild);
@@ -521,11 +513,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="context">The context of the operation.</param>
         /// <param name="targetUser">The user to clear the default character of.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> ClearDefaultCharacterForUserAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] User targetUser
+            ICommandContext context,
+            User targetUser
         )
         {
             var getDefaultCharacterResult = await GetDefaultCharacterAsync(targetUser, context.Guild);
@@ -552,12 +544,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character to set the name of.</param>
         /// <param name="newCharacterName">The new name.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterNameAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] Character character,
-            [NotNull] string newCharacterName
+            ICommandContext context,
+            Character character,
+            string newCharacterName
         )
         {
             if (string.IsNullOrWhiteSpace(newCharacterName))
@@ -607,11 +599,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character to set the avatar of.</param>
         /// <param name="newCharacterAvatarUrl">The new avatar.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterAvatarAsync
         (
-            [NotNull] Character character,
-            [NotNull] string newCharacterAvatarUrl
+            Character character,
+            string newCharacterAvatarUrl
         )
         {
             if (string.IsNullOrWhiteSpace(newCharacterAvatarUrl))
@@ -641,11 +633,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character to set the nickname of.</param>
         /// <param name="newCharacterNickname">The new nickname.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterNicknameAsync
         (
-            [NotNull] Character character,
-            [NotNull] string newCharacterNickname
+            Character character,
+            string newCharacterNickname
         )
         {
             if (string.IsNullOrWhiteSpace(newCharacterNickname))
@@ -675,11 +667,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character to set the summary of.</param>
         /// <param name="newCharacterSummary">The new summary.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterSummaryAsync
         (
-            [NotNull] Character character,
-            [NotNull] string newCharacterSummary
+            Character character,
+            string newCharacterSummary
         )
         {
             if (string.IsNullOrWhiteSpace(newCharacterSummary))
@@ -709,11 +701,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character to set the description of.</param>
         /// <param name="newCharacterDescription">The new description.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterDescriptionAsync
         (
-            [NotNull] Character character,
-            [NotNull] string newCharacterDescription
+            Character character,
+            string newCharacterDescription
         )
         {
             if (string.IsNullOrWhiteSpace(newCharacterDescription))
@@ -742,11 +734,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character.</param>
         /// <param name="pronounFamily">The pronoun family.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterPronounAsync
         (
-            [NotNull] Character character,
-            [NotNull] string pronounFamily
+            Character character,
+            string pronounFamily
         )
         {
             if (pronounFamily.IsNullOrWhitespace())
@@ -778,10 +770,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character to edit.</param>
         /// <param name="isNSFW">Whether or not the character is NSFW.</param>
         /// <returns>A task that must be awaited.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterIsNSFWAsync
         (
-            [NotNull] Character character,
+            Character character,
             bool isNSFW
         )
         {
@@ -807,12 +799,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character to transfer.</param>
         /// <param name="guild">The guild to scope the character search to.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> TransferCharacterOwnershipAsync
         (
-            [NotNull] User newOwner,
-            [NotNull] Character character,
-            [NotNull] IGuild guild
+            User newOwner,
+            Character character,
+            IGuild guild
         )
         {
             var newOwnerCharacters = GetUserCharacters(newOwner, guild);
@@ -831,11 +823,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="discordUser">The user to get the characters of.</param>
         /// <param name="guild">The guild to get the user's characters on.</param>
         /// <returns>A queryable list of characters belonging to the user.</returns>
-        [Pure, NotNull, ItemNotNull]
+        [Pure, ItemNotNull]
         public IQueryable<Character> GetUserCharacters
         (
-            [NotNull] User discordUser,
-            [NotNull] IGuild guild
+            User discordUser,
+            IGuild guild
         )
         {
             var characters = GetCharacters(guild).Where(ch => ch.Owner.DiscordID == discordUser.DiscordID);
@@ -849,12 +841,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="characterName">The character name to check.</param>
         /// <param name="guild">The guild to scope the character search to.</param>
         /// <returns>true if the name is unique; otherwise, false.</returns>
-        [Pure, NotNull]
+        [Pure]
         public async Task<bool> IsCharacterNameUniqueForUserAsync
         (
-            [NotNull] User discordUser,
-            [NotNull] string characterName,
-            [NotNull] IGuild guild
+            User discordUser,
+            string characterName,
+            IGuild guild
         )
         {
             var userCharacters = GetUserCharacters(discordUser, guild);
@@ -870,12 +862,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="imageCaption">The caption of the image.</param>
         /// <param name="isNSFW">Whether or not the image is NSFW.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> AddImageToCharacterAsync
         (
-            [NotNull] Character character,
-            [NotNull] string imageName,
-            [NotNull] string imageUrl,
+            Character character,
+            string imageName,
+            string imageUrl,
             string? imageCaption = null,
             bool isNSFW = false
         )
@@ -921,11 +913,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character to remove the image from.</param>
         /// <param name="imageName">The name of the image.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> RemoveImageFromCharacterAsync
         (
-            [NotNull] Character character,
-            [NotNull] string imageName
+            Character character,
+            string imageName
         )
         {
             var hasNamedImage = character.Images.Any(i => string.Equals(i.Name.ToLower(), imageName.ToLower()));
@@ -955,10 +947,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="role">The discord role.</param>
         /// <param name="access">The access conditions.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<CreateEntityResult<CharacterRole>> CreateCharacterRoleAsync
         (
-            [NotNull] IRole role,
+            IRole role,
             RoleAccess access
         )
         {
@@ -992,10 +984,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="role">The character role.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<DeleteEntityResult> DeleteCharacterRoleAsync
         (
-            [NotNull] CharacterRole role
+            CharacterRole role
         )
         {
             _database.CharacterRoles.Remove(role);
@@ -1009,10 +1001,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="role">The discord role.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<RetrieveEntityResult<CharacterRole>> GetCharacterRoleAsync
         (
-            [NotNull] IRole role
+            IRole role
         )
         {
             var characterRole = await _database.CharacterRoles.AsQueryable()
@@ -1034,10 +1026,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="guild">The Discord guild.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<RetrieveEntityResult<IQueryable<CharacterRole>>> GetCharacterRolesAsync
         (
-            [NotNull] IGuild guild
+            IGuild guild
         )
         {
             var getServerResult = await _servers.GetOrRegisterServerAsync(guild);
@@ -1059,10 +1051,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="role">The character role.</param>
         /// <param name="access">The access conditions.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterRoleAccessAsync
         (
-            [NotNull] CharacterRole role,
+            CharacterRole role,
             RoleAccess access
         )
         {
@@ -1086,11 +1078,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character.</param>
         /// <param name="characterRole">The role to set.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterRoleAsync
         (
-            [NotNull] Character character,
-            [NotNull] CharacterRole characterRole
+            Character character,
+            CharacterRole characterRole
         )
         {
             if (character.Role == characterRole)
@@ -1113,10 +1105,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="character">The character.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<ModifyEntityResult> ClearCharacterRoleAsync
         (
-            [NotNull] Character character
+            Character character
         )
         {
             if (character.Role is null)
@@ -1140,11 +1132,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="user">The user.</param>
         /// <param name="guild">The server the user is on.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<RetrieveEntityResult<Character>> GetDefaultCharacterAsync
         (
-            [NotNull] User user,
-            [NotNull] IGuild guild
+            User user,
+            IGuild guild
         )
         {
             var userCharacters = GetUserCharacters(user, guild);

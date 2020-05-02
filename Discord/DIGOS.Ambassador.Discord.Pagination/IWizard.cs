@@ -36,14 +36,14 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// Gets the emotes that should be active for the current page.
         /// </summary>
         /// <returns>The emotes.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         IEnumerable<IEmote> GetCurrentPageEmotes();
 
         /// <summary>
         /// Gets the current page in the wizard.
         /// </summary>
         /// <returns>The current page.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         Task<Embed> GetCurrentPageAsync();
     }
 }

@@ -49,9 +49,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
         /// <param name="logger">The logging instance for this type.</param>
         public ExpirationBehaviour
         (
-            [NotNull] DiscordSocketClient client,
-            [NotNull] IServiceScope serviceScope,
-            [NotNull] ILogger<ExpirationBehaviour> logger
+            DiscordSocketClient client,
+            IServiceScope serviceScope,
+            ILogger<ExpirationBehaviour> logger
         )
             : base(client, serviceScope, logger)
         {

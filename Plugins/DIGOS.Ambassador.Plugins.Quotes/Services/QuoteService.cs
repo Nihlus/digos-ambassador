@@ -39,8 +39,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// <param name="message">The message to quote.</param>
         /// <param name="quotingUser">The user that is quoting the message.</param>
         /// <returns>The quote.</returns>
-        [NotNull]
-        public EmbedBuilder CreateMessageQuote([NotNull] IMessage message, [NotNull] IMentionable quotingUser)
+        public EmbedBuilder CreateMessageQuote(IMessage message, IMentionable quotingUser)
         {
             var eb = new EmbedBuilder();
 
@@ -68,7 +67,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
         /// <returns>true if information was added; otherwise, false.</returns>
-        private bool TryAddImageAttachmentInfo([NotNull] IMessage message, [NotNull] ref EmbedBuilder embed)
+        private bool TryAddImageAttachmentInfo(IMessage message, ref EmbedBuilder embed)
         {
             var firstAttachment = message.Attachments.FirstOrDefault();
             if (firstAttachment is null || firstAttachment.Height is null)
@@ -87,7 +86,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
         /// <returns>true if information was added; otherwise, false.</returns>
-        private bool TryAddOtherAttachmentInfo([NotNull] IMessage message, [NotNull] ref EmbedBuilder embed)
+        private bool TryAddOtherAttachmentInfo(IMessage message, ref EmbedBuilder embed)
         {
             var firstAttachment = message.Attachments.FirstOrDefault();
             if (firstAttachment is null)
@@ -109,9 +108,9 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// <returns>true if a rich embed was copied; otherwise, false.</returns>
         private bool TryCopyRichEmbed
         (
-            [NotNull] IMessage message,
-            [NotNull] IMentionable executingUser,
-            [NotNull] ref EmbedBuilder embed
+            IMessage message,
+            IMentionable executingUser,
+            ref EmbedBuilder embed
         )
         {
             var firstEmbed = message.Embeds.FirstOrDefault();
@@ -143,7 +142,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// </summary>
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
-        private void AddActivity([NotNull] IMessage message, [NotNull] ref EmbedBuilder embed)
+        private void AddActivity(IMessage message, ref EmbedBuilder embed)
         {
             if (message.Activity is null)
             {
@@ -160,7 +159,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// </summary>
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
-        private void AddOtherEmbed([NotNull] IMessage message, [NotNull] ref EmbedBuilder embed)
+        private void AddOtherEmbed(IMessage message, ref EmbedBuilder embed)
         {
             if (!message.Embeds.Any())
             {
@@ -176,7 +175,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// </summary>
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the content to.</param>
-        private void AddContent([NotNull] IMessage message, [NotNull] ref EmbedBuilder embed)
+        private void AddContent(IMessage message, ref EmbedBuilder embed)
         {
             if (string.IsNullOrWhiteSpace(message.Content))
             {
@@ -202,9 +201,9 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// <param name="embed">The embed to add the information to.</param>
         private void AddMeta
         (
-            [NotNull] IMessage message,
-            [NotNull] IMentionable quotingUser,
-            [NotNull] ref EmbedBuilder embed
+            IMessage message,
+            IMentionable quotingUser,
+            ref EmbedBuilder embed
         )
         {
             embed
@@ -224,8 +223,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// </summary>
         /// <param name="message">The message.</param>
         /// <returns>The formatted time.</returns>
-        [NotNull]
-        private static string GetPostedTimeInfo([NotNull] IMessage message)
+        private static string GetPostedTimeInfo(IMessage message)
         {
             return $"{message.Timestamp.DateTime.ToOrdinalWords()} " +
                    $"at {message.Timestamp:HH:mm}, " +

@@ -167,7 +167,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
         /// </summary>
         /// <param name="context">The context.</param>
         /// <returns>true if the user has consented or the command does not require consent; otherwise, false.</returns>
-        private async Task<bool> HasConsentedOrCommandDoesNotRequireConsentAsync([NotNull] SocketCommandContext context)
+        private async Task<bool> HasConsentedOrCommandDoesNotRequireConsentAsync(SocketCommandContext context)
         {
             // Find the argument pos
             if (!FindCommandStartPosition(context.Message, out var argumentPos))
@@ -232,7 +232,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task HandleInternalErrorAsync
         (
-            [NotNull] ICommandContext context,
+            ICommandContext context,
             ExecuteResult result
         )
         {

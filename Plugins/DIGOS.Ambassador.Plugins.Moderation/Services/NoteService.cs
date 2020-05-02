@@ -39,9 +39,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     [PublicAPI]
     public sealed class NoteService
     {
-        [NotNull] private readonly ModerationDatabaseContext _database;
-        [NotNull] private readonly ServerService _servers;
-        [NotNull] private readonly UserService _users;
+        private readonly ModerationDatabaseContext _database;
+        private readonly ServerService _servers;
+        private readonly UserService _users;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NoteService"/> class.
@@ -51,9 +51,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="users">The user service.</param>
         public NoteService
         (
-            [NotNull] ModerationDatabaseContext database,
-            [NotNull] ServerService servers,
-            [NotNull] UserService users
+            ModerationDatabaseContext database,
+            ServerService servers,
+            UserService users
         )
         {
             _database = database;
@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="user">The user.</param>
         /// <returns>The notes.</returns>
-        public IQueryable<UserNote> GetNotes([NotNull] IGuildUser user)
+        public IQueryable<UserNote> GetNotes(IGuildUser user)
         {
             return _database.UserNotes.AsQueryable().Where
             (
@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="server">The server the note is on.</param>
         /// <param name="noteID">The note ID.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<UserNote>> GetNoteAsync([NotNull] IGuild server, long noteID)
+        public async Task<RetrieveEntityResult<UserNote>> GetNoteAsync(IGuild server, long noteID)
         {
             // The server isn't strictly required here, but it prevents leaking notes between servers.
             var note = await _database.UserNotes.AsQueryable().FirstOrDefaultAsync
@@ -106,9 +106,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<UserNote>> CreateNoteAsync
         (
-            [NotNull] IUser authorUser,
-            [NotNull] IGuildUser guildUser,
-            [NotNull] string content
+            IUser authorUser,
+            IGuildUser guildUser,
+            string content
         )
         {
             var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
@@ -163,7 +163,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="note">The note.</param>
         /// <param name="content">The content.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetNoteContentsAsync([NotNull] UserNote note, [NotNull] string content)
+        public async Task<ModifyEntityResult> SetNoteContentsAsync(UserNote note, string content)
         {
             if (content.IsNullOrWhitespace())
             {
@@ -196,7 +196,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="note">The note to delete.</param>
         /// <returns>A deletion result which may or may note have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteNoteAsync([NotNull] UserNote note)
+        public async Task<DeleteEntityResult> DeleteNoteAsync(UserNote note)
         {
             if (!_database.UserNotes.Any(n => n.ID == note.ID))
             {

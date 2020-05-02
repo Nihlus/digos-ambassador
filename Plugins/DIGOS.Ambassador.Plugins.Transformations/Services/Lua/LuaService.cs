@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     [PublicAPI]
     public sealed class LuaService
     {
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         private readonly IReadOnlyList<string> _functionWhitelist = new[]
         {
             "assert",
@@ -105,10 +105,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
             "os.time",
         };
 
-        [NotNull]
         private readonly ContentService _contentService;
 
-        [NotNull]
         private readonly Regex _getErroringFunctionRegex =
             new Regex("(?<=\\((?>global)|(?>field )(?> \')).+(?=\'\\))", RegexOptions.Compiled);
 
@@ -116,7 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// Initializes a new instance of the <see cref="LuaService"/> class.
         /// </summary>
         /// <param name="contentService">The application's content service.</param>
-        public LuaService([NotNull] ContentService contentService)
+        public LuaService(ContentService contentService)
         {
             _contentService = contentService;
         }
@@ -125,9 +123,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// Gets a sandboxed lua state.
         /// </summary>
         /// <returns>A sandboxed lua state.</returns>
-        [NotNull]
         [MustUseReturnValue("The state must be disposed after use.")]
-        private NLua.Lua GetState([NotNull] params (string Name, object? Value)[] variables)
+        private NLua.Lua GetState(params (string Name, object? Value)[] variables)
         {
             var state = new NLua.Lua();
 
@@ -205,11 +202,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// <param name="snippet">The snippet to execute.</param>
         /// <param name="variables">Any variables to pass to the snippet as globals.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public Task<RetrieveEntityResult<string>> ExecuteSnippetAsync
         (
-            [NotNull] string snippet,
-            [NotNull] params (string Name, object? Value)[] variables
+            string snippet,
+            params (string Name, object? Value)[] variables
         )
         {
             return Task.Run
@@ -259,11 +256,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// <param name="scriptPath">The path to the file which should be executed.</param>
         /// <param name="variables">Any variables to pass to the script as globals.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [NotNull, ItemNotNull]
+        [ItemNotNull]
         public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync
         (
             [PathReference] UPath scriptPath,
-            [NotNull] params (string Name, object? Value)[] variables
+            params (string Name, object? Value)[] variables
         )
         {
             var getScriptResult = _contentService.OpenLocalStream(scriptPath);

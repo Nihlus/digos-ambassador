@@ -77,7 +77,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="colour">The output colour.</param>
         /// <returns>true if the parsing was successful; otherwise, false.</returns>
         [Pure]
-        [ContractAnnotation("input : null => false, colour : null; => false, colour : null; => true, colour : notnull")]
         public static bool TryParse
         (
             string? input,

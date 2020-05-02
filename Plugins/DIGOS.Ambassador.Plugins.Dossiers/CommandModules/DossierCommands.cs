@@ -114,7 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
         [Alias("view", "show")]
         [Command("view")]
         [Summary("Views the named dossier.")]
-        public async Task ViewDossierAsync([NotNull] string title)
+        public async Task ViewDossierAsync(string title)
         {
             var getDossierResult = await _dossiers.GetDossierByTitleAsync(title);
             if (!getDossierResult.IsSuccess)
@@ -139,8 +139,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             await this.Context.Channel.SendFileAsync(dossierData, $"{dossier.Title}.pdf");
         }
 
-        [NotNull]
-        private Embed BuildDossierEmbed([NotNull] Dossier dossier)
+        private Embed BuildDossierEmbed(Dossier dossier)
         {
             var eb = _feedback.CreateEmbedBase();
             eb.WithTitle(dossier.Title);
@@ -159,7 +158,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
         [Command("add")]
         [Summary("Adds a new dossier with the given title and summary. A PDF with the full dossier can be attached.")]
         [RequireOwner]
-        public async Task AddDossierAsync([NotNull] string title, [NotNull] string summary = "No summary set.")
+        public async Task AddDossierAsync(string title, string summary = "No summary set.")
         {
             var dossierCreationResult = await _dossiers.CreateDossierAsync(title, summary);
             if (!dossierCreationResult.IsSuccess)
@@ -195,7 +194,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
         [Command("remove")]
         [Summary("Removes the dossier with the given title.")]
         [RequireOwner]
-        public async Task RemoveDossierAsync([NotNull] string title)
+        public async Task RemoveDossierAsync(string title)
         {
             var getDossierResult = await _dossiers.GetDossierByTitleAsync(title);
             if (!getDossierResult.IsSuccess)
@@ -244,7 +243,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             [Command("title")]
             [Summary("Sets the title of the given dossier.")]
             [RequireOwner]
-            public async Task SetTitleAsync([NotNull] string title, [NotNull] string newTitle)
+            public async Task SetTitleAsync(string title, string newTitle)
             {
                 var getDossierResult = await _dossiers.GetDossierByTitleAsync(title);
                 if (!getDossierResult.IsSuccess)
@@ -274,7 +273,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             [Command("summary")]
             [Summary("Sets the summary of the given dossier.")]
             [RequireOwner]
-            public async Task SetSummaryAsync([NotNull] string title, [NotNull] string newSummary)
+            public async Task SetSummaryAsync(string title, string newSummary)
             {
                 var getDossierResult = await _dossiers.GetDossierByTitleAsync(title);
                 if (!getDossierResult.IsSuccess)
@@ -303,7 +302,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             [Command("data")]
             [Summary("Sets the data of the given dossier. Attach a PDF to the command.")]
             [RequireOwner]
-            public async Task SetFileAsync([NotNull] string title)
+            public async Task SetFileAsync(string title)
             {
                 var getDossierResult = await _dossiers.GetDossierByTitleAsync(title);
                 if (!getDossierResult.IsSuccess)

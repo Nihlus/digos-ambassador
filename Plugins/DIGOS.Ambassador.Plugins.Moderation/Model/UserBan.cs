@@ -89,10 +89,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <param name="expiresOn">The time at which the ban expires.</param>
         public UserBan
         (
-            [NotNull] Server server,
-            [NotNull] User user,
-            [NotNull] User author,
-            [NotNull] string reason,
+            Server server,
+            User user,
+            User author,
+            string reason,
             long? messageID = null,
             DateTime? expiresOn = null
         )

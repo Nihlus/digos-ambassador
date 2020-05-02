@@ -49,8 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
         /// <param name="json">The serialized kink collection.</param>
         /// <returns>A deserialized kink collection.</returns>
         [Pure]
-        [NotNull]
-        public static KinkCollection FromJson([NotNull] string json)
+        public static KinkCollection FromJson(string json)
         {
             var settings = new JsonSerializerSettings
             {

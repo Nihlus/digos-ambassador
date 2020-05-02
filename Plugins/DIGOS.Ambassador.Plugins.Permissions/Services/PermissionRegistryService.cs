@@ -36,13 +36,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
     [PublicAPI]
     public sealed class PermissionRegistryService
     {
-        [NotNull]
         private readonly Dictionary<Type, IPermission> _registeredPermissions = new Dictionary<Type, IPermission>();
 
         /// <summary>
         /// Gets the permissions that have been registered in the service.
         /// </summary>
-        [NotNull]
         public IEnumerable<IPermission> RegisteredPermissions => _registeredPermissions.Values;
 
         /// <summary>
@@ -51,8 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="assembly">The assembly to register permissions from.</param>
         /// <param name="services">The services.</param>
         /// <returns>true if all permissions were successfully registered; otherwise, false.</returns>
-        [NotNull]
-        public ModifyEntityResult RegisterPermissions([NotNull] Assembly assembly, [NotNull] IServiceProvider services)
+        public ModifyEntityResult RegisterPermissions(Assembly assembly, IServiceProvider services)
         {
             var permissionTypes = assembly.DefinedTypes.Where
             (
@@ -79,8 +76,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="services">The application's services.</param>
         /// <typeparam name="TPermission">The permission type.</typeparam>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        [NotNull]
-        public CreateEntityResult<TPermission> RegisterPermission<TPermission>([NotNull] IServiceProvider services)
+        public CreateEntityResult<TPermission> RegisterPermission<TPermission>(IServiceProvider services)
             where TPermission : class, IPermission
         {
             var permissionType = typeof(TPermission);
@@ -99,11 +95,10 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// <param name="permissionType">The permission type.</param>
         /// <param name="services">The application's services.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        [NotNull]
         public CreateEntityResult<IPermission> RegisterPermission
         (
-            [NotNull] Type permissionType,
-            [NotNull] IServiceProvider services
+            Type permissionType,
+            IServiceProvider services
         )
         {
             if (_registeredPermissions.ContainsKey(permissionType))
@@ -138,7 +133,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// </summary>
         /// <typeparam name="TPermission">The permission type.</typeparam>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [NotNull]
         public RetrieveEntityResult<TPermission> GetPermission<TPermission>()
             where TPermission : class, IPermission
         {
@@ -156,8 +150,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// </summary>
         /// <param name="permissionType">The permission type.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [NotNull]
-        public RetrieveEntityResult<IPermission> GetPermission([NotNull] Type permissionType)
+        public RetrieveEntityResult<IPermission> GetPermission(Type permissionType)
         {
             if (!_registeredPermissions.TryGetValue(permissionType, out var permission))
             {
@@ -173,8 +166,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// </summary>
         /// <param name="permissionName">The friendly name of the permission type.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [NotNull]
-        public RetrieveEntityResult<IPermission> GetPermission([NotNull] string permissionName)
+        public RetrieveEntityResult<IPermission> GetPermission(string permissionName)
         {
             var permission = this.RegisteredPermissions.FirstOrDefault
             (

@@ -37,13 +37,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
         /// <summary>
         /// Gets the name of the image.
         /// </summary>
-        [Required, NotNull]
+        [Required]
         public string Name { get; internal set; }
 
         /// <summary>
         /// Gets the caption of the image.
         /// </summary>
-        [Required, NotNull]
+        [Required]
         public string Caption { get; internal set; }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
         /// <summary>
         /// Gets the online URL of the image.
         /// </summary>
-        [Required, NotNull]
+        [Required]
         public string Url { get; internal set; }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
         /// <param name="name">The name of the image.</param>
         /// <param name="url">The URL to the image.</param>
         /// <param name="caption">The caption of the image.</param>
-        public Image([NotNull] string name, [NotNull] string url, [NotNull] string caption = "No caption set.")
+        public Image(string name, string url, string caption = "No caption set.")
         {
             this.Name = name;
             this.Url = url;

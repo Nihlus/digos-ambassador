@@ -40,10 +40,10 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
         /// <param name="this">The service collection.</param>
         /// <typeparam name="TContext">The context type.</typeparam>
         /// <returns>The service collection, with the pool added.</returns>
-        [PublicAPI, NotNull]
+        [PublicAPI]
         public static IServiceCollection AddConfiguredSchemaAwareDbContextPool<TContext>
         (
-            [NotNull] this IServiceCollection @this
+            this IServiceCollection @this
         )
             where TContext : SchemaAwareDbContext
         {

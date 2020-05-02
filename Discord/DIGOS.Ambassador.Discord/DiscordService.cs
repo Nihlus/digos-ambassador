@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Discord
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
         [MustUseReturnValue("The resulting stream must be disposed.")]
-        public async Task<RetrieveEntityResult<Stream>> GetAttachmentStreamAsync([NotNull] IAttachment attachment)
+        public async Task<RetrieveEntityResult<Stream>> GetAttachmentStreamAsync(IAttachment attachment)
         {
             try
             {
@@ -79,8 +79,8 @@ namespace DIGOS.Ambassador.Discord
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetUserNicknameAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] IGuildUser guildUser,
+            ICommandContext context,
+            IGuildUser guildUser,
             string? nickname
         )
         {
@@ -115,9 +115,9 @@ namespace DIGOS.Ambassador.Discord
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> AddUserRoleAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] IGuildUser guildUser,
-            [NotNull] IRole role
+            ICommandContext context,
+            IGuildUser guildUser,
+            IRole role
         )
         {
             if (!await HasPermissionAsync(context, GuildPermission.ManageRoles))
@@ -157,9 +157,9 @@ namespace DIGOS.Ambassador.Discord
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> RemoveUserRoleAsync
         (
-            [NotNull] ICommandContext context,
-            [NotNull] IGuildUser guildUser,
-            [NotNull] IRole role
+            ICommandContext context,
+            IGuildUser guildUser,
+            IRole role
         )
         {
             if (!await HasPermissionAsync(context, GuildPermission.ManageRoles))
@@ -197,7 +197,7 @@ namespace DIGOS.Ambassador.Discord
         /// <param name="guildPermission">The permission to check.</param>
         /// <returns>true if she has permission; otherwise, false.</returns>
         [Pure]
-        public async Task<bool> HasPermissionAsync([NotNull] ICommandContext context, GuildPermission guildPermission)
+        public async Task<bool> HasPermissionAsync(ICommandContext context, GuildPermission guildPermission)
         {
             var amby = await context.Guild.GetUserAsync(context.Client.CurrentUser.Id);
             if (amby is null)

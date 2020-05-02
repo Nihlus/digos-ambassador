@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Tests.Extensions
         /// Directly creates the schema of the database.
         /// </summary>
         /// <param name="facade">The database.</param>
-        public static void Create([NotNull] this DatabaseFacade facade)
+        public static void Create(this DatabaseFacade facade)
         {
             facade.ExecuteSqlRaw(facade.GenerateCreateScript());
         }
@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.Tests.Extensions
         /// </summary>
         /// <param name="facade">The database.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public static Task CreateAsync([NotNull] this DatabaseFacade facade)
+        public static Task CreateAsync(this DatabaseFacade facade)
         {
             return facade.ExecuteSqlRawAsync(facade.GenerateCreateScript());
         }

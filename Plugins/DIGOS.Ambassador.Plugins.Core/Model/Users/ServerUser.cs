@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
         /// </summary>
         /// <param name="server">The server.</param>
         /// <param name="user">The user.</param>
-        public ServerUser([NotNull] Server server, [NotNull] User user)
+        public ServerUser(Server server, User user)
         {
             this.Server = server;
             this.User = user;

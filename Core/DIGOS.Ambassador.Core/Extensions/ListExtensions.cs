@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <typeparam name="T">The type contained in the list.</typeparam>
         /// <returns>A random value.</returns>
         [Pure]
-        public static T PickRandom<T>([NotNull] this IReadOnlyList<T> list)
+        public static T PickRandom<T>(this IReadOnlyList<T> list)
         {
             lock (RandomLock)
             {

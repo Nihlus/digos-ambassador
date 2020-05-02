@@ -139,7 +139,6 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// Updates the message contents.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
         protected async Task UpdateAsync()
         {
             if (this.IsDeleting)
@@ -154,7 +153,6 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// Updates the message contents.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [NotNull]
         protected virtual Task OnUpdateAsync()
         {
             return Task.CompletedTask;

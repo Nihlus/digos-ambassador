@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Discord.Extensions
         /// <param name="this">The user.</param>
         /// <param name="client">The context of the check.</param>
         /// <returns>true if the user is the same as the bot user; otherwise, false.</returns>
-        public static bool IsMe([NotNull] this IUser @this, [NotNull] IDiscordClient client)
+        public static bool IsMe(this IUser @this, IDiscordClient client)
         {
             return @this.Id == client.CurrentUser.Id;
         }

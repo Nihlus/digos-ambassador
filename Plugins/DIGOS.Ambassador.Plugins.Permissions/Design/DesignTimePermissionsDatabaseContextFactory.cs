@@ -40,7 +40,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Design
     public class DesignTimePermissionsDatabaseContextFactory : IDesignTimeDbContextFactory<PermissionsDatabaseContext>
     {
         /// <inheritdoc />
-        [NotNull]
         public PermissionsDatabaseContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<PermissionsDatabaseContext>();

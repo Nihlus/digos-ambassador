@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Discord.Extensions
         /// </summary>
         /// <param name="this">The exception.</param>
         /// <returns>true if it was caused by the user not accepting DMs; Otherwise, false.</returns>
-        public static bool WasCausedByDMsNotAccepted([NotNull] this HttpException @this)
+        public static bool WasCausedByDMsNotAccepted(this HttpException @this)
         {
             return @this.HttpCode == HttpStatusCode.Forbidden && @this.DiscordCode == 50007;
         }
@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Discord.Extensions
         /// </summary>
         /// <param name="this">The exception.</param>
         /// <returns>true if it was caused by insufficient permissions; Otherwise, false.</returns>
-        public static bool WasCausedByMissingPermission([NotNull] this HttpException @this)
+        public static bool WasCausedByMissingPermission(this HttpException @this)
         {
             return @this.HttpCode == HttpStatusCode.Forbidden && @this.DiscordCode == 50013;
         }

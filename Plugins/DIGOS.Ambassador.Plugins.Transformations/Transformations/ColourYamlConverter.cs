@@ -35,13 +35,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
     public sealed class ColourYamlConverter : IYamlTypeConverter
     {
         /// <inheritdoc />
-        public bool Accepts([NotNull] Type type)
+        public bool Accepts(Type type)
         {
             return type == typeof(Colour);
         }
 
         /// <inheritdoc />
-        public object? ReadYaml([NotNull] IParser parser, [NotNull] Type type)
+        public object? ReadYaml(IParser parser, Type type)
         {
             if (!parser.TryConsume<Scalar>(out var rawColour))
             {
@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         }
 
         /// <inheritdoc />
-        public void WriteYaml([NotNull] IEmitter emitter, object? value, [NotNull] Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type)
         {
             var valueString = value?.ToString();
             if (valueString is null)

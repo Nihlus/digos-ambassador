@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// </summary>
         /// <param name="pretty">Whether or not the format should be in a pretty format.</param>
         /// <returns>A lua string.</returns>
-        [Pure, NotNull]
+        [Pure]
         string Format(bool pretty = false);
     }
 }

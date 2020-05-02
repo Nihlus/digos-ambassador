@@ -45,10 +45,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Group("set")]
         public class WarningSetCommands : ModuleBase
         {
-            [NotNull]
             private readonly WarningService _warnings;
 
-            [NotNull]
             private readonly UserFeedbackService _feedback;
 
             /// <summary>
@@ -58,8 +56,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             /// <param name="feedback">The feedback service.</param>
             public WarningSetCommands
             (
-                [NotNull] WarningService warnings,
-                [NotNull] UserFeedbackService feedback
+                WarningService warnings,
+                UserFeedbackService feedback
             )
             {
                 _warnings = warnings;

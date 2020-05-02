@@ -72,8 +72,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Used by EF Core proxies.")]
         public RoleplayParticipant
         (
-            [NotNull] Roleplay roleplay,
-            [NotNull] User user
+            Roleplay roleplay,
+            User user
         )
         {
             this.Roleplay = roleplay;

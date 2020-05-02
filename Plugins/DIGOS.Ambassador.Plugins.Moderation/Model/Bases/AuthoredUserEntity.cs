@@ -75,7 +75,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model.Bases
         /// <param name="server">The server that the entity was authored on.</param>
         /// <param name="user">The user that the entity is associated with.</param>
         /// <param name="author">The user that created the entity.</param>
-        protected AuthoredUserEntity([NotNull] Server server, [NotNull] User user, [NotNull] User author)
+        protected AuthoredUserEntity(Server server, User user, User author)
         {
             this.Server = server;
             this.User = user;

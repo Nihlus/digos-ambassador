@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Core.Async
         [ItemNotNull]
         public static async Task<string[]> ReadAllLinesAsync
         (
-            [NotNull] string path,
+            string path,
             Encoding? encoding = null
         )
         {
@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Core.Async
         /// <returns>The contents of the file.</returns>
         public static async Task<string[]> ReadAllLinesAsync
         (
-            [NotNull] Stream stream,
+            Stream stream,
             Encoding? encoding = null,
             bool leaveOpen = true
         )
@@ -111,8 +111,7 @@ namespace DIGOS.Ambassador.Core.Async
         /// <param name="path">The path to the file.</param>
         /// <param name="encoding">The encoding of the file.</param>
         /// <returns>The contents of the file.</returns>
-        [NotNull]
-        public static async Task<string> ReadAllTextAsync([NotNull] string path, Encoding? encoding = null)
+        public static async Task<string> ReadAllTextAsync(string path, Encoding? encoding = null)
         {
             encoding ??= Encoding.UTF8;
 
@@ -140,7 +139,7 @@ namespace DIGOS.Ambassador.Core.Async
         /// <returns>The contents of the stream.</returns>
         public static async Task<string> ReadAllTextAsync
         (
-            [NotNull] Stream stream,
+            Stream stream,
             Encoding? encoding = null,
             bool leaveOpen = true
         )

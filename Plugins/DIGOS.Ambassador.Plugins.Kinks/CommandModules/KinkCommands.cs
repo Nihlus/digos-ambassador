@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [UsedImplicitly]
         [Command("info")]
         [Summary("Shows information about the named kink.")]
-        public async Task ShowKinkAsync([NotNull] string kinkName)
+        public async Task ShowKinkAsync(string kinkName)
         {
             var getKinkInfoResult = await _kinks.GetKinkByNameAsync(kinkName);
             if (!getKinkInfoResult.IsSuccess)
@@ -102,7 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [Alias("show", "preference")]
         [Command("show")]
         [Summary("Shows your preference for the named kink.")]
-        public async Task ShowKinkPreferenceAsync([NotNull] string kinkName)
+        public async Task ShowKinkPreferenceAsync(string kinkName)
             => await ShowKinkPreferenceAsync(this.Context.User, kinkName);
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [Alias("show", "preference")]
         [Command("show")]
         [Summary("Shows the user's preference for the named kink.")]
-        public async Task ShowKinkPreferenceAsync([NotNull] IUser user, [NotNull] string kinkName)
+        public async Task ShowKinkPreferenceAsync(IUser user, string kinkName)
         {
             var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(user, kinkName);
             if (!getUserKinkResult.IsSuccess)
@@ -136,7 +136,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [UsedImplicitly]
         [Command("overlap")]
         [Summary("Shows the kinks which overlap between you and the given user.")]
-        public async Task ShowKinkOverlap([NotNull] IUser otherUser)
+        public async Task ShowKinkOverlap(IUser otherUser)
         {
             var getUserKinksResult = await _kinks.GetUserKinksAsync(this.Context.User);
             if (!getUserKinksResult.IsSuccess)
@@ -195,7 +195,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [Summary("Shows the given user's kinks with the given preference.")]
         public async Task ShowKinksByPreferenceAsync
         (
-            [NotNull]
             IUser otherUser,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
             KinkPreference preference
@@ -235,7 +234,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [Summary("Sets your preference for the given kink.")]
         public async Task SetKinkPreferenceAsync
         (
-            [NotNull]
             string kinkName,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
             KinkPreference preference

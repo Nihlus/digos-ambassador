@@ -36,7 +36,6 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
     public class HumanizerEnumTypeReader<T> : TypeReader where T : struct, IComparable, IFormattable
     {
         /// <inheritdoc />
-        [NotNull]
         public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
         {
             var defaultLocator = Configurator.EnumDescriptionPropertyLocator;

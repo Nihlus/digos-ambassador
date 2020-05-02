@@ -43,11 +43,11 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="search">The value to search for.</param>
         /// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, NotNull]
+        [Pure]
         public static RetrieveEntityResult<string> BestLevenshteinMatch
         (
-            [NotNull, ItemNotNull] this IEnumerable<string> @this,
-            [NotNull] string search,
+            [ItemNotNull] this IEnumerable<string> @this,
+            string search,
             double tolerance = 0.25
         )
         {

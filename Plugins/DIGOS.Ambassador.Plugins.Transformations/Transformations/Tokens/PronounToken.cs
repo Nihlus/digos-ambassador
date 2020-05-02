@@ -34,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     [TokenIdentifier("pronoun", "pr")]
     public sealed class PronounToken : ReplacableTextToken<PronounToken>
     {
-        [NotNull]
         private readonly PronounService _pronouns;
 
         /// <summary>
@@ -46,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
         /// Initializes a new instance of the <see cref="PronounToken"/> class.
         /// </summary>
         /// <param name="pronouns">The character service.</param>
-        public PronounToken([NotNull] PronounService pronouns)
+        public PronounToken(PronounService pronouns)
         {
             _pronouns = pronouns;
         }

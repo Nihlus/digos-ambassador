@@ -60,10 +60,10 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
         /// <param name="quotes">The feedback service.</param>
         public MessageQuoteBehaviour
         (
-            [NotNull] DiscordSocketClient client,
-            [NotNull] IServiceScope serviceScope,
-            [NotNull] ILogger<MessageQuoteBehaviour> logger,
-            [NotNull] QuoteService quotes
+            DiscordSocketClient client,
+            IServiceScope serviceScope,
+            ILogger<MessageQuoteBehaviour> logger,
+            QuoteService quotes
         )
             : base(client, serviceScope, logger)
         {
@@ -184,7 +184,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
         /// </summary>
         /// <param name="message">The message.</param>
         /// <returns>true if the message is a quoted message; otherwise, false.</returns>
-        private bool IsQuote([NotNull] IMessage message)
+        private bool IsQuote(IMessage message)
         {
             var hasQuoteField =
                 message

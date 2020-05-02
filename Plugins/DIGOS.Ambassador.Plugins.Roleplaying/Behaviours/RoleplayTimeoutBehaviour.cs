@@ -48,7 +48,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <summary>
         /// Gets the feedback service.
         /// </summary>
-        [NotNull]
         private UserFeedbackService Feedback { get; }
 
         /// <summary>
@@ -61,9 +60,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         public RoleplayTimeoutBehaviour
         (
             DiscordSocketClient client,
-            [NotNull] IServiceScope serviceScope,
-            [NotNull] ILogger<RoleplayTimeoutBehaviour> logger,
-            [NotNull] UserFeedbackService feedback
+            IServiceScope serviceScope,
+            ILogger<RoleplayTimeoutBehaviour> logger,
+            UserFeedbackService feedback
         )
             : base(client, serviceScope, logger)
         {

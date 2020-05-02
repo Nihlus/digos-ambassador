@@ -52,7 +52,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         }
 
         /// <inheritdoc />
-        public void WriteYaml([NotNull] IEmitter emitter, object? value, Type type)
+        public void WriteYaml(IEmitter emitter, object? value, Type type)
         {
             if (!(value is Species species))
             {
