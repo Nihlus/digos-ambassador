@@ -52,7 +52,7 @@
     <DocGenerator>dotnet $(DocGeneratorAssembly)</DocGenerator>
   </PropertyGroup>
 
-  <Target Name="GenerateDocs" AfterTargets="PostBuildEvent" Condition="Exists('$(DocGeneratorAssembly)')">
+  <Target Name="GenerateDocs" AfterTargets="PostBuildEvent" Condition="Exists('$(DocGeneratorAssembly)') And $(IsRunnableTarget)">
     <Message Text="Generating module documentation..." Importance="normal" />
     <Exec Command="$(DocGenerator) --assemblies $(OutputPath)$(AssemblyName)$(TargetExt) $(OutputPath)*.Plugins.*.dll --output $(SolutionDir)/docs" ContinueOnError="true" />
   </Target>

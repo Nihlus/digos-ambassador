@@ -373,123 +373,26 @@ namespace DIGOS.Ambassador.Doc
 
                 if (typeDefinition.FullName == typeof(string).FullName)
                 {
-                    // Ugh, strings. Let's perform some simple heuristics...
-                    // TODO: Improve this crap
-                    if (parameter.Name.Contains("Permission", StringComparison.OrdinalIgnoreCase))
+                    if (_placeholderData.TryGetGenericStringPlaceholder(parameter.Name, out var genericPlaceholder))
                     {
-                        exampleBuilder.Append("DoTheThing");
-                        continue;
-                    }
+                        if (genericPlaceholder.Contains(' '))
+                        {
+                            exampleBuilder.Append(genericPlaceholder.Quote());
+                            continue;
+                        }
 
-                    if
-                    (
-                        parameter.Name.Contains("Emote", StringComparison.OrdinalIgnoreCase) ||
-                        parameter.Name.Contains("Emoji", StringComparison.OrdinalIgnoreCase)
-                    )
-                    {
-                        exampleBuilder.Append(":thinking:");
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Kink", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("Doinking");
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Nickname", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("John Doe".Quote());
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Title", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("My cool title".Quote());
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Summary", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("My short summary".Quote());
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Description", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("My detailed description".Quote());
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Reason", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("My good reason".Quote());
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Caption", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("My sweet caption".Quote());
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Message", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("My message".Quote());
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Pronoun", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("Feminine");
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Species", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("shark");
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Content", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("My content".Quote());
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Bio", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("My long biography".Quote());
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Search", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("My search text".Quote());
-                        continue;
-                    }
-
-                    if
-                    (
-                        parameter.Name.Contains("Url", StringComparison.OrdinalIgnoreCase) ||
-                        parameter.Name.Contains("Uri", StringComparison.OrdinalIgnoreCase)
-                    )
-                    {
-                        exampleBuilder.Append("https://www.example.com");
-                        continue;
-                    }
-
-                    if (parameter.Name.Contains("Name", StringComparison.OrdinalIgnoreCase))
-                    {
-                        exampleBuilder.Append("John");
+                        exampleBuilder.Append(genericPlaceholder);
                         continue;
                     }
                 }
 
+                var assemblyName = command.Module.Name;
+                var warningPrefix = $"{assemblyName}: Warning DD0001 :";
+
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine
                 (
-                    $"No placeholder data available for parameter \"{typeDefinition.Name} {parameter.Name}\" " +
+                    $"{warningPrefix} No placeholder data available for parameter \"{typeDefinition.Name} {parameter.Name}\" " +
                     $"in \"!{GetInvokableCommands(command).First()}\"."
                 );
 

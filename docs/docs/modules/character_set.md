@@ -84,7 +84,7 @@ Sets whether or not a character is NSFW.
 
 ### *pronoun*
 #### Overloads
-**`!character set pronoun mickey Feminine` (or `character set pronouns`)**
+**`!character set pronoun mickey feminine` (or `character set pronouns`)**
 
 Sets the preferred pronoun of a character.
 

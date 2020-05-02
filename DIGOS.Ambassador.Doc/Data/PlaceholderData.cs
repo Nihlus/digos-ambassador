@@ -22,6 +22,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 using Mono.Cecil;
 
@@ -33,6 +35,33 @@ namespace DIGOS.Ambassador.Doc.Data
     public class PlaceholderData
     {
         private readonly Dictionary<string, IReadOnlyCollection<string>> _placeholderCollections;
+
+        /// <summary>
+        /// Holds a set of simple lookup terms mapped to their placeholder replacements. This is used for simple
+        /// string parameters, and the lookup terms are based on the parameter name for the string.
+        /// </summary>
+        private readonly Dictionary<string, string> _genericStringPlaceholders = new Dictionary<string, string>
+        {
+            { "permission", "DoTheThing" },
+            { "emote", ":thinking:" },
+            { "emoji", ":thinking:" },
+            { "kink", "Doinking" },
+            { "nickname", "John Doe" },
+            { "title", "My cool title" },
+            { "summary", "My short summary" },
+            { "description", "My detailed description" },
+            { "reason", "My good reason" },
+            { "caption", "My sweet caption" },
+            { "message", "My message" },
+            { "pronoun", "feminine" },
+            { "species", "shark" },
+            { "content", "My content" },
+            { "bio", "My long biography" },
+            { "search", "My search text" },
+            { "url", "https://www.example.com" },
+            { "uri", "https://www.example.com" },
+            { "name", "John" }
+        };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaceholderData"/> class.
@@ -178,6 +207,35 @@ namespace DIGOS.Ambassador.Doc.Data
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets a placeholder for a generic string.
+        /// </summary>
+        /// <param name="parameterName">The name of the string-typed parameter.</param>
+        /// <param name="genericPlaceholder">The generic placeholder.</param>
+        /// <returns>true if a generic placeholder was found; otherwise, false.</returns>
+        public bool TryGetGenericStringPlaceholder
+        (
+            string parameterName,
+            [NotNullWhen(true)] out string? genericPlaceholder
+        )
+        {
+            genericPlaceholder = null;
+
+            var matchingKey = _genericStringPlaceholders.Keys.FirstOrDefault
+            (
+                k =>
+                    parameterName.Contains(k, StringComparison.OrdinalIgnoreCase)
+            );
+
+            if (matchingKey is null)
+            {
+                return false;
+            }
+
+            genericPlaceholder = _genericStringPlaceholders[matchingKey];
+            return true;
         }
     }
 }
