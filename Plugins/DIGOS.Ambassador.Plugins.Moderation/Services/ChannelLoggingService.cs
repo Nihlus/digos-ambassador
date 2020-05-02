@@ -184,10 +184,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 ? "(expired)"
                 : $"by {rescinder.Mention}";
 
-            var warnedUser = guild.GetUser((ulong)warning.User.DiscordID);
             eb.WithDescription
             (
-                $"A warning was removed from {warnedUser.Mention} (ID {warnedUser.Id}) {whoDidIt}."
+                $"A warning was removed from {MentionUtils.MentionUser((ulong)warning.User.DiscordID)} " +
+                $"(ID {warning.User.DiscordID}) {whoDidIt}."
             );
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
