@@ -30,7 +30,6 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using JetBrains.Annotations;
 using MoreLinq.Extensions;
 using Document = iTextSharp.text.Document;
 

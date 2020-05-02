@@ -31,8 +31,6 @@ using Discord.WebSocket;
 using Remora.Behaviours.Services;
 using Remora.Results;
 
-using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
-
 namespace DIGOS.Ambassador.Discord.Interactivity
 {
     /// <summary>

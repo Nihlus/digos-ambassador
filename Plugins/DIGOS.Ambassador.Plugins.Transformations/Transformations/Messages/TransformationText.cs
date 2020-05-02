@@ -25,8 +25,6 @@ using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
-using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
-
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
 {
     /// <summary>

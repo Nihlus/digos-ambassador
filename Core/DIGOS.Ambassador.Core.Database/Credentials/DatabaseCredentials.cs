@@ -21,7 +21,6 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Core.Database.Credentials
 {

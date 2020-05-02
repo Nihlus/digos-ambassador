@@ -24,7 +24,6 @@ using System.Linq;
 using Discord;
 using Humanizer;
 using Humanizer.Bytes;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Quotes.Services
 {

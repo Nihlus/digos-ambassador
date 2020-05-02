@@ -28,7 +28,6 @@ using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Discord;
 using Discord.Commands;
 using Discord.Net;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Discord.Interactivity
 {

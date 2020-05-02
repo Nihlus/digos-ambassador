@@ -22,7 +22,6 @@
 
 using System;
 using Discord;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Discord.Pagination
 {

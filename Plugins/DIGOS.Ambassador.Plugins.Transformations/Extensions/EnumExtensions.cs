@@ -23,7 +23,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
 {

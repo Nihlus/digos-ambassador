@@ -23,7 +23,6 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Discord.Interactivity.Messages
 {

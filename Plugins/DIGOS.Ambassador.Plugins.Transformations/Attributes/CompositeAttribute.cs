@@ -23,7 +23,6 @@
 using System;
 using System.Collections.Generic;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Attributes
 {

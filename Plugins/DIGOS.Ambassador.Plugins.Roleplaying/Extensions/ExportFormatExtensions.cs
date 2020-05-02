@@ -22,7 +22,6 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Extensions
 {

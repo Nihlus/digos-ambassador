@@ -28,7 +28,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
-using JetBrains.Annotations;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations

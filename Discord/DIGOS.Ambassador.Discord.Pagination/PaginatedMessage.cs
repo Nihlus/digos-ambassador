@@ -29,7 +29,6 @@ using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Discord;
 using Discord.WebSocket;
-using JetBrains.Annotations;
 
 // ReSharper disable AssignmentIsFullyDiscarded
 namespace DIGOS.Ambassador.Discord.Pagination

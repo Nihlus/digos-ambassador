@@ -24,7 +24,6 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using Discord.Commands;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.TypeReaders
 {

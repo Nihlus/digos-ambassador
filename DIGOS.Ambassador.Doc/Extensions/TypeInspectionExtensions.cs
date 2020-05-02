@@ -26,8 +26,6 @@ using DIGOS.Ambassador.Doc.Reflection;
 using JetBrains.Annotations;
 using Mono.Cecil;
 
-using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
-
 namespace DIGOS.Ambassador.Doc.Extensions
 {
     /// <summary>

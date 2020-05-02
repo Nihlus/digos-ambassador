@@ -22,7 +22,6 @@
 
 using System.Net;
 using Discord.Net;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Discord.Extensions
 {

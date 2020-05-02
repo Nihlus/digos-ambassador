@@ -27,8 +27,6 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using JetBrains.Annotations;
 
-using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
-
 namespace DIGOS.Ambassador.Plugins.Kinks.Model
 {
     /// <summary>

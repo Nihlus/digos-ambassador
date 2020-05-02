@@ -37,7 +37,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using Remora.Results;
-using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
 
 namespace DIGOS.Ambassador.Plugins.Help.Wizards
 {

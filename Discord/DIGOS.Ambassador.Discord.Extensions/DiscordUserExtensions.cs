@@ -21,7 +21,6 @@
 //
 
 using Discord;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Discord.Extensions
 {

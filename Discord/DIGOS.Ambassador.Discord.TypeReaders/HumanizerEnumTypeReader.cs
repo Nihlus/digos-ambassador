@@ -25,7 +25,6 @@ using System.Threading.Tasks;
 using Discord.Commands;
 using Humanizer;
 using Humanizer.Configuration;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Discord.TypeReaders
 {

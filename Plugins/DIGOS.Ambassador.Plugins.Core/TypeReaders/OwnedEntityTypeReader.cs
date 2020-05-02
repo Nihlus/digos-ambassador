@@ -30,7 +30,6 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using Discord;
 using Discord.Commands;
-using JetBrains.Annotations;
 using MoreLinq.Extensions;
 using Remora.Results;
 

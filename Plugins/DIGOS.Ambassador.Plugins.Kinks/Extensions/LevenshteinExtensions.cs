@@ -26,7 +26,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Utility;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Results;

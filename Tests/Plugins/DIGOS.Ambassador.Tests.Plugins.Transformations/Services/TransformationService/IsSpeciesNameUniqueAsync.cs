@@ -25,7 +25,6 @@
 #pragma warning disable SA1649
 
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Transformations

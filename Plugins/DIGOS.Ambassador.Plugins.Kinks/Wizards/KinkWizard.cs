@@ -38,8 +38,6 @@ using Humanizer;
 using JetBrains.Annotations;
 using Remora.Results;
 
-using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
-
 namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
 {
     /// <summary>

@@ -29,8 +29,6 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using JetBrains.Annotations;
 using YamlDotNet.Serialization;
 
-using NotNullAttribute = JetBrains.Annotations.NotNullAttribute;
-
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Transformations.Model
 {

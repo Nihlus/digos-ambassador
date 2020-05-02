@@ -22,7 +22,6 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
-using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 

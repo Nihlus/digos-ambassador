@@ -22,7 +22,6 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
-using JetBrains.Annotations;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
 using YamlDotNet.Serialization;

@@ -27,7 +27,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using Discord;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Discord.Pagination
 {
