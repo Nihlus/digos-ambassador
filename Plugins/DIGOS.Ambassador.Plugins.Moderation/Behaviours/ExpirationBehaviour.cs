@@ -80,13 +80,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var warnings = await warningService.GetWarnings(guild).Where(w => w.ExpiresOn.HasValue).ToListAsync(ct);
                 foreach (var warning in warnings)
                 {
-                    if (warning.ExpiresOn <= now)
+                    if (!(warning.ExpiresOn <= now))
                     {
-                        var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
-                        await loggingService.NotifyUserWarningRemoved(warning, rescinder);
-
-                        await warningService.DeleteWarningAsync(warning);
+                        continue;
                     }
+
+                    var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
+                    await loggingService.NotifyUserWarningRemoved(warning, rescinder);
+
+                    await warningService.DeleteWarningAsync(warning);
                 }
 
                 if (!guild.GetUser(this.Client.CurrentUser.Id).GuildPermissions.BanMembers)
@@ -99,14 +101,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var bans = await banService.GetBans(guild).Where(b => b.ExpiresOn.HasValue).ToListAsync(ct);
                 foreach (var ban in bans)
                 {
-                    if (ban.ExpiresOn <= now)
+                    if (!(ban.ExpiresOn <= now))
                     {
-                        var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
-                        await loggingService.NotifyUserUnbanned(ban, rescinder);
-
-                        await banService.DeleteBanAsync(ban);
-                        await guild.RemoveBanAsync((ulong)ban.User.DiscordID);
+                        continue;
                     }
+
+                    var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
+                    await loggingService.NotifyUserUnbanned(ban, rescinder);
+
+                    await banService.DeleteBanAsync(ban);
+                    await guild.RemoveBanAsync((ulong)ban.User.DiscordID);
                 }
             }
 

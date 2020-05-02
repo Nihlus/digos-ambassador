@@ -315,7 +315,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
                 try
                 {
-                    using (var ds = new MemoryStream(Encoding.UTF8.GetBytes(character.Description)))
+                    await using (var ds = new MemoryStream(Encoding.UTF8.GetBytes(character.Description)))
                     {
                         await userDMChannel.SendMessageAsync(string.Empty, false, eb.Build());
                         await userDMChannel.SendFileAsync(ds, $"{character.Name}_description.txt");

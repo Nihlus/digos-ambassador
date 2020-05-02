@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador
             // Configure logging
             const string configurationName = "DIGOS.Ambassador.log4net.config";
             var logConfig = new XmlDocument();
-            using (var configStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(configurationName))
+            await using (var configStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(configurationName))
             {
                 if (configStream is null)
                 {

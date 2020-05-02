@@ -73,12 +73,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
                 return this;
             }
 
-            if (data == "pattern")
+            if (data != "pattern")
             {
-                this.UsePattern = true;
                 return this;
             }
 
+            this.UsePattern = true;
             return this;
         }
     }

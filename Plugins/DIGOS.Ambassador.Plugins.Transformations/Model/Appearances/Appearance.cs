@@ -129,7 +129,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// <param name="character">The character that the appearance is linked to.</param>
         /// <param name="transformations">The transformation service.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        [Pure, JetBrains.Annotations.ItemNotNull]
+        [Pure, ItemNotNull]
         public static async Task<CreateEntityResult<Appearance>> CreateDefaultAsync
         (
             [JetBrains.Annotations.NotNull] Character character,

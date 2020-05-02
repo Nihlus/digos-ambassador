@@ -275,10 +275,10 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
                 reportEmbed.WithTitle("Click here to create a new issue");
                 reportEmbed.WithUrl(_content.AutomaticBugReportCreationUri.ToString());
 
-                using var ms = new MemoryStream();
+                await using var ms = new MemoryStream();
                 var now = DateTime.UtcNow;
 
-                using (var sw = new StreamWriter(ms, Encoding.Default, 1024, true))
+                await using (var sw = new StreamWriter(ms, Encoding.Default, 1024, true))
                 {
                     await sw.WriteLineAsync("Automatic bug report");
                     await sw.WriteLineAsync("====================");

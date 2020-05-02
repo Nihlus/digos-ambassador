@@ -265,17 +265,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 ch => string.Equals(ch.Name.ToLower(), characterName.ToLower())
             );
 
-            if (character is null)
+            if (!(character is null))
             {
-                var isCurrentUser = context.Message.Author.Id == (ulong)characterOwner.DiscordID;
-                var errorMessage = isCurrentUser
-                    ? "You don't own a character with that name."
-                    : "The user doesn't own a character with that name.";
-
-                return RetrieveEntityResult<Character>.FromError(errorMessage);
+                return RetrieveEntityResult<Character>.FromSuccess(character);
             }
 
-            return RetrieveEntityResult<Character>.FromSuccess(character);
+            var isCurrentUser = context.Message.Author.Id == (ulong)characterOwner.DiscordID;
+            var errorMessage = isCurrentUser
+                ? "You don't own a character with that name."
+                : "The user doesn't own a character with that name.";
+
+            return RetrieveEntityResult<Character>.FromError(errorMessage);
         }
 
         /// <summary>

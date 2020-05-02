@@ -243,15 +243,15 @@ namespace DIGOS.Ambassador.Discord.Pagination
 
         private async Task<bool> CanManageMessages()
         {
-            if (this.Channel is IGuildChannel guildChannel)
+            if (!(this.Channel is IGuildChannel guildChannel))
             {
-                var botUser = this.Interactivity.Client.CurrentUser;
-                var botGuildUser = await guildChannel.Guild.GetUserAsync(botUser.Id);
-
-                return botGuildUser.GetPermissions(guildChannel).ManageMessages;
+                return false;
             }
 
-            return false;
+            var botUser = this.Interactivity.Client.CurrentUser;
+            var botGuildUser = await guildChannel.Guild.GetUserAsync(botUser.Id);
+
+            return botGuildUser.GetPermissions(guildChannel).ManageMessages;
         }
 
         /// <inheritdoc/>

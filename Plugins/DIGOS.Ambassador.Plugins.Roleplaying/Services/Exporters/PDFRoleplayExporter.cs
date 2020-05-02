@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
             var pdfDoc = new Document();
 
             var filePath = Path.GetTempFileName();
-            using (var of = File.Create(filePath))
+            await using (var of = File.Create(filePath))
             {
                 var writer = PdfWriter.GetInstance(pdfDoc, of);
                 writer.Open();
@@ -81,22 +81,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                         async p =>
                         {
                             var guildUser = await this.Guild.GetUserAsync((ulong)p.User.DiscordID);
-                            if (guildUser is null)
+                            if (!(guildUser is null))
                             {
-                                var messageByUser = roleplay.Messages.FirstOrDefault
-                                (
-                                    m => m.AuthorDiscordID == p.User.DiscordID
-                                );
-
-                                if (messageByUser is null)
-                                {
-                                    return $"Unknown user ({p.User.DiscordID})";
-                                }
-
-                                return messageByUser.AuthorNickname;
+                                return guildUser.Username;
                             }
 
-                            return guildUser.Username;
+                            var messageByUser = roleplay.Messages.FirstOrDefault
+                            (
+                                m => m.AuthorDiscordID == p.User.DiscordID
+                            );
+
+                            if (messageByUser is null)
+                            {
+                                return $"Unknown user ({p.User.DiscordID})";
+                            }
+
+                            return messageByUser.AuthorNickname;
                         }
                     )
                 );

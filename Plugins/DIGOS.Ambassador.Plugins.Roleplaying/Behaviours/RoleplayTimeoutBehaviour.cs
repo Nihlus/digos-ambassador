@@ -91,11 +91,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             {
                 // ReSharper disable once PossibleInvalidOperationException
                 var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated!.Value;
-                if (timeSinceLastActivity > TimeSpan.FromHours(72))
+                if (timeSinceLastActivity <= TimeSpan.FromHours(72))
                 {
-                    await StopRoleplayAsync(roleplayService, roleplay);
-                    await NotifyOwner(roleplay);
+                    continue;
                 }
+
+                await StopRoleplayAsync(roleplayService, roleplay);
+                await NotifyOwner(roleplay);
             }
 
             await Task.Delay(TimeSpan.FromSeconds(5), ct);

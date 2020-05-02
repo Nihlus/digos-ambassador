@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
             public async Task ReturnsTrueIfTokenFileExistsAndContainsValidToken()
             {
                 this.FileSystem.CreateDirectory(_tokenDirectory);
-                using (var sw = new StreamWriter(this.FileSystem.CreateFile(_tokenPath)))
+                await using (var sw = new StreamWriter(this.FileSystem.CreateFile(_tokenPath)))
                 {
                     await sw.WriteLineAsync("02f978n90908nsaf908n2908n2908n");
                 }
@@ -82,7 +82,7 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
             public async Task ActuallyReturnsToken()
             {
                 this.FileSystem.CreateDirectory(_tokenDirectory);
-                using (var sw = new StreamWriter(this.FileSystem.CreateFile(_tokenPath)))
+                await using (var sw = new StreamWriter(this.FileSystem.CreateFile(_tokenPath)))
                 {
                     await sw.WriteLineAsync("02f978n90908nsaf908n2908n2908n");
                 }

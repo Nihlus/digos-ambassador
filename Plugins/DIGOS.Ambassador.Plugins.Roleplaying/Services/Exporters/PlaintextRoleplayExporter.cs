@@ -49,9 +49,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
             var owner = await this.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
 
             var filePath = Path.GetTempFileName();
-            using (var of = File.Create(filePath))
+            await using (var of = File.Create(filePath))
             {
-                using var ofw = new StreamWriter(of);
+                await using var ofw = new StreamWriter(of);
                 await ofw.WriteLineAsync($"Roleplay name: {roleplay.Name}");
                 await ofw.WriteLineAsync($"Owner: {owner.Username}");
 

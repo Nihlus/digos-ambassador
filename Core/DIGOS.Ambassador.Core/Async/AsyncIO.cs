@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Core.Async
 
             // Open the FileStream with the same FileMode, FileAccess
             // and FileShare as a call to File.OpenText would've done.
-            using var stream = new FileStream
+            await using var stream = new FileStream
             (
                 path,
                 FileMode.Open,
@@ -93,13 +93,12 @@ namespace DIGOS.Ambassador.Core.Async
             encoding ??= Encoding.UTF8;
 
             var lines = new List<string>();
-            using (var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen))
+            using var reader = new StreamReader(stream, encoding, false, DefaultBufferSize, leaveOpen);
+
+            string? line;
+            while ((line = await reader.ReadLineAsync()) != null)
             {
-                string? line;
-                while ((line = await reader.ReadLineAsync()) != null)
-                {
-                    lines.Add(line);
-                }
+                lines.Add(line);
             }
 
             return lines.ToArray();
@@ -117,7 +116,7 @@ namespace DIGOS.Ambassador.Core.Async
 
             // Open the FileStream with the same FileMode, FileAccess
             // and FileShare as a call to File.OpenText would've done.
-            using var stream = new FileStream
+            await using var stream = new FileStream
             (
                 path,
                 FileMode.Open,

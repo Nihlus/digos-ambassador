@@ -52,13 +52,20 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             out object? value
         )
         {
-            if (_nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
+            if (!_nodeDeserializer.Deserialize(parser, expectedType, nestedObjectDeserializer, out value))
             {
-                var context = new ValidationContext(value, null, null);
-                Validator.ValidateObject(value, context, true);
-                return true;
+                return false;
             }
-            return false;
+
+            // TODO: Probably redundant, but YamlDotNet doesn't have nullability turned on yet
+            if (value is null)
+            {
+                return false;
+            }
+
+            var context = new ValidationContext(value, null, null);
+            Validator.ValidateObject(value, context, true);
+            return true;
         }
     }
 }

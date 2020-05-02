@@ -140,7 +140,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                     return RetrieveEntityResult<IReadOnlyList<Species>>.FromError(openStreamResult);
                 }
 
-                using var speciesFile = openStreamResult.Entity;
+                await using var speciesFile = openStreamResult.Entity;
                 var content = await AsyncIO.ReadAllTextAsync(speciesFile, Encoding.UTF8);
 
                 try
@@ -200,7 +200,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                 }
 
                 string content;
-                using (var transformationFileStream = getTransformationFileStream.Entity)
+                await using (var transformationFileStream = getTransformationFileStream.Entity)
                 {
                     content = await AsyncIO.ReadAllTextAsync(transformationFileStream);
                 }

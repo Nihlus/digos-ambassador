@@ -128,7 +128,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                 await channel.SendMessageAsync(string.Empty, embed: errorBuilder.Build());
             }
 
-            using var privacyPolicy = result.Entity;
+            await using var privacyPolicy = result.Entity;
             await channel.SendFileAsync(privacyPolicy, "PrivacyPolicy.pdf");
         }
 

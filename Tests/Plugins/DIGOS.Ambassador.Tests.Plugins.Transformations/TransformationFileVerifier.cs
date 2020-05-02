@@ -45,30 +45,28 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         /// <returns>A condition result, which may or may not have succeeded.</returns>
         public DetermineConditionResult VerifyFile<T>(string file)
         {
-            using (var sr = new StreamReader(File.OpenRead(file)))
+            using var sr = new StreamReader(File.OpenRead(file));
+            var deserB = new DeserializerBuilder()
+                .WithTypeConverter(new ColourYamlConverter())
+                .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
+                .WithNamingConvention(UnderscoredNamingConvention.Instance);
+
+            if (typeof(T) != typeof(Species))
             {
-                var deserB = new DeserializerBuilder()
-                    .WithTypeConverter(new ColourYamlConverter())
-                    .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
-                    .WithNamingConvention(UnderscoredNamingConvention.Instance);
+                deserB = deserB.WithTypeConverter(new RawSpeciesYamlConverter());
+            }
 
-                if (typeof(T) != typeof(Species))
-                {
-                    deserB = deserB.WithTypeConverter(new RawSpeciesYamlConverter());
-                }
+            var deser = deserB.Build();
 
-                var deser = deserB.Build();
+            var content = sr.ReadToEnd();
 
-                var content = sr.ReadToEnd();
-
-                try
-                {
-                    deser.Deserialize<T>(content);
-                }
-                catch (YamlException yex)
-                {
-                    return DetermineConditionResult.FromError(yex, Path.GetFileName(file));
-                }
+            try
+            {
+                deser.Deserialize<T>(content);
+            }
+            catch (YamlException yex)
+            {
+                return DetermineConditionResult.FromError(yex, Path.GetFileName(file));
             }
 
             return DetermineConditionResult.FromSuccess();
@@ -98,13 +96,15 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             }
 
             var speciesPath = Path.Combine(directory, "Species.yml");
-            if (File.Exists(speciesPath))
+            if (!File.Exists(speciesPath))
             {
-                var speciesVerificationResult = VerifyFile<Species>(speciesPath);
-                if (!speciesVerificationResult.IsSuccess)
-                {
-                    return speciesVerificationResult;
-                }
+                return DetermineConditionResult.FromSuccess();
+            }
+
+            var speciesVerificationResult = VerifyFile<Species>(speciesPath);
+            if (!speciesVerificationResult.IsSuccess)
+            {
+                return speciesVerificationResult;
             }
 
             return DetermineConditionResult.FromSuccess();

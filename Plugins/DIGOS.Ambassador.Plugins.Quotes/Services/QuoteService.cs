@@ -84,18 +84,15 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// </summary>
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
-        /// <returns>true if information was added; otherwise, false.</returns>
-        private bool TryAddOtherAttachmentInfo(IMessage message, ref EmbedBuilder embed)
+        private void TryAddOtherAttachmentInfo(IMessage message, ref EmbedBuilder embed)
         {
             var firstAttachment = message.Attachments.FirstOrDefault();
             if (firstAttachment is null)
             {
-                return false;
+                return;
             }
 
             embed.AddField($"Attachment (Size: {new ByteSize(firstAttachment.Size)})", firstAttachment.Url);
-
-            return true;
         }
 
         /// <summary>

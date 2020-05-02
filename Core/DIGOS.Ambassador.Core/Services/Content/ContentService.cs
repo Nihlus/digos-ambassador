@@ -110,7 +110,7 @@ namespace DIGOS.Ambassador.Core.Services
                 return RetrieveEntityResult<string>.FromError("The token file could not be opened.");
             }
 
-            using var tokenStream = getTokenStream.Entity;
+            await using var tokenStream = getTokenStream.Entity;
             var token = await AsyncIO.ReadAllTextAsync(tokenStream);
 
             if (string.IsNullOrEmpty(token))

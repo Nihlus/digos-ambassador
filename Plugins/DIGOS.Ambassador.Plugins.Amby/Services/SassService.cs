@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.Services
             var getSassStream = _content.OpenLocalStream(sassPath);
             if (getSassStream.IsSuccess)
             {
-                using var sassStream = getSassStream.Entity;
+                await using var sassStream = getSassStream.Entity;
                 _sass = (await AsyncIO.ReadAllLinesAsync(sassStream)).ToList();
             }
             else
@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.Services
             var getNSFWSassStream = _content.OpenLocalStream(sassNSFWPath);
             if (getNSFWSassStream.IsSuccess)
             {
-                using var nsfwSassStream = getNSFWSassStream.Entity;
+                await using var nsfwSassStream = getNSFWSassStream.Entity;
                 _sassNSFW = (await AsyncIO.ReadAllLinesAsync(nsfwSassStream)).ToList();
             }
             else

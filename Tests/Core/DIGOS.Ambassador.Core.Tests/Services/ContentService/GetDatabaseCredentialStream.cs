@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
 
                 fileSystem.CreateDirectory(databaseDirectory);
 
-                using var sw = new StreamWriter
+                await using var sw = new StreamWriter
                 (
                     fileSystem.OpenFile(credentialsPath, FileMode.Create, FileAccess.Write)
                 );

@@ -59,19 +59,19 @@ namespace DIGOS.Ambassador.Doc.Extensions
         [Pure]
         public static string Humanize(this TypeReference @this)
         {
-            if (@this.IsPrimitive || @this.Name == nameof(String))
+            if (!@this.IsPrimitive && @this.Name != nameof(String))
             {
-                var resolvedType = Type.GetType($"{@this.FullName}");
-
-                if (resolvedType is null)
-                {
-                    throw new InvalidOperationException();
-                }
-
-                return TypeAliases.ContainsKey(resolvedType) ? TypeAliases[resolvedType] : @this.Name;
+                return @this.Name;
             }
 
-            return @this.Name;
+            var resolvedType = Type.GetType($"{@this.FullName}");
+
+            if (resolvedType is null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return TypeAliases.ContainsKey(resolvedType) ? TypeAliases[resolvedType] : @this.Name;
         }
     }
 }

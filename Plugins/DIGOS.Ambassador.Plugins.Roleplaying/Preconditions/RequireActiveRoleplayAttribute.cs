@@ -58,13 +58,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
                 return PreconditionResult.FromError(result.ErrorReason);
             }
 
-            if (_requireOwner)
+            if (!_requireOwner)
             {
-                var roleplay = result.Entity;
-                if (roleplay.Owner.DiscordID != (long)context.User.Id)
-                {
-                    return PreconditionResult.FromError("Only the roleplay owner can do that.");
-                }
+                return PreconditionResult.FromSuccess();
+            }
+
+            var roleplay = result.Entity;
+            if (roleplay.Owner.DiscordID != (long)context.User.Id)
+            {
+                return PreconditionResult.FromError("Only the roleplay owner can do that.");
             }
 
             return PreconditionResult.FromSuccess();

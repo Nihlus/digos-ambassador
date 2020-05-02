@@ -108,23 +108,23 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
             }
 
             var retrieveEntityResult = await RetrieveEntityAsync(owner, entityName, context, services);
-            if (!retrieveEntityResult.IsSuccess)
+            if (retrieveEntityResult.IsSuccess)
             {
-                if (!(owner is null))
-                {
-                    return TypeReaderResult.FromError(CommandError.Unsuccessful, retrieveEntityResult.ErrorReason);
-                }
-
-                var retrieveUserEntityResult = await RetrieveEntityAsync(context.User, entityName, context, services);
-                if (!retrieveUserEntityResult.IsSuccess)
-                {
-                    return TypeReaderResult.FromError(CommandError.Unsuccessful, retrieveUserEntityResult.ErrorReason);
-                }
-
-                return TypeReaderResult.FromSuccess(retrieveUserEntityResult.Entity);
+                return TypeReaderResult.FromSuccess(retrieveEntityResult.Entity);
             }
 
-            return TypeReaderResult.FromSuccess(retrieveEntityResult.Entity);
+            if (!(owner is null))
+            {
+                return TypeReaderResult.FromError(CommandError.Unsuccessful, retrieveEntityResult.ErrorReason);
+            }
+
+            var retrieveUserEntityResult = await RetrieveEntityAsync(context.User, entityName, context, services);
+            if (!retrieveUserEntityResult.IsSuccess)
+            {
+                return TypeReaderResult.FromError(CommandError.Unsuccessful, retrieveUserEntityResult.ErrorReason);
+            }
+
+            return TypeReaderResult.FromSuccess(retrieveUserEntityResult.Entity);
         }
 
         /// <summary>
@@ -201,21 +201,23 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
             // By Mention
             if (!MentionUtils.TryParseUser(input, out var id))
             {
-                var getUserResult = await GetUserByIdAsync(context, id);
-                if (getUserResult.IsSuccess)
+                var getUserByMentionResult = await GetUserByIdAsync(context, id);
+                if (getUserByMentionResult.IsSuccess)
                 {
-                    return getUserResult;
+                    return getUserByMentionResult;
                 }
             }
 
             // By Id
-            if (ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out id))
+            if (!ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out id))
             {
-                var getUserResult = await GetUserByIdAsync(context, id);
-                if (getUserResult.IsSuccess)
-                {
-                    return getUserResult;
-                }
+                return await FindBestMatchingUserAsync(context, input);
+            }
+
+            var getUserByIdResult = await GetUserByIdAsync(context, id);
+            if (getUserByIdResult.IsSuccess)
+            {
+                return getUserByIdResult;
             }
 
             return await FindBestMatchingUserAsync(context, input);
@@ -284,20 +286,22 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
                 return RetrieveEntityResult<IUser>.FromSuccess(bestGuildUserByName.Entity);
             }
 
-            if (!(context.Guild is null))
+            if (context.Guild is null)
             {
-                // By Nickname
-                var bestUserByNick = FindBestMatchingUserBy(channelUsers.Cast<IGuildUser>(), u => u.Nickname, input);
-                if (bestUserByNick.IsSuccess)
-                {
-                    return RetrieveEntityResult<IUser>.FromSuccess(bestUserByNick.Entity);
-                }
+                return RetrieveEntityResult<IUser>.FromError("User not found.");
+            }
 
-                var bestGuildUserByNick = FindBestMatchingUserBy(guildUsers, gu => gu.Nickname, input);
-                if (bestGuildUserByNick.IsSuccess)
-                {
-                    return RetrieveEntityResult<IUser>.FromSuccess(bestGuildUserByNick.Entity);
-                }
+            // By Nickname
+            var bestUserByNick = FindBestMatchingUserBy(channelUsers.Cast<IGuildUser>(), u => u.Nickname, input);
+            if (bestUserByNick.IsSuccess)
+            {
+                return RetrieveEntityResult<IUser>.FromSuccess(bestUserByNick.Entity);
+            }
+
+            var bestGuildUserByNick = FindBestMatchingUserBy(guildUsers, gu => gu.Nickname, input);
+            if (bestGuildUserByNick.IsSuccess)
+            {
+                return RetrieveEntityResult<IUser>.FromSuccess(bestGuildUserByNick.Entity);
             }
 
             return RetrieveEntityResult<IUser>.FromError("User not found.");

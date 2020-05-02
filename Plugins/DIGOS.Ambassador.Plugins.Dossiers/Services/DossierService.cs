@@ -351,42 +351,40 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
                 return ModifyEntityResult.FromError("Invalid dossier format. PDF files are accepted.");
             }
 
-            using (var client = new HttpClient())
+            using var client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(2);
+
+            try
             {
-                client.Timeout = TimeSpan.FromSeconds(2);
+                var dossierPath = GetDossierDataPath(dossier);
+                await using var dataStream = await client.GetStreamAsync(dossierAttachment.Url);
 
                 try
                 {
-                    var dossierPath = GetDossierDataPath(dossier);
-                    using var dataStream = await client.GetStreamAsync(dossierAttachment.Url);
+                    await using var dataFile = _content.FileSystem.CreateFile(dossierPath);
+                    await dataStream.CopyToAsync(dataFile);
 
-                    try
+                    if (!await dataFile.HasSignatureAsync(FileSignatures.PDF))
                     {
-                        using var dataFile = _content.FileSystem.CreateFile(dossierPath);
-                        await dataStream.CopyToAsync(dataFile);
-
-                        if (!await dataFile.HasSignatureAsync(FileSignatures.PDF))
-                        {
-                            return ModifyEntityResult.FromError
-                            (
-                                "Invalid dossier format. PDF files are accepted."
-                            );
-                        }
+                        return ModifyEntityResult.FromError
+                        (
+                            "Invalid dossier format. PDF files are accepted."
+                        );
                     }
-                    catch (Exception e)
-                    {
-                        return ModifyEntityResult.FromError(e);
-                    }
-
-                    await _database.SaveChangesAsync();
                 }
-                catch (TaskCanceledException)
+                catch (Exception e)
                 {
-                    return ModifyEntityResult.FromError
-                    (
-                        "The download operation timed out. The data file was not added."
-                    );
+                    return ModifyEntityResult.FromError(e);
                 }
+
+                await _database.SaveChangesAsync();
+            }
+            catch (TaskCanceledException)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    "The download operation timed out. The data file was not added."
+                );
             }
 
             return ModifyEntityResult.FromSuccess();
