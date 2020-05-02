@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 var character = new Character((long)_guild.Id, _user, "Dummy");
 
                 this.Database.Characters.Update(character);
-                this.Database.SaveChanges();
+                await this.Database.SaveChangesAsync();
 
                 var result = await this.Characters.HasActiveCharacterOnServerAsync(_user, _guild);
 
@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 };
 
                 this.Database.Characters.Update(character);
-                this.Database.SaveChanges();
+                await this.Database.SaveChangesAsync();
 
                 var result = await this.Characters.HasActiveCharacterOnServerAsync(_user, _guild);
 

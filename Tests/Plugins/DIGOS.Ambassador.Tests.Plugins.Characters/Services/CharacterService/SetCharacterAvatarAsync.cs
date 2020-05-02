@@ -54,7 +54,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 _character = new Character(0, _owner, "Dummy", AvatarURL);
 
                 this.Database.Characters.Update(_character);
-                this.Database.SaveChanges();
+                await this.Database.SaveChangesAsync();
             }
 
             [Fact]

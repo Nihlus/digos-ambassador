@@ -52,7 +52,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 _character = new Character((long)_guild.Id, _owner, CharacterName);
 
                 this.Database.Characters.Update(_character);
-                this.Database.SaveChanges();
+                await this.Database.SaveChangesAsync();
             }
 
             [Fact]

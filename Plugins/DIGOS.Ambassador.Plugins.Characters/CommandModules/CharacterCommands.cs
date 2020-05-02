@@ -1535,7 +1535,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     }
 
                     using var sr = new StreamReader(getAttachmentStreamResult.Entity);
-                    newCharacterDescription = sr.ReadToEnd();
+                    newCharacterDescription = await sr.ReadToEndAsync();
                 }
 
                 var setDescriptionResult = await _characters.SetCharacterDescriptionAsync(character, newCharacterDescription);

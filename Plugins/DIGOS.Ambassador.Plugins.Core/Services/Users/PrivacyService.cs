@@ -161,7 +161,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                     HasConsented = true
                 };
 
-                _database.UserConsents.Add(userConsent);
+                await _database.UserConsents.AddAsync(userConsent);
             }
             else
             {

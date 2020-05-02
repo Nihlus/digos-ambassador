@@ -52,7 +52,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 _character = new Character(0, _owner, "Test");
 
                 this.CharacterDatabase.Characters.Update(_character);
-                this.CharacterDatabase.SaveChanges();
+                await this.CharacterDatabase.SaveChangesAsync();
 
                 // Set up the default appearance
                 var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateDefaultAppearanceAsync

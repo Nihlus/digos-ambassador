@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Core.Tests.Services.ContentService
             public async Task ReturnsFalseIfTokenFileExistsButContainsNoValidToken()
             {
                 this.FileSystem.CreateDirectory(_tokenDirectory);
-                this.FileSystem.CreateFile(_tokenPath).Dispose();
+                await this.FileSystem.CreateFile(_tokenPath).DisposeAsync();
 
                 var result = await this.ContentService.GetBotTokenAsync();
 
