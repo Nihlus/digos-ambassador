@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>The warnings.</returns>
         public IQueryable<UserBan> GetBans([NotNull] IGuild guild)
         {
-            return _database.UserBans.Where
+            return _database.UserBans.AsQueryable().Where
             (
                 n => n.Server.DiscordID == (long)guild.Id
             );
@@ -82,7 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>The bans.</returns>
         public IQueryable<UserBan> GetBans([NotNull] IGuildUser user)
         {
-            return _database.UserBans.Where
+            return _database.UserBans.AsQueryable().Where
             (
                 n => n.User.DiscordID == (long)user.Id && n.Server.DiscordID == (long)user.Guild.Id
             );
@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         public async Task<RetrieveEntityResult<UserBan>> GetBanAsync([NotNull] IGuild server, long banID)
         {
             // The server isn't strictly required here, but it prevents leaking bans between servers.
-            var ban = await _database.UserBans.FirstOrDefaultAsync
+            var ban = await _database.UserBans.AsQueryable().FirstOrDefaultAsync
             (
                 n => n.ID == banID &&
                      n.Server.DiscordID == (long)server.Id

@@ -368,7 +368,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             [NotNull] IGuild guild
         )
         {
-            if (await _database.Roleplays.CountAsync(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower())) > 1)
+            if
+            (
+                await _database.Roleplays.AsQueryable()
+                    .CountAsync(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower())) > 1
+            )
             {
                 return RetrieveEntityResult<Roleplay>.FromError
                 (
@@ -398,7 +402,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             [NotNull] IMessageChannel channel
         )
         {
-            var roleplay = await _database.Roleplays.FirstOrDefaultAsync
+            var roleplay = await _database.Roleplays.AsQueryable().FirstOrDefaultAsync
             (
                 rp => rp.IsActive && rp.ActiveChannelID == (long)channel.Id
             );
@@ -422,7 +426,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         [Pure, NotNull]
         public async Task<bool> HasActiveRoleplayAsync([NotNull] IChannel channel)
         {
-            return await _database.Roleplays.AnyAsync(rp => rp.IsActive && rp.ActiveChannelID == (long)channel.Id);
+            return await _database.Roleplays.AsQueryable().AnyAsync
+            (
+                rp => rp.IsActive && rp.ActiveChannelID == (long)channel.Id
+            );
         }
 
         /// <summary>
@@ -457,12 +464,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return _database.Roleplays;
             }
 
-            return _database.Roleplays
-                .Where
-                (
-                    rp =>
-                        rp.ServerID == (long)guild.Id
-                );
+            return _database.Roleplays.AsQueryable()
+            .Where
+            (
+                rp =>
+                    rp.ServerID == (long)guild.Id
+            );
         }
 
         /// <summary>
@@ -1155,7 +1162,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             [NotNull] Server server
         )
         {
-            var existingSettings = await _database.ServerSettings.FirstOrDefaultAsync(s => s.Server == server);
+            var existingSettings = await _database.ServerSettings.AsQueryable().FirstOrDefaultAsync
+            (
+                s => s.Server == server
+            );
 
             if (!(existingSettings is null))
             {

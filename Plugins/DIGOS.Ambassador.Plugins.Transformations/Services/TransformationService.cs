@@ -131,7 +131,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure, NotNull, ItemNotNull]
         private async Task<RetrieveEntityResult<Appearance>> GetDefaultAppearanceAsync([NotNull] Character character)
         {
-            var defaultAppearance = await _database.Appearances.FirstOrDefaultAsync
+            var defaultAppearance = await _database.Appearances.AsQueryable().FirstOrDefaultAsync
             (
                 da => da.Character == character && da.IsDefault
             );
@@ -190,7 +190,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure, NotNull, ItemNotNull]
         private async Task<RetrieveEntityResult<Appearance>> GetCurrentAppearanceAsync([NotNull] Character character)
         {
-            var currentAppearance = await _database.Appearances.FirstOrDefaultAsync
+            var currentAppearance = await _database.Appearances.AsQueryable().FirstOrDefaultAsync
             (
                 da => da.Character == character && da.IsCurrent
             );
@@ -579,7 +579,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure, NotNull, ItemNotNull]
         public async Task<IReadOnlyList<Species>> GetAvailableSpeciesAsync()
         {
-            return await _database.Species
+            return await _database.Species.AsQueryable()
                 .ToListAsync();
         }
 
@@ -591,7 +591,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure, NotNull, ItemNotNull]
         public async Task<IReadOnlyList<Transformation>> GetAvailableTransformationsAsync(Bodypart bodyPart)
         {
-            return await _database.Transformations
+            return await _database.Transformations.AsQueryable()
                 .Where(tf => tf.Part == bodyPart).ToListAsync();
         }
 
@@ -866,7 +866,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             [NotNull] IUser discordUser
         )
         {
-            var protection = await _database.GlobalUserProtections
+            var protection = await _database.GlobalUserProtections.AsQueryable()
             .FirstOrDefaultAsync(p => p.User.DiscordID == (long)discordUser.Id);
 
             if (!(protection is null))
@@ -904,7 +904,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             [NotNull] IGuild guild
         )
         {
-            var protection = await _database.ServerUserProtections.FirstOrDefaultAsync
+            var protection = await _database.ServerUserProtections.AsQueryable().FirstOrDefaultAsync
             (
                 p =>
                     p.User.DiscordID == (long)discordUser.Id && p.Server.DiscordID == (long)guild.Id
@@ -1096,7 +1096,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 bodyparts.Add(bodypart);
             }
 
-            var transformations = await _database.Transformations
+            var transformations = await _database.Transformations.AsQueryable()
                 .Where(tf => bodyparts.Contains(tf.Part) && tf.Species.Name.ToLower().Equals(species.Name.ToLower()))
                 .ToListAsync();
 
@@ -1124,7 +1124,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             [NotNull] Species species
         )
         {
-            return !await _database.Transformations.AnyAsync
+            return !await _database.Transformations.AsQueryable().AnyAsync
             (
                 tf => tf.Part == bodypart && string.Equals(tf.Species.Name.ToLower(), species.Name.ToLower())
             );
@@ -1155,7 +1155,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             [NotNull] string speciesName
         )
         {
-            var species = await _database.Species.FirstOrDefaultAsync
+            var species = await _database.Species.AsQueryable().FirstOrDefaultAsync
             (
                 s => string.Equals(s.Name.ToLower(), speciesName.ToLower())
             );
@@ -1179,7 +1179,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             [NotNull] string speciesName
         )
         {
-            return !await _database.Species.AnyAsync
+            return !await _database.Species.AsQueryable().AnyAsync
             (
                 s => string.Equals(s.Name.ToLower(), speciesName.ToLower())
             );

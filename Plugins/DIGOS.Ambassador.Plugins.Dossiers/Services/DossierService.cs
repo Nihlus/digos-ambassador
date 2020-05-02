@@ -192,7 +192,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         [Pure, NotNull]
         public async Task<bool> IsDossierTitleUniqueAsync([NotNull] string dossierTitle)
         {
-            return await _database.Dossiers.Select(d => d.Title)
+            return await _database.Dossiers.AsQueryable().Select(d => d.Title)
             .AllAsync
             (
                 p => !p.ToLower().Equals(dossierTitle.ToLower())
@@ -207,7 +207,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         [Pure, NotNull]
         public async Task<RetrieveEntityResult<Dossier>> GetDossierByTitleAsync([NotNull] string title)
         {
-            var dossier = await _database.Dossiers.FirstOrDefaultAsync
+            var dossier = await _database.Dossiers.AsQueryable().FirstOrDefaultAsync
             (
                 d => string.Equals(d.Title.ToLower(), title.ToLower())
             );

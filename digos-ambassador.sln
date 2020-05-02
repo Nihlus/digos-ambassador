@@ -22,6 +22,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Doc", "DIGOS.Ambassador.Doc\DIGOS.Ambassador.Doc.csproj", "{B90660FB-2903-4FE4-BBE3-4E46A3D1A29B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{1EDC2213-9E6B-4F55-974F-6466F48B4385}"
+ProjectSection(SolutionItems) = preProject
+	Tests\Directory.Build.props = Tests\Directory.Build.props
+EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{4A182B87-C1AD-49B5-A162-86AEFACCE002}"
 EndProject

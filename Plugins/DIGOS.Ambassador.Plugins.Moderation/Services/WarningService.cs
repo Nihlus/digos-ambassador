@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>The warnings.</returns>
         public IQueryable<UserWarning> GetWarnings([NotNull] IGuild guild)
         {
-            return _database.UserWarnings.Where
+            return _database.UserWarnings.AsQueryable().Where
             (
                 n => n.Server.DiscordID == (long)guild.Id
             );
@@ -82,7 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>The warnings.</returns>
         public IQueryable<UserWarning> GetWarnings([NotNull] IGuildUser user)
         {
-            return _database.UserWarnings.Where
+            return _database.UserWarnings.AsQueryable().Where
             (
                 n => n.User.DiscordID == (long)user.Id && n.Server.DiscordID == (long)user.Guild.Id
             );
@@ -97,7 +97,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         public async Task<RetrieveEntityResult<UserWarning>> GetWarningAsync([NotNull] IGuild server, long warningID)
         {
             // The server isn't strictly required here, but it prevents leaking warnings between servers.
-            var warning = await _database.UserWarnings.FirstOrDefaultAsync
+            var warning = await _database.UserWarnings.AsQueryable().FirstOrDefaultAsync
             (
                 n => n.ID == warningID &&
                      n.Server.DiscordID == (long)server.Id

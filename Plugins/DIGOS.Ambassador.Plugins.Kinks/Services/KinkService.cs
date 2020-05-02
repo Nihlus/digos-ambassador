@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             }
 
             var user = getUserResult.Entity;
-            var userKinks = _database.UserKinks.Where(k => k.User == user);
+            var userKinks = _database.UserKinks.AsQueryable().Where(k => k.User == user);
 
             return RetrieveEntityResult<IQueryable<UserKink>>.FromSuccess(userKinks);
         }
@@ -319,7 +319,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure, NotNull, ItemNotNull]
         public async Task<IEnumerable<KinkCategory>> GetKinkCategoriesAsync()
         {
-            return (await _database.Kinks.Select(k => k.Category).ToListAsync())
+            return (await _database.Kinks.AsQueryable().Select(k => k.Category).ToListAsync())
                 .OrderBy(k => k.ToString())
                 .Distinct();
         }
@@ -332,7 +332,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure, NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<Kink>> GetKinkByFListIDAsync(int onlineKinkID)
         {
-            var kink = await _database.Kinks.FirstOrDefaultAsync(k => k.FListID == onlineKinkID);
+            var kink = await _database.Kinks.AsQueryable().FirstOrDefaultAsync(k => k.FListID == onlineKinkID);
             if (kink is null)
             {
                 return RetrieveEntityResult<Kink>.FromError("No kink with that ID found.");
@@ -349,7 +349,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure, NotNull, ItemNotNull]
         public async Task<RetrieveEntityResult<IEnumerable<Kink>>> GetKinksByCategoryAsync(KinkCategory category)
         {
-            var group = await _database.Kinks.Where(k => k.Category == category).ToListAsync();
+            var group = await _database.Kinks.AsQueryable().Where(k => k.Category == category).ToListAsync();
             if (group is null || !group.Any())
             {
                 return RetrieveEntityResult<IEnumerable<Kink>>.FromError
@@ -407,7 +407,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
 
             var user = getUserResult.Entity;
 
-            _database.UserKinks.RemoveRange(_database.UserKinks.Where(k => k.User == user));
+            _database.UserKinks.RemoveRange(_database.UserKinks.AsQueryable().Where(k => k.User == user));
 
             await _database.SaveChangesAsync();
 
@@ -527,7 +527,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         {
             foreach (var kink in newKinks)
             {
-                if (!await _database.Kinks.AnyAsync(k => k.FListID == kink.FListID))
+                if (!await _database.Kinks.AsQueryable().AnyAsync(k => k.FListID == kink.FListID))
                 {
                     await _database.Kinks.AddAsync(kink);
                 }

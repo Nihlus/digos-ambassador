@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <returns>The notes.</returns>
         public IQueryable<UserNote> GetNotes([NotNull] IGuildUser user)
         {
-            return _database.UserNotes.Where
+            return _database.UserNotes.AsQueryable().Where
             (
                 n => n.User.DiscordID == (long)user.Id && n.Server.DiscordID == (long)user.Guild.Id
             );
@@ -83,7 +83,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         public async Task<RetrieveEntityResult<UserNote>> GetNoteAsync([NotNull] IGuild server, long noteID)
         {
             // The server isn't strictly required here, but it prevents leaking notes between servers.
-            var note = await _database.UserNotes.FirstOrDefaultAsync
+            var note = await _database.UserNotes.AsQueryable().FirstOrDefaultAsync
             (
                 n => n.ID == noteID &&
                      n.Server.DiscordID == (long)server.Id

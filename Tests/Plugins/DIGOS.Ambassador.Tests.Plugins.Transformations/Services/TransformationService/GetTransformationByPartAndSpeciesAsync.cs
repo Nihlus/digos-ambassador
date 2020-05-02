@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             protected override async Task InitializeTestAsync()
             {
-                _templateSpecies = await this.Database.Species.FirstAsync(s => s.Name == "template");
+                _templateSpecies = await this.Database.Species.AsQueryable().FirstAsync(s => s.Name == "template");
             }
 
             [Fact]

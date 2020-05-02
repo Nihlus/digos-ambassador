@@ -437,7 +437,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             [NotNull] IUser discordUser
         )
         {
-            return _database.UserPermissions
+            return _database.UserPermissions.AsQueryable()
                 .Where(p => p.ServerID == (long)discordServer.Id)
                 .Where(p => p.UserID == (long)discordUser.Id);
         }
@@ -455,7 +455,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         {
             var userRoles = discordUser.RoleIds.ToList();
 
-            return _database.RolePermissions
+            return _database.RolePermissions.AsQueryable()
                 .Where(p => userRoles.Any(r => r == (ulong)p.RoleID))
                 .ToList()
                 .OrderBy(p => userRoles.IndexOf(userRoles.First(r => r == (ulong)p.RoleID)));
@@ -481,7 +481,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 throw new ArgumentException("Invalid permission target.", nameof(target));
             }
 
-            var existingPermission = await _database.RolePermissions.FirstOrDefaultAsync
+            var existingPermission = await _database.RolePermissions.AsQueryable().FirstOrDefaultAsync
             (
                 p =>
                     p.RoleID == (long)discordRole.Id &&
@@ -529,7 +529,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 throw new ArgumentException("Invalid permission target.", nameof(target));
             }
 
-            var existingPermission = await _database.UserPermissions.FirstOrDefaultAsync
+            var existingPermission = await _database.UserPermissions.AsQueryable().FirstOrDefaultAsync
             (
                 p =>
                     p.ServerID == (long)discordGuild.Id &&

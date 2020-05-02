@@ -6,8 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="YamlDotNet" Version="8.0.0" />
-        <PackageReference Include="NLua" Version="1.4.26" />
+        <PackageReference Include="YamlDotNet" Version="8.1.1" />
+        <PackageReference Include="NLua" Version="1.4.31" />
     </ItemGroup>
 
     <!-- Workaround for https://github.com/aspnet/EntityFrameworkCore/issues/19426 -->

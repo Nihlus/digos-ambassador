@@ -218,7 +218,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             [NotNull] IGuild guild
         )
         {
-            var guildCharacters = _database.Characters.Where(ch => ch.ServerID == (long)guild.Id);
+            var guildCharacters = _database.Characters.AsQueryable().Where(ch => ch.ServerID == (long)guild.Id);
             if (await guildCharacters.CountAsync(ch => string.Equals(ch.Name.ToLower(), characterName.ToLower())) > 1)
             {
                 return RetrieveEntityResult<Character>.FromError
@@ -246,7 +246,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         [Pure, NotNull, ItemNotNull]
         public IQueryable<Character> GetCharacters([NotNull] IGuild guild)
         {
-            return _database.Characters
+            return _database.Characters.AsQueryable()
                 .Where(c => c.ServerID == (long)guild.Id)
                 .Include(c => c.Owner);
         }
@@ -1015,7 +1015,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             [NotNull] IRole role
         )
         {
-            var characterRole = await _database.CharacterRoles
+            var characterRole = await _database.CharacterRoles.AsQueryable()
                 .FirstOrDefaultAsync(r => r.Server.DiscordID == (long)role.Guild.Id && r.DiscordID == (long)role.Id);
 
             if (characterRole is null)
@@ -1048,7 +1048,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var server = getServerResult.Entity;
 
-            var roles = _database.CharacterRoles.Where(r => r.Server == server);
+            var roles = _database.CharacterRoles.AsQueryable().Where(r => r.Server == server);
 
             return RetrieveEntityResult<IQueryable<CharacterRole>>.FromSuccess(roles);
         }
