@@ -114,7 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
             var messageBuilder = new StringBuilder();
             void InsertRemovalMessage(string message)
             {
-                messageBuilder.Append(message);
+                messageBuilder!.Append(message);
 
                 if (!message.EndsWith(" "))
                 {

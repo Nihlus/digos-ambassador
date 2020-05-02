@@ -99,12 +99,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.113" PrivateAssets="all" />
-        <PackageReference Include="Nullable" Version="1.2.0" PrivateAssets="all" />
+        <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.164" PrivateAssets="all" />
+        <PackageReference Include="Nullable" Version="1.2.1" PrivateAssets="all" />
     </ItemGroup>
 
     <!-- JetBrains Annotations -->
     <ItemGroup>
-        <PackageReference Include="JetBrains.Annotations" Version="2019.1.3" PrivateAssets="all" />
+        <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" PrivateAssets="all" />
     </ItemGroup>
 </Project>

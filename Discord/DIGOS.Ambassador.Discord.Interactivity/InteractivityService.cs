@@ -94,7 +94,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
 
                 if (filter!(userMessage))
                 {
-                    messageTrigger.SetResult(userMessage);
+                    messageTrigger!.SetResult(userMessage);
                 }
 
                 return Task.CompletedTask;

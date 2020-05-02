@@ -131,7 +131,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
             var messageBuilder = new StringBuilder();
             void InsertShiftMessage(string message)
             {
-                messageBuilder.Append(message);
+                messageBuilder!.Append(message);
 
                 if (!message.EndsWith(" "))
                 {

@@ -898,12 +898,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 }
             }
 
+            Optional<ulong?> categoryId;
+            if (settings.DedicatedRoleplayChannelsCategory is null)
+            {
+                categoryId = null;
+            }
+            else
+            {
+                categoryId = (ulong?)settings.DedicatedRoleplayChannelsCategory;
+            }
+
             var dedicatedChannel = await guild.CreateTextChannelAsync
             (
                 $"{roleplay.Name}-rp",
                 properties =>
                 {
-                    properties.CategoryId = new Optional<ulong?>((ulong?)settings.DedicatedRoleplayChannelsCategory);
+                    properties.CategoryId = categoryId;
                     properties.IsNsfw = roleplay.IsNSFW;
                     properties.Topic = $"Dedicated roleplay channel for {roleplay.Name}.";
                 }
@@ -987,23 +997,23 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             [NotNull] Roleplay roleplay
         )
         {
-            if (!(roleplay.DedicatedChannelID is null))
+            if (roleplay.DedicatedChannelID is null)
             {
-                var guildChannel = await guild.GetChannelAsync((ulong)roleplay.DedicatedChannelID.Value);
-                if (!(guildChannel is null))
-                {
-                    return RetrieveEntityResult<IGuildChannel>.FromSuccess(guildChannel);
-                }
-
                 return RetrieveEntityResult<IGuildChannel>.FromError
                 (
-                    "Attempted to delete a channel, but it appears to have been deleted."
+                    "The roleplay doesn't have a dedicated channel."
                 );
+            }
+
+            var guildChannel = await guild.GetChannelAsync((ulong)roleplay.DedicatedChannelID.Value);
+            if (!(guildChannel is null))
+            {
+                return RetrieveEntityResult<IGuildChannel>.FromSuccess(guildChannel);
             }
 
             return RetrieveEntityResult<IGuildChannel>.FromError
             (
-                "The roleplay doesn't have a dedicated channel."
+                "Attempted to delete a channel, but it appears to have been deleted."
             );
         }
 
@@ -1202,7 +1212,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             var settings = getSettingsResult.Entity;
 
-            settings.DedicatedRoleplayChannelsCategory = (long?)category?.Id;
+            long? categoryId;
+            if (category?.Id is null)
+            {
+                categoryId = null;
+            }
+            else
+            {
+                categoryId = (long)category.Id;
+            }
+
+            settings.DedicatedRoleplayChannelsCategory = categoryId;
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -1229,7 +1249,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             var settings = getSettingsResult.Entity;
 
-            settings.ArchiveChannel = (long?)channel?.Id;
+            long? channelId;
+            if (channel?.Id is null)
+            {
+                channelId = null;
+            }
+            else
+            {
+                channelId = (long)channel.Id;
+            }
+
+            settings.ArchiveChannel = channelId;
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
