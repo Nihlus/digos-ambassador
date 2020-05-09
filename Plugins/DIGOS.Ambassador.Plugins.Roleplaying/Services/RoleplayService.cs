@@ -613,7 +613,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             // Check the invite list for nonpublic roleplays.
             if (!roleplay.IsPublic && !roleplay.IsInvited(newUser))
             {
-                return CreateEntityResult<RoleplayParticipant>.FromError("The user hasn't been invited to that roleplay.");
+                return CreateEntityResult<RoleplayParticipant>.FromError
+                (
+                    "The user hasn't been invited to that roleplay."
+                );
             }
 
             var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)newUser.Id);
