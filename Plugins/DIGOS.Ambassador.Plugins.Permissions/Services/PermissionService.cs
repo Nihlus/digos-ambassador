@@ -452,12 +452,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             IGuildUser discordUser
         )
         {
-            var userRoles = discordUser.RoleIds.ToList();
+            var userRoles = discordUser.RoleIds.Select(rid => (long)rid).ToList();
 
-            return _database.RolePermissions.AsQueryable()
-                .Where(p => userRoles.Any(r => r == (ulong)p.RoleID))
-                .ToList()
-                .OrderBy(p => userRoles.IndexOf(userRoles.First(r => r == (ulong)p.RoleID)));
+            var relevantPermissions = _database.RolePermissions.AsQueryable()
+                .Where(p => userRoles.Contains(p.RoleID))
+                .ToList();
+
+            return relevantPermissions.OrderBy(p => userRoles.IndexOf(p.RoleID));
         }
 
         /// <summary>
