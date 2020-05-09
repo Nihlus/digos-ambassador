@@ -659,11 +659,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             IUser invitedUser
         )
         {
-            if (roleplay.IsPublic && !roleplay.IsKicked(invitedUser))
-            {
-                return ModifyEntityResult.FromError("The roleplay is not set to private.");
-            }
-
             if (roleplay.InvitedUsers.Any(p => p.User.DiscordID == (long)invitedUser.Id))
             {
                 return ModifyEntityResult.FromError("The user has already been invited to that roleplay.");
