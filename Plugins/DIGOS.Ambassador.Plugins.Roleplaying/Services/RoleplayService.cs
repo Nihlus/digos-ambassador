@@ -1228,6 +1228,50 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         }
 
         /// <summary>
+        /// Retrieves the channel category that's set for the given server as the roleplay category.
+        /// </summary>
+        /// <param name="discordServer">The server.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<ICategoryChannel>> GetDedicatedRoleplayChannelCategoryAsync
+        (
+            IGuild discordServer
+        )
+        {
+            var getServerResult = await _servers.GetOrRegisterServerAsync(discordServer);
+            if (!getServerResult.IsSuccess)
+            {
+                return RetrieveEntityResult<ICategoryChannel>.FromError(getServerResult);
+            }
+
+            var server = getServerResult.Entity;
+            var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
+            if (!getSettingsResult.IsSuccess)
+            {
+                return RetrieveEntityResult<ICategoryChannel>.FromError(getSettingsResult);
+            }
+
+            var settings = getSettingsResult.Entity;
+
+            if (!settings.DedicatedRoleplayChannelsCategory.HasValue)
+            {
+                return RetrieveEntityResult<ICategoryChannel>.FromError("Failed to retrieve a valid category.");
+            }
+
+            var categories = await discordServer.GetCategoriesAsync();
+            var category = categories.FirstOrDefault
+            (
+                c => c.Id == (ulong)settings.DedicatedRoleplayChannelsCategory.Value
+            );
+
+            if (category is null)
+            {
+                return RetrieveEntityResult<ICategoryChannel>.FromError("Failed to retrieve a valid category.");
+            }
+
+            return RetrieveEntityResult<ICategoryChannel>.FromSuccess(category);
+        }
+
+        /// <summary>
         /// Sets the channel to use for archived roleplays.
         /// </summary>
         /// <param name="server">The server.</param>

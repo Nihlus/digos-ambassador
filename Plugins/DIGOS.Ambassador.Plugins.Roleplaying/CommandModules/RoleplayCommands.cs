@@ -278,6 +278,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 return;
             }
 
+            // Create a channel by default, if channels are configured
+            var getDedicatedCategoryResult = await _roleplays.GetDedicatedRoleplayChannelCategoryAsync
+            (
+                this.Context.Guild
+            );
+
+            if (getDedicatedCategoryResult.IsSuccess)
+            {
+                await ShowOrCreateDedicatedRoleplayChannel(result.Entity);
+            }
+
             await _feedback.SendConfirmationAsync(this.Context, $"Roleplay \"{result.Entity.Name}\" created.");
         }
 
