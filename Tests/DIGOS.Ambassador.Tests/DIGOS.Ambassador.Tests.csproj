@@ -10,7 +10,7 @@
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="Moq" Version="4.14.1" />
     <PackageReference Include="MockQueryable.Moq" Version="3.1.2" />
-    <PackageReference Include="Discord.Net.Core" Version="2.1.1" />
+    <PackageReference Include="Discord.Net.Core" Version="2.2.0" />
   </ItemGroup>
   
   <ItemGroup>

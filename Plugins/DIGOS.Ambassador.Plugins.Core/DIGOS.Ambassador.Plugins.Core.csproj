@@ -6,8 +6,8 @@
 
     <ItemGroup>
         <PackageReference Include="morelinq" Version="3.3.2" />
-        <PackageReference Include="Discord.Net.Commands" Version="2.1.1" />
-        <PackageReference Include="Remora.Plugins.Abstractions" Version="2.1.0" />
+        <PackageReference Include="Discord.Net.Commands" Version="2.2.0" />
+        <PackageReference Include="Remora.Plugins.Abstractions" Version="2.1.1" />
     </ItemGroup>
 
     <!-- Workaround for https://github.com/aspnet/EntityFrameworkCore/issues/19426 -->
