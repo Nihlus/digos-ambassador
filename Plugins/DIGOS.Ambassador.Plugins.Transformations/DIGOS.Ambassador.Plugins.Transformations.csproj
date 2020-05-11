@@ -10,7 +10,10 @@
         <PackageReference Include="NLua" Version="1.4.32" />
     </ItemGroup>
 
-    <!-- Workaround for https://github.com/aspnet/EntityFrameworkCore/issues/19426 -->
+    <!-- Workaround for a problem with EF Core -->
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.3" />
+    </ItemGroup>
 
     <ItemGroup>
         <Content Include="Content\**\*.*">
@@ -21,7 +24,6 @@
     <ItemGroup>
       <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />
-      <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Abstractions.Database\DIGOS.Ambassador.Plugins.Abstractions.Database.csproj" />
       <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Characters\DIGOS.Ambassador.Plugins.Characters.csproj" />
     </ItemGroup>
 
