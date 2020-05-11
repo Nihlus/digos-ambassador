@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
@@ -36,12 +37,26 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         private const string SchemaName = "AutoroleModule";
 
         /// <summary>
+        /// Gets or sets the table where autoroles are stored.
+        /// </summary>
+        public DbSet<Autorole> Autoroles { get; [UsedImplicitly] set; } = null!;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleDatabaseContext"/> class.
         /// </summary>
         /// <param name="contextOptions">The context options.</param>
         public AutoroleDatabaseContext(DbContextOptions<AutoroleDatabaseContext> contextOptions)
             : base(SchemaName, contextOptions)
         {
+        }
+
+        /// <inheritdoc />
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<MessageCountInSourceCondition>()
+                .HasBaseType<AutoroleCondition>();
         }
     }
 }
