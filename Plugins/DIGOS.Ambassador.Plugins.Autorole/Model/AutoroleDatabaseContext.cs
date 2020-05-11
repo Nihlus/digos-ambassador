@@ -22,6 +22,7 @@
 
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
@@ -41,6 +42,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         /// Gets or sets the table where autoroles are stored.
         /// </summary>
         public DbSet<Autorole> Autoroles { get; [UsedImplicitly] set; } = null!;
+
+        /// <summary>
+        /// Gets or sets the table where user statistics are stored.
+        /// </summary>
+        public DbSet<UserStatistics> UserStatistics { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleDatabaseContext"/> class.
