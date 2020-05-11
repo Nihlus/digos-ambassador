@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
+using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
@@ -55,8 +56,25 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         {
             base.OnModelCreating(modelBuilder);
 
+            // Abstract bases
+            modelBuilder.Entity<TimeSinceEventCondition>()
+                .HasBaseType<AutoroleCondition>();
+
+            // Concrete types
             modelBuilder.Entity<MessageCountInSourceCondition>()
                 .HasBaseType<AutoroleCondition>();
+
+            modelBuilder.Entity<ReactionCondition>()
+                .HasBaseType<AutoroleCondition>();
+
+            modelBuilder.Entity<RoleCondition>()
+                .HasBaseType<AutoroleCondition>();
+
+            modelBuilder.Entity<TimeSinceJoinCondition>()
+                .HasBaseType<TimeSinceEventCondition>();
+
+            modelBuilder.Entity<TimeSinceLastActivityCondition>()
+                .HasBaseType<TimeSinceEventCondition>();
         }
     }
 }

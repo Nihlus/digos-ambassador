@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
 using JetBrains.Annotations;
 

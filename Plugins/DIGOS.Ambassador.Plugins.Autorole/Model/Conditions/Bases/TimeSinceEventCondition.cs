@@ -1,5 +1,5 @@
 //
-//  AutoroleCondition.cs
+//  TimeSinceEventCondition.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,18 +20,29 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.ComponentModel.DataAnnotations.Schema;
-using DIGOS.Ambassador.Core.Database.Entities;
+using System;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
 {
     /// <summary>
-    /// Represents the base class for autorole conditions.
+    /// Represents an abstract condition requiring a set amount of time to have passed since an event.
     /// </summary>
     [PublicAPI]
-    [Table("AutoroleConditions", Schema = "AutoroleModule")]
-    public abstract class AutoroleCondition : EFEntity
+    public abstract class TimeSinceEventCondition : AutoroleCondition
     {
+        /// <summary>
+        /// Gets the required elapsed time.
+        /// </summary>
+        public TimeSpan RequiredTime { get; private set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TimeSinceEventCondition"/> class.
+        /// </summary>
+        /// <param name="requiredTime">The required time.</param>
+        protected TimeSinceEventCondition(TimeSpan requiredTime)
+        {
+            this.RequiredTime = requiredTime;
+        }
     }
 }

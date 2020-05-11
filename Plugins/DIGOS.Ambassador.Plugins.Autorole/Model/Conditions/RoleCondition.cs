@@ -1,5 +1,5 @@
 //
-//  Autorole.cs
+//  RoleCondition.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,40 +20,35 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using DIGOS.Ambassador.Core.Database.Entities;
-using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+using Discord;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
     /// <summary>
-    /// Represents an automatic role.
+    /// Represents a required role.
     /// </summary>
     [PublicAPI]
-    [Table("Autoroles", Schema = "AutoroleModule")]
-    public class Autorole : EFEntity
+    public class RoleCondition : AutoroleCondition
     {
         /// <summary>
         /// Gets the ID of the Discord role.
         /// </summary>
-        public long DiscordRoleID { get; private set; }
+        public long RoleID { get; private set; }
 
-        /// <summary>
-        /// Gets the conditions for acquiring the role.
-        /// </summary>
-        public virtual List<AutoroleCondition> Conditions { get; private set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Autorole"/> class.
-        /// </summary>
-        /// <param name="discordRoleID">The ID of the discord role to assign.</param>
-        public Autorole(long discordRoleID)
+        private RoleCondition(long roleID)
         {
-            this.DiscordRoleID = discordRoleID;
-            this.Conditions = new List<AutoroleCondition>();
+            this.RoleID = roleID;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleCondition"/> class.
+        /// </summary>
+        /// <param name="role">The role.</param>
+        public RoleCondition(IRole role)
+            : this((long)role.Id)
+        {
         }
     }
 }
