@@ -47,13 +47,21 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         public virtual List<AutoroleCondition> Conditions { get; private set; }
 
         /// <summary>
+        /// Gets a value indicating whether the role needs external confirmation (from a moderator, for example)
+        /// to be applied after all conditions are met.
+        /// </summary>
+        public bool RequiresConfirmation { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Autorole"/> class.
         /// </summary>
         /// <param name="discordRoleID">The ID of the discord role to assign.</param>
-        public Autorole(long discordRoleID)
+        /// <param name="requiresConfirmation">Whether the role requires external confirmation to be assigned.</param>
+        public Autorole(long discordRoleID, bool requiresConfirmation)
         {
             this.DiscordRoleID = discordRoleID;
             this.Conditions = new List<AutoroleCondition>();
+            this.RequiresConfirmation = requiresConfirmation;
         }
     }
 }
