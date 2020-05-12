@@ -22,6 +22,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using DIGOS.Ambassador.Discord.Extensions;
 using Discord;
 using JetBrains.Annotations;
 
@@ -38,12 +39,14 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <param name="fields">The fields to paginate.</param>
         /// <param name="maxFieldsPerPage">The maximum number of embed fields per page.</param>
         /// <param name="description">The description to display on each page.</param>
+        /// <param name="pageBase">The base layout for the page.</param>
         /// <returns>The paginated embed.</returns>
         public static IEnumerable<EmbedBuilder> FromFields
         (
             [ItemNotNull] IEnumerable<EmbedFieldBuilder> fields,
             uint maxFieldsPerPage = 5,
-            string description = ""
+            string description = "",
+            EmbedBuilder? pageBase = null
         )
         {
             var enumeratedFields = fields.ToList();
@@ -51,10 +54,14 @@ namespace DIGOS.Ambassador.Discord.Pagination
             // Build the pages
             var pages = new List<EmbedBuilder>();
 
-            var currentPage = new EmbedBuilder();
-            currentPage.WithDescription(description);
-            currentPage.WithColor(Color.DarkPurple);
+            if (pageBase is null)
+            {
+                pageBase = new EmbedBuilder();
+                pageBase.WithDescription(description);
+                pageBase.WithColor(Color.DarkPurple);
+            }
 
+            var currentPage = pageBase.CopyEmbedBuilder();
             foreach (var field in enumeratedFields)
             {
                 var fieldContentLength = field.Name.Length + (field.Value.ToString()?.Length ?? 0);
@@ -63,9 +70,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
                 {
                     pages.Add(currentPage);
 
-                    currentPage = new EmbedBuilder();
-                    currentPage.WithDescription(description);
-                    currentPage.WithColor(Color.DarkPurple);
+                    currentPage = pageBase.CopyEmbedBuilder();
                 }
 
                 currentPage.AddField(field);
