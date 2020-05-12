@@ -31,7 +31,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
     /// </summary>
     [PublicAPI]
     [Table("AutoroleConditions", Schema = "AutoroleModule")]
-    public abstract class AutoroleCondition : EFEntity
+    public abstract class AutoroleCondition : EFEntity, IAutoroleCondition
     {
+        /// <inheritdoc />
+        public abstract string GetDescriptiveUIText();
     }
 }

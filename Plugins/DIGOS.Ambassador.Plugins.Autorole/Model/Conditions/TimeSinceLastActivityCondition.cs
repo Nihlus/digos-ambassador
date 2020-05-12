@@ -22,6 +22,7 @@
 
 using System;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+using Humanizer;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
@@ -37,6 +38,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         public TimeSinceLastActivityCondition(TimeSpan requiredTime)
             : base(requiredTime)
         {
+        }
+
+        /// <inheritdoc />
+        public override string GetDescriptiveUIText()
+        {
+            return $"Has been active in the last {this.RequiredTime.Humanize(toWords: true, precision: 3)}";
         }
     }
 }

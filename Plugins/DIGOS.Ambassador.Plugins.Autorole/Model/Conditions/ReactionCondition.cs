@@ -63,5 +63,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
             : this((long)message.Channel.Id, (long)message.Id, reaction.Emote.Name)
         {
         }
+
+        /// <inheritdoc />
+        public override string GetDescriptiveUIText()
+        {
+            return $"Has reacted to {this.MessageID} in {MentionUtils.MentionChannel((ulong)this.ChannelID)} " +
+                   $"with {this.EmoteName}";
+        }
     }
 }

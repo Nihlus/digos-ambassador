@@ -49,5 +49,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
             : this((long)guild.Id, requiredCount)
         {
         }
+
+        /// <inheritdoc/>
+        public override string GetDescriptiveUIText()
+        {
+            return $"{this.RequiredCount} messages in the server";
+        }
     }
 }

@@ -50,5 +50,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
             : this((long)role.Id)
         {
         }
+
+        /// <inheritdoc />
+        public override string GetDescriptiveUIText()
+        {
+            return $"Has the {MentionUtils.MentionRole((ulong)this.RoleID)} role";
+        }
     }
 }

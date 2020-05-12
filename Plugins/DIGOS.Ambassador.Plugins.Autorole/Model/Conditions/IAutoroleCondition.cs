@@ -1,5 +1,5 @@
 //
-//  TimeSinceJoinCondition.cs
+//  IAutoroleCondition.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,30 +20,17 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
-using Humanizer;
-
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
     /// <summary>
-    /// Represents a requirement for an elapsed time since the user joined.
+    /// Defines the public API of an autorole condition.
     /// </summary>
-    public class TimeSinceJoinCondition : TimeSinceEventCondition
+    public interface IAutoroleCondition
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TimeSinceJoinCondition"/> class.
+        /// Gets a piece of text that sufficiently describes what the condition requires, suitable for display in a UI.
         /// </summary>
-        /// <param name="requiredTime">The required time.</param>
-        public TimeSinceJoinCondition(TimeSpan requiredTime)
-            : base(requiredTime)
-        {
-        }
-
-        /// <inheritdoc />
-        public override string GetDescriptiveUIText()
-        {
-            return $"Has been in the server for at least {this.RequiredTime.Humanize(toWords: true, precision: 3)}";
-        }
+        /// <returns>The descriptive UI text.</returns>
+        string GetDescriptiveUIText();
     }
 }
