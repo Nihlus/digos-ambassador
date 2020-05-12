@@ -33,10 +33,20 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageCountInChannelCondition"/> class.
         /// </summary>
+        /// <param name="sourceID">The source ID.</param>
+        /// <param name="requiredCount">The required message count.</param>
+        private MessageCountInChannelCondition(long sourceID, long requiredCount)
+            : base(sourceID, requiredCount)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessageCountInChannelCondition"/> class.
+        /// </summary>
         /// <param name="textChannel">The source guild.</param>
         /// <param name="requiredCount">The required number of messages.</param>
         public MessageCountInChannelCondition(ITextChannel textChannel, long requiredCount)
-            : base((long)textChannel.Id, requiredCount)
+            : this((long)textChannel.Id, requiredCount)
         {
         }
     }

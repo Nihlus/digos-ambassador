@@ -41,7 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         /// <summary>
         /// Gets or sets the table where autoroles are stored.
         /// </summary>
-        public DbSet<Autorole> Autoroles { get; [UsedImplicitly] set; } = null!;
+        public DbSet<AutoroleConfiguration> Autoroles { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where user statistics are stored.

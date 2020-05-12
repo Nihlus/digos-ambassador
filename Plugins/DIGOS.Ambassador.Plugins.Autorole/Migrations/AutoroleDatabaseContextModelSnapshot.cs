@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                 .HasAnnotation("ProductVersion", "3.1.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Autorole", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.AutoroleConfiguration", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
@@ -38,6 +38,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 
                     b.Property<long>("DiscordRoleID")
                         .HasColumnType("bigint");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("RequiresConfirmation")
                         .HasColumnType("boolean");
@@ -54,7 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long?>("AutoroleID")
+                    b.Property<long?>("AutoroleConfigurationID")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Discriminator")
@@ -63,7 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("AutoroleID");
+                    b.HasIndex("AutoroleConfigurationID");
 
                     b.ToTable("AutoroleConditions","AutoroleModule");
 
@@ -209,6 +212,21 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.ToTable("Users","Core");
                 });
 
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.MessageCountInSourceCondition", b =>
+                {
+                    b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition");
+
+                    b.Property<long>("RequiredCount")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("SourceID")
+                        .HasColumnType("bigint");
+
+                    b.ToTable("AutoroleConditions","AutoroleModule");
+
+                    b.HasDiscriminator().HasValue("MessageCountInSourceCondition");
+                });
+
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.TimeSinceEventCondition", b =>
                 {
                     b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition");
@@ -219,24 +237,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.ToTable("AutoroleConditions","AutoroleModule");
 
                     b.HasDiscriminator().HasValue("TimeSinceEventCondition");
-                });
-
-            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.MessageCountInSourceCondition", b =>
-                {
-                    b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition");
-
-                    b.Property<long>("RequiredCount")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("SourceID")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("SourceType")
-                        .HasColumnType("integer");
-
-                    b.ToTable("AutoroleConditions","AutoroleModule");
-
-                    b.HasDiscriminator().HasValue("MessageCountInSourceCondition");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.ReactionCondition", b =>
@@ -270,6 +270,24 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.HasDiscriminator().HasValue("RoleCondition");
                 });
 
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.MessageCountInChannelCondition", b =>
+                {
+                    b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.MessageCountInSourceCondition");
+
+                    b.ToTable("AutoroleConditions","AutoroleModule");
+
+                    b.HasDiscriminator().HasValue("MessageCountInChannelCondition");
+                });
+
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.MessageCountInGuildCondition", b =>
+                {
+                    b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.MessageCountInSourceCondition");
+
+                    b.ToTable("AutoroleConditions","AutoroleModule");
+
+                    b.HasDiscriminator().HasValue("MessageCountInGuildCondition");
+                });
+
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.TimeSinceJoinCondition", b =>
                 {
                     b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.TimeSinceEventCondition");
@@ -290,9 +308,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition", b =>
                 {
-                    b.HasOne("DIGOS.Ambassador.Plugins.Autorole.Model.Autorole", null)
+                    b.HasOne("DIGOS.Ambassador.Plugins.Autorole.Model.AutoroleConfiguration", null)
                         .WithMany("Conditions")
-                        .HasForeignKey("AutoroleID");
+                        .HasForeignKey("AutoroleConfigurationID");
                 });
 
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Statistics.UserChannelStatistics", b =>

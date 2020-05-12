@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.ToTable("AutoroleConditions","AutoroleModule");
                     b.HasDiscriminator<string>("Discriminator").HasValue("AutoroleCondition");
                 });
-            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Statistics.UserChannelStatistics", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Statistics.UserChannelStatistics", b =>
                 {
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
@@ -162,7 +162,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                 });
             modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.MessageCountInSourceCondition", b =>
                 {
-                    b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition");
+                    b.HasBaseType("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Conditions.Bases.AutoroleCondition");
                     b.Property<long>("RequiredCount")
                         .HasColumnType("bigint");
                     b.Property<long>("SourceID")
@@ -172,9 +172,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.ToTable("AutoroleConditions","AutoroleModule");
                     b.HasDiscriminator().HasValue("MessageCountInSourceCondition");
                 });
-            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.ReactionCondition", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Conditions.ReactionCondition", b =>
                 {
-                    b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition");
+                    b.HasBaseType("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Conditions.Bases.AutoroleCondition");
                     b.Property<long>("ChannelID")
                         .HasColumnType("bigint");
                     b.Property<string>("EmoteName")
@@ -185,46 +185,46 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                     b.ToTable("AutoroleConditions","AutoroleModule");
                     b.HasDiscriminator().HasValue("ReactionCondition");
                 });
-            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.RoleCondition", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Conditions.RoleCondition", b =>
                 {
-                    b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition");
+                    b.HasBaseType("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Conditions.Bases.AutoroleCondition");
                     b.Property<long>("RoleID")
                         .HasColumnType("bigint");
                     b.ToTable("AutoroleConditions","AutoroleModule");
                     b.HasDiscriminator().HasValue("RoleCondition");
                 });
-            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.TimeSinceJoinCondition", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Conditions.TimeSinceJoinCondition", b =>
                 {
-                    b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.TimeSinceEventCondition");
+                    b.HasBaseType("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Conditions.Bases.TimeSinceEventCondition");
                     b.ToTable("AutoroleConditions","AutoroleModule");
                     b.HasDiscriminator().HasValue("TimeSinceJoinCondition");
                 });
-            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.TimeSinceLastActivityCondition", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Conditions.TimeSinceLastActivityCondition", b =>
                 {
-                    b.HasBaseType("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.TimeSinceEventCondition");
+                    b.HasBaseType("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Conditions.Bases.TimeSinceEventCondition");
                     b.ToTable("AutoroleConditions","AutoroleModule");
                     b.HasDiscriminator().HasValue("TimeSinceLastActivityCondition");
                 });
-            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases.AutoroleCondition", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Conditions.Bases.AutoroleCondition", b =>
                 {
-                    b.HasOne("DIGOS.Ambassador.Plugins.Autorole.Model.Autorole", null)
+                    b.HasOne("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.AutoroleConfiguration", null)
                         .WithMany("Conditions")
                         .HasForeignKey("AutoroleID");
                 });
-            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Statistics.UserChannelStatistics", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Statistics.UserChannelStatistics", b =>
                 {
-                    b.HasOne("DIGOS.Ambassador.Plugins.Autorole.Model.Statistics.UserServerStatistics", null)
+                    b.HasOne("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Statistics.UserServerStatistics", null)
                         .WithMany("ChannelStatistics")
                         .HasForeignKey("UserServerStatisticsID");
                 });
-            modelBuilder.Entity("DIGOS.Ambassador.Plugins.Autorole.Model.Statistics.UserServerStatistics", b =>
+            modelBuilder.Entity("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Statistics.UserServerStatistics", b =>
                 {
                     b.HasOne("DIGOS.Ambassador.Plugins.Core.Model.Servers.Server", "Server")
                         .WithMany()
                         .HasForeignKey("ServerID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                    b.HasOne("DIGOS.Ambassador.Plugins.Autorole.Model.Statistics.UserStatistics", null)
+                    b.HasOne("DIGOS.Ambassador.Plugins.AutoroleConfiguration.Model.Statistics.UserStatistics", null)
                         .WithMany("ServerStatistics")
                         .HasForeignKey("UserStatisticsID");
                 });

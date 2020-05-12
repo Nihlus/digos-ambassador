@@ -1,5 +1,5 @@
 //
-//  Autorole.cs
+//  AutoroleConfiguration.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -23,8 +23,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
-using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+using Discord;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model
@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
     /// </summary>
     [PublicAPI]
     [Table("Autoroles", Schema = "AutoroleModule")]
-    public class Autorole : EFEntity
+    public class AutoroleConfiguration : EFEntity
     {
         /// <summary>
         /// Gets the ID of the Discord role.
@@ -59,15 +59,24 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         public bool IsEnabled { get; internal set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Autorole"/> class.
+        /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
         /// </summary>
         /// <param name="discordRoleID">The ID of the discord role to assign.</param>
-        public Autorole(long discordRoleID)
+        public AutoroleConfiguration(long discordRoleID)
         {
             this.DiscordRoleID = discordRoleID;
             this.Conditions = new List<AutoroleCondition>();
 
             this.IsEnabled = true;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
+        /// </summary>
+        /// <param name="discordRole">The Discord role.</param>
+        public AutoroleConfiguration(IRole discordRole)
+            : this((long)discordRole.Id)
+        {
         }
     }
 }

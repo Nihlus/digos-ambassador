@@ -28,9 +28,9 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Plugins.Autorole;
-using DIGOS.Ambassador.Plugins.Autorole.CommandModules;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
+using DIGOS.Ambassador.Plugins.Autorole.TypeReaders;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
@@ -39,6 +39,7 @@ using Remora.Behaviours;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using AutoroleCommands = DIGOS.Ambassador.Plugins.Autorole.CommandModules.AutoroleCommands;
 
 [assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Autorole")]
 [assembly: RemoraPlugin(typeof(AutorolePlugin))]
@@ -80,6 +81,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole
             }
 
             var commands = serviceProvider.GetRequiredService<CommandService>();
+            commands.AddTypeReader<AutoroleTypeReader>(new AutoroleTypeReader());
+
             await commands.AddModuleAsync<AutoroleCommands>(serviceProvider);
 
             var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
