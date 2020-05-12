@@ -20,8 +20,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Interactivity;
+using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Discord;
@@ -43,16 +48,24 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
     {
         private readonly AutoroleService _autoroles;
         private readonly UserFeedbackService _feedback;
+        private readonly InteractivityService _interactivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleCommands"/> class.
         /// </summary>
         /// <param name="autoroles">The autorole service.</param>
         /// <param name="feedback">The feedback service.</param>
-        public AutoroleCommands(AutoroleService autoroles, UserFeedbackService feedback)
+        /// <param name="interactivity">The interactivity service.</param>
+        public AutoroleCommands
+        (
+            AutoroleService autoroles,
+            UserFeedbackService feedback,
+            InteractivityService interactivity
+        )
         {
             _autoroles = autoroles;
             _feedback = feedback;
+            _interactivity = interactivity;
         }
 
         /// <summary>
@@ -63,6 +76,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Alias("create")]
         [Command("create")]
         [Summary("Creates a new autorole configuration for the given Discord role.")]
+        [RequireContext(ContextType.Guild)]
         public async Task CreateAutoroleAsync(IRole discordRole)
         {
             var create = await _autoroles.CreateAutoroleAsync(discordRole);
@@ -82,6 +96,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Alias("delete")]
         [Command("delete")]
         [Summary("Deletes an existing autorole configuration for the given Discord role.")]
+        [RequireContext(ContextType.Guild)]
         public async Task DeleteAutoroleAsync(AutoroleConfiguration autorole)
         {
             var deleteAutorole = await _autoroles.DeleteAutoroleAsync(autorole);
@@ -101,6 +116,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Alias("enable")]
         [Command("enable")]
         [Summary("Enables the given autorole, allowing it to be added to users.")]
+        [RequireContext(ContextType.Guild)]
         public async Task EnableAutoroleAsync(AutoroleConfiguration autorole)
         {
             var enableAutorole = await _autoroles.EnableAutoroleAsync(autorole);
@@ -120,6 +136,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Alias("disable")]
         [Command("disable")]
         [Summary("Disables the given autorole, preventing it from being added to users.")]
+        [RequireContext(ContextType.Guild)]
         public async Task DisableAutoroleAsync(AutoroleConfiguration autorole)
         {
             var disableAutorole = await _autoroles.DisableAutoroleAsync(autorole);
@@ -139,6 +156,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Alias("show", "view")]
         [Command("show")]
         [Summary("Show the settings for the given autorole.")]
+        [RequireContext(ContextType.Guild)]
         public async Task ShowAutoroleAsync(AutoroleConfiguration autorole)
         {
             var embedBase = _feedback.CreateEmbedBase();
@@ -151,6 +169,47 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
             // TODO: Display conditions in some agnostic manner
             await _feedback.SendEmbedAsync(this.Context.Channel, embedBase.Build());
+        }
+
+        /// <summary>
+        /// Lists configured autoroles.
+        /// </summary>
+        [UsedImplicitly]
+        [Alias("list")]
+        [Command("list")]
+        [Summary("Lists configured autoroles.")]
+        [RequireContext(ContextType.Guild)]
+        public async Task ListAutorolesAsync()
+        {
+            var autoroles = new List<AutoroleConfiguration>();
+            foreach (var role in this.Context.Guild.Roles)
+            {
+                var getAutorole = await _autoroles.GetAutoroleAsync(role);
+                if (!getAutorole.IsSuccess)
+                {
+                    continue;
+                }
+
+                autoroles.Add(getAutorole.Entity);
+            }
+
+            var pager = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                _feedback,
+                _interactivity,
+                this.Context.User,
+                autoroles,
+                at => $"@{this.Context.Guild.Roles.First(r => r.Id == (ulong)at.DiscordRoleID).Name}",
+                at => at.IsEnabled ? "Enabled" : "Disabled",
+                "There are no autoroles configured."
+            );
+
+            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            (
+                this.Context.Channel,
+                pager,
+                TimeSpan.FromMinutes(5)
+            );
         }
     }
 }
