@@ -24,6 +24,7 @@ using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
+using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Discord.Commands;
 using JetBrains.Annotations;
@@ -59,12 +60,32 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// <summary>
                 /// Adds an instance of the condition to the role.
                 /// </summary>
+                /// <param name="autorole">The autorole configuration.</param>
                 /// <param name="time">The required time.</param>
                 [UsedImplicitly]
                 [Command]
                 [Summary("Adds an instance of the condition to the role.")]
-                public async Task AddOrModifyConditionAsync(TimeSpan time)
+                public async Task AddConditionAsync(AutoroleConfiguration autorole, TimeSpan time)
                 {
+                    var condition = _autoroles.CreateConditionProxy<TimeSinceJoinCondition>
+                    (
+                        time
+                    );
+
+                    if (condition is null)
+                    {
+                        await _feedback.SendErrorAsync(this.Context, "Failed to create a condition object. Yikes!");
+                        return;
+                    }
+
+                    var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
+                    if (!addCondition.IsSuccess)
+                    {
+                        await _feedback.SendErrorAsync(this.Context, addCondition.ErrorReason);
+                        return;
+                    }
+
+                    await _feedback.SendConfirmationAsync(this.Context, "Condition added.");
                 }
 
                 /// <summary>
@@ -83,6 +104,23 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     TimeSpan time
                 )
                 {
+                    var getCondition = _autoroles.GetCondition<TimeSinceJoinCondition>
+                    (
+                        autorole,
+                        conditionID
+                    );
+
+                    if (!getCondition.IsSuccess)
+                    {
+                        await _feedback.SendErrorAsync(this.Context, getCondition.ErrorReason);
+                        return;
+                    }
+
+                    var condition = getCondition.Entity;
+                    condition.RequiredTime = time;
+
+                    await _autoroles.SaveChangesAsync();
+                    await _feedback.SendConfirmationAsync(this.Context, "Condition updated.");
                 }
             }
         }

@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         /// <summary>
         /// Gets the required elapsed time.
         /// </summary>
-        public TimeSpan RequiredTime { get; private set; }
+        public TimeSpan RequiredTime { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TimeSinceEventCondition{TActualCondition}"/> class.

@@ -35,7 +35,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// <summary>
         /// Gets the ID of the Discord role.
         /// </summary>
-        public long RoleID { get; private set; }
+        public long RoleID { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleCondition"/> class.

@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
+using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Discord;
 using Discord.Commands;
@@ -64,8 +65,27 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 [UsedImplicitly]
                 [Command]
                 [Summary("Adds an instance of the condition to the role.")]
-                public async Task AddOrModifyConditionAsync(AutoroleConfiguration autorole, IRole role)
+                public async Task AddConditionAsync(AutoroleConfiguration autorole, IRole role)
                 {
+                    var condition = _autoroles.CreateConditionProxy<RoleCondition>
+                    (
+                        role
+                    );
+
+                    if (condition is null)
+                    {
+                        await _feedback.SendErrorAsync(this.Context, "Failed to create a condition object. Yikes!");
+                        return;
+                    }
+
+                    var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
+                    if (!addCondition.IsSuccess)
+                    {
+                        await _feedback.SendErrorAsync(this.Context, addCondition.ErrorReason);
+                        return;
+                    }
+
+                    await _feedback.SendConfirmationAsync(this.Context, "Condition added.");
                 }
 
                 /// <summary>
@@ -84,6 +104,23 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     IRole role
                 )
                 {
+                    var getCondition = _autoroles.GetCondition<RoleCondition>
+                    (
+                        autorole,
+                        conditionID
+                    );
+
+                    if (!getCondition.IsSuccess)
+                    {
+                        await _feedback.SendErrorAsync(this.Context, getCondition.ErrorReason);
+                        return;
+                    }
+
+                    var condition = getCondition.Entity;
+                    condition.RoleID = (long)role.Id;
+
+                    await _autoroles.SaveChangesAsync();
+                    await _feedback.SendConfirmationAsync(this.Context, "Condition updated.");
                 }
             }
         }

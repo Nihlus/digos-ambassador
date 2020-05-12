@@ -6,12 +6,13 @@ These commands are prefixed with `autorole condition total-messages`. You can al
 ## Commands
 ### *autorole condition total-messages*
 #### Overloads
-**`!autorole condition total-messages 10`**
+**`!autorole condition total-messages "placeholder" 10`**
 
 Adds an instance of the condition to the role.
 
 | Name | Type | Optional |
 | --- | --- | --- |
+| autorole | AutoroleConfiguration | `no` |
 | count | long | `no` |
 
 **`!autorole condition total-messages "placeholder" 10 10`**

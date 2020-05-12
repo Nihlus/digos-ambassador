@@ -6,12 +6,13 @@ These commands are prefixed with `autorole condition time-since-join`. You can a
 ## Commands
 ### *autorole condition time-since-join*
 #### Overloads
-**`!autorole condition time-since-join 5m`**
+**`!autorole condition time-since-join "placeholder" 5m`**
 
 Adds an instance of the condition to the role.
 
 | Name | Type | Optional |
 | --- | --- | --- |
+| autorole | AutoroleConfiguration | `no` |
 | time | TimeSpan | `no` |
 
 **`!autorole condition time-since-join "placeholder" 10 5m`**

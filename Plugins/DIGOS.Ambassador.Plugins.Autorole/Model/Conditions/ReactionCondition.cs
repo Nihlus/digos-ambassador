@@ -40,12 +40,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// <summary>
         /// Gets the ID of the Discord message.
         /// </summary>
-        public long MessageID { get; private set; }
+        public long MessageID { get; internal set; }
 
         /// <summary>
         /// Gets the name of the required emote.
         /// </summary>
-        public string EmoteName { get; private set; }
+        public string EmoteName { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReactionCondition"/> class.
