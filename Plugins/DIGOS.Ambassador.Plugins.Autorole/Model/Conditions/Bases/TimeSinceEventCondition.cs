@@ -28,8 +28,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
     /// <summary>
     /// Represents an abstract condition requiring a set amount of time to have passed since an event.
     /// </summary>
+    /// <typeparam name="TActualCondition">The actual condition.</typeparam>
     [PublicAPI]
-    public abstract class TimeSinceEventCondition : AutoroleCondition
+    public abstract class TimeSinceEventCondition<TActualCondition> : AutoroleCondition
+        where TActualCondition : TimeSinceEventCondition<TActualCondition>
     {
         /// <summary>
         /// Gets the required elapsed time.
@@ -37,12 +39,23 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         public TimeSpan RequiredTime { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TimeSinceEventCondition"/> class.
+        /// Initializes a new instance of the <see cref="TimeSinceEventCondition{TActualCondition}"/> class.
         /// </summary>
         /// <param name="requiredTime">The required time.</param>
         protected TimeSinceEventCondition(TimeSpan requiredTime)
         {
             this.RequiredTime = requiredTime;
+        }
+
+        /// <inheritdoc />
+        public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
+        {
+            if (!(autoroleCondition is TActualCondition actualCondition))
+            {
+                return false;
+            }
+
+            return this.RequiredTime == actualCondition.RequiredTime;
         }
     }
 }

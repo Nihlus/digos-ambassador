@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
 {
     /// <summary>
     /// Defines the public API of an autorole condition.
@@ -32,5 +32,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// </summary>
         /// <returns>The descriptive UI text.</returns>
         string GetDescriptiveUIText();
+
+        /// <summary>
+        /// Determines whether this condition has the same conditions as another condition.
+        /// </summary>
+        /// <param name="autoroleCondition">The other condition.</param>
+        /// <returns>true if this condition has the same conditions as another condition; otherwise, false.</returns>
+        bool HasSameConditionsAs(IAutoroleCondition autoroleCondition);
     }
 }

@@ -29,7 +29,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
     /// <summary>
     /// Represents a requirement for an elapsed time since the user joined.
     /// </summary>
-    public class TimeSinceLastActivityCondition : TimeSinceEventCondition
+    public class TimeSinceLastActivityCondition : TimeSinceEventCondition<TimeSinceLastActivityCondition>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TimeSinceLastActivityCondition"/> class.

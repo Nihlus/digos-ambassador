@@ -56,5 +56,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         {
             return $"Has the {MentionUtils.MentionRole((ulong)this.RoleID)} role";
         }
+
+        /// <inheritdoc />
+        public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
+        {
+            if (!(autoroleCondition is RoleCondition roleCondition))
+            {
+                return false;
+            }
+
+            return this.RoleID == roleCondition.RoleID;
+        }
     }
 }

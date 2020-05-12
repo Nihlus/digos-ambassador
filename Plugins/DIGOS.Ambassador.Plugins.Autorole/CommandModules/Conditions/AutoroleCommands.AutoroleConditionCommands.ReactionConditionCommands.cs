@@ -21,8 +21,10 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
+using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
@@ -41,6 +43,20 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Group("reaction")]
             public class ReactionConditionCommands : ModuleBase
             {
+                private readonly AutoroleService _autoroles;
+                private readonly UserFeedbackService _feedback;
+
+                /// <summary>
+                /// Initializes a new instance of the <see cref="ReactionConditionCommands"/> class.
+                /// </summary>
+                /// <param name="autoroles">The autorole service.</param>
+                /// <param name="feedback">The feedback service.</param>
+                public ReactionConditionCommands(AutoroleService autoroles, UserFeedbackService feedback)
+                {
+                    _autoroles = autoroles;
+                    _feedback = feedback;
+                }
+
                 /// <summary>
                 /// Adds an instance of the condition to the role.
                 /// </summary>

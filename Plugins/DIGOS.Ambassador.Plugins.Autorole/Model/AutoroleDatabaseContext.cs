@@ -62,31 +62,47 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         {
             base.OnModelCreating(modelBuilder);
 
-            // Abstract bases
-            modelBuilder.Entity<TimeSinceEventCondition>()
-                .HasBaseType<AutoroleCondition>();
-
-            modelBuilder.Entity<MessageCountInSourceCondition>()
-                .HasBaseType<AutoroleCondition>();
-
-            // Concrete types
             modelBuilder.Entity<ReactionCondition>()
                 .HasBaseType<AutoroleCondition>();
 
             modelBuilder.Entity<RoleCondition>()
                 .HasBaseType<AutoroleCondition>();
 
-            modelBuilder.Entity<TimeSinceJoinCondition>()
-                .HasBaseType<TimeSinceEventCondition>();
+            ConfigureTimeSinceEventCondition<TimeSinceJoinCondition>(modelBuilder);
+            ConfigureTimeSinceEventCondition<TimeSinceLastActivityCondition>(modelBuilder);
 
-            modelBuilder.Entity<TimeSinceLastActivityCondition>()
-                .HasBaseType<TimeSinceEventCondition>();
+            ConfigureMessageCountCondition<MessageCountInChannelCondition>(modelBuilder);
+            ConfigureMessageCountCondition<MessageCountInGuildCondition>(modelBuilder);
+        }
 
-            modelBuilder.Entity<MessageCountInChannelCondition>()
-                .HasBaseType<MessageCountInSourceCondition>();
+        private void ConfigureTimeSinceEventCondition<TTimeSinceEventCondition>(ModelBuilder modelBuilder)
+            where TTimeSinceEventCondition : TimeSinceEventCondition<TTimeSinceEventCondition>
+        {
+            modelBuilder.Entity<TTimeSinceEventCondition>()
+                .HasBaseType<TimeSinceEventCondition<TTimeSinceEventCondition>>()
+                .HasDiscriminator()
+                .HasValue(typeof(TTimeSinceEventCondition).Name);
 
-            modelBuilder.Entity<MessageCountInGuildCondition>()
-                .HasBaseType<MessageCountInSourceCondition>();
+            modelBuilder.Entity<TTimeSinceEventCondition>()
+                .Property(c => c.RequiredTime)
+                .HasColumnName(nameof(TimeSinceEventCondition<TTimeSinceEventCondition>.RequiredTime));
+        }
+
+        private void ConfigureMessageCountCondition<TMessageCountCondition>(ModelBuilder modelBuilder)
+            where TMessageCountCondition : MessageCountInSourceCondition<TMessageCountCondition>
+        {
+            modelBuilder.Entity<TMessageCountCondition>()
+                .HasBaseType<MessageCountInSourceCondition<TMessageCountCondition>>()
+                .HasDiscriminator()
+                .HasValue(typeof(TMessageCountCondition).Name);
+
+            modelBuilder.Entity<TMessageCountCondition>()
+                .Property(e => e.RequiredCount)
+                .HasColumnName(nameof(MessageCountInSourceCondition<TMessageCountCondition>.RequiredCount));
+
+            modelBuilder.Entity<TMessageCountCondition>()
+                .Property(e => e.SourceID)
+                .HasColumnName(nameof(MessageCountInSourceCondition<TMessageCountCondition>.SourceID));
         }
     }
 }

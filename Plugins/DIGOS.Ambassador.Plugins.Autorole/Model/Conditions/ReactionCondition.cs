@@ -70,5 +70,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
             return $"Has reacted to {this.MessageID} in {MentionUtils.MentionChannel((ulong)this.ChannelID)} " +
                    $"with {this.EmoteName}";
         }
+
+        /// <inheritdoc />
+        public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
+        {
+            if (!(autoroleCondition is ReactionCondition reactionCondition))
+            {
+                return false;
+            }
+
+            return this.ChannelID == reactionCondition.ChannelID &&
+                   this.MessageID == reactionCondition.MessageID &&
+                   this.EmoteName == reactionCondition.EmoteName;
+        }
     }
 }

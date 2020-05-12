@@ -21,7 +21,9 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
+using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
@@ -40,6 +42,20 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Group("role")]
             public class RoleConditionCommands : ModuleBase
             {
+                private readonly AutoroleService _autoroles;
+                private readonly UserFeedbackService _feedback;
+
+                /// <summary>
+                /// Initializes a new instance of the <see cref="RoleConditionCommands"/> class.
+                /// </summary>
+                /// <param name="autoroles">The autorole service.</param>
+                /// <param name="feedback">The feedback service.</param>
+                public RoleConditionCommands(AutoroleService autoroles, UserFeedbackService feedback)
+                {
+                    _autoroles = autoroles;
+                    _feedback = feedback;
+                }
+
                 /// <summary>
                 /// Adds an instance of the condition to the role.
                 /// </summary>

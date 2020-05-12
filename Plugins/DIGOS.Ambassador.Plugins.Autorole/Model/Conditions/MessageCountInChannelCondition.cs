@@ -28,7 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
     /// <summary>
     /// Represents a condition that requires a certain number of messages in a specific channel.
     /// </summary>
-    public class MessageCountInChannelCondition : MessageCountInSourceCondition
+    public class MessageCountInChannelCondition : MessageCountInSourceCondition<MessageCountInChannelCondition>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageCountInChannelCondition"/> class.

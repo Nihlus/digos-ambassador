@@ -28,8 +28,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
     /// Represents a condition where a role would be assigned after a user posts a certain number of messages in a
     /// given source location.
     /// </summary>
+    /// <typeparam name="TActualCondition">The actual condition type.</typeparam>
     [PublicAPI]
-    public abstract class MessageCountInSourceCondition : AutoroleCondition
+    public abstract class MessageCountInSourceCondition<TActualCondition> : AutoroleCondition
+        where TActualCondition : MessageCountInSourceCondition<TActualCondition>
     {
         /// <summary>
         /// Gets the Discord ID of the message source.
@@ -42,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         public long RequiredCount { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MessageCountInSourceCondition"/> class.
+        /// Initializes a new instance of the <see cref="MessageCountInSourceCondition{TActualCondition}"/> class.
         /// </summary>
         /// <param name="sourceID">The source ID.</param>
         /// <param name="requiredCount">The required message count.</param>
@@ -50,6 +52,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         {
             this.SourceID = sourceID;
             this.RequiredCount = requiredCount;
+        }
+
+        /// <inheritdoc />
+        public override bool HasSameConditionsAs(IAutoroleCondition autoroleCondition)
+        {
+            if (!(autoroleCondition is TActualCondition channelCondition))
+            {
+                return false;
+            }
+
+            return this.SourceID == channelCondition.SourceID &&
+                   this.RequiredCount == channelCondition.RequiredCount;
         }
     }
 }

@@ -35,5 +35,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
     {
         /// <inheritdoc />
         public abstract string GetDescriptiveUIText();
+
+        /// <inheritdoc />
+        public abstract bool HasSameConditionsAs(IAutoroleCondition autoroleCondition);
     }
 }

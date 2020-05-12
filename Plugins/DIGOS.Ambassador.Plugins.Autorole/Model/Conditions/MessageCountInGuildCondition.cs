@@ -28,7 +28,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
     /// <summary>
     /// Represents a condition that requires a certain number of messages in the whole server.
     /// </summary>
-    public class MessageCountInGuildCondition : MessageCountInSourceCondition
+    public class MessageCountInGuildCondition : MessageCountInSourceCondition<MessageCountInGuildCondition>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageCountInGuildCondition"/> class.
