@@ -38,7 +38,7 @@ using Remora.Results;
 namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 {
     /// <summary>
-    /// Acts on various user-related events, logging statistics..
+    /// Acts on various user-related events, logging statistics.
     /// </summary>
     [UsedImplicitly]
     internal sealed class UserStatisticBehaviour : ClientEventBehaviour<UserStatisticBehaviour>
@@ -116,6 +116,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                     {
                         channelStats.MessageCount = await countResult.Entity;
                     }
+                    else if (!(countResult.Exception is null))
+                    {
+                        this.Log.LogError(countResult.Exception, "Message counting failed.");
+                    }
                 }
             }
 
@@ -143,6 +147,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                         var countResult = await CountUserMessagesAsync(guildChannel, guildUser);
                         if (!countResult.IsSuccess)
                         {
+                            if (!(countResult.Exception is null))
+                            {
+                                this.Log.LogError(countResult.Exception, "Message counting failed.");
+                            }
+
                             continue;
                         }
 
@@ -167,6 +176,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                     return RetrieveEntityResult<Task<long>>.FromError("No messages in channel.");
                 }
 
+                // We'll explicitly include the latest message, since it'd get ignored otherwise
+                if (latestMessage.Author.Id == user.Id)
+                {
+                    sum += 1;
+                }
+
                 while (true)
                 {
                     var channelMessages = channel.GetMessagesAsync(latestMessage, Direction.Before);
@@ -182,7 +197,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                         foreach (var channelMessage in channelMessageBatch)
                         {
                             latestMessage = channelMessage;
-                            if (channelMessage.Author.Id == user.Id)
+                            if (latestMessage.Author.Id == user.Id)
                             {
                                 sum += 1;
                             }
