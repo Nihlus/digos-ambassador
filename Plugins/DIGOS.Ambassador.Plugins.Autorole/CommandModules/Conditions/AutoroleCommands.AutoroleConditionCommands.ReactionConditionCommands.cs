@@ -21,6 +21,7 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.TypeReaders;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
@@ -47,7 +48,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 [UsedImplicitly]
                 [Command]
                 [Summary("Adds the condition to the role, or modifies the existing condition.")]
-                public async Task AddOrModifyConditionAsync(IMessage message, IEmote emote)
+                public async Task AddOrModifyConditionAsync
+                (
+                    [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
+                    IMessage message,
+                    IEmote emote
+                )
                 {
                 }
 
