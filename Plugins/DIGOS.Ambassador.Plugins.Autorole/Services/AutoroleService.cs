@@ -26,6 +26,7 @@ using DIGOS.Ambassador.Plugins.Autorole.Model;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Services
@@ -156,6 +157,26 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             autorole.IsEnabled = false;
 
             await _database.SaveChangesAsync();
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Removes a condition with the given ID from the given autorole.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="conditionID">The ID of the condition.</param>
+        /// <returns>A modification which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> RemoveConditionAsync(AutoroleConfiguration autorole, long conditionID)
+        {
+            var condition = autorole.Conditions.FirstOrDefault(c => c.ID == conditionID);
+            if (condition is null)
+            {
+                return ModifyEntityResult.FromError("The autorole doesn't have any condition with that ID.");
+            }
+
+            autorole.Conditions.Remove(condition);
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
     }
