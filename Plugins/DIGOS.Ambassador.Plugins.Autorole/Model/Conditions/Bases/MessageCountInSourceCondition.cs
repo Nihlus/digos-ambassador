@@ -20,18 +20,16 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
-using Discord;
 using JetBrains.Annotations;
 
-namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
+namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
 {
     /// <summary>
     /// Represents a condition where a role would be assigned after a user posts a certain number of messages in a
     /// given source location.
     /// </summary>
     [PublicAPI]
-    public class MessageCountInSourceCondition : AutoroleCondition
+    public abstract class MessageCountInSourceCondition : AutoroleCondition
     {
         /// <summary>
         /// Gets the Discord ID of the message source.
@@ -39,40 +37,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         public long SourceID { get; private set; }
 
         /// <summary>
-        /// Gets the type of the message source.
-        /// </summary>
-        public MessageSourceType SourceType { get; private set; }
-
-        /// <summary>
         /// Gets the required number of messages.
         /// </summary>
         public long RequiredCount { get; private set; }
 
-        private MessageCountInSourceCondition(long sourceID, MessageSourceType sourceType, long requiredCount)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MessageCountInSourceCondition"/> class.
+        /// </summary>
+        /// <param name="sourceID">The source ID.</param>
+        /// <param name="requiredCount">The required message count.</param>
+        protected MessageCountInSourceCondition(long sourceID, long requiredCount)
         {
             this.SourceID = sourceID;
-            this.SourceType = sourceType;
             this.RequiredCount = requiredCount;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageCountInSourceCondition"/> class.
-        /// </summary>
-        /// <param name="guild">The source guild.</param>
-        /// <param name="requiredCount">The required number of messages.</param>
-        public MessageCountInSourceCondition(IGuild guild, long requiredCount)
-            : this((long)guild.Id, MessageSourceType.Guild, requiredCount)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageCountInSourceCondition"/> class.
-        /// </summary>
-        /// <param name="textChannel">The source guild.</param>
-        /// <param name="requiredCount">The required number of messages.</param>
-        public MessageCountInSourceCondition(ITextChannel textChannel, long requiredCount)
-            : this((long)textChannel.Id, MessageSourceType.Guild, requiredCount)
-        {
         }
     }
 }

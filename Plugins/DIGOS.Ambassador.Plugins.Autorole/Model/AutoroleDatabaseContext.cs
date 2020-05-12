@@ -66,10 +66,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
             modelBuilder.Entity<TimeSinceEventCondition>()
                 .HasBaseType<AutoroleCondition>();
 
-            // Concrete types
             modelBuilder.Entity<MessageCountInSourceCondition>()
                 .HasBaseType<AutoroleCondition>();
 
+            // Concrete types
             modelBuilder.Entity<ReactionCondition>()
                 .HasBaseType<AutoroleCondition>();
 
@@ -81,6 +81,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
 
             modelBuilder.Entity<TimeSinceLastActivityCondition>()
                 .HasBaseType<TimeSinceEventCondition>();
+
+            modelBuilder.Entity<MessageCountInChannelCondition>()
+                .HasBaseType<MessageCountInSourceCondition>();
+
+            modelBuilder.Entity<MessageCountInGuildCondition>()
+                .HasBaseType<MessageCountInSourceCondition>();
         }
     }
 }
