@@ -159,16 +159,40 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task ShowAutoroleAsync(AutoroleConfiguration autorole)
         {
-            var embedBase = _feedback.CreateEmbedBase();
+            var paginatedEmbed = new PaginatedEmbed(_feedback, _interactivity, this.Context.User)
+            {
+                Appearance = PaginatedAppearanceOptions.Default
+            };
 
-            embedBase
+            var baseEmbed = paginatedEmbed.Appearance.CreateEmbedBase()
                 .WithTitle("Autorole Configuration")
                 .WithDescription(MentionUtils.MentionRole((ulong)autorole.DiscordRoleID))
                 .AddField("Requires confirmation", autorole.RequiresConfirmation, true)
                 .AddField("Is enabled", autorole.IsEnabled, true);
 
-            // TODO: Display conditions in some agnostic manner
-            await _feedback.SendEmbedAsync(this.Context.Channel, embedBase.Build());
+            if (!autorole.Conditions.Any())
+            {
+                baseEmbed.AddField("Conditions", "No conditions");
+                baseEmbed.Footer = null;
+
+                await _feedback.SendEmbedAsync(this.Context.Channel, baseEmbed.Build());
+                return;
+            }
+
+            var conditionFields = autorole.Conditions.Select
+            (
+                c => new EmbedFieldBuilder().WithName(c.GetDescriptiveUIText()).WithValue("\n\u200b")
+            );
+
+            var pages = PageFactory.FromFields(conditionFields, pageBase: baseEmbed);
+            paginatedEmbed.WithPages(pages);
+
+            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            (
+                this.Context.Channel,
+                paginatedEmbed,
+                TimeSpan.FromMinutes(5)
+            );
         }
 
         /// <summary>
