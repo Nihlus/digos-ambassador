@@ -21,6 +21,7 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Plugins.Autorole.Model;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
@@ -41,25 +42,35 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             public class MessageCountInChannelConditionCommands : ModuleBase
             {
                 /// <summary>
-                /// Adds the condition to the role, or modifies the existing condition.
+                /// Adds an instance of the condition to the role.
                 /// </summary>
+                /// <param name="autorole">The autorole configuration.</param>
                 /// <param name="channel">The Discord channel.</param>
                 /// <param name="count">The message count.</param>
                 [UsedImplicitly]
                 [Command]
-                [Summary("Adds the condition to the role, or modifies the existing condition.")]
-                public async Task AddOrModifyConditionAsync(ITextChannel channel, long count)
+                [Summary("Adds an instance of the condition to the role.")]
+                public async Task AddConditionAsync(AutoroleConfiguration autorole, ITextChannel channel, long count)
                 {
                 }
 
                 /// <summary>
-                /// Removes the condition from the role.
+                /// Modifies an instance of the condition on the role.
                 /// </summary>
+                /// <param name="autorole">The autorole configuration.</param>
+                /// <param name="conditionID">The ID of the condition.</param>
+                /// <param name="channel">The Discord channel.</param>
+                /// <param name="count">The message count.</param>
                 [UsedImplicitly]
-                [Alias("remove")]
-                [Command("remove")]
-                [Summary("Removes the condition from the role.")]
-                public async Task RemoveConditionAsync()
+                [Command]
+                [Summary("Modifies an instance of the condition on the role.")]
+                public async Task ModifyConditionAsync
+                (
+                    AutoroleConfiguration autorole,
+                    long conditionID,
+                    ITextChannel channel,
+                    long count
+                )
                 {
                 }
             }
