@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics
         /// <summary>
         /// Gets the total message count of the user in this server.
         /// </summary>
-        public long? TotalMessageCount { get; private set; }
+        public long? TotalMessageCount { get; internal set; }
 
         /// <summary>
         /// Gets the individual channel post counts of the user.

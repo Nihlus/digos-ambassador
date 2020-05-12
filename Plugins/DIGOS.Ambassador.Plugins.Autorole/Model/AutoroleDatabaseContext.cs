@@ -67,6 +67,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
                 .WithOne()
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<AutoroleConfiguration>()
+                .HasOne(a => a.Server)
+                .WithMany()
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<ReactionCondition>()
                 .HasBaseType<AutoroleCondition>();
 

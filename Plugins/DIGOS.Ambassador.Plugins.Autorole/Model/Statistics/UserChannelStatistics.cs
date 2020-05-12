@@ -42,27 +42,24 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics
         /// <summary>
         /// Gets the message count in this channel.
         /// </summary>
-        public long MessageCount { get; private set; }
+        public long? MessageCount { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserChannelStatistics"/> class.
         /// </summary>
         /// <param name="channelID">The channel ID.</param>
-        /// <param name="messageCount">The message count.</param>
         [UsedImplicitly]
-        protected UserChannelStatistics(long channelID, long messageCount)
+        protected UserChannelStatistics(long channelID)
         {
             this.ChannelID = channelID;
-            this.MessageCount = messageCount;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserChannelStatistics"/> class.
         /// </summary>
         /// <param name="textChannel">The channel.</param>
-        /// <param name="messageCount">The message count.</param>
-        public UserChannelStatistics(ITextChannel textChannel, long messageCount)
-            : this((long)textChannel.Id, messageCount)
+        public UserChannelStatistics(ITextChannel textChannel)
+            : this((long)textChannel.Id)
         {
         }
     }

@@ -22,8 +22,10 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using Discord;
 using JetBrains.Annotations;
 
@@ -37,6 +39,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
     public class AutoroleConfiguration : EFEntity
     {
         /// <summary>
+        /// Gets the server the autorole belongs to.
+        /// </summary>
+        public virtual Server Server { get; private set; } = null!;
+
+        /// <summary>
         /// Gets the ID of the Discord role.
         /// </summary>
         public long DiscordRoleID { get; private set; }
@@ -44,7 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         /// <summary>
         /// Gets the conditions for acquiring the role.
         /// </summary>
-        public virtual List<AutoroleCondition> Conditions { get; private set; }
+        public virtual List<AutoroleCondition> Conditions { get; private set; } = null!;
 
         /// <summary>
         /// Gets a value indicating whether the role needs external confirmation (from a moderator, for example)
@@ -61,9 +68,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
         /// </summary>
-        /// <param name="discordRoleID">The ID of the discord role to assign.</param>
-        public AutoroleConfiguration(long discordRoleID)
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
+        protected AutoroleConfiguration()
         {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
+        /// </summary>
+        /// <param name="server">The server.</param>
+        /// <param name="discordRoleID">The ID of the discord role to assign.</param>
+        protected AutoroleConfiguration(Server server, long discordRoleID)
+        {
+            this.Server = server;
             this.DiscordRoleID = discordRoleID;
             this.Conditions = new List<AutoroleCondition>();
 
@@ -73,9 +90,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleConfiguration"/> class.
         /// </summary>
+        /// <param name="server">The server.</param>
         /// <param name="discordRole">The Discord role.</param>
-        public AutoroleConfiguration(IRole discordRole)
-            : this((long)discordRole.Id)
+        public AutoroleConfiguration(Server server, IRole discordRole)
+            : this(server, (long)discordRole.Id)
         {
         }
     }
