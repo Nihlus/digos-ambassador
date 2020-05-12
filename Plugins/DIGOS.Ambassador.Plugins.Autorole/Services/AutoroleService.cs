@@ -24,6 +24,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -38,14 +39,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
     public class AutoroleService
     {
         private readonly AutoroleDatabaseContext _database;
+        private readonly ServerService _servers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleService"/> class.
         /// </summary>
         /// <param name="database">The database.</param>
-        public AutoroleService(AutoroleDatabaseContext database)
+        /// <param name="servers">The server service.</param>
+        public AutoroleService(AutoroleDatabaseContext database, ServerService servers)
         {
             _database = database;
+            _servers = servers;
         }
 
         /// <summary>
@@ -96,7 +100,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 );
             }
 
-            var autorole = _database.CreateProxy<AutoroleConfiguration>(discordRole);
+            var getServer = await _servers.GetOrRegisterServerAsync(discordRole.Guild);
+            if (!getServer.IsSuccess)
+            {
+                return CreateEntityResult<AutoroleConfiguration>.FromError(getServer);
+            }
+
+            var server = getServer.Entity;
+
+            var autorole = _database.CreateProxy<AutoroleConfiguration>(server, discordRole);
             if (autorole is null)
             {
                 return CreateEntityResult<AutoroleConfiguration>.FromError
@@ -105,7 +117,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 );
             }
 
-            await _database.Autoroles.AddAsync(autorole);
+            _database.Autoroles.Update(autorole);
             await _database.SaveChangesAsync();
 
             return autorole;
@@ -259,6 +271,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         public Task<int> SaveChangesAsync()
         {
             return _database.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Gets all autoroles in the database.
+        /// </summary>
+        /// <param name="guild">The Discord guild.</param>
+        /// <returns>The autoroles.</returns>
+        public IQueryable<AutoroleConfiguration> GetAutoroles(IGuild guild)
+        {
+            return _database.Autoroles.AsQueryable().Where(a => a.Server.DiscordID == (long)guild.Id);
         }
     }
 }

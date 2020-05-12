@@ -64,6 +64,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole
         {
             serviceCollection
                 .AddScoped<AutoroleService>()
+                .AddScoped<UserStatisticsService>()
                 .AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>();
         }
 
@@ -89,6 +90,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole
             await commands.AddModuleAsync<AutoroleCommands>(serviceProvider);
 
             var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
+            await behaviourService.AddBehavioursAsync(Assembly.GetExecutingAssembly(), serviceProvider);
             await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
             await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
