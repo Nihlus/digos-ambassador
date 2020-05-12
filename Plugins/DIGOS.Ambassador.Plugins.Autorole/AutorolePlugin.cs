@@ -27,11 +27,13 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
+using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Autorole;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using DIGOS.Ambassador.Plugins.Autorole.TypeReaders;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
+using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -81,7 +83,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole
             }
 
             var commands = serviceProvider.GetRequiredService<CommandService>();
-            commands.AddTypeReader<AutoroleTypeReader>(new AutoroleTypeReader());
+            commands.AddTypeReader<AutoroleConfiguration>(new AutoroleTypeReader());
+            commands.AddTypeReader<IEmote>(new EmojiTypeReader());
 
             await commands.AddModuleAsync<AutoroleCommands>(serviceProvider);
 
