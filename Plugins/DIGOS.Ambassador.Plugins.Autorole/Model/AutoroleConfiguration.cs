@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
     /// Represents an automatic role.
     /// </summary>
     [PublicAPI]
-    [Table("Autoroles", Schema = "AutoroleModule")]
+    [Table("AutoroleConfigurations", Schema = "AutoroleModule")]
     public class AutoroleConfiguration : EFEntity
     {
         /// <summary>
