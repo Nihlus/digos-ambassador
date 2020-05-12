@@ -32,19 +32,66 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
     /// Reads an IMessage, downloading it if necessary.
     /// </summary>
     /// <typeparam name="T">A type implementing <see cref="IMessage"/>.</typeparam>
-    public class UncachedMessageTypeReader<T> : TypeReader where T : class, IMessage
+    public class UncachedMessageTypeReader<T> : MessageTypeReader<T> where T : class, IMessage
     {
         /// <inheritdoc />
-        public override async Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
+        public override async Task<TypeReaderResult> ReadAsync
+        (
+            ICommandContext context,
+            string input,
+            IServiceProvider services
+        )
         {
+            var baseResult = await base.ReadAsync(context, input, services);
+            if (baseResult.IsSuccess)
+            {
+                return baseResult;
+            }
+
             if (!ulong.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out var id))
             {
+                // Maybe it's a message link?
+                if (!Uri.IsWellFormedUriString(input, UriKind.RelativeOrAbsolute))
+                {
+                    return TypeReaderResult.FromError(CommandError.Unsuccessful, "Message not found.");
+                }
+
+                var uri = new Uri(input, UriKind.RelativeOrAbsolute);
+                if (uri.Segments.Length < 3)
+                {
+                    return TypeReaderResult.FromError(CommandError.Unsuccessful, "Message not found.");
+                }
+
+                var messageIDSegment = uri.Segments[^1];
+                var channelIDSegment = uri.Segments[^2];
+
+                if (!ulong.TryParse(messageIDSegment.Trim('/'), out var messageID))
+                {
+                    return TypeReaderResult.FromError(CommandError.Unsuccessful, "Message not found.");
+                }
+
+                if (!ulong.TryParse(channelIDSegment.Trim('/'), out var channelID))
+                {
+                    return TypeReaderResult.FromError(CommandError.Unsuccessful, "Message not found.");
+                }
+
+                var channel = await context.Guild.GetChannelAsync(channelID);
+                if (!(channel is ITextChannel textChannel))
+                {
+                    return TypeReaderResult.FromError(CommandError.Unsuccessful, "Message not found.");
+                }
+
+                if (await textChannel.GetMessageAsync(messageID) is T jumpUrlMessage)
+                {
+                    return TypeReaderResult.FromSuccess(jumpUrlMessage);
+                }
+
                 return TypeReaderResult.FromError(CommandError.Unsuccessful, "Message not found.");
             }
 
-            if (await context.Channel.GetMessageAsync(id) is T message)
+            if (await context.Channel.GetMessageAsync(id) is T directIDMessage)
             {
-                return TypeReaderResult.FromSuccess(message);
+                return TypeReaderResult.FromSuccess(directIDMessage);
             }
 
             return TypeReaderResult.FromError(CommandError.Unsuccessful, "Message not found.");
