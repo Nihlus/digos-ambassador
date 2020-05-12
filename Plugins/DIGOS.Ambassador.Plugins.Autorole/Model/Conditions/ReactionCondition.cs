@@ -47,7 +47,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// </summary>
         public string EmoteName { get; private set; }
 
-        private ReactionCondition(long channelID, long messageID, string emoteName)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReactionCondition"/> class.
+        /// </summary>
+        /// <param name="channelID">The channel ID.</param>
+        /// <param name="messageID">The message ID.</param>
+        /// <param name="emoteName">The name of the emote.</param>
+        [UsedImplicitly]
+        protected ReactionCondition(long channelID, long messageID, string emoteName)
         {
             this.ChannelID = channelID;
             this.MessageID = messageID;

@@ -36,12 +36,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         /// <summary>
         /// Gets the Discord ID of the message source.
         /// </summary>
-        public long SourceID { get; private set; }
+        public long SourceID { get; internal set; }
 
         /// <summary>
         /// Gets the required number of messages.
         /// </summary>
-        public long RequiredCount { get; private set; }
+        public long RequiredCount { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MessageCountInSourceCondition{TActualCondition}"/> class.

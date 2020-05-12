@@ -22,6 +22,7 @@
 
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
+using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
@@ -35,7 +36,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// </summary>
         /// <param name="sourceID">The source ID.</param>
         /// <param name="requiredCount">The required message count.</param>
-        private MessageCountInGuildCondition(long sourceID, long requiredCount)
+        [UsedImplicitly]
+        protected MessageCountInGuildCondition(long sourceID, long requiredCount)
             : base(sourceID, requiredCount)
         {
         }
