@@ -181,7 +181,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
             var conditionFields = autorole.Conditions.Select
             (
-                c => new EmbedFieldBuilder().WithName(c.GetDescriptiveUIText()).WithValue("\n\u200b")
+                c => new EmbedFieldBuilder()
+                    .WithName($"Condition #{autorole.Conditions.IndexOf(c)} (ID {c.ID})")
+                    .WithValue(c.GetDescriptiveUIText())
             );
 
             var pages = PageFactory.FromFields(conditionFields, pageBase: baseEmbed);

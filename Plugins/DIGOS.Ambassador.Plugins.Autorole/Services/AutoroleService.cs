@@ -23,10 +23,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
+using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Services
@@ -96,8 +96,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 );
             }
 
-            var proxy = _database.CreateProxy(typeof(AutoroleConfiguration), discordRole);
-            if (!(proxy is AutoroleConfiguration autorole))
+            var autorole = _database.CreateProxy<AutoroleConfiguration>(discordRole);
+            if (autorole is null)
             {
                 return CreateEntityResult<AutoroleConfiguration>.FromError
                 (
@@ -178,6 +178,87 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Adds a condition to the given autorole.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="condition">The condition.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> AddConditionAsync
+        (
+            AutoroleConfiguration autorole,
+            AutoroleCondition condition
+        )
+        {
+            if (autorole.Conditions.Any(c => c.HasSameConditionsAs(condition)))
+            {
+                return ModifyEntityResult.FromError
+                (
+                    "There's already a condition with the same settings in the autorole."
+                );
+            }
+
+            autorole.Conditions.Add(condition);
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Gets a condition of the specified ID and type from the given autorole.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="conditionID">The ID of the condition.</param>
+        /// <typeparam name="TCondition">The type of the condition.</typeparam>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public RetrieveEntityResult<TCondition> GetCondition<TCondition>
+        (
+            AutoroleConfiguration autorole,
+            long conditionID
+        )
+            where TCondition : AutoroleCondition
+        {
+            var condition = autorole.Conditions.FirstOrDefault(c => c.ID == conditionID);
+            if (condition is null)
+            {
+                return RetrieveEntityResult<TCondition>.FromError
+                (
+                    "The autorole doesn't have any condition with that ID."
+                );
+            }
+
+            if (!(condition is TCondition))
+            {
+                return RetrieveEntityResult<TCondition>.FromError
+                (
+                    "The condition with that ID isn't this kind of condition."
+                );
+            }
+
+            return (TCondition)condition;
+        }
+
+        /// <summary>
+        /// Creates a proxy object for the given condition type.
+        /// </summary>
+        /// <param name="args">The constructor arguments for the condition.</param>
+        /// <typeparam name="TCondition">The condition type.</typeparam>
+        /// <returns>The condition, or null.</returns>
+        public TCondition? CreateConditionProxy<TCondition>(params object[] args)
+            where TCondition : AutoroleCondition
+        {
+            return _database.CreateProxy<TCondition>(args);
+        }
+
+        /// <summary>
+        /// Explicitly saves the database.
+        /// </summary>
+        /// <returns>The number of entities saved.</returns>
+        public Task<int> SaveChangesAsync()
+        {
+            return _database.SaveChangesAsync();
         }
     }
 }
