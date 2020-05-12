@@ -50,18 +50,24 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         /// Gets a value indicating whether the role needs external confirmation (from a moderator, for example)
         /// to be applied after all conditions are met.
         /// </summary>
-        public bool RequiresConfirmation { get; private set; }
+        public bool RequiresConfirmation { get; internal set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the role is currently enabled; that is, whether new users meeting the
+        /// conditions will have the role applied.
+        /// </summary>
+        public bool IsEnabled { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Autorole"/> class.
         /// </summary>
         /// <param name="discordRoleID">The ID of the discord role to assign.</param>
-        /// <param name="requiresConfirmation">Whether the role requires external confirmation to be assigned.</param>
-        public Autorole(long discordRoleID, bool requiresConfirmation)
+        public Autorole(long discordRoleID)
         {
             this.DiscordRoleID = discordRoleID;
             this.Conditions = new List<AutoroleCondition>();
-            this.RequiresConfirmation = requiresConfirmation;
+
+            this.IsEnabled = true;
         }
     }
 }
