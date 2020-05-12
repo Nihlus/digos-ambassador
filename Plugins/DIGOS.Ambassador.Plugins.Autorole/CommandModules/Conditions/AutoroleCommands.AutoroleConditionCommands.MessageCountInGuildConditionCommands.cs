@@ -20,7 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Threading.Tasks;
 using Discord.Commands;
+using JetBrains.Annotations;
+
+#pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
 namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 {
@@ -34,6 +38,27 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Group("total-messages")]
             public class MessageCountInGuildConditionCommands : ModuleBase
             {
+                /// <summary>
+                /// Adds the condition to the role, or modifies the existing condition.
+                /// </summary>
+                /// <param name="count">The message count.</param>
+                [UsedImplicitly]
+                [Command]
+                [Summary("Adds the condition to the role, or modifies the existing condition.")]
+                public async Task AddOrModifyConditionAsync(long count)
+                {
+                }
+
+                /// <summary>
+                /// Removes the condition from the role.
+                /// </summary>
+                [UsedImplicitly]
+                [Alias("remove")]
+                [Command("remove")]
+                [Summary("Removes the condition from the role.")]
+                public async Task RemoveConditionAsync()
+                {
+                }
             }
         }
     }

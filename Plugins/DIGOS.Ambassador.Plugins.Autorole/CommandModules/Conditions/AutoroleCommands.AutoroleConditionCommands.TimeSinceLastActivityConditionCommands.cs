@@ -20,7 +20,12 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Threading.Tasks;
 using Discord.Commands;
+using JetBrains.Annotations;
+
+#pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
 namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 {
@@ -35,6 +40,27 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Group("time-since-last-activity")]
             public class TimeSinceLastActivityConditionCommands : ModuleBase
             {
+                /// <summary>
+                /// Adds the condition to the role, or modifies the existing condition.
+                /// </summary>
+                /// <param name="time">The required time.</param>
+                [UsedImplicitly]
+                [Command]
+                [Summary("Adds the condition to the role, or modifies the existing condition.")]
+                public async Task AddOrModifyConditionAsync(TimeSpan time)
+                {
+                }
+
+                /// <summary>
+                /// Removes the condition from the role.
+                /// </summary>
+                [UsedImplicitly]
+                [Alias("remove")]
+                [Command("remove")]
+                [Summary("Removes the condition from the role.")]
+                public async Task RemoveConditionAsync()
+                {
+                }
             }
         }
     }

@@ -20,7 +20,12 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
+using JetBrains.Annotations;
+
+#pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
 namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 {
@@ -34,6 +39,28 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Group("reaction")]
             public class ReactionConditionCommands : ModuleBase
             {
+                /// <summary>
+                /// Adds the condition to the role, or modifies the existing condition.
+                /// </summary>
+                /// <param name="message">The message.</param>
+                /// <param name="emote">The emote.</param>
+                [UsedImplicitly]
+                [Command]
+                [Summary("Adds the condition to the role, or modifies the existing condition.")]
+                public async Task AddOrModifyConditionAsync(IMessage message, IEmote emote)
+                {
+                }
+
+                /// <summary>
+                /// Removes the condition from the role.
+                /// </summary>
+                [UsedImplicitly]
+                [Alias("remove")]
+                [Command("remove")]
+                [Summary("Removes the condition from the role.")]
+                public async Task RemoveConditionAsync()
+                {
+                }
             }
         }
     }
