@@ -64,6 +64,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             foreach (var guild in this.Client.Guilds)
             {
+                var botUser = guild.GetUser(this.Client.CurrentUser.Id);
+                if (botUser is null)
+                {
+                    this.Log.LogError("Failed to get our own user as a guild user. Yikes!");
+                    continue;
+                }
+
+                if (!botUser.GuildPermissions.ManageRoles)
+                {
+                    // It's pointless to try to add or remove roles on this server
+                    continue;
+                }
+
                 var guildAutoroles = autoroles.GetAutoroles(guild);
 
                 if (!await guildAutoroles.AnyAsync(ct))
