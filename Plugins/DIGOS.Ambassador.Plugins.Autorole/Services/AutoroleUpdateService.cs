@@ -98,6 +98,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             AutoroleConfiguration autorole, IGuildUser guildUser
         )
         {
+            if (!autorole.IsEnabled)
+            {
+                return Disabled;
+            }
+
+            if (!autorole.Conditions.Any())
+            {
+                return Unconditional;
+            }
+
             var role = guildUser.Guild.GetRole((ulong)autorole.DiscordRoleID);
             if (role is null)
             {
