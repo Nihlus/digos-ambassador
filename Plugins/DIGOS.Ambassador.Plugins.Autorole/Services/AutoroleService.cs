@@ -162,6 +162,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return ModifyEntityResult.FromError("The autorole is already enabled.");
             }
 
+            if (!autorole.Conditions.Any())
+            {
+                return ModifyEntityResult.FromError("The autorole doesn't have any configured conditions.");
+            }
+
             autorole.IsEnabled = true;
 
             await _database.SaveChangesAsync();
@@ -198,6 +203,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             if (condition is null)
             {
                 return ModifyEntityResult.FromError("The autorole doesn't have any condition with that ID.");
+            }
+
+            if (autorole.Conditions.Count == 1 && autorole.IsEnabled)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    "The autorole is still enabled, so it requires at least one condition to be present. " +
+                    "Either disable the role, or add more conditions."
+                );
             }
 
             autorole.Conditions.Remove(condition);
