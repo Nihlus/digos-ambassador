@@ -20,11 +20,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -40,16 +42,28 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
     {
         private readonly AutoroleDatabaseContext _database;
         private readonly ServerService _servers;
+        private readonly UserService _users;
+        private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleService"/> class.
         /// </summary>
         /// <param name="database">The database.</param>
         /// <param name="servers">The server service.</param>
-        public AutoroleService(AutoroleDatabaseContext database, ServerService servers)
+        /// <param name="users">The user service.</param>
+        /// <param name="serviceProvider">The service provider.</param>
+        public AutoroleService
+        (
+            AutoroleDatabaseContext database,
+            ServerService servers,
+            UserService users,
+            IServiceProvider serviceProvider
+        )
         {
             _database = database;
             _servers = servers;
+            _users = users;
+            _serviceProvider = serviceProvider;
         }
 
         /// <summary>
@@ -250,6 +264,134 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             return (TCondition)condition;
+        }
+
+        /// <summary>
+        /// Gets or creates an autorole confirmation for a given user.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="discordUser">The user.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<AutoroleConfirmation>> GetOrCreateAutoroleConfirmationAsync
+        (
+            AutoroleConfiguration autorole,
+            IUser discordUser
+        )
+        {
+            var existingConfirmation = await _database.AutoroleConfirmations.AsQueryable().FirstOrDefaultAsync
+            (
+                ac => ac.User.DiscordID == (long)discordUser.Id
+            );
+
+            if (!(existingConfirmation is null))
+            {
+                return existingConfirmation;
+            }
+
+            var getUser = await _users.GetOrRegisterUserAsync(discordUser);
+            if (!getUser.IsSuccess)
+            {
+                return RetrieveEntityResult<AutoroleConfirmation>.FromError(getUser);
+            }
+
+            var user = getUser.Entity;
+            var newConfirmation = _database.CreateProxy<AutoroleConfirmation>(autorole, user, false);
+
+            _database.AutoroleConfirmations.Update(newConfirmation);
+            await _database.SaveChangesAsync();
+
+            return newConfirmation;
+        }
+
+        /// <summary>
+        /// Explicitly affirms an autorole assignment.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="discordUser">The user.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> AffirmAutoroleAsync
+        (
+            AutoroleConfiguration autorole,
+            IUser discordUser
+        )
+        {
+            if (autorole.RequiresConfirmation)
+            {
+                return ModifyEntityResult.FromError("The autorole doesn't require explicit affirmation.");
+            }
+
+            var getCondition = await GetOrCreateAutoroleConfirmationAsync(autorole, discordUser);
+            if (!getCondition.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getCondition);
+            }
+
+            var condition = getCondition.Entity;
+            if (condition.IsConfirmed)
+            {
+                return ModifyEntityResult.FromError("The autorole assignment has already been affirmed.");
+            }
+
+            condition.IsConfirmed = true;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Explicitly denies an autorole assignment.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="discordUser">The user.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> DenyAutoroleAsync
+        (
+            AutoroleConfiguration autorole,
+            IUser discordUser
+        )
+        {
+            if (autorole.RequiresConfirmation)
+            {
+                return ModifyEntityResult.FromError("The autorole doesn't require explicit affirmation.");
+            }
+
+            var getCondition = await GetOrCreateAutoroleConfirmationAsync(autorole, discordUser);
+            if (!getCondition.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getCondition);
+            }
+
+            var condition = getCondition.Entity;
+            if (condition.IsConfirmed)
+            {
+                return ModifyEntityResult.FromError
+                (
+                    "The autorole assignment has already been denied, or has never been affirmed."
+                );
+            }
+
+            condition.IsConfirmed = false;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Determines whether a given user is qualified for the given autorole.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="user">The user.</param>
+        /// <returns>true if the user qualifies; otherwise, false.</returns>
+        public async Task<bool> IsUserQualifiedForAutoroleAsync(AutoroleConfiguration autorole, IGuildUser user)
+        {
+            return (await Task.WhenAll
+            (
+                autorole.Conditions.Select
+                (
+                    c => c.IsConditionFulfilledForUser(_serviceProvider, user)
+                )
+            ))
+            .All(c => c);
         }
 
         /// <summary>

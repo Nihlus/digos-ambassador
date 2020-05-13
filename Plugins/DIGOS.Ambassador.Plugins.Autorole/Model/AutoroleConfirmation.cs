@@ -46,9 +46,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         public virtual User User { get; private set; } = null!;
 
         /// <summary>
-        /// Gets a value indicating whether the user's qualification has been confirmed.
+        /// Gets a value indicating whether the user's qualification has been affirmed.
         /// </summary>
         public bool IsConfirmed { get; internal set; }
+
+        /// <summary>
+        /// Gets a value indicating whether a notification has been sent that the user is qualified but not affirmed.
+        /// </summary>
+        public bool HasNotificationBeenSent { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleConfirmation"/> class.
