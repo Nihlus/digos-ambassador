@@ -28,10 +28,13 @@ using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
+using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
+using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
+using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -77,6 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Command("create")]
         [Summary("Creates a new autorole configuration for the given Discord role.")]
         [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(CreateAutorole), PermissionTarget.Self)]
         public async Task CreateAutoroleAsync(IRole discordRole)
         {
             var create = await _autoroles.CreateAutoroleAsync(discordRole);
@@ -97,6 +101,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Command("delete")]
         [Summary("Deletes an existing autorole configuration for the given Discord role.")]
         [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(DeleteAutorole), PermissionTarget.Self)]
         public async Task DeleteAutoroleAsync(AutoroleConfiguration autorole)
         {
             var deleteAutorole = await _autoroles.DeleteAutoroleAsync(autorole);
@@ -117,6 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Command("enable")]
         [Summary("Enables the given autorole, allowing it to be added to users.")]
         [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
         public async Task EnableAutoroleAsync(AutoroleConfiguration autorole)
         {
             var enableAutorole = await _autoroles.EnableAutoroleAsync(autorole);
@@ -137,6 +143,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Command("disable")]
         [Summary("Disables the given autorole, preventing it from being added to users.")]
         [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
         public async Task DisableAutoroleAsync(AutoroleConfiguration autorole)
         {
             var disableAutorole = await _autoroles.DisableAutoroleAsync(autorole);
@@ -157,6 +164,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Command("show")]
         [Summary("Show the settings for the given autorole.")]
         [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(ViewAutorole), PermissionTarget.Self)]
         public async Task ShowAutoroleAsync(AutoroleConfiguration autorole)
         {
             var paginatedEmbed = new PaginatedEmbed(_feedback, _interactivity, this.Context.User)
@@ -205,6 +213,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Command("list")]
         [Summary("Lists configured autoroles.")]
         [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(ViewAutorole), PermissionTarget.Self)]
         public async Task ListAutorolesAsync()
         {
             var autoroles = new List<AutoroleConfiguration>();
@@ -248,6 +257,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Command("affirm")]
         [Summary("Affirms a user's qualification for an autorole.")]
         [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.Self)]
         public async Task AffirmAutoroleForUserAsync
         (
             AutoroleConfiguration autorole,
@@ -274,6 +284,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Command("deny")]
         [Summary("Denies a user's qualification for an autorole.")]
         [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.Self)]
         public async Task DenyAutoroleForUserAsync
         (
             AutoroleConfiguration autorole,
@@ -300,6 +311,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Command("require-confirmation")]
         [Summary("Sets whether the given autorole require confirmation for the assignment after a user has qualified.")]
         [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
         public async Task SetAffirmationRequirementAsync
         (
             AutoroleConfiguration autorole,

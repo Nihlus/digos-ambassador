@@ -25,7 +25,10 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
+using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
+using DIGOS.Ambassador.Plugins.Permissions.Model;
+using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using Discord.Commands;
 using JetBrains.Annotations;
 
@@ -65,6 +68,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 [UsedImplicitly]
                 [Command]
                 [Summary("Adds an instance of the condition to the role.")]
+                [RequireContext(ContextType.Guild)]
+                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
                 public async Task AddConditionAsync(AutoroleConfiguration autorole, TimeSpan time)
                 {
                     var condition = _autoroles.CreateConditionProxy<TimeSinceJoinCondition>
@@ -97,6 +102,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 [UsedImplicitly]
                 [Command]
                 [Summary("Modifies an instance of the condition on the role.")]
+                [RequireContext(ContextType.Guild)]
+                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
                 public async Task ModifyConditionAsync
                 (
                     AutoroleConfiguration autorole,

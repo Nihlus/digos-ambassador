@@ -23,7 +23,10 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
+using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
+using DIGOS.Ambassador.Plugins.Permissions.Model;
+using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using Discord.Commands;
 using JetBrains.Annotations;
 
@@ -62,6 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Alias("remove")]
             [Command("remove")]
             [Summary("Removes the condition from the role.")]
+            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
             public async Task RemoveConditionAsync
             (
                 AutoroleConfiguration autorole,
