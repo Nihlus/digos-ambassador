@@ -60,6 +60,73 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         }
 
         /// <inheritdoc/>
+        protected override async Task MessageUpdated
+        (
+            Cacheable<IMessage, ulong> oldMessage,
+            SocketMessage newMessage,
+            ISocketMessageChannel channel
+        )
+        {
+            if (!(newMessage.Author is IGuildUser guildUser))
+            {
+                return;
+            }
+
+            var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
+        }
+
+        /// <inheritdoc/>
+        protected override async Task UserJoined(SocketGuildUser user)
+        {
+            var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            await UpdateLastActivityTimestampForUser(userStatistics, user);
+        }
+
+        /// <inheritdoc/>
+        protected override async Task ReactionAdded
+        (
+            Cacheable<IUserMessage, ulong> message,
+            ISocketMessageChannel channel,
+            SocketReaction reaction
+        )
+        {
+            var reactingUser = await channel.GetUserAsync(reaction.UserId);
+
+            if (!(reactingUser is IGuildUser guildUser))
+            {
+                return;
+            }
+
+            var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
+        }
+
+        /// <inheritdoc/>
+        protected override async Task UserVoiceStateUpdated
+        (
+            SocketUser user,
+            SocketVoiceState oldState,
+            SocketVoiceState newState
+        )
+        {
+            if (!(user is IGuildUser guildUser))
+            {
+                return;
+            }
+
+            var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
+        }
+
+        /// <inheritdoc/>
+        protected override async Task GuildMemberUpdated(SocketGuildUser oldMember, SocketGuildUser newMember)
+        {
+            var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            await UpdateLastActivityTimestampForUser(userStatistics, newMember);
+        }
+
+        /// <inheritdoc/>
         protected override async Task MessageReceived(SocketMessage message)
         {
             if (!(message.Author is SocketGuildUser guildUser))
@@ -77,20 +144,29 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             var autorolesOnServer = autoroles.GetAutoroles(guildUser.Guild);
 
-            var wantsToUpdateLocalStats =
+            var wantsToUpdateChannelMessageCounts =
                 autorolesOnServer.Any(a => a.Conditions.Any(c => c is MessageCountInChannelCondition));
 
-            var wantsToUpdateGlobalStats =
+            var wantsToUpdateServerMessageCounts =
                 autorolesOnServer.Any(a => a.Conditions.Any(c => c is MessageCountInGuildCondition));
 
-            if (!(wantsToUpdateLocalStats || wantsToUpdateGlobalStats))
+            var wantsToUpdateLastActivityTime =
+                autorolesOnServer.Any(a => a.Conditions.Any(c => c is TimeSinceLastActivityCondition));
+
+            if
+            (
+                !wantsToUpdateChannelMessageCounts &&
+                !wantsToUpdateServerMessageCounts &&
+                !wantsToUpdateLastActivityTime
+            )
             {
                 return;
             }
 
             var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
 
-            if (wantsToUpdateLocalStats)
+            if (wantsToUpdateChannelMessageCounts)
             {
                 var getChannelStats = await userStatistics.GetOrCreateUserChannelStatisticsAsync
                 (
@@ -123,7 +199,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 }
             }
 
-            if (wantsToUpdateGlobalStats)
+            if (wantsToUpdateServerMessageCounts)
             {
                 var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser);
                 if (!getGlobalStats.IsSuccess)
@@ -163,6 +239,29 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             }
 
             await userStatistics.SaveChangesAsync();
+        }
+
+        /// <summary>
+        /// Updates the last activity timestamp for the given user.
+        /// </summary>
+        /// <param name="userStatistics">The statistics service.</param>
+        /// <param name="guildUser">The guild user.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        private async Task UpdateLastActivityTimestampForUser
+        (
+            UserStatisticsService userStatistics,
+            IGuildUser guildUser
+        )
+        {
+            var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser);
+            if (!getGlobalStats.IsSuccess)
+            {
+                this.Log.LogError(getGlobalStats.Exception, getGlobalStats.ErrorReason);
+                return;
+            }
+
+            var globalStats = getGlobalStats.Entity;
+            globalStats.LastActivityTime = DateTimeOffset.UtcNow;
         }
 
         private async Task<RetrieveEntityResult<Task<long>>> CountUserMessagesAsync(IMessageChannel channel, IUser user)
