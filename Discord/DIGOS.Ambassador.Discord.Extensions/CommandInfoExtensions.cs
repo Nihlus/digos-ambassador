@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Discord.Extensions
             // HACK: override the command name if the name has capitals in it, which means it's a top-level command
             if (commandName.Any(char.IsUpper))
             {
-                commandName = @this.Aliases.First();
+                commandName = string.Empty;
             }
 
             return commandName;
