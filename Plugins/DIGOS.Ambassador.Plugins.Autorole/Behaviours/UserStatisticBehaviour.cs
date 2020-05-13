@@ -67,19 +67,31 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             ISocketMessageChannel channel
         )
         {
+            if (newMessage.Author.IsBot || newMessage.Author.IsWebhook)
+            {
+                return;
+            }
+
             if (!(newMessage.Author is IGuildUser guildUser))
             {
                 return;
             }
 
-            var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            using var eventScope = this.Services.CreateScope();
+            var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
             await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
         }
 
         /// <inheritdoc/>
         protected override async Task UserJoined(SocketGuildUser user)
         {
-            var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            if (user.IsBot || user.IsWebhook)
+            {
+                return;
+            }
+
+            using var eventScope = this.Services.CreateScope();
+            var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
             await UpdateLastActivityTimestampForUser(userStatistics, user);
         }
 
@@ -92,13 +104,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         )
         {
             var reactingUser = await channel.GetUserAsync(reaction.UserId);
+            if (reactingUser.IsBot || reactingUser.IsWebhook)
+            {
+                return;
+            }
 
             if (!(reactingUser is IGuildUser guildUser))
             {
                 return;
             }
 
-            var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            using var eventScope = this.Services.CreateScope();
+            var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
             await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
         }
 
@@ -110,25 +127,42 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             SocketVoiceState newState
         )
         {
+            if (user.IsBot || user.IsWebhook)
+            {
+                return;
+            }
+
             if (!(user is IGuildUser guildUser))
             {
                 return;
             }
 
-            var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            using var eventScope = this.Services.CreateScope();
+            var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
             await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
         }
 
         /// <inheritdoc/>
         protected override async Task GuildMemberUpdated(SocketGuildUser oldMember, SocketGuildUser newMember)
         {
-            var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            if (newMember.IsBot || newMember.IsWebhook)
+            {
+                return;
+            }
+
+            using var eventScope = this.Services.CreateScope();
+            var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
             await UpdateLastActivityTimestampForUser(userStatistics, newMember);
         }
 
         /// <inheritdoc/>
         protected override async Task MessageReceived(SocketMessage message)
         {
+            if (message.Author.IsBot || message.Author.IsWebhook)
+            {
+                return;
+            }
+
             if (!(message.Author is SocketGuildUser guildUser))
             {
                 return;
@@ -140,7 +174,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             }
 
             // First, let's get some valid service instances
-            var autoroles = this.Services.GetRequiredService<AutoroleService>();
+            using var eventScope = this.Services.CreateScope();
+            var autoroles = eventScope.ServiceProvider.GetRequiredService<AutoroleService>();
 
             var autorolesOnServer = autoroles.GetAutoroles(guildUser.Guild);
 
@@ -163,7 +198,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 return;
             }
 
-            var userStatistics = this.Services.GetRequiredService<UserStatisticsService>();
+            var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
             await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
 
             if (wantsToUpdateChannelMessageCounts)

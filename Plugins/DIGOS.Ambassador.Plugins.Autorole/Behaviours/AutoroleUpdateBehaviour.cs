@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Results;
@@ -59,8 +60,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         /// <inheritdoc />
         protected override async Task OnTickAsync(CancellationToken ct)
         {
-            var autoroles = this.Services.GetRequiredService<AutoroleService>();
-            var autoroleUpdates = this.Services.GetRequiredService<AutoroleUpdateService>();
+            using var tickScope = this.Services.CreateScope();
+            var autoroles = tickScope.ServiceProvider.GetRequiredService<AutoroleService>();
+            var autoroleUpdates = tickScope.ServiceProvider.GetRequiredService<AutoroleUpdateService>();
 
             foreach (var guild in this.Client.Guilds)
             {
@@ -77,9 +79,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                     continue;
                 }
 
-                var guildAutoroles = autoroles.GetAutoroles(guild);
+                var guildAutoroles = await autoroles.GetAutoroles(guild).ToListAsync(ct);
 
-                if (!await guildAutoroles.AnyAsync(ct))
+                if (!guildAutoroles.Any())
                 {
                     continue;
                 }
