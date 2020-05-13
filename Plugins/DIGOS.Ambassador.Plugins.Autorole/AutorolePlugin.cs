@@ -64,6 +64,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole
         {
             serviceCollection
                 .AddScoped<AutoroleService>()
+                .AddScoped<AutoroleUpdateService>()
                 .AddScoped<UserStatisticsService>()
                 .AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>();
         }
