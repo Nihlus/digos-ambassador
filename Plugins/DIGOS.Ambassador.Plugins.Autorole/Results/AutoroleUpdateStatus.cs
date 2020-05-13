@@ -28,6 +28,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Results
     public enum AutoroleUpdateStatus
     {
         /// <summary>
+        /// The autorole is disabled.
+        /// </summary>
+        Disabled,
+
+        /// <summary>
+        /// The autorole is unconditional (i.e, it has no configured conditions). This is not allowed for safety
+        /// reasons.
+        /// </summary>
+        Unconditional,
+
+        /// <summary>
         /// The user did not qualify for the autorole.
         /// </summary>
         Unqualified,
