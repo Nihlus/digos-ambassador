@@ -482,5 +482,100 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             return ModifyEntityResult.FromSuccess();
         }
+
+        /// <summary>
+        /// Gets or creates server settings for the given guild.
+        /// </summary>
+        /// <param name="guild">The guild.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<AutoroleServerSettings>> GetOrCreateServerSettingsAsync
+        (
+            IGuild guild
+        )
+        {
+            var existingSettings = await _database.AutoroleServerSettings.AsQueryable().FirstOrDefaultAsync
+            (
+                s => s.Server.DiscordID == (long)guild.Id
+            );
+
+            if (!(existingSettings is null))
+            {
+                return existingSettings;
+            }
+
+            var getServer = await _servers.GetOrRegisterServerAsync(guild);
+            if (!getServer.IsSuccess)
+            {
+                return RetrieveEntityResult<AutoroleServerSettings>.FromError(getServer);
+            }
+
+            var server = getServer.Entity;
+            var newSettings = _database.CreateProxy<AutoroleServerSettings>(server);
+
+            _database.AutoroleServerSettings.Update(newSettings);
+            await _database.SaveChangesAsync();
+
+            return newSettings;
+        }
+
+        /// <summary>
+        /// Sets the affirmation notification channel for the given guild.
+        /// </summary>
+        /// <param name="guild">The guild.</param>
+        /// <param name="textChannel">The channel.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetAffirmationNotificationChannelAsync
+        (
+            IGuild guild,
+            ITextChannel textChannel
+        )
+        {
+            var getSettings = await GetOrCreateServerSettingsAsync(guild);
+            if (!getSettings.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getSettings);
+            }
+
+            var settings = getSettings.Entity;
+
+            if (settings.AffirmationRequiredNotificationChannelID == (decimal?)textChannel.Id)
+            {
+                return ModifyEntityResult.FromError("That's already the affirmation notification channel.");
+            }
+
+            settings.AffirmationRequiredNotificationChannelID = (long)textChannel.Id;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Clears the affirmation notification channel for the given guild.
+        /// </summary>
+        /// <param name="guild">The guild.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> ClearAffirmationNotificationChannelAsync
+        (
+            IGuild guild
+        )
+        {
+            var getSettings = await GetOrCreateServerSettingsAsync(guild);
+            if (!getSettings.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getSettings);
+            }
+
+            var settings = getSettings.Entity;
+
+            if (settings.AffirmationRequiredNotificationChannelID is null)
+            {
+                return ModifyEntityResult.FromError("There's no affirmation notification channel set.");
+            }
+
+            settings.AffirmationRequiredNotificationChannelID = null;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
     }
 }

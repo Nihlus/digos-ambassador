@@ -24,8 +24,13 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
+using Discord;
+using Discord.Net;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -42,19 +47,25 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
     [UsedImplicitly]
     public class AutoroleUpdateBehaviour : ContinuousDiscordBehaviour<AutoroleUpdateBehaviour>
     {
+        private readonly UserFeedbackService _feedback;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleUpdateBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
         /// <param name="serviceScope">The service scope.</param>
         /// <param name="logger">The logger.</param>
+        /// <param name="feedback">The user feedback service.</param>
         public AutoroleUpdateBehaviour
         (
             DiscordSocketClient client,
             IServiceScope serviceScope,
-            ILogger<AutoroleUpdateBehaviour> logger)
+            ILogger<AutoroleUpdateBehaviour> logger,
+            UserFeedbackService feedback
+        )
             : base(client, serviceScope, logger)
         {
+            _feedback = feedback;
         }
 
         /// <inheritdoc />
@@ -93,9 +104,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
                 foreach (var autorole in guildAutoroles)
                 {
-                    var updateResults = autoroleUpdates.UpdateAutoroleAsync(autorole).WithCancellation(ct);
-                    await foreach (var updateResult in updateResults)
+                    foreach (var user in guild.Users)
                     {
+                        var updateResult = await autoroleUpdates.UpdateAutoroleForUserAsync(autorole, user);
                         if (!updateResult.IsSuccess)
                         {
                             this.Log.LogError(updateResult.Exception, updateResult.ErrorReason);
@@ -106,7 +117,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                         {
                             case AutoroleUpdateStatus.RequiresAffirmation:
                             {
-                                // TODO: Send affirmation request
+                                await NotifyUserNeedsAffirmation(autoroles, guild, autorole, user);
                                 break;
                             }
                         }
@@ -115,6 +126,73 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             }
 
             await Task.Delay(TimeSpan.FromSeconds(1), ct);
+        }
+
+        private async Task NotifyUserNeedsAffirmation
+        (
+            AutoroleService autoroles,
+            SocketGuild guild,
+            AutoroleConfiguration autorole,
+            IUser user
+        )
+        {
+            var getAutoroleConfirmation = await autoroles.GetOrCreateAutoroleConfirmationAsync(autorole, user);
+            if (!getAutoroleConfirmation.IsSuccess)
+            {
+                this.Log.LogError(getAutoroleConfirmation.Exception, getAutoroleConfirmation.ErrorReason);
+                return;
+            }
+
+            var autoroleConfirmation = getAutoroleConfirmation.Entity;
+
+            if (autoroleConfirmation.HasNotificationBeenSent)
+            {
+                return;
+            }
+
+            var getSettings = await autoroles.GetOrCreateServerSettingsAsync(guild);
+            if (!getSettings.IsSuccess)
+            {
+                this.Log.LogError(getSettings.Exception, getSettings.ErrorReason);
+                return;
+            }
+
+            var settings = getSettings.Entity;
+
+            var notificationChannelID = settings.AffirmationRequiredNotificationChannelID;
+            if (notificationChannelID is null)
+            {
+                return;
+            }
+
+            var notificationChannel = guild.GetTextChannel((ulong)notificationChannelID.Value);
+            if (notificationChannel is null)
+            {
+                return;
+            }
+
+            var embed = _feedback.CreateEmbedBase()
+                .WithTitle("Confirmation Required")
+                .WithDescription
+                (
+                    $"{MentionUtils.MentionUser(user.Id)} has met the requirements for the " +
+                    $"{MentionUtils.MentionRole((ulong)autorole.DiscordRoleID)} role.\n" +
+                    $"\n" +
+                    $"Use \"!at affirm {MentionUtils.MentionRole((ulong)autorole.DiscordRoleID)} " +
+                    $"{MentionUtils.MentionUser(user.Id)}\" to affirm and give the user the role."
+                )
+                .WithColor(Color.Green);
+
+            try
+            {
+                await _feedback.SendEmbedAsync(notificationChannel, embed.Build());
+
+                autoroleConfirmation.HasNotificationBeenSent = true;
+                await autoroles.SaveChangesAsync();
+            }
+            catch (HttpException hex) when (hex.WasCausedByMissingPermission())
+            {
+            }
         }
     }
 }
