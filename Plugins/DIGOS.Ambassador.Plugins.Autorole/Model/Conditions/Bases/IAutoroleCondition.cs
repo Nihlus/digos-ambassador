@@ -20,6 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Threading.Tasks;
+using Discord;
+
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
 {
     /// <summary>
@@ -39,5 +43,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         /// <param name="autoroleCondition">The other condition.</param>
         /// <returns>true if this condition has the same conditions as another condition; otherwise, false.</returns>
         bool HasSameConditionsAs(IAutoroleCondition autoroleCondition);
+
+        /// <summary>
+        /// Determines whether the condition is fulfilled for the given Discord user.
+        /// </summary>
+        /// <param name="services">The service provider.</param>
+        /// <param name="discordUser">The Discord user.</param>
+        /// <returns>true if the condition is fulfilled; otherwise, false.</returns>
+        Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser);
     }
 }

@@ -20,6 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
 using JetBrains.Annotations;
@@ -89,6 +92,44 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
             return this.ChannelID == reactionCondition.ChannelID &&
                    this.MessageID == reactionCondition.MessageID &&
                    this.EmoteName == reactionCondition.EmoteName;
+        }
+
+        /// <inheritdoc/>
+        public override async Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
+        {
+            var channel = await discordUser.Guild.GetTextChannelAsync((ulong)this.ChannelID);
+            if (channel is null)
+            {
+                // TODO: Maybe we should throw here instead, or return a monad?
+                return false;
+            }
+
+            var message = await channel.GetMessageAsync((ulong)this.MessageID);
+            if (message is null)
+            {
+                // TODO: Same here...
+                return false;
+            }
+
+            var reactions = message.Reactions;
+            var emojiKey = reactions.Keys.FirstOrDefault(k => k.Name == this.EmoteName);
+            if (emojiKey is null)
+            {
+                // Nobody's reacted with this emoji
+                return false;
+            }
+
+            var reactionData = reactions[emojiKey];
+            var reactionUsers = message.GetReactionUsersAsync(emojiKey, reactionData.ReactionCount);
+            await foreach (var userBatch in reactionUsers)
+            {
+                if (userBatch.Any(user => user.Id == discordUser.Id))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

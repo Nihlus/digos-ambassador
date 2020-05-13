@@ -20,6 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
 using JetBrains.Annotations;
@@ -71,6 +74,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
             }
 
             return this.RoleID == roleCondition.RoleID;
+        }
+
+        /// <inheritdoc/>
+        public override Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
+        {
+            return Task.FromResult(discordUser.RoleIds.Contains((ulong)this.RoleID));
         }
     }
 }

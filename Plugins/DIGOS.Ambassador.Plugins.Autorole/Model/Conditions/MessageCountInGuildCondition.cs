@@ -20,9 +20,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Discord;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
@@ -56,6 +60,23 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         public override string GetDescriptiveUIText()
         {
             return $"{this.RequiredCount} messages in the server";
+        }
+
+        /// <inheritdoc/>
+        public override async Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
+        {
+            var statistics = services.GetRequiredService<UserStatisticsService>();
+
+            var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(discordUser);
+            if (!getUserStatistics.IsSuccess)
+            {
+                // TODO: Maybe we should throw here instead, or return a monad?
+                return false;
+            }
+
+            var userStatistics = getUserStatistics.Entity;
+
+            return userStatistics.TotalMessageCount.HasValue && userStatistics.TotalMessageCount >= this.RequiredCount;
         }
     }
 }

@@ -20,8 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Entities;
+using Discord;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
@@ -38,5 +41,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
 
         /// <inheritdoc />
         public abstract bool HasSameConditionsAs(IAutoroleCondition autoroleCondition);
+
+        /// <inheritdoc/>
+        public abstract Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser);
     }
 }

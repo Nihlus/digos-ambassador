@@ -21,8 +21,12 @@
 //
 
 using System;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+using DIGOS.Ambassador.Plugins.Autorole.Services;
+using Discord;
 using Humanizer;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
@@ -44,6 +48,29 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         public override string GetDescriptiveUIText()
         {
             return $"Has been active in the last {this.RequiredTime.Humanize(toWords: true, precision: 3)}";
+        }
+
+        /// <inheritdoc />
+        public override async Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
+        {
+            var statistics = services.GetRequiredService<UserStatisticsService>();
+
+            var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(discordUser);
+            if (!getUserStatistics.IsSuccess)
+            {
+                // TODO: Maybe we should throw here instead, or return a monad?
+                return false;
+            }
+
+            var userStatistics = getUserStatistics.Entity;
+
+            if (userStatistics.LastActivityTime is null)
+            {
+                // The user has never been active
+                return false;
+            }
+
+            return (DateTime.UtcNow - userStatistics.LastActivityTime) >= this.RequiredTime;
         }
     }
 }

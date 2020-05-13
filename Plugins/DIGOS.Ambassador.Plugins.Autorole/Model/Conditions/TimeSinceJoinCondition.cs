@@ -21,7 +21,9 @@
 //
 
 using System;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+using Discord;
 using Humanizer;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
@@ -44,6 +46,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         public override string GetDescriptiveUIText()
         {
             return $"Has been in the server for at least {this.RequiredTime.Humanize(toWords: true, precision: 3)}";
+        }
+
+        /// <inheritdoc/>
+        public override Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
+        {
+            if (discordUser.JoinedAt is null)
+            {
+                // TODO: Maybe we should throw here instead, or return a monad?
+                return Task.FromResult(false);
+            }
+
+            return Task.FromResult((DateTime.UtcNow - discordUser.JoinedAt) >= this.RequiredTime);
         }
     }
 }

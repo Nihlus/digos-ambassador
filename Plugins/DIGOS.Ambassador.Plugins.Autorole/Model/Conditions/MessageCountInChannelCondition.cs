@@ -20,9 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Discord;
+using Discord.WebSocket;
 using JetBrains.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
@@ -56,6 +61,30 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         public override string GetDescriptiveUIText()
         {
             return $"{this.RequiredCount} messages in {MentionUtils.MentionChannel((ulong)this.SourceID)}";
+        }
+
+        /// <inheritdoc/>
+        public override async Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
+        {
+            var statistics = services.GetRequiredService<UserStatisticsService>();
+
+            var channel = await discordUser.Guild.GetTextChannelAsync((ulong)this.SourceID);
+            if (channel is null)
+            {
+                // TODO: Maybe we should throw here instead, or return a monad?
+                return false;
+            }
+
+            var getUserStatistics = await statistics.GetOrCreateUserChannelStatisticsAsync(discordUser, channel);
+            if (!getUserStatistics.IsSuccess)
+            {
+                // TODO: Same here...
+                return false;
+            }
+
+            var userStatistics = getUserStatistics.Entity;
+
+            return userStatistics.MessageCount.HasValue && userStatistics.MessageCount >= this.RequiredCount;
         }
     }
 }
