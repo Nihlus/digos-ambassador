@@ -83,8 +83,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
             this.Server = server;
             this.DiscordRoleID = discordRoleID;
             this.Conditions = new List<AutoroleCondition>();
-
-            this.IsEnabled = true;
         }
 
         /// <summary>
