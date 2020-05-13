@@ -98,6 +98,31 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
                 await _feedback.SendEmbedAsync(this.Context.Channel, embed.Build());
             }
+
+            /// <summary>
+            /// Clears the confirmation notification channel.
+            /// </summary>
+            [UsedImplicitly]
+            [Alias("clear-confirmation-notification-channel")]
+            [Command("clear-notification-channel")]
+            [Summary("clears the confirmation notification channel.")]
+            [RequireContext(ContextType.Guild)]
+            [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
+            public async Task ClearAffirmationNotificationChannel()
+            {
+                var clearResult = await _autoroles.ClearAffirmationNotificationChannelAsync
+                (
+                    this.Context.Guild
+                );
+
+                if (!clearResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, clearResult.ErrorReason);
+                    return;
+                }
+
+                await _feedback.SendConfirmationAsync(this.Context, "Channel cleared.");
+            }
         }
     }
 }
