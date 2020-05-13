@@ -1,5 +1,5 @@
 //
-//  AutoroleAssignmentService.cs
+//  AutoroleUpdateService.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,32 +20,34 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
+using DIGOS.Ambassador.Plugins.Autorole.Results;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
-using Remora.Results;
+
+using static DIGOS.Ambassador.Plugins.Autorole.Results.AutoroleUpdateStatus;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Services
 {
     /// <summary>
-    /// Handles business logic for assignment of autoroles.
+    /// Handles business logic for updating of autoroles.
     /// </summary>
-    public class AutoroleAssignmentService
+    public class AutoroleUpdateService
     {
         private readonly DiscordSocketClient _discordClient;
         private readonly AutoroleService _autoroles;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AutoroleAssignmentService"/> class.
+        /// Initializes a new instance of the <see cref="AutoroleUpdateService"/> class.
         /// </summary>
         /// <param name="discordClient">The Discord client.</param>
         /// <param name="autoroles">The autorole service.</param>
-        public AutoroleAssignmentService
+        public AutoroleUpdateService
         (
             DiscordSocketClient discordClient,
             AutoroleService autoroles
@@ -64,15 +66,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// A modification result which may or may not have succeeded. If any individual autorole update fails, this
         /// result will also indicate failure. That does not mean that *all* updates failed, however.
         /// </returns>
-        public async Task<ModifyEntityResult> UpdateAutoroleAsync(AutoroleConfiguration autorole)
+        public async IAsyncEnumerable<AutoroleUpdateResult> UpdateAutoroleAsync(AutoroleConfiguration autorole)
         {
             var guild = _discordClient.GetGuild((ulong)autorole.Server.DiscordID);
             if (guild is null)
             {
-                return ModifyEntityResult.FromError
-                (
-                    "Failed to get a valid guild for the given autorole. The bot may no longer be in the guild."
-                );
+                yield break;
             }
 
             // Ensure we have all users available to us
@@ -81,19 +80,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 await guild.DownloadUsersAsync();
             }
 
-            var didAnyUpdateFail = false;
             foreach (var user in guild.Users)
             {
-                var updateUser = await UpdateAutoroleForUserAsync(autorole, user);
-                if (!updateUser.IsSuccess)
-                {
-                    didAnyUpdateFail = true;
-                }
+                yield return await UpdateAutoroleForUserAsync(autorole, user);
             }
-
-            return didAnyUpdateFail
-                ? ModifyEntityResult.FromError("One or more autorole updates failed.")
-                : ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -103,7 +93,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="autorole">The autorole.</param>
         /// <param name="guildUser">The user.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> UpdateAutoroleForUserAsync
+        public async Task<AutoroleUpdateResult> UpdateAutoroleForUserAsync
         (
             AutoroleConfiguration autorole, IGuildUser guildUser
         )
@@ -111,7 +101,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var role = guildUser.Guild.GetRole((ulong)autorole.DiscordRoleID);
             if (role is null)
             {
-                return ModifyEntityResult.FromError("The relevant role could not be found. Deleted?");
+                return AutoroleUpdateResult.FromError("The relevant role could not be found. Deleted?");
             }
 
             var userHasRole = guildUser.RoleIds.Contains(role.Id);
@@ -119,7 +109,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             if (isUserQualified && userHasRole)
             {
-                return ModifyEntityResult.FromSuccess();
+                return Unchanged;
             }
 
             if (!isUserQualified && userHasRole)
@@ -127,10 +117,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 try
                 {
                     await guildUser.RemoveRoleAsync(role);
+                    return Removed;
                 }
                 catch (HttpException hex) when (hex.WasCausedByMissingPermission())
                 {
-                    return ModifyEntityResult.FromError("No permission to change the user's role.");
+                    return AutoroleUpdateResult.FromError("No permission to change the user's role.");
                 }
             }
 
@@ -138,7 +129,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             if (!isUserQualified)
             {
                 // We consider a no-op for an unqualified user a success.
-                return ModifyEntityResult.FromSuccess();
+                return Unqualified;
             }
 
             try
@@ -148,14 +139,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                     var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync(autorole, guildUser);
                     if (!getConfirmation.IsSuccess)
                     {
-                        return ModifyEntityResult.FromError("Couldn't get a valid confirmation entry for the user.");
+                        return AutoroleUpdateResult.FromError("Couldn't get a valid confirmation entry for the user.");
                     }
 
                     var confirmation = getConfirmation.Entity;
                     if (!confirmation.IsConfirmed)
                     {
                         // We consider a no-op for an qualified but not affirmed user a success.
-                        return ModifyEntityResult.FromSuccess();
+                        return RequiresAffirmation;
                     }
                 }
 
@@ -163,10 +154,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
             catch (HttpException hex) when (hex.WasCausedByMissingPermission())
             {
-                return ModifyEntityResult.FromError("No permission to change the user's role.");
+                return AutoroleUpdateResult.FromError("No permission to change the user's role.");
             }
 
-            return ModifyEntityResult.FromSuccess();
+            return Applied;
         }
     }
 }
