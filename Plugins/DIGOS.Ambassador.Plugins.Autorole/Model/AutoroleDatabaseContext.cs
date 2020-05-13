@@ -54,6 +54,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         public DbSet<AutoroleConfirmation> AutoroleConfirmations { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
+        /// Gets or sets the table where autorole server settings are stored.
+        /// </summary>
+        public DbSet<AutoroleServerSettings> AutoroleServerSettings { get; [UsedImplicitly] set; } = null!;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleDatabaseContext"/> class.
         /// </summary>
         /// <param name="contextOptions">The context options.</param>
