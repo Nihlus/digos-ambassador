@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Permissions
         public override Guid UniqueIdentifier { get; } = new Guid("BFE193B1-2EBC-4E07-936B-DE4C1CC5E625");
 
         /// <inheritdoc/>
-        public override string FriendlyName { get; } = nameof(EditAutorole);
+        public override string FriendlyName { get; } = nameof(EditAutoroleServerSettings);
 
         /// <inheritdoc/>
         public override string Description { get; } = "Allows you to edit server-wide autorole settings.";
