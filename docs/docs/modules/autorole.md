@@ -7,6 +7,7 @@ Commands for creating, editing, and interacting with automatic roles.
 
 ## Submodules
 * [Condition](autorole_condition.md)
+* [Settings](autorole_settings.md)
 
 ## Commands
 ### *create*
