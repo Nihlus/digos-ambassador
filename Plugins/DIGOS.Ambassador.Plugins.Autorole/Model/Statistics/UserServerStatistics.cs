@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
@@ -50,6 +51,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics
         /// Gets the individual channel post counts of the user.
         /// </summary>
         public virtual List<UserChannelStatistics> ChannelStatistics { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the last time the user performed a tracked activity on the server.
+        /// </summary>
+        public DateTimeOffset? LastActivityTime { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserServerStatistics"/> class.
