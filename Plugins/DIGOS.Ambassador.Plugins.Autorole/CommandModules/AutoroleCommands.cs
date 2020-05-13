@@ -237,5 +237,87 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 TimeSpan.FromMinutes(5)
             );
         }
+
+        /// <summary>
+        /// Affirms a user's qualification for an autorole.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="user">The user.</param>
+        [UsedImplicitly]
+        [Alias("affirm", "confirm")]
+        [Command("affirm")]
+        [Summary("Affirms a user's qualification for an autorole.")]
+        [RequireContext(ContextType.Guild)]
+        public async Task AffirmAutoroleForUserAsync
+        (
+            AutoroleConfiguration autorole,
+            IUser user
+        )
+        {
+            var affirmResult = await _autoroles.AffirmAutoroleAsync(autorole, user);
+            if (!affirmResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, affirmResult.ErrorReason);
+                return;
+            }
+
+            await _feedback.SendConfirmationAsync(this.Context, "Qualification affirmed.");
+        }
+
+        /// <summary>
+        /// Denies a user's qualification for an autorole.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="user">The user.</param>
+        [UsedImplicitly]
+        [Alias("deny")]
+        [Command("deny")]
+        [Summary("Denies a user's qualification for an autorole.")]
+        [RequireContext(ContextType.Guild)]
+        public async Task DenyAutoroleForUserAsync
+        (
+            AutoroleConfiguration autorole,
+            IUser user
+        )
+        {
+            var denyResult = await _autoroles.DenyAutoroleAsync(autorole, user);
+            if (!denyResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, denyResult.ErrorReason);
+                return;
+            }
+
+            await _feedback.SendConfirmationAsync(this.Context, "Qualification denied.");
+        }
+
+        /// <summary>
+        /// Sets whether the given autorole require confirmation for the assignment after a user has qualified.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="requireAffirmation">Whether confirmation is required.</param>
+        [UsedImplicitly]
+        [Alias("require-affirmation", "require-confirmation")]
+        [Command("require-confirmation")]
+        [Summary("Sets whether the given autorole require confirmation for the assignment after a user has qualified.")]
+        [RequireContext(ContextType.Guild)]
+        public async Task SetAffirmationRequirementAsync
+        (
+            AutoroleConfiguration autorole,
+            bool requireAffirmation = true
+        )
+        {
+            var setRequirementResult = await _autoroles.SetAffirmationRequiredAsync(autorole, requireAffirmation);
+            if (!setRequirementResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, setRequirementResult.ErrorReason);
+                return;
+            }
+
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                requireAffirmation ? "Affirmation is now required." : "Affirmation is no longer required."
+            );
+        }
     }
 }

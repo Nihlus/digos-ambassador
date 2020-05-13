@@ -281,6 +281,22 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         }
 
         /// <summary>
+        /// Removes an autorole confirmation entry from the database.
+        /// </summary>
+        /// <param name="confirmation">The confirmation.</param>
+        /// <returns>A deletion result which may or may not have succeeded.</returns>
+        public async Task<DeleteEntityResult> RemoveAutoroleConfirmationAsync
+        (
+            AutoroleConfirmation confirmation
+        )
+        {
+            _database.AutoroleConfirmations.Remove(confirmation);
+            await _database.SaveChangesAsync();
+
+            return DeleteEntityResult.FromSuccess();
+        }
+
+        /// <summary>
         /// Gets or creates an autorole confirmation for a given user.
         /// </summary>
         /// <param name="autorole">The autorole.</param>
@@ -329,7 +345,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             IUser discordUser
         )
         {
-            if (autorole.RequiresConfirmation)
+            if (!autorole.RequiresConfirmation)
             {
                 return ModifyEntityResult.FromError("The autorole doesn't require explicit affirmation.");
             }
@@ -364,7 +380,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             IUser discordUser
         )
         {
-            if (autorole.RequiresConfirmation)
+            if (!autorole.RequiresConfirmation)
             {
                 return ModifyEntityResult.FromError("The autorole doesn't require explicit affirmation.");
             }
@@ -437,6 +453,34 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         public IQueryable<AutoroleConfiguration> GetAutoroles(IGuild guild)
         {
             return _database.Autoroles.AsQueryable().Where(a => a.Server.DiscordID == (long)guild.Id);
+        }
+
+        /// <summary>
+        /// Sets whether the given autorole requires external affirmation.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <param name="requireAffirmation">Whether external affirmation is required.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetAffirmationRequiredAsync
+        (
+            AutoroleConfiguration autorole,
+            bool requireAffirmation
+        )
+        {
+            if (autorole.RequiresConfirmation && requireAffirmation)
+            {
+                return ModifyEntityResult.FromError("The autorole already requires affirmation.");
+            }
+
+            if (!autorole.RequiresConfirmation && !requireAffirmation)
+            {
+                return ModifyEntityResult.FromError("The autorole already doesn't require affirmation.");
+            }
+
+            autorole.RequiresConfirmation = requireAffirmation;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
         }
     }
 }

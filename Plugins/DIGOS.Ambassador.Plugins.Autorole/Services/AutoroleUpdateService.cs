@@ -127,6 +127,21 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 try
                 {
                     await guildUser.RemoveRoleAsync(role);
+
+                    var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync(autorole, guildUser);
+                    if (!getConfirmation.IsSuccess)
+                    {
+                        return Removed;
+                    }
+
+                    // Remove any existing affirmation
+                    var confirmation = getConfirmation.Entity;
+                    var removeConfirmation = await _autoroles.RemoveAutoroleConfirmationAsync(confirmation);
+                    if (!removeConfirmation.IsSuccess)
+                    {
+                        return AutoroleUpdateResult.FromError(removeConfirmation);
+                    }
+
                     return Removed;
                 }
                 catch (HttpException hex) when (hex.WasCausedByMissingPermission())
