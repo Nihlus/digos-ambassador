@@ -68,9 +68,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// Initializes a new instance of the <see cref="ReactionCondition"/> class.
         /// </summary>
         /// <param name="message">The message.</param>
-        /// <param name="reaction">The required reaction.</param>
-        public ReactionCondition(IMessage message, IReaction reaction)
-            : this((long)message.Channel.Id, (long)message.Id, reaction.Emote.Name)
+        /// <param name="emote">The required reaction.</param>
+        public ReactionCondition(IMessage message, IEmote emote)
+            : this((long)message.Channel.Id, (long)message.Id, emote.Name)
         {
         }
 
