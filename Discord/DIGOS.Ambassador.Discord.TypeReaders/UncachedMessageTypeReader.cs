@@ -94,6 +94,19 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
                 return TypeReaderResult.FromSuccess(directIDMessage);
             }
 
+            foreach (var channel in await context.Guild.GetChannelsAsync())
+            {
+                if (!(channel is ITextChannel textChannel))
+                {
+                    continue;
+                }
+
+                if (await textChannel.GetMessageAsync(id) is T otherChannelMessage)
+                {
+                    return TypeReaderResult.FromSuccess(otherChannelMessage);
+                }
+            }
+
             return TypeReaderResult.FromError(CommandError.Unsuccessful, "Message not found.");
         }
     }
