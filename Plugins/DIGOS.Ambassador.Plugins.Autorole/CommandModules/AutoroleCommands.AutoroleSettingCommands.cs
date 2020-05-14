@@ -66,6 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Summary("Shows the server-wide autorole settings.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(ShowAutoroleServerSettings), PermissionTarget.Self)]
+            [Priority(-1)]
             public Task Default() => ShowSettingsAsync();
 
             /// <summary>
