@@ -9,14 +9,6 @@ Commands for server-wide autorole settings.
 * [Set](autorole_settings_set.md)
 
 ## Commands
-### *autorole settings*
-#### Overloads
-**`!autorole settings`**
-
-Shows the server-wide autorole settings.
-
----
-
 ### *show*
 #### Overloads
 **`!autorole settings show` (or `autorole settings view`)**

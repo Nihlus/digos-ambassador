@@ -30,3 +30,4 @@ using Discord;
 [assembly: PlaceholderData(typeof(ICategoryChannel), "572105666269937705")]
 [assembly: PlaceholderData(typeof(IRole), "@Moderators", "@Users", "@Admins")]
 [assembly: PlaceholderData(typeof(IEmote), "🦈")]
+[assembly: PlaceholderData(typeof(IChannel), "#general")]
