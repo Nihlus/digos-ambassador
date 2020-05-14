@@ -63,15 +63,21 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// <summary>
                 /// Sets the confirmation notification channel.
                 /// </summary>
-                /// <param name="textChannel">The channel.</param>
+                /// <param name="channel">The channel.</param>
                 [UsedImplicitly]
                 [Alias("confirmation-notification-channel")]
                 [Command("confirmation-notification-channel")]
                 [Summary("Sets the confirmation notification channel.")]
                 [RequireContext(ContextType.Guild)]
                 [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
-                public async Task SetAffirmationNotificationChannel(ITextChannel textChannel)
+                public async Task SetAffirmationNotificationChannel(IChannel channel)
                 {
+                    if (!(channel is ITextChannel textChannel))
+                    {
+                        await _feedback.SendErrorAsync(this.Context, "That's not a text channel.");
+                        return;
+                    }
+
                     var setResult = await _autoroles.SetAffirmationNotificationChannelAsync
                     (
                         this.Context.Guild,
