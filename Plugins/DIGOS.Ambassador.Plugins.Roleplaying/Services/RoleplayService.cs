@@ -933,7 +933,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             // Configure visibility for everyone
             // viewChannel starts off as deny, since starting or stopping the RP will set the correct permissions.
-            var everyoneRole = guild.EveryoneRole;
+            IRole everyoneRole;
+            if (settings.DefaultUserRole.HasValue)
+            {
+                var defaultRole = guild.GetRole((ulong)settings.DefaultUserRole.Value);
+                everyoneRole = defaultRole ?? guild.EveryoneRole;
+            }
+            else
+            {
+                everyoneRole = guild.EveryoneRole;
+            }
+
             var everyonePermissions = OverwritePermissions.InheritAll.Modify
             (
                 readMessageHistory: roleplay.IsPublic ? PermValue.Allow : PermValue.Deny,
@@ -1301,6 +1311,48 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             settings.ArchiveChannel = channelId;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Sets the role to use as a default @everyone role.
+        /// </summary>
+        /// <param name="server">The server.</param>
+        /// <param name="role">The role to use.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        [ItemNotNull]
+        public async Task<ModifyEntityResult> SetDefaultUserRoleAsync
+        (
+            Server server,
+            IRole? role
+        )
+        {
+            var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
+            if (!getSettingsResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getSettingsResult);
+            }
+
+            var settings = getSettingsResult.Entity;
+
+            long? roleId;
+            if (role?.Id is null)
+            {
+                roleId = null;
+            }
+            else
+            {
+                roleId = (long)role.Id;
+            }
+
+            if (settings.DefaultUserRole == roleId)
+            {
+                return ModifyEntityResult.FromError("That's already the default user role.");
+            }
+
+            settings.DefaultUserRole = roleId;
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();

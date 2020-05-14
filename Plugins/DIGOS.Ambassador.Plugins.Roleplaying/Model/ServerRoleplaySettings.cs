@@ -54,6 +54,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         public long? ArchiveChannel { get; internal set; }
 
         /// <summary>
+        /// Gets the default user role; that is, the role that all valid users on the server should have. Typically,
+        /// this is the @everyone role, but certain servers use that as a very restricted role, and give users their
+        /// default role after some condition is met. This allows those servers to override the standard @everyone role
+        /// used for dynamic roleplay channels.
+        /// </summary>
+        public long? DefaultUserRole { get; internal set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ServerRoleplaySettings"/> class.
         /// </summary>
         /// <remarks>

@@ -96,6 +96,40 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 await _feedback.SendConfirmationAsync(this.Context, "Dedicated channel category cleared.");
             }
+
+            /// <summary>
+            /// Clears the role to use as a default @everyone role in dynamic roleplays.
+            /// </summary>
+            [UsedImplicitly]
+            [Command("clear-default-user-role")]
+            [Summary("Clears the role to use as a default @everyone role in dynamic roleplays.")]
+            [RequireContext(Guild)]
+            [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
+            public async Task SetDefaultUserRole()
+            {
+                var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+                if (!getServerResult.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
+                    return;
+                }
+
+                var server = getServerResult.Entity;
+
+                var result = await _roleplaying.SetDefaultUserRoleAsync
+                (
+                    server,
+                    null
+                );
+
+                if (!result.IsSuccess)
+                {
+                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
+                    return;
+                }
+
+                await _feedback.SendConfirmationAsync(this.Context, "Default user role cleared.");
+            }
         }
     }
 }
