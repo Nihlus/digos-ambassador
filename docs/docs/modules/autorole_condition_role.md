@@ -6,7 +6,7 @@ These commands are prefixed with `autorole condition role`. You can also use `at
 ## Commands
 ### *autorole condition role*
 #### Overloads
-**`!autorole condition role "placeholder" @Moderators`**
+**`!autorole condition role @Users @Moderators`**
 
 Adds an instance of the condition to the role.
 
@@ -15,7 +15,7 @@ Adds an instance of the condition to the role.
 | autorole | AutoroleConfiguration | `no` |
 | role | IRole | `no` |
 
-**`!autorole condition role "placeholder" 10 @Moderators`**
+**`!autorole condition role @Users 10 @Moderators`**
 
 Modifies an instance of the condition on the role.
 

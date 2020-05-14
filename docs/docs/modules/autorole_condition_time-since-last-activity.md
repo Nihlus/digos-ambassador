@@ -6,7 +6,7 @@ These commands are prefixed with `autorole condition time-since-last-activity`. 
 ## Commands
 ### *autorole condition time-since-last-activity*
 #### Overloads
-**`!autorole condition time-since-last-activity "placeholder" 5m`**
+**`!autorole condition time-since-last-activity @Users 5m`**
 
 Adds an instance of the condition to the role.
 
@@ -15,7 +15,7 @@ Adds an instance of the condition to the role.
 | autorole | AutoroleConfiguration | `no` |
 | time | TimeSpan | `no` |
 
-**`!autorole condition time-since-last-activity "placeholder" 10 5m`**
+**`!autorole condition time-since-last-activity @Users 10 5m`**
 
 Modifies an instance of the condition on the role.
 

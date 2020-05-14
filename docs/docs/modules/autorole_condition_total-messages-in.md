@@ -6,7 +6,7 @@ These commands are prefixed with `autorole condition total-messages-in`. You can
 ## Commands
 ### *autorole condition total-messages-in*
 #### Overloads
-**`!autorole condition total-messages-in "placeholder" #general 10`**
+**`!autorole condition total-messages-in @Users #general 10`**
 
 Adds an instance of the condition to the role.
 
@@ -16,7 +16,7 @@ Adds an instance of the condition to the role.
 | channel | ITextChannel | `no` |
 | count | long | `no` |
 
-**`!autorole condition total-messages-in "placeholder" 10 #general 10`**
+**`!autorole condition total-messages-in @Users 10 #general 10`**
 
 Modifies an instance of the condition on the role.
 

@@ -24,7 +24,7 @@ Creates a new autorole configuration for the given Discord role.
 
 ### *delete*
 #### Overloads
-**`!autorole delete "placeholder"`**
+**`!autorole delete @Users`**
 
 Deletes an existing autorole configuration for the given Discord role.
 
@@ -36,7 +36,7 @@ Deletes an existing autorole configuration for the given Discord role.
 
 ### *enable*
 #### Overloads
-**`!autorole enable "placeholder"`**
+**`!autorole enable @Users`**
 
 Enables the given autorole, allowing it to be added to users.
 
@@ -48,7 +48,7 @@ Enables the given autorole, allowing it to be added to users.
 
 ### *disable*
 #### Overloads
-**`!autorole disable "placeholder"`**
+**`!autorole disable @Users`**
 
 Disables the given autorole, preventing it from being added to users.
 
@@ -60,7 +60,7 @@ Disables the given autorole, preventing it from being added to users.
 
 ### *show*
 #### Overloads
-**`!autorole show "placeholder"` (or `autorole view`)**
+**`!autorole show @Users` (or `autorole view`)**
 
 Show the settings for the given autorole.
 
@@ -80,7 +80,7 @@ Lists configured autoroles.
 
 ### *affirm*
 #### Overloads
-**`!autorole affirm "placeholder" @Ada` (or `autorole confirm`)**
+**`!autorole affirm @Users @Ada` (or `autorole confirm`)**
 
 Affirms a user's qualification for an autorole.
 
@@ -93,7 +93,7 @@ Affirms a user's qualification for an autorole.
 
 ### *deny*
 #### Overloads
-**`!autorole deny "placeholder" @Ada`**
+**`!autorole deny @Users @Ada`**
 
 Denies a user's qualification for an autorole.
 
@@ -106,7 +106,7 @@ Denies a user's qualification for an autorole.
 
 ### *require-confirmation*
 #### Overloads
-**`!autorole require-confirmation "placeholder" true` (or `autorole require-affirmation`)**
+**`!autorole require-confirmation @Users true` (or `autorole require-affirmation`)**
 
 Sets whether the given autorole require confirmation for the assignment after a user has qualified.
 

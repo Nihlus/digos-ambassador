@@ -6,7 +6,7 @@ These commands are prefixed with `autorole condition reaction`. You can also use
 ## Commands
 ### *autorole condition reaction*
 #### Overloads
-**`!autorole condition reaction "placeholder" 660204034829058070 "placeholder"`**
+**`!autorole condition reaction @Users 660204034829058070 🦈`**
 
 Adds an instance of the condition to the role.
 
@@ -16,7 +16,7 @@ Adds an instance of the condition to the role.
 | message | IMessage | `no` |
 | emote | IEmote | `no` |
 
-**`!autorole condition reaction "placeholder" 10 660204034829058070 "placeholder"`**
+**`!autorole condition reaction @Users 10 660204034829058070 🦈`**
 
 Modifies an instance of the condition on the role.
 

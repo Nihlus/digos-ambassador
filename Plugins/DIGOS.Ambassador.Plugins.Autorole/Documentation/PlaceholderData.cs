@@ -21,12 +21,6 @@
 //
 
 using DIGOS.Ambassador.Doc.Abstractions;
-using Discord;
+using DIGOS.Ambassador.Plugins.Autorole.Model;
 
-[assembly: PlaceholderData(typeof(IUser), "@Ada", "@Bea", "@Cyrus", "@Don")]
-[assembly: PlaceholderData(typeof(IGuildUser), "@Ada", "@Bea", "@Cyrus", "@Don")]
-[assembly: PlaceholderData(typeof(IMessage), "660204034829058070", "660203865316130867")]
-[assembly: PlaceholderData(typeof(ITextChannel), "#general", "#streaming", "#hangout")]
-[assembly: PlaceholderData(typeof(ICategoryChannel), "572105666269937705")]
-[assembly: PlaceholderData(typeof(IRole), "@Moderators", "@Users", "@Admins")]
-[assembly: PlaceholderData(typeof(IEmote), "🦈")]
+[assembly: PlaceholderData(typeof(AutoroleConfiguration), "@Users")]

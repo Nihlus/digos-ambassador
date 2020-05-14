@@ -14,7 +14,7 @@ These commands are prefixed with `autorole condition`. You can also use `at cond
 ## Commands
 ### *remove*
 #### Overloads
-**`!autorole condition remove "placeholder" 10`**
+**`!autorole condition remove @Users 10`**
 
 Removes the condition from the role.
 
