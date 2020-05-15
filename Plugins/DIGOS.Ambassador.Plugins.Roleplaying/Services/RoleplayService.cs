@@ -131,8 +131,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var owner = getOwnerResult.Entity;
             _database.Attach(owner);
 
+            var getServer = await _servers.GetOrRegisterServerAsync(context.Guild);
+            if (!getServer.IsSuccess)
+            {
+                return CreateEntityResult<Roleplay>.FromError(getServer);
+            }
+
+            var server = getServer.Entity;
+
             // Use a dummy name, since we'll be setting it using the service.
-            var roleplay = new Roleplay((long)context.Guild.Id, owner, string.Empty);
+            var roleplay = new Roleplay(server, owner, string.Empty);
 
             var ownerParticipant = new RoleplayParticipant(roleplay, owner)
             {
@@ -471,7 +479,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             .Where
             (
                 rp =>
-                    rp.ServerID == (long)guild.Id
+                    rp.Server.DiscordID == (long)guild.Id
             );
         }
 

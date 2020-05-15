@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
             foreach (var activeRoleplay in activeRoleplays)
             {
-                var guild = this.Client.GetGuild((ulong)activeRoleplay.ServerID);
+                var guild = this.Client.GetGuild((ulong)activeRoleplay.Server.DiscordID);
 
                 // ReSharper disable once PossibleInvalidOperationException
                 var channel = guild?.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID!.Value);
