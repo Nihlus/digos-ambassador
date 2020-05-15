@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
     public class Character : EFEntity, IOwnedNamedEntity, IServerEntity
     {
         /// <inheritdoc />
-        public long ServerID { get; private set; }
+        public virtual Server Server { get; private set; } = null!;
 
         /// <inheritdoc />
         [Required]
@@ -129,7 +129,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="Character"/> class.
         /// </summary>
-        /// <param name="serverID">The server ID that the character resides on.</param>
+        /// <param name="server">The server that the character resides on.</param>
         /// <param name="owner">The owner of the character.</param>
         /// <param name="name">The character's name.</param>
         /// <param name="avatarUrl">The avatar URL for the character.</param>
@@ -140,7 +140,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
         public Character
         (
-            long serverID,
+            Server server,
             User owner,
             string name,
             string avatarUrl = "https://www.example.com/avatar.png",
@@ -150,7 +150,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
             string pronounProviderFamily = "They"
         )
         {
-            this.ServerID = serverID;
+            this.Server = server;
             this.Owner = owner;
             this.Name = name;
             this.AvatarUrl = avatarUrl;

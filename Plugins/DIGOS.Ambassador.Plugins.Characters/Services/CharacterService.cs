@@ -211,7 +211,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             IGuild guild
         )
         {
-            var guildCharacters = _database.Characters.AsQueryable().Where(ch => ch.ServerID == (long)guild.Id);
+            var guildCharacters = _database.Characters.AsQueryable().Where(ch => ch.Server.DiscordID == (long)guild.Id);
             if (await guildCharacters.CountAsync(ch => string.Equals(ch.Name.ToLower(), characterName.ToLower())) > 1)
             {
                 return RetrieveEntityResult<Character>.FromError
@@ -240,7 +240,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         public IQueryable<Character> GetCharacters(IGuild guild)
         {
             return _database.Characters.AsQueryable()
-                .Where(c => c.ServerID == (long)guild.Id)
+                .Where(c => c.Server.DiscordID == (long)guild.Id)
                 .Include(c => c.Owner);
         }
 
@@ -423,8 +423,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var owner = getOwnerResult.Entity;
 
+            var getServer = await _servers.GetOrRegisterServerAsync(context.Guild);
+            if (!getServer.IsSuccess)
+            {
+                return CreateEntityResult<Character>.FromError(getServer);
+            }
+
+            var server = getServer.Entity;
+
             // Use a dummy name here, because we'll set it using the service afterwards
-            var character = new Character((long)context.Guild.Id, owner, string.Empty);
+            var character = new Character(server, owner, string.Empty);
 
             var modifyEntityResult = await SetCharacterNameAsync(context, character, characterName);
             if (!modifyEntityResult.IsSuccess)
