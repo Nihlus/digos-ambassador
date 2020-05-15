@@ -23,7 +23,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Discord;
 using JetBrains.Annotations;
 
@@ -45,7 +47,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the author of the message.
         /// </summary>
-        public long AuthorDiscordID { get; private set; }
+        public virtual User Author { get; private set; } = null!;
 
         /// <summary>
         /// Gets the timestamp of the message.
@@ -65,26 +67,53 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         public string Contents { get; internal set; } = null!;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="UserMessage"/> class.
+        /// </summary>
+        [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Required by EF Core.")]
+        protected UserMessage()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserMessage"/> class.
+        /// </summary>
+        /// <param name="author">The author.</param>
+        /// <param name="discordMessageID">The Discord ID of the message.</param>
+        /// <param name="timestamp">The timestamp of the message.</param>
+        /// <param name="authorNickname">The nickname in use by the author at the time of sending.</param>
+        /// <param name="contents">The contents of the message.</param>
+        public UserMessage
+        (
+            User author,
+            long discordMessageID,
+            DateTimeOffset timestamp,
+            string authorNickname,
+            string contents
+        )
+        {
+            this.Author = author;
+            this.DiscordMessageID = discordMessageID;
+            this.Timestamp = timestamp;
+            this.AuthorNickname = authorNickname;
+            this.Contents = contents;
+        }
+
+        /// <summary>
         /// Creates a new <see cref="UserMessage"/> from the specified Discord message.
         /// </summary>
+        /// <param name="author">The author of the message.</param>
         /// <param name="message">The message to create from.</param>
         /// <param name="authorNickname">The current display name of the author.</param>
         /// <returns>A new UserMessage.</returns>
         [Pure]
         public static UserMessage FromDiscordMessage
         (
-            IMessage message,
+            User author,
+            IUserMessage message,
             string authorNickname
         )
         {
-            return new UserMessage
-            {
-                DiscordMessageID = (long)message.Id,
-                AuthorDiscordID = (long)message.Author.Id,
-                Timestamp = message.Timestamp,
-                AuthorNickname = authorNickname,
-                Contents = message.Content
-            };
+            return new UserMessage(author, (long)message.Id, message.Timestamp, authorNickname, message.Content);
         }
     }
 }

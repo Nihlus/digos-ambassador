@@ -708,7 +708,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 userNick = guildUser.Nickname;
             }
 
-            var roleplayMessage = UserMessage.FromDiscordMessage(message, userNick);
+            var getAuthor = await _users.GetOrRegisterUserAsync(message.Author);
+            if (!getAuthor.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getAuthor);
+            }
+
+            var author = getAuthor.Entity;
+            var roleplayMessage = UserMessage.FromDiscordMessage(author, message, userNick);
 
             return await _roleplays.AddOrUpdateMessageInRoleplayAsync(roleplay, roleplayMessage);
         }

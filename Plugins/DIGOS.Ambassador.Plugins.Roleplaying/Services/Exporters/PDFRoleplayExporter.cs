@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
 
                             var messageByUser = roleplay.Messages.FirstOrDefault
                             (
-                                m => m.AuthorDiscordID == p.User.DiscordID
+                                m => m.Author == p.User
                             );
 
                             if (messageByUser is null)
