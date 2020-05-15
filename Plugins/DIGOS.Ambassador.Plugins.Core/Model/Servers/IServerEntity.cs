@@ -34,6 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         /// <summary>
         /// Gets the Discord server ID.
         /// </summary>
-        long ServerID { get; }
+        Server Server { get; }
     }
 }
