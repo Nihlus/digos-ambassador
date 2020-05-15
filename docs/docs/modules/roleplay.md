@@ -257,6 +257,14 @@ Manually refreshes the given roleplay, resetting its last-updated time to now.
 
 ---
 
+### *reset-permissions*
+#### Overloads
+**`!roleplay reset-permissions`**
+
+Resets the permission set of all dedicated channels.
+
+---
+
 ### *move-to*
 #### Overloads
 **`!roleplay move-to John @Ada @Bea` (as well as `roleplay copy-to` or `roleplay move`)**

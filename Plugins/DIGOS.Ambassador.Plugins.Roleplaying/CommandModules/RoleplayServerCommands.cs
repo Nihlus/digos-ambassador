@@ -48,22 +48,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         {
             private readonly UserFeedbackService _feedback;
             private readonly ServerService _servers;
-            private readonly RoleplayService _roleplaying;
+            private readonly RoleplayServerSettingsService _serverSettings;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="RoleplayServerCommands"/> class.
             /// </summary>
             /// <param name="feedback">The user feedback service.</param>
-            /// <param name="roleplaying">The roleplaying service.</param>
+            /// <param name="serverSettings">The roleplaying server settings service.</param>
             /// <param name="servers">The server service.</param>
             public RoleplayServerCommands
             (
                 UserFeedbackService feedback,
-                RoleplayService roleplaying,
+                RoleplayServerSettingsService serverSettings,
                 ServerService servers)
             {
                 _feedback = feedback;
-                _roleplaying = roleplaying;
+                _serverSettings = serverSettings;
                 _servers = servers;
             }
 
@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 var server = getServerResult.Entity;
 
-                var result = await _roleplaying.SetDedicatedRoleplayChannelCategoryAsync(server, null);
+                var result = await _serverSettings.SetDedicatedChannelCategoryAsync(server, null);
 
                 if (!result.IsSuccess)
                 {
@@ -116,7 +116,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 var server = getServerResult.Entity;
 
-                var result = await _roleplaying.SetDefaultUserRoleAsync
+                var result = await _serverSettings.SetDefaultUserRoleAsync
                 (
                     server,
                     null

@@ -49,22 +49,23 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             {
                 private readonly UserFeedbackService _feedback;
                 private readonly ServerService _servers;
-                private readonly RoleplayService _roleplaying;
+                private readonly RoleplayServerSettingsService _serverSettings;
 
                 /// <summary>
                 /// Initializes a new instance of the <see cref="ServerSetCommands"/> class.
                 /// </summary>
                 /// <param name="feedback">The user feedback service.</param>
-                /// <param name="roleplaying">The roleplaying service.</param>
+                /// <param name="serverSettings">The server settings service.</param>
                 /// <param name="servers">The server service.</param>
                 public ServerSetCommands
                 (
                     UserFeedbackService feedback,
-                    RoleplayService roleplaying,
-                    ServerService servers)
+                    RoleplayServerSettingsService serverSettings,
+                    ServerService servers
+                )
                 {
                     _feedback = feedback;
-                    _roleplaying = roleplaying;
+                    _serverSettings = serverSettings;
                     _servers = servers;
                 }
 
@@ -88,7 +89,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                     var server = getServerResult.Entity;
 
-                    var result = await _roleplaying.SetDedicatedRoleplayChannelCategoryAsync
+                    var result = await _serverSettings.SetDedicatedChannelCategoryAsync
                     (
                         server,
                         category
@@ -123,7 +124,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                     var server = getServerResult.Entity;
 
-                    var result = await _roleplaying.SetArchiveChannelAsync
+                    var result = await _serverSettings.SetArchiveChannelAsync
                     (
                         server,
                         channel
@@ -158,7 +159,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                     var server = getServerResult.Entity;
 
-                    var result = await _roleplaying.SetDefaultUserRoleAsync
+                    var result = await _serverSettings.SetDefaultUserRoleAsync
                     (
                         server,
                         role

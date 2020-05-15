@@ -82,6 +82,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             using var tickScope = this.Services.CreateScope();
             var roleplayService = tickScope.ServiceProvider.GetRequiredService<RoleplayService>();
             var serverService = tickScope.ServiceProvider.GetRequiredService<ServerService>();
+            var serverSettings = tickScope.ServiceProvider.GetRequiredService<RoleplayServerSettingsService>();
+            var dedicatedChannels = tickScope.ServiceProvider.GetRequiredService<DedicatedChannelService>();
 
             foreach (var guild in this.Client.Guilds)
             {
@@ -99,7 +101,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                         continue;
                     }
 
-                    await ArchiveRoleplayAsync(guild, serverService, roleplayService, roleplay);
+                    await ArchiveRoleplayAsync(guild, serverService, roleplayService, dedicatedChannels, serverSettings, roleplay);
                     await NotifyOwnerAsync(roleplay);
                 }
             }
@@ -112,6 +114,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             SocketGuild guild,
             ServerService serverService,
             RoleplayService roleplayService,
+            DedicatedChannelService dedicatedChannels,
+            RoleplayServerSettingsService serverSettings,
             Roleplay roleplay
         )
         {
@@ -122,7 +126,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
             if (roleplay.IsPublic)
             {
-                await PostArchivedRoleplayAsync(guild, serverService, roleplayService, roleplay);
+                await PostArchivedRoleplayAsync(guild, serverService, serverSettings, roleplay);
             }
 
             var dedicatedChannel = guild.GetTextChannel((ulong)roleplay.DedicatedChannelID);
@@ -138,7 +142,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 await roleplayService.AddToOrUpdateMessageInRoleplayAsync(roleplay, message);
             }
 
-            await roleplayService.DeleteDedicatedRoleplayChannelAsync(guild, roleplay);
+            await dedicatedChannels.DeleteChannelAsync(guild, roleplay);
         }
 
         /// <summary>
@@ -146,14 +150,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// </summary>
         /// <param name="guild">The guild.</param>
         /// <param name="serverService">The server service.</param>
-        /// <param name="roleplayService">The roleplay service.</param>
+        /// <param name="serverSettings">The server settings service.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task PostArchivedRoleplayAsync
         (
             SocketGuild guild,
             ServerService serverService,
-            RoleplayService roleplayService,
+            RoleplayServerSettingsService serverSettings,
             Roleplay roleplay
         )
         {
@@ -166,7 +170,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
             var server = getServer.Entity;
 
-            var getSettings = await roleplayService.GetOrCreateServerRoleplaySettingsAsync(server);
+            var getSettings = await serverSettings.GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettings.IsSuccess)
             {
                 this.Log.LogWarning("Failed to get the server settings for the current guild. Bug?");

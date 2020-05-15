@@ -64,6 +64,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
         {
             serviceCollection
                 .AddScoped<RoleplayService>()
+                .AddScoped<RoleplayServerSettingsService>()
+                .AddScoped<DedicatedChannelService>()
                 .AddConfiguredSchemaAwareDbContextPool<RoleplayingDatabaseContext>();
         }
 

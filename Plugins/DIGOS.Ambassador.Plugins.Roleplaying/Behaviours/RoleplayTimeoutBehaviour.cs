@@ -81,6 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
             using var tickScope = this.Services.CreateScope();
             var roleplayService = tickScope.ServiceProvider.GetRequiredService<RoleplayService>();
+            var channelService = tickScope.ServiceProvider.GetRequiredService<DedicatedChannelService>();
 
             var roleplays = await roleplayService.GetRoleplays()
                 .Where(r => r.IsActive)
@@ -96,7 +97,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     continue;
                 }
 
-                await StopRoleplayAsync(roleplayService, roleplay);
+                await StopRoleplayAsync(roleplayService, channelService, roleplay);
                 await NotifyOwner(roleplay);
             }
 
@@ -143,7 +144,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <param name="roleplayService">The roleplaying service in use.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task StopRoleplayAsync(RoleplayService roleplayService, Roleplay roleplay)
+        private async Task StopRoleplayAsync(RoleplayService roleplayService, DedicatedChannelService channelService, Roleplay roleplay)
         {
             var stopRoleplayAsync = await roleplayService.StopRoleplayAsync(roleplay);
             if (!stopRoleplayAsync.IsSuccess)
@@ -164,7 +165,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     return;
                 }
 
-                var getDedicatedChannelResult = await roleplayService.GetDedicatedRoleplayChannelAsync
+                var getDedicatedChannelResult = await channelService.GetDedicatedChannelAsync
                 (
                     guild,
                     roleplay
@@ -183,14 +184,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                             continue;
                         }
 
-                        await roleplayService.SetDedicatedChannelWritabilityForUserAsync
+                        await channelService.SetChannelWritabilityForUserAsync
                         (
                             dedicatedChannel,
                             user,
                             false
                         );
 
-                        await roleplayService.SetDedicatedChannelVisibilityForUserAsync
+                        await channelService.SetChannelVisibilityForUserAsync
                         (
                             dedicatedChannel,
                             user,
@@ -201,7 +202,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     if (roleplay.IsPublic)
                     {
                         var everyoneRole = guild.EveryoneRole;
-                        await roleplayService.SetDedicatedChannelVisibilityForRoleAsync
+                        await channelService.SetChannelVisibilityForRoleAsync
                         (
                             dedicatedChannel,
                             everyoneRole,

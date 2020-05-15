@@ -45,19 +45,24 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         {
             private readonly RoleplayService _roleplays;
             private readonly UserFeedbackService _feedback;
+            private readonly DedicatedChannelService _dedicatedChannels;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
             /// <param name="roleplays">The roleplay service.</param>
             /// <param name="feedback">The user feedback service.</param>
+            /// <param name="dedicatedChannels">The dedicated channel service.</param>
             public SetCommands
             (
                 RoleplayService roleplays,
-                UserFeedbackService feedback)
+                UserFeedbackService feedback,
+                DedicatedChannelService dedicatedChannels
+            )
             {
                 _roleplays = roleplays;
                 _feedback = feedback;
+                _dedicatedChannels = dedicatedChannels;
             }
 
             /// <summary>
@@ -83,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     return;
                 }
 
-                var getDedicatedChannelResult = await _roleplays.GetDedicatedRoleplayChannelAsync
+                var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync
                 (
                     this.Context.Guild,
                     roleplay
@@ -192,7 +197,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     return;
                 }
 
-                var getDedicatedChannelResult = await _roleplays.GetDedicatedRoleplayChannelAsync
+                var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync
                 (
                     this.Context.Guild,
                     roleplay
@@ -203,7 +208,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     var dedicatedChannel = getDedicatedChannelResult.Entity;
                     var everyoneRole = this.Context.Guild.EveryoneRole;
 
-                    await _roleplays.SetDedicatedChannelVisibilityForRoleAsync
+                    await _dedicatedChannels.SetChannelVisibilityForRoleAsync
                     (
                         dedicatedChannel,
                         everyoneRole,

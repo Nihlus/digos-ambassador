@@ -8,7 +8,7 @@ Commands for editing server-wide autorole settings.
 ## Commands
 ### *confirmation-notification-channel*
 #### Overloads
-**`!autorole settings set confirmation-notification-channel "placeholder"`**
+**`!autorole settings set confirmation-notification-channel #general`**
 
 Sets the confirmation notification channel.
 
