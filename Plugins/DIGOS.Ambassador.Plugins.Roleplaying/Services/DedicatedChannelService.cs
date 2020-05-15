@@ -23,7 +23,6 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord;
@@ -142,7 +141,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 {
                     properties.CategoryId = categoryId;
                     properties.IsNsfw = roleplay.IsNSFW;
-                    properties.Topic = $"Dedicated roleplay channel for {roleplay.Name}.";
+                    properties.Topic = $"Dedicated roleplay channel for {roleplay.Name}. {roleplay.Summary}";
                 }
             );
 
@@ -234,7 +233,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="guild">The context in which the request was made.</param>
         /// <param name="roleplay">The roleplay to delete the channel of.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> DeleteChannelAsync
+        public async Task<DeleteEntityResult> DeleteChannelAsync
         (
             IGuild guild,
             Roleplay roleplay
@@ -242,7 +241,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         {
             if (roleplay.DedicatedChannelID is null)
             {
-                return ModifyEntityResult.FromError
+                return DeleteEntityResult.FromError
                 (
                     "The roleplay doesn't have a dedicated channel."
                 );
@@ -257,7 +256,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             roleplay.DedicatedChannelID = null;
             await _database.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess();
+            return DeleteEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -266,7 +265,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="guild">The guild that contains the channel.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IGuildChannel>> GetDedicatedChannelAsync
+        public async Task<RetrieveEntityResult<ITextChannel>> GetDedicatedChannelAsync
         (
             IGuild guild,
             Roleplay roleplay
@@ -274,19 +273,19 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         {
             if (roleplay.DedicatedChannelID is null)
             {
-                return RetrieveEntityResult<IGuildChannel>.FromError
+                return RetrieveEntityResult<ITextChannel>.FromError
                 (
                     "The roleplay doesn't have a dedicated channel."
                 );
             }
 
-            var guildChannel = await guild.GetChannelAsync((ulong)roleplay.DedicatedChannelID.Value);
+            var guildChannel = await guild.GetTextChannelAsync((ulong)roleplay.DedicatedChannelID.Value);
             if (!(guildChannel is null))
             {
-                return RetrieveEntityResult<IGuildChannel>.FromSuccess(guildChannel);
+                return RetrieveEntityResult<ITextChannel>.FromSuccess(guildChannel);
             }
 
-            return RetrieveEntityResult<IGuildChannel>.FromError
+            return RetrieveEntityResult<ITextChannel>.FromError
             (
                 "Attempted to delete a channel, but it appears to have been deleted."
             );
@@ -330,17 +329,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Revokes the given roleplay participant access to the given roleplay channel.
         /// </summary>
-        /// <param name="guild">The guild in which the request was made.</param>
-        /// <param name="dedicatedChannel">The roleplay's dedicated channel.</param>
+        /// <param name="roleplay">The roleplay.</param>
         /// <param name="participant">The participant to grant access to.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> RevokeUserAccessAsync
         (
-            IGuild guild,
-            IGuildChannel dedicatedChannel,
-            IUser participant
+            Roleplay roleplay,
+            IGuildUser participant
         )
         {
+            var guild = participant.Guild;
+
             if (!(await guild.GetUserAsync(_client.CurrentUser.Id)).GuildPermissions.ManageChannels)
             {
                 return ModifyEntityResult.FromError
@@ -349,13 +348,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 );
             }
 
-            var user = await guild.GetUserAsync(participant.Id);
-            if (user is null)
+            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
+            if (!getChannel.IsSuccess)
             {
-                return ModifyEntityResult.FromError("User not found in guild.");
+                return ModifyEntityResult.FromError(getChannel);
             }
 
-            await dedicatedChannel.RemovePermissionOverwriteAsync(user);
+            var channel = getChannel.Entity;
+
+            await channel.RemovePermissionOverwriteAsync(participant);
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -509,6 +510,84 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             await SetChannelVisibilityForRoleAsync(channel, everyoneRole, roleplay.IsActive);
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Updates the name of the roleplay channel.
+        /// </summary>
+        /// <param name="roleplay">The roleplay.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> UpdateChannelNameAsync(Roleplay roleplay)
+        {
+            var guild = await _client.GetGuildAsync((ulong)roleplay.Server.DiscordID);
+            if (guild is null)
+            {
+                return ModifyEntityResult.FromError("Could not retrieve a valid guild.");
+            }
+
+            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
+            if (!getChannel.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getChannel);
+            }
+
+            var channel = getChannel.Entity;
+            await channel.ModifyAsync(m => m.Name = $"{roleplay.Name}-rp");
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Updates the summary of the roleplay channel.
+        /// </summary>
+        /// <param name="roleplay">The roleplay.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> UpdateChannelSummaryAsync(Roleplay roleplay)
+        {
+            var guild = await _client.GetGuildAsync((ulong)roleplay.Server.DiscordID);
+            if (guild is null)
+            {
+                return ModifyEntityResult.FromError("Could not retrieve a valid guild.");
+            }
+
+            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
+            if (!getChannel.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getChannel);
+            }
+
+            var channel = getChannel.Entity;
+            await channel.ModifyAsync
+            (
+                m => m.Topic = $"Dedicated roleplay channel for {roleplay.Name}. {roleplay.Summary}"
+            );
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Updates the NSFW status of the roleplay channel.
+        /// </summary>
+        /// <param name="roleplay">The roleplay.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> UpdateChannelNSFWStatus(Roleplay roleplay)
+        {
+            var guild = await _client.GetGuildAsync((ulong)roleplay.Server.DiscordID);
+            if (guild is null)
+            {
+                return ModifyEntityResult.FromError("Could not retrieve a valid guild.");
+            }
+
+            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
+            if (!getChannel.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getChannel);
+            }
+
+            var channel = getChannel.Entity;
+            await channel.ModifyAsync(m => m.IsNsfw = roleplay.IsNSFW);
 
             return ModifyEntityResult.FromSuccess();
         }

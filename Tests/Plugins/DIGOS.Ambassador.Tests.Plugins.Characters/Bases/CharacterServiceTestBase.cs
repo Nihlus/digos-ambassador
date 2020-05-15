@@ -62,6 +62,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         protected UserService Users { get; private set; } = null!;
 
         /// <summary>
+        /// Gets the server service.
+        /// </summary>
+        protected ServerService Servers { get; private set; } = null!;
+
+        /// <summary>
         /// Gets the command service dependency.
         /// </summary>
         protected CommandService Commands { get; private set; } = null!;

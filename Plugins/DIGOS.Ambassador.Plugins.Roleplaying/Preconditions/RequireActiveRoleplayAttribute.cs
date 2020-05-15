@@ -23,6 +23,7 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
+using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -48,11 +49,21 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
         }
 
         /// <inheritdoc />
-        public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
+        public override async Task<PreconditionResult> CheckPermissionsAsync
+        (
+            ICommandContext context,
+            CommandInfo command,
+            IServiceProvider services
+        )
         {
-            var roleplayService = services.GetRequiredService<RoleplayService>();
+            if (!(context.Channel is ITextChannel textChannel))
+            {
+                return PreconditionResult.FromError("The channel was not a text channel.");
+            }
 
-            var result = await roleplayService.GetActiveRoleplayAsync(context.Channel);
+            var roleplayService = services.GetRequiredService<RoleplayDiscordService>();
+
+            var result = await roleplayService.GetActiveRoleplayAsync(textChannel);
             if (!result.IsSuccess)
             {
                 return PreconditionResult.FromError(result.ErrorReason);

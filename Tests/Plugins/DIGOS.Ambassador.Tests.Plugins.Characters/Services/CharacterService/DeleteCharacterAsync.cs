@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
 using Xunit;
@@ -48,7 +49,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 var user = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
 
-                _character = new Character((long)_guild.Id, user, CharacterName);
+                _character = new Character(new Server((long)_guild.Id), user, CharacterName);
 
                 this.Database.Characters.Update(_character);
 

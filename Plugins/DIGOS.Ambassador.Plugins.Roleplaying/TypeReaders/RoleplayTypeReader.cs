@@ -50,11 +50,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
             IServiceProvider services
         )
         {
-            var roleplayService = services.GetRequiredService<RoleplayService>();
+            var roleplayService = services.GetRequiredService<RoleplayDiscordService>();
+
+            if (!(context.Channel is ITextChannel textChannel))
+            {
+                return RetrieveEntityResult<Roleplay>.FromError("The channel was not a text channel.");
+            }
 
             if (!entityName.IsNullOrWhitespace() && string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
             {
-                return await roleplayService.GetActiveRoleplayAsync(context.Channel);
+                return await roleplayService.GetActiveRoleplayAsync(textChannel);
             }
 
             return await roleplayService.GetBestMatchingRoleplayAsync

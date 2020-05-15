@@ -65,41 +65,51 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         protected override async Task Connected()
         {
             using var connectionScope = this.Services.CreateScope();
-            var roleplayService = connectionScope.ServiceProvider.GetRequiredService<RoleplayService>();
+            var roleplayService = connectionScope.ServiceProvider.GetRequiredService<RoleplayDiscordService>();
 
-            var activeRoleplays = await roleplayService.GetRoleplays()
-                .Where(r => r.DedicatedChannelID.HasValue)
-                .ToListAsync();
-
-            foreach (var activeRoleplay in activeRoleplays)
+            foreach (var guild in this.Client.Guilds)
             {
-                var guild = this.Client.GetGuild((ulong)activeRoleplay.Server.DiscordID);
-
-                // ReSharper disable once PossibleInvalidOperationException
-                var channel = guild?.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID!.Value);
-                if (channel is null)
+                var getRoleplays = await roleplayService.GetRoleplaysAsync(guild);
+                if (!getRoleplays.IsSuccess)
                 {
                     continue;
                 }
 
-                var updatedMessages = 0;
-                foreach (var message in await channel.GetMessagesAsync().FlattenAsync())
-                {
-                    // We don't care about the results here.
-                    var updateResult = await roleplayService.AddToOrUpdateMessageInRoleplayAsync(activeRoleplay, message);
-                    if (updateResult.IsSuccess)
-                    {
-                        ++updatedMessages;
-                    }
-                }
+                var guildRoleplays = getRoleplays.Entity;
 
-                if (updatedMessages > 0)
+                var activeRoleplays = await guildRoleplays.Where(r => r.DedicatedChannelID.HasValue).ToListAsync();
+                foreach (var activeRoleplay in activeRoleplays)
                 {
-                    this.Log.LogInformation
-                    (
-                        $"Added or updated {updatedMessages} missed {(updatedMessages > 1 ? "messages" : "message")} " +
-                        $"in \"{activeRoleplay.Name}\"."
-                    );
+                    var channel = guild.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID!.Value);
+                    if (channel is null)
+                    {
+                        continue;
+                    }
+
+                    var updatedMessages = 0;
+                    foreach (var message in await channel.GetMessagesAsync().FlattenAsync())
+                    {
+                        if (!(message is IUserMessage userMessage))
+                        {
+                            continue;
+                        }
+
+                        // We don't care about the results here.
+                        var updateResult = await roleplayService.ConsumeMessageAsync(userMessage);
+                        if (updateResult.IsSuccess)
+                        {
+                            ++updatedMessages;
+                        }
+                    }
+
+                    if (updatedMessages > 0)
+                    {
+                        this.Log.LogInformation
+                        (
+                            $"Added or updated {updatedMessages} missed {(updatedMessages > 1 ? "messages" : "message")} " +
+                            $"in \"{activeRoleplay.Name}\"."
+                        );
+                    }
                 }
             }
         }
@@ -130,7 +140,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             }
 
             using var messageScope = this.Services.CreateScope();
-            var roleplayService = messageScope.ServiceProvider.GetRequiredService<RoleplayService>();
+            var roleplayService = messageScope.ServiceProvider.GetRequiredService<RoleplayDiscordService>();
 
             await roleplayService.ConsumeMessageAsync(message);
         }

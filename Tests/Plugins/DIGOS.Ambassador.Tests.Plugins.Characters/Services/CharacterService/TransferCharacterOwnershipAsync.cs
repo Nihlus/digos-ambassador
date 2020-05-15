@@ -23,6 +23,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
@@ -51,7 +52,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 var dbOldOwner = new User((long)_originalOwner.Id);
                 _dbNewOwner = new User((long)_newOwner.Id);
 
-                _character = new Character((long)_guild.Id, dbOldOwner, "Dummy");
+                _character = new Character(new Server((long)_guild.Id), dbOldOwner, "Dummy");
 
                 this.Database.Characters.Update(_character);
                 this.Database.SaveChanges();

@@ -43,24 +43,24 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Group("set")]
         public class SetCommands : ModuleBase
         {
-            private readonly RoleplayService _roleplays;
+            private readonly RoleplayDiscordService _discordRoleplays;
             private readonly UserFeedbackService _feedback;
             private readonly DedicatedChannelService _dedicatedChannels;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
-            /// <param name="roleplays">The roleplay service.</param>
+            /// <param name="discordRoleplays">The roleplay service.</param>
             /// <param name="feedback">The user feedback service.</param>
             /// <param name="dedicatedChannels">The dedicated channel service.</param>
             public SetCommands
             (
-                RoleplayService roleplays,
+                RoleplayDiscordService discordRoleplays,
                 UserFeedbackService feedback,
                 DedicatedChannelService dedicatedChannels
             )
             {
-                _roleplays = roleplays;
+                _discordRoleplays = discordRoleplays;
                 _feedback = feedback;
                 _dedicatedChannels = dedicatedChannels;
             }
@@ -81,7 +81,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 Roleplay roleplay
             )
             {
-                var result = await _roleplays.SetRoleplayNameAsync(this.Context.Guild, roleplay, newRoleplayName);
+                var result = await _discordRoleplays.SetRoleplayNameAsync
+                (
+                    roleplay,
+                    newRoleplayName
+                );
+
                 if (!result.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -120,7 +125,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 Roleplay roleplay
             )
             {
-                var result = await _roleplays.SetRoleplaySummaryAsync(roleplay, newRoleplaySummary);
+                var result = await _discordRoleplays.SetRoleplaySummaryAsync(roleplay, newRoleplaySummary);
                 if (!result.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -147,7 +152,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 Roleplay roleplay
             )
             {
-                var result = await _roleplays.SetRoleplayIsNSFWAsync(roleplay, isNSFW);
+                var result = await _discordRoleplays.SetRoleplayIsNSFWAsync(roleplay, isNSFW);
                 if (!result.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -175,7 +180,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 => SetRoleplayIsPublic(!isPrivate, roleplay);
 
             /// <summary>
-            /// Sets a value indicating whether or not the named roleplay is publíc. This restricts replays to participants.
+            /// Sets a value indicating whether or not the named roleplay is public. This restricts replays to
+            /// participants.
             /// </summary>
             /// <param name="isPublic">true if the roleplay is public; otherwise, false.</param>
             /// <param name="roleplay">The roleplay.</param>
@@ -190,7 +196,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 Roleplay roleplay
             )
             {
-                var result = await _roleplays.SetRoleplayIsPublicAsync(roleplay, isPublic);
+                var result = await _discordRoleplays.SetRoleplayIsPublicAsync(roleplay, isPublic);
                 if (!result.IsSuccess)
                 {
                     await _feedback.SendErrorAsync(this.Context, result.ErrorReason);

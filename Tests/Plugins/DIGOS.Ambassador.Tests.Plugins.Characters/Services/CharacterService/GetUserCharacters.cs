@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
@@ -55,7 +56,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsEmptySetFromDatabaseWithCharactersWithNoMatchingOwner()
             {
-                var character = new Character((long)_guild.Id, new User(1), "Dummy");
+                var character = new Character(new Server((long)_guild.Id), new User(1), "Dummy");
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();
@@ -67,7 +68,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsNEmptySetFromDatabaseWithCharactersWithMatchingOwnerButNoMatchingServer()
             {
-                var character = new Character(0, _user, "Dummy");
+                var character = new Character(new Server(0), _user, "Dummy");
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();
@@ -79,7 +80,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsNonEmptySetFromDatabaseWithCharactersWithMatchingOwner()
             {
-                var character = new Character((long)_guild.Id, _user, "Dummy");
+                var character = new Character(new Server((long)_guild.Id), _user, "Dummy");
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();
@@ -91,7 +92,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsCorrectCharacterFromDatabase()
             {
-                var character = new Character((long)_guild.Id, _user, "Dummy");
+                var character = new Character(new Server((long)_guild.Id), _user, "Dummy");
 
                 this.Database.Characters.Update(character);
                 this.Database.SaveChanges();
@@ -103,9 +104,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public void ReturnsCorrectMultipleCharactersFromDatabase()
             {
-                var character1 = new Character((long)_guild.Id, _user, "Dummy1");
+                var character1 = new Character(new Server((long)_guild.Id), _user, "Dummy1");
 
-                var character2 = new Character((long)_guild.Id, _user, "Dummy2");
+                var character2 = new Character(new Server((long)_guild.Id), _user, "Dummy2");
 
                 this.Database.Characters.Update(character1);
                 this.Database.Characters.Update(character2);

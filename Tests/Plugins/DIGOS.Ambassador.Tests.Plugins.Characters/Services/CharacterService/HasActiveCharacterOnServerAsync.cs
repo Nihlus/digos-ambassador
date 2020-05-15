@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
@@ -58,7 +59,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsFalseIfUserHasNoActiveCharacter()
             {
-                var character = new Character((long)_guild.Id, _user, "Dummy");
+                var character = new Character(new Server((long)_guild.Id), _user, "Dummy");
 
                 this.Database.Characters.Update(character);
                 await this.Database.SaveChangesAsync();
@@ -71,7 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsTrueIfUserHasAnActiveCharacter()
             {
-                var character = new Character((long)_guild.Id, _user, "Dummy")
+                var character = new Character(new Server((long)_guild.Id), _user, "Dummy")
                 {
                     IsCurrent = true
                 };

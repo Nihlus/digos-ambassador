@@ -32,7 +32,6 @@ using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Core.Preconditions;
-using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
@@ -71,34 +70,34 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
     public partial class RoleplayCommands : ModuleBase
     {
         private readonly RoleplayService _roleplays;
+        private readonly RoleplayDiscordService _discordRoleplays;
         private readonly DedicatedChannelService _dedicatedChannels;
 
-        private readonly UserService _users;
         private readonly UserFeedbackService _feedback;
         private readonly InteractivityService _interactivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayCommands"/> class.
         /// </summary>
-        /// <param name="roleplays">The roleplay service.</param>
+        /// <param name="discordRoleplays">The roleplay service.</param>
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="interactivity">The interactivity service.</param>
-        /// <param name="users">The user service.</param>
         /// <param name="dedicatedChannels">The dedicated channel service.</param>
+        /// <param name="roleplays">The low-level roleplay service.</param>
         public RoleplayCommands
         (
-            RoleplayService roleplays,
+            RoleplayDiscordService discordRoleplays,
             UserFeedbackService feedback,
             InteractivityService interactivity,
-            UserService users,
-            DedicatedChannelService dedicatedChannels
+            DedicatedChannelService dedicatedChannels,
+            RoleplayService roleplays
         )
         {
-            _roleplays = roleplays;
+            _discordRoleplays = discordRoleplays;
             _feedback = feedback;
             _interactivity = interactivity;
-            _users = users;
             _dedicatedChannels = dedicatedChannels;
+            _roleplays = roleplays;
         }
 
         /// <summary>
@@ -111,10 +110,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task ShowRoleplayAsync()
         {
-            var getCurrentRoleplayResult = await _roleplays.GetActiveRoleplayAsync
-            (this.Context.Channel
-            );
+            if (!(this.Context.Channel is ITextChannel textChannel))
+            {
+                return;
+            }
 
+            var getCurrentRoleplayResult = await _discordRoleplays.GetActiveRoleplayAsync(textChannel);
             if (!getCurrentRoleplayResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentRoleplayResult.ErrorReason);
@@ -181,9 +182,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task ListServerRoleplaysAsync()
         {
-            // TODO: Filter so that ones where the user has joined but are private are also included
-            var roleplays = _roleplays.GetRoleplays(this.Context.Guild)
-                .Where(r => r.IsPublic);
+            var getRoleplays = await _discordRoleplays.GetRoleplaysAsync(this.Context.Guild);
+            if (!getRoleplays.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getRoleplays.ErrorReason);
+                return;
+            }
+
+            var roleplays = await getRoleplays.Entity.Where(r => r.IsPublic).ToListAsync();
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Available Roleplays";
@@ -217,20 +223,27 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Command("list-owned")]
         [Summary("Lists the roleplays that the given user owns.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ListOwnedRoleplaysAsync(IUser? discordUser = null)
+        public async Task ListOwnedRoleplaysAsync(IGuildUser? discordUser = null)
         {
-            discordUser ??= this.Context.Message.Author;
-
-            var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
-            if (!getUserResult.IsSuccess)
+            if (discordUser is null)
             {
-                await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
+                var authorUser = this.Context.User;
+                if (!(authorUser is IGuildUser guildUser))
+                {
+                    return;
+                }
+
+                discordUser = guildUser;
+            }
+
+            var getUserRoleplays = await _discordRoleplays.GetUserRoleplaysAsync(discordUser);
+            if (!getUserRoleplays.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getUserRoleplays.ErrorReason);
                 return;
             }
 
-            var user = getUserResult.Entity;
-
-            var roleplays = _roleplays.GetUserRoleplays(user, this.Context.Guild);
+            var roleplays = await getUserRoleplays.Entity.ToListAsync();
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Your roleplays";
@@ -243,7 +256,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 this.Context.User,
                 roleplays,
                 r => r.Name,
-                r => r.Summary ?? "No summary set.",
+                r => r.Summary,
                 "You don't have any roleplays.",
                 appearance
             );
@@ -276,22 +289,24 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             bool isPublic = true
         )
         {
-            var result = await _roleplays.CreateRoleplayAsync(this.Context, roleplayName, roleplaySummary, isNSFW, isPublic);
+            if (!(this.Context.User is IGuildUser guildUser))
+            {
+                return;
+            }
+
+            var result = await _discordRoleplays.CreateRoleplayAsync
+            (
+                guildUser,
+                roleplayName,
+                roleplaySummary,
+                isNSFW,
+                isPublic
+            );
+
             if (!result.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
                 return;
-            }
-
-            // Create a channel by default, if channels are configured
-            var getDedicatedCategoryResult = await _dedicatedChannels.GetDedicatedChannelCategoryAsync
-            (
-                this.Context.Guild
-            );
-
-            if (getDedicatedCategoryResult.IsSuccess)
-            {
-                await ShowOrCreateDedicatedRoleplayChannel(result.Entity);
             }
 
             await _feedback.SendConfirmationAsync(this.Context, $"Roleplay \"{result.Entity.Name}\" created.");
@@ -312,26 +327,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             Roleplay roleplay
         )
         {
-            var deletionResult = await _roleplays.DeleteRoleplayAsync(roleplay);
+            var deletionResult = await _discordRoleplays.DeleteRoleplayAsync(roleplay);
             if (!deletionResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, deletionResult.ErrorReason);
                 return;
-            }
-
-            if (!(roleplay.DedicatedChannelID is null))
-            {
-                var deleteDedicatedChannelResult = await _dedicatedChannels.DeleteChannelAsync
-                (
-                    this.Context.Guild,
-                    roleplay
-                );
-
-                if (!deleteDedicatedChannelResult.IsSuccess)
-                {
-                    await _feedback.SendErrorAsync(this.Context, deleteDedicatedChannelResult.ErrorReason);
-                    return;
-                }
             }
 
             var canReplyInChannelAfterDeletion = (long)this.Context.Channel.Id != roleplay.DedicatedChannelID;
@@ -359,35 +359,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(JoinRoleplay), PermissionTarget.Self)]
         public async Task JoinRoleplayAsync(Roleplay roleplay)
         {
-            var addUserResult = await _roleplays.AddUserToRoleplayAsync(roleplay, this.Context.Message.Author);
+            if (!(this.Context.User is IGuildUser guildUser))
+            {
+                return;
+            }
+
+            var addUserResult = await _discordRoleplays.AddUserToRoleplayAsync(roleplay, guildUser);
             if (!addUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, addUserResult.ErrorReason);
                 return;
-            }
-
-            // Ensure the user has the correct permissions for the dedicated channel
-            var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync(this.Context.Guild, roleplay);
-            if (getDedicatedChannelResult.IsSuccess)
-            {
-                var dedicatedChannel = getDedicatedChannelResult.Entity;
-
-                if (roleplay.IsActive)
-                {
-                    await _dedicatedChannels.SetChannelWritabilityForUserAsync
-                    (
-                        dedicatedChannel,
-                        this.Context.User,
-                        true
-                    );
-
-                    await _dedicatedChannels.SetChannelVisibilityForUserAsync
-                    (
-                        dedicatedChannel,
-                        this.Context.User,
-                        true
-                    );
-                }
             }
 
             var roleplayOwnerUser = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
@@ -406,12 +387,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(EditRoleplay), PermissionTarget.Self)]
         public async Task InvitePlayerAsync
         (
-            IUser playerToInvite,
+            IGuildUser playerToInvite,
             [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
             Roleplay roleplay
         )
         {
-            var invitePlayerResult = await _roleplays.InviteUserAsync(roleplay, playerToInvite);
+            var invitePlayerResult = await _discordRoleplays.InviteUserToRoleplayAsync(roleplay, playerToInvite);
             if (!invitePlayerResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, invitePlayerResult.ErrorReason);
@@ -449,30 +430,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task LeaveRoleplayAsync(Roleplay roleplay)
         {
-            var removeUserResult = await _roleplays.RemoveUserFromRoleplayAsync(roleplay, this.Context.Message.Author);
+            if (!(this.Context.User is IGuildUser guildUser))
+            {
+                return;
+            }
+
+            var removeUserResult = await _discordRoleplays.RemoveUserFromRoleplayAsync(roleplay, guildUser);
             if (!removeUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, removeUserResult.ErrorReason);
                 return;
-            }
-
-            // Ensure the user has the correct permissions for the dedicated channel
-            var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync(this.Context.Guild, roleplay);
-            if (getDedicatedChannelResult.IsSuccess)
-            {
-                var dedicatedChannel = getDedicatedChannelResult.Entity;
-
-                var grantPermissionResult = await _dedicatedChannels.RevokeUserAccessAsync
-                (
-                    this.Context.Guild,
-                    dedicatedChannel,
-                    this.Context.User
-                );
-
-                if (!grantPermissionResult.IsSuccess)
-                {
-                    await _feedback.SendWarningAsync(this.Context, grantPermissionResult.ErrorReason);
-                }
             }
 
             var roleplayOwnerUser = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
@@ -491,35 +458,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(KickRoleplayMember), PermissionTarget.Self)]
         public async Task KickRoleplayParticipantAsync
         (
-            IUser discordUser,
+            IGuildUser discordUser,
             [RequireEntityOwnerOrPermission(typeof(KickRoleplayMember), PermissionTarget.Other)]
             Roleplay roleplay
         )
         {
-            var kickUserResult = await _roleplays.KickUserFromRoleplayAsync(roleplay, discordUser);
+            var kickUserResult = await _discordRoleplays.KickUserFromRoleplayAsync(roleplay, discordUser);
             if (!kickUserResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, kickUserResult.ErrorReason);
                 return;
-            }
-
-            // Ensure the user has the correct permissions for the dedicated channel
-            var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync(this.Context.Guild, roleplay);
-            if (getDedicatedChannelResult.IsSuccess)
-            {
-                var dedicatedChannel = getDedicatedChannelResult.Entity;
-
-                var grantPermissionResult = await _dedicatedChannels.RevokeUserAccessAsync
-                (
-                    this.Context.Guild,
-                    dedicatedChannel,
-                    discordUser
-                );
-
-                if (!grantPermissionResult.IsSuccess)
-                {
-                    await _feedback.SendWarningAsync(this.Context, grantPermissionResult.ErrorReason);
-                }
             }
 
             var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
@@ -527,7 +475,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             {
                 await userDMChannel.SendMessageAsync
                 (
-                    $"You've been removed from the roleplay \"{roleplay.Name}\" by {this.Context.Message.Author.Username}."
+                    $"You've been removed from the roleplay \"{roleplay.Name}\" by " +
+                    $"{this.Context.Message.Author.Username}."
                 );
             }
             catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
@@ -538,7 +487,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 await userDMChannel.CloseAsync();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"{discordUser.Mention} has been kicked from {roleplay.Name}.");
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                $"{discordUser.Mention} has been kicked from {roleplay.Name}."
+            );
         }
 
         /// <summary>
@@ -616,10 +569,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             Roleplay roleplay
         )
         {
-            var startRoleplayResult = await _roleplays.StartRoleplayAsync
+            var startRoleplayResult = await _discordRoleplays.StartRoleplayAsync
             (
                 (ITextChannel)this.Context.Channel,
-                this.Context.Guild,
                 roleplay
             );
 
@@ -629,25 +581,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 return;
             }
 
-            // Refresh channel permissions
-            if (roleplay.DedicatedChannelID.HasValue)
-            {
-                var updatePermissions = await _dedicatedChannels.UpdateParticipantPermissionsAsync
-                (
-                    this.Context.Guild,
-                    roleplay
-                );
+            var joinedUsers = roleplay.JoinedUsers.Select
+            (
+                async p => await this.Context.Client.GetUserAsync((ulong)p.User.DiscordID)
+            );
 
-                if (!updatePermissions.IsSuccess)
-                {
-                    await _feedback.SendErrorAsync(this.Context, updatePermissions.ErrorReason);
-                }
-            }
-
-            var joinedUsers = roleplay.JoinedUsers.Select(async p => await this.Context.Client.GetUserAsync((ulong)p.User.DiscordID));
             var joinedMentions = joinedUsers.Select(async u => (await u).Mention);
 
-            // ReSharper disable once PossibleInvalidOperationException
             var channel = await this.Context.Guild.GetTextChannelAsync((ulong)roleplay.ActiveChannelID!);
 
             var activationMessage = $"The roleplay \"{roleplay.Name}\" is now active in " +
@@ -678,31 +618,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             Roleplay roleplay
         )
         {
-            var stopRoleplayAsync = await _roleplays.StopRoleplayAsync(roleplay);
+            var stopRoleplayAsync = await _discordRoleplays.StopRoleplayAsync(roleplay);
             if (!stopRoleplayAsync.IsSuccess)
             {
-                await _feedback.SendErrorAsync
-                (
-                    this.Context,
-                    stopRoleplayAsync.ErrorReason
-                );
-
+                await _feedback.SendErrorAsync(this.Context, stopRoleplayAsync.ErrorReason);
                 return;
-            }
-
-            // Refresh channel permissions
-            if (roleplay.DedicatedChannelID.HasValue)
-            {
-                var updatePermissions = await _dedicatedChannels.UpdateParticipantPermissionsAsync
-                (
-                    this.Context.Guild,
-                    roleplay
-                );
-
-                if (!updatePermissions.IsSuccess)
-                {
-                    await _feedback.SendErrorAsync(this.Context, updatePermissions.ErrorReason);
-                }
             }
 
             await _feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplay.Name}\" has been stopped.");
@@ -742,7 +662,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             var latestMessage = startMessage;
             while (latestMessage.Timestamp < finalMessage.Timestamp)
             {
-                var messages = (await this.Context.Channel.GetMessagesAsync(latestMessage, Direction.After).FlattenAsync()).OrderBy(m => m.Timestamp).ToList();
+                var messages = (await this.Context.Channel.GetMessagesAsync
+                (
+                    latestMessage, Direction.After
+                ).FlattenAsync()).OrderBy(m => m.Timestamp).ToList();
+
                 latestMessage = messages.Last();
 
                 foreach (var message in messages)
@@ -753,7 +677,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                         break;
                     }
 
-                    var modifyResult = await _roleplays.AddToOrUpdateMessageInRoleplayAsync(roleplay, message);
+                    if (!(message is IUserMessage userMessage))
+                    {
+                        continue;
+                    }
+
+                    var modifyResult = await _discordRoleplays.ConsumeMessageAsync(userMessage);
                     if (modifyResult.IsSuccess)
                     {
                         ++addedOrUpdatedMessageCount;
@@ -776,21 +705,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(TransferRoleplay), PermissionTarget.Self)]
         public async Task TransferRoleplayOwnershipAsync
         (
-            IUser newOwner,
+            IGuildUser newOwner,
             [RequireEntityOwnerOrPermission(typeof(TransferRoleplay), PermissionTarget.Other)]
             Roleplay roleplay
         )
         {
-            var getNewOwnerResult = await _users.GetOrRegisterUserAsync(newOwner);
-            if (!getNewOwnerResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getNewOwnerResult.ErrorReason);
-                return;
-            }
+            var transferResult = await _discordRoleplays.TransferRoleplayOwnershipAsync
+            (
+                newOwner,
+                roleplay
+            );
 
-            var newOwnerUser = getNewOwnerResult.Entity;
-
-            var transferResult = await _roleplays.TransferRoleplayOwnershipAsync(newOwnerUser, roleplay, this.Context.Guild);
             if (!transferResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);
@@ -1041,7 +966,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task HideAllRoleplaysAsync()
         {
-            var roleplays = _roleplays.GetRoleplays(this.Context.Guild);
+            var getRoleplays = await _discordRoleplays.GetRoleplaysAsync(this.Context.Guild);
+            if (!getRoleplays.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getRoleplays.ErrorReason);
+                return;
+            }
+
+            var roleplays = await getRoleplays.Entity.ToListAsync();
             foreach (var roleplay in roleplays)
             {
                 var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync
@@ -1105,7 +1037,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.All)]
         public async Task ResetChannelPermissionsAsync()
         {
-            var roleplays = await _roleplays.GetRoleplays(this.Context.Guild).ToListAsync();
+            var getRoleplays = await _discordRoleplays.GetRoleplaysAsync(this.Context.Guild);
+            if (!getRoleplays.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getRoleplays.ErrorReason);
+                return;
+            }
+
+            var roleplays = await getRoleplays.Entity.ToListAsync();
+
             foreach (var roleplay in roleplays)
             {
                 if (!roleplay.DedicatedChannelID.HasValue)
@@ -1134,11 +1074,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Summary("Moves an ongoing roleplay outside of the bot's systems into a channel with the given name.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(CreateRoleplay), PermissionTarget.Self)]
-        public async Task MoveRoleplayIntoChannelAsync(string newName, params IUser[] participants)
+        public async Task MoveRoleplayIntoChannelAsync(string newName, params IGuildUser[] participants)
         {
-            var createRoleplayAsync = await _roleplays.CreateRoleplayAsync
+            if (!(this.Context.User is IGuildUser guildUser))
+            {
+                return;
+            }
+
+            var createRoleplayAsync = await _discordRoleplays.CreateRoleplayAsync
             (
-                this.Context,
+                guildUser,
                 newName,
                 "No summary set.",
                 false,
@@ -1153,20 +1098,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
             var roleplay = createRoleplayAsync.Entity;
 
-            var createChannelAsync = await _dedicatedChannels.CreateDedicatedChannelAsync
-            (
-                this.Context.Guild,
-                roleplay
-            );
-
-            if (!createChannelAsync.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, createChannelAsync.ErrorReason);
-                return;
-            }
-
-            var dedicatedChannel = createChannelAsync.Entity;
-
             foreach (var participant in participants)
             {
                 if (participant == this.Context.User)
@@ -1175,7 +1106,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     continue;
                 }
 
-                var addParticipantAsync = await _roleplays.AddUserToRoleplayAsync(roleplay, participant);
+                var addParticipantAsync = await _discordRoleplays.AddUserToRoleplayAsync(roleplay, participant);
                 if (addParticipantAsync.IsSuccess)
                 {
                     continue;
@@ -1214,35 +1145,31 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 }
             }
 
+            var getDedicatedChannel = await _dedicatedChannels.GetDedicatedChannelAsync(this.Context.Guild, roleplay);
+            if (!getDedicatedChannel.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getDedicatedChannel.ErrorReason);
+                return;
+            }
+
+            var dedicatedChannel = getDedicatedChannel.Entity;
+
             foreach (var participantMessage in participantMessages.OrderByDescending(m => m.Timestamp))
             {
                 var messageLink = participantMessage.GetJumpUrl();
                 await dedicatedChannel.SendMessageAsync(messageLink);
             }
 
-            var startRoleplayAsync = await _roleplays.StartRoleplayAsync
+            var startRoleplayAsync = await _discordRoleplays.StartRoleplayAsync
             (
                 (ITextChannel)this.Context.Channel,
-                this.Context.Guild,
                 roleplay
             );
 
             if (!startRoleplayAsync.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, createChannelAsync.ErrorReason);
+                await _feedback.SendErrorAsync(this.Context, startRoleplayAsync.ErrorReason);
                 return;
-            }
-
-            // Refresh channel permissions
-            var updatePermissions = await _dedicatedChannels.UpdateParticipantPermissionsAsync
-            (
-                this.Context.Guild,
-                roleplay
-            );
-
-            if (!updatePermissions.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, updatePermissions.ErrorReason);
             }
 
             await _feedback.SendConfirmationAsync

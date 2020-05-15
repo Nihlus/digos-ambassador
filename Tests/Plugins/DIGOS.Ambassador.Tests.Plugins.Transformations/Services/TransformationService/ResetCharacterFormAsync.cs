@@ -26,6 +26,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Tests.Utility;
@@ -49,7 +50,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             {
                 _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
 
-                _character = new Character(0, _owner, "Test");
+                _character = new Character(new Server(0), _owner, "Test");
 
                 this.CharacterDatabase.Characters.Update(_character);
                 await this.CharacterDatabase.SaveChangesAsync();

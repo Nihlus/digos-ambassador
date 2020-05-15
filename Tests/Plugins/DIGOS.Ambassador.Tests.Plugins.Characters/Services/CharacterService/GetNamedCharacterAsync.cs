@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
@@ -49,7 +50,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
 
-                _character = new Character((long)_guild.Id, _owner, CharacterName);
+                _character = new Character(new Server((long)_guild.Id), _owner, CharacterName);
 
                 this.Database.Characters.Update(_character);
                 await this.Database.SaveChangesAsync();
@@ -66,7 +67,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfMoreThanOneCharacterWithThatNameExists()
             {
-                var anotherCharacter = _character = new Character((long)_guild.Id, _owner, CharacterName);
+                var anotherCharacter = _character = new Character(new Server((long)_guild.Id), _owner, CharacterName);
 
                 this.Database.Characters.Update(anotherCharacter);
                 await this.Database.SaveChangesAsync();

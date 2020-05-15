@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
@@ -79,7 +80,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 _context = mockedContext.Object;
 
-                _character = new Character((long)_guild.Id, _user, CharacterName);
+                _character = new Character(new Server((long)_guild.Id), _user, CharacterName);
 
                 this.Database.Characters.Update(_character);
                 this.Database.SaveChanges();
@@ -108,7 +109,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsInvokersCharacterIfOwnerIsNullAndMoreThanOneCharacterWithThatNameExists()
             {
-                var anotherCharacter = new Character((long)_guild.Id, new User(2), CharacterName);
+                var anotherCharacter = new Character(new Server((long)_guild.Id), new User(2), CharacterName);
 
                 this.Database.Characters.Update(anotherCharacter);
                 await this.Database.SaveChangesAsync();

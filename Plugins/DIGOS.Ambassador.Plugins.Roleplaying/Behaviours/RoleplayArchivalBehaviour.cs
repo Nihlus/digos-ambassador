@@ -80,14 +80,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             }
 
             using var tickScope = this.Services.CreateScope();
-            var roleplayService = tickScope.ServiceProvider.GetRequiredService<RoleplayService>();
+            var roleplayService = tickScope.ServiceProvider.GetRequiredService<RoleplayDiscordService>();
             var serverService = tickScope.ServiceProvider.GetRequiredService<ServerService>();
             var serverSettings = tickScope.ServiceProvider.GetRequiredService<RoleplayServerSettingsService>();
             var dedicatedChannels = tickScope.ServiceProvider.GetRequiredService<DedicatedChannelService>();
 
             foreach (var guild in this.Client.Guilds)
             {
-                var roleplays = await roleplayService.GetRoleplays(guild)
+                var getGuildRoleplays = await roleplayService.GetRoleplaysAsync(guild);
+                if (!getGuildRoleplays.IsSuccess)
+                {
+                    continue;
+                }
+
+                var guildRoleplays = getGuildRoleplays.Entity;
+
+                var roleplays = await guildRoleplays
                     .Where(r => r.DedicatedChannelID.HasValue)
                     .Where(r => r.LastUpdated.HasValue)
                     .ToListAsync(ct);
@@ -101,7 +109,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                         continue;
                     }
 
-                    await ArchiveRoleplayAsync(guild, serverService, roleplayService, dedicatedChannels, serverSettings, roleplay);
+                    await ArchiveRoleplayAsync
+                    (
+                        guild,
+                        serverService,
+                        roleplayService,
+                        dedicatedChannels,
+                        serverSettings,
+                        roleplay
+                    );
+
                     await NotifyOwnerAsync(roleplay);
                 }
             }
@@ -113,7 +130,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         (
             SocketGuild guild,
             ServerService serverService,
-            RoleplayService roleplayService,
+            RoleplayDiscordService roleplayService,
             DedicatedChannelService dedicatedChannels,
             RoleplayServerSettingsService serverSettings,
             Roleplay roleplay
@@ -138,8 +155,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             // Ensure the messages are all caught up
             foreach (var message in await dedicatedChannel.GetMessagesAsync().FlattenAsync())
             {
+                if (!(message is IUserMessage userMessage))
+                {
+                    continue;
+                }
+
                 // We don't care about the results here.
-                await roleplayService.AddToOrUpdateMessageInRoleplayAsync(roleplay, message);
+                await roleplayService.ConsumeMessageAsync(userMessage);
             }
 
             await dedicatedChannels.DeleteChannelAsync(guild, roleplay);

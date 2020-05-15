@@ -140,12 +140,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="server">The ID of the server the roleplay is created on.</param>
         /// <param name="owner">The owner of the roleplay.</param>
         /// <param name="name">The name of the roleplay.</param>
+        /// <param name="summary">The summary of the roleplay.</param>
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
-        public Roleplay(Server server, User owner, string name)
+        public Roleplay(Server server, User owner, string name, string summary)
         {
             this.Server = server;
             this.Owner = owner;
             this.Name = name;
+            this.Summary = summary;
         }
 
         /// <inheritdoc />

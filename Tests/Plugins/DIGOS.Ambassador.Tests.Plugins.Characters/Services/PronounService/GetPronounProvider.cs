@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Xunit;
 
@@ -40,7 +41,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public GetPronounProvider()
             {
-                _character = new Character(0, new User(0), "Dummy");
+                _character = new Character(new Server(0), new User(0), "Dummy");
             }
 
             [Fact]

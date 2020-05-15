@@ -23,6 +23,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
@@ -62,7 +63,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 this.Database.Characters.Update
                 (
-                    new Character((long)_guild.Id, _owner, "dummy")
+                    new Character(new Server((long)_guild.Id), _owner, "dummy")
                 );
 
                 this.Database.SaveChanges();
@@ -78,7 +79,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 this.Database.Characters.Update
                 (
-                    new Character(1, _owner, "dummy")
+                    new Character(new Server(1), _owner, "dummy")
                 );
 
                 this.Database.SaveChanges();
@@ -93,17 +94,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 this.Database.Characters.Update
                 (
-                    new Character(1, _owner, "dummy")
+                    new Character(new Server(1), _owner, "dummy")
                 );
 
                 this.Database.Characters.Update
                 (
-                    new Character((long)_guild.Id, _owner, "dummy1")
+                    new Character(new Server((long)_guild.Id), _owner, "dummy1")
                 );
 
                 this.Database.Characters.Update
                 (
-                    new Character((long)_guild.Id, _owner, "dummy2")
+                    new Character(new Server((long)_guild.Id), _owner, "dummy2")
                 );
 
                 this.Database.SaveChanges();

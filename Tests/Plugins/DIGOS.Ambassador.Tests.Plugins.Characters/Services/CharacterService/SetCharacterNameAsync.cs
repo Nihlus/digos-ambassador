@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Plugins.Characters.CommandModules;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.TypeReaders;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
@@ -89,14 +90,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 _character = new Character
                 (
-                    (long)mockedGuildObject.Id,
+                    new Server((long)mockedGuildObject.Id),
                     new User((long)mockedUserObject.Id),
                     CharacterName
                 );
 
                 var anotherCharacter = new Character
                 (
-                    (long)mockedGuildObject.Id,
+                    new Server((long)mockedGuildObject.Id),
                     new User((long)mockedUserObject.Id),
                     AnotherCharacterName
                 );

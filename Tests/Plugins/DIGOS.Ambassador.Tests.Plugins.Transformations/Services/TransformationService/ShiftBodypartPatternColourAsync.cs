@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tests.Utility;
@@ -117,7 +118,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                var character = new Character(0, owner, "Test");
+                var character = new Character(new Server(0), owner, "Test");
 
                 this.CharacterDatabase.Characters.Update(character);
                 await this.CharacterDatabase.SaveChangesAsync();

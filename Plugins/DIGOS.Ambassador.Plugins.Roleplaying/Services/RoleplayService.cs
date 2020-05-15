@@ -23,17 +23,10 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using DIGOS.Ambassador.Plugins.Core.Services.Servers;
-using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Results;
@@ -43,113 +36,56 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// <summary>
     /// Acts as an interface for accessing, enabling, and disabling ongoing roleplays.
     /// </summary>
-    [PublicAPI]
     public sealed class RoleplayService
     {
-        private readonly IDiscordClient _client;
         private readonly RoleplayingDatabaseContext _database;
-        private readonly ServerService _servers;
-        private readonly UserService _users;
-        private readonly CommandService _commands;
         private readonly OwnedEntityService _ownedEntities;
-        private readonly DedicatedChannelService _dedicatedChannels;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayService"/> class.
         /// </summary>
-        /// <param name="client">The application's Discord client.</param>
-        /// <param name="commands">The application's command service.</param>
         /// <param name="entityService">The application's owned entity service.</param>
-        /// <param name="users">The user service.</param>
-        /// <param name="servers">The server service.</param>
         /// <param name="database">The database.</param>
-        /// <param name="dedicatedChannels">The dedicated channel service.</param>
         public RoleplayService
         (
-            IDiscordClient client,
-            CommandService commands,
             OwnedEntityService entityService,
-            UserService users,
-            ServerService servers,
-            RoleplayingDatabaseContext database,
-            DedicatedChannelService dedicatedChannels
+            RoleplayingDatabaseContext database
         )
         {
-            _client = client;
-            _commands = commands;
             _ownedEntities = entityService;
-            _users = users;
-            _servers = servers;
             _database = database;
-            _dedicatedChannels = dedicatedChannels;
-        }
-
-        /// <summary>
-        /// Consumes a message, adding it to the active roleplay in its channel if the author is a participant.
-        /// </summary>
-        /// <param name="message">The received message.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task ConsumeMessageAsync(IMessage message)
-        {
-            var result = await GetActiveRoleplayAsync(message.Channel);
-            if (!result.IsSuccess)
-            {
-                return;
-            }
-
-            var roleplay = result.Entity;
-
-            await AddToOrUpdateMessageInRoleplayAsync(roleplay, message);
         }
 
         /// <summary>
         /// Creates a roleplay with the given parameters.
         /// </summary>
-        /// <param name="context">The context of the command.</param>
+        /// <param name="owner">The user that owns the roleplay.</param>
+        /// <param name="server">The server that the roleplay is associated with.</param>
         /// <param name="roleplayName">The name of the roleplay.</param>
         /// <param name="roleplaySummary">The summary of the roleplay.</param>
         /// <param name="isNSFW">Whether or not the roleplay is NSFW.</param>
         /// <param name="isPublic">Whether or not the roleplay is public.</param>
         /// <returns>A creation result which may or may not have been successful.</returns>
-        [ItemNotNull]
         public async Task<CreateEntityResult<Roleplay>> CreateRoleplayAsync
         (
-            ICommandContext context,
+            User owner,
+            Server server,
             string roleplayName,
             string roleplaySummary,
             bool isNSFW,
             bool isPublic
         )
         {
-            var getOwnerResult = await _users.GetOrRegisterUserAsync(context.User);
-            if (!getOwnerResult.IsSuccess)
-            {
-                return CreateEntityResult<Roleplay>.FromError(getOwnerResult);
-            }
-
-            // Ensure the user is attached, so we don't create any conflicts.
-            var owner = getOwnerResult.Entity;
-            _database.Attach(owner);
-
-            var getServer = await _servers.GetOrRegisterServerAsync(context.Guild);
-            if (!getServer.IsSuccess)
-            {
-                return CreateEntityResult<Roleplay>.FromError(getServer);
-            }
-
-            var server = getServer.Entity;
-
             // Use a dummy name, since we'll be setting it using the service.
-            var roleplay = new Roleplay(server, owner, string.Empty);
+            var roleplay = _database.CreateProxy<Roleplay>(server, owner, string.Empty, string.Empty);
+            _database.Attach(roleplay);
 
-            var ownerParticipant = new RoleplayParticipant(roleplay, owner)
-            {
-                Status = ParticipantStatus.Joined
-            };
+            var ownerParticipant = _database.CreateProxy<RoleplayParticipant>(roleplay, owner);
+            ownerParticipant.Status = ParticipantStatus.Joined;
 
             roleplay.ParticipatingUsers.Add(ownerParticipant);
 
-            var setNameResult = await SetRoleplayNameAsync(context.Guild, roleplay, roleplayName);
+            var setNameResult = await SetRoleplayNameAsync(roleplay, roleplayName);
             if (!setNameResult.IsSuccess)
             {
                 return CreateEntityResult<Roleplay>.FromError(setNameResult);
@@ -161,29 +97,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return CreateEntityResult<Roleplay>.FromError(setSummaryResult);
             }
 
-            var setIsNSFWResult = await SetRoleplayIsNSFWAsync(roleplay, isNSFW);
-            if (!setIsNSFWResult.IsSuccess)
-            {
-                return CreateEntityResult<Roleplay>.FromError(setIsNSFWResult);
-            }
-
-            var setIsPublicResult = await SetRoleplayIsPublicAsync(roleplay, isPublic);
-            if (!setIsPublicResult.IsSuccess)
-            {
-                return CreateEntityResult<Roleplay>.FromError(setIsPublicResult);
-            }
+            roleplay.IsNSFW = isNSFW;
+            roleplay.IsPublic = isPublic;
 
             _database.Roleplays.Update(roleplay);
 
             await _database.SaveChangesAsync();
 
-            var roleplayResult = await GetUserRoleplayByNameAsync(context.Guild, context.User, roleplayName);
-            if (!roleplayResult.IsSuccess)
-            {
-                return CreateEntityResult<Roleplay>.FromError(roleplayResult);
-            }
-
-            return CreateEntityResult<Roleplay>.FromSuccess(roleplayResult.Entity);
+            return roleplay;
         }
 
         /// <summary>
@@ -191,7 +112,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<DeleteEntityResult> DeleteRoleplayAsync(Roleplay roleplay)
         {
             _database.Roleplays.Remove(roleplay);
@@ -203,71 +123,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Starts the given roleplay.
         /// </summary>
-        /// <param name="currentChannel">The channel the command was executed in.</param>
-        /// <param name="guild">The guild the command was executed in.</param>
         /// <param name="roleplay">The roleplay.</param>
+        /// <param name="channelID">The Discord ID of the channel.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> StartRoleplayAsync
-        (
-            ITextChannel currentChannel,
-            IGuild guild,
-            Roleplay roleplay
-        )
+        public async Task<ModifyEntityResult> StartRoleplayAsync(Roleplay roleplay, long channelID)
         {
-            var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync
-            (
-                guild,
-                roleplay
-            );
-
-            // Identify the channel to start the RP in. Preference is given to the roleplay's dedicated channel.
-            ISocketMessageChannel channel;
-            if (getDedicatedChannelResult.IsSuccess)
+            if (roleplay.IsActive && roleplay.ActiveChannelID == channelID)
             {
-                channel = (ISocketMessageChannel)getDedicatedChannelResult.Entity;
-            }
-            else
-            {
-                channel = (ISocketMessageChannel)currentChannel;
+                return ModifyEntityResult.FromError("The roleplay is already running.");
             }
 
-            var isNsfwChannel = channel is ITextChannel textChannel && textChannel.IsNsfw;
-            if (roleplay.IsNSFW && !isNsfwChannel)
-            {
-                return ModifyEntityResult.FromError
-                (
-                    "This channel is not marked as NSFW, while your roleplay is... naughty!"
-                );
-            }
-
-            if (await HasActiveRoleplayAsync(channel))
-            {
-                var currentRoleplayResult = await GetActiveRoleplayAsync(channel);
-                if (!currentRoleplayResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(currentRoleplayResult);
-                }
-
-                var currentRoleplay = currentRoleplayResult.Entity;
-                var timeOfLastMessage = currentRoleplay.Messages.Last().Timestamp;
-                var currentTime = DateTimeOffset.Now;
-
-                if (timeOfLastMessage < currentTime.AddHours(-4))
-                {
-                    currentRoleplay.IsActive = false;
-                }
-                else
-                {
-                    return ModifyEntityResult.FromError("There's already a roleplay active in this channel.");
-                }
-            }
-
-            if (roleplay.ActiveChannelID != (long)channel.Id)
-            {
-                roleplay.ActiveChannelID = (long)channel.Id;
-            }
-
+            roleplay.ActiveChannelID = channelID;
             roleplay.IsActive = true;
             roleplay.LastUpdated = DateTime.Now;
 
@@ -282,35 +148,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to modify.</param>
         /// <param name="message">The message to add or update.</param>
         /// <returns>A task wrapping the update action.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> AddToOrUpdateMessageInRoleplayAsync
-        (
-            Roleplay roleplay,
-            IMessage message
-        )
+        public async Task<ModifyEntityResult> AddOrUpdateMessageInRoleplayAsync(Roleplay roleplay, UserMessage message)
         {
-            if (!roleplay.HasJoined(message.Author))
-            {
-                return ModifyEntityResult.FromError("The given message was not authored by a participant of the roleplay.");
-            }
-
-            var userNick = message.Author.Username;
-            if (message.Author is SocketGuildUser guildUser && !string.IsNullOrEmpty(guildUser.Nickname))
-            {
-                userNick = guildUser.Nickname;
-            }
-
-            if (roleplay.Messages.Any(m => m.DiscordMessageID == (long)message.Id))
+            var existingMessage = roleplay.Messages.FirstOrDefault(m => m.DiscordMessageID == message.DiscordMessageID);
+            if (!(existingMessage is null))
             {
                 // Edit the existing message
-                var existingMessage = roleplay.Messages.First(m => m.DiscordMessageID == (long)message.Id);
-
-                if (existingMessage.Contents.Equals(message.Content))
+                if (existingMessage.Contents.Equals(message.Contents))
                 {
                     return ModifyEntityResult.FromError("Nothing to do; message content match.");
                 }
 
-                existingMessage.Contents = message.Content;
+                existingMessage.Contents = message.Contents;
 
                 // Update roleplay timestamp
                 roleplay.LastUpdated = DateTime.Now;
@@ -319,8 +168,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return ModifyEntityResult.FromSuccess();
             }
 
-            var roleplayMessage = UserMessage.FromDiscordMessage(message, userNick);
-            roleplay.Messages.Add(roleplayMessage);
+            roleplay.Messages.Add(message);
 
             // Update roleplay timestamp
             roleplay.LastUpdated = DateTime.Now;
@@ -330,54 +178,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         }
 
         /// <summary>
-        /// This method searches for the best matching roleplay given an owner and a name. If no owner is provided, then
-        /// the global list is searched for a unique name. If neither are provided, the currently active roleplay is
-        /// returned. If no match can be found, a failed result is returned.
-        /// </summary>
-        /// <param name="currentChannel">The channel the command was executed in.</param>
-        /// <param name="guild">The guild the command was executed in.</param>
-        /// <param name="roleplayOwner">The owner of the roleplay, if any.</param>
-        /// <param name="roleplayName">The name of the roleplay, if any.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, ItemNotNull]
-        public async Task<RetrieveEntityResult<Roleplay>> GetBestMatchingRoleplayAsync
-        (
-            ITextChannel currentChannel,
-            IGuild guild,
-            IUser? roleplayOwner,
-            string? roleplayName
-        )
-        {
-            if (roleplayOwner is null && roleplayName is null)
-            {
-                return await GetActiveRoleplayAsync(currentChannel);
-            }
-
-            if (roleplayOwner is null)
-            {
-                return await GetNamedRoleplayAsync(roleplayName!, guild);
-            }
-
-            if (roleplayName.IsNullOrWhitespace())
-            {
-                return await GetActiveRoleplayAsync(currentChannel);
-            }
-
-            return await GetUserRoleplayByNameAsync(guild, roleplayOwner, roleplayName);
-        }
-
-        /// <summary>
         /// Gets a roleplay by its given name.
         /// </summary>
         /// <param name="roleplayName">The name of the roleplay.</param>
-        /// <param name="guild">The guild that the search is scoped to.</param>
+        /// <param name="server">The server that the search is scoped to.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, ItemNotNull]
-        public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync
-        (
-            string roleplayName,
-            IGuild guild
-        )
+        public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync(string roleplayName, Server server)
         {
             if
             (
@@ -391,7 +197,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 );
             }
 
-            var roleplay = GetRoleplays(guild)
+            var roleplay = GetRoleplays(server)
                 .FirstOrDefault(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower()));
 
             if (roleplay is null)
@@ -403,74 +209,33 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         }
 
         /// <summary>
-        /// Gets the current active roleplay in the given channel.
-        /// </summary>
-        /// <param name="channel">The channel to get the roleplay from.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, ItemNotNull]
-        public async Task<RetrieveEntityResult<Roleplay>> GetActiveRoleplayAsync
-        (
-            IMessageChannel channel
-        )
-        {
-            var roleplay = await _database.Roleplays.AsQueryable().FirstOrDefaultAsync
-            (
-                rp => rp.IsActive && rp.ActiveChannelID == (long)channel.Id
-            );
-
-            if (roleplay is null)
-            {
-                return RetrieveEntityResult<Roleplay>.FromError
-                (
-                    "There is no roleplay that is currently active in this channel."
-                );
-            }
-
-            return RetrieveEntityResult<Roleplay>.FromSuccess(roleplay);
-        }
-
-        /// <summary>
-        /// Determines whether or not there is an active roleplay in the given channel.
-        /// </summary>
-        /// <param name="channel">The channel to check.</param>
-        /// <returns>true if there is an active roleplay; otherwise, false.</returns>
-        [Pure]
-        public async Task<bool> HasActiveRoleplayAsync(IChannel channel)
-        {
-            return await _database.Roleplays.AsQueryable().AnyAsync
-            (
-                rp => rp.IsActive && rp.ActiveChannelID == (long)channel.Id
-            );
-        }
-
-        /// <summary>
         /// Determines whether or not the given roleplay name is unique for a given user.
         /// </summary>
         /// <param name="user">The user to check.</param>
         /// <param name="roleplayName">The roleplay name to check.</param>
-        /// <param name="guild">The guild to scope the roleplays to.</param>
+        /// <param name="server">The server to scope the roleplays to.</param>
         /// <returns>true if the name is unique; otherwise, false.</returns>
         [Pure]
         public async Task<bool> IsRoleplayNameUniqueForUserAsync
         (
             User user,
             string roleplayName,
-            IGuild guild
+            Server server
         )
         {
-            var userRoleplays = GetUserRoleplays(user, guild);
+            var userRoleplays = GetUserRoleplays(user, server);
             return await _ownedEntities.IsEntityNameUniqueForUserAsync(userRoleplays, roleplayName);
         }
 
         /// <summary>
-        /// Get the roleplays owned by the given user.
+        /// Gets the roleplays on the given server.
         /// </summary>
-        /// <param name="guild">The guild to scope the search to.</param>
-        /// <returns>A queryable list of roleplays belonging to the user.</returns>
+        /// <param name="server">The server to scope the search to.</param>
+        /// <returns>A queryable list of roleplays on the given server.</returns>
         [Pure, ItemNotNull]
-        public IQueryable<Roleplay> GetRoleplays(IGuild? guild = null)
+        public IQueryable<Roleplay> GetRoleplays(Server? server = null)
         {
-            if (guild is null)
+            if (server is null)
             {
                 return _database.Roleplays;
             }
@@ -479,7 +244,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             .Where
             (
                 rp =>
-                    rp.Server.DiscordID == (long)guild.Id
+                    rp.Server == server
             );
         }
 
@@ -487,12 +252,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// Get the roleplays owned by the given user.
         /// </summary>
         /// <param name="user">The user to get the roleplays of.</param>
-        /// <param name="guild">The guild that the search is scoped to.</param>
+        /// <param name="server">The server that the search is scoped to.</param>
         /// <returns>A queryable list of roleplays belonging to the user.</returns>
         [Pure, ItemNotNull]
-        public IQueryable<Roleplay> GetUserRoleplays(User user, IGuild guild)
+        public IQueryable<Roleplay> GetUserRoleplays(User user, Server server)
         {
-            return GetRoleplays(guild).Where
+            return GetRoleplays(server).Where
             (
                 rp =>
                     rp.Owner == user
@@ -502,24 +267,24 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Gets a roleplay belonging to a given user by a given name.
         /// </summary>
-        /// <param name="guild">The guild of the user.</param>
+        /// <param name="server">The server of the user.</param>
         /// <param name="roleplayOwner">The user to get the roleplay from.</param>
         /// <param name="roleplayName">The name of the roleplay.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync
         (
-            IGuild guild,
-            IUser roleplayOwner,
+            Server server,
+            User roleplayOwner,
             string roleplayName
         )
         {
-            var roleplay = await GetRoleplays(guild)
+            var roleplay = await GetRoleplays(server)
             .FirstOrDefaultAsync
             (
                 rp =>
                     rp.Name.ToLower().Equals(roleplayName.ToLower()) &&
-                    rp.Owner.DiscordID == (long)roleplayOwner.Id
+                    rp.Owner == roleplayOwner
             );
 
             if (roleplay is null)
@@ -536,16 +301,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to remove the user from.</param>
         /// <param name="kickedUser">The user to remove from the roleplay.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> KickUserFromRoleplayAsync
-        (
-            Roleplay roleplay,
-            IUser kickedUser
-        )
+        public async Task<ModifyEntityResult> KickUserFromRoleplayAsync(Roleplay roleplay, User kickedUser)
         {
             if (!roleplay.HasJoined(kickedUser) && !roleplay.IsInvited(kickedUser))
             {
-                return ModifyEntityResult.FromError("That user is neither invited to or a participant of the roleplay.");
+                return ModifyEntityResult.FromError
+                (
+                    "That user is neither invited to or a participant of the roleplay."
+                );
             }
 
             if (!roleplay.HasJoined(kickedUser))
@@ -553,11 +316,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 var removeUserResult = await RemoveUserFromRoleplayAsync(roleplay, kickedUser);
                 if (!removeUserResult.IsSuccess)
                 {
-                    return removeUserResult;
+                    return ModifyEntityResult.FromError(removeUserResult);
                 }
             }
 
-            var participantEntry = roleplay.JoinedUsers.First(p => p.User.DiscordID == (long)kickedUser.Id);
+            var participantEntry = roleplay.JoinedUsers.First(p => p.User == kickedUser);
             participantEntry.Status = ParticipantStatus.Kicked;
 
             await _database.SaveChangesAsync();
@@ -571,29 +334,24 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to remove the user from.</param>
         /// <param name="removedUser">The user to remove from the roleplay.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> RemoveUserFromRoleplayAsync
-        (
-            Roleplay roleplay,
-            IUser removedUser
-        )
+        public async Task<DeleteEntityResult> RemoveUserFromRoleplayAsync(Roleplay roleplay, User removedUser)
         {
             if (!roleplay.HasJoined(removedUser))
             {
-                return ModifyEntityResult.FromError("No matching user found in the roleplay.");
+                return DeleteEntityResult.FromError("No matching user found in the roleplay.");
             }
 
             if (roleplay.IsOwner(removedUser))
             {
-                return ModifyEntityResult.FromError("The owner of a roleplay can't be removed from it.");
+                return DeleteEntityResult.FromError("The owner of a roleplay can't be removed from it.");
             }
 
-            var participantEntry = roleplay.JoinedUsers.First(p => p.User.DiscordID == (long)removedUser.Id);
-            participantEntry.Status = ParticipantStatus.None;
+            var participantEntry = roleplay.JoinedUsers.First(p => p.User == removedUser);
+            roleplay.ParticipatingUsers.Remove(participantEntry);
 
             await _database.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess();
+            return DeleteEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -602,11 +360,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to add the user to.</param>
         /// <param name="newUser">The user to add to the roleplay.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<CreateEntityResult<RoleplayParticipant>> AddUserToRoleplayAsync
         (
             Roleplay roleplay,
-            IUser newUser
+            User newUser
         )
         {
             if (roleplay.HasJoined(newUser))
@@ -631,23 +388,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 );
             }
 
-            var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)newUser.Id);
+            var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User == newUser);
             if (participantEntry is null)
             {
-                var getUserResult = await _users.GetOrRegisterUserAsync(newUser);
-                if (!getUserResult.IsSuccess)
-                {
-                    return CreateEntityResult<RoleplayParticipant>.FromError(getUserResult);
-                }
-
-                var user = getUserResult.Entity;
-
-                // Ensure the user is attached, so we don't create any conflicts.
-                _database.Attach(user);
-                participantEntry = new RoleplayParticipant(roleplay, user)
-                {
-                    Status = ParticipantStatus.Joined
-                };
+                participantEntry = _database.CreateProxy<RoleplayParticipant>(roleplay, newUser);
+                participantEntry.Status = ParticipantStatus.Joined;
 
                 roleplay.ParticipatingUsers.Add(participantEntry);
             }
@@ -658,7 +403,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             await _database.SaveChangesAsync();
 
-            return CreateEntityResult<RoleplayParticipant>.FromSuccess(participantEntry);
+            return participantEntry;
         }
 
         /// <summary>
@@ -667,36 +412,23 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to invite the user to.</param>
         /// <param name="invitedUser">The user to invite.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> InviteUserAsync
-        (
-            Roleplay roleplay,
-            IUser invitedUser
-        )
+        public async Task<ModifyEntityResult> InviteUserToRoleplayAsync(Roleplay roleplay, User invitedUser)
         {
-            if (roleplay.InvitedUsers.Any(p => p.User.DiscordID == (long)invitedUser.Id))
+            if (roleplay.InvitedUsers.Any(p => p.User.DiscordID == invitedUser.DiscordID))
             {
                 return ModifyEntityResult.FromError("The user has already been invited to that roleplay.");
             }
 
             // Remove the invited user from the kick list, if they're on it
-            var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault(p => p.User.DiscordID == (long)invitedUser.Id);
+            var participantEntry = roleplay.ParticipatingUsers.FirstOrDefault
+            (
+                p => p.User.DiscordID == invitedUser.DiscordID
+            );
+
             if (participantEntry is null)
             {
-                var getUserResult = await _users.GetOrRegisterUserAsync(invitedUser);
-                if (!getUserResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(getUserResult);
-                }
-
-                var user = getUserResult.Entity;
-
-                // Ensure the user is attached, so we don't create any conflicts.
-                _database.Attach(user);
-                participantEntry = new RoleplayParticipant(roleplay, user)
-                {
-                    Status = ParticipantStatus.Invited
-                };
+                participantEntry = _database.CreateProxy<RoleplayParticipant>(roleplay, invitedUser);
+                participantEntry.Status = ParticipantStatus.Invited;
 
                 roleplay.ParticipatingUsers.Add(participantEntry);
             }
@@ -715,17 +447,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="newOwner">The new owner.</param>
         /// <param name="roleplay">The roleplay to transfer.</param>
-        /// <param name="guild">The guild to scope the roleplays to.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> TransferRoleplayOwnershipAsync
-        (
-            User newOwner,
-            Roleplay roleplay,
-            IGuild guild
-        )
+        public async Task<ModifyEntityResult> TransferRoleplayOwnershipAsync(User newOwner, Roleplay roleplay)
         {
-            var newOwnerRoleplays = GetUserRoleplays(newOwner, guild);
+            var newOwnerRoleplays = GetUserRoleplays(newOwner, roleplay.Server);
             return await _ownedEntities.TransferEntityOwnershipAsync
             (
                 _database,
@@ -738,17 +463,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Sets the name of the given roleplay.
         /// </summary>
-        /// <param name="guild">The guild the roleplay is on.</param>
         /// <param name="roleplay">The roleplay to set the name of.</param>
         /// <param name="newRoleplayName">The new name.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> SetRoleplayNameAsync
-        (
-            IGuild guild,
-            Roleplay roleplay,
-            string newRoleplayName
-        )
+        public async Task<ModifyEntityResult> SetRoleplayNameAsync(Roleplay roleplay, string newRoleplayName)
         {
             if (string.IsNullOrWhiteSpace(newRoleplayName))
             {
@@ -760,16 +478,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return ModifyEntityResult.FromError("The name may not contain double quotes.");
             }
 
-            if (!await IsRoleplayNameUniqueForUserAsync(roleplay.Owner, newRoleplayName, guild))
+            if (!await IsRoleplayNameUniqueForUserAsync(roleplay.Owner, newRoleplayName, roleplay.Server))
             {
                 return ModifyEntityResult.FromError("You already have a roleplay with that name.");
-            }
-
-            var commandModule = _commands.Modules.First(m => m.Name == "roleplay");
-            var validNameResult = _ownedEntities.IsEntityNameValid(commandModule.GetAllCommandNames(), newRoleplayName);
-            if (!validNameResult.IsSuccess)
-            {
-                return ModifyEntityResult.FromError(validNameResult);
             }
 
             roleplay.Name = newRoleplayName;
@@ -784,12 +495,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to set the summary of.</param>
         /// <param name="newRoleplaySummary">The new summary.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> SetRoleplaySummaryAsync
-        (
-            Roleplay roleplay,
-            string newRoleplaySummary
-        )
+        public async Task<ModifyEntityResult> SetRoleplaySummaryAsync(Roleplay roleplay, string newRoleplaySummary)
         {
             if (string.IsNullOrWhiteSpace(newRoleplaySummary))
             {
@@ -808,13 +514,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to set the value in.</param>
         /// <param name="isNSFW">The new value.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> SetRoleplayIsNSFWAsync
-        (
-            Roleplay roleplay,
-            bool isNSFW
-        )
+        public async Task<ModifyEntityResult> SetRoleplayIsNSFWAsync(Roleplay roleplay, bool isNSFW)
         {
+            if (roleplay.IsNSFW == isNSFW)
+            {
+                return ModifyEntityResult.FromError($"The roleplay is already {(isNSFW ? "NSFW" : "SFW")}.");
+            }
+
             if (roleplay.Messages.Count > 0 && roleplay.IsNSFW && !isNSFW)
             {
                 return ModifyEntityResult.FromError("You can't mark a NSFW roleplay with messages in it as non-NSFW.");
@@ -832,13 +538,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplay">The roleplay to set the value in.</param>
         /// <param name="isPublic">The new value.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> SetRoleplayIsPublicAsync
-        (
-            Roleplay roleplay,
-            bool isPublic
-        )
+        public async Task<ModifyEntityResult> SetRoleplayIsPublicAsync(Roleplay roleplay, bool isPublic)
         {
+            if (roleplay.IsPublic == isPublic)
+            {
+                return ModifyEntityResult.FromError($"The roleplay is already {(isPublic ? "public" : "private")}.");
+            }
+
             roleplay.IsPublic = isPublic;
             await _database.SaveChangesAsync();
 
