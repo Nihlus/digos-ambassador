@@ -439,6 +439,19 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             await SetChannelWritabilityForUserAsync(channel, botDiscordUser, true);
             await SetChannelVisibilityForUserAsync(channel, botDiscordUser, true);
 
+            var extraPerms = OverwritePermissions.InheritAll.Modify
+            (
+                manageChannel: PermValue.Allow,
+                manageMessages: PermValue.Allow,
+                addReactions: PermValue.Allow,
+                embedLinks: PermValue.Allow,
+                attachFiles: PermValue.Allow,
+                useExternalEmojis: PermValue.Allow,
+                manageRoles: PermValue.Allow
+            );
+
+            await channel.AddPermissionOverwriteAsync(botDiscordUser, extraPerms);
+
             // Then, set up permission overrides for participants
             var updateParticipants = await UpdateParticipantPermissionsAsync(guild, roleplay);
             if (!updateParticipants.IsSuccess)
