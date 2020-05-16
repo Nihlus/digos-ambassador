@@ -80,25 +80,38 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             }
 
             using var tickScope = this.Services.CreateScope();
-            var roleplayService = tickScope.ServiceProvider.GetRequiredService<RoleplayService>();
-            var channelService = tickScope.ServiceProvider.GetRequiredService<DedicatedChannelService>();
+            var roleplayService = tickScope.ServiceProvider.GetRequiredService<RoleplayDiscordService>();
 
-            var roleplays = await roleplayService.GetRoleplays()
-                .Where(r => r.IsActive)
-                .Where(r => r.LastUpdated.HasValue)
-                .ToListAsync(ct);
-
-            foreach (var roleplay in roleplays)
+            foreach (var guild in this.Client.Guilds)
             {
-                // ReSharper disable once PossibleInvalidOperationException
-                var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated!.Value;
-                if (timeSinceLastActivity <= TimeSpan.FromHours(72))
+                var getRoleplays = await roleplayService.GetRoleplaysAsync(guild);
+                if (!getRoleplays.IsSuccess)
                 {
                     continue;
                 }
 
-                await StopRoleplayAsync(roleplayService, channelService, roleplay);
-                await NotifyOwner(roleplay);
+                var roleplays = await getRoleplays.Entity
+                    .Where(r => r.IsActive)
+                    .Where(r => r.LastUpdated.HasValue)
+                    .ToListAsync(ct);
+
+                foreach (var roleplay in roleplays)
+                {
+                    // ReSharper disable once PossibleInvalidOperationException
+                    var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated!.Value;
+                    if (timeSinceLastActivity <= TimeSpan.FromHours(72))
+                    {
+                        continue;
+                    }
+
+                    var stopRoleplay = await roleplayService.StopRoleplayAsync(roleplay);
+                    if (!stopRoleplay.IsSuccess)
+                    {
+                        this.Log.LogWarning(stopRoleplay.Exception, stopRoleplay.ErrorReason);
+                    }
+
+                    await NotifyOwner(roleplay);
+                }
             }
 
             await Task.Delay(TimeSpan.FromSeconds(5), ct);
@@ -135,81 +148,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
             {
                 // Nom nom nom
-            }
-        }
-
-        /// <summary>
-        /// Stops the given roleplay, and hides the dedicated channel if it has one.
-        /// </summary>
-        /// <param name="roleplayService">The roleplaying service in use.</param>
-        /// <param name="roleplay">The roleplay.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task StopRoleplayAsync(RoleplayService roleplayService, DedicatedChannelService channelService, Roleplay roleplay)
-        {
-            var stopRoleplayAsync = await roleplayService.StopRoleplayAsync(roleplay);
-            if (!stopRoleplayAsync.IsSuccess)
-            {
-                this.Log.LogWarning($"Failed to stop the roleplay {roleplay.Name}: {stopRoleplayAsync.ErrorReason}");
-                return;
-            }
-
-            if (!(roleplay.DedicatedChannelID is null))
-            {
-                var guild = this.Client.Guilds.FirstOrDefault
-                (
-                    g => g.Channels.Any(c => c.Id == (ulong)roleplay.DedicatedChannelID.Value)
-                );
-
-                if (guild is null)
-                {
-                    return;
-                }
-
-                var getDedicatedChannelResult = await channelService.GetDedicatedChannelAsync
-                (
-                    guild,
-                    roleplay
-                );
-
-                // Hide the channel for all participants
-                if (getDedicatedChannelResult.IsSuccess)
-                {
-                    var dedicatedChannel = getDedicatedChannelResult.Entity;
-
-                    foreach (var participant in roleplay.ParticipatingUsers)
-                    {
-                        var user = guild.GetUser((ulong)participant.User.DiscordID);
-                        if (user is null)
-                        {
-                            continue;
-                        }
-
-                        await channelService.SetChannelWritabilityForUserAsync
-                        (
-                            dedicatedChannel,
-                            user,
-                            false
-                        );
-
-                        await channelService.SetChannelVisibilityForUserAsync
-                        (
-                            dedicatedChannel,
-                            user,
-                            false
-                        );
-                    }
-
-                    if (roleplay.IsPublic)
-                    {
-                        var everyoneRole = guild.EveryoneRole;
-                        await channelService.SetChannelVisibilityForRoleAsync
-                        (
-                            dedicatedChannel,
-                            everyoneRole,
-                            false
-                        );
-                    }
-                }
             }
         }
     }
