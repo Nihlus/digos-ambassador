@@ -23,6 +23,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord;
@@ -436,21 +437,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             // Finally, ensure the bot has full access to the channel
             var botDiscordUser = await guild.GetUserAsync(_client.CurrentUser.Id);
-            await SetChannelWritabilityForUserAsync(channel, botDiscordUser, true);
-            await SetChannelVisibilityForUserAsync(channel, botDiscordUser, true);
+            var allowAll = OverwritePermissions.AllowAll(channel);
 
-            var extraPerms = OverwritePermissions.InheritAll.Modify
-            (
-                manageChannel: PermValue.Allow,
-                manageMessages: PermValue.Allow,
-                addReactions: PermValue.Allow,
-                embedLinks: PermValue.Allow,
-                attachFiles: PermValue.Allow,
-                useExternalEmojis: PermValue.Allow,
-                manageRoles: PermValue.Allow
-            );
-
-            await channel.AddPermissionOverwriteAsync(botDiscordUser, extraPerms);
+            await channel.AddPermissionOverwriteAsync(botDiscordUser, allowAll);
 
             // Then, set up permission overrides for participants
             var updateParticipants = await UpdateParticipantPermissionsAsync(guild, roleplay);
@@ -610,7 +599,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="channel">The channel.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        private static async Task<ModifyEntityResult> ClearChannelPermissionOverwrites(IGuildChannel channel)
+        private async Task<ModifyEntityResult> ClearChannelPermissionOverwrites(IGuildChannel channel)
         {
             var guild = channel.Guild;
 
@@ -641,6 +630,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                     {
                         var user = await guild.GetUserAsync(overwrite.TargetId);
                         if (user is null)
+                        {
+                            continue;
+                        }
+
+                        if (user.IsMe(_client))
                         {
                             continue;
                         }
