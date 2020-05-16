@@ -90,20 +90,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     continue;
                 }
 
-                var roleplays = await getRoleplays.Entity
+                var now = DateTime.Now;
+
+                var timedOutRoleplays = await getRoleplays.Entity
                     .Where(r => r.IsActive)
                     .Where(r => r.LastUpdated.HasValue)
+                    .Where(r => now - r.LastUpdated > TimeSpan.FromHours(72))
                     .ToListAsync(ct);
 
-                foreach (var roleplay in roleplays)
+                foreach (var roleplay in timedOutRoleplays)
                 {
-                    // ReSharper disable once PossibleInvalidOperationException
-                    var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated!.Value;
-                    if (timeSinceLastActivity <= TimeSpan.FromHours(72))
-                    {
-                        continue;
-                    }
-
                     var stopRoleplay = await roleplayService.StopRoleplayAsync(roleplay);
                     if (!stopRoleplay.IsSuccess)
                     {
