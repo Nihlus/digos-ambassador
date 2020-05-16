@@ -666,35 +666,33 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             var settings = getSettings.Entity;
 
-            // Configure visibility for everyone
-            // viewChannel starts off as deny, since starting or stopping the RP will set the correct permissions.
-            IRole everyoneRole;
-            if (settings.DefaultUserRole.HasValue)
-            {
-                var defaultRole = guild.GetRole((ulong)settings.DefaultUserRole.Value);
-                everyoneRole = defaultRole ?? guild.EveryoneRole;
-
-                // Also override @everyone so it can't see anything
-                var denyView = OverwritePermissions.InheritAll.Modify
-                (
-                    viewChannel: PermValue.Deny
-                );
-
-                await dedicatedChannel.AddPermissionOverwriteAsync(guild.EveryoneRole, denyView);
-            }
-            else
-            {
-                everyoneRole = guild.EveryoneRole;
-            }
-
-            var everyonePermissions = OverwritePermissions.InheritAll.Modify
+            var denyView = OverwritePermissions.InheritAll.Modify
             (
                 viewChannel: PermValue.Deny,
                 sendMessages: PermValue.Deny,
                 addReactions: PermValue.Deny
             );
 
-            await dedicatedChannel.AddPermissionOverwriteAsync(everyoneRole, everyonePermissions);
+            // Configure visibility for everyone
+            // viewChannel starts off as deny, since starting or stopping the RP will set the correct permissions.
+            IRole defaultUserRole;
+            if (settings.DefaultUserRole.HasValue)
+            {
+                var defaultRole = guild.GetRole((ulong)settings.DefaultUserRole.Value);
+                defaultUserRole = defaultRole ?? guild.EveryoneRole;
+            }
+            else
+            {
+                defaultUserRole = guild.EveryoneRole;
+            }
+
+            await dedicatedChannel.AddPermissionOverwriteAsync(defaultUserRole, denyView);
+
+            if (defaultUserRole != guild.EveryoneRole)
+            {
+                // Also override @everyone so it can't see anything
+                await dedicatedChannel.AddPermissionOverwriteAsync(guild.EveryoneRole, denyView);
+            }
 
             return ModifyEntityResult.FromSuccess();
         }
