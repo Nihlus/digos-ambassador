@@ -98,17 +98,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 var roleplays = await guildRoleplays
                     .Where(r => r.DedicatedChannelID.HasValue)
                     .Where(r => r.LastUpdated.HasValue)
+                    .Where(r => DateTime.Now - r.LastUpdated > TimeSpan.FromDays(28))
                     .ToListAsync(ct);
 
                 foreach (var roleplay in roleplays)
                 {
-                    // ReSharper disable once PossibleInvalidOperationException
-                    var timeSinceLastActivity = DateTime.Now - roleplay.LastUpdated!.Value;
-                    if (timeSinceLastActivity <= TimeSpan.FromDays(28))
-                    {
-                        continue;
-                    }
-
                     await ArchiveRoleplayAsync
                     (
                         guild,
