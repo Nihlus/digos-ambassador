@@ -673,6 +673,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             {
                 var defaultRole = guild.GetRole((ulong)settings.DefaultUserRole.Value);
                 everyoneRole = defaultRole ?? guild.EveryoneRole;
+
+                // Also override @everyone so it can't see anything
+                var denyView = OverwritePermissions.InheritAll.Modify
+                (
+                    viewChannel: PermValue.Deny
+                );
+
+                await dedicatedChannel.AddPermissionOverwriteAsync(guild.EveryoneRole, denyView);
             }
             else
             {
