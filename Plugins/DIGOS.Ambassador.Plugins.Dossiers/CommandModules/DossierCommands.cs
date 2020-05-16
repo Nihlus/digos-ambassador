@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
                 this.Context.User,
                 dossiers,
                 d => d.Title,
-                d => d.Summary ?? "No summary set.",
+                d => d.Summary,
                 "There are no dossiers available.",
                 appearance
             );
