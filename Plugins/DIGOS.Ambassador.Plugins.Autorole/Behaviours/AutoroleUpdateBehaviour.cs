@@ -79,8 +79,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 var botUser = guild.GetUser(this.Client.CurrentUser.Id);
                 if (botUser is null)
                 {
-                    this.Log.LogError("Failed to get our own user as a guild user. Yikes!");
-                    continue;
+                    // The client is probably not ready yet.
+                    break;
                 }
 
                 if (!botUser.GuildPermissions.ManageRoles)
