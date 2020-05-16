@@ -1037,6 +1037,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.All)]
         public async Task ResetChannelPermissionsAsync()
         {
+            await _feedback.SendConfirmationAsync(this.Context, "Working...");
+
             var getRoleplays = await _discordRoleplays.GetRoleplaysAsync(this.Context.Guild);
             if (!getRoleplays.IsSuccess)
             {
