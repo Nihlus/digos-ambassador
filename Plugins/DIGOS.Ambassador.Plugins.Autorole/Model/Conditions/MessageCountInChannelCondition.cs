@@ -25,7 +25,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Discord;
-using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 

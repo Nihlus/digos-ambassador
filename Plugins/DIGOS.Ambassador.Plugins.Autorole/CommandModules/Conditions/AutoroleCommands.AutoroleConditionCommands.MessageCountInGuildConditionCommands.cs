@@ -27,7 +27,6 @@ using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
