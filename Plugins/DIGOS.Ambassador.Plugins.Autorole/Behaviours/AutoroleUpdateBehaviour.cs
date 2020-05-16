@@ -69,11 +69,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         }
 
         /// <inheritdoc />
-        protected override async Task OnTickAsync(CancellationToken ct)
+        protected override async Task OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
-            using var tickScope = this.Services.CreateScope();
-            var autoroles = tickScope.ServiceProvider.GetRequiredService<AutoroleService>();
-            var autoroleUpdates = tickScope.ServiceProvider.GetRequiredService<AutoroleUpdateService>();
+            var autoroles = tickServices.GetRequiredService<AutoroleService>();
+            var autoroleUpdates = tickServices.GetRequiredService<AutoroleUpdateService>();
 
             foreach (var guild in this.Client.Guilds)
             {

@@ -70,20 +70,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         }
 
         /// <inheritdoc />
-        protected override async Task OnTickAsync(CancellationToken ct)
+        protected override async Task OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
-            if (this.Client.ConnectionState != ConnectionState.Connected)
-            {
-                // Give the client some time to start up
-                await Task.Delay(TimeSpan.FromSeconds(5), ct);
-                return;
-            }
-
-            using var tickScope = this.Services.CreateScope();
-            var roleplayService = tickScope.ServiceProvider.GetRequiredService<RoleplayDiscordService>();
-            var serverService = tickScope.ServiceProvider.GetRequiredService<ServerService>();
-            var serverSettings = tickScope.ServiceProvider.GetRequiredService<RoleplayServerSettingsService>();
-            var dedicatedChannels = tickScope.ServiceProvider.GetRequiredService<DedicatedChannelService>();
+            var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
+            var serverService = tickServices.GetRequiredService<ServerService>();
+            var serverSettings = tickServices.GetRequiredService<RoleplayServerSettingsService>();
+            var dedicatedChannels = tickServices.GetRequiredService<DedicatedChannelService>();
 
             foreach (var guild in this.Client.Guilds)
             {

@@ -25,7 +25,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
-using Discord;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -58,19 +57,11 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
         }
 
         /// <inheritdoc/>
-        protected override async Task OnTickAsync(CancellationToken ct)
+        protected override async Task OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
-            if (this.Client.ConnectionState != ConnectionState.Connected)
-            {
-                // Give the client some time to start up
-                await Task.Delay(TimeSpan.FromSeconds(5), ct);
-                return;
-            }
-
-            using var tickScope = this.Services.CreateScope();
-            var warningService = tickScope.ServiceProvider.GetRequiredService<WarningService>();
-            var banService = tickScope.ServiceProvider.GetRequiredService<BanService>();
-            var loggingService = tickScope.ServiceProvider.GetRequiredService<ChannelLoggingService>();
+            var warningService = tickServices.GetRequiredService<WarningService>();
+            var banService = tickServices.GetRequiredService<BanService>();
+            var loggingService = tickServices.GetRequiredService<ChannelLoggingService>();
 
             var now = DateTime.UtcNow;
 
