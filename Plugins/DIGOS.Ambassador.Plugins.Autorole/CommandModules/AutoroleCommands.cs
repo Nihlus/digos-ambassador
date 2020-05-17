@@ -280,6 +280,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// <param name="autorole">The autorole.</param>
         [UsedImplicitly]
         [Alias("affirm-all", "confirm-all")]
+        [Command("affirm-all")]
         [Summary("Affirms all currently qualifying users for the given autorole.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
