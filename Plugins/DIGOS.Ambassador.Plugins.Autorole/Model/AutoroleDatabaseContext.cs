@@ -93,6 +93,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
 
             ConfigureMessageCountCondition<MessageCountInChannelCondition>(modelBuilder);
             ConfigureMessageCountCondition<MessageCountInGuildCondition>(modelBuilder);
+
+            modelBuilder.Entity<UserStatistics>()
+                .HasMany(s => s.ServerStatistics)
+                .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserServerStatistics>()
+                .HasMany(s => s.ChannelStatistics)
+                .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         private void ConfigureTimeSinceEventCondition<TTimeSinceEventCondition>(ModelBuilder modelBuilder)
