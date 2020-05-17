@@ -16,10 +16,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            /*
             migrationBuilder.RenameSequence(
                 name: "UserKink_ID_seq",
                 schema: "KinkModule",
                 newName: "UserKinks_ID_seq");
+            */
 
             migrationBuilder.AlterColumn<long>(
                 name: "ID",
@@ -42,10 +44,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            /*
             migrationBuilder.RenameSequence(
                 name: "UserKinks_ID_seq",
                 schema: "KinkModule",
                 newName: "UserKink_ID_seq");
+            */
 
             migrationBuilder.AlterColumn<long>(
                 name: "ID",

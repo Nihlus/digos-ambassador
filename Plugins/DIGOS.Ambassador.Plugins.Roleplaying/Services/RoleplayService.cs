@@ -23,6 +23,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -76,6 +77,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             bool isPublic
         )
         {
+            owner = _database.NormalizeReference(owner);
+            server = _database.NormalizeReference(server);
+
             // Use a dummy name, since we'll be setting it using the service.
             var roleplay = _database.CreateProxy<Roleplay>(server, owner, string.Empty, string.Empty);
             _database.Attach(roleplay);
@@ -162,6 +166,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             string contents
         )
         {
+            author = _database.NormalizeReference(author);
+
             var existingMessage = roleplay.Messages.FirstOrDefault(m => m.DiscordMessageID == messageID);
             if (!(existingMessage is null))
             {
@@ -178,17 +184,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
                 await _database.SaveChangesAsync();
                 return ModifyEntityResult.FromSuccess();
-            }
-
-            // HACK: The author may be the owner, in which case we've already materialized a tracked entity.
-            var existingUserEntity = _database.ChangeTracker.Entries<User>().FirstOrDefault
-            (
-                e => e.Entity.ID == author.ID
-            );
-
-            if (!(existingUserEntity is null))
-            {
-                author = existingUserEntity.Entity;
             }
 
             var newMessage = _database.CreateProxy<UserMessage>(author, messageID, timestamp, authorNickname, contents);
@@ -210,6 +205,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync(string roleplayName, Server server)
         {
+            server = _database.NormalizeReference(server);
+
             if
             (
                 await _database.Roleplays.AsQueryable()
@@ -248,6 +245,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             Server server
         )
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             var userRoleplays = GetUserRoleplays(user, server);
             return await _ownedEntities.IsEntityNameUniqueForUserAsync(userRoleplays, roleplayName);
         }
@@ -264,6 +264,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             {
                 return _database.Roleplays;
             }
+
+            server = _database.NormalizeReference(server);
 
             return _database.Roleplays.AsQueryable()
             .Where
@@ -282,6 +284,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         [Pure, ItemNotNull]
         public IQueryable<Roleplay> GetUserRoleplays(User user, Server server)
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             return GetRoleplays(server).Where
             (
                 rp =>
@@ -304,6 +309,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             string roleplayName
         )
         {
+            roleplayOwner = _database.NormalizeReference(roleplayOwner);
+            server = _database.NormalizeReference(server);
+
             var roleplay = await GetRoleplays(server)
             .FirstOrDefaultAsync
             (
@@ -328,6 +336,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> KickUserFromRoleplayAsync(Roleplay roleplay, User kickedUser)
         {
+            kickedUser = _database.NormalizeReference(kickedUser);
+
             if (!roleplay.HasJoined(kickedUser) && !roleplay.IsInvited(kickedUser))
             {
                 return ModifyEntityResult.FromError
@@ -361,6 +371,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<DeleteEntityResult> RemoveUserFromRoleplayAsync(Roleplay roleplay, User removedUser)
         {
+            removedUser = _database.NormalizeReference(removedUser);
+
             if (!roleplay.HasJoined(removedUser))
             {
                 return DeleteEntityResult.FromError("No matching user found in the roleplay.");
@@ -371,7 +383,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return DeleteEntityResult.FromError("The owner of a roleplay can't be removed from it.");
             }
 
-            var participantEntry = roleplay.JoinedUsers.First(p => p.User == removedUser);
+            var participantEntry = roleplay.JoinedUsers.FirstOrDefault(p => p.User == removedUser);
             roleplay.ParticipatingUsers.Remove(participantEntry);
 
             await _database.SaveChangesAsync();
@@ -391,16 +403,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             User newUser
         )
         {
-            // HACK: The entity may already be tracked, so we'll try to find one first
-            var existingUserEntity = _database.ChangeTracker.Entries<User>().FirstOrDefault
-            (
-                e => e.Entity.ID == newUser.ID
-            );
-
-            if (!(existingUserEntity is null))
-            {
-                newUser = existingUserEntity.Entity;
-            }
+            newUser = _database.NormalizeReference(newUser);
 
             if (roleplay.HasJoined(newUser))
             {
@@ -450,6 +453,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> InviteUserToRoleplayAsync(Roleplay roleplay, User invitedUser)
         {
+            invitedUser = _database.NormalizeReference(invitedUser);
+
             if (roleplay.InvitedUsers.Any(p => p.User.DiscordID == invitedUser.DiscordID))
             {
                 return ModifyEntityResult.FromError("The user has already been invited to that roleplay.");
@@ -486,6 +491,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> TransferRoleplayOwnershipAsync(User newOwner, Roleplay roleplay)
         {
+            newOwner = _database.NormalizeReference(newOwner);
+
             var newOwnerRoleplays = GetUserRoleplays(newOwner, roleplay.Server);
             return await _ownedEntities.TransferEntityOwnershipAsync
             (

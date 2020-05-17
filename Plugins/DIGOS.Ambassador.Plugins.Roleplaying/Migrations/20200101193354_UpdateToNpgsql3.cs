@@ -16,6 +16,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            /*
             migrationBuilder.RenameSequence(
                 name: "RoleplayParticipant_ID_seq",
                 schema: "RoleplayModule",
@@ -25,6 +26,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 name: "UserMessage_ID_seq",
                 schema: "RoleplayModule",
                 newName: "UserMessages_ID_seq");
+            */
 
             migrationBuilder.AlterColumn<long>(
                 name: "ID",
@@ -65,6 +67,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            /*
             migrationBuilder.RenameSequence(
                 name: "RoleplayParticipants_ID_seq",
                 schema: "RoleplayModule",
@@ -74,6 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Migrations
                 name: "UserMessages_ID_seq",
                 schema: "RoleplayModule",
                 newName: "UserMessage_ID_seq");
+            */
 
             migrationBuilder.AlterColumn<long>(
                 name: "ID",

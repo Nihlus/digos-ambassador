@@ -16,6 +16,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            /*
             migrationBuilder.RenameSequence(
                 name: "Appearance_ID_seq",
                 schema: "TransformationModule",
@@ -30,6 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                 name: "UserProtectionEntry_ID_seq",
                 schema: "TransformationModule",
                 newName: "UserProtectionEntries_ID_seq");
+            */
 
             migrationBuilder.DropForeignKey(
                 name: "FK_UserProtectionEntries_GlobalUserProtections_GlobalProtectionID",
@@ -112,6 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            /*
             migrationBuilder.RenameSequence(
                 name: "Appearances_ID_seq",
                 schema: "TransformationModule",
@@ -126,6 +129,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Migrations
                 name: "UserProtectionEntries_ID_seq",
                 schema: "TransformationModule",
                 newName: "UserProtectionEntry_ID_seq");
+
+            */
 
             migrationBuilder.DropForeignKey(
                 name: "FK_UserProtectionEntries_GlobalUserProtections_GlobalProtectio~",

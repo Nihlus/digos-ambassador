@@ -288,7 +288,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             return RetrieveEntityResult<ITextChannel>.FromError
             (
-                "Attempted to delete a channel, but it appears to have been deleted."
+                "Attempted to retrieve a channel, but it appears to have been deleted."
             );
         }
 
