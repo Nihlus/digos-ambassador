@@ -391,6 +391,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             User newUser
         )
         {
+            // HACK: The entity may already be tracked, so we'll try to find one first
+            var existingUserEntity = _database.ChangeTracker.Entries<User>().FirstOrDefault
+            (
+                e => e.Entity.ID == newUser.ID
+            );
+
+            if (!(existingUserEntity is null))
+            {
+                newUser = existingUserEntity.Entity;
+            }
+
             if (roleplay.HasJoined(newUser))
             {
                 return CreateEntityResult<RoleplayParticipant>.FromError("The user is already in that roleplay.");
