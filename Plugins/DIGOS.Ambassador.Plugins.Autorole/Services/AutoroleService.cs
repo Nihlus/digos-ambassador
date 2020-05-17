@@ -369,6 +369,33 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         }
 
         /// <summary>
+        /// Explicitly affirms an autorole assignment for all currently qualifying users for the role.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> AffirmAutoroleForAllAsync(AutoroleConfiguration autorole)
+        {
+            if (!autorole.RequiresConfirmation)
+            {
+                return ModifyEntityResult.FromError("The autorole doesn't require explicit affirmation.");
+            }
+
+            var qualifyingUsers = await _database.AutoroleConfirmations.AsQueryable()
+                .Where(a => a.Autorole == autorole)
+                .Where(a => !a.IsConfirmed)
+                .ToListAsync();
+
+            foreach (var qualifyingUser in qualifyingUsers)
+            {
+                qualifyingUser.IsConfirmed = true;
+            }
+
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
         /// Explicitly denies an autorole assignment.
         /// </summary>
         /// <param name="autorole">The autorole.</param>

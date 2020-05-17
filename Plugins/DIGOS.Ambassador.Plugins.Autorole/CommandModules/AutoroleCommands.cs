@@ -257,7 +257,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Command("affirm")]
         [Summary("Affirms a user's qualification for an autorole.")]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.Self)]
+        [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
         public async Task AffirmAutoroleForUserAsync
         (
             AutoroleConfiguration autorole,
@@ -272,6 +272,27 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Qualification affirmed.");
+        }
+
+        /// <summary>
+        /// Affirms all currently qualifying users for the given autorole.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        [UsedImplicitly]
+        [Alias("affirm-all", "confirm-all")]
+        [Summary("Affirms all currently qualifying users for the given autorole.")]
+        [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
+        public async Task AffirmAutoroleForAllAsync(AutoroleConfiguration autorole)
+        {
+            var affirmResult = await _autoroles.AffirmAutoroleForAllAsync(autorole);
+            if (!affirmResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, affirmResult.ErrorReason);
+                return;
+            }
+
+            await _feedback.SendConfirmationAsync(this.Context, "Qualifications affirmed.");
         }
 
         /// <summary>
