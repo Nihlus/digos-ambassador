@@ -125,6 +125,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             var server = getServer.Entity;
 
+            // Since we're adding to the database indirectly, an attach is required here.
+            _database.Attach(server);
+
             var newServerStatistics = _database.CreateProxy<UserServerStatistics>(server);
 
             statistics.ServerStatistics.Add(newServerStatistics);

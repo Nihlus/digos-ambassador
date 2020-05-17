@@ -105,6 +105,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 {
                     foreach (var user in guild.Users)
                     {
+                        if (user.IsBot || user.IsWebhook)
+                        {
+                            // Skip bots and webhooks
+                            continue;
+                        }
+
                         var updateResult = await autoroleUpdates.UpdateAutoroleForUserAsync(autorole, user);
                         if (!updateResult.IsSuccess)
                         {
