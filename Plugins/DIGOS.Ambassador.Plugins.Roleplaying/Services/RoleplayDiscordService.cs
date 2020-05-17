@@ -715,9 +715,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             var author = getAuthor.Entity;
-            var roleplayMessage = UserMessage.FromDiscordMessage(author, message, userNick);
 
-            return await _roleplays.AddOrUpdateMessageInRoleplayAsync(roleplay, roleplayMessage);
+            return await _roleplays.AddOrUpdateMessageInRoleplayAsync
+            (
+                roleplay,
+                author,
+                (long)message.Id,
+                message.Timestamp,
+                userNick,
+                message.Content
+            );
         }
 
         /// <summary>

@@ -97,23 +97,5 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
             this.AuthorNickname = authorNickname;
             this.Contents = contents;
         }
-
-        /// <summary>
-        /// Creates a new <see cref="UserMessage"/> from the specified Discord message.
-        /// </summary>
-        /// <param name="author">The author of the message.</param>
-        /// <param name="message">The message to create from.</param>
-        /// <param name="authorNickname">The current display name of the author.</param>
-        /// <returns>A new UserMessage.</returns>
-        [Pure]
-        public static UserMessage FromDiscordMessage
-        (
-            User author,
-            IUserMessage message,
-            string authorNickname
-        )
-        {
-            return new UserMessage(author, (long)message.Id, message.Timestamp, authorNickname, message.Content);
-        }
     }
 }

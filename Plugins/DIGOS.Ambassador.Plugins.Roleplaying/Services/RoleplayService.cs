@@ -146,20 +146,32 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// Adds a new message to the given roleplay, or edits it if there is an existing one.
         /// </summary>
         /// <param name="roleplay">The roleplay to modify.</param>
-        /// <param name="message">The message to add or update.</param>
+        /// <param name="author">The author of the message.</param>
+        /// <param name="messageID">The ID of the message.</param>
+        /// <param name="timestamp">The timestamp of the message.</param>
+        /// <param name="authorNickname">The nickname of the author at the time of sending.</param>
+        /// <param name="contents">The contents of the message.</param>
         /// <returns>A task wrapping the update action.</returns>
-        public async Task<ModifyEntityResult> AddOrUpdateMessageInRoleplayAsync(Roleplay roleplay, UserMessage message)
+        public async Task<ModifyEntityResult> AddOrUpdateMessageInRoleplayAsync
+        (
+            Roleplay roleplay,
+            User author,
+            long messageID,
+            DateTimeOffset timestamp,
+            string authorNickname,
+            string contents
+        )
         {
-            var existingMessage = roleplay.Messages.FirstOrDefault(m => m.DiscordMessageID == message.DiscordMessageID);
+            var existingMessage = roleplay.Messages.FirstOrDefault(m => m.DiscordMessageID == messageID);
             if (!(existingMessage is null))
             {
                 // Edit the existing message
-                if (existingMessage.Contents.Equals(message.Contents))
+                if (existingMessage.Contents.Equals(contents))
                 {
                     return ModifyEntityResult.FromError("Nothing to do; message content match.");
                 }
 
-                existingMessage.Contents = message.Contents;
+                existingMessage.Contents = contents;
 
                 // Update roleplay timestamp
                 roleplay.LastUpdated = DateTime.Now;
@@ -168,7 +180,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return ModifyEntityResult.FromSuccess();
             }
 
-            roleplay.Messages.Add(message);
+            // HACK: The author may be the owner, in which case we've already materialized a tracked entity.
+            var existingUserEntity = _database.ChangeTracker.Entries<User>().FirstOrDefault
+            (
+                e => e.Entity.ID == author.ID
+            );
+
+            if (!(existingUserEntity is null))
+            {
+                author = existingUserEntity.Entity;
+            }
+
+            var newMessage = _database.CreateProxy<UserMessage>(author, messageID, timestamp, authorNickname, contents);
+
+            roleplay.Messages.Add(newMessage);
 
             // Update roleplay timestamp
             roleplay.LastUpdated = DateTime.Now;
