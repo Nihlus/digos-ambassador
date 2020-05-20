@@ -100,6 +100,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Tests.Plug
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Plugins.Autorole", "Plugins\DIGOS.Ambassador.Plugins.Autorole\DIGOS.Ambassador.Plugins.Autorole.csproj", "{82D3BADC-CCC8-46BA-94C7-7A038AFCE452}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DIGOS.Ambassador.Plugins.Drone", "Plugins\DIGOS.Ambassador.Plugins.Drone\DIGOS.Ambassador.Plugins.Drone.csproj", "{4232D243-8996-4DA1-9B1F-E2309AC8C5E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -246,6 +248,10 @@ Global
 		{82D3BADC-CCC8-46BA-94C7-7A038AFCE452}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82D3BADC-CCC8-46BA-94C7-7A038AFCE452}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82D3BADC-CCC8-46BA-94C7-7A038AFCE452}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4232D243-8996-4DA1-9B1F-E2309AC8C5E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4232D243-8996-4DA1-9B1F-E2309AC8C5E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4232D243-8996-4DA1-9B1F-E2309AC8C5E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4232D243-8996-4DA1-9B1F-E2309AC8C5E3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -285,5 +291,6 @@ Global
 		{6AD6AB08-5A5A-4CC7-99C1-099D073D2B27} = {4A182B87-C1AD-49B5-A162-86AEFACCE002}
 		{E28B12D4-563B-482D-AF93-94137081374B} = {D01849C4-E9C7-4BB8-BFDF-970FE307C82A}
 		{82D3BADC-CCC8-46BA-94C7-7A038AFCE452} = {4A182B87-C1AD-49B5-A162-86AEFACCE002}
+		{4232D243-8996-4DA1-9B1F-E2309AC8C5E3} = {4A182B87-C1AD-49B5-A162-86AEFACCE002}
 	EndGlobalSection
 EndGlobal
