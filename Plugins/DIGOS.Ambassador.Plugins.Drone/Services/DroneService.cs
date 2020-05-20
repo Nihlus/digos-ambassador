@@ -23,10 +23,12 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
+using DIGOS.Ambassador.Plugins.Drone.Extensions;
 using Discord;
 using Microsoft.EntityFrameworkCore;
 using Remora.Results;
@@ -41,6 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
         private readonly Random _random;
         private readonly UserService _users;
         private readonly CharacterService _characters;
+        private readonly ContentService _content;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DroneService"/> class.
@@ -48,11 +51,13 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
         /// <param name="characters">The character service.</param>
         /// <param name="random">An entropy source.</param>
         /// <param name="users">The user service.</param>
-        public DroneService(CharacterService characters, Random random, UserService users)
+        /// <param name="content">The content service.</param>
+        public DroneService(CharacterService characters, Random random, UserService users, ContentService content)
         {
             _characters = characters;
             _random = random;
             _users = users;
+            _content = content;
         }
 
         /// <summary>
@@ -71,12 +76,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
             var user = getUser.Entity;
 
             var generatedIdentity = await GenerateDroneIdentityAsync(user, guildUser);
-
-            var getGeneratedAppearance = await GetRandomAvatarAsync();
-            if (!getGeneratedAppearance.IsSuccess)
-            {
-                return CreateEntityResult<Character>.FromError(getGeneratedAppearance);
-            }
+            var generatedAppearance = _content.GetRandomDroneAvatarUri();
 
             throw new NotImplementedException();
         }
@@ -112,15 +112,6 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
             }
 
             return (characterName, displayName);
-        }
-
-        /// <summary>
-        /// Gets a random avatar from a selection of sharkdrone avatars.
-        /// </summary>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        private async Task<RetrieveEntityResult<string>> GetRandomAvatarAsync()
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
