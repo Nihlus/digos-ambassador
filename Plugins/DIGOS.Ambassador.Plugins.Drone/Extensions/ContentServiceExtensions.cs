@@ -76,5 +76,25 @@ namespace DIGOS.Ambassador.Plugins.Drone.Extensions
         {
             return new Uri(@this.BaseCDNUri, $"plugins/drone/avatars/{AvatarNames.PickRandom()}");
         }
+
+        /// <summary>
+        /// Gets a random summary for a drone.
+        /// </summary>
+        /// <param name="this">The content service.</param>
+        /// <returns>The summary.</returns>
+        public static string GetRandomDroneSummary(this ContentService @this)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Gets a random description for a drone.
+        /// </summary>
+        /// <param name="this">The content service.</param>
+        /// <returns>The summary.</returns>
+        public static string GetRandomDroneDescription(this ContentService @this)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

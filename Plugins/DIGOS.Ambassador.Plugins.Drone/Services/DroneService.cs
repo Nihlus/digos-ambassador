@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
+using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Drone.Extensions;
@@ -41,8 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
     public class DroneService
     {
         private readonly Random _random;
-        private readonly UserService _users;
-        private readonly CharacterService _characters;
+        private readonly CharacterDiscordService _characters;
         private readonly ContentService _content;
 
         /// <summary>
@@ -50,13 +50,11 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
         /// </summary>
         /// <param name="characters">The character service.</param>
         /// <param name="random">An entropy source.</param>
-        /// <param name="users">The user service.</param>
         /// <param name="content">The content service.</param>
-        public DroneService(CharacterService characters, Random random, UserService users, ContentService content)
+        public DroneService(CharacterDiscordService characters, Random random, ContentService content)
         {
             _characters = characters;
             _random = random;
-            _users = users;
             _content = content;
         }
 
@@ -67,29 +65,56 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<Character>> DroneUserAsync(IGuildUser guildUser)
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
-            if (!getUser.IsSuccess)
+            var createGeneratedIdentity = await GenerateDroneIdentityAsync(guildUser);
+            if (!createGeneratedIdentity.IsSuccess)
             {
-                return CreateEntityResult<Character>.FromError(getUser);
+                return CreateEntityResult<Character>.FromError(createGeneratedIdentity);
             }
 
-            var user = getUser.Entity;
+            var (name, nickname) = createGeneratedIdentity.Entity;
+            var generatedCharacterResult = await _characters.CreateCharacterAsync
+            (
+                guildUser,
+                name,
+                _content.GetRandomDroneAvatarUri().ToString(),
+                nickname,
+                _content.GetRandomDroneSummary(),
+                _content.GetRandomDroneDescription(),
+                new FemininePronounProvider().Family
+            );
 
-            var generatedIdentity = await GenerateDroneIdentityAsync(user, guildUser);
-            var generatedAppearance = _content.GetRandomDroneAvatarUri();
+            if (!generatedCharacterResult.IsSuccess)
+            {
+                return generatedCharacterResult;
+            }
 
-            throw new NotImplementedException();
+            var character = generatedCharacterResult.Entity;
+            var becomeCharacterResult = await _characters.MakeCharacterCurrentAsync(guildUser, character);
+            if (!becomeCharacterResult.IsSuccess)
+            {
+                return CreateEntityResult<Character>.FromError(becomeCharacterResult);
+            }
+
+            return character;
         }
 
         /// <summary>
         /// Generates a drone name.
         /// </summary>
-        /// <param name="user">The database user.</param>
         /// <param name="guildUser">The Discord user.</param>
         /// <returns>The generated identity.</returns>
-        private async Task<(string Name, string Nickname)> GenerateDroneIdentityAsync(User user, IGuildUser guildUser)
+        private async Task<CreateEntityResult<(string Name, string Nickname)>> GenerateDroneIdentityAsync
+        (
+            IGuildUser guildUser
+        )
         {
-            var characters = _characters.GetUserCharacters(user, guildUser.Guild);
+            var getCharacters = await _characters.GetUserCharactersAsync(guildUser);
+            if (!getCharacters.IsSuccess)
+            {
+                return CreateEntityResult<(string Name, string Nickname)>.FromError(getCharacters);
+            }
+
+            var characters = getCharacters.Entity;
             var characterNames = await characters.Select(c => c.Name).ToListAsync();
 
             string? characterName;
