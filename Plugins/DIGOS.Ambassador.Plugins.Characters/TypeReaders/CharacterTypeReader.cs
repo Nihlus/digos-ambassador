@@ -50,34 +50,25 @@ namespace DIGOS.Ambassador.Plugins.Characters.TypeReaders
             IServiceProvider services
         )
         {
-            var characterService = services.GetRequiredService<CharacterService>();
-            var userService = services.GetRequiredService<UserService>();
+            var characterService = services.GetRequiredService<CharacterDiscordService>();
 
-            var getInvokerResult = await userService.GetOrRegisterUserAsync(context.User);
-            if (!getInvokerResult.IsSuccess)
+            // Special case
+            if (!string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
             {
-                return RetrieveEntityResult<Character>.FromError(getInvokerResult);
+                return await characterService.GetBestMatchingCharacterAsync
+                (
+                    context.Guild,
+                    entityOwner as IGuildUser,
+                    entityName
+                );
             }
 
-            var invoker = getInvokerResult.Entity;
-            if (!entityName.IsNullOrWhitespace() && string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
+            if (!(context.User is IGuildUser invoker))
             {
-                return await characterService.GetCurrentCharacterAsync(context, invoker);
+                return RetrieveEntityResult<Character>.FromError("The current user isn't a guild user.");
             }
 
-            if (entityOwner is null)
-            {
-                return await characterService.GetBestMatchingCharacterAsync(context, null, entityName);
-            }
-
-            var getOwnerResult = await userService.GetOrRegisterUserAsync(entityOwner);
-            if (!getOwnerResult.IsSuccess)
-            {
-                return RetrieveEntityResult<Character>.FromError(getOwnerResult);
-            }
-
-            var owner = getOwnerResult.Entity;
-            return await characterService.GetBestMatchingCharacterAsync(context, owner, entityName);
+            return await characterService.GetCurrentCharacterAsync(invoker);
         }
     }
 }
