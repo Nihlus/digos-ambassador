@@ -25,71 +25,133 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Characters.Model.Data;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using DIGOS.Ambassador.Plugins.Core.Services.Servers;
-using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using Discord;
-using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Results;
-using Image = DIGOS.Ambassador.Plugins.Characters.Model.Data.Image;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Services
 {
     /// <summary>
     /// Acts as an interface for accessing and modifying user characters.
     /// </summary>
-    [PublicAPI]
     public sealed class CharacterService
     {
         private readonly CharactersDatabaseContext _database;
-
-        private readonly ServerService _servers;
-
-        private readonly CommandService _commands;
-
         private readonly OwnedEntityService _ownedEntities;
-
         private readonly ContentService _content;
-
-        private readonly UserService _users;
-
         private readonly PronounService _pronouns;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterService"/> class.
         /// </summary>
-        /// <param name="commands">The application's command service.</param>
         /// <param name="entityService">The application's owned entity service.</param>
         /// <param name="content">The content service.</param>
-        /// <param name="users">The user service.</param>
-        /// <param name="servers">The server service.</param>
         /// <param name="database">The core database.</param>
         /// <param name="pronouns">The pronoun service.</param>
         public CharacterService
         (
-            CommandService commands,
             OwnedEntityService entityService,
             ContentService content,
-            UserService users,
-            ServerService servers,
             CharactersDatabaseContext database,
             PronounService pronouns
         )
         {
-            _commands = commands;
             _ownedEntities = entityService;
             _content = content;
-            _users = users;
-            _servers = servers;
             _database = database;
             _pronouns = pronouns;
+        }
+
+        /// <summary>
+        /// Creates a character with the given parameters.
+        /// </summary>
+        /// <param name="user">The owner of the character..</param>
+        /// <param name="server">The server the owner is on.</param>
+        /// <param name="name">The name of the character.</param>
+        /// <param name="avatarUrl">The character's avatar url.</param>
+        /// <param name="nickname">The nickname that should be applied to the user when the character is active.</param>
+        /// <param name="summary">The summary of the character.</param>
+        /// <param name="description">The full description of the character.</param>
+        /// <param name="pronounFamily">The pronoun family of the character.</param>
+        /// <returns>A creation result which may or may not have been successful.</returns>
+        public async Task<CreateEntityResult<Character>> CreateCharacterAsync
+        (
+            User user,
+            Server server,
+            string name,
+            string? avatarUrl,
+            string? nickname,
+            string? summary,
+            string? description,
+            string? pronounFamily
+        )
+        {
+            avatarUrl ??= _content.GetDefaultAvatarUri().ToString();
+            nickname ??= name;
+            summary ??= "No summary set.";
+            description ??= "No description set.";
+            pronounFamily ??= new TheyPronounProvider().Family;
+
+            // Use dummy values here - we'll set them with the service so we can ensure they're correctly formatted.
+            var character = _database.CreateProxy<Character>
+            (
+                user,
+                server,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty
+            );
+
+            var modifyEntityResult = await SetCharacterNameAsync(character, name);
+            if (!modifyEntityResult.IsSuccess)
+            {
+                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+            }
+
+            modifyEntityResult = await SetCharacterAvatarAsync(character, avatarUrl);
+            if (!modifyEntityResult.IsSuccess)
+            {
+                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+            }
+
+            modifyEntityResult = await SetCharacterNicknameAsync(character, nickname);
+            if (!modifyEntityResult.IsSuccess)
+            {
+                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+            }
+
+            modifyEntityResult = await SetCharacterSummaryAsync(character, summary);
+            if (!modifyEntityResult.IsSuccess)
+            {
+                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+            }
+
+            modifyEntityResult = await SetCharacterDescriptionAsync(character, description);
+            if (!modifyEntityResult.IsSuccess)
+            {
+                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+            }
+
+            modifyEntityResult = await SetCharacterPronounsAsync(character, pronounFamily);
+            if (!modifyEntityResult.IsSuccess)
+            {
+                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+            }
+
+            _database.Characters.Update(character);
+            await _database.SaveChangesAsync();
+
+            return character;
         }
 
         /// <summary>
@@ -110,82 +172,51 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// This method searches for the best matching character given an owner and a name. If no owner is provided, then
         /// the global list is searched for a unique name. If no match can be found, a failed result is returned.
         /// </summary>
-        /// <param name="context">The command context.</param>
-        /// <param name="characterOwner">The owner of the character, if any.</param>
-        /// <param name="characterName">The name of the character.</param>
+        /// <param name="server">The server the user is on.</param>
+        /// <param name="user">The owner of the character, if any.</param>
+        /// <param name="name">The name of the character, if any.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure, ItemNotNull]
         public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
         (
-            ICommandContext context,
-            User? characterOwner,
-            string? characterName
+            Server server,
+            User? user,
+            string? name
         )
         {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(context.User);
-            if (!getInvokerResult.IsSuccess)
+            if (user is null && name is null)
             {
-                return RetrieveEntityResult<Character>.FromError(getInvokerResult);
+                return RetrieveEntityResult<Character>.FromError("No user and no name specified.");
             }
 
-            var invoker = getInvokerResult.Entity;
-
-            if (characterOwner is null && characterName is null)
+            if (user is null)
             {
-                return await GetCurrentCharacterAsync(context, invoker);
+                return await GetCharacterByNameAsync(server, name!);
             }
 
-            if (characterOwner is null)
+            if (name.IsNullOrWhitespace())
             {
-                // Search the invoker's characters first
-                var invokerCharacterResult = await GetUserCharacterByNameAsync
-                (
-                    context,
-                    invoker,
-                    characterName!
-                );
-
-                if (invokerCharacterResult.IsSuccess)
-                {
-                    return invokerCharacterResult;
-                }
-
-                return await GetNamedCharacterAsync(characterName!, context.Guild);
+                return await GetCurrentCharacterAsync(user, server);
             }
 
-            if (characterName.IsNullOrWhitespace())
-            {
-                return await GetCurrentCharacterAsync(context, characterOwner);
-            }
-
-            return await GetUserCharacterByNameAsync(context, characterOwner, characterName);
+            return await GetUserCharacterByNameAsync(user, server, name);
         }
 
         /// <summary>
         /// Gets the current character a user has assumed the form of.
         /// </summary>
-        /// <param name="context">The context of the user.</param>
-        /// <param name="discordUser">The user to get the current character of.</param>
+        /// <param name="user">The user to get the current character of.</param>
+        /// <param name="server">The server the user is on.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, ItemNotNull]
-        public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync
-        (
-            ICommandContext context,
-            User discordUser
-        )
+        [Pure]
+        public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync(User user, Server server)
         {
-            if (!await HasActiveCharacterOnServerAsync(discordUser, context.Guild))
+            if (!await HasCurrentCharacterAsync(user, server))
             {
-                var isCurrentUser = context.Message.Author.Id == (ulong)discordUser.DiscordID;
-                var errorMessage = isCurrentUser
-                    ? "You haven't assumed a character."
-                    : "The user hasn't assumed a character.";
-
-                return RetrieveEntityResult<Character>.FromError(errorMessage);
+                return RetrieveEntityResult<Character>.FromError("The user hasn't assumed a character.");
             }
 
-            var currentCharacter = await GetUserCharacters(discordUser, context.Guild)
-            .FirstOrDefaultAsync
+            var currentCharacter = await GetUserCharacters(user, server).FirstOrDefaultAsync
             (
                 ch => ch.IsCurrent
             );
@@ -201,18 +232,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Gets a character by its given name.
         /// </summary>
-        /// <param name="characterName">The name of the character.</param>
-        /// <param name="guild">The guild that the character is on.</param>
+        /// <param name="server">The server that the character is on.</param>
+        /// <param name="name">The name of the character.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, ItemNotNull]
-        public async Task<RetrieveEntityResult<Character>> GetNamedCharacterAsync
+        [Pure]
+        public async Task<RetrieveEntityResult<Character>> GetCharacterByNameAsync
         (
-            string characterName,
-            IGuild guild
+            Server server,
+            string name
         )
         {
-            var guildCharacters = _database.Characters.AsQueryable().Where(ch => ch.Server.DiscordID == (long)guild.Id);
-            if (await guildCharacters.CountAsync(ch => string.Equals(ch.Name.ToLower(), characterName.ToLower())) > 1)
+            if (await GetCharacters(server).CountAsync(ch => string.Equals(ch.Name.ToLower(), name.ToLower())) > 1)
             {
                 return RetrieveEntityResult<Character>.FromError
                 (
@@ -220,8 +250,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 );
             }
 
-            var character = GetCharacters(guild)
-                .FirstOrDefault(ch => string.Equals(ch.Name.ToLower(), characterName.ToLower()));
+            var character = GetCharacters(server).FirstOrDefault
+            (
+                ch => string.Equals(ch.Name.ToLower(), name.ToLower())
+            );
 
             if (character is null)
             {
@@ -232,37 +264,34 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         }
 
         /// <summary>
-        /// Gets the characters in the database along with their navigation properties.
+        /// Gets the characters on the given server.
         /// </summary>
-        /// <param name="guild">The guild where the characters are.</param>
+        /// <param name="server">The server to scope the search to.</param>
         /// <returns>A queryable set of characters.</returns>
         [Pure, ItemNotNull]
-        public IQueryable<Character> GetCharacters(IGuild guild)
+        public IQueryable<Character> GetCharacters(Server server)
         {
-            return _database.Characters.AsQueryable()
-                .Where(c => c.Server.DiscordID == (long)guild.Id)
-                .Include(c => c.Owner);
+            return _database.Characters.AsQueryable().Where(c => c.Server == server);
         }
 
         /// <summary>
         /// Gets a character belonging to a given user by a given name.
         /// </summary>
-        /// <param name="context">The context of the user.</param>
-        /// <param name="characterOwner">The user to get the character from.</param>
-        /// <param name="characterName">The name of the character.</param>
+        /// <param name="user">The user to get the character from.</param>
+        /// <param name="server">The server that the user is on.</param>
+        /// <param name="name">The name of the character.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public async Task<RetrieveEntityResult<Character>> GetUserCharacterByNameAsync
         (
-            ICommandContext context,
-            User characterOwner,
-            string characterName
+            User user,
+            Server server,
+            string name
         )
         {
-            var character = await GetUserCharacters(characterOwner, context.Guild)
-            .FirstOrDefaultAsync
+            var character = await GetUserCharacters(user, server).FirstOrDefaultAsync
             (
-                ch => string.Equals(ch.Name.ToLower(), characterName.ToLower())
+                ch => string.Equals(ch.Name.ToLower(), name.ToLower())
             );
 
             if (!(character is null))
@@ -270,43 +299,25 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return RetrieveEntityResult<Character>.FromSuccess(character);
             }
 
-            var isCurrentUser = context.Message.Author.Id == (ulong)characterOwner.DiscordID;
-            var errorMessage = isCurrentUser
-                ? "You don't own a character with that name."
-                : "The user doesn't own a character with that name.";
-
-            return RetrieveEntityResult<Character>.FromError(errorMessage);
+            return RetrieveEntityResult<Character>.FromError("The user doesn't own a character with that name.");
         }
 
         /// <summary>
         /// Makes the given character current on the given server.
         /// </summary>
-        /// <param name="context">The context of the user.</param>
-        /// <param name="discordServer">The server to make the character current on.</param>
+        /// <param name="user">The user.</param>
+        /// <param name="server">The server the user is on.</param>
         /// <param name="character">The character to make current.</param>
         /// <returns>A task that must be awaited.</returns>
         [ItemNotNull]
-        public async Task<ModifyEntityResult> MakeCharacterCurrentOnServerAsync
-        (
-            ICommandContext context,
-            IGuild discordServer,
-            Character character
-        )
+        public async Task<ModifyEntityResult> MakeCharacterCurrentAsync(User user, Server server, Character character)
         {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(context.User);
-            if (!getInvokerResult.IsSuccess)
-            {
-                return ModifyEntityResult.FromError(getInvokerResult);
-            }
-
-            var user = getInvokerResult.Entity;
-
             if (character.IsCurrent)
             {
                 return ModifyEntityResult.FromError("The character is already current on the server.");
             }
 
-            await ClearCurrentCharacterOnServerAsync(user, discordServer);
+            await ClearCurrentCharacterAsync(user, server);
 
             character.IsCurrent = true;
 
@@ -318,22 +329,18 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Clears any current characters in the server from the given user.
         /// </summary>
-        /// <param name="discordUser">The user to clear the characters from.</param>
-        /// <param name="discordServer">The server to clear the characters on.</param>
+        /// <param name="user">The user to clear the characters from.</param>
+        /// <param name="server">The server to clear the characters on.</param>
         /// <returns>A task that must be awaited.</returns>
         [ItemNotNull]
-        public async Task<ModifyEntityResult> ClearCurrentCharacterOnServerAsync
-        (
-            User discordUser,
-            IGuild discordServer
-        )
+        public async Task<ModifyEntityResult> ClearCurrentCharacterAsync(User user, Server server)
         {
-            if (!await HasActiveCharacterOnServerAsync(discordUser, discordServer))
+            if (!await HasCurrentCharacterAsync(user, server))
             {
                 return ModifyEntityResult.FromError("There's no current character on this server.");
             }
 
-            var currentCharactersOnServer = GetUserCharacters(discordUser, discordServer).Where(ch => ch.IsCurrent);
+            var currentCharactersOnServer = GetUserCharacters(user, server).Where(ch => ch.IsCurrent);
 
             await currentCharactersOnServer.ForEachAsync
             (
@@ -348,168 +355,67 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Determines whether or not the given user has an active character on the given server.
         /// </summary>
-        /// <param name="discordUser">The user to check.</param>
-        /// <param name="discordServer">The server to check.</param>
+        /// <param name="user">The user to check.</param>
+        /// <param name="server">The server the user is on.</param>
         /// <returns>true if the user has an active character on the server; otherwise, false.</returns>
         [Pure]
-        public async Task<bool> HasActiveCharacterOnServerAsync
+        public async Task<bool> HasCurrentCharacterAsync
         (
-            User discordUser,
-            IGuild discordServer
+            User user,
+            Server server
         )
         {
-            var userCharacters = GetUserCharacters(discordUser, discordServer);
-
-            return await userCharacters
-            .AnyAsync
+            return await GetUserCharacters(user, server).AnyAsync
             (
                 c => c.IsCurrent
             );
         }
 
         /// <summary>
-        /// Creates a character with the given name and default settings.
+        /// Retrieves the given user's default character.
         /// </summary>
-        /// <param name="context">The context of the command.</param>
-        /// <param name="characterName">The name of the character.</param>
-        /// <returns>A creation result which may or may not have been successful.</returns>
-        [ItemNotNull]
-        public async Task<CreateEntityResult<Character>> CreateCharacterAsync
-        (
-            ICommandContext context,
-            string characterName
-        )
+        /// <param name="user">The user.</param>
+        /// <param name="server">The server the user is on.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<Character>> GetDefaultCharacterAsync(User user, Server server)
         {
-            return await CreateCharacterAsync
-            (
-                context,
-                characterName,
-                _content.GetDefaultAvatarUri().ToString(),
-                null,
-                null,
-                null
-            );
-        }
+            var defaultCharacter = await GetUserCharacters(user, server).FirstOrDefaultAsync(c => c.IsDefault);
 
-        /// <summary>
-        /// Creates a character with the given parameters.
-        /// </summary>
-        /// <param name="context">The context of the command.</param>
-        /// <param name="characterName">The name of the character.</param>
-        /// <param name="characterAvatarUrl">The character's avatar url.</param>
-        /// <param name="characterNickname">The nickname that should be applied to the user when the character is active.</param>
-        /// <param name="characterSummary">The summary of the character.</param>
-        /// <param name="characterDescription">The full description of the character.</param>
-        /// <returns>A creation result which may or may not have been successful.</returns>
-        [ItemNotNull]
-        public async Task<CreateEntityResult<Character>> CreateCharacterAsync
-        (
-            ICommandContext context,
-            string characterName,
-            string characterAvatarUrl,
-            string? characterNickname,
-            string? characterSummary,
-            string? characterDescription
-        )
-        {
-            // Default the nickname to the character name
-            characterNickname ??= characterName;
-
-            var getOwnerResult = await _users.GetOrRegisterUserAsync(context.Message.Author);
-            if (!getOwnerResult.IsSuccess)
+            if (defaultCharacter is null)
             {
-                return CreateEntityResult<Character>.FromError(getOwnerResult);
+                return RetrieveEntityResult<Character>.FromError("The user doesn't have a default character.");
             }
 
-            var owner = getOwnerResult.Entity;
-
-            var getServer = await _servers.GetOrRegisterServerAsync(context.Guild);
-            if (!getServer.IsSuccess)
-            {
-                return CreateEntityResult<Character>.FromError(getServer);
-            }
-
-            var server = getServer.Entity;
-
-            // Use a dummy name here, because we'll set it using the service afterwards
-            var character = new Character(server, owner, string.Empty);
-
-            var modifyEntityResult = await SetCharacterNameAsync(context, character, characterName);
-            if (!modifyEntityResult.IsSuccess)
-            {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
-            }
-
-            modifyEntityResult = await SetCharacterAvatarAsync(character, characterAvatarUrl);
-            if (!modifyEntityResult.IsSuccess)
-            {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
-            }
-
-            modifyEntityResult = await SetCharacterNicknameAsync(character, characterNickname);
-            if (!modifyEntityResult.IsSuccess)
-            {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
-            }
-
-            if (!(characterSummary is null))
-            {
-                modifyEntityResult = await SetCharacterSummaryAsync(character, characterSummary);
-                if (!modifyEntityResult.IsSuccess)
-                {
-                    return CreateEntityResult<Character>.FromError(modifyEntityResult);
-                }
-            }
-
-            if (!(characterDescription is null))
-            {
-                modifyEntityResult = await SetCharacterDescriptionAsync(character, characterDescription);
-                if (!modifyEntityResult.IsSuccess)
-                {
-                    return CreateEntityResult<Character>.FromError(modifyEntityResult);
-                }
-            }
-
-            _database.Characters.Update(character);
-            await _database.SaveChangesAsync();
-
-            return CreateEntityResult<Character>.FromSuccess(character);
+            return RetrieveEntityResult<Character>.FromSuccess(defaultCharacter);
         }
 
         /// <summary>
         /// Sets the default character of a user.
         /// </summary>
-        /// <param name="context">The context of the operation.</param>
-        /// <param name="newDefaultCharacter">The new default character.</param>
-        /// <param name="targetUser">The user to set the default character of.</param>
+        /// <param name="user">The user to set the default character of.</param>
+        /// <param name="server">The server the user is on.</param>
+        /// <param name="character">The new default character.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> SetDefaultCharacterForUserAsync
-        (
-            ICommandContext context,
-            Character newDefaultCharacter,
-            User targetUser
-        )
+        public async Task<ModifyEntityResult> SetDefaultCharacterAsync(User user, Server server, Character character)
         {
-            var getDefaultCharacterResult = await GetDefaultCharacterAsync(targetUser, context.Guild);
+            if (character.Owner != user)
+            {
+                return ModifyEntityResult.FromError("The user doesn't own that character.");
+            }
+
+            var getDefaultCharacterResult = await GetDefaultCharacterAsync(user, server);
             if (getDefaultCharacterResult.IsSuccess)
             {
                 var currentDefault = getDefaultCharacterResult.Entity;
-                if (currentDefault == newDefaultCharacter)
+                if (currentDefault == character)
                 {
-                    var isCurrentUser = context.Message.Author.Id == (ulong)newDefaultCharacter.Owner.DiscordID;
-
-                    var errorMessage = isCurrentUser
-                        ? "That's already your default character."
-                        : "That's already the user's default character.";
-
-                    return ModifyEntityResult.FromError(errorMessage);
+                    return ModifyEntityResult.FromError("That's already the user's default character.");
                 }
 
                 currentDefault.IsDefault = false;
             }
 
-            newDefaultCharacter.IsDefault = true;
+            character.IsDefault = true;
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -518,25 +424,15 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Clears the default character from the given user.
         /// </summary>
-        /// <param name="context">The context of the operation.</param>
-        /// <param name="targetUser">The user to clear the default character of.</param>
+        /// <param name="user">The user to clear the default character of.</param>
+        /// <param name="server">The server the user is on.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> ClearDefaultCharacterForUserAsync
-        (
-            ICommandContext context,
-            User targetUser
-        )
+        public async Task<ModifyEntityResult> ClearDefaultCharacterAsync(User user, Server server)
         {
-            var getDefaultCharacterResult = await GetDefaultCharacterAsync(targetUser, context.Guild);
+            var getDefaultCharacterResult = await GetDefaultCharacterAsync(user, server);
             if (!getDefaultCharacterResult.IsSuccess)
             {
-                var isCurrentUser = context.Message.Author.Id == (ulong)targetUser.DiscordID;
-                var errorMessage = isCurrentUser
-                    ? "You don't have a default character."
-                    : "That user doesn't have a default character.";
-
-                return ModifyEntityResult.FromError(errorMessage);
+                return ModifyEntityResult.FromError("That user doesn't have a default character.");
             }
 
             getDefaultCharacterResult.Entity.IsDefault = false;
@@ -548,54 +444,36 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Sets the name of the given character.
         /// </summary>
-        /// <param name="context">The context of the operation.</param>
         /// <param name="character">The character to set the name of.</param>
-        /// <param name="newCharacterName">The new name.</param>
+        /// <param name="name">The new name.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterNameAsync
         (
-            ICommandContext context,
             Character character,
-            string newCharacterName
+            string name
         )
         {
-            if (string.IsNullOrWhiteSpace(newCharacterName))
+            if (string.IsNullOrWhiteSpace(name))
             {
                 return ModifyEntityResult.FromError("You need to provide a name.");
             }
 
-            if (string.Equals(character.Name, newCharacterName, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(character.Name, name, StringComparison.OrdinalIgnoreCase))
             {
                 return ModifyEntityResult.FromError("The character already has that name.");
             }
 
-            if (newCharacterName.Contains("\""))
+            if (name.Contains("\""))
             {
                 return ModifyEntityResult.FromError("The name may not contain double quotes.");
             }
 
-            var isCurrentUser = context.Message.Author.Id == (ulong)character.Owner.DiscordID;
-            if (!await IsCharacterNameUniqueForUserAsync(character.Owner, newCharacterName, context.Guild))
+            if (!await IsNameUniqueForUserAsync(character.Owner, character.Server, name))
             {
-                var errorMessage = isCurrentUser
-                    ? "You already have a character with that name."
-                    : "The user already has a character with that name.";
-
-                return ModifyEntityResult.FromError(errorMessage);
+                return ModifyEntityResult.FromError("The user already has a character with that name.");
             }
 
-            var commandModule = _commands.Modules.FirstOrDefault(m => m.Name == "character");
-            if (!(commandModule is null))
-            {
-                var validNameResult = _ownedEntities.IsEntityNameValid(commandModule.GetAllCommandNames(), newCharacterName);
-                if (!validNameResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(validNameResult);
-                }
-            }
-
-            character.Name = newCharacterName;
+            character.Name = name;
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -605,31 +483,30 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Sets the avatar of the given character.
         /// </summary>
         /// <param name="character">The character to set the avatar of.</param>
-        /// <param name="newCharacterAvatarUrl">The new avatar.</param>
+        /// <param name="avatarUrl">The new avatar.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterAvatarAsync
         (
             Character character,
-            string newCharacterAvatarUrl
+            string avatarUrl
         )
         {
-            if (string.IsNullOrWhiteSpace(newCharacterAvatarUrl))
+            if (string.IsNullOrWhiteSpace(avatarUrl))
             {
                 return ModifyEntityResult.FromError("You need to provide a new avatar url.");
             }
 
-            if (!Uri.TryCreate(newCharacterAvatarUrl, UriKind.Absolute, out _))
+            if (!Uri.TryCreate(avatarUrl, UriKind.Absolute, out _))
             {
                 return ModifyEntityResult.FromError("The given image URL wasn't valid.");
             }
 
-            if (character.AvatarUrl == newCharacterAvatarUrl)
+            if (character.AvatarUrl == avatarUrl)
             {
                 return ModifyEntityResult.FromError("The character's avatar is already set to that URL.");
             }
 
-            character.AvatarUrl = newCharacterAvatarUrl;
+            character.AvatarUrl = avatarUrl;
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -639,31 +516,30 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Sets the nickname of the given character.
         /// </summary>
         /// <param name="character">The character to set the nickname of.</param>
-        /// <param name="newCharacterNickname">The new nickname.</param>
+        /// <param name="nickname">The new nickname.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterNicknameAsync
         (
             Character character,
-            string newCharacterNickname
+            string nickname
         )
         {
-            if (string.IsNullOrWhiteSpace(newCharacterNickname))
+            if (string.IsNullOrWhiteSpace(nickname))
             {
                 return ModifyEntityResult.FromError("You need to provide a new nickname.");
             }
 
-            if (character.Nickname == newCharacterNickname)
+            if (character.Nickname == nickname)
             {
                 return ModifyEntityResult.FromError("The character already has that nickname.");
             }
 
-            if (newCharacterNickname.Length > 32)
+            if (nickname.Length > 32)
             {
                 return ModifyEntityResult.FromError("The nickname is too long. It can be at most 32 characters.");
             }
 
-            character.Nickname = newCharacterNickname;
+            character.Nickname = nickname;
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -673,31 +549,30 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Sets the summary of the given character.
         /// </summary>
         /// <param name="character">The character to set the summary of.</param>
-        /// <param name="newCharacterSummary">The new summary.</param>
+        /// <param name="summary">The new summary.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterSummaryAsync
         (
             Character character,
-            string newCharacterSummary
+            string summary
         )
         {
-            if (string.IsNullOrWhiteSpace(newCharacterSummary))
+            if (string.IsNullOrWhiteSpace(summary))
             {
                 return ModifyEntityResult.FromError("You need to provide a new summary.");
             }
 
-            if (character.Summary == newCharacterSummary)
+            if (character.Summary == summary)
             {
                 return ModifyEntityResult.FromError("That's already the character's summary.");
             }
 
-            if (newCharacterSummary.Length > 240)
+            if (summary.Length > 240)
             {
                 return ModifyEntityResult.FromError("The summary is too long. It can be at most 240 characters.");
             }
 
-            character.Summary = newCharacterSummary;
+            character.Summary = summary;
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -707,30 +582,30 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Sets the description of the given character.
         /// </summary>
         /// <param name="character">The character to set the description of.</param>
-        /// <param name="newCharacterDescription">The new description.</param>
+        /// <param name="description">The new description.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterDescriptionAsync
         (
             Character character,
-            string newCharacterDescription
+            string description
         )
         {
-            if (string.IsNullOrWhiteSpace(newCharacterDescription))
+            if (string.IsNullOrWhiteSpace(description))
             {
                 return ModifyEntityResult.FromError("You need to provide a new description.");
             }
 
-            if (character.Description == newCharacterDescription)
+            if (character.Description == description)
             {
                 return ModifyEntityResult.FromError("The character already has that description.");
             }
 
-            if (newCharacterDescription.Length > 1000)
+            if (description.Length > 1000)
             {
                 return ModifyEntityResult.FromError("The description is too long. It can be at most 1000 characters.");
             }
-            character.Description = newCharacterDescription;
+            character.Description = description;
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
@@ -742,8 +617,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character.</param>
         /// <param name="pronounFamily">The pronoun family.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> SetCharacterPronounAsync
+        public async Task<ModifyEntityResult> SetCharacterPronounsAsync
         (
             Character character,
             string pronounFamily
@@ -778,7 +652,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character to edit.</param>
         /// <param name="isNSFW">Whether or not the character is NSFW.</param>
         /// <returns>A task that must be awaited.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterIsNSFWAsync
         (
             Character character,
@@ -804,18 +677,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Transfers ownership of the named character to the specified user.
         /// </summary>
         /// <param name="newOwner">The new owner.</param>
+        /// <param name="server">The server to scope the character search to.</param>
         /// <param name="character">The character to transfer.</param>
-        /// <param name="guild">The guild to scope the character search to.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> TransferCharacterOwnershipAsync
         (
             User newOwner,
-            Character character,
-            IGuild guild
+            Server server,
+            Character character
         )
         {
-            var newOwnerCharacters = GetUserCharacters(newOwner, guild);
+            var newOwnerCharacters = GetUserCharacters(newOwner, server);
             return await _ownedEntities.TransferEntityOwnershipAsync
             (
                 _database,
@@ -828,36 +700,36 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Get the characters owned by the given user.
         /// </summary>
-        /// <param name="discordUser">The user to get the characters of.</param>
-        /// <param name="guild">The guild to get the user's characters on.</param>
+        /// <param name="user">The user to get the characters of.</param>
+        /// <param name="server">The server to scope the search to.</param>
         /// <returns>A queryable list of characters belonging to the user.</returns>
         [Pure, ItemNotNull]
         public IQueryable<Character> GetUserCharacters
         (
-            User discordUser,
-            IGuild guild
+            User user,
+            Server server
         )
         {
-            var characters = GetCharacters(guild).Where(ch => ch.Owner.DiscordID == discordUser.DiscordID);
+            var characters = GetCharacters(server).Where(ch => ch.Owner.DiscordID == user.DiscordID);
             return characters;
         }
 
         /// <summary>
         /// Determines whether or not the given character name is unique for a given user.
         /// </summary>
-        /// <param name="discordUser">The user to check.</param>
+        /// <param name="user">The user to check.</param>
+        /// <param name="server">The server to scope the character search to.</param>
         /// <param name="characterName">The character name to check.</param>
-        /// <param name="guild">The guild to scope the character search to.</param>
         /// <returns>true if the name is unique; otherwise, false.</returns>
         [Pure]
-        public async Task<bool> IsCharacterNameUniqueForUserAsync
+        public async Task<bool> IsNameUniqueForUserAsync
         (
-            User discordUser,
-            string characterName,
-            IGuild guild
+            User user,
+            Server server,
+            string characterName
         )
         {
-            var userCharacters = GetUserCharacters(discordUser, guild);
+            var userCharacters = GetUserCharacters(user, server);
             return await _ownedEntities.IsEntityNameUniqueForUserAsync(userCharacters, characterName);
         }
 
@@ -870,8 +742,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="imageCaption">The caption of the image.</param>
         /// <param name="isNSFW">Whether or not the image is NSFW.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> AddImageToCharacterAsync
+        public async Task<CreateEntityResult<Image>> AddImageToCharacterAsync
         (
             Character character,
             string imageName,
@@ -883,12 +754,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var isImageNameUnique = !character.Images.Any(i => string.Equals(i.Name.ToLower(), imageName.ToLower()));
             if (!isImageNameUnique)
             {
-                return ModifyEntityResult.FromError("The character already has an image with that name.");
+                return CreateEntityResult<Image>.FromError("The character already has an image with that name.");
             }
 
             if (imageName.IsNullOrWhitespace())
             {
-                return ModifyEntityResult.FromError("You need to specify a name.");
+                return CreateEntityResult<Image>.FromError("You need to specify a name.");
             }
 
             if (imageCaption.IsNullOrWhitespace())
@@ -898,265 +769,38 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (!Uri.IsWellFormedUriString(imageUrl, UriKind.RelativeOrAbsolute))
             {
-                return ModifyEntityResult.FromError
+                return CreateEntityResult<Image>.FromError
                 (
                     $"That URL doesn't look valid. Please check \"{imageUrl}\" for errors."
                 );
             }
 
-            var image = new Image(imageName, imageUrl, imageCaption)
-            {
-                IsNSFW = isNSFW
-            };
+            var image = _database.CreateProxy<Image>(imageName, imageUrl, imageCaption);
+            image.IsNSFW = isNSFW;
 
             character.Images.Add(image);
             await _database.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess();
+            return image;
         }
 
         /// <summary>
         /// Removes the named image from the given character.
         /// </summary>
         /// <param name="character">The character to remove the image from.</param>
-        /// <param name="imageName">The name of the image.</param>
+        /// <param name="image">The image.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> RemoveImageFromCharacterAsync
-        (
-            Character character,
-            string imageName
-        )
+        public async Task<DeleteEntityResult> RemoveImageFromCharacterAsync(Character character, Image image)
         {
-            var hasNamedImage = character.Images.Any(i => string.Equals(i.Name.ToLower(), imageName.ToLower()));
-            if (!hasNamedImage)
+            if (!character.Images.Contains(image))
             {
-                return ModifyEntityResult.FromError("The character has no image with that name.");
+                return DeleteEntityResult.FromError("The character has no image with that name.");
             }
 
-            var deletedImages = character.Images
-                .Where(i => string.Equals(i.Name.ToLower(), imageName.ToLower()))
-                .ToList();
-
-            character.Images = character.Images.Except(deletedImages).ToList();
-            foreach (var deletedImage in deletedImages)
-            {
-                _database.Remove(deletedImage);
-            }
-
-            await _database.SaveChangesAsync();
-
-            return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <summary>
-        /// Creates a new character role from the given Discord role and access condition.
-        /// </summary>
-        /// <param name="role">The discord role.</param>
-        /// <param name="access">The access conditions.</param>
-        /// <returns>A creation result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<CreateEntityResult<CharacterRole>> CreateCharacterRoleAsync
-        (
-            IRole role,
-            RoleAccess access
-        )
-        {
-            var getExistingRoleResult = await GetCharacterRoleAsync(role);
-            if (getExistingRoleResult.IsSuccess)
-            {
-                return CreateEntityResult<CharacterRole>.FromError
-                (
-                    "That role is already registered as a character role."
-                );
-            }
-
-            var getServerResult = await _servers.GetOrRegisterServerAsync(role.Guild);
-            if (!getServerResult.IsSuccess)
-            {
-                return CreateEntityResult<CharacterRole>.FromError(getServerResult);
-            }
-
-            var server = getServerResult.Entity;
-
-            var characterRole = new CharacterRole(server, (long)role.Id, access);
-
-            _database.CharacterRoles.Update(characterRole);
-            await _database.SaveChangesAsync();
-
-            return CreateEntityResult<CharacterRole>.FromSuccess(characterRole);
-        }
-
-        /// <summary>
-        /// Deletes the character role for the given Discord role.
-        /// </summary>
-        /// <param name="role">The character role.</param>
-        /// <returns>A deletion result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<DeleteEntityResult> DeleteCharacterRoleAsync
-        (
-            CharacterRole role
-        )
-        {
-            _database.CharacterRoles.Remove(role);
+            character.Images.Remove(image);
             await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
-        }
-
-        /// <summary>
-        /// Gets an existing character role from the database.
-        /// </summary>
-        /// <param name="role">The discord role.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<RetrieveEntityResult<CharacterRole>> GetCharacterRoleAsync
-        (
-            IRole role
-        )
-        {
-            var characterRole = await _database.CharacterRoles.AsQueryable()
-                .FirstOrDefaultAsync(r => r.Server.DiscordID == (long)role.Guild.Id && r.DiscordID == (long)role.Id);
-
-            if (characterRole is null)
-            {
-                return RetrieveEntityResult<CharacterRole>.FromError
-                (
-                    "That role is not registered as a character role."
-                );
-            }
-
-            return RetrieveEntityResult<CharacterRole>.FromSuccess(characterRole);
-        }
-
-        /// <summary>
-        /// Gets the roles available on the given server.
-        /// </summary>
-        /// <param name="guild">The Discord guild.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<RetrieveEntityResult<IQueryable<CharacterRole>>> GetCharacterRolesAsync
-        (
-            IGuild guild
-        )
-        {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(guild);
-            if (!getServerResult.IsSuccess)
-            {
-                return RetrieveEntityResult<IQueryable<CharacterRole>>.FromError(getServerResult);
-            }
-
-            var server = getServerResult.Entity;
-
-            var roles = _database.CharacterRoles.AsQueryable().Where(r => r.Server == server);
-
-            return RetrieveEntityResult<IQueryable<CharacterRole>>.FromSuccess(roles);
-        }
-
-        /// <summary>
-        /// Sets the access conditions for the given character role.
-        /// </summary>
-        /// <param name="role">The character role.</param>
-        /// <param name="access">The access conditions.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> SetCharacterRoleAccessAsync
-        (
-            CharacterRole role,
-            RoleAccess access
-        )
-        {
-            if (role.Access == access)
-            {
-                return ModifyEntityResult.FromError
-                (
-                    "The role already has those access conditions."
-                );
-            }
-
-            role.Access = access;
-            await _database.SaveChangesAsync();
-
-            return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <summary>
-        /// Sets the custom role of a character.
-        /// </summary>
-        /// <param name="character">The character.</param>
-        /// <param name="characterRole">The role to set.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> SetCharacterRoleAsync
-        (
-            Character character,
-            CharacterRole characterRole
-        )
-        {
-            if (character.Role == characterRole)
-            {
-                return ModifyEntityResult.FromError
-                (
-                    "The character already has that role."
-                );
-            }
-
-            character.Role = characterRole;
-
-            await _database.SaveChangesAsync();
-
-            return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <summary>
-        /// Clears the custom role of a character.
-        /// </summary>
-        /// <param name="character">The character.</param>
-        /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<ModifyEntityResult> ClearCharacterRoleAsync
-        (
-            Character character
-        )
-        {
-            if (character.Role is null)
-            {
-                return ModifyEntityResult.FromError
-                (
-                    "The character doesn't have a role set."
-                );
-            }
-
-            character.Role = null;
-
-            await _database.SaveChangesAsync();
-
-            return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <summary>
-        /// Retrieves the given user's default character.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        /// <param name="guild">The server the user is on.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [ItemNotNull]
-        public async Task<RetrieveEntityResult<Character>> GetDefaultCharacterAsync
-        (
-            User user,
-            IGuild guild
-        )
-        {
-            var userCharacters = GetUserCharacters(user, guild);
-            var defaultCharacter = await userCharacters
-                .FirstOrDefaultAsync(c => c.IsDefault);
-
-            if (defaultCharacter is null)
-            {
-                return RetrieveEntityResult<Character>.FromError("The user doesn't have a default character.");
-            }
-
-            return RetrieveEntityResult<Character>.FromSuccess(defaultCharacter);
         }
     }
 }

@@ -140,14 +140,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         [SuppressMessage("ReSharper", "VirtualMemberCallInConstructor", Justification = "Required by EF Core.")]
         public Character
         (
-            Server server,
             User owner,
+            Server server,
             string name,
-            string avatarUrl = "https://www.example.com/avatar.png",
-            string? nickname = null,
-            string summary = "No summary set.",
-            string description = "No description set.",
-            string pronounProviderFamily = "They"
+            string avatarUrl,
+            string nickname,
+            string summary,
+            string description,
+            string pronounProviderFamily
         )
         {
             this.Server = server;
@@ -157,7 +157,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
             this.Summary = summary;
             this.Description = description;
             this.PronounProviderFamily = pronounProviderFamily;
-            this.Nickname = nickname ?? name;
+            this.Nickname = nickname;
         }
 
         /// <inheritdoc />
