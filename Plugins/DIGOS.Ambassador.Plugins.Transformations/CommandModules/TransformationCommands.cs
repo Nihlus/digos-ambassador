@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
         private readonly ContentService _content;
 
-        private readonly CharacterService _characters;
+        private readonly CharacterDiscordService _characters;
 
         private readonly TransformationService _transformation;
 
@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         public TransformationCommands
         (
             UserFeedbackService feedback,
-            CharacterService characters,
+            CharacterDiscordService characters,
             TransformationService transformation,
             InteractivityService interactivity,
             UserService users,
@@ -105,6 +105,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Priority(int.MinValue)]
         [Command]
         [Summary("Transforms the given bodypart into the given species on yourself.")]
+        [RequireContext(Guild)]
         public async Task ShiftAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
@@ -113,7 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Bodypart bodyPart,
             string species
         )
-        => await ShiftAsync(this.Context.User, chirality, bodyPart, species);
+        => await ShiftAsync((IGuildUser)this.Context.User, chirality, bodyPart, species);
 
         /// <summary>
         /// Transforms the given bodypart into the given species on yourself.
@@ -124,13 +125,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Priority(int.MinValue)]
         [Command]
         [Summary("Transforms the given bodypart into the given species on yourself.")]
+        [RequireContext(Guild)]
         public async Task ShiftAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
             string species
         )
-        => await ShiftAsync(this.Context.User, Chirality.Center, bodyPart, species);
+        => await ShiftAsync((IGuildUser)this.Context.User, Chirality.Center, bodyPart, species);
 
         /// <summary>
         /// Transforms the given bodypart into the given species on the target user.
@@ -145,7 +147,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftAsync
         (
-            IUser target,
+            IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
             string species
@@ -166,7 +168,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftAsync
         (
-            IUser target,
+            IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
@@ -174,16 +176,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             string species
         )
         {
-            var getTargetUserResult = await _users.GetOrRegisterUserAsync(target);
-            if (!getTargetUserResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getTargetUserResult.ErrorReason);
-                return;
-            }
-
-            var targetUser = getTargetUserResult.Entity;
-
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, targetUser);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -220,6 +213,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("colour")]
         [Summary("Transforms the base colour of the given bodypart on yourself into the given colour.")]
+        [RequireContext(Guild)]
         public async Task ShiftColourAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
@@ -228,7 +222,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Bodypart bodypart,
             Colour colour
         )
-        => await ShiftColourAsync(this.Context.User, chirality, bodypart, colour);
+        => await ShiftColourAsync((IGuildUser)this.Context.User, chirality, bodypart, colour);
 
         /// <summary>
         /// Transforms the base colour of the given bodypart on yourself into the given colour.
@@ -238,13 +232,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("colour")]
         [Summary("Transforms the base colour of the given bodypart on yourself into the given colour.")]
+        [RequireContext(Guild)]
         public async Task ShiftColourAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodypart,
             Colour colour
         )
-        => await ShiftColourAsync(this.Context.User, Chirality.Center, bodypart, colour);
+        => await ShiftColourAsync((IGuildUser)this.Context.User, Chirality.Center, bodypart, colour);
 
         /// <summary>
         /// Transforms the base colour of the given bodypart on the target user into the given colour.
@@ -258,7 +253,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftColourAsync
         (
-            IUser target,
+            IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
             Colour colour
@@ -278,7 +273,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftColourAsync
         (
-            IUser target,
+            IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
@@ -286,16 +281,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Colour colour
         )
         {
-            var getTargetUserResult = await _users.GetOrRegisterUserAsync(target);
-            if (!getTargetUserResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getTargetUserResult.ErrorReason);
-                return;
-            }
-
-            var targetUser = getTargetUserResult.Entity;
-
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, targetUser);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -331,6 +317,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("pattern")]
         [Summary("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
+        [RequireContext(Guild)]
         public async Task ShiftPatternAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
@@ -339,7 +326,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Pattern pattern,
             Colour colour
         )
-        => await ShiftPatternAsync(this.Context.User, Chirality.Center, bodypart, pattern, colour);
+        => await ShiftPatternAsync((IGuildUser)this.Context.User, Chirality.Center, bodypart, pattern, colour);
 
         /// <summary>
         /// Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.
@@ -351,6 +338,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("pattern")]
         [Summary("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
+        [RequireContext(Guild)]
         public async Task ShiftPatternAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
@@ -361,7 +349,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Pattern pattern,
             Colour colour
         )
-        => await ShiftPatternAsync(this.Context.User, chirality, bodypart, pattern, colour);
+        => await ShiftPatternAsync((IGuildUser)this.Context.User, chirality, bodypart, pattern, colour);
 
         /// <summary>
         /// Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.
@@ -376,7 +364,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftPatternAsync
         (
-            IUser target,
+            IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Pattern>))]
@@ -399,7 +387,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftPatternAsync
         (
-            IUser target,
+            IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
@@ -409,16 +397,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Colour colour
         )
         {
-            var getTargetUserResult = await _users.GetOrRegisterUserAsync(target);
-            if (!getTargetUserResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getTargetUserResult.ErrorReason);
-                return;
-            }
-
-            var targetUser = getTargetUserResult.Entity;
-
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, targetUser);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -455,6 +434,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("pattern-colour")]
         [Summary("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
+        [RequireContext(Guild)]
         public async Task ShiftPatternColourAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
@@ -463,7 +443,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Bodypart bodypart,
             Colour colour
         )
-        => await ShiftPatternColourAsync(this.Context.User, chirality, bodypart, colour);
+        => await ShiftPatternColourAsync((IGuildUser)this.Context.User, chirality, bodypart, colour);
 
         /// <summary>
         /// Transforms the colour of the pattern on the given bodypart to the given colour.
@@ -473,13 +453,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("pattern-colour")]
         [Summary("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
+        [RequireContext(Guild)]
         public async Task ShiftPatternColourAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodypart,
             Colour colour
         )
-            => await ShiftPatternColourAsync(this.Context.User, Chirality.Center, bodypart, colour);
+            => await ShiftPatternColourAsync((IGuildUser)this.Context.User, Chirality.Center, bodypart, colour);
 
         /// <summary>
         /// Transforms the colour of the pattern on the given bodypart on the target user to the given colour.
@@ -493,7 +474,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftPatternColourAsync
         (
-            IUser target,
+            IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
             Colour colour
@@ -513,7 +494,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [RequireContext(Guild)]
         public async Task ShiftPatternColourAsync
         (
-            IUser target,
+            IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
@@ -521,16 +502,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             Colour colour
         )
         {
-            var getTargetUserResult = await _users.GetOrRegisterUserAsync(target);
-            if (!getTargetUserResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getTargetUserResult.ErrorReason);
-                return;
-            }
-
-            var targetUser = getTargetUserResult.Entity;
-
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, targetUser);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -784,18 +756,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("describe")]
         [Summary("Describes the current physical appearance of the current character.")]
+        [RequireContext(Guild)]
         public async Task DescribeCharacterAsync()
         {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Context.User);
-            if (!getInvokerResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
-                return;
-            }
-
-            var invoker = getInvokerResult.Entity;
-
-            var result = await _characters.GetCurrentCharacterAsync(this.Context, invoker);
+            var result = await _characters.GetCurrentCharacterAsync((IGuildUser)this.Context.User);
             if (!result.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
@@ -812,6 +776,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("describe")]
         [Summary("Describes the current physical appearance of a character.")]
+        [RequireContext(Guild)]
         public async Task DescribeCharacterAsync(Character character)
         {
             var generateDescriptionAsync = await _transformation.GenerateCharacterDescriptionAsync
@@ -861,18 +826,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Alias("reset")]
         [Command("reset")]
         [Summary("Resets your form to your default one.")]
+        [RequireContext(Guild)]
         public async Task ResetFormAsync()
         {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Context.User);
-            if (!getInvokerResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
-                return;
-            }
-
-            var invoker = getInvokerResult.Entity;
-
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, invoker);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync((IGuildUser)this.Context.User);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
@@ -897,18 +854,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Alias("set-default", "save-default")]
         [Command("set-default")]
         [Summary("Sets your current appearance as your current character's default one.")]
+        [RequireContext(Guild)]
         public async Task SetCurrentAppearanceAsDefaultAsync()
         {
-            var getInvokerResult = await _users.GetOrRegisterUserAsync(this.Context.User);
-            if (!getInvokerResult.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getInvokerResult.ErrorReason);
-                return;
-            }
-
-            var invoker = getInvokerResult.Entity;
-
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(this.Context, invoker);
+            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync((IGuildUser)this.Context.User);
             if (!getCurrentCharacterResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
