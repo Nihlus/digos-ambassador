@@ -7,7 +7,7 @@
 
     <ItemGroup>
         <PackageReference Include="morelinq" Version="3.3.2" />
-        <PackageReference Include="Remora.Results" Version="1.0.5" />
+        <PackageReference Include="Remora.Results" Version="1.1.0" />
         <PackageReference Include="Zio" Version="0.8.0" />
     </ItemGroup>
 
