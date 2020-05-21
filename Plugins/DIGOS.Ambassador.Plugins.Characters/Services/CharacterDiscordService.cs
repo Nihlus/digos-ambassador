@@ -111,11 +111,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         (
             IGuildUser guildUser,
             string name,
-            string? avatarUrl,
-            string? nickname,
-            string? summary,
-            string? description,
-            string? pronounFamily
+            string? avatarUrl = null,
+            string? nickname = null,
+            string? summary = null,
+            string? description = null,
+            string? pronounFamily = null
         )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
@@ -179,7 +179,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="guildUser">The user.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IQueryable<Character>>> GetUserCharacters(IGuildUser guildUser)
+        public async Task<RetrieveEntityResult<IQueryable<Character>>> GetUserCharactersAsync(IGuildUser guildUser)
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
