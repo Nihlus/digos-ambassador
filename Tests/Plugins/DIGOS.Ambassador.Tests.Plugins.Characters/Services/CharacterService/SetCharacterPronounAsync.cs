@@ -24,10 +24,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
-using DIGOS.Ambassador.Plugins.Core.Model.Servers;
-using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

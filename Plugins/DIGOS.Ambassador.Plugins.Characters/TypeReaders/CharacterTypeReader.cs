@@ -22,10 +22,8 @@
 
 using System;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
-using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Core.TypeReaders;
 using Discord;
 using Discord.Commands;
