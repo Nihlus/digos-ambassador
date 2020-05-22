@@ -67,10 +67,20 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 
             foreach (var guild in this.Client.Guilds)
             {
+                if (ct.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 // Using .HasValue instead of .IsTemporary here to allow server-side evaluation
                 var warnings = await warningService.GetWarnings(guild).Where(w => w.ExpiresOn.HasValue).ToListAsync(ct);
                 foreach (var warning in warnings)
                 {
+                    if (ct.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
                     if (!(warning.ExpiresOn <= now))
                     {
                         continue;
@@ -92,6 +102,11 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var bans = await banService.GetBans(guild).Where(b => b.ExpiresOn.HasValue).ToListAsync(ct);
                 foreach (var ban in bans)
                 {
+                    if (ct.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
                     if (!(ban.ExpiresOn <= now))
                     {
                         continue;

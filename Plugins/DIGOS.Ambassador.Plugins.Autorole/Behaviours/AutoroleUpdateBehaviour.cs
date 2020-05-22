@@ -76,6 +76,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             foreach (var guild in this.Client.Guilds)
             {
+                if (ct.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 var botUser = guild.GetUser(this.Client.CurrentUser.Id);
                 if (botUser is null)
                 {
@@ -103,8 +108,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
                 foreach (var autorole in guildAutoroles)
                 {
+                    if (ct.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
                     foreach (var user in guild.Users)
                     {
+                        if (ct.IsCancellationRequested)
+                        {
+                            return;
+                        }
+
                         if (user.IsBot || user.IsWebhook)
                         {
                             // Skip bots and webhooks

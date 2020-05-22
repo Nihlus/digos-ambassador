@@ -79,6 +79,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
             foreach (var guild in this.Client.Guilds)
             {
+                if (ct.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 var getGuildRoleplays = await roleplayService.GetRoleplaysAsync(guild);
                 if (!getGuildRoleplays.IsSuccess)
                 {
@@ -95,6 +100,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
                 foreach (var roleplay in roleplays)
                 {
+                    if (ct.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
                     await ArchiveRoleplayAsync
                     (
                         guild,
