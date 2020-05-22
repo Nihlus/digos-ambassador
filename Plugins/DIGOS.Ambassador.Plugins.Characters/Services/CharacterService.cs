@@ -327,7 +327,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         }
 
         /// <summary>
-        /// Clears any current characters in the server from the given user.
+        /// Clears any current characters in the server from the given user, returning them to their default form.
         /// </summary>
         /// <param name="user">The user to clear the characters from.</param>
         /// <param name="server">The server to clear the characters on.</param>
@@ -335,17 +335,27 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         [ItemNotNull]
         public async Task<ModifyEntityResult> ClearCurrentCharacterAsync(User user, Server server)
         {
-            if (!await HasCurrentCharacterAsync(user, server))
+            var getCurrentCharacter = await GetCurrentCharacterAsync(user, server);
+            if (!getCurrentCharacter.IsSuccess)
             {
-                return ModifyEntityResult.FromError("There's no current character on this server.");
+                return ModifyEntityResult.FromError(getCurrentCharacter);
             }
 
-            var currentCharactersOnServer = GetUserCharacters(user, server).Where(ch => ch.IsCurrent);
+            var currentCharacter = getCurrentCharacter.Entity;
 
-            await currentCharactersOnServer.ForEachAsync
-            (
-                ch => ch.IsCurrent = false
-            );
+            var getDefaultCharacter = await GetDefaultCharacterAsync(user, server);
+            if (getDefaultCharacter.IsSuccess)
+            {
+                var defaultCharacter = getDefaultCharacter.Entity;
+                if (currentCharacter == defaultCharacter)
+                {
+                    return ModifyEntityResult.FromError("The user is already their default form.");
+                }
+
+                defaultCharacter.IsCurrent = true;
+            }
+
+            currentCharacter.IsCurrent = false;
 
             await _database.SaveChangesAsync();
 

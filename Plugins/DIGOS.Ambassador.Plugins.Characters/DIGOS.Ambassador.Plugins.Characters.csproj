@@ -28,4 +28,13 @@
       <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Permissions\DIGOS.Ambassador.Plugins.Permissions.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="CommandModules\CharacterCommands.RoleCommands.cs">
+        <DependentUpon>CharacterCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\CharacterCommands.SetCommands.cs">
+        <DependentUpon>CharacterCommands.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
 </Project>

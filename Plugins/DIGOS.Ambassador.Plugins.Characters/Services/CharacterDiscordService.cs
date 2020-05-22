@@ -22,6 +22,8 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
@@ -29,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Remora.Results;
 
 using Image = DIGOS.Ambassador.Plugins.Characters.Model.Data.Image;
@@ -41,10 +44,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
     public class CharacterDiscordService
     {
         private readonly CharacterService _characters;
+        private readonly CharacterRoleService _characterRoles;
         private readonly CommandService _commands;
         private readonly OwnedEntityService _ownedEntities;
         private readonly UserService _users;
         private readonly ServerService _servers;
+        private readonly DiscordService _discord;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterDiscordService"/> class.
@@ -54,13 +59,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="servers">The server service.</param>
         /// <param name="commands">The command service.</param>
         /// <param name="ownedEntities">The owned entity service.</param>
+        /// <param name="discord">The Discord service.</param>
+        /// <param name="characterRoles">The character role service.</param>
         public CharacterDiscordService
         (
             CharacterService characters,
             UserService users,
             ServerService servers,
             CommandService commands,
-            OwnedEntityService ownedEntities
+            OwnedEntityService ownedEntities,
+            DiscordService discord,
+            CharacterRoleService characterRoles
         )
         {
             _characters = characters;
@@ -68,6 +77,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             _servers = servers;
             _commands = commands;
             _ownedEntities = ownedEntities;
+            _discord = discord;
+            _characterRoles = characterRoles;
         }
 
         /// <summary>
@@ -149,11 +160,44 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Deletes the given character.
         /// </summary>
+        /// <param name="guildUser">The user that owns the character.</param>
         /// <param name="character">The character to delete.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteCharacterAsync(Character character)
+        public async Task<DeleteEntityResult> DeleteCharacterAsync(IGuildUser guildUser, Character character)
         {
-            return await _characters.DeleteCharacterAsync(character);
+            var getCurrentCharacter = await _characters.GetCurrentCharacterAsync(character.Owner, character.Server);
+
+            var deleteCharacter = await _characters.DeleteCharacterAsync(character);
+            if (!deleteCharacter.IsSuccess)
+            {
+                return deleteCharacter;
+            }
+
+            if (!getCurrentCharacter.IsSuccess)
+            {
+                return DeleteEntityResult.FromSuccess();
+            }
+
+            var currentCharacter = getCurrentCharacter.Entity;
+            if (currentCharacter != character)
+            {
+                return DeleteEntityResult.FromSuccess();
+            }
+
+            // Update the user's nickname
+            var updateNickname = await UpdateUserNickname(guildUser);
+            if (!updateNickname.IsSuccess)
+            {
+                return DeleteEntityResult.FromError(updateNickname);
+            }
+
+            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, getCurrentCharacter.Entity);
+            if (!updateRoles.IsSuccess)
+            {
+                return DeleteEntityResult.FromError(updateRoles);
+            }
+
+            return DeleteEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -270,6 +314,40 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         }
 
         /// <summary>
+        /// Gets a random character from the user's characters.
+        /// </summary>
+        /// <param name="guildUser">The user.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<Character>> GetRandomUserCharacterAsync(IGuildUser guildUser)
+        {
+            var getUserCharacters = await GetUserCharactersAsync(guildUser);
+            if (!getUserCharacters.IsSuccess)
+            {
+                return RetrieveEntityResult<Character>.FromError(getUserCharacters);
+            }
+
+            var userCharacters = await getUserCharacters.Entity.ToListAsync();
+            if (userCharacters.Count == 0)
+            {
+                return RetrieveEntityResult<Character>.FromError("The user doesn't have any characters.");
+            }
+
+            if (userCharacters.Count == 1)
+            {
+                return RetrieveEntityResult<Character>.FromError("The user only has one character.");
+            }
+
+            var getCurrentCharacter = await GetCurrentCharacterAsync(guildUser);
+            if (!getCurrentCharacter.IsSuccess)
+            {
+                return userCharacters.PickRandom();
+            }
+
+            var currentCharacter = getCurrentCharacter.Entity;
+            return userCharacters.Except(new[] { currentCharacter }).ToList().PickRandom();
+        }
+
+        /// <summary>
         /// Gets the best matching character for the given owner and name combination. If no owner is provided, then the
         /// global list is searched for a unique name. If no name is provided, then the user's current character is
         /// used. If neither are set, no character will ever be returned.
@@ -344,12 +422,36 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Sets the nickname of the given character.
         /// </summary>
+        /// <param name="guildUser">The owner of the character.</param>
         /// <param name="character">The character.</param>
         /// <param name="nickname">The new nickname.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterNicknameAsync(Character character, string nickname)
+        public async Task<ModifyEntityResult> SetCharacterNicknameAsync
+        (
+            IGuildUser guildUser,
+            Character character,
+            string nickname
+        )
         {
-            return await _characters.SetCharacterNicknameAsync(character, nickname);
+            var setNickname = await _characters.SetCharacterNicknameAsync(character, nickname);
+            if (!setNickname.IsSuccess)
+            {
+                return setNickname;
+            }
+
+            var getCurrentCharacter = await GetCurrentCharacterAsync(guildUser);
+            if (!getCurrentCharacter.IsSuccess)
+            {
+                return ModifyEntityResult.FromSuccess();
+            }
+
+            var currentCharacter = getCurrentCharacter.Entity;
+            if (currentCharacter != character)
+            {
+                return ModifyEntityResult.FromSuccess();
+            }
+
+            return await UpdateUserNickname(guildUser);
         }
 
         /// <summary>
@@ -410,8 +512,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             Character character,
             string imageName,
             string imageUrl,
-            string imageCaption,
-            bool isNSFW
+            string? imageCaption = null,
+            bool isNSFW = false
         )
         {
             return await _characters.AddImageToCharacterAsync(character, imageName, imageUrl, imageCaption, isNSFW);
@@ -451,7 +553,28 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return await _characters.MakeCharacterCurrentAsync(user, server, character);
+            var getOriginalCharacter = await _characters.GetCurrentCharacterAsync(user, server);
+
+            var makeCurrent = await _characters.MakeCharacterCurrentAsync(user, server, character);
+            if (!makeCurrent.IsSuccess)
+            {
+                return makeCurrent;
+            }
+
+            // Update the user's nickname
+            var updateNickname = await UpdateUserNickname(guildUser);
+            if (!updateNickname.IsSuccess)
+            {
+                return updateNickname;
+            }
+
+            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, getOriginalCharacter.Entity);
+            if (!updateRoles.IsSuccess)
+            {
+                return updateRoles;
+            }
+
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>
@@ -476,7 +599,73 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return await _characters.ClearCurrentCharacterAsync(user, server);
+            var getOriginalCharacter = await _characters.GetCurrentCharacterAsync(user, server);
+
+            var clearResult = await _characters.ClearCurrentCharacterAsync(user, server);
+            if (!clearResult.IsSuccess)
+            {
+                return clearResult;
+            }
+
+            // Update the user's nickname
+            var updateNickname = await UpdateUserNickname(guildUser);
+            if (!updateNickname.IsSuccess)
+            {
+                return updateNickname;
+            }
+
+            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, getOriginalCharacter.Entity);
+            if (!updateRoles.IsSuccess)
+            {
+                return updateRoles;
+            }
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Updates the user's current nickname based on their character.
+        /// </summary>
+        /// <param name="guildUser">The user.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        private async Task<ModifyEntityResult> UpdateUserNickname(IGuildUser guildUser)
+        {
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            if (!getUser.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getUser);
+            }
+
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            if (!getServer.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getServer);
+            }
+
+            var user = getUser.Entity;
+            var server = getServer.Entity;
+
+            string newNick;
+            var getNewCharacter = await _characters.GetCurrentCharacterAsync(user, server);
+            if (getNewCharacter.IsSuccess)
+            {
+                var newCharacter = getNewCharacter.Entity;
+                newNick = newCharacter.Nickname.IsNullOrWhitespace()
+                    ? guildUser.Username
+                    : newCharacter.Nickname;
+            }
+            else
+            {
+                newNick = guildUser.Username;
+            }
+
+            var setNick = await _discord.SetUserNicknameAsync(guildUser, newNick);
+            if (!setNick.IsSuccess)
+            {
+                return setNick;
+            }
+
+            return ModifyEntityResult.FromSuccess();
         }
 
         /// <summary>

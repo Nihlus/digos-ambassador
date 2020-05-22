@@ -27,7 +27,6 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
 using Discord.Net;
 using JetBrains.Annotations;
 using Remora.Results;
@@ -41,9 +40,20 @@ namespace DIGOS.Ambassador.Discord
     {
         private static readonly HttpClient Client = new HttpClient();
 
+        private readonly IDiscordClient _client;
+
         static DiscordService()
         {
             Client.Timeout = TimeSpan.FromSeconds(4);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DiscordService"/> class.
+        /// </summary>
+        /// <param name="client">The Discord client.</param>
+        public DiscordService(IDiscordClient client)
+        {
+            _client = client;
         }
 
         /// <summary>
@@ -73,23 +83,21 @@ namespace DIGOS.Ambassador.Discord
         /// <summary>
         /// Sets the nickname of the given user.
         /// </summary>
-        /// <param name="context">The context in which the user is.</param>
         /// <param name="guildUser">The guild user to set the nick of.</param>
         /// <param name="nickname">The nickname to set.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetUserNicknameAsync
         (
-            ICommandContext context,
             IGuildUser guildUser,
             string? nickname
         )
         {
-            if (!await HasPermissionAsync(context, GuildPermission.ManageNicknames))
+            if (!await HasPermissionAsync(guildUser.Guild, GuildPermission.ManageNicknames))
             {
                 return ModifyEntityResult.FromError("I'm not allowed to set nicknames on this server.");
             }
 
-            if (context.Guild.OwnerId == guildUser.Id)
+            if (guildUser.Guild.OwnerId == guildUser.Id)
             {
                 return ModifyEntityResult.FromError("I can't set the nickname of the server's owner.");
             }
@@ -109,18 +117,16 @@ namespace DIGOS.Ambassador.Discord
         /// <summary>
         /// Adds the given role to the given user.
         /// </summary>
-        /// <param name="context">The command context.</param>
         /// <param name="guildUser">The user.</param>
         /// <param name="role">The role.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> AddUserRoleAsync
         (
-            ICommandContext context,
             IGuildUser guildUser,
             IRole role
         )
         {
-            if (!await HasPermissionAsync(context, GuildPermission.ManageRoles))
+            if (!await HasPermissionAsync(guildUser.Guild, GuildPermission.ManageRoles))
             {
                 return ModifyEntityResult.FromError
                 (
@@ -151,18 +157,16 @@ namespace DIGOS.Ambassador.Discord
         /// <summary>
         /// Removes the given role from the given user.
         /// </summary>
-        /// <param name="context">The command context.</param>
         /// <param name="guildUser">The user.</param>
         /// <param name="role">The role.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> RemoveUserRoleAsync
         (
-            ICommandContext context,
             IGuildUser guildUser,
             IRole role
         )
         {
-            if (!await HasPermissionAsync(context, GuildPermission.ManageRoles))
+            if (!await HasPermissionAsync(guildUser.Guild, GuildPermission.ManageRoles))
             {
                 return ModifyEntityResult.FromError
                 (
@@ -191,15 +195,15 @@ namespace DIGOS.Ambassador.Discord
         }
 
         /// <summary>
-        /// Determines whether or not the ambassador has the given permission in the given context.
+        /// Determines whether or not the bot has the given permission in the given guild.
         /// </summary>
-        /// <param name="context">The command context.</param>
+        /// <param name="guild">The guild the bot is in.</param>
         /// <param name="guildPermission">The permission to check.</param>
         /// <returns>true if she has permission; otherwise, false.</returns>
         [Pure]
-        public async Task<bool> HasPermissionAsync(ICommandContext context, GuildPermission guildPermission)
+        public async Task<bool> HasPermissionAsync(IGuild guild, GuildPermission guildPermission)
         {
-            var amby = await context.Guild.GetUserAsync(context.Client.CurrentUser.Id);
+            var amby = await guild.GetUserAsync(_client.CurrentUser.Id);
             if (amby is null)
             {
                 return false;
