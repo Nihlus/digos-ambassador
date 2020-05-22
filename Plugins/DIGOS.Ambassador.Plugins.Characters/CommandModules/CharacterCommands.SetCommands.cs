@@ -57,11 +57,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
-            /// <param name="database">A database context from the context pool.</param>
             /// <param name="discordService">The Discord integration service.</param>
             /// <param name="feedbackService">The feedback service.</param>
             /// <param name="characterService">The character service.</param>
-            /// <param name="servers">The server service.</param>
             /// <param name="characterRoles">The character role service.</param>
             public SetCommands
             (

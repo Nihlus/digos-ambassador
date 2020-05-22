@@ -32,7 +32,6 @@ using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
-using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
@@ -56,8 +55,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
     [Summary("Transformation-related commands, such as transforming certain body parts or saving transforms as characters.")]
     public class TransformationCommands : ModuleBase
     {
-        private readonly UserService _users;
-
         private readonly UserFeedbackService _feedback;
 
         private readonly ContentService _content;
@@ -75,7 +72,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <param name="characters">The character service.</param>
         /// <param name="transformation">The transformation service.</param>
         /// <param name="interactivity">The interactivity service.</param>
-        /// <param name="users">The user service.</param>
         /// <param name="content">The content service.</param>
         public TransformationCommands
         (
@@ -83,7 +79,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             CharacterDiscordService characters,
             TransformationService transformation,
             InteractivityService interactivity,
-            UserService users,
             ContentService content
         )
         {
@@ -91,7 +86,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             _characters = characters;
             _transformation = transformation;
             _interactivity = interactivity;
-            _users = users;
             _content = content;
         }
 

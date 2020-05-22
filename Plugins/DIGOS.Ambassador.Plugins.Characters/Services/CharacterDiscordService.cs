@@ -396,13 +396,15 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         public async Task<ModifyEntityResult> SetCharacterNameAsync(Character character, string name)
         {
             var commandModule = _commands.Modules.FirstOrDefault(m => m.Name == "character");
-            if (!(commandModule is null))
+            if (commandModule is null)
             {
-                var validNameResult = _ownedEntities.IsEntityNameValid(commandModule.GetAllCommandNames(), name);
-                if (!validNameResult.IsSuccess)
-                {
-                    return ModifyEntityResult.FromError(validNameResult);
-                }
+                return await _characters.SetCharacterNameAsync(character, name);
+            }
+
+            var validNameResult = _ownedEntities.IsEntityNameValid(commandModule.GetAllCommandNames(), name);
+            if (!validNameResult.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(validNameResult);
             }
 
             return await _characters.SetCharacterNameAsync(character, name);
