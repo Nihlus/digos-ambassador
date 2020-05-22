@@ -23,6 +23,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
@@ -93,6 +94,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             string? pronounFamily = null
         )
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             avatarUrl ??= _content.GetDefaultAvatarUri().ToString();
             nickname ??= name;
             summary ??= "No summary set.";
@@ -186,6 +190,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             string? name
         )
         {
+            server = _database.NormalizeReference(server);
+            if (!(user is null))
+            {
+                user = _database.NormalizeReference(user);
+            }
+
             if (user is null && name is null)
             {
                 return RetrieveEntityResult<Character>.FromError("No user and no name specified.");
@@ -213,6 +223,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         [Pure]
         public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync(User user, Server server)
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             if (!await HasCurrentCharacterAsync(user, server))
             {
                 return RetrieveEntityResult<Character>.FromError("The user hasn't assumed a character.");
@@ -244,6 +257,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             string name
         )
         {
+            server = _database.NormalizeReference(server);
+
             if (await GetCharacters(server).CountAsync(ch => string.Equals(ch.Name.ToLower(), name.ToLower())) > 1)
             {
                 return RetrieveEntityResult<Character>.FromError
@@ -273,6 +288,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         [Pure, ItemNotNull]
         public IQueryable<Character> GetCharacters(Server server)
         {
+            server = _database.NormalizeReference(server);
+
             return _database.Characters.AsQueryable().Where(c => c.Server == server);
         }
 
@@ -291,6 +308,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             string name
         )
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             var character = await GetUserCharacters(user, server).FirstOrDefaultAsync
             (
                 ch => string.Equals(ch.Name.ToLower(), name.ToLower())
@@ -314,6 +334,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         [ItemNotNull]
         public async Task<ModifyEntityResult> MakeCharacterCurrentAsync(User user, Server server, Character character)
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             if (character.IsCurrent)
             {
                 return ModifyEntityResult.FromError("The character is already current on the server.");
@@ -337,6 +360,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         [ItemNotNull]
         public async Task<ModifyEntityResult> ClearCurrentCharacterAsync(User user, Server server)
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             var getCurrentCharacter = await GetCurrentCharacterAsync(user, server);
             if (!getCurrentCharacter.IsSuccess)
             {
@@ -377,6 +403,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             Server server
         )
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             return await GetUserCharacters(user, server).AnyAsync
             (
                 c => c.IsCurrent
@@ -391,6 +420,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<Character>> GetDefaultCharacterAsync(User user, Server server)
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             var defaultCharacter = await GetUserCharacters(user, server).FirstOrDefaultAsync(c => c.IsDefault);
 
             if (defaultCharacter is null)
@@ -410,6 +442,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetDefaultCharacterAsync(User user, Server server, Character character)
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             if (character.Owner != user)
             {
                 return ModifyEntityResult.FromError("The user doesn't own that character.");
@@ -441,6 +476,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> ClearDefaultCharacterAsync(User user, Server server)
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             var getDefaultCharacterResult = await GetDefaultCharacterAsync(user, server);
             if (!getDefaultCharacterResult.IsSuccess)
             {
@@ -699,6 +737,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             Character character
         )
         {
+            newOwner = _database.NormalizeReference(newOwner);
+            server = _database.NormalizeReference(server);
+
             var newOwnerCharacters = GetUserCharacters(newOwner, server);
             return await _ownedEntities.TransferEntityOwnershipAsync
             (
@@ -722,6 +763,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             Server server
         )
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             var characters = GetCharacters(server).Where(ch => ch.Owner.DiscordID == user.DiscordID);
             return characters;
         }
@@ -741,6 +785,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             string characterName
         )
         {
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
             var userCharacters = GetUserCharacters(user, server);
             return await _ownedEntities.IsEntityNameUniqueForUserAsync(userCharacters, characterName);
         }
