@@ -48,19 +48,16 @@ namespace DIGOS.Ambassador.Doc.Reflection
         /// <summary>
         /// Gets the aliases of the module, if any.
         /// </summary>
-        [ItemNotNull]
         public IReadOnlyCollection<string> Aliases { get; }
 
         /// <summary>
         /// Gets the commands defined in the module.
         /// </summary>
-        [ItemNotNull]
         public IReadOnlyCollection<CommandInformation> Commands { get; private set; }
 
         /// <summary>
         /// Gets the submodules defined in the module.
         /// </summary>
-        [ItemNotNull]
         public IReadOnlyCollection<ModuleInformation> Submodules { get; private set; }
 
         /// <summary>

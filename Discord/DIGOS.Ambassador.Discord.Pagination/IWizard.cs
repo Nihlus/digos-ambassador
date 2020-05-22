@@ -23,7 +23,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Discord.Pagination
 {
@@ -36,14 +35,12 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// Gets the emotes that should be active for the current page.
         /// </summary>
         /// <returns>The emotes.</returns>
-        [ItemNotNull]
         IEnumerable<IEmote> GetCurrentPageEmotes();
 
         /// <summary>
         /// Gets the current page in the wizard.
         /// </summary>
         /// <returns>The current page.</returns>
-        [ItemNotNull]
         Task<Embed> GetCurrentPageAsync();
     }
 }

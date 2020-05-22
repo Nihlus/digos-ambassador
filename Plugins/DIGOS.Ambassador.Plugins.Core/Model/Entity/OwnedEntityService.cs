@@ -47,7 +47,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <summary>
         /// Holds reserved names which entities may not have.
         /// </summary>
-        [ItemNotNull]
         private readonly string[] _reservedNames = { "current" };
 
         /// <summary>
@@ -80,7 +79,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="entity">The entity to transfer.</param>
         /// <typeparam name="TContext">The database context to use.</typeparam>
         /// <returns>An entity modification result, which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> TransferEntityOwnershipAsync<TContext>
         (
             TContext db,

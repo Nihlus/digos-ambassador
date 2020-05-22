@@ -35,7 +35,6 @@ using DIGOS.Ambassador.Plugins.Help.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using JetBrains.Annotations;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Help.Wizards
@@ -69,7 +68,6 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
         /// </summary>
         private IReadOnlyCollection<IEmote> CurrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
 
-        [ItemNotNull]
         private readonly IReadOnlyList<ModuleInfo> _modules;
 
         private readonly IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>> _moduleListPages;
@@ -108,7 +106,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
         /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
         public HelpWizard
         (
-            [ItemNotNull] IReadOnlyList<ModuleInfo> modules,
+            IReadOnlyList<ModuleInfo> modules,
             InteractivityService interactivityService,
             UserFeedbackService feedback,
             HelpService help,
@@ -134,7 +132,6 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
         /// Builds a set of pre-formatted pages for the command modules.
         /// </summary>
         /// <returns>A list of pages, where each page is a list of embed fields.</returns>
-        [ItemNotNull]
         private IReadOnlyList<IReadOnlyList<EmbedFieldBuilder>> BuildModuleListPages()
         {
             var pages = new List<IReadOnlyList<EmbedFieldBuilder>>();

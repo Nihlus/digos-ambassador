@@ -24,7 +24,6 @@ using System.Collections.Generic;
 using System.Linq;
 using DIGOS.Ambassador.Discord.Extensions;
 using Discord;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Discord.Pagination
 {
@@ -43,7 +42,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <returns>The paginated embed.</returns>
         public static IEnumerable<EmbedBuilder> FromFields
         (
-            [ItemNotNull] IEnumerable<EmbedFieldBuilder> fields,
+            IEnumerable<EmbedFieldBuilder> fields,
             uint maxFieldsPerPage = 5,
             string description = "",
             EmbedBuilder? pageBase = null

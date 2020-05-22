@@ -65,7 +65,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>Stored information about the user.</returns>
-        [ItemNotNull]
         public async Task<RetrieveEntityResult<User>> GetOrRegisterUserAsync
         (
             IUser discordUser
@@ -84,7 +83,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>Stored information about the user.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public async Task<RetrieveEntityResult<User>> GetUserAsync(IUser discordUser)
         {
             var user = await _database.Users.FirstOrDefaultAsync
@@ -107,7 +106,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>The freshly created information about the user.</returns>
         /// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
-        [ItemNotNull]
         public async Task<RetrieveEntityResult<User>> AddUserAsync(IUser discordUser)
         {
             if (discordUser.IsBot || discordUser.IsWebhook)
@@ -142,7 +140,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="user">The user.</param>
         /// <param name="timezoneOffset">The timezone.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> SetUserTimezoneAsync(User user, int timezoneOffset)
         {
             if (timezoneOffset < -12 || timezoneOffset > 14)
@@ -168,7 +165,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="user">The user.</param>
         /// <param name="bio">The bio.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> SetUserBioAsync(User user, string bio)
         {
             if (bio.IsNullOrWhitespace())

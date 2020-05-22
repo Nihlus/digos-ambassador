@@ -165,7 +165,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="character">The character to delete.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<DeleteEntityResult> DeleteCharacterAsync(Character character)
         {
             _database.Characters.Remove(character);
@@ -182,7 +181,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="user">The owner of the character, if any.</param>
         /// <param name="name">The name of the character, if any.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
         (
             Server server,
@@ -285,7 +284,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="server">The server to scope the search to.</param>
         /// <returns>A queryable set of characters.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public IQueryable<Character> GetCharacters(Server server)
         {
             server = _database.NormalizeReference(server);
@@ -331,7 +330,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="server">The server the user is on.</param>
         /// <param name="character">The character to make current.</param>
         /// <returns>A task that must be awaited.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> MakeCharacterCurrentAsync(User user, Server server, Character character)
         {
             user = _database.NormalizeReference(user);
@@ -357,7 +355,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="user">The user to clear the characters from.</param>
         /// <param name="server">The server to clear the characters on.</param>
         /// <returns>A task that must be awaited.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> ClearCurrentCharacterAsync(User user, Server server)
         {
             user = _database.NormalizeReference(user);
@@ -634,7 +631,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="character">The character to set the description of.</param>
         /// <param name="description">The new description.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> SetCharacterDescriptionAsync
         (
             Character character,
@@ -756,7 +752,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="user">The user to get the characters of.</param>
         /// <param name="server">The server to scope the search to.</param>
         /// <returns>A queryable list of characters belonging to the user.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public IQueryable<Character> GetUserCharacters
         (
             User user,

@@ -31,7 +31,6 @@ using DIGOS.Ambassador.Doc.Data;
 using DIGOS.Ambassador.Doc.Extensions;
 using DIGOS.Ambassador.Doc.Reflection;
 using Humanizer;
-using JetBrains.Annotations;
 using Mono.Cecil;
 using Remora.Markdown;
 using static Remora.Markdown.EmphasisType;
@@ -106,7 +105,7 @@ namespace DIGOS.Ambassador.Doc
         /// <returns>A set of paired <see cref="ModuleInformation"/> and <see cref="MarkdownPage"/> objects.</returns>
         protected virtual Dictionary<ModuleInformation, MarkdownPage> GenerateDocumentationPages
         (
-            [ItemNotNull] IEnumerable<ModuleInformation> modules
+            IEnumerable<ModuleInformation> modules
         )
         {
             var modulePages = new Dictionary<ModuleInformation, MarkdownPage>();
@@ -155,7 +154,7 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="modulePages">The pages to include in the index.</param>
         /// <returns>A page with the index.</returns>
-        protected virtual MarkdownPage GenerateDocumentationIndex([ItemNotNull] IEnumerable<MarkdownPage> modulePages)
+        protected virtual MarkdownPage GenerateDocumentationIndex(IEnumerable<MarkdownPage> modulePages)
         {
             var moduleList = new MarkdownList();
             foreach (var modulePage in modulePages)
@@ -407,7 +406,6 @@ namespace DIGOS.Ambassador.Doc
         /// </summary>
         /// <param name="command">The command.</param>
         /// <returns>A list of Markdown content nodes.</returns>
-        [ItemNotNull]
         protected virtual IEnumerable<IMarkdownNode> GenerateCommandOverloadContent(CommandInformation command)
         {
             var invokableCommands = GetInvokableCommands(command).ToList();

@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// </summary>
         /// <param name="this">The content service.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public static async Task<RetrieveEntityResult<IReadOnlyList<Species>>> DiscoverBundledSpeciesAsync
         (
             this ContentService @this
@@ -169,7 +169,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         /// <param name="transformation">The transformation service.</param>
         /// <param name="species">The species to discover transformations for.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public static async Task<RetrieveEntityResult<IReadOnlyList<Transformation>>> DiscoverBundledTransformationsAsync
         (
             this ContentService @this,

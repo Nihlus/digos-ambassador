@@ -105,7 +105,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// Gets the available pronoun providers.
         /// </summary>
         /// <returns>An enumerator over the available pronouns.</returns>
-        [ItemNotNull]
         public IEnumerable<IPronounProvider> GetAvailablePronounProviders()
         {
             return _pronounProviders.Values;

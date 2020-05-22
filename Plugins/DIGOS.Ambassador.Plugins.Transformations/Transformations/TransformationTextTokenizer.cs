@@ -26,7 +26,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
 {
@@ -113,7 +112,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// </summary>
         /// <param name="text">The text to tokenize.</param>
         /// <returns>A list of recognized tokens in the text.</returns>
-        [ItemNotNull]
         public IReadOnlyList<IReplaceableTextToken> GetTokens(string text)
         {
             var tokens = new List<IReplaceableTextToken>();

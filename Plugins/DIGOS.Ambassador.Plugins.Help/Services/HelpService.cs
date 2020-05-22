@@ -220,7 +220,6 @@ namespace DIGOS.Ambassador.Plugins.Help.Services
         /// <param name="command">The command to get the parameters from.</param>
         /// <returns>A humanized parameter list.</returns>
         [Pure]
-        [ItemNotNull]
         private IEnumerable<string> BuildDetailedParameterList(CommandInfo command)
         {
             if (!command.Parameters.Any())

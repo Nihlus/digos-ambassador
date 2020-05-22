@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model.Appearances
         /// </summary>
         /// <param name="transformation">The transformation.</param>
         /// <returns>A set of appearance components.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public static IEnumerable<AppearanceComponent> CreateFromChiral(Transformation transformation)
         {
             if (!transformation.Part.IsChiral())

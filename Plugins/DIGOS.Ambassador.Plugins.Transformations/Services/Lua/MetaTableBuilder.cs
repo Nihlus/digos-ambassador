@@ -22,7 +22,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
 {
@@ -31,7 +30,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
     /// </summary>
     public sealed class MetaTableBuilder
     {
-        [ItemNotNull]
         private readonly List<string> _entries = new List<string>();
 
         /// <summary>

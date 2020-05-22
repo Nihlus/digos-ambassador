@@ -24,7 +24,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Core.Async
 {
@@ -52,7 +51,6 @@ namespace DIGOS.Ambassador.Core.Async
         /// <param name="path">The path to the file.</param>
         /// <param name="encoding">The encoding of the file.</param>
         /// <returns>The contents of the file.</returns>
-        [ItemNotNull]
         public static async Task<string[]> ReadAllLinesAsync
         (
             string path,

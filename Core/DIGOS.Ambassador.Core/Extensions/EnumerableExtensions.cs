@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         [Pure]
         public static RetrieveEntityResult<string> BestLevenshteinMatch
         (
-            [ItemNotNull] this IEnumerable<string> @this,
+            this IEnumerable<string> @this,
             string search,
             double tolerance = 0.25
         )

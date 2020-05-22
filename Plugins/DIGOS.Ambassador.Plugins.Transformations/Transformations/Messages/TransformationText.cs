@@ -73,7 +73,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
             /// <summary>
             /// Gets a list of sex and species descriptions. These are used in the beginning of appearance descriptions.
             /// </summary>
-            [ItemNotNull]
             [JsonProperty("sexSpecies", Required = Required.Always)]
             public IReadOnlyList<string> SexSpecies { get; private set; } = new List<string>();
 
@@ -97,7 +96,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
                 /// <summary>
                 /// Gets a list of pattern descriptions. These are used when describing patterns on bodyparts.
                 /// </summary>
-                [ItemNotNull]
                 [JsonProperty("pattern", Required = Required.Always)]
                 public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
             }
@@ -110,7 +108,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
                 /// <summary>
                 /// Gets a list of pattern descriptions. These are used when describing patterns on bodyparts.
                 /// </summary>
-                [ItemNotNull]
                 [JsonProperty("pattern", Required = Required.Always)]
                 public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
             }
@@ -166,7 +163,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
                     /// <summary>
                     /// Gets a list of pattern addition messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("pattern", Required = Required.Always)]
                     public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
                 }
@@ -179,7 +175,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
                     /// <summary>
                     /// Gets a list of pattern addition messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("pattern", Required = Required.Always)]
                     public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
                 }
@@ -210,98 +205,84 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
                     /// <summary>
                     /// Gets a list of hair removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("hair", Required = Required.Always)]
                     public IReadOnlyList<string> Hair { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of face removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("face", Required = Required.Always)]
                     public IReadOnlyList<string> Face { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of ear removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("ear", Required = Required.Always)]
                     public IReadOnlyList<string> Ear { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of eye removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("eye", Required = Required.Always)]
                     public IReadOnlyList<string> Eye { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of teeth removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("teeth", Required = Required.Always)]
                     public IReadOnlyList<string> Teeth { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of leg removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("leg", Required = Required.Always)]
                     public IReadOnlyList<string> Leg { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of arm removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("arm", Required = Required.Always)]
                     public IReadOnlyList<string> Arm { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of tail removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("tail", Required = Required.Always)]
                     public IReadOnlyList<string> Tail { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of wing removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("wing", Required = Required.Always)]
                     public IReadOnlyList<string> Wing { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of penile removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("penis", Required = Required.Always)]
                     public IReadOnlyList<string> Penis { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of vaginal removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("vagina", Required = Required.Always)]
                     public IReadOnlyList<string> Vagina { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of head removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("head", Required = Required.Always)]
                     public IReadOnlyList<string> Head { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of body removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("body", Required = Required.Always)]
                     public IReadOnlyList<string> Body { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of pattern removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("pattern", Required = Required.Always)]
                     public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
                 }
@@ -314,42 +295,36 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
                     /// <summary>
                     /// Gets a list of uniform ear removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("ears", Required = Required.Always)]
                     public IReadOnlyList<string> Ears { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of uniform eye removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("eyes", Required = Required.Always)]
                     public IReadOnlyList<string> Eyes { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of uniform leg removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("legs", Required = Required.Always)]
                     public IReadOnlyList<string> Legs { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of uniform arm removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("arms", Required = Required.Always)]
                     public IReadOnlyList<string> Arms { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of uniform wing removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("wings", Required = Required.Always)]
                     public IReadOnlyList<string> Wings { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of uniform pattern removal messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("pattern", Required = Required.Always)]
                     public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
                 }
@@ -381,21 +356,18 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
                     /// <summary>
                     /// Gets a list of colour shifting messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("colour", Required = Required.Always)]
                     public IReadOnlyList<string> Colour { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of pattern shifting messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("pattern", Required = Required.Always)]
                     public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of pattern colour shifting messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("patternColour", Required = Required.Always)]
                     public IReadOnlyList<string> PatternColour { get; private set; } = new List<string>();
                 }
@@ -408,21 +380,18 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
                     /// <summary>
                     /// Gets a list of uniform colour shifting messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("colour", Required = Required.Always)]
                     public IReadOnlyList<string> Colour { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of uniform pattern shifting messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("pattern", Required = Required.Always)]
                     public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
 
                     /// <summary>
                     /// Gets a list of uniform pattern colour shifting messages.
                     /// </summary>
-                    [ItemNotNull]
                     [JsonProperty("patternColour", Required = Required.Always)]
                     public IReadOnlyList<string> PatternColour { get; private set; } = new List<string>();
                 }

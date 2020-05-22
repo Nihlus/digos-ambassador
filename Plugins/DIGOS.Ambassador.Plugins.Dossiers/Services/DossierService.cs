@@ -99,7 +99,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// </summary>
         /// <param name="dossier">The dossier.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public Task<DeleteEntityResult> DeleteDossierDataAsync(Dossier dossier)
         {
             var dataPath = GetDossierDataPath(dossier);
@@ -137,7 +136,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <param name="title">The title of the dossier.</param>
         /// <param name="summary">The summary of the dossier.</param>
         /// <returns>A creation task which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<CreateEntityResult<Dossier>> CreateDossierAsync
         (
             string title,
@@ -167,7 +165,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// </summary>
         /// <param name="dossier">The dossier to delete.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<DeleteEntityResult> DeleteDossierAsync(Dossier dossier)
         {
             var deleteContentResult = await DeleteDossierDataAsync(dossier);
@@ -224,7 +221,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <param name="dossier">The dossier to modify.</param>
         /// <param name="newTitle">The new title.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> SetDossierTitleAsync(Dossier dossier, string newTitle)
         {
             var isNewNameUnique = await IsDossierTitleUniqueAsync(newTitle);
@@ -273,7 +269,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <param name="dossier">The dossier to modify.</param>
         /// /// <param name="newSummary">The new summary.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> SetDossierSummaryAsync
         (
             Dossier dossier,
@@ -297,7 +292,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <param name="dossier">The dossier to update.</param>
         /// <param name="newTitle">The new dossier title.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> UpdateDossierDataLocationAsync
         (
             Dossier dossier,
@@ -333,7 +327,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// <param name="dossier">The dosser for which to set the data.</param>
         /// <param name="context">The stream containing the PDF data.</param>
         /// <returns>An entity modification result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> SetDossierDataAsync
         (
             Dossier dossier,

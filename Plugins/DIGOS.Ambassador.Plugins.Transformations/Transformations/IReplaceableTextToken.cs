@@ -60,7 +60,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <param name="appearance">The appearance that the text should be relevant for.</param>
         /// <param name="component">The component that the text originates from.</param>
         /// <returns>The text that the token should be replaced with.</returns>
-        [ItemNotNull]
         Task<string> GetTextAsync
         (
             Appearance appearance,

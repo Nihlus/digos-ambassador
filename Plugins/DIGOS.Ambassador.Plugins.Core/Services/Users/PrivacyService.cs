@@ -70,7 +70,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="channel">The channel.</param>
         /// <returns>An execution result.</returns>
-        [ItemNotNull]
         public async Task<DetermineConditionResult> RequestConsentAsync(IDMChannel channel)
         {
             try
@@ -176,7 +175,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The user that has revoked consent.</param>
         /// <returns>A task that must be awaited.</returns>
-        [ItemNotNull]
         public async Task<ModifyEntityResult> RevokeUserConsentAsync(IUser discordUser)
         {
             var userConsent = await _database.UserConsents.FirstOrDefaultAsync

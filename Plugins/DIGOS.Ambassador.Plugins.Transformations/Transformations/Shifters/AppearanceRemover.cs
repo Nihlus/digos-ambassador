@@ -26,7 +26,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
-using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
@@ -55,7 +54,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="bodypart">The bodypart.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         protected abstract Task<ShiftBodypartResult> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality);
 
         /// <summary>
@@ -63,7 +61,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// </summary>
         /// <param name="bodypart">The bodypart.</param>
         /// <returns>The removal message.</returns>
-        [ItemNotNull]
         protected abstract Task<string> GetUniformRemoveMessageAsync(Bodypart bodypart);
 
         /// <summary>
@@ -72,7 +69,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// <param name="bodypart">The bodypart.</param>
         /// <param name="chirality">The chirality of the bodypart.</param>
         /// <returns>The removal message.</returns>
-        [ItemNotNull]
         protected abstract Task<string> GetRemoveMessageAsync(Bodypart bodypart, Chirality chirality);
 
         /// <summary>
@@ -80,7 +76,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// </summary>
         /// <param name="bodypart">The bodypart.</param>
         /// <returns>The no-change message.</returns>
-        [ItemNotNull]
         protected abstract Task<string> GetNoChangeMessageAsync(Bodypart bodypart);
 
         /// <inheritdoc />
@@ -104,7 +99,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         /// </summary>
         /// <param name="bodypart">The bodypart.</param>
         /// <returns>A shifting result which may or may not have succeeded.</returns>
-        [ItemNotNull]
         private async Task<ShiftBodypartResult> RemoveCompositeBodypartAsync(Bodypart bodypart)
         {
             var composingParts = bodypart.GetComposingParts();
@@ -213,7 +207,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
             return ShiftBodypartResult.FromSuccess(messageBuilder.ToString(), ShiftBodypartAction.Shift);
         }
 
-        [ItemNotNull]
         private Task<string> BuildMessageFromResultAsync
         (
             ShiftBodypartResult result,

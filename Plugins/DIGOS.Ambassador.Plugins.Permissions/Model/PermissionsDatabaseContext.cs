@@ -39,13 +39,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// <summary>
         /// Gets or sets the table where role-associated permissions are stored.
         /// </summary>
-        [ItemNotNull]
         public DbSet<RolePermission> RolePermissions { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>
         /// Gets or sets the table where user-associated permissions are stored.
         /// </summary>
-        [ItemNotNull]
         public DbSet<UserPermission> UserPermissions { get; [UsedImplicitly] set; } = null!;
 
         /// <summary>

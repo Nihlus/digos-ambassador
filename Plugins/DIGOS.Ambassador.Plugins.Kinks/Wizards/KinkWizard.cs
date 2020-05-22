@@ -35,7 +35,6 @@ using DIGOS.Ambassador.Plugins.Kinks.Services;
 using Discord;
 using Discord.WebSocket;
 using Humanizer;
-using JetBrains.Annotations;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
@@ -69,13 +68,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         /// <summary>
         /// Gets the currently accepted emotes.
         /// </summary>
-        [ItemNotNull]
         private IReadOnlyCollection<IEmote> AcceptedEmotes => GetCurrentPageEmotes().ToList();
 
         /// <summary>
         /// Gets the emotes that are currently rejected by the wizard.
         /// </summary>
-        [ItemNotNull]
         private IReadOnlyCollection<IEmote> CurrrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
 
         private readonly Embed _loadingEmbed;
@@ -373,7 +370,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             await UpdateAsync();
         }
 
-        [ItemNotNull]
         private async Task<ModifyEntityResult> OpenCategory(string categoryName)
         {
             var getCategoryResult = _categories.Select(c => c.ToString()).BestLevenshteinMatch(categoryName, 0.75);
@@ -500,7 +496,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             }
         }
 
-        [ItemNotNull]
         private IEnumerable<IEmote> GetCurrentPageRejectedEmotes()
         {
             switch (_state)

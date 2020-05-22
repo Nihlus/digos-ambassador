@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
         /// <typeparam name="TSource">The source type of the enumerable.</typeparam>
         /// <typeparam name="TResult">The resulting type.</typeparam>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public static async Task<RetrieveEntityResult<TResult>> SelectFromBestLevenshteinMatchAsync<TSource, TResult>
         (
             this IQueryable<TSource> @this,
@@ -98,7 +98,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
         [Pure]
         public static RetrieveEntityResult<TResult> SelectFromBestLevenshteinMatch<TSource, TResult>
         (
-            [ItemNotNull] this IEnumerable<TSource> @this,
+            this IEnumerable<TSource> @this,
             Func<TSource, TResult> selector,
             Func<TSource, string> stringSelector,
             string search,

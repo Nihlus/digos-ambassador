@@ -257,7 +257,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="server">The server to scope the search to.</param>
         /// <returns>A queryable list of roleplays on the given server.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public IQueryable<Roleplay> GetRoleplays(Server? server = null)
         {
             if (server is null)
@@ -281,7 +281,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="user">The user to get the roleplays of.</param>
         /// <param name="server">The server that the search is scoped to.</param>
         /// <returns>A queryable list of roleplays belonging to the user.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public IQueryable<Roleplay> GetUserRoleplays(User user, Server server)
         {
             user = _database.NormalizeReference(user);
@@ -301,7 +301,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplayOwner">The user to get the roleplay from.</param>
         /// <param name="roleplayName">The name of the roleplay.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        [Pure, ItemNotNull]
+        [Pure]
         public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync
         (
             Server server,
