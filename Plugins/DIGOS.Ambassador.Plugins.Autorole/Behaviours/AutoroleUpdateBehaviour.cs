@@ -113,17 +113,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                         return;
                     }
 
-                    foreach (var user in guild.Users)
+                    foreach (var user in guild.Users.Where(u => !u.IsBot).Where(u => !u.IsWebhook))
                     {
                         if (ct.IsCancellationRequested)
                         {
                             return;
-                        }
-
-                        if (user.IsBot || user.IsWebhook)
-                        {
-                            // Skip bots and webhooks
-                            continue;
                         }
 
                         var updateResult = await autoroleUpdates.UpdateAutoroleForUserAsync(autorole, user);
