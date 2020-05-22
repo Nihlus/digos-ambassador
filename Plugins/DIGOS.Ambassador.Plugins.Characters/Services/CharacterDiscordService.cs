@@ -166,6 +166,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         public async Task<DeleteEntityResult> DeleteCharacterAsync(IGuildUser guildUser, Character character)
         {
             var getCurrentCharacter = await _characters.GetCurrentCharacterAsync(character.Owner, character.Server);
+            if (getCurrentCharacter.IsSuccess)
+            {
+                // Forcibly load the role so we can access it later
+                _ = getCurrentCharacter.Entity.Role;
+            }
 
             var deleteCharacter = await _characters.DeleteCharacterAsync(character);
             if (!deleteCharacter.IsSuccess)
@@ -570,7 +575,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return updateNickname;
             }
 
-            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, getOriginalCharacter.Entity);
+            var originalCharacter = getOriginalCharacter.IsSuccess ? getOriginalCharacter.Entity : null;
+            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, originalCharacter);
             if (!updateRoles.IsSuccess)
             {
                 return updateRoles;
@@ -616,7 +622,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return updateNickname;
             }
 
-            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, getOriginalCharacter.Entity);
+            var originalCharacter = getOriginalCharacter.IsSuccess ? getOriginalCharacter.Entity : null;
+            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, originalCharacter);
             if (!updateRoles.IsSuccess)
             {
                 return updateRoles;
