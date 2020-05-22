@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
@@ -41,6 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
     {
         private readonly Random _random;
         private readonly CharacterDiscordService _characters;
+        private readonly CharacterRoleService _characterRoles;
         private readonly ContentService _content;
 
         /// <summary>
@@ -49,11 +51,19 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
         /// <param name="characters">The character service.</param>
         /// <param name="random">An entropy source.</param>
         /// <param name="content">The content service.</param>
-        public DroneService(CharacterDiscordService characters, Random random, ContentService content)
+        /// <param name="characterRoles">The role service.</param>
+        public DroneService
+        (
+            CharacterDiscordService characters,
+            Random random,
+            ContentService content,
+            CharacterRoleService characterRoles
+        )
         {
             _characters = characters;
             _random = random;
             _content = content;
+            _characterRoles = characterRoles;
         }
 
         /// <summary>
@@ -87,6 +97,32 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
             }
 
             var character = generatedCharacterResult.Entity;
+
+            var droneRole = guildUser.Guild.Roles.FirstOrDefault
+            (
+                r => r.Name.Contains("Drone") || r.Name.Contains("Dronies")
+            );
+
+            if (!(droneRole is null))
+            {
+                var getCharacterRole = await _characterRoles.GetCharacterRoleAsync(droneRole);
+                if (getCharacterRole.IsSuccess)
+                {
+                    var characterRole = getCharacterRole.Entity;
+                    var setCharacterRole = await _characterRoles.SetCharacterRoleAsync
+                    (
+                        guildUser,
+                        character,
+                        characterRole
+                    );
+
+                    if (!setCharacterRole.IsSuccess)
+                    {
+                        return CreateEntityResult<Character>.FromError(setCharacterRole);
+                    }
+                }
+            }
+
             var becomeCharacterResult = await _characters.MakeCharacterCurrentAsync(guildUser, character);
             if (!becomeCharacterResult.IsSuccess)
             {
@@ -135,34 +171,6 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
             }
 
             return (characterName, displayName);
-        }
-
-        /// <summary>
-        /// Gets a random message from a selection of messages where Amby acquiesces someone's desire to drone
-        /// themselves.
-        /// </summary>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<string>> GetRandomSelfDroneMessageAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets a random message from a selection of messages where Amby turns the tables on a would-be droner.
-        /// </summary>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<string>> GetRandomTurnTheTablesMessageAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Gets a random message from a selection of messages where a person has just been droned.
-        /// </summary>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<string>> GetRandomConfirmationMessageAsync()
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -21,7 +21,9 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Plugins.Drone.Extensions;
 using DIGOS.Ambassador.Plugins.Drone.Services;
 using Discord;
 using Discord.Commands;
@@ -34,6 +36,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
     /// </summary>
     public class DroneCommands : ModuleBase
     {
+        private readonly ContentService _content;
         private readonly DroneService _drone;
         private readonly UserFeedbackService _feedback;
 
@@ -42,10 +45,12 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
         /// </summary>
         /// <param name="drone">The drone service.</param>
         /// <param name="feedback">The feedback service.</param>
-        public DroneCommands(DroneService drone, UserFeedbackService feedback)
+        /// <param name="content">The content service.</param>
+        public DroneCommands(DroneService drone, UserFeedbackService feedback, ContentService content)
         {
             _drone = drone;
             _feedback = feedback;
+            _content = content;
         }
 
         /// <summary>
@@ -57,6 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
         [UsedImplicitly]
         [Command("drone")]
         [RequireContext(ContextType.Guild)]
+        [RequireNsfw]
         [Summary("Drones the target user.")]
         public async Task DroneAsync(IGuildUser user)
         {
@@ -66,29 +72,9 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
                 return;
             }
 
-            string droneMessage;
-            if (user == target)
-            {
-                var getSelfDroneMessage = await _drone.GetRandomSelfDroneMessageAsync();
-                if (!getSelfDroneMessage.IsSuccess)
-                {
-                    await _feedback.SendErrorAsync(this.Context, getSelfDroneMessage.ErrorReason);
-                    return;
-                }
-
-                droneMessage = getSelfDroneMessage.Entity;
-            }
-            else
-            {
-                var getTurnTheTablesMessage = await _drone.GetRandomTurnTheTablesMessageAsync();
-                if (!getTurnTheTablesMessage.IsSuccess)
-                {
-                    await _feedback.SendErrorAsync(this.Context, getTurnTheTablesMessage.ErrorReason);
-                    return;
-                }
-
-                droneMessage = getTurnTheTablesMessage.Entity;
-            }
+            var droneMessage = user == target
+                ? _content.GetRandomSelfDroneMessage()
+                : _content.GetRandomTurnTheTablesMessage();
 
             await _feedback.SendConfirmationAsync(this.Context, droneMessage);
 
@@ -99,14 +85,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
                 return;
             }
 
-            var getConfirmationMessage = await _drone.GetRandomConfirmationMessageAsync();
-            if (!getConfirmationMessage.IsSuccess)
-            {
-                await _feedback.SendErrorAsync(this.Context, getConfirmationMessage.ErrorReason);
-                return;
-            }
-
-            await _feedback.SendConfirmationAsync(this.Context, getConfirmationMessage.Entity);
+            await _feedback.SendConfirmationAsync(this.Context, _content.GetRandomConfirmationMessage());
         }
     }
 }
