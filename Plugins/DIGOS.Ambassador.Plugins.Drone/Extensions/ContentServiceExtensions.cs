@@ -125,10 +125,13 @@ namespace DIGOS.Ambassador.Plugins.Drone.Extensions
             "now enjoys her role serving her Mistress. She likes long walks on the beach, dragging unsuspecting " +
             "swimmers into the water, and making more sisters from the aforementioned. Oops, did she say that out " +
             "loud?",
+
             "A veritable bundle of love, she just can't help but to get some of it on you. Be careful around this " +
             "sharkdrone - she's a handful, and before you know it, you might be walking to the same tune she is.",
+
             "The faint glow that surrounds this sharkdrone is almost hypnotic. She walks with a smooth, synchronized," +
             " suave sway, gently pulsing her dome at you. Won't you come in for a closer look?~",
+
             "Fresh out of the pod, this drone is eager to serve both her sisters and her Mistress. Shards of her " +
             "former personality seep through every now and then, but she's an expert at calming them back down with a" +
             "few rubs and tweaks. So much of an expert, in fact, that she's quite good at doing it to others... " +
