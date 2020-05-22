@@ -566,6 +566,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task ClearCharacterFormAsync()
         {
+            // First, let's try dropping to a default form instead.
+            var getDefaultCharacter = await _characters.GetDefaultCharacterAsync((IGuildUser)this.Context.User);
+            if (getDefaultCharacter.IsSuccess)
+            {
+                var defaultCharacter = getDefaultCharacter.Entity;
+                await AssumeCharacterFormAsync(defaultCharacter);
+
+                return;
+            }
+
             var result = await _characters.ClearCurrentCharacterAsync((IGuildUser)this.Context.User);
             if (!result.IsSuccess)
             {

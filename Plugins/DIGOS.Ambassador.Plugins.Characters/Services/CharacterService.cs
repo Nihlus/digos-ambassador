@@ -367,19 +367,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             var currentCharacter = getCurrentCharacter.Entity;
-
-            var getDefaultCharacter = await GetDefaultCharacterAsync(user, server);
-            if (getDefaultCharacter.IsSuccess)
-            {
-                var defaultCharacter = getDefaultCharacter.Entity;
-                if (currentCharacter == defaultCharacter)
-                {
-                    return ModifyEntityResult.FromError("The user is already their default form.");
-                }
-
-                defaultCharacter.IsCurrent = true;
-            }
-
             currentCharacter.IsCurrent = false;
 
             await _database.SaveChangesAsync();
