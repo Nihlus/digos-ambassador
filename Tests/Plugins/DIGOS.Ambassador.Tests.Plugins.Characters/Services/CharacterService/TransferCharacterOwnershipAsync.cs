@@ -39,29 +39,24 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     {
         public class TransferCharacterOwnershipAsync : CharacterServiceTestBase
         {
-            private readonly Character _character;
+            private Character _character = null!;
+            private User _newOwner = null!;
 
-            private readonly IUser _originalOwner = MockHelper.CreateDiscordUser(0);
-            private readonly IUser _newOwner = MockHelper.CreateDiscordUser(1);
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(2);
-
-            private readonly User _dbNewOwner;
-
-            public TransferCharacterOwnershipAsync()
+            public override async Task InitializeAsync()
             {
-                var dbOldOwner = new User((long)_originalOwner.Id);
-                _dbNewOwner = new User((long)_newOwner.Id);
-
-                _character = new Character(new Server((long)_guild.Id), dbOldOwner, "Dummy");
-
-                this.Database.Characters.Update(_character);
-                this.Database.SaveChanges();
+                _character = await CreateCharacterAsync();
+                _newOwner = new User(1);
             }
 
             [Fact]
             public async Task ReturnsSuccessfulResultIfCharacterIsTransferred()
             {
-                var result = await this.Characters.TransferCharacterOwnershipAsync(_dbNewOwner, _character, _guild);
+                var result = await this.Characters.TransferCharacterOwnershipAsync
+                (
+                    _newOwner,
+                    this.DefaultServer,
+                    _character
+                );
 
                 Assert.True(result.IsSuccess);
             }
@@ -69,10 +64,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task TransfersCharacter()
             {
-                await this.Characters.TransferCharacterOwnershipAsync(_dbNewOwner, _character, _guild);
+                await this.Characters.TransferCharacterOwnershipAsync(_newOwner, this.DefaultServer, _character);
 
                 var character = this.Database.Characters.First();
-                Assert.Equal((long)_newOwner.Id, character.Owner.DiscordID);
+                Assert.Equal(_newOwner, character.Owner);
             }
         }
     }

@@ -42,45 +42,21 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         {
             private const string CharacterName = "Test";
 
-            private readonly ICommandContext _context;
-            private readonly IGuildUser _owner = MockHelper.CreateDiscordGuildUser(0);
-
             private readonly Character _character;
-
-            private readonly User _user;
 
             public GetUserCharacterByNameAsync()
             {
-                _user = new User((long)_owner.Id);
-
-                var mockedGuild = new Mock<IGuild>();
-                mockedGuild.Setup(g => g.Id).Returns(1);
-                mockedGuild.Setup
-                    (
-                        c =>
-                            c.GetUserAsync
-                            (
-                                It.IsAny<ulong>(),
-                                CacheMode.AllowDownload,
-                                null
-                            )
-                    )
-                    .Returns(Task.FromResult(_owner));
-
-                var guild = mockedGuild.Object;
-
-                var mockedContext = new Mock<ICommandContext>();
-                mockedContext.Setup(c => c.User).Returns(_owner);
-                mockedContext.Setup(c => c.Guild).Returns(guild);
-
-                var mockedMessage = new Mock<IUserMessage>();
-                mockedMessage.Setup(m => m.Author).Returns(_owner);
-
-                mockedContext.Setup(c => c.Message).Returns(mockedMessage.Object);
-
-                _context = mockedContext.Object;
-
-                _character = new Character(new Server((long)guild.Id), _user, CharacterName);
+                _character = new Character
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    CharacterName,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
 
                 this.Database.Characters.Update(_character);
                 this.Database.SaveChanges();
@@ -89,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfOwnerDoesNotHaveACharacterWithThatName()
             {
-                var result = await this.Characters.GetUserCharacterByNameAsync(_context, _user, "NonExistant");
+                var result = await this.Characters.GetUserCharacterByNameAsync(this.DefaultOwner, this.DefaultServer, "NonExistant");
 
                 Assert.False(result.IsSuccess);
             }
@@ -97,7 +73,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfOwnerHasACharacterWithThatName()
             {
-                var result = await this.Characters.GetUserCharacterByNameAsync(_context, _user, CharacterName);
+                var result = await this.Characters.GetUserCharacterByNameAsync(this.DefaultOwner, this.DefaultServer, CharacterName);
 
                 Assert.True(result.IsSuccess);
             }
@@ -105,7 +81,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsCorrectCharacter()
             {
-                var result = await this.Characters.GetUserCharacterByNameAsync(_context, _user, CharacterName);
+                var result = await this.Characters.GetUserCharacterByNameAsync(this.DefaultOwner, this.DefaultServer, CharacterName);
 
                 Assert.Same(_character, result.Entity);
             }

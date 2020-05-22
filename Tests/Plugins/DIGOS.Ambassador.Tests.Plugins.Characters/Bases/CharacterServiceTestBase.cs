@@ -28,12 +28,15 @@ using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Discord.Commands;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -46,6 +49,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     [PublicAPI]
     public abstract class CharacterServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
     {
+        /// <summary>
+        /// Gets the default character owner.
+        /// </summary>
+        protected User DefaultOwner { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the default server characters are on.
+        /// </summary>
+        protected Server DefaultServer { get; private set; } = null!;
+
         /// <summary>
         /// Gets the database.
         /// </summary>
@@ -70,6 +83,55 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         /// Gets the command service dependency.
         /// </summary>
         protected CommandService Commands { get; private set; } = null!;
+
+        /// <summary>
+        /// Creates a character in the database with the given settings.
+        /// </summary>
+        /// <param name="owner">The owner. Defaults to <see cref="DefaultOwner"/>.</param>
+        /// <param name="server">The server. Defaults <see cref="DefaultServer"/>.</param>
+        /// <param name="name">The name.</param>
+        /// <param name="avatarUrl">The avatar.</param>
+        /// <param name="nickname">The nickname.</param>
+        /// <param name="summary">The summary.</param>
+        /// <param name="description">The description.</param>
+        /// <param name="pronouns">The pronouns.</param>
+        /// <param name="isNSFW">Whether the character is NSFW.</param>
+        /// <returns>The character.</returns>
+        protected async Task<Character> CreateCharacterAsync
+        (
+            User? owner = null,
+            Server? server = null,
+            string? name = null,
+            string? avatarUrl = null,
+            string? nickname = null,
+            string? summary = null,
+            string? description = null,
+            string? pronouns = null,
+            bool? isNSFW = null
+        )
+        {
+            var character = this.Database.CreateProxy<Character>
+            (
+                owner ?? this.DefaultOwner,
+                server ?? this.DefaultServer,
+                name ?? string.Empty,
+                avatarUrl ?? string.Empty,
+                nickname ?? string.Empty,
+                summary ?? string.Empty,
+                description ?? string.Empty,
+                pronouns ?? "They" // a real value is used here to avoid having to set it in the majority of cases
+            );
+
+            if (!(isNSFW is null))
+            {
+                character.IsNSFW = isNSFW.Value;
+            }
+
+            this.Database.Update(character);
+            await this.Database.SaveChangesAsync();
+
+            return character;
+        }
 
         /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)
@@ -103,6 +165,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             this.Characters = serviceProvider.GetRequiredService<CharacterService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();
             this.Commands = serviceProvider.GetRequiredService<CommandService>();
+
+            this.DefaultOwner = this.Database.CreateProxy<User>(0);
+            this.DefaultServer = this.Database.CreateProxy<Server>(1);
+
+            this.Database.Update(this.DefaultOwner);
+            this.Database.Update(this.DefaultServer);
+            this.Database.SaveChanges();
+
+            // Default pronouns
+            var pronounService = serviceProvider.GetRequiredService<PronounService>();
+            pronounService.WithPronounProvider(new TheyPronounProvider());
         }
 
         /// <inheritdoc />

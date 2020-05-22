@@ -42,45 +42,21 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         {
             private const string CharacterName = "Test";
 
-            private readonly ICommandContext _context;
-            private readonly IGuildUser _owner = MockHelper.CreateDiscordGuildUser(0);
-            private readonly IGuild _guild;
-
             private readonly Character _character;
-            private readonly User _user;
 
             public GetBestMatchingCharacterAsync()
             {
-                _user = new User((long)_owner.Id);
-
-                var mockedGuild = new Mock<IGuild>();
-                mockedGuild.Setup(g => g.Id).Returns(1);
-                mockedGuild.Setup
-                    (
-                        c =>
-                            c.GetUserAsync
-                            (
-                                It.IsAny<ulong>(),
-                                CacheMode.AllowDownload,
-                                null
-                            )
-                    )
-                    .Returns(Task.FromResult(_owner));
-
-                _guild = mockedGuild.Object;
-
-                var mockedContext = new Mock<ICommandContext>();
-                mockedContext.Setup(c => c.User).Returns(_owner);
-                mockedContext.Setup(c => c.Guild).Returns(_guild);
-
-                var mockedMessage = new Mock<IUserMessage>();
-                mockedMessage.Setup(m => m.Author).Returns(_owner);
-
-                mockedContext.Setup(c => c.Message).Returns(mockedMessage.Object);
-
-                _context = mockedContext.Object;
-
-                _character = new Character(new Server((long)_guild.Id), _user, CharacterName);
+                _character = new Character
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    CharacterName,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
 
                 this.Database.Characters.Update(_character);
                 this.Database.SaveChanges();
@@ -93,7 +69,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfOwnerIsNullAndNameIsNullAndNoCharacterIsCurrent()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, null, null);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -101,29 +77,15 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfOwnerIsNullAndNoACharacterWithThatNameExists()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, null, "NonExistant");
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, "NonExistant");
 
                 Assert.False(result.IsSuccess);
             }
 
             [Fact]
-            public async Task ReturnsInvokersCharacterIfOwnerIsNullAndMoreThanOneCharacterWithThatNameExists()
-            {
-                var anotherCharacter = new Character(new Server((long)_guild.Id), new User(2), CharacterName);
-
-                this.Database.Characters.Update(anotherCharacter);
-                await this.Database.SaveChangesAsync();
-
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, null, CharacterName);
-
-                Assert.True(result.IsSuccess);
-                Assert.Same(_character, result.Entity);
-            }
-
-            [Fact]
             public async Task ReturnsUnsuccessfulResultIfNameIsNullAndOwnerDoesNotHaveACurrentCharacter()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, _user, null);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -131,7 +93,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNameIsEmptyAndOwnerDoesNotHaveACurrentCharacter()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, _user, string.Empty);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -139,7 +101,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfOwnerIsNotNullAndNameIsNotNullAndUserDoesNotHaveACharacterWithThatName()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, _user, "NonExistant");
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, "NonExistant");
 
                 Assert.False(result.IsSuccess);
             }
@@ -149,19 +111,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
              */
 
             [Fact]
-            public async Task ReturnsSuccessfulResultIfOwnerIsNullAndNameIsNullAndOwnerHasACurrentCharacter()
-            {
-                await this.Characters.MakeCharacterCurrentOnServerAsync(_context, _guild, _character);
-
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, null, null);
-
-                Assert.True(result.IsSuccess);
-            }
-
-            [Fact]
             public async Task ReturnsSuccessfulResultIfOwnerIsNullAndASingleCharacterWithThatNameExists()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, null, CharacterName);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, CharacterName);
 
                 Assert.True(result.IsSuccess);
             }
@@ -169,9 +121,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfNameIsNullAndOwnerHasACurrentCharacter()
             {
-                await this.Characters.MakeCharacterCurrentOnServerAsync(_context, _guild, _character);
+                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, _user, null);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, null);
 
                 Assert.True(result.IsSuccess);
             }
@@ -179,9 +131,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfNameIsEmptyAndOwnerHasACurrentCharacter()
             {
-                await this.Characters.MakeCharacterCurrentOnServerAsync(_context, _guild, _character);
+                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, _user, string.Empty);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, string.Empty);
 
                 Assert.True(result.IsSuccess);
             }
@@ -189,7 +141,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfOwnerIsNotNullAndNameIsNotNullAndOwnerHasACharacterWithThatName()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, _user, CharacterName);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, CharacterName);
 
                 Assert.True(result.IsSuccess);
             }
@@ -199,19 +151,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
              */
 
             [Fact]
-            public async Task ReturnsCurrentCharacterIfOwnerIsNullAndNameIsNullAndOwnerHasACurrentCharacter()
-            {
-                await this.Characters.MakeCharacterCurrentOnServerAsync(_context, _guild, _character);
-
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, null, null);
-
-                Assert.Same(_character, result.Entity);
-            }
-
-            [Fact]
             public async Task ReturnsCorrectCharacterIfOwnerIsNullAndASingleCharacterWithThatNameExists()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, null, CharacterName);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, null, CharacterName);
 
                 Assert.Same(_character, result.Entity);
             }
@@ -219,9 +161,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsCurrentCharacterIfNameIsNullAndOwnerHasACurrentCharacter()
             {
-                await this.Characters.MakeCharacterCurrentOnServerAsync(_context, _guild, _character);
+                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, _user, null);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, null);
 
                 Assert.Same(_character, result.Entity);
             }
@@ -229,9 +171,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsCurrentCharacterIfNameIsEmptyAndOwnerHasACurrentCharacter()
             {
-                await this.Characters.MakeCharacterCurrentOnServerAsync(_context, _guild, _character);
+                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, _user, string.Empty);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, string.Empty);
 
                 Assert.Same(_character, result.Entity);
             }
@@ -239,7 +181,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsCorrectCharacterIfOwnerIsNotNullAndNameIsNotNullAndOwnerHasACharacterWithThatName()
             {
-                var result = await this.Characters.GetBestMatchingCharacterAsync(_context, _user, CharacterName);
+                var result = await this.Characters.GetBestMatchingCharacterAsync(this.DefaultServer, this.DefaultOwner, CharacterName);
 
                 Assert.Same(_character, result.Entity);
             }

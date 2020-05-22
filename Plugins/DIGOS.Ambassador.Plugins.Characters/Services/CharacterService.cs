@@ -86,11 +86,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             User user,
             Server server,
             string name,
-            string? avatarUrl,
-            string? nickname,
-            string? summary,
-            string? description,
-            string? pronounFamily
+            string? avatarUrl = null,
+            string? nickname = null,
+            string? summary = null,
+            string? description = null,
+            string? pronounFamily = null
         )
         {
             avatarUrl ??= _content.GetDefaultAvatarUri().ToString();
@@ -111,6 +111,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 string.Empty,
                 string.Empty
             );
+
+            _database.Attach(character);
 
             var modifyEntityResult = await SetCharacterNameAsync(character, name);
             if (!modifyEntityResult.IsSuccess)

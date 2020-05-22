@@ -50,7 +50,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             {
                 _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
 
-                _character = new Character(new Server(0), _owner, "Test");
+                _character = new Character
+                (
+                    _owner,
+                    new Server(0),
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
 
                 this.CharacterDatabase.Characters.Update(_character);
                 await this.CharacterDatabase.SaveChangesAsync();

@@ -42,22 +42,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         {
             private const bool IsNSFW = false;
 
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
-
-            private User _owner = null!;
             private Character _character = null!;
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
-
-                _character = new Character(new Server(0), _owner, "Dummy")
-                {
-                    IsNSFW = IsNSFW
-                };
-
-                this.Database.Characters.Update(_character);
-                await this.Database.SaveChangesAsync();
+                _character = await CreateCharacterAsync(isNSFW: IsNSFW);
             }
 
             [Fact]

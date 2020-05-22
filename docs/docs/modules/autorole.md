@@ -91,6 +91,18 @@ Affirms a user's qualification for an autorole.
 
 ---
 
+### *affirm-all*
+#### Overloads
+**`!autorole affirm-all @Users` (or `autorole confirm-all`)**
+
+Affirms all currently qualifying users for the given autorole.
+
+| Name | Type | Optional |
+| --- | --- | --- |
+| autorole | AutoroleConfiguration | `no` |
+
+---
+
 ### *deny*
 #### Overloads
 **`!autorole deny @Users @Ada`**

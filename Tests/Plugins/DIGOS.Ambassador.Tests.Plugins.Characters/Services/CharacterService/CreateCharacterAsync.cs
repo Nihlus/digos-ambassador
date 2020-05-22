@@ -22,11 +22,8 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
-using Discord;
-using Discord.Commands;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -39,32 +36,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     {
         public class CreateCharacterAsync : CharacterServiceTestBase
         {
-            private readonly ICommandContext _context;
-
-            public CreateCharacterAsync()
-            {
-                this.Services.GetRequiredService<PronounService>().WithPronounProvider(new TheyPronounProvider());
-
-                var mockedUser = new Mock<IUser>();
-                mockedUser.Setup(u => u.Id).Returns(0);
-
-                var mockedMessage = new Mock<IUserMessage>();
-                mockedMessage.Setup(m => m.Author).Returns(mockedUser.Object);
-
-                var mockedGuild = new Mock<IGuild>();
-                mockedGuild.Setup(g => g.Id).Returns(1);
-
-                var mockedContext = new Mock<ICommandContext>();
-                mockedContext.Setup(c => c.Message).Returns(mockedMessage.Object);
-                mockedContext.Setup(c => c.Guild).Returns(mockedGuild.Object);
-
-                _context = mockedContext.Object;
-            }
-
             [Fact]
             public async Task CanCreateWithNameOnly()
             {
-                var result = await this.Characters.CreateCharacterAsync(_context, "Test");
+                var result = await this.Characters.CreateCharacterAsync(this.DefaultOwner, this.DefaultServer, "Test");
 
                 Assert.True(result.IsSuccess);
                 Assert.NotEmpty(this.Database.Characters);

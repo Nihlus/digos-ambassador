@@ -1,5 +1,5 @@
 //
-//  IsCharacterNameUniqueForUserAsync.cs
+//  HasCurrentCharacterAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -34,39 +34,35 @@ using Xunit;
 
 namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
-    public partial class CharacterServiceTests
+    public static partial class CharacterServiceTests
     {
-        public class IsCharacterNameUniqueForUserAsync : CharacterServiceTestBase
+        public class HasCurrentCharacterAsync : CharacterServiceTestBase
         {
-            private const string CharacterName = "Test";
-
-            private readonly IUser _owner = MockHelper.CreateDiscordUser(0);
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
-
-            private readonly User _user;
-
-            public IsCharacterNameUniqueForUserAsync()
-            {
-                _user = new User((long)_owner.Id);
-
-                var character = new Character(new Server((long)_guild.Id), _user, CharacterName);
-
-                this.Database.Characters.Update(character);
-                this.Database.SaveChanges();
-            }
-
             [Fact]
-            public async Task ReturnsFalseIfUserHasACharacterWithThatName()
+            public async Task ReturnsFalseIfUserHasNoCharacters()
             {
-                var result = await this.Characters.IsCharacterNameUniqueForUserAsync(_user, CharacterName, _guild);
+                var result = await this.Characters.HasCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
                 Assert.False(result);
             }
 
             [Fact]
-            public async Task ReturnsTrueIfUserDoesNotHaveACharacterWithThatName()
+            public async Task ReturnsFalseIfUserHasNoActiveCharacter()
             {
-                var result = await this.Characters.IsCharacterNameUniqueForUserAsync(_user, "AnotherName", _guild);
+                var result = await this.Characters.HasCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
+
+                Assert.False(result);
+            }
+
+            [Fact]
+            public async Task ReturnsTrueIfUserHasAnActiveCharacter()
+            {
+                var character = await CreateCharacterAsync();
+                character.IsCurrent = true;
+
+                await this.Database.SaveChangesAsync();
+
+                var result = await this.Characters.HasCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
                 Assert.True(result);
             }

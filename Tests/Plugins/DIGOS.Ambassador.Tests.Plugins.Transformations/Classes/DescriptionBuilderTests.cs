@@ -46,7 +46,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         [Fact]
         public void ReplacesFluentTokensCorrectly()
         {
-            var character = new Character(new Server(0), new User(0), "Amby", pronounProviderFamily: "Feminine");
+            var character = new Character
+            (
+                new User(0),
+                new Server(0),
+                "Amby",
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                pronounProviderFamily: "Feminine"
+            );
 
             var hairColour = new Colour(Shade.White, ShadeModifier.Fluorescent);
 
@@ -71,7 +81,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             var pronounService = new PronounService();
             pronounService.WithPronounProvider(new FemininePronounProvider());
 
-            var characterService = new CharacterService(null, null, null, null, null, null, pronounService);
+            var characterService = new CharacterService(null!, null!, null!, pronounService);
 
             var serviceProvider = new ServiceCollection()
                 .AddSingleton(pronounService)

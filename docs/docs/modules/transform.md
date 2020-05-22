@@ -33,7 +33,7 @@ Transforms the given bodypart of the target user into the given species.
 
 | Name | Type | Optional |
 | --- | --- | --- |
-| target | IUser | `no` |
+| target | IGuildUser | `no` |
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
 
@@ -43,7 +43,7 @@ Transforms the given bodypart of the target user into the given species.
 
 | Name | Type | Optional |
 | --- | --- | --- |
-| target | IUser | `no` |
+| target | IGuildUser | `no` |
 | chirality | Chirality | `no` |
 | bodyPart | Bodypart | `no` |
 | species | string | `no` |
@@ -77,7 +77,7 @@ Transforms the base colour of the given bodypart on the target user into the giv
 
 | Name | Type | Optional |
 | --- | --- | --- |
-| target | IUser | `no` |
+| target | IGuildUser | `no` |
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
 
@@ -87,7 +87,7 @@ Transforms the base colour of the given bodypart on the target user into the giv
 
 | Name | Type | Optional |
 | --- | --- | --- |
-| target | IUser | `no` |
+| target | IGuildUser | `no` |
 | chirality | Chirality | `no` |
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
@@ -123,7 +123,7 @@ Transforms the pattern on the given bodypart on the target user into the given p
 
 | Name | Type | Optional |
 | --- | --- | --- |
-| target | IUser | `no` |
+| target | IGuildUser | `no` |
 | bodyPart | Bodypart | `no` |
 | pattern | Pattern | `no` |
 | colour | Colour | `no` |
@@ -134,7 +134,7 @@ Transforms the pattern on the given bodypart on the target user into the given p
 
 | Name | Type | Optional |
 | --- | --- | --- |
-| target | IUser | `no` |
+| target | IGuildUser | `no` |
 | chirality | Chirality | `no` |
 | bodyPart | Bodypart | `no` |
 | pattern | Pattern | `no` |
@@ -169,7 +169,7 @@ Transforms the colour of the pattern on the given bodypart on the target user to
 
 | Name | Type | Optional |
 | --- | --- | --- |
-| target | IUser | `no` |
+| target | IGuildUser | `no` |
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |
 
@@ -179,7 +179,7 @@ Transforms the colour of the pattern on the given bodypart on the target user to
 
 | Name | Type | Optional |
 | --- | --- | --- |
-| target | IUser | `no` |
+| target | IGuildUser | `no` |
 | chirality | Chirality | `no` |
 | bodyPart | Bodypart | `no` |
 | colour | Colour | `no` |

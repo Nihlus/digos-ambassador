@@ -54,85 +54,19 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             private const string CharacterName = "Test";
             private const string AnotherCharacterName = "Test2";
 
-            private readonly ICommandContext _context;
-            private readonly Character _character;
-
-            public SetCharacterNameAsync()
-            {
-                var mockedUserObject = MockHelper.CreateDiscordGuildUser(0);
-
-                var mockedGuild = new Mock<IGuild>();
-                mockedGuild.Setup(g => g.Id).Returns(1);
-                mockedGuild.Setup
-                    (
-                        c =>
-                            c.GetUserAsync
-                            (
-                                It.IsAny<ulong>(),
-                                CacheMode.AllowDownload,
-                                null
-                            )
-                    )
-                    .Returns(Task.FromResult(mockedUserObject));
-
-                var mockedGuildObject = mockedGuild.Object;
-
-                var mockedContext = new Mock<ICommandContext>();
-                mockedContext.Setup(c => c.User).Returns(mockedUserObject);
-                mockedContext.Setup(c => c.Guild).Returns(mockedGuildObject);
-
-                var mockedMessage = new Mock<IUserMessage>();
-                mockedMessage.Setup(m => m.Author).Returns(mockedUserObject);
-
-                mockedContext.Setup(c => c.Message).Returns(mockedMessage.Object);
-
-                _context = mockedContext.Object;
-
-                _character = new Character
-                (
-                    new Server((long)mockedGuildObject.Id),
-                    new User((long)mockedUserObject.Id),
-                    CharacterName
-                );
-
-                var anotherCharacter = new Character
-                (
-                    new Server((long)mockedGuildObject.Id),
-                    new User((long)mockedUserObject.Id),
-                    AnotherCharacterName
-                );
-
-                this.Database.Characters.Update(_character);
-                this.Database.Characters.Update(anotherCharacter);
-                this.Database.SaveChanges();
-            }
-
-            protected override void RegisterServices(IServiceCollection serviceCollection)
-            {
-                base.RegisterServices(serviceCollection);
-
-                serviceCollection
-                    .AddScoped<DiscordService>()
-                    .AddScoped<UserFeedbackService>()
-                    .AddSingleton<DelayedActionService>()
-                    .AddScoped<InteractivityService>()
-                    .AddScoped<BaseSocketClient>(p => new DiscordSocketClient())
-                    .AddScoped<Random>();
-            }
+            private Character _character = null!;
 
             public override async Task InitializeAsync()
             {
-                this.Commands.AddTypeReader<Character>(new CharacterTypeReader());
-                await this.Commands.AddModuleAsync<CharacterCommands>(this.Services);
-
-                await base.InitializeAsync();
+                _character = await CreateCharacterAsync(name: CharacterName);
+                await CreateCharacterAsync(name: AnotherCharacterName);
             }
 
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNameIsNull()
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Characters.SetCharacterNameAsync(_context, _character, null);
+                var result = await this.Characters.SetCharacterNameAsync(_character, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -140,7 +74,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNameIsEmpty()
             {
-                var result = await this.Characters.SetCharacterNameAsync(_context, _character, string.Empty);
+                var result = await this.Characters.SetCharacterNameAsync(_character, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -148,23 +82,15 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfCharacterAlreadyHasThatName()
             {
-                var result = await this.Characters.SetCharacterNameAsync(_context, _character, CharacterName);
+                var result = await this.Characters.SetCharacterNameAsync(_character, CharacterName);
 
                 Assert.False(result.IsSuccess);
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNameIsNotUniqueForUser()
+            public async Task ReturnsUnsuccessfulResultIfNameIsNotUnique()
             {
-                var result = await this.Characters.SetCharacterNameAsync(_context, _character, AnotherCharacterName);
-
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task ReturnsUnsuccessfulResultIfNameIsInvalid()
-            {
-                var result = await this.Characters.SetCharacterNameAsync(_context, _character, "create");
+                var result = await this.Characters.SetCharacterNameAsync(_character, AnotherCharacterName);
 
                 Assert.False(result.IsSuccess);
             }
@@ -172,7 +98,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfNameIsAccepted()
             {
-                var result = await this.Characters.SetCharacterNameAsync(_context, _character, "Jeff");
+                var result = await this.Characters.SetCharacterNameAsync(_character, "Jeff");
 
                 Assert.True(result.IsSuccess);
             }
@@ -182,7 +108,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 const string validName = "Jeff";
 
-                await this.Characters.SetCharacterNameAsync(_context, _character, validName);
+                await this.Characters.SetCharacterNameAsync(_character, validName);
 
                 var character = this.Database.Characters.First();
                 Assert.Equal(validName, character.Name);

@@ -1,5 +1,5 @@
 //
-//  SetCharacterPronounsAsync.cs
+//  SetCharacterPronounAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -41,12 +41,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public partial class CharacterServiceTests
     {
-        public class SetCharacterPronounAsync : CharacterServiceTestBase
+        public class SetCharacterPronounsAsync : CharacterServiceTestBase
         {
             private const string PronounFamily = "Feminine";
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
 
-            private User _owner = null!;
             private Character _character = null!;
 
             public override async Task InitializeAsync()
@@ -54,14 +52,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 this.Services.GetRequiredService<PronounService>().WithPronounProvider(new FemininePronounProvider());
                 this.Services.GetRequiredService<PronounService>().WithPronounProvider(new ZeHirPronounProvider());
 
-                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
-                _character = new Character(new Server(0), _owner, "Dummy")
-                {
-                    PronounProviderFamily = PronounFamily
-                };
-
-                this.Database.Characters.Update(_character);
-                await this.Database.SaveChangesAsync();
+                _character = await CreateCharacterAsync(pronouns: PronounFamily);
             }
 
             [Fact]

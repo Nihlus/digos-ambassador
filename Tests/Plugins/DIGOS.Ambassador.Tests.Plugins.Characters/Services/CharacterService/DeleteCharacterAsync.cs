@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
 using Xunit;
@@ -38,18 +39,21 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     {
         public class DeleteCharacterAsync : CharacterServiceTestBase
         {
-            private const string CharacterName = "Test";
-
-            private readonly IUser _owner = MockHelper.CreateDiscordUser(0);
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
-
             private Character _character = null!;
 
             public override async Task InitializeAsync()
             {
-                var user = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-
-                _character = new Character(new Server((long)_guild.Id), user, CharacterName);
+                _character = new Character
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
 
                 this.Database.Characters.Update(_character);
 

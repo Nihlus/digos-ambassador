@@ -1,5 +1,5 @@
 //
-//  GetCurrentCharacterAsync.cs
+//  MakeCharacterCurrentAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
@@ -39,54 +38,38 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public static partial class CharacterServiceTests
     {
-        public class GetCurrentCharacterAsync : CharacterServiceTestBase
+        public class MakeCharacterCurrentAsync : CharacterServiceTestBase
         {
-            private readonly Character _character;
+            private Character _character = null!;
 
-            public GetCurrentCharacterAsync()
+            public override async Task InitializeAsync()
             {
-                _character = new Character
-                (
-                    this.DefaultOwner,
-                    this.DefaultServer,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty
-                );
-
-                this.Database.Characters.Update(_character);
-                this.Database.SaveChanges();
+                _character = await CreateCharacterAsync();
             }
 
             [Fact]
-            public async Task ReturnsUnsuccessfulResultIfUserDoesNotHaveAnActiveCharacter()
+            public async Task ReturnsSuccessfulResultIfCharacterIsNotCurrent()
             {
-                var result = await this.Characters.GetCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
-
-                Assert.False(result.IsSuccess);
-            }
-
-            [Fact]
-            public async Task ReturnsSuccessfulResultIfUserHasActiveCharacter()
-            {
-                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
-
-                var result = await this.Characters.GetCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
+                var result = await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
                 Assert.True(result.IsSuccess);
             }
 
             [Fact]
-            public async Task ReturnsCorrectCharacter()
+            public async Task MakesCharacterCurrentOnCorrectServer()
             {
                 await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
 
-                var result = await this.Characters.GetCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
+                Assert.True(_character.IsCurrent);
+            }
 
-                Assert.Same(_character, result.Entity);
+            [Fact]
+            public async Task ReturnsUnsuccessfulResultIfCharacterIsAlreadyCurrent()
+            {
+                await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
+                var result = await this.Characters.MakeCharacterCurrentAsync(this.DefaultOwner, this.DefaultServer, _character);
+
+                Assert.False(result.IsSuccess);
             }
         }
     }

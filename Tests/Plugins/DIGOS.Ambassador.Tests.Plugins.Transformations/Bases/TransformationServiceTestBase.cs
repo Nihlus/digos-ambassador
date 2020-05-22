@@ -103,6 +103,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();
+
+            var pronouns = serviceProvider.GetRequiredService<PronounService>();
+            pronouns.WithPronounProvider(new TheyPronounProvider());
         }
 
         /// <inheritdoc />

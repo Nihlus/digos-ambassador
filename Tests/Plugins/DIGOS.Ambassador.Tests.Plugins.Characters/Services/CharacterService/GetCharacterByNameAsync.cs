@@ -1,5 +1,5 @@
 //
-//  GetNamedCharacterAsync.cs
+//  GetCharacterByNameAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -37,20 +37,25 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public static partial class CharacterServiceTests
     {
-        public class GetNamedCharacterAsync : CharacterServiceTestBase
+        public class GetCharacterByNameAsync : CharacterServiceTestBase
         {
             private const string CharacterName = "Test";
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(0);
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
 
-            private User _owner = null!;
             private Character _character = null!;
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
-
-                _character = new Character(new Server((long)_guild.Id), _owner, CharacterName);
+                _character = new Character
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    CharacterName,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
 
                 this.Database.Characters.Update(_character);
                 await this.Database.SaveChangesAsync();
@@ -59,7 +64,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNoCharacterWithThatNameExists()
             {
-                var result = await this.Characters.GetNamedCharacterAsync("NonExistant", _guild);
+                var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, "NonExistant");
 
                 Assert.False(result.IsSuccess);
             }
@@ -67,12 +72,22 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfMoreThanOneCharacterWithThatNameExists()
             {
-                var anotherCharacter = _character = new Character(new Server((long)_guild.Id), _owner, CharacterName);
+                var anotherCharacter = new Character
+                (
+                    new User(1),
+                    this.DefaultServer,
+                    CharacterName,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
 
                 this.Database.Characters.Update(anotherCharacter);
                 await this.Database.SaveChangesAsync();
 
-                var result = await this.Characters.GetNamedCharacterAsync(CharacterName, _guild);
+                var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
 
                 Assert.False(result.IsSuccess);
             }
@@ -80,7 +95,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfASingleCharacterWithThatNameExists()
             {
-                var result = await this.Characters.GetNamedCharacterAsync(CharacterName, _guild);
+                var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
 
                 Assert.True(result.IsSuccess);
             }
@@ -88,7 +103,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsCorrectCharacter()
             {
-                var result = await this.Characters.GetNamedCharacterAsync(CharacterName, _guild);
+                var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
 
                 Assert.Same(_character, result.Entity);
             }

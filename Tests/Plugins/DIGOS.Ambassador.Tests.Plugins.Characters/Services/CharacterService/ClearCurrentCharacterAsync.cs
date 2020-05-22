@@ -1,5 +1,5 @@
 //
-//  HasActiveCharacterOnServerAsync.cs
+//  ClearCurrentCharacterAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -24,8 +24,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -36,53 +34,56 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public static partial class CharacterServiceTests
     {
-        public class HasActiveCharacterOnServerAsync : CharacterServiceTestBase
+        public class ClearCurrentCharacterAsync : CharacterServiceTestBase
         {
-            private readonly IUser _owner = MockHelper.CreateDiscordUser(0);
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
+            private readonly Character _character;
 
-            private readonly User _user;
-
-            public HasActiveCharacterOnServerAsync()
+            public ClearCurrentCharacterAsync()
             {
-                _user = new User((long)_owner.Id);
+                _character = new Character
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
+
+                this.Database.Characters.Update(_character);
+                this.Database.SaveChangesAsync();
             }
 
             [Fact]
-            public async Task ReturnsFalseIfUserHasNoCharacters()
+            public async Task ReturnsUnsuccessfulResultIfCharacterIsNotCurrent()
             {
-                var result = await this.Characters.HasActiveCharacterOnServerAsync(_user, _guild);
+                var result = await this.Characters.ClearCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
-                Assert.False(result);
+                Assert.False(result.IsSuccess);
             }
 
             [Fact]
-            public async Task ReturnsFalseIfUserHasNoActiveCharacter()
+            public async Task ReturnsSuccessfulResultIfCharacterIsCurrent()
             {
-                var character = new Character(new Server((long)_guild.Id), _user, "Dummy");
-
-                this.Database.Characters.Update(character);
+                _character.IsCurrent = true;
                 await this.Database.SaveChangesAsync();
 
-                var result = await this.Characters.HasActiveCharacterOnServerAsync(_user, _guild);
+                var result = await this.Characters.ClearCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
-                Assert.False(result);
+                Assert.True(result.IsSuccess);
             }
 
             [Fact]
-            public async Task ReturnsTrueIfUserHasAnActiveCharacter()
+            public async Task RemovesCorrectServerFromCharacter()
             {
-                var character = new Character(new Server((long)_guild.Id), _user, "Dummy")
-                {
-                    IsCurrent = true
-                };
-
-                this.Database.Characters.Update(character);
+                _character.IsCurrent = true;
                 await this.Database.SaveChangesAsync();
 
-                var result = await this.Characters.HasActiveCharacterOnServerAsync(_user, _guild);
+                await this.Characters.ClearCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
-                Assert.True(result);
+                Assert.False(_character.IsCurrent);
             }
         }
     }

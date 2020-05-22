@@ -107,7 +107,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
 
-                var character = new Character(new Server(0), owner, "Test", pronounProviderFamily: "Feminine");
+                var character = new Character
+                (
+                    owner,
+                    new Server(0),
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    "They"
+                );
 
                 this.CharacterDatabase.Characters.Update(character);
                 await this.CharacterDatabase.SaveChangesAsync();

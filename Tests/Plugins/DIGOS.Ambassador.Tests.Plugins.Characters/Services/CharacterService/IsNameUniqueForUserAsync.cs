@@ -1,5 +1,5 @@
 //
-//  SetCharacterRoleAccessAsync.cs
+//  IsNameUniqueForUserAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -22,6 +22,8 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
 using Xunit;
@@ -34,45 +36,29 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public partial class CharacterServiceTests
     {
-        public class SetCharacterRoleAccessAsync : CharacterServiceTestBase
+        public class IsNameUniqueForUserAsync : CharacterServiceTestBase
         {
-            private readonly IRole _discordRole;
-
-            public SetCharacterRoleAccessAsync()
-            {
-                var guild = MockHelper.CreateDiscordGuild(0);
-                _discordRole = MockHelper.CreateDiscordRole(1, guild);
-            }
+            private const string CharacterName = "Test";
 
             public override async Task InitializeAsync()
             {
-                await this.Characters.CreateCharacterRoleAsync
-                (
-                    _discordRole,
-                    RoleAccess.Open
-                );
+                await CreateCharacterAsync(name: CharacterName);
             }
 
             [Fact]
-            public async Task CanSetAccess()
+            public async Task ReturnsFalseIfUserHasACharacterWithThatName()
             {
-                var getExistingRoleResult = await this.Characters.GetCharacterRoleAsync
-                (
-                    _discordRole
-                );
+                var result = await this.Characters.IsNameUniqueForUserAsync(this.DefaultOwner, this.DefaultServer, CharacterName);
 
-                var existingRole = getExistingRoleResult.Entity;
+                Assert.False(result);
+            }
 
-                Assert.Equal(RoleAccess.Open, existingRole.Access);
+            [Fact]
+            public async Task ReturnsTrueIfUserDoesNotHaveACharacterWithThatName()
+            {
+                var result = await this.Characters.IsNameUniqueForUserAsync(this.DefaultOwner, this.DefaultServer, "AnotherName");
 
-                var result = await this.Characters.SetCharacterRoleAccessAsync
-                (
-                    existingRole,
-                    RoleAccess.Restricted
-                );
-
-                Assert.True(result.IsSuccess);
-                Assert.Equal(RoleAccess.Restricted, existingRole.Access);
+                Assert.True(result);
             }
         }
     }

@@ -42,22 +42,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         public class SetCharacterSummaryAsync : CharacterServiceTestBase
         {
             private const string Summary = "A cool person";
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
 
-            private User _owner = null!;
             private Character _character = null!;
 
             public override async Task InitializeAsync()
             {
-                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
-
-                _character = new Character(new Server(0), _owner, "Dummy")
-                {
-                    Summary = Summary
-                };
-
-                this.Database.Characters.Update(_character);
-                await this.Database.SaveChangesAsync();
+                _character = await CreateCharacterAsync(summary: Summary);
             }
 
             [Fact]

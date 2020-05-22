@@ -1,5 +1,5 @@
 //
-//  SetDefaultCharacterForUserAsync.cs
+//  ClearDefaultCharacterAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -24,10 +24,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using DIGOS.Ambassador.Tests.Utility;
-using Discord;
-using Discord.Commands;
-using Moq;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -39,85 +35,75 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public partial class CharacterServiceTests
     {
-        public class SetDefaultCharacterForUserAsync : CharacterServiceTestBase
+        public class ClearDefaultCharacterAsync : CharacterServiceTestBase
         {
             private const string CharacterName = "Test";
 
-            private readonly IUser _owner = MockHelper.CreateDiscordUser(0);
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
-
-            private User _user = null!;
             private Character _character = null!;
 
             public override async Task InitializeAsync()
             {
-                _user = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-
-                _character = new Character(new Server((long)_guild.Id), _user, CharacterName);
+                _character = new Character
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    CharacterName,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
 
                 this.Database.Characters.Update(_character);
                 await this.Database.SaveChangesAsync();
             }
 
             [Fact]
-            public async Task CanSetDefaultCharacter()
+            public async Task CanClearDefaultCharacter()
             {
-                var contextMock = new Mock<ICommandContext>();
-                contextMock.Setup(c => c.Message.Author.Id).Returns(_owner.Id);
-                contextMock.Setup(c => c.Guild).Returns(_guild);
-
-                var context = contextMock.Object;
-
-                var result = await this.Characters.SetDefaultCharacterForUserAsync
+                await this.Characters.SetDefaultCharacterAsync
                 (
-                    context,
-                    _character,
-                    _user
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    _character
+                );
+
+                var result = await this.Characters.ClearDefaultCharacterAsync
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer
                 );
 
                 Assert.True(result.IsSuccess);
 
                 var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
                 (
-                    _user,
-                    _guild
+                    this.DefaultOwner,
+                    this.DefaultServer
                 );
 
-                Assert.Same(_character, defaultCharacterResult.Entity);
+                Assert.False(defaultCharacterResult.IsSuccess);
             }
 
             [Fact]
-            public async Task ReturnsErrorIfDefaultCharacterIsAlreadySetToTheSameCharacter()
+            public async Task ReturnsErrorIfDefaultCharacterIsNotSet()
             {
-                var contextMock = new Mock<ICommandContext>();
-                contextMock.Setup(c => c.Message.Author.Id).Returns(_owner.Id);
-                contextMock.Setup(c => c.Guild).Returns(_guild);
-
-                var context = contextMock.Object;
-
-                await this.Characters.SetDefaultCharacterForUserAsync
+                var result = await this.Characters.ClearDefaultCharacterAsync
                 (
-                    context,
-                    _character,
-                    _user
-                );
-
-                var result = await this.Characters.SetDefaultCharacterForUserAsync
-                (
-                    context,
-                    _character,
-                    _user
+                    this.DefaultOwner,
+                    this.DefaultServer
                 );
 
                 Assert.False(result.IsSuccess);
 
                 var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
                 (
-                    _user,
-                    _guild
+                    this.DefaultOwner,
+                    this.DefaultServer
                 );
 
-                Assert.Same(_character, defaultCharacterResult.Entity);
+                Assert.False(defaultCharacterResult.IsSuccess);
             }
         }
     }

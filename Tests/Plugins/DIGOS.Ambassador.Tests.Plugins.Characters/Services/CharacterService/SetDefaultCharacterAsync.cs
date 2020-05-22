@@ -1,5 +1,5 @@
 //
-//  ClearCharacterRoleAsync.cs
+//  SetDefaultCharacterAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -23,8 +23,11 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
+using Discord.Commands;
+using Moq;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -36,62 +39,62 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public partial class CharacterServiceTests
     {
-        public class ClearCharacterRoleAsync : CharacterServiceTestBase
+        public class SetDefaultCharacterAsync : CharacterServiceTestBase
         {
-            private const string CharacterName = "Test";
-
-            private readonly IUser _owner = MockHelper.CreateDiscordUser(0);
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
-
             private Character _character = null!;
-            private CharacterRole _role = null!;
 
             public override async Task InitializeAsync()
             {
-                var user = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-
-                _character = new Character(new Server((long)_guild.Id), user, CharacterName);
-
-                this.Database.Characters.Update(_character);
-
-                var createRoleResult = await this.Characters.CreateCharacterRoleAsync
-                (
-                    MockHelper.CreateDiscordRole(2, _guild),
-                    RoleAccess.Open
-                );
-
-                _role = createRoleResult.Entity;
-
-                await this.Database.SaveChangesAsync();
+                _character = await CreateCharacterAsync();
             }
 
             [Fact]
-            public async Task CanClearCharacterRole()
+            public async Task CanSetDefaultCharacter()
             {
-                await this.Characters.SetCharacterRoleAsync
+                var result = await this.Characters.SetDefaultCharacterAsync
                 (
-                    _character,
-                    _role
-                );
-
-                var result = await this.Characters.ClearCharacterRoleAsync
-                (
+                    this.DefaultOwner,
+                    this.DefaultServer,
                     _character
                 );
 
                 Assert.True(result.IsSuccess);
-                Assert.Null(_character.Role);
+
+                var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer
+                );
+
+                Assert.Same(_character, defaultCharacterResult.Entity);
             }
 
             [Fact]
-            public async Task ReturnsErrorIfCharacterDoesNotHaveARole()
+            public async Task ReturnsErrorIfDefaultCharacterIsAlreadySetToTheSameCharacter()
             {
-                var result = await this.Characters.ClearCharacterRoleAsync
+                await this.Characters.SetDefaultCharacterAsync
                 (
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    _character
+                );
+
+                var result = await this.Characters.SetDefaultCharacterAsync
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer,
                     _character
                 );
 
                 Assert.False(result.IsSuccess);
+
+                var defaultCharacterResult = await this.Characters.GetDefaultCharacterAsync
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer
+                );
+
+                Assert.Same(_character, defaultCharacterResult.Entity);
             }
         }
     }

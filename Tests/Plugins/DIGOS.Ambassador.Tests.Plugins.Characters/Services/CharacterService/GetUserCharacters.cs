@@ -20,11 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
+using MoreLinq;
 using Xunit;
 
 #pragma warning disable SA1600
@@ -37,88 +40,115 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     {
         public class GetUserCharacters : CharacterServiceTestBase
         {
-            private readonly IUser _owner = MockHelper.CreateDiscordUser(0);
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(1);
-
-            private readonly User _user;
-
-            public GetUserCharacters()
-            {
-                _user = new User((long)_owner.Id);
-            }
-
             [Fact]
             public void ReturnsEmptySetFromEmptyDatabase()
             {
-                Assert.Empty(this.Characters.GetUserCharacters(_user, _guild));
+                Assert.Empty(this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer));
             }
 
             [Fact]
             public void ReturnsEmptySetFromDatabaseWithCharactersWithNoMatchingOwner()
             {
-                var character = new Character(new Server((long)_guild.Id), new User(1), "Dummy");
+                var anotherCharacter = new Character
+                (
+                    new User(1),
+                    this.DefaultServer,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
 
-                this.Database.Characters.Update(character);
+                this.Database.Characters.Update(anotherCharacter);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(_user, _guild);
+                var result = this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer);
                 Assert.Empty(result);
             }
 
             [Fact]
-            public void ReturnsNEmptySetFromDatabaseWithCharactersWithMatchingOwnerButNoMatchingServer()
+            public void ReturnsEmptySetFromDatabaseWithCharactersWithMatchingOwnerButNoMatchingServer()
             {
-                var character = new Character(new Server(0), _user, "Dummy");
+                var anotherCharacter = new Character
+                (
+                    this.DefaultOwner,
+                    new Server(2),
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
 
-                this.Database.Characters.Update(character);
+                this.Database.Characters.Update(anotherCharacter);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(_user, _guild);
+                var result = this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer);
                 Assert.Empty(result);
             }
 
             [Fact]
             public void ReturnsNonEmptySetFromDatabaseWithCharactersWithMatchingOwner()
             {
-                var character = new Character(new Server((long)_guild.Id), _user, "Dummy");
+                var anotherCharacter = new Character
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
 
-                this.Database.Characters.Update(character);
+                this.Database.Characters.Update(anotherCharacter);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(_user, _guild);
+                var result = this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer);
                 Assert.NotEmpty(result);
             }
 
             [Fact]
             public void ReturnsCorrectCharacterFromDatabase()
             {
-                var character = new Character(new Server((long)_guild.Id), _user, "Dummy");
+                var anotherCharacter = new Character
+                (
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
+                );
 
-                this.Database.Characters.Update(character);
+                this.Database.Characters.Update(anotherCharacter);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(_user, _guild);
-                Assert.Collection(result, c => Assert.Same(character, c));
+                var result = this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer);
+                Assert.Collection(result, c => Assert.Same(anotherCharacter, c));
             }
 
             [Fact]
-            public void ReturnsCorrectMultipleCharactersFromDatabase()
+            public async Task ReturnsCorrectMultipleCharactersFromDatabase()
             {
-                var character1 = new Character(new Server((long)_guild.Id), _user, "Dummy1");
+                var character1 = await CreateCharacterAsync(name: "dummy1");
+                var character2 = await CreateCharacterAsync(name: "dummy2");
 
-                var character2 = new Character(new Server((long)_guild.Id), _user, "Dummy2");
+                this.Database.Update(character1);
+                this.Database.Update(character2);
+                await this.Database.SaveChangesAsync();
 
-                this.Database.Characters.Update(character1);
-                this.Database.Characters.Update(character2);
-                this.Database.SaveChanges();
+                var result = this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer);
 
-                var result = this.Characters.GetUserCharacters(_user, _guild);
-                Assert.Collection
-                (
-                    result,
-                    c => Assert.Same(character1, c),
-                    c => Assert.Same(character2, c)
-                );
+                Assert.Equal(2, result.Count());
+                Assert.Contains(character1, result);
+                Assert.Contains(character2, result);
             }
         }
     }

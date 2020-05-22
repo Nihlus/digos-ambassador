@@ -105,8 +105,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             protected override async Task InitializeTestAsync()
             {
-                this.Services.GetRequiredService<PronounService>().WithPronounProvider(new TheyPronounProvider());
-
                 // Ensure owner is opted into transformations
                 var protection = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (
@@ -118,7 +116,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                var character = new Character(new Server(0), owner, "Test");
+                var character = new Character
+                (
+                    owner,
+                    new Server(0),
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    "They"
+                );
 
                 this.CharacterDatabase.Characters.Update(character);
                 await this.CharacterDatabase.SaveChangesAsync();

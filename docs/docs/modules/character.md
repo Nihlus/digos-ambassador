@@ -179,14 +179,14 @@ Adds a linked image to a character's gallery.
 
 ### *remove-image*
 #### Overloads
-**`!character remove-image mickey John` (or `character delete-image`)**
+**`!character remove-image mickey "placeholder"` (or `character delete-image`)**
 
 Removes an image from a character's gallery.
 
 | Name | Type | Optional |
 | --- | --- | --- |
 | character | Character | `no` |
-| imageName | string | `no` |
+| image | Image | `no` |
 
 ---
 

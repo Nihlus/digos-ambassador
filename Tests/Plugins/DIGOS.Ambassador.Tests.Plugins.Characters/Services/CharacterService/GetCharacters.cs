@@ -40,51 +40,61 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     {
         public class GetCharacters : CharacterServiceTestBase
         {
-            private readonly IGuild _guild = MockHelper.CreateDiscordGuild(0);
-            private readonly IUser _user = MockHelper.CreateDiscordUser(0);
-
-            private User _owner = null!;
-
-            public override async Task InitializeAsync()
-            {
-                _owner = (await this.Users.GetOrRegisterUserAsync(_user)).Entity;
-            }
-
             [Fact]
             public void ReturnsNoCharactersFromEmptyDatabase()
             {
-                var result = this.Characters.GetCharacters(_guild);
+                var result = this.Characters.GetCharacters(this.DefaultServer);
 
                 Assert.Empty(result);
             }
 
             [Fact]
-            public void ReturnsSingleCharacterFromSingleCharacterOnServer()
+            public void ReturnsSingleCharacterFromSingleCharacter()
             {
                 this.Database.Characters.Update
                 (
-                    new Character(new Server((long)_guild.Id), _owner, "dummy")
+                    new Character
+                    (
+                        this.DefaultOwner,
+                        this.DefaultServer,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty
+                    )
                 );
 
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetCharacters(_guild);
+                var result = this.Characters.GetCharacters(this.DefaultServer);
 
                 Assert.NotEmpty(result);
                 Assert.Single(result);
             }
 
             [Fact]
-            public void ReturnsNoCharacterFromSingleCharacterOnServerWhenRequestedServerIsDifferent()
+            public void ReturnsNoCharacterFromSingleCharacterWhenRequestedServerIsDifferent()
             {
                 this.Database.Characters.Update
                 (
-                    new Character(new Server(1), _owner, "dummy")
+                    new Character
+                    (
+                        this.DefaultOwner,
+                        new Server(2),
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty
+                    )
                 );
 
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetCharacters(_guild);
+                var result = this.Characters.GetCharacters(this.DefaultServer);
 
                 Assert.Empty(result);
             }
@@ -94,22 +104,52 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 this.Database.Characters.Update
                 (
-                    new Character(new Server(1), _owner, "dummy")
+                    new Character
+                    (
+                        this.DefaultOwner,
+                        new Server(1),
+                        "dummy",
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty
+                    )
                 );
 
                 this.Database.Characters.Update
                 (
-                    new Character(new Server((long)_guild.Id), _owner, "dummy1")
+                    new Character
+                    (
+                        this.DefaultOwner,
+                        this.DefaultServer,
+                        "dummy1",
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty
+                    )
                 );
 
                 this.Database.Characters.Update
                 (
-                    new Character(new Server((long)_guild.Id), _owner, "dummy2")
+                    new Character
+                    (
+                        this.DefaultOwner,
+                        this.DefaultServer,
+                        "dummy2",
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty
+                    )
                 );
 
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetCharacters(_guild);
+                var result = this.Characters.GetCharacters(this.DefaultServer);
 
                 Assert.NotEmpty(result);
                 Assert.Equal(2, result.Count());
