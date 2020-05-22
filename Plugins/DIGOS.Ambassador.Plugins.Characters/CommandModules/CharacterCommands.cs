@@ -736,7 +736,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         /// Removes the named image from the given character.
         /// </summary>
         /// <param name="character">The character to remove the image from.</param>
-        /// <param name="image">The image to remove.</param>
+        /// <param name="imageName">The image to remove.</param>
         [UsedImplicitly]
         [Alias("remove-image", "delete-image")]
         [Command("remove-image")]
@@ -747,9 +747,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         (
             [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
             Character character,
-            Image image
+            string imageName
         )
         {
+            var image = character.Images.FirstOrDefault(i => string.Equals(imageName.ToLower(), i.Name.ToLower()));
+            if (image is null)
+            {
+                await _feedback.SendErrorAsync(this.Context, "The character doesn't have an image with that name.");
+                return;
+            }
+
             var removeImageResult = await _characters.RemoveImageFromCharacterAsync(character, image);
             if (!removeImageResult.IsSuccess)
             {
