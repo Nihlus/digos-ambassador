@@ -74,11 +74,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             var autoroles = tickServices.GetRequiredService<AutoroleService>();
             var autoroleUpdates = tickServices.GetRequiredService<AutoroleUpdateService>();
 
-            foreach (var guild in this.Client.Guilds)
+            foreach (var autorole in await autoroles.GetAutoroles().ToListAsync(ct))
             {
                 if (ct.IsCancellationRequested)
                 {
                     return;
+                }
+
+                var guild = this.Client.GetGuild((ulong)autorole.Server.DiscordID);
+                if (guild is null)
+                {
+                    continue;
                 }
 
                 var botUser = guild.GetUser(this.Client.CurrentUser.Id);
@@ -94,46 +100,31 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                     continue;
                 }
 
-                var guildAutoroles = await autoroles.GetAutoroles(guild).ToListAsync(ct);
-
-                if (!guildAutoroles.Any())
-                {
-                    continue;
-                }
-
                 if (!guild.HasAllMembers)
                 {
                     await guild.DownloadUsersAsync();
                 }
 
-                foreach (var autorole in guildAutoroles)
+                foreach (var user in guild.Users.Where(u => !u.IsBot).Where(u => !u.IsWebhook))
                 {
                     if (ct.IsCancellationRequested)
                     {
                         return;
                     }
 
-                    foreach (var user in guild.Users.Where(u => !u.IsBot).Where(u => !u.IsWebhook))
+                    var updateResult = await autoroleUpdates.UpdateAutoroleForUserAsync(autorole, user);
+                    if (!updateResult.IsSuccess)
                     {
-                        if (ct.IsCancellationRequested)
-                        {
-                            return;
-                        }
+                        this.Log.LogError(updateResult.Exception, updateResult.ErrorReason);
+                        continue;
+                    }
 
-                        var updateResult = await autoroleUpdates.UpdateAutoroleForUserAsync(autorole, user);
-                        if (!updateResult.IsSuccess)
+                    switch (updateResult.Status)
+                    {
+                        case AutoroleUpdateStatus.RequiresAffirmation:
                         {
-                            this.Log.LogError(updateResult.Exception, updateResult.ErrorReason);
-                            continue;
-                        }
-
-                        switch (updateResult.Status)
-                        {
-                            case AutoroleUpdateStatus.RequiresAffirmation:
-                            {
-                                await NotifyUserNeedsAffirmation(autoroles, guild, autorole, user);
-                                break;
-                            }
+                            await NotifyUserNeedsAffirmation(autoroles, guild, autorole, user);
+                            break;
                         }
                     }
                 }

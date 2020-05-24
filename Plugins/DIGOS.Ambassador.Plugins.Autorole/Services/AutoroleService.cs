@@ -473,13 +473,22 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         }
 
         /// <summary>
-        /// Gets all autoroles in the database.
+        /// Gets all autoroles in the database, scoped to the given server.
         /// </summary>
         /// <param name="guild">The Discord guild.</param>
         /// <returns>The autoroles.</returns>
         public IQueryable<AutoroleConfiguration> GetAutoroles(IGuild guild)
         {
             return _database.Autoroles.AsQueryable().Where(a => a.Server.DiscordID == (long)guild.Id);
+        }
+
+        /// <summary>
+        /// Gets all autoroles in the database.
+        /// </summary>
+        /// <returns>The autoroles.</returns>
+        public IQueryable<AutoroleConfiguration> GetAutoroles()
+        {
+            return _database.Autoroles.AsQueryable();
         }
 
         /// <summary>
