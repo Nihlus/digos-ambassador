@@ -511,9 +511,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 everyoneRole = guild.EveryoneRole;
             }
 
-            await SetChannelVisibilityForRoleAsync(channel, everyoneRole, roleplay.IsActive);
-
-            return ModifyEntityResult.FromSuccess();
+            return await SetChannelVisibilityForRoleAsync
+            (
+                channel,
+                everyoneRole,
+                roleplay.IsActive && roleplay.IsPublic
+            );
         }
 
         /// <summary>
