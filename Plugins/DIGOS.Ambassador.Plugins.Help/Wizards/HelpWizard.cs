@@ -140,7 +140,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
             var currentContentLength = 0;
             foreach (var module in _modules)
             {
-                var moduleContentLength = module.Name.Length + module.Summary.Length;
+                var moduleContentLength = module.Name.Length + (module.Summary?.Length ?? 0);
                 if (currentPage.Count >= 3 || currentContentLength + moduleContentLength > 1300)
                 {
                     pages.Add(currentPage);
@@ -149,7 +149,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
                     currentContentLength = 0;
                 }
 
-                var ebf = new EmbedFieldBuilder().WithName(module.Name).WithValue(module.Summary);
+                var ebf = new EmbedFieldBuilder().WithName(module.Name).WithValue(module.Summary ?? "No summary set.");
                 currentPage.Add(ebf);
 
                 currentContentLength += moduleContentLength;

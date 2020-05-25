@@ -34,6 +34,8 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
     /// <summary>
     /// Contains droning commands.
     /// </summary>
+    [Name("drone")]
+    [Summary("Contains some commands to perform actions with drones.")]
     public class DroneCommands : ModuleBase
     {
         private readonly ContentService _content;
