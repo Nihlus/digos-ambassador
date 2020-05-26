@@ -313,6 +313,20 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
+            var getNewCharacter = await _characters.GetCurrentCharacterAsync(user, server);
+            if (!getNewCharacter.IsSuccess)
+            {
+                return ModifyEntityResult.FromSuccess();
+            }
+
+            var newCharacter = getNewCharacter.Entity;
+
+            // First, quick sanity check - do we need to remove the role?
+            if (!(previousCharacter?.Role is null) && newCharacter.Role == previousCharacter.Role)
+            {
+                return ModifyEntityResult.FromSuccess();
+            }
+
             // Clear any old role
             if (!(previousCharacter?.Role is null))
             {
@@ -327,19 +341,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 }
             }
 
-            // Apply any new role
-            var getNewCharacter = await _characters.GetCurrentCharacterAsync(user, server);
-            if (!getNewCharacter.IsSuccess)
-            {
-                return ModifyEntityResult.FromSuccess();
-            }
-
-            var newCharacter = getNewCharacter.Entity;
             if (newCharacter.Role is null)
             {
                 return ModifyEntityResult.FromSuccess();
             }
 
+            // Apply any new role
             var newRole = guildUser.Guild.GetRole((ulong)newCharacter.Role.DiscordID);
             if (newRole is null)
             {
