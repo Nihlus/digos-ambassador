@@ -308,6 +308,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             IUser discordUser
         )
         {
+            if (!autorole.RequiresConfirmation)
+            {
+                return RetrieveEntityResult<AutoroleConfirmation>.FromError
+                (
+                    "The autorole does not require confirmation."
+                );
+            }
+
             var existingConfirmation = await _database.AutoroleConfirmations.AsQueryable().FirstOrDefaultAsync
             (
                 ac => ac.User.DiscordID == (long)discordUser.Id
