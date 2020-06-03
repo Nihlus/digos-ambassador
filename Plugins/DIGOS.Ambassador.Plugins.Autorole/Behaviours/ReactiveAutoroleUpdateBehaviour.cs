@@ -213,10 +213,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 yield break;
             }
 
-            var relevantAutoroles = guildAutoroles
-            .Where
-            (
-                a => a.Conditions.Any
+            foreach (var autorole in guildAutoroles)
+            {
+                var isRelevant = autorole.Conditions.Any
                 (
                     c =>
                     {
@@ -242,18 +241,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
                         return true;
                     }
-                )
-            )
-            .ToList();
+                );
 
-            if (relevantAutoroles.Count == 0)
-            {
-                yield break;
-            }
-
-            foreach (var relevantAutorole in relevantAutoroles)
-            {
-                yield return relevantAutorole;
+                if (isRelevant)
+                {
+                    yield return autorole;
+                }
             }
         }
 
