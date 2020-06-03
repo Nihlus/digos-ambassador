@@ -34,6 +34,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -351,6 +352,50 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             (
                 this.Context,
                 requireAffirmation ? "Affirmation is now required." : "Affirmation is no longer required."
+            );
+        }
+
+        /// <summary>
+        /// Lists users that haven't been confirmed yet for the given autorole.
+        /// </summary>
+        /// <param name="autorole">The autorole.</param>
+        [UsedImplicitly]
+        [Alias("unconfirmed")]
+        [Command("unconfirmed")]
+        [Summary("Lists users that haven't been confirmed yet for the given autorole.")]
+        [RequireContext(ContextType.Guild)]
+        [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
+        public async Task ListUnconfirmedUsersAsync(AutoroleConfiguration autorole)
+        {
+            var getUsers = _autoroles.GetUnconfirmedUsers(autorole);
+            if (!getUsers.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, getUsers.ErrorReason);
+                return;
+            }
+
+            var users = await getUsers.Entity.ToListAsync();
+            var discordUsers = await Task.WhenAll
+            (
+                users.Select(u => this.Context.Guild.GetUserAsync((ulong)u.DiscordID))
+            );
+
+            var listMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            (
+                _feedback,
+                _interactivity,
+                this.Context.User,
+                discordUsers,
+                u => $"{u.Nickname} ({u.Username}#{u.Discriminator} | {u.Id})",
+                u => "Not confirmed",
+                "There are no users that haven't been confirmed for that role."
+            );
+
+            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            (
+                this.Context.Channel,
+                listMessage,
+                TimeSpan.FromMinutes(5)
             );
         }
     }

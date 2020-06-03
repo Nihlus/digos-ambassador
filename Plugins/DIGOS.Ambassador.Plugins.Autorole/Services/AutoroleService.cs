@@ -25,6 +25,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord;
@@ -620,6 +621,31 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Gets a query representing the users that have qualified, but have not yet been confirmed for the given
+        /// role.
+        /// </summary>
+        /// <param name="autoroleConfiguration">The autorole.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public RetrieveEntityResult<IQueryable<User>> GetUnconfirmedUsers
+        (
+            AutoroleConfiguration autoroleConfiguration
+        )
+        {
+            if (!autoroleConfiguration.RequiresConfirmation)
+            {
+                return RetrieveEntityResult<IQueryable<User>>.FromError("The autorole doesn't require confirmation.");
+            }
+
+            return RetrieveEntityResult<IQueryable<User>>.FromSuccess
+            (
+                _database.AutoroleConfirmations.AsQueryable()
+                    .Where(ac => ac.Autorole == autoroleConfiguration)
+                    .Where(ac => !ac.IsConfirmed)
+                    .Select(ac => ac.User)
+            );
         }
     }
 }
