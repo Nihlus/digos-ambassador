@@ -145,6 +145,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             var dedicatedChannel = guild.GetTextChannel((ulong)roleplay.DedicatedChannelID);
             if (dedicatedChannel is null)
             {
+                // Something's gone wrong in the database. Who the fuck knows why. We'll do an extra delete to be
+                // on the safe side.
+                await dedicatedChannels.DeleteChannelAsync(guild, roleplay);
+
                 return;
             }
 
