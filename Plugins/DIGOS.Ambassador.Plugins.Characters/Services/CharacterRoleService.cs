@@ -316,6 +316,24 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var getNewCharacter = await _characters.GetCurrentCharacterAsync(user, server);
             if (!getNewCharacter.IsSuccess)
             {
+                // Clear any old role
+                if (previousCharacter?.Role is null)
+                {
+                    return ModifyEntityResult.FromSuccess();
+                }
+
+                var oldRole = guildUser.Guild.GetRole((ulong)previousCharacter.Role.DiscordID);
+                if (oldRole is null)
+                {
+                    return ModifyEntityResult.FromSuccess();
+                }
+
+                var removeRole = await _discord.RemoveUserRoleAsync(guildUser, oldRole);
+                if (!removeRole.IsSuccess)
+                {
+                    return removeRole;
+                }
+
                 return ModifyEntityResult.FromSuccess();
             }
 
