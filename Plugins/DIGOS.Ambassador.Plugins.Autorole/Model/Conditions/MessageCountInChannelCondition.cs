@@ -27,6 +27,7 @@ using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
@@ -63,22 +64,24 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override async Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
+        public override async Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser
+        (
+            IServiceProvider services,
+            IGuildUser discordUser
+        )
         {
             var statistics = services.GetRequiredService<UserStatisticsService>();
 
             var channel = await discordUser.Guild.GetTextChannelAsync((ulong)this.SourceID);
             if (channel is null)
             {
-                // TODO: Maybe we should throw here instead, or return a monad?
-                return false;
+                return RetrieveEntityResult<bool>.FromError("Failed to retrieve the channel.");
             }
 
             var getUserStatistics = await statistics.GetOrCreateUserChannelStatisticsAsync(discordUser, channel);
             if (!getUserStatistics.IsSuccess)
             {
-                // TODO: Same here...
-                return false;
+                return RetrieveEntityResult<bool>.FromError(getUserStatistics);
             }
 
             var userStatistics = getUserStatistics.Entity;

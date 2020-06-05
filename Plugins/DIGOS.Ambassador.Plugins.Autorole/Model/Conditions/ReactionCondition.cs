@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
 using JetBrains.Annotations;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
@@ -95,20 +96,22 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override async Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
+        public override async Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser
+        (
+            IServiceProvider services,
+            IGuildUser discordUser
+        )
         {
             var channel = await discordUser.Guild.GetTextChannelAsync((ulong)this.ChannelID);
             if (channel is null)
             {
-                // TODO: Maybe we should throw here instead, or return a monad?
-                return false;
+                return RetrieveEntityResult<bool>.FromError("Failed to find the channel.");
             }
 
             var message = await channel.GetMessageAsync((ulong)this.MessageID);
             if (message is null)
             {
-                // TODO: Same here...
-                return false;
+                return RetrieveEntityResult<bool>.FromError("Failed to find the message.");
             }
 
             var reactions = message.Reactions;

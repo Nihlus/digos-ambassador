@@ -448,16 +448,26 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="autorole">The autorole.</param>
         /// <param name="user">The user.</param>
         /// <returns>true if the user qualifies; otherwise, false.</returns>
-        public async Task<bool> IsUserQualifiedForAutoroleAsync(AutoroleConfiguration autorole, IGuildUser user)
+        public async Task<RetrieveEntityResult<bool>> IsUserQualifiedForAutoroleAsync
+        (
+            AutoroleConfiguration autorole,
+            IGuildUser user
+        )
         {
-            return (await Task.WhenAll
+            var results = await Task.WhenAll
             (
                 autorole.Conditions.Select
                 (
                     c => c.IsConditionFulfilledForUser(_serviceProvider, user)
                 )
-            ))
-            .All(c => c);
+            );
+
+            if (results.Any(r => !r.IsSuccess))
+            {
+                return RetrieveEntityResult<bool>.FromError("One or more conditions were indeterminate.");
+            }
+
+            return results.All(r => r.Entity);
         }
 
         /// <summary>

@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Entities;
 using Discord;
 using JetBrains.Annotations;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
 {
@@ -43,6 +44,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         public abstract bool HasSameConditionsAs(IAutoroleCondition autoroleCondition);
 
         /// <inheritdoc/>
-        public abstract Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser);
+        public abstract Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser
+        (
+            IServiceProvider services,
+            IGuildUser discordUser
+        );
     }
 }

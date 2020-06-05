@@ -26,6 +26,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
 using JetBrains.Annotations;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
@@ -77,9 +78,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
+        public override Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
         {
-            return Task.FromResult(discordUser.RoleIds.Contains((ulong)this.RoleID));
+            return Task.FromResult
+            (
+                RetrieveEntityResult<bool>.FromSuccess(discordUser.RoleIds.Contains((ulong)this.RoleID))
+            );
         }
     }
 }

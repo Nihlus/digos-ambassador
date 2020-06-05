@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
 using Humanizer;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 {
@@ -49,15 +50,24 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
+        public override Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser
+        (
+            IServiceProvider services,
+            IGuildUser discordUser
+        )
         {
             if (discordUser.JoinedAt is null)
             {
-                // TODO: Maybe we should throw here instead, or return a monad?
-                return Task.FromResult(false);
+                return Task.FromResult
+                (
+                    RetrieveEntityResult<bool>.FromError("Could not figure out when the user had joined.")
+                );
             }
 
-            return Task.FromResult((DateTime.UtcNow - discordUser.JoinedAt) >= this.RequiredTime);
+            return Task.FromResult
+            (
+                RetrieveEntityResult<bool>.FromSuccess(DateTime.UtcNow - discordUser.JoinedAt >= this.RequiredTime)
+            );
         }
     }
 }

@@ -23,6 +23,7 @@
 using System;
 using System.Threading.Tasks;
 using Discord;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
 {
@@ -50,6 +51,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         /// <param name="services">The service provider.</param>
         /// <param name="discordUser">The Discord user.</param>
         /// <returns>true if the condition is fulfilled; otherwise, false.</returns>
-        Task<bool> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser);
+        Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser);
     }
 }

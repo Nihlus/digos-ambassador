@@ -115,7 +115,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             var userHasRole = guildUser.RoleIds.Contains(role.Id);
-            var isUserQualified = await _autoroles.IsUserQualifiedForAutoroleAsync(autorole, guildUser);
+            var getIsUserQualified = await _autoroles.IsUserQualifiedForAutoroleAsync(autorole, guildUser);
+            if (!getIsUserQualified.IsSuccess)
+            {
+                return AutoroleUpdateResult.FromError(getIsUserQualified);
+            }
+
+            var isUserQualified = getIsUserQualified.Entity;
 
             if (isUserQualified && userHasRole)
             {
