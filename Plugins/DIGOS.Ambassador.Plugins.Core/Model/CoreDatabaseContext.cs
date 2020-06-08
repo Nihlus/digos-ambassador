@@ -68,6 +68,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
 
             modelBuilder.Entity<ServerUser>().HasOne(su => su.Server).WithMany(s => s.KnownUsers);
             modelBuilder.Entity<ServerUser>().HasOne(su => su.User).WithMany();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.DiscordID)
+                .IsUnique();
+
+            modelBuilder.Entity<Server>()
+                .HasIndex(s => s.DiscordID)
+                .IsUnique();
         }
     }
 }
