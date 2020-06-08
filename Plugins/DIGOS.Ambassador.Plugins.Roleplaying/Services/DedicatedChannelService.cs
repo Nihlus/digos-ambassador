@@ -148,7 +148,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             roleplay.DedicatedChannelID = (long)dedicatedChannel.Id;
 
-            var resetPermissions = await ResetChannelPermissionsAsync(guild, roleplay);
+            var resetPermissions = await ResetChannelPermissionsAsync(dedicatedChannel, roleplay);
             if (!resetPermissions.IsSuccess)
             {
                 return CreateEntityResult<ITextChannel>.FromError(resetPermissions);
@@ -408,18 +408,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Resets the channel permissions for the given roleplay to their default values.
         /// </summary>
-        /// <param name="guild">The guild.</param>
+        /// <param name="channel">The channel.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ResetChannelPermissionsAsync(IGuild guild, Roleplay roleplay)
+        public async Task<ModifyEntityResult> ResetChannelPermissionsAsync(ITextChannel channel, Roleplay roleplay)
         {
-            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
-            if (!getChannel.IsSuccess)
-            {
-                return ModifyEntityResult.FromError(getChannel);
-            }
-
-            var channel = getChannel.Entity;
+            var guild = channel.Guild;
 
             // First, clear all overwrites from the channel
             var clear = await ClearChannelPermissionOverwrites(channel);
@@ -449,6 +443,25 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Resets the channel permissions for the given roleplay to their default values.
+        /// </summary>
+        /// <param name="guild">The guild.</param>
+        /// <param name="roleplay">The roleplay.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> ResetChannelPermissionsAsync(IGuild guild, Roleplay roleplay)
+        {
+            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
+            if (!getChannel.IsSuccess)
+            {
+                return ModifyEntityResult.FromError(getChannel);
+            }
+
+            var channel = getChannel.Entity;
+
+            return await ResetChannelPermissionsAsync(channel, roleplay);
         }
 
         /// <summary>
