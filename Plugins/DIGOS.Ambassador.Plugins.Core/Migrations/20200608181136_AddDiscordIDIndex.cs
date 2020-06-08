@@ -15,6 +15,18 @@ namespace DIGOS.Ambassador.Plugins.Core.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            // Delete duplicate servers
+            migrationBuilder.Sql
+            (
+                "delete from \"Core\".\"Servers\" where \"ID\" in (select \"ID\" from (select \"ID\", \"DiscordID\", row_number() over (partition by \"DiscordID\" order by \"ID\" asc) as Row from \"Core\".\"Servers\") dupes where dupes.Row > 1)\n"
+            );
+
+            // Delete duplicate users
+            migrationBuilder.Sql
+            (
+                "delete from \"Core\".\"Users\" where \"ID\" in (select \"ID\" from (select \"ID\", \"DiscordID\", row_number() over (partition by \"DiscordID\" order by \"ID\" asc) as Row from \"Core\".\"Users\") dupes where dupes.Row > 1)\n"
+            );
+
             migrationBuilder.CreateIndex(
                 name: "IX_Users_DiscordID",
                 schema: "Core",
