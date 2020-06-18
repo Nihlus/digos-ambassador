@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Core.TypeReaders
         {
             IUser? owner = null;
             string? entityName;
-            if (!input.IsNullOrWhitespace() && input.Any(c => c == ':'))
+            if (!input.IsNullOrWhitespace() && input.Count(c => c == ':') == 1)
             {
                 // We have a mentioned owner and a name. Owners may have colons in the name, so let's check from the back.
                 var splitIndex = input.LastIndexOf(':');
