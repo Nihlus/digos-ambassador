@@ -91,6 +91,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     }
 
                     await _feedback.SendConfirmationAsync(this.Context, "Channel set.");
+                    _autoroles.SaveChanges();
                 }
             }
         }

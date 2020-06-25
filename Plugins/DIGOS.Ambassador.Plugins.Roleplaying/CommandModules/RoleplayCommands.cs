@@ -310,6 +310,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, $"Roleplay \"{result.Entity.Name}\" created.");
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -346,6 +347,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build(), false);
             }
+
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -372,7 +375,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             var roleplayOwnerUser = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
-            await _feedback.SendConfirmationAsync(this.Context, $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                $"Joined {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\""
+            );
+
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -399,7 +408,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 return;
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"Invited {playerToInvite.Mention} to {roleplay.Name}.");
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                $"Invited {playerToInvite.Mention} to {roleplay.Name}."
+            );
 
             var userDMChannel = await playerToInvite.GetOrCreateDMChannelAsync();
             try
@@ -418,6 +431,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             {
                 await userDMChannel.CloseAsync();
             }
+
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -443,7 +458,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             var roleplayOwnerUser = await this.Context.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
-            await _feedback.SendConfirmationAsync(this.Context, $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\"");
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                $"Left {roleplayOwnerUser.Mention}'s roleplay \"{roleplay.Name}\""
+            );
+
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -492,6 +513,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 this.Context,
                 $"{discordUser.Mention} has been kicked from {roleplay.Name}."
             );
+
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -552,6 +575,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 await StopRoleplayAsync(roleplay);
                 await StartRoleplayAsync(roleplay);
             }
+
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -601,6 +626,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             );
 
             await channel.SendMessageAsync($"Calling {participantList}!");
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -626,6 +652,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, $"The roleplay \"{roleplay.Name}\" has been stopped.");
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -690,7 +717,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 }
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"{addedOrUpdatedMessageCount} messages added to \"{roleplay.Name}\".");
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                $"{addedOrUpdatedMessageCount} messages added to \"{roleplay.Name}\"."
+            );
+
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -723,6 +756,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Roleplay ownership transferred.");
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -918,6 +952,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             (
                 this.Context, $"The roleplay \"{roleplay.Name}\" is now visible in {channelMention}."
             );
+
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -955,6 +991,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             (
                 this.Context, "Roleplay hidden."
             );
+
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -996,6 +1034,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             (
                 this.Context, "Roleplays hidden."
             );
+
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -1025,6 +1065,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Timeout refreshed.");
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -1063,6 +1104,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Permissions reset.");
+            _discordRoleplays.SaveChanges();
         }
 
         /// <summary>
@@ -1185,6 +1227,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
             var participantList = (await Task.WhenAll(joinedMentions)).Humanize();
             await dedicatedChannel.SendMessageAsync($"Calling {participantList}!");
+
+            _discordRoleplays.SaveChanges();
         }
     }
 }

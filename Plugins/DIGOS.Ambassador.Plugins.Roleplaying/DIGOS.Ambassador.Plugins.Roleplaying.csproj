@@ -22,4 +22,13 @@
       <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="CommandModules\RoleplayServerSetCommands.cs">
+        <DependentUpon>RoleplayServerCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\RoleplaySetCommands.cs">
+        <DependentUpon>RoleplayCommands.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
 </Project>

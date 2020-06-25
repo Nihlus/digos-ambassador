@@ -152,6 +152,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Character role created.");
+                _characterRoles.SaveChanges();
             }
 
             /// <summary>
@@ -184,6 +185,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Character role deleted.");
+                _characterRoles.SaveChanges();
             }
 
             /// <summary>
@@ -225,6 +227,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 (
                     this.Context, "Character role access conditions set."
                 );
+
+                _characterRoles.SaveChanges();
             }
 
             /// <summary>
@@ -250,6 +254,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Character role cleared.");
+                _characterRoles.SaveChanges();
             }
         }
     }

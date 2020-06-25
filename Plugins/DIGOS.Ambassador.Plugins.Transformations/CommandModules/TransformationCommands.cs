@@ -196,6 +196,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, result.ShiftMessage!);
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -300,6 +301,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage!);
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -417,6 +419,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage!);
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -505,7 +508,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             var character = getCurrentCharacterResult.Entity;
 
-            var shiftPartResult = await _transformation.ShiftPatternColourAsync(this.Context, character, bodyPart, colour, chirality);
+            var shiftPartResult = await _transformation.ShiftPatternColourAsync
+            (
+                this.Context,
+                character,
+                bodyPart,
+                colour,
+                chirality
+            );
 
             if (!shiftPartResult.IsSuccess)
             {
@@ -514,6 +524,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage!);
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -839,6 +850,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Character form reset.");
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -867,7 +879,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 return;
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Current appearance saved as the default one of this character.");
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                "Current appearance saved as the default one of this character."
+            );
+
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -892,6 +910,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 this.Context,
                 $"You're now opted {(shouldOptIn ? "in" : "out")} by default on new servers."
             );
+
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -911,6 +931,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Opted into transformations. Have fun!");
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -930,6 +951,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Opted out of transformations.");
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -948,7 +970,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 return;
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"Default protection type set to \"{protectionType.Humanize()}\"");
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                $"Default protection type set to \"{protectionType.Humanize()}\""
+            );
+
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -968,7 +996,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 return;
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"Protection type set to \"{protectionType.Humanize()}\"");
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                $"Protection type set to \"{protectionType.Humanize()}\""
+            );
+
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -988,6 +1022,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "User whitelisted.");
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -1007,6 +1042,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "User whitelisted.");
+            _transformation.SaveChanges();
         }
 
         /// <summary>
@@ -1032,6 +1068,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 $"and {updateTransformationsResult.TransformationsUpdated} transformations updated.";
 
             await _feedback.SendConfirmationAsync(this.Context, confirmationText);
+            _transformation.SaveChanges();
         }
     }
 }

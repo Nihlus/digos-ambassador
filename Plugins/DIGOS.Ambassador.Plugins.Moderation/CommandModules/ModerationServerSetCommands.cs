@@ -82,6 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                     }
 
                     await _feedback.SendConfirmationAsync(this.Context, "Channel set.");
+                    _moderation.SaveChanges();
                 }
 
                 /// <summary>
@@ -102,6 +103,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                     }
 
                     await _feedback.SendConfirmationAsync(this.Context, "Channel set.");
+                    _moderation.SaveChanges();
                 }
 
                 /// <summary>
@@ -122,6 +124,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                     }
 
                     await _feedback.SendConfirmationAsync(this.Context, "Threshold set.");
+                    _moderation.SaveChanges();
                 }
             }
         }

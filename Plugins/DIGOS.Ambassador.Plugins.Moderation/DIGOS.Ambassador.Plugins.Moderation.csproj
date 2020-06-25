@@ -30,13 +30,13 @@
         <DependentUpon>ModerationServerCommands.cs</DependentUpon>
       </Compile>
       <Compile Update="CommandModules\BanSetCommands.cs">
-        <DependentUpon>ModerationBanCommands.cs</DependentUpon>
+        <DependentUpon>BanCommands.cs</DependentUpon>
       </Compile>
       <Compile Update="CommandModules\NoteSetCommands.cs">
-        <DependentUpon>ModerationNoteCommands.cs</DependentUpon>
+        <DependentUpon>NoteCommands.cs</DependentUpon>
       </Compile>
       <Compile Update="CommandModules\WarningSetCommands.cs">
-        <DependentUpon>ModerationWarningCommands.cs</DependentUpon>
+        <DependentUpon>WarningCommands.cs</DependentUpon>
       </Compile>
     </ItemGroup>
 

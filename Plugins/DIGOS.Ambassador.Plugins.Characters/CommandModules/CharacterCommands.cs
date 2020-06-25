@@ -405,6 +405,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             (
                 this.Context, $"Character \"{createCharacterResult.Entity.Name}\" created."
             );
+
+            _characters.SaveChanges();
         }
 
         /// <summary>
@@ -437,6 +439,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
+            _characters.SaveChanges();
         }
 
         /// <summary>
@@ -534,6 +537,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 this.Context,
                 $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}."
             );
+
+            _characters.SaveChanges();
         }
 
         /// <summary>
@@ -554,6 +559,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Default character cleared.");
+            _characters.SaveChanges();
         }
 
         /// <summary>
@@ -584,6 +590,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Character cleared.");
+            _characters.SaveChanges();
         }
 
         /// <summary>
@@ -698,6 +705,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                         ?? firstAttachment.Url.GetHashCode().ToString();
 
             await AddImageAsync(character, imageName, imageUrl, imageCaption, isNSFW);
+            _characters.SaveChanges();
         }
 
         /// <summary>
@@ -738,7 +746,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 return;
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"Added \"{imageName}\" to {character.Name}'s gallery.");
+            await _feedback.SendConfirmationAsync
+            (
+                this.Context,
+                $"Added \"{imageName}\" to {character.Name}'s gallery."
+            );
+
+            _characters.SaveChanges();
         }
 
         /// <summary>
@@ -774,6 +788,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Image removed.");
+            _characters.SaveChanges();
         }
 
         /// <summary>
@@ -806,6 +821,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Character ownership transferred.");
+            _characters.SaveChanges();
         }
     }
 }

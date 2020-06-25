@@ -107,6 +107,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Roleplay name set.");
+                _discordRoleplays.SaveChanges();
             }
 
             /// <summary>
@@ -133,6 +134,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Roleplay summary set.");
+                _discordRoleplays.SaveChanges();
             }
 
             /// <summary>
@@ -160,6 +162,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, $"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}");
+                _discordRoleplays.SaveChanges();
             }
 
             /// <summary>
@@ -222,7 +225,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     );
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, $"Roleplay set to {(isPublic ? "public" : "private")}");
+                await _feedback.SendConfirmationAsync
+                (
+                    this.Context,
+                    $"Roleplay set to {(isPublic ? "public" : "private")}"
+                );
+
+                _discordRoleplays.SaveChanges();
             }
         }
     }

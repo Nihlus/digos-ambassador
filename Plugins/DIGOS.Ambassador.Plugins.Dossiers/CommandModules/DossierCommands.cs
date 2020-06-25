@@ -172,17 +172,12 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             var modifyResult = await _dossiers.SetDossierDataAsync(dossier, this.Context);
             if (!modifyResult.IsSuccess)
             {
-                if (!(modifyResult.Exception is null))
-                {
-                    await _feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-                    await _dossiers.DeleteDossierAsync(dossier);
-                    return;
-                }
-
-                await _feedback.SendWarningAsync(this.Context, modifyResult.ErrorReason);
+                await _feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
+                return;
             }
 
             await _feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" added.");
+            _dossiers.SaveChanges();
         }
 
         /// <summary>
@@ -212,6 +207,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" deleted.");
+            _dossiers.SaveChanges();
         }
 
         /// <summary>
@@ -262,6 +258,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "New dossier title set.");
+                _dossiers.SaveChanges();
             }
 
             /// <summary>
@@ -292,6 +289,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "New dossier summary set.");
+                _dossiers.SaveChanges();
             }
 
             /// <summary>
@@ -321,6 +319,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Dossier data set.");
+                _dossiers.SaveChanges();
             }
         }
     }

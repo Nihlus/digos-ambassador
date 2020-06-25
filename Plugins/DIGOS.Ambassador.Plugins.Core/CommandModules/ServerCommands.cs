@@ -121,6 +121,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             eb.AddField("First-join Message", content);
 
             await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            _servers.SaveChanges();
         }
 
         /// <summary>
@@ -155,6 +156,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             eb.WithDescription(getJoinMessageResult.Entity);
 
             await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            _servers.SaveChanges();
         }
 
         /// <summary>
@@ -207,6 +209,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Server description set.");
+                _servers.SaveChanges();
             }
 
             /// <summary>
@@ -237,6 +240,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Server first-join message set.");
+                _servers.SaveChanges();
             }
 
             /// <summary>
@@ -271,6 +275,8 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                     this.Context,
                     $"The server is {(isNsfw ? "now set as NSFW" : "no longer NSFW")}."
                 );
+
+                _servers.SaveChanges();
             }
 
             /// <summary>
@@ -309,6 +315,8 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                     this.Context,
                     $"The server {willDo}."
                 );
+
+                _servers.SaveChanges();
             }
         }
     }

@@ -18,4 +18,16 @@
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Permissions\DIGOS.Ambassador.Plugins.Permissions.csproj" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <Compile Update="CommandModules\AutoroleCommands.AutoroleSettingCommands.cs">
+        <DependentUpon>AutoroleCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\AutoroleCommands.AutoroleSettingCommands.AutoroleSettingSetCommands.cs">
+        <DependentUpon>AutoroleCommands.AutoroleSettingCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\AutoroleCommands.AutoroleConditionCommands.cs">
+        <DependentUpon>AutoroleCommands.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
 </Project>

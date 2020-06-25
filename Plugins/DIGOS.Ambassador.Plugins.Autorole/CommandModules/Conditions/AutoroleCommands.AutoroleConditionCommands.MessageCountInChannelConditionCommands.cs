@@ -89,6 +89,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     }
 
                     await _feedback.SendConfirmationAsync(this.Context, "Condition added.");
+                    _autoroles.SaveChanges();
                 }
 
                 /// <summary>
@@ -127,8 +128,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     condition.RequiredCount = count;
                     condition.SourceID = (long)channel.Id;
 
-                    _autoroles.SaveChanges();
                     await _feedback.SendConfirmationAsync(this.Context, "Condition updated.");
+                    _autoroles.SaveChanges();
                 }
             }
         }

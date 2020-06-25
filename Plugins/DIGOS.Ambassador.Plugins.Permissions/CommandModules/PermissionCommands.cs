@@ -279,6 +279,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                     this.Context,
                     $"{permission.FriendlyName} granted to {discordUser.Mention}."
                 );
+
+                _permissions.SaveChanges();
             }
 
             /// <summary>
@@ -324,6 +326,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                     this.Context,
                     $"{permission.FriendlyName} granted to {MentionUtils.MentionRole(discordRole.Id)}."
                 );
+
+                _permissions.SaveChanges();
             }
         }
 
@@ -418,6 +422,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                     this.Context,
                     $"{permission.FriendlyName} revoked from {discordUser.Mention}."
                 );
+
+                _permissions.SaveChanges();
             }
 
             /// <summary>
@@ -463,6 +469,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                     this.Context,
                     $"{permission.FriendlyName} revoked from {MentionUtils.MentionRole(discordRole.Id)}."
                 );
+
+                _permissions.SaveChanges();
             }
         }
     }

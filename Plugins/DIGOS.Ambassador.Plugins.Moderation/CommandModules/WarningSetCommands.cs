@@ -92,6 +92,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Warning reason updated.");
+                _warnings.SaveChanges();
             }
 
             /// <summary>
@@ -122,6 +123,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Warning context message updated.");
+                _warnings.SaveChanges();
             }
 
             /// <summary>
@@ -154,6 +156,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Warning duration updated.");
+                _warnings.SaveChanges();
             }
         }
     }

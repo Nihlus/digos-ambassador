@@ -112,6 +112,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Channel cleared.");
+                _autoroles.SaveChanges();
             }
         }
     }

@@ -192,6 +192,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                     this.Context, $"The warned user now has {warningCount} warnings. Consider further action."
                 );
             }
+
+            _warnings.SaveChanges();
         }
 
         /// <summary>
@@ -226,6 +228,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Warning deleted.");
+            _warnings.SaveChanges();
         }
     }
 }

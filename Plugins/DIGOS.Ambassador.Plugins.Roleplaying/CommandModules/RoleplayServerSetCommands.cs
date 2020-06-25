@@ -102,6 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     }
 
                     await _feedback.SendConfirmationAsync(this.Context, "Dedicated channel category set.");
+                    _serverSettings.SaveChanges();
                 }
 
                 /// <summary>
@@ -137,6 +138,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     }
 
                     await _feedback.SendConfirmationAsync(this.Context, "Archive channel set.");
+                    _serverSettings.SaveChanges();
                 }
 
                 /// <summary>
@@ -172,6 +174,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     }
 
                     await _feedback.SendConfirmationAsync(this.Context, "Default user role set.");
+                    _serverSettings.SaveChanges();
                 }
             }
         }

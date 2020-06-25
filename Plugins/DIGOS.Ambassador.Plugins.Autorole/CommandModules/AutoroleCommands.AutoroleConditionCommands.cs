@@ -80,6 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Condition removed.");
+                _autoroles.SaveChanges();
             }
         }
     }

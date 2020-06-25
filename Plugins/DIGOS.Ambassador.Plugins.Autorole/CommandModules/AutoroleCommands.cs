@@ -88,9 +88,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             if (!create.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, create.ErrorReason);
+                return;
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Autorole configuration created.");
+            _autoroles.SaveChanges();
         }
 
         /// <summary>
@@ -109,9 +111,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             if (!deleteAutorole.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, deleteAutorole.ErrorReason);
+                return;
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Autorole configuration deleted.");
+            _autoroles.SaveChanges();
         }
 
         /// <summary>
@@ -130,9 +134,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             if (!enableAutorole.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, enableAutorole.ErrorReason);
+                return;
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Autorole enabled.");
+            _autoroles.SaveChanges();
         }
 
         /// <summary>
@@ -151,9 +157,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             if (!disableAutorole.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, disableAutorole.ErrorReason);
+                return;
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Autorole disabled.");
+            _autoroles.SaveChanges();
         }
 
         /// <summary>
@@ -273,6 +281,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Qualification affirmed.");
+            _autoroles.SaveChanges();
         }
 
         /// <summary>
@@ -295,6 +304,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Qualifications affirmed.");
+            _autoroles.SaveChanges();
         }
 
         /// <summary>
@@ -322,6 +332,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Qualification denied.");
+            _autoroles.SaveChanges();
         }
 
         /// <summary>
@@ -353,6 +364,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 this.Context,
                 requireAffirmation ? "Affirmation is now required." : "Affirmation is no longer required."
             );
+
+            _autoroles.SaveChanges();
         }
 
         /// <summary>

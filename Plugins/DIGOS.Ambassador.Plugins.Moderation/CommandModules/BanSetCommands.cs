@@ -92,6 +92,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Ban reason updated.");
+                _bans.SaveChanges();
             }
 
             /// <summary>
@@ -122,6 +123,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Ban context message updated.");
+                _bans.SaveChanges();
             }
 
             /// <summary>
@@ -154,6 +156,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Ban duration updated.");
+                _bans.SaveChanges();
             }
         }
     }

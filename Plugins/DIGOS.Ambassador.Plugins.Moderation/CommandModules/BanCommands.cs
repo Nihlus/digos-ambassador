@@ -177,6 +177,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             await _feedback.SendConfirmationAsync(this.Context, $"User banned (ban ID {ban.ID}).");
 
             await _logging.NotifyUserBanned(ban);
+            _bans.SaveChanges();
         }
 
         /// <summary>
@@ -211,6 +212,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
             await _logging.NotifyUserUnbanned(ban, rescinder);
+
+            _bans.SaveChanges();
         }
     }
 }
