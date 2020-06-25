@@ -24,6 +24,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace DIGOS.Ambassador.Core.Services.TransientState
 {
@@ -38,6 +40,11 @@ namespace DIGOS.Ambassador.Core.Services.TransientState
         private readonly IReadOnlyCollection<ITransientStateService> _nestedServices;
 
         /// <summary>
+        /// Holds the logging instance used by this class.
+        /// </summary>
+        private readonly ILogger<AbstractTransientStateService> _log;
+
+        /// <summary>
         /// Holds a value indicating whether the object has been disposed.
         /// </summary>
         private bool _isDisposed;
@@ -50,10 +57,12 @@ namespace DIGOS.Ambassador.Core.Services.TransientState
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractTransientStateService"/> class.
         /// </summary>
+        /// <param name="log">The logging instance.</param>
         /// <param name="nestedServices">The nested services.</param>
-        protected AbstractTransientStateService(params ITransientStateService[] nestedServices)
+        protected AbstractTransientStateService(ILogger<AbstractTransientStateService> log, params ITransientStateService[] nestedServices)
         {
             _nestedServices = nestedServices;
+            _log = log;
         }
 
         /// <summary>
@@ -105,13 +114,18 @@ namespace DIGOS.Ambassador.Core.Services.TransientState
                 nestedService.Dispose();
             }
 
-            if (_stateChoice is null)
-            {
-                throw new InvalidOperationException("No choice as to whether to discard or save changes was made.");
-            }
-
             switch (_stateChoice)
             {
+                case null:
+                {
+                    _log.LogWarning
+                    (
+                        "No choice as to whether to discard or save changes was made. Defaulting to discard."
+                    );
+
+                    OnDiscardingChanges();
+                    break;
+                }
                 case TransientStateChoice.Save:
                 {
                     OnSavingChanges();
@@ -144,13 +158,18 @@ namespace DIGOS.Ambassador.Core.Services.TransientState
                 await nestedService.DisposeAsync();
             }
 
-            if (_stateChoice is null)
-            {
-                throw new InvalidOperationException("No choice as to whether to discard or save changes was made.");
-            }
-
             switch (_stateChoice)
             {
+                case null:
+                {
+                    _log.LogWarning
+                    (
+                        "No choice as to whether to discard or save changes was made. Defaulting to discard."
+                    );
+
+                    await OnDiscardingChangesAsync();
+                    break;
+                }
                 case TransientStateChoice.Save:
                 {
                     await OnSavingChangesAsync();
