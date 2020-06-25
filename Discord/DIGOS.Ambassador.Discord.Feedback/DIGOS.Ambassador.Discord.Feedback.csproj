@@ -8,7 +8,7 @@
     <ItemGroup>
         <PackageReference Include="Discord.Net.Core" Version="2.2.0" />
         <PackageReference Include="Humanizer.Core" Version="2.8.11" />
-        <PackageReference Include="Remora.Behaviours" Version="2.0.0" />
+        <PackageReference Include="Remora.Behaviours" Version="3.0.0" />
     </ItemGroup>
     
 </Project>
