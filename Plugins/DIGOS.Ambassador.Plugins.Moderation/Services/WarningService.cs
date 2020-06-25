@@ -159,7 +159,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var author = getAuthor.Entity;
 
-            var warning = new UserWarning(server, user, author, string.Empty);
+            var warning = _database.CreateProxy<UserWarning>(server, user, author, string.Empty, null, null);
+
+            _database.UserWarnings.Update(warning);
 
             var setReason = await SetWarningReasonAsync(warning, reason);
             if (!setReason.IsSuccess)
@@ -185,16 +187,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 }
             }
 
-            _database.UserWarnings.Update(warning);
-
-            // Requery the database
-            var getWarning = await GetWarningAsync(guildUser.Guild, warning.ID);
-            if (!getWarning.IsSuccess)
-            {
-                return CreateEntityResult<UserWarning>.FromError(getWarning);
-            }
-
-            return CreateEntityResult<UserWarning>.FromSuccess(getWarning.Entity);
+            return warning;
         }
 
         /// <summary>

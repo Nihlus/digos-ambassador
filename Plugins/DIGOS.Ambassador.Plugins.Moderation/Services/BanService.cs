@@ -159,7 +159,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var author = getAuthor.Entity;
 
-            var ban = new UserBan(server, user, author, string.Empty);
+            var ban = _database.CreateProxy<UserBan>(server, user, author, string.Empty, null, null);
+            _database.UserBans.Update(ban);
 
             var setReason = await SetBanReasonAsync(ban, reason);
             if (!setReason.IsSuccess)
@@ -185,16 +186,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 }
             }
 
-            _database.UserBans.Update(ban);
-
-            // Requery the database
-            var getBan = await GetBanAsync(guildUser.Guild, ban.ID);
-            if (!getBan.IsSuccess)
-            {
-                return CreateEntityResult<UserBan>.FromError(getBan);
-            }
-
-            return CreateEntityResult<UserBan>.FromSuccess(getBan.Entity);
+            return ban;
         }
 
         /// <summary>

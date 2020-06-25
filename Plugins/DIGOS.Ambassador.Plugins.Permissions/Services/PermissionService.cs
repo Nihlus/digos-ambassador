@@ -492,17 +492,18 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 return RetrieveEntityResult<RolePermission>.FromSuccess(existingPermission);
             }
 
-            var newPermission = new RolePermission((long)discordRole.Id, permission.UniqueIdentifier, target)
-            {
-                IsGranted = permission.IsGrantedByDefaultTo(target)
-            };
+            var newPermission = _database.CreateProxy<RolePermission>
+            (
+                (long)discordRole.Id,
+                permission.UniqueIdentifier,
+                target
+            );
+
+            newPermission.IsGranted = permission.IsGrantedByDefaultTo(target);
 
             _database.RolePermissions.Update(newPermission);
 
-            await _database.SaveChangesAsync();
-
-            // Requery the database
-            return await GetOrCreateRolePermissionAsync(discordRole, permission, target);
+            return newPermission;
         }
 
         /// <summary>
@@ -540,23 +541,19 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 return RetrieveEntityResult<UserPermission>.FromSuccess(existingPermission);
             }
 
-            var newPermission = new UserPermission
+            var newPermission = _database.CreateProxy<UserPermission>
             (
                 (long)discordGuild.Id,
                 (long)discordUser.Id,
                 permission.UniqueIdentifier,
                 target
-            )
-            {
-                IsGranted = permission.IsGrantedByDefaultTo(target)
-            };
+            );
+
+            newPermission.IsGranted = permission.IsGrantedByDefaultTo(target);
 
             _database.UserPermissions.Update(newPermission);
 
-            await _database.SaveChangesAsync();
-
-            // Requery the database
-            return await GetOrCreateUserPermissionAsync(discordGuild, discordUser, permission, target);
+            return newPermission;
         }
 
         /// <inheritdoc/>

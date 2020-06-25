@@ -129,12 +129,10 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                 );
             }
 
-            var newUser = new User((long)discordUser.Id);
+            var newUser = _database.CreateProxy<User>((long)discordUser.Id);
 
             _database.Users.Update(newUser);
-
-            // Requery the database
-            return await GetUserAsync(discordUser);
+            return newUser;
         }
 
         /// <summary>

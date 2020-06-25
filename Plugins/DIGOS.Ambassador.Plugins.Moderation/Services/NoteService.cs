@@ -141,7 +141,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var author = getAuthor.Entity;
 
-            var note = new UserNote(server, user, author, string.Empty);
+            var note = _database.CreateProxy<UserNote>(server, user, author, string.Empty);
+            _database.UserNotes.Update(note);
 
             var setContent = await SetNoteContentsAsync(note, content);
             if (!setContent.IsSuccess)
@@ -149,16 +150,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 return CreateEntityResult<UserNote>.FromError(setContent);
             }
 
-            _database.UserNotes.Update(note);
-
-            // Requery the database
-            var getNote = await GetNoteAsync(guildUser.Guild, note.ID);
-            if (!getNote.IsSuccess)
-            {
-                return CreateEntityResult<UserNote>.FromError(getNote);
-            }
-
-            return CreateEntityResult<UserNote>.FromSuccess(getNote.Entity);
+            return note;
         }
 
         /// <summary>
