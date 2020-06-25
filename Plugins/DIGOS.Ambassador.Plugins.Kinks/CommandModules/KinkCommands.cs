@@ -255,6 +255,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Preference set.");
+            _kinks.SaveChanges();
         }
 
         /// <summary>
@@ -339,6 +340,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, $"Done. {updatedKinkCount} kinks updated.");
+            _kinks.SaveChanges();
         }
 
         /// <summary>
@@ -351,6 +353,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         {
             await _kinks.ResetUserKinksAsync(this.Context.User);
             await _feedback.SendConfirmationAsync(this.Context, "Preferences reset.");
+
+            _kinks.SaveChanges();
         }
     }
 }
