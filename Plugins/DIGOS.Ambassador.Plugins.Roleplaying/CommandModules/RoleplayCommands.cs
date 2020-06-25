@@ -69,7 +69,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
     )]
     public partial class RoleplayCommands : ModuleBase
     {
-        private readonly RoleplayService _roleplays;
         private readonly RoleplayDiscordService _discordRoleplays;
         private readonly DedicatedChannelService _dedicatedChannels;
 
@@ -83,21 +82,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         /// <param name="feedback">The user feedback service.</param>
         /// <param name="interactivity">The interactivity service.</param>
         /// <param name="dedicatedChannels">The dedicated channel service.</param>
-        /// <param name="roleplays">The low-level roleplay service.</param>
         public RoleplayCommands
         (
             RoleplayDiscordService discordRoleplays,
             UserFeedbackService feedback,
             InteractivityService interactivity,
-            DedicatedChannelService dedicatedChannels,
-            RoleplayService roleplays
+            DedicatedChannelService dedicatedChannels
         )
         {
             _discordRoleplays = discordRoleplays;
             _feedback = feedback;
             _interactivity = interactivity;
             _dedicatedChannels = dedicatedChannels;
-            _roleplays = roleplays;
         }
 
         /// <summary>
@@ -1057,7 +1053,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 return;
             }
 
-            var refreshResult = await _roleplays.RefreshRoleplayAsync(roleplay);
+            var refreshResult = await _discordRoleplays.RefreshRoleplayAsync(roleplay);
             if (!refreshResult.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, refreshResult.ErrorReason);

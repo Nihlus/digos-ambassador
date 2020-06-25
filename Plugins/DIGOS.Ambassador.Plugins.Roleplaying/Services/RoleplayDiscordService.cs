@@ -753,5 +753,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var newOwner = getNewOwner.Entity;
             return await _roleplays.TransferRoleplayOwnershipAsync(newOwner, roleplay);
         }
+
+        /// <summary>
+        /// Refreshes the timestamp on the given roleplay.
+        /// </summary>
+        /// <param name="roleplay">The roleplay.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        public Task<ModifyEntityResult> RefreshRoleplayAsync(Roleplay roleplay)
+        {
+            return _roleplays.RefreshRoleplayAsync(roleplay);
+        }
     }
 }
