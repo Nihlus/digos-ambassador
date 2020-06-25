@@ -130,6 +130,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 }
             }
 
+            autoroles.SaveChanges();
+            autoroleUpdates.SaveChanges();
+
             await Task.Delay(TimeSpan.FromSeconds(1), ct);
         }
 
@@ -193,7 +196,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 await _feedback.SendEmbedAsync(notificationChannel, embed.Build());
 
                 autoroleConfirmation.HasNotificationBeenSent = true;
-                autoroles.SaveChanges();
             }
             catch (HttpException hex) when (hex.WasCausedByMissingPermission())
             {

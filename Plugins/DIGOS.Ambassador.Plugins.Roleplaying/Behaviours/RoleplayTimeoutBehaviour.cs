@@ -110,6 +110,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 }
             }
 
+            roleplayService.SaveChanges();
+
             await Task.Delay(TimeSpan.FromSeconds(5), ct);
         }
 
