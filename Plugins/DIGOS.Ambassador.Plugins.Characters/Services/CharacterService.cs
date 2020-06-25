@@ -122,7 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 string.Empty
             );
 
-            _database.Attach(character);
+            _database.Characters.Update(character);
 
             var modifyEntityResult = await SetCharacterNameAsync(character, name);
             if (!modifyEntityResult.IsSuccess)
@@ -159,8 +159,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             {
                 return CreateEntityResult<Character>.FromError(modifyEntityResult);
             }
-
-            _database.Characters.Update(character);
 
             return character;
         }
