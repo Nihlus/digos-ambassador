@@ -273,7 +273,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 }
             }
 
-            await userStatistics.SaveChangesAsync();
+            userStatistics.SaveChanges();
         }
 
         /// <summary>

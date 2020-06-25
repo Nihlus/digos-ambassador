@@ -23,8 +23,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -48,14 +50,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
     /// Handles transformations of users and their characters.
     /// </summary>
     [PublicAPI]
-    public sealed class TransformationService
+    public sealed class TransformationService : AbstractTransientStateService
     {
         private readonly TransformationsDatabaseContext _database;
-
         private readonly UserService _users;
-
         private readonly ServerService _servers;
-
         private readonly ContentService _content;
 
         private TransformationDescriptionBuilder _descriptionBuilder;
@@ -76,6 +75,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             TransformationsDatabaseContext database,
             TransformationDescriptionBuilder descriptionBuilder
         )
+            : base(users, servers)
         {
             _content = content;
             _users = users;
@@ -110,8 +110,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             defaultAppearance.IsDefault = true;
 
             _database.Appearances.Update(defaultAppearance);
-
-            await _database.SaveChangesAsync();
 
             // Requery the database
             return await GetOrCreateDefaultAppearanceAsync(character);
@@ -168,8 +166,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             currentAppearance.IsCurrent = true;
 
             _database.Appearances.Update(currentAppearance);
-
-            await _database.SaveChangesAsync();
 
             // Requery the database
             return await GetOrCreateCurrentAppearanceAsync(character);
@@ -234,12 +230,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             );
 
             var shiftResult = await bodypartRemover.RemoveAsync(bodyPart, chirality);
-
-            if (shiftResult.IsSuccess)
-            {
-                await _database.SaveChangesAsync();
-            }
-
             return shiftResult;
         }
 
@@ -276,11 +266,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var patternRemover = new PatternRemover(appearance, _descriptionBuilder);
             var shiftResult = await patternRemover.RemoveAsync(bodyPart, chirality);
-
-            if (shiftResult.IsSuccess)
-            {
-                await _database.SaveChangesAsync();
-            }
 
             return shiftResult;
         }
@@ -329,11 +314,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var speciesShifter = new SpeciesShifter(appearance, species, this, _descriptionBuilder);
             var shiftResult = await speciesShifter.ShiftAsync(bodyPart, chirality);
 
-            if (shiftResult.IsSuccess)
-            {
-                await _database.SaveChangesAsync();
-            }
-
             return shiftResult;
         }
 
@@ -381,11 +361,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var colourShifter = new ColourShifter(appearance, colour, _descriptionBuilder);
             var shiftResult = await colourShifter.ShiftAsync(bodyPart, chirality);
 
-            if (shiftResult.IsSuccess)
-            {
-                await _database.SaveChangesAsync();
-            }
-
             return shiftResult;
         }
 
@@ -427,11 +402,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             var patternShifter = new PatternShifter(appearance, pattern, patternColour, _descriptionBuilder);
             var shiftResult = await patternShifter.ShiftAsync(bodyPart, chirality);
 
-            if (shiftResult.IsSuccess)
-            {
-                await _database.SaveChangesAsync();
-            }
-
             return shiftResult;
         }
 
@@ -470,11 +440,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var patternColourShifter = new PatternColourShifter(appearance, patternColour, _descriptionBuilder);
             var shiftResult = await patternColourShifter.ShiftAsync(bodyPart, chirality);
-
-            if (shiftResult.IsSuccess)
-            {
-                await _database.SaveChangesAsync();
-            }
 
             return shiftResult;
         }
@@ -609,8 +574,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 return ModifyEntityResult.FromError(createNewCurrentResult);
             }
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -647,8 +610,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             existingCurrentAppearance.IsDefault = true;
             existingCurrentAppearance.IsCurrent = false;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -678,7 +639,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             }
 
             protection.DefaultType = protectionType;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -711,7 +671,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             }
 
             protection.Type = protectionType;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -771,8 +730,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 protectionEntry.Type = ListingType.Whitelist;
             }
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -831,8 +788,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 protectionEntry.Type = ListingType.Blacklist;
             }
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -865,8 +820,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             protection = new GlobalUserProtection(user);
 
             _database.GlobalUserProtections.Update(protection);
-
-            await _database.SaveChangesAsync();
 
             return RetrieveEntityResult<GlobalUserProtection>.FromSuccess(protection);
         }
@@ -914,8 +867,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             _database.ServerUserProtections.Update(protection);
 
-            await _database.SaveChangesAsync();
-
             return RetrieveEntityResult<ServerUserProtection>.FromSuccess(protection);
         }
 
@@ -957,8 +908,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                         ++updatedSpecies;
                     }
                 }
-
-                await _database.SaveChangesAsync();
             }
 
             uint addedTransformations = 0;
@@ -1036,8 +985,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                             ++updatedTransformations;
                         }
                     }
-
-                    await _database.SaveChangesAsync();
                 }
             }
 
@@ -1186,8 +1133,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             protection.HasOptedIn = true;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -1214,8 +1159,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             protection.HasOptedIn = false;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -1241,9 +1184,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             protection.DefaultOptIn = shouldOptIn;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

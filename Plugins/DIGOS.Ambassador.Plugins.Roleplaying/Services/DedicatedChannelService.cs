@@ -22,7 +22,9 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
@@ -36,7 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// Business logic for managing dedicated roleplay channels.
     /// </summary>
     [PublicAPI]
-    public class DedicatedChannelService
+    public class DedicatedChannelService : AbstractTransientStateService
     {
         private readonly RoleplayingDatabaseContext _database;
         private readonly IDiscordClient _client;
@@ -57,6 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             RoleplayServerSettingsService serverSettings,
             RoleplayingDatabaseContext database
         )
+            : base(servers, serverSettings)
         {
             _client = client;
             _servers = servers;
@@ -154,7 +157,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return CreateEntityResult<ITextChannel>.FromError(resetPermissions);
             }
 
-            await _database.SaveChangesAsync();
             return CreateEntityResult<ITextChannel>.FromSuccess(dedicatedChannel);
         }
 
@@ -255,7 +257,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             roleplay.DedicatedChannelID = null;
-            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -718,6 +719,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

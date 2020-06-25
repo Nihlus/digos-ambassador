@@ -21,7 +21,9 @@
 //
 
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
@@ -35,7 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
     /// <summary>
     /// Business logic class for user statistics.
     /// </summary>
-    public class UserStatisticsService
+    public sealed class UserStatisticsService : AbstractTransientStateService
     {
         private readonly AutoroleDatabaseContext _database;
         private readonly UserService _users;
@@ -48,6 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
         public UserStatisticsService(AutoroleDatabaseContext database, UserService users, ServerService servers)
+            : base(users, servers)
         {
             _database = database;
             _users = users;
@@ -85,7 +88,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var newStatistics = _database.CreateProxy<UserStatistics>(user);
 
             _database.UserStatistics.Update(newStatistics);
-            await _database.SaveChangesAsync();
 
             return newStatistics;
         }
@@ -131,7 +133,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var newServerStatistics = _database.CreateProxy<UserServerStatistics>(server);
 
             statistics.ServerStatistics.Add(newServerStatistics);
-            await _database.SaveChangesAsync();
 
             return newServerStatistics;
         }
@@ -167,18 +168,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             var newStats = _database.CreateProxy<UserChannelStatistics>(discordChannel);
             serverStats.ChannelStatistics.Add(newStats);
-
-            await _database.SaveChangesAsync();
             return newStats;
         }
 
-        /// <summary>
-        /// Explicitly saves the database.
-        /// </summary>
-        /// <returns>The number of entities saved.</returns>
-        public Task<int> SaveChangesAsync()
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
         {
-            return _database.SaveChangesAsync();
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

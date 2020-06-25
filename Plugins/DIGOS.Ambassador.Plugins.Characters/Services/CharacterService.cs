@@ -22,10 +22,12 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Model.Data;
@@ -42,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
     /// <summary>
     /// Acts as an interface for accessing and modifying user characters.
     /// </summary>
-    public sealed class CharacterService
+    public sealed class CharacterService : AbstractTransientStateService
     {
         private readonly CharactersDatabaseContext _database;
         private readonly OwnedEntityService _ownedEntities;
@@ -155,7 +157,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             _database.Characters.Update(character);
-            await _database.SaveChangesAsync();
 
             return character;
         }
@@ -168,7 +169,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         public async Task<DeleteEntityResult> DeleteCharacterAsync(Character character)
         {
             _database.Characters.Remove(character);
-            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -344,8 +344,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             character.IsCurrent = true;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -368,8 +366,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var currentCharacter = getCurrentCharacter.Entity;
             currentCharacter.IsCurrent = false;
-
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -447,7 +443,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.IsDefault = true;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -470,7 +465,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             getDefaultCharacterResult.Entity.IsDefault = false;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -508,7 +502,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Name = name;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -541,7 +534,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.AvatarUrl = avatarUrl;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -574,7 +566,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Nickname = nickname;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -607,7 +598,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Summary = summary;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -639,7 +629,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError("The description is too long. It can be at most 1000 characters.");
             }
             character.Description = description;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -674,8 +663,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var pronounProvider = getPronounProviderResult.Entity;
             character.PronounProviderFamily = pronounProvider.Family;
-
-            await _database.SaveChangesAsync();
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -701,7 +688,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.IsNSFW = isNSFW;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -821,7 +807,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             image.IsNSFW = isNSFW;
 
             character.Images.Add(image);
-            await _database.SaveChangesAsync();
 
             return image;
         }
@@ -840,9 +825,20 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Images.Remove(image);
-            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

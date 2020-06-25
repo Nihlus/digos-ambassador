@@ -126,7 +126,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     var condition = getCondition.Entity;
                     condition.RoleID = (long)role.Id;
 
-                    await _autoroles.SaveChangesAsync();
+                    _autoroles.SaveChanges();
                     await _feedback.SendConfirmationAsync(this.Context, "Condition updated.");
                 }
             }

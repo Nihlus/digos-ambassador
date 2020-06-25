@@ -22,7 +22,9 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -39,7 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
     /// Handles business logic for autoroles.
     /// </summary>
     [PublicAPI]
-    public class AutoroleService
+    public sealed class AutoroleService : AbstractTransientStateService
     {
         private readonly AutoroleDatabaseContext _database;
         private readonly ServerService _servers;
@@ -60,6 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             UserService users,
             IServiceProvider serviceProvider
         )
+            : base(servers, users)
         {
             _database = database;
             _servers = servers;
@@ -133,7 +136,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             _database.Autoroles.Update(autorole);
-            await _database.SaveChangesAsync();
 
             return autorole;
         }
@@ -146,7 +148,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         public async Task<DeleteEntityResult> DeleteAutoroleAsync(AutoroleConfiguration autorole)
         {
             _database.Autoroles.Remove(autorole);
-            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -169,8 +170,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             autorole.IsEnabled = true;
-
-            await _database.SaveChangesAsync();
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -187,8 +186,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             autorole.IsEnabled = false;
-
-            await _database.SaveChangesAsync();
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -216,7 +213,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             autorole.Conditions.Remove(condition);
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -242,7 +238,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             autorole.Conditions.Add(condition);
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -292,8 +287,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         )
         {
             _database.AutoroleConfirmations.Remove(confirmation);
-            await _database.SaveChangesAsync();
-
             return DeleteEntityResult.FromSuccess();
         }
 
@@ -337,7 +330,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var newConfirmation = _database.CreateProxy<AutoroleConfirmation>(autorole, user, false);
 
             _database.AutoroleConfirmations.Update(newConfirmation);
-            await _database.SaveChangesAsync();
 
             return newConfirmation;
         }
@@ -372,7 +364,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             condition.IsConfirmed = true;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -398,8 +389,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             {
                 qualifyingUser.IsConfirmed = true;
             }
-
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -437,7 +426,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             condition.IsConfirmed = false;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -483,15 +471,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         }
 
         /// <summary>
-        /// Explicitly saves the database.
-        /// </summary>
-        /// <returns>The number of entities saved.</returns>
-        public Task<int> SaveChangesAsync()
-        {
-            return _database.SaveChangesAsync();
-        }
-
-        /// <summary>
         /// Gets all autoroles in the database, scoped to the given server.
         /// </summary>
         /// <param name="guild">The Discord guild.</param>
@@ -533,8 +512,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             autorole.RequiresConfirmation = requireAffirmation;
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -568,7 +545,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var newSettings = _database.CreateProxy<AutoroleServerSettings>(server);
 
             _database.AutoroleServerSettings.Update(newSettings);
-            await _database.SaveChangesAsync();
 
             return newSettings;
         }
@@ -599,7 +575,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             settings.AffirmationRequiredNotificationChannelID = (long)textChannel.Id;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -628,8 +603,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             settings.AffirmationRequiredNotificationChannelID = null;
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -656,6 +629,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                     .Where(ac => !ac.IsConfirmed)
                     .Select(ac => ac.User)
             );
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

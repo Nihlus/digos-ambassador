@@ -21,8 +21,10 @@
 //
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using Discord;
@@ -36,7 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
     /// Handles modification of server settings.
     /// </summary>
     [PublicAPI]
-    public sealed class ServerService
+    public sealed class ServerService : AbstractTransientStateService
     {
         private readonly CoreDatabaseContext _database;
 
@@ -111,7 +113,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             var server = Server.CreateDefault(discordServer);
 
             await _database.Servers.AddAsync(server);
-            await _database.SaveChangesAsync();
 
             return RetrieveEntityResult<Server>.FromSuccess(server);
         }
@@ -169,9 +170,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.Description = description;
-
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -229,8 +227,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
 
             server.JoinMessage = joinMessage;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -255,7 +251,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.IsNSFW = isNsfw;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -281,9 +276,20 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.SendJoinMessage = sendJoinMessage;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

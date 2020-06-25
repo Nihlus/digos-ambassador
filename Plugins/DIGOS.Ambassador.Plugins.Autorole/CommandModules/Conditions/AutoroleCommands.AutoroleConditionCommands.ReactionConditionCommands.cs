@@ -138,7 +138,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     condition.MessageID = (long)message.Id;
                     condition.EmoteName = emote.Name;
 
-                    await _autoroles.SaveChangesAsync();
+                    _autoroles.SaveChanges();
                     await _feedback.SendConfirmationAsync(this.Context, "Condition updated.");
                 }
             }

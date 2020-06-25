@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
@@ -37,7 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
     /// <summary>
     /// Contains business logic for creating and generating drone characters.
     /// </summary>
-    public class DroneService
+    public class DroneService : AbstractTransientStateService
     {
         private readonly Random _random;
         private readonly CharacterDiscordService _characters;
@@ -58,6 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
             ContentService content,
             CharacterRoleService characterRoles
         )
+            : base(characters, characterRoles)
         {
             _characters = characters;
             _random = random;

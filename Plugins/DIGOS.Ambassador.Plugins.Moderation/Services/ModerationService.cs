@@ -20,7 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using Discord;
@@ -34,7 +36,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     /// Acts as an interface for accessing and modifying moderation settings.
     /// </summary>
     [PublicAPI]
-    public sealed class ModerationService
+    public sealed class ModerationService : AbstractTransientStateService
     {
         private readonly ModerationDatabaseContext _database;
         private readonly ServerService _servers;
@@ -49,6 +51,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             ModerationDatabaseContext database,
             ServerService servers
         )
+            : base(servers)
         {
             _database = database;
             _servers = servers;
@@ -131,7 +134,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var settings = new ServerModerationSettings(server);
 
             _database.ServerSettings.Update(settings);
-            await _database.SaveChangesAsync();
 
             return settings;
         }
@@ -162,8 +164,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             settings.ModerationLogChannel = (long)channel.Id;
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -193,8 +193,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             settings.MonitoringChannel = (long)channel.Id;
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -224,9 +222,20 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             settings.WarningThreshold = warningThreshold;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

@@ -23,7 +23,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using Discord;
 using JetBrains.Annotations;
@@ -37,7 +39,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
     /// Encapsulates business logic for permissions.
     /// </summary>
     [PublicAPI]
-    public sealed class PermissionService
+    public sealed class PermissionService : AbstractTransientStateService
     {
         private readonly PermissionsDatabaseContext _database;
 
@@ -552,6 +554,18 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             // Requery the database
             return await GetOrCreateUserPermissionAsync(discordGuild, discordUser, permission, target);
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

@@ -22,8 +22,10 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -37,7 +39,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// <summary>
     /// Acts as an interface for accessing, enabling, and disabling ongoing roleplays.
     /// </summary>
-    public sealed class RoleplayService
+    public sealed class RoleplayService : AbstractTransientStateService
     {
         private readonly RoleplayingDatabaseContext _database;
         private readonly OwnedEntityService _ownedEntities;
@@ -106,8 +108,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             _database.Roleplays.Update(roleplay);
 
-            await _database.SaveChangesAsync();
-
             return roleplay;
         }
 
@@ -119,8 +119,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         public async Task<DeleteEntityResult> DeleteRoleplayAsync(Roleplay roleplay)
         {
             _database.Roleplays.Remove(roleplay);
-
-            await _database.SaveChangesAsync();
             return DeleteEntityResult.FromSuccess();
         }
 
@@ -140,8 +138,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             roleplay.ActiveChannelID = channelID;
             roleplay.IsActive = true;
             roleplay.LastUpdated = DateTime.Now;
-
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -193,7 +189,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             // Update roleplay timestamp
             roleplay.LastUpdated = DateTime.Now;
 
-            await _database.SaveChangesAsync();
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -358,8 +353,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var participantEntry = roleplay.JoinedUsers.First(p => p.User == kickedUser);
             participantEntry.Status = ParticipantStatus.Kicked;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -385,8 +378,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             var participantEntry = roleplay.JoinedUsers.FirstOrDefault(p => p.User == removedUser);
             roleplay.ParticipatingUsers.Remove(participantEntry);
-
-            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -440,8 +431,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 participantEntry.Status = ParticipantStatus.Joined;
             }
 
-            await _database.SaveChangesAsync();
-
             return participantEntry;
         }
 
@@ -477,8 +466,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             {
                 participantEntry.Status = ParticipantStatus.Invited;
             }
-
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -527,7 +514,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             roleplay.Name = newRoleplayName;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -546,7 +532,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             roleplay.Summary = newRoleplaySummary;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -570,7 +555,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             roleplay.IsNSFW = isNSFW;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -589,7 +573,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             roleplay.IsPublic = isPublic;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -602,7 +585,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         public async Task<ModifyEntityResult> RefreshRoleplayAsync(Roleplay roleplay)
         {
             roleplay.LastUpdated = DateTime.Now;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -622,9 +604,19 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             roleplay.IsActive = false;
             roleplay.ActiveChannelID = null;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

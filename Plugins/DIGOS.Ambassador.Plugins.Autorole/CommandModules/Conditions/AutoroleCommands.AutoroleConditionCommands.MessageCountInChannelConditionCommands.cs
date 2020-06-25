@@ -127,7 +127,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     condition.RequiredCount = count;
                     condition.SourceID = (long)channel.Id;
 
-                    await _autoroles.SaveChangesAsync();
+                    _autoroles.SaveChanges();
                     await _feedback.SendConfirmationAsync(this.Context, "Condition updated.");
                 }
             }

@@ -20,7 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord;
@@ -34,7 +36,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// Business logic for server-specific roleplay settings.
     /// </summary>
     [PublicAPI]
-    public class RoleplayServerSettingsService
+    public class RoleplayServerSettingsService : AbstractTransientStateService
     {
         private readonly RoleplayingDatabaseContext _database;
 
@@ -70,7 +72,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var newSettings = _database.CreateProxy<ServerRoleplaySettings>(server);
 
             _database.ServerSettings.Update(newSettings);
-            await _database.SaveChangesAsync();
 
             return newSettings;
         }
@@ -106,7 +107,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             settings.ArchiveChannel = channelId;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -147,7 +147,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             settings.DefaultUserRole = roleId;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -183,9 +182,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             settings.DedicatedRoleplayChannelsCategory = categoryId;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

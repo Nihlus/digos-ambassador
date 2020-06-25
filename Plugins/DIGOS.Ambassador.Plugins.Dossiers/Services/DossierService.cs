@@ -24,9 +24,11 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Dossiers.Extensions;
 using DIGOS.Ambassador.Plugins.Dossiers.Model;
 using DIGOS.Ambassador.Plugins.Dossiers.Signatures;
@@ -43,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
     /// Handles dossier management.
     /// </summary>
     [PublicAPI]
-    public sealed class DossierService
+    public sealed class DossierService : AbstractTransientStateService
     {
         [ProvidesContext]
         private readonly DossiersDatabaseContext _database;
@@ -156,7 +158,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             }
 
             await _database.Dossiers.AddAsync(dossier);
-            await _database.SaveChangesAsync();
             return CreateEntityResult<Dossier>.FromSuccess((await GetDossierByTitleAsync(title)).Entity);
         }
 
@@ -174,7 +175,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             }
 
             _database.Dossiers.Remove(dossier);
-            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -258,8 +258,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
 
             dossier.Title = newTitle;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -281,7 +279,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             }
 
             dossier.Summary = newSummary;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -315,8 +312,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             {
                 return ModifyEntityResult.FromError(e.Message);
             }
-
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -369,8 +364,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
                 {
                     return ModifyEntityResult.FromError(e);
                 }
-
-                await _database.SaveChangesAsync();
             }
             catch (TaskCanceledException)
             {
@@ -381,6 +374,18 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             }
 
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

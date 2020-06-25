@@ -22,7 +22,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Kinks.Extensions;
@@ -40,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
     /// Service class for user kinks.
     /// </summary>
     [PublicAPI]
-    public sealed class KinkService
+    public sealed class KinkService : AbstractTransientStateService
     {
         private readonly KinksDatabaseContext _database;
 
@@ -60,6 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             UserService users,
             KinksDatabaseContext database
         )
+            : base(users)
         {
             _feedback = feedback;
             _users = users;
@@ -217,7 +220,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         )
         {
             userKink.Preference = preference;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -301,8 +303,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             var userKink = new UserKink(user, kink);
 
             _database.UserKinks.Update(userKink);
-
-            await _database.SaveChangesAsync();
             return CreateEntityResult<UserKink>.FromSuccess(userKink);
         }
 
@@ -401,8 +401,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             var user = getUserResult.Entity;
 
             _database.UserKinks.RemoveRange(_database.UserKinks.AsQueryable().Where(k => k.User == user));
-
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -517,15 +515,34 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <returns>The number of updated kinks.</returns>
         public async Task<int> UpdateKinksAsync(IEnumerable<Kink> newKinks)
         {
+            var alteredKinks = 0;
             foreach (var kink in newKinks)
             {
                 if (!await _database.Kinks.AsQueryable().AnyAsync(k => k.FListID == kink.FListID))
                 {
                     await _database.Kinks.AddAsync(kink);
+
+                    var entry = _database.Entry(kink);
+                    if (entry.State != EntityState.Unchanged)
+                    {
+                        ++alteredKinks;
+                    }
                 }
             }
 
-            return await _database.SaveChangesAsync();
+            return alteredKinks;
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

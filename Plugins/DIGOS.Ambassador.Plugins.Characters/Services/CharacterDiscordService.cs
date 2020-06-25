@@ -23,6 +23,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
@@ -41,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
     /// <summary>
     /// Handles Discord-facing business logic.
     /// </summary>
-    public class CharacterDiscordService
+    public class CharacterDiscordService : AbstractTransientStateService
     {
         private readonly CharacterService _characters;
         private readonly CharacterRoleService _characterRoles;
@@ -71,6 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             DiscordService discord,
             CharacterRoleService characterRoles
         )
+            : base(characters, characterRoles, users, servers)
         {
             _characters = characters;
             _users = users;

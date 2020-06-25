@@ -21,8 +21,10 @@
 //
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Discord;
@@ -36,7 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
     /// Handles user-related logic.
     /// </summary>
     [PublicAPI]
-    public sealed class UserService
+    public sealed class UserService : AbstractTransientStateService
     {
         private readonly CoreDatabaseContext _database;
 
@@ -128,8 +130,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
 
             _database.Users.Update(newUser);
 
-            await _database.SaveChangesAsync();
-
             // Requery the database
             return await GetUserAsync(discordUser);
         }
@@ -153,8 +153,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             }
 
             user.Timezone = timezoneOffset;
-
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -184,9 +182,19 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
 
             user.Bio = bio;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

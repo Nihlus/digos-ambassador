@@ -193,7 +193,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 await _feedback.SendEmbedAsync(notificationChannel, embed.Build());
 
                 autoroleConfirmation.HasNotificationBeenSent = true;
-                await autoroles.SaveChangesAsync();
+                autoroles.SaveChanges();
             }
             catch (HttpException hex) when (hex.WasCausedByMissingPermission())
             {

@@ -22,8 +22,10 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
@@ -38,7 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     /// Acts as an interface for accessing and modifying bans.
     /// </summary>
     [PublicAPI]
-    public sealed class BanService
+    public sealed class BanService : AbstractTransientStateService
     {
         private readonly ModerationDatabaseContext _database;
         private readonly ServerService _servers;
@@ -56,6 +58,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             ServerService servers,
             UserService users
         )
+            : base(servers, users)
         {
             _database = database;
             _servers = servers;
@@ -181,8 +184,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             _database.UserBans.Update(ban);
 
-            await _database.SaveChangesAsync();
-
             // Requery the database
             var getBan = await GetBanAsync(guildUser.Guild, ban.ID);
             if (!getBan.IsSuccess)
@@ -222,8 +223,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             ban.Reason = reason;
             ban.NotifyUpdate();
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -246,8 +245,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             ban.MessageID = messageID;
             ban.NotifyUpdate();
-
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -277,8 +274,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             ban.ExpiresOn = expiresOn;
             ban.NotifyUpdate();
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -298,9 +293,20 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             _database.UserBans.Remove(ban);
-            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

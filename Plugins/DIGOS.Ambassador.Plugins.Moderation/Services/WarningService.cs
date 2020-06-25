@@ -22,8 +22,10 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
@@ -38,7 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     /// Acts as an interface for accessing and modifying warnings.
     /// </summary>
     [PublicAPI]
-    public sealed class WarningService
+    public sealed class WarningService : AbstractTransientStateService
     {
         private readonly ModerationDatabaseContext _database;
         private readonly ServerService _servers;
@@ -56,6 +58,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             ServerService servers,
             UserService users
         )
+            : base(servers, users)
         {
             _database = database;
             _servers = servers;
@@ -181,8 +184,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             _database.UserWarnings.Update(warning);
 
-            await _database.SaveChangesAsync();
-
             // Requery the database
             var getWarning = await GetWarningAsync(guildUser.Guild, warning.ID);
             if (!getWarning.IsSuccess)
@@ -222,8 +223,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             warning.Reason = reason;
             warning.NotifyUpdate();
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -246,8 +245,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             warning.MessageID = messageID;
             warning.NotifyUpdate();
-
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -277,8 +274,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             warning.ExpiresOn = expiresOn;
             warning.NotifyUpdate();
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -298,9 +293,20 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             _database.UserWarnings.Remove(warning);
-            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

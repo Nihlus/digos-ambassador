@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
@@ -40,7 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// Contains high-level business logic that can be used in Discord commands to consistently interact with roleplays.
     /// The purpose of this class is to coordinate Discord-specific logic with platform-agnostic functionality.
     /// </summary>
-    public class RoleplayDiscordService
+    public class RoleplayDiscordService : AbstractTransientStateService
     {
         private readonly IDiscordClient _client;
         private readonly RoleplayService _roleplays;
@@ -72,6 +73,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             CommandService commands,
             OwnedEntityService ownedEntities
         )
+            : base(roleplays, dedicatedChannels, users, servers)
         {
             _client = client;
             _roleplays = roleplays;
