@@ -27,6 +27,8 @@ using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Permissions
@@ -51,7 +53,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
         protected sealed override void RegisterServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddDbContext<PermissionsDatabaseContext>(ConfigureOptions<PermissionsDatabaseContext>);
-            serviceCollection.AddScoped<PermissionService>();
+
+            serviceCollection
+                .AddScoped<PermissionService>()
+                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
         /// <inheritdoc />

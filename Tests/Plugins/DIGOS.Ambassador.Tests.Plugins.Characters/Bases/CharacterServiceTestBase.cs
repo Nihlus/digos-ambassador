@@ -38,6 +38,8 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -148,7 +150,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 .AddScoped<ServerService>()
                 .AddScoped<UserService>()
                 .AddScoped<OwnedEntityService>()
-                .AddScoped<CharacterService>();
+                .AddScoped<CharacterService>()
+                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
         /// <inheritdoc />

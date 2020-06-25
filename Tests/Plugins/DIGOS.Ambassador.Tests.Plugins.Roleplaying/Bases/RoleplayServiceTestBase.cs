@@ -32,6 +32,8 @@ using DIGOS.Ambassador.Tests.TestBases;
 using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
@@ -64,7 +66,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
                 .AddScoped<OwnedEntityService>()
                 .AddScoped<UserService>()
                 .AddScoped<ServerService>()
-                .AddScoped<RoleplayService>();
+                .AddScoped<RoleplayService>()
+                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
         /// <inheritdoc />

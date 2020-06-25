@@ -27,6 +27,8 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 #pragma warning disable SA1648
@@ -64,8 +66,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
-            serviceCollection.AddScoped<UserService>();
+            serviceCollection
+                .AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
+
+            serviceCollection
+                .AddScoped<UserService>()
+                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
         /// <inheritdoc />

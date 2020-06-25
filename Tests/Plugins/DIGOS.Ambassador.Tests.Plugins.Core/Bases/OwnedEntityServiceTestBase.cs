@@ -27,6 +27,8 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Core
@@ -59,7 +61,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 
             serviceCollection
                 .AddScoped<OwnedEntityService>()
-                .AddScoped<UserService>();
+                .AddScoped<UserService>()
+                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
         /// <inheritdoc />

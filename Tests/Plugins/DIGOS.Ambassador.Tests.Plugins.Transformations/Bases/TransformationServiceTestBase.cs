@@ -35,6 +35,8 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tests.Extensions;
 using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -86,7 +88,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 .AddScoped<ContentService>()
                 .AddScoped<UserService>()
                 .AddScoped<ServerService>()
-                .AddScoped<UserService>();
+                .AddScoped<UserService>()
+                .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
         /// <inheritdoc />
