@@ -30,7 +30,7 @@ using DIGOS.Ambassador.Plugins.Autorole.Results;
 using Discord;
 using Discord.Net;
 using Discord.WebSocket;
-
+using Microsoft.Extensions.Logging;
 using static DIGOS.Ambassador.Plugins.Autorole.Results.AutoroleUpdateStatus;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Services
@@ -48,12 +48,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// </summary>
         /// <param name="discordClient">The Discord client.</param>
         /// <param name="autoroles">The autorole service.</param>
+        /// <param name="log">The logging instance.</param>
         public AutoroleUpdateService
         (
             DiscordSocketClient discordClient,
-            AutoroleService autoroles
+            AutoroleService autoroles,
+            ILogger<AbstractTransientStateService> log
         )
-            : base(autoroles)
+            : base(log, autoroles)
         {
             _discordClient = discordClient;
             _autoroles = autoroles;

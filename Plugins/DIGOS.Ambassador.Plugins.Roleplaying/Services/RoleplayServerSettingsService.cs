@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
@@ -44,7 +45,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// Initializes a new instance of the <see cref="RoleplayServerSettingsService"/> class.
         /// </summary>
         /// <param name="database">The database context.</param>
-        public RoleplayServerSettingsService(RoleplayingDatabaseContext database)
+        /// <param name="log">The logging instance.</param>
+        public RoleplayServerSettingsService
+        (
+            RoleplayingDatabaseContext database,
+            ILogger<AbstractTransientStateService> log
+        )
+            : base(log)
         {
             _database = database;
         }

@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Drone.Extensions;
 using Discord;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Drone.Services
@@ -52,14 +53,16 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
         /// <param name="random">An entropy source.</param>
         /// <param name="content">The content service.</param>
         /// <param name="characterRoles">The role service.</param>
+        /// <param name="log">The logging instance.</param>
         public DroneService
         (
             CharacterDiscordService characters,
             Random random,
             ContentService content,
-            CharacterRoleService characterRoles
+            CharacterRoleService characterRoles,
+            ILogger<AbstractTransientStateService> log
         )
-            : base(characters, characterRoles)
+            : base(log, characters, characterRoles)
         {
             _characters = characters;
             _random = random;

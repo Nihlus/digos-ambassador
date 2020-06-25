@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Model;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -47,7 +48,9 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// Initializes a new instance of the <see cref="PermissionService"/> class.
         /// </summary>
         /// <param name="database">The database.</param>
-        public PermissionService(PermissionsDatabaseContext database)
+        /// <param name="log">The logging instance.</param>
+        public PermissionService(PermissionsDatabaseContext database, ILogger<AbstractTransientStateService> log)
+            : base(log)
         {
             _database = database;
         }

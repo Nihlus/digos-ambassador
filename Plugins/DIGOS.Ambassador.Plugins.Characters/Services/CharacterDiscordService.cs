@@ -33,6 +33,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 using Image = DIGOS.Ambassador.Plugins.Characters.Model.Data.Image;
@@ -62,6 +63,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="ownedEntities">The owned entity service.</param>
         /// <param name="discord">The Discord service.</param>
         /// <param name="characterRoles">The character role service.</param>
+        /// <param name="log">The logging instance.</param>
         public CharacterDiscordService
         (
             CharacterService characters,
@@ -70,9 +72,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CommandService commands,
             OwnedEntityService ownedEntities,
             DiscordService discord,
-            CharacterRoleService characterRoles
+            CharacterRoleService characterRoles,
+            ILogger<AbstractTransientStateService> log
         )
-            : base(characters, characterRoles, users, servers)
+            : base(log, characters, characterRoles, users, servers)
         {
             _characters = characters;
             _users = users;

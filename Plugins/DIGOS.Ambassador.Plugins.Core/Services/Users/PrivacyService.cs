@@ -21,8 +21,10 @@
 //
 
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -30,6 +32,7 @@ using Discord;
 using Discord.Net;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 using Zio;
 
@@ -39,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
     /// Handles privacy-related logic.
     /// </summary>
     [PublicAPI]
-    public sealed class PrivacyService
+    public sealed class PrivacyService : AbstractTransientStateService
     {
         private readonly CoreDatabaseContext _database;
 
@@ -53,12 +56,15 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="database">The core database.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="content">The content service.</param>
+        /// <param name="log">The logging instance.</param>
         public PrivacyService
         (
             CoreDatabaseContext database,
             UserFeedbackService feedback,
-            ContentService content
+            ContentService content,
+            ILogger<AbstractTransientStateService> log
         )
+            : base(log)
         {
             _database = database;
             _feedback = feedback;
@@ -166,8 +172,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             {
                 userConsent.HasConsented = true;
             }
-
-            await _database.SaveChangesAsync();
         }
 
         /// <summary>
@@ -188,9 +192,20 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             }
 
             userConsent.HasConsented = false;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnSavingChanges()
+        {
+            _database.SaveChanges();
+        }
+
+        /// <inheritdoc/>
+        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
+        {
+            await _database.SaveChangesAsync(ct);
         }
     }
 }

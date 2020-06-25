@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
@@ -52,14 +53,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="servers">The server service.</param>
         /// <param name="serverSettings">The server settings service.</param>
         /// <param name="database">The database context.</param>
+        /// <param name="log">The logging instance.</param>
         public DedicatedChannelService
         (
             IDiscordClient client,
             ServerService servers,
             RoleplayServerSettingsService serverSettings,
-            RoleplayingDatabaseContext database
+            RoleplayingDatabaseContext database,
+            ILogger<AbstractTransientStateService> log
         )
-            : base(servers, serverSettings)
+            : base(log, servers, serverSettings)
         {
             _client = client;
             _servers = servers;

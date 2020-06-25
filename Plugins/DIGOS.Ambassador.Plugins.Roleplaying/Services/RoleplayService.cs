@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
@@ -49,11 +50,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="entityService">The application's owned entity service.</param>
         /// <param name="database">The database.</param>
+        /// <param name="log">The logging instance.</param>
         public RoleplayService
         (
             OwnedEntityService entityService,
-            RoleplayingDatabaseContext database
+            RoleplayingDatabaseContext database,
+            ILogger<AbstractTransientStateService> log
         )
+            : base(log)
         {
             _ownedEntities = entityService;
             _database = database;

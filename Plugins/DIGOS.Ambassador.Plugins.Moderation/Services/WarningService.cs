@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Plugins.Moderation.Model;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.Services
@@ -52,13 +53,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="database">The database context.</param>
         /// <param name="servers">The server service.</param>
         /// <param name="users">The user service.</param>
+        /// <param name="log">The logging instance.</param>
         public WarningService
         (
             ModerationDatabaseContext database,
             ServerService servers,
-            UserService users
+            UserService users,
+            ILogger<AbstractTransientStateService> log
         )
-            : base(servers, users)
+            : base(log, servers, users)
         {
             _database = database;
             _servers = servers;

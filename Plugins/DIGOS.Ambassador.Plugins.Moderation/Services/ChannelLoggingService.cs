@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Quotes.Services;
 using Discord;
 using Discord.WebSocket;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.Services
@@ -50,14 +51,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="client">The Discord client in use.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="quotes">The quote service.</param>
+        /// <param name="log">The logging instance.</param>
         public ChannelLoggingService
         (
             ModerationService moderation,
             DiscordSocketClient client,
             UserFeedbackService feedback,
-            QuoteService quotes
+            QuoteService quotes,
+            ILogger<AbstractTransientStateService> log
         )
-            : base(moderation)
+            : base(log, moderation)
         {
             _moderation = moderation;
             _client = client;

@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Services
@@ -54,6 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="characters">The character service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="client">The discord client.</param>
+        /// <param name="log">The logging instance.</param>
         public CharacterRoleService
         (
             CharactersDatabaseContext database,
@@ -61,9 +63,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             DiscordService discord,
             CharacterService characters,
             UserService users,
-            IDiscordClient client
+            IDiscordClient client,
+            ILogger<AbstractTransientStateService> log
         )
-            : base(servers, characters, users)
+            : base(log, servers, characters, users)
         {
             _database = database;
             _servers = servers;

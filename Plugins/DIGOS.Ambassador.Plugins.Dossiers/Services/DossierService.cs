@@ -36,6 +36,7 @@ using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 using Zio;
 
@@ -62,7 +63,14 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// </summary>
         /// <param name="content">The content service.</param>
         /// <param name="database">The dossier database context.</param>
-        public DossierService(ContentService content, DossiersDatabaseContext database)
+        /// <param name="log">The logging instance.</param>
+        public DossierService
+        (
+            ContentService content,
+            DossiersDatabaseContext database,
+            ILogger<AbstractTransientStateService> log
+        )
+            : base(log)
         {
             _content = content;
             _database = database;

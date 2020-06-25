@@ -33,6 +33,7 @@ using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord;
 using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
@@ -63,6 +64,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="servers">The server service.</param>
         /// <param name="commands">The command service.</param>
         /// <param name="ownedEntities">The owned entity service.</param>
+        /// <param name="log">The logging instance.</param>
         public RoleplayDiscordService
         (
             IDiscordClient client,
@@ -71,9 +73,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             UserService users,
             ServerService servers,
             CommandService commands,
-            OwnedEntityService ownedEntities
+            OwnedEntityService ownedEntities,
+            ILogger<AbstractTransientStateService> log
         )
-            : base(roleplays, dedicatedChannels, users, servers)
+            : base(log, roleplays, dedicatedChannels, users, servers)
         {
             _client = client;
             _roleplays = roleplays;

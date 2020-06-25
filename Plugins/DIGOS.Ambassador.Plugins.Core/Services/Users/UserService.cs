@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Core.Services.Users
@@ -46,7 +47,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// Initializes a new instance of the <see cref="UserService"/> class.
         /// </summary>
         /// <param name="database">The core database.</param>
-        public UserService(CoreDatabaseContext database)
+        /// <param name="log">The logging instance.</param>
+        public UserService(CoreDatabaseContext database, ILogger<AbstractTransientStateService> log)
+            : base(log)
         {
             _database = database;
         }

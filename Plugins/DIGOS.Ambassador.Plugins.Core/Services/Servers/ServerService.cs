@@ -30,6 +30,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
@@ -46,7 +47,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// Initializes a new instance of the <see cref="ServerService"/> class.
         /// </summary>
         /// <param name="database">The core database.</param>
-        public ServerService(CoreDatabaseContext database)
+        /// <param name="log">The logging instance.</param>
+        public ServerService(CoreDatabaseContext database, ILogger<AbstractTransientStateService> log)
+            : base(log)
         {
             _database = database;
         }

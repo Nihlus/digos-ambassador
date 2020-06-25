@@ -33,6 +33,7 @@ using Discord;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MoreLinq.Extensions;
 using Remora.Results;
 
@@ -56,13 +57,15 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="feedback">The feedback service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="database">The database.</param>
+        /// <param name="log">The logging instance.</param>
         public KinkService
         (
             UserFeedbackService feedback,
             UserService users,
-            KinksDatabaseContext database
+            KinksDatabaseContext database,
+            ILogger<AbstractTransientStateService> log
         )
-            : base(users)
+            : base(log, users)
         {
             _feedback = feedback;
             _users = users;

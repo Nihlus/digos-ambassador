@@ -33,6 +33,7 @@ using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Services
@@ -55,14 +56,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="servers">The server service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="serviceProvider">The service provider.</param>
+        /// <param name="log">The logging instance.</param>
         public AutoroleService
         (
             AutoroleDatabaseContext database,
             ServerService servers,
             UserService users,
-            IServiceProvider serviceProvider
+            IServiceProvider serviceProvider,
+            ILogger<AbstractTransientStateService> log
         )
-            : base(servers, users)
+            : base(log, servers, users)
         {
             _database = database;
             _servers = servers;

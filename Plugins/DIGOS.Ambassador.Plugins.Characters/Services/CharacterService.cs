@@ -37,6 +37,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Services
@@ -58,13 +59,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="content">The content service.</param>
         /// <param name="database">The core database.</param>
         /// <param name="pronouns">The pronoun service.</param>
+        /// <param name="log">The logging instance.</param>
         public CharacterService
         (
             OwnedEntityService entityService,
             ContentService content,
             CharactersDatabaseContext database,
-            PronounService pronouns
+            PronounService pronouns,
+            ILogger<AbstractTransientStateService> log
         )
+            : base(log)
         {
             _ownedEntities = entityService;
             _content = content;

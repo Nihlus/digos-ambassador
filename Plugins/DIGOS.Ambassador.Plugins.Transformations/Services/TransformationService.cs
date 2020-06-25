@@ -41,6 +41,7 @@ using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Remora.Results;
 using PureAttribute = JetBrains.Annotations.PureAttribute;
 
@@ -67,15 +68,17 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="servers">The server service.</param>
         /// <param name="database">The database.</param>
         /// <param name="descriptionBuilder">The description builder.</param>
+        /// <param name="log">The logging instance.</param>
         public TransformationService
         (
             ContentService content,
             UserService users,
             ServerService servers,
             TransformationsDatabaseContext database,
-            TransformationDescriptionBuilder descriptionBuilder
+            TransformationDescriptionBuilder descriptionBuilder,
+            ILogger<AbstractTransientStateService> log
         )
-            : base(users, servers)
+            : base(log, users, servers)
         {
             _content = content;
             _users = users;
