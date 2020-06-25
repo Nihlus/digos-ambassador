@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -32,6 +33,11 @@ namespace DIGOS.Ambassador.Core.Services.TransientState
     public abstract class AbstractTransientStateService : ITransientStateService
     {
         /// <summary>
+        /// Holds any nested services whose state changes should be managed in sync with this service.
+        /// </summary>
+        private readonly IReadOnlyCollection<ITransientStateService> _nestedServices;
+
+        /// <summary>
         /// Holds a value indicating whether the object has been disposed.
         /// </summary>
         private bool _isDisposed;
@@ -42,6 +48,15 @@ namespace DIGOS.Ambassador.Core.Services.TransientState
         private TransientStateChoice? _stateChoice;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="AbstractTransientStateService"/> class.
+        /// </summary>
+        /// <param name="nestedServices">The nested services.</param>
+        protected AbstractTransientStateService(params ITransientStateService[] nestedServices)
+        {
+            _nestedServices = nestedServices;
+        }
+
+        /// <summary>
         /// Handles actual save logic. This method runs at the end of a saving scope. By default, this does nothing.
         /// </summary>
         protected virtual void OnSavingChanges()
@@ -49,7 +64,7 @@ namespace DIGOS.Ambassador.Core.Services.TransientState
         }
 
         /// <summary>
-        /// Handles actual save logic. This method runs at the end of a saving scope.
+        /// Handles actual save logic. This method runs at the end of a saving scope. By default, this does nothing.
         /// </summary>
         /// <param name="ct">The cancellation token.</param>
         /// <returns>A <see cref="ValueTask"/> representing the current asynchronous operation.</returns>
@@ -59,14 +74,16 @@ namespace DIGOS.Ambassador.Core.Services.TransientState
         }
 
         /// <summary>
-        /// Handles actual discard logic. This method runs at the end of a discarding scope.
+        /// Handles actual discard logic. This method runs at the end of a discarding scope. By default, this does
+        /// nothing.
         /// </summary>
         protected virtual void OnDiscardingChanges()
         {
         }
 
         /// <summary>
-        /// Handles actual discard logic. This method runs at the end of a discarding scope.
+        /// Handles actual discard logic. This method runs at the end of a discarding scope. By default, this does
+        /// nothing.
         /// </summary>
         /// <param name="ct">The cancellation token.</param>
         /// <returns>A <see cref="ValueTask"/> representing the current asynchronous operation.</returns>
@@ -81,6 +98,11 @@ namespace DIGOS.Ambassador.Core.Services.TransientState
             if (_isDisposed)
             {
                 return;
+            }
+
+            foreach (var nestedService in _nestedServices)
+            {
+                nestedService.Dispose();
             }
 
             if (_stateChoice is null)
@@ -117,6 +139,11 @@ namespace DIGOS.Ambassador.Core.Services.TransientState
                 return;
             }
 
+            foreach (var nestedService in _nestedServices)
+            {
+                await nestedService.DisposeAsync();
+            }
+
             if (_stateChoice is null)
             {
                 throw new InvalidOperationException("No choice as to whether to discard or save changes was made.");
@@ -144,14 +171,24 @@ namespace DIGOS.Ambassador.Core.Services.TransientState
         }
 
         /// <inheritdoc />
-        public void SaveChanges()
+        public virtual void SaveChanges()
         {
+            foreach (var nestedService in _nestedServices)
+            {
+                nestedService.SaveChanges();
+            }
+
             _stateChoice = TransientStateChoice.Save;
         }
 
         /// <inheritdoc />
-        public void DiscardChanges()
+        public virtual void DiscardChanges()
         {
+            foreach (var nestedService in _nestedServices)
+            {
+                nestedService.DiscardChanges();
+            }
+
             _stateChoice = TransientStateChoice.Discard;
         }
     }
