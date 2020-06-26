@@ -93,19 +93,5 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
         {
             return this.KnownUsers.Any(su => su.User.DiscordID == (long)user.Id);
         }
-
-        /// <summary>
-        /// Creates a default server entity based on a Discord guild.
-        /// </summary>
-        /// <param name="discordServer">The Discord server.</param>
-        /// <returns>A default server entity with some information filled in.</returns>
-        [Pure]
-        public static Server CreateDefault(IGuild discordServer)
-        {
-            return new Server((long)discordServer.Id)
-            {
-                IsNSFW = true,
-            };
-        }
     }
 }

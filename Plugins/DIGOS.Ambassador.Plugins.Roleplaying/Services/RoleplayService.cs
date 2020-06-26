@@ -89,11 +89,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             // Use a dummy name, since we'll be setting it using the service.
             var roleplay = _database.CreateProxy<Roleplay>(server, owner, string.Empty, string.Empty);
-            _database.Attach(roleplay);
+            _database.Roleplays.Update(roleplay);
 
             var ownerParticipant = _database.CreateProxy<RoleplayParticipant>(roleplay, owner);
-            ownerParticipant.Status = ParticipantStatus.Joined;
+            _database.Update(ownerParticipant);
 
+            ownerParticipant.Status = ParticipantStatus.Joined;
             roleplay.ParticipatingUsers.Add(ownerParticipant);
 
             var setNameResult = await SetRoleplayNameAsync(roleplay, roleplayName);
@@ -110,8 +111,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             roleplay.IsNSFW = isNSFW;
             roleplay.IsPublic = isPublic;
-
-            _database.Roleplays.Update(roleplay);
 
             return roleplay;
         }
@@ -182,12 +181,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
                 // Update roleplay timestamp
                 roleplay.LastUpdated = DateTime.Now;
-
-                await _database.SaveChangesAsync();
                 return ModifyEntityResult.FromSuccess();
             }
 
             var newMessage = _database.CreateProxy<UserMessage>(author, messageID, timestamp, authorNickname, contents);
+            _database.Update(newMessage);
 
             roleplay.Messages.Add(newMessage);
 
@@ -430,8 +428,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             if (participantEntry is null)
             {
                 participantEntry = _database.CreateProxy<RoleplayParticipant>(roleplay, newUser);
-                participantEntry.Status = ParticipantStatus.Joined;
+                _database.Update(participantEntry);
 
+                participantEntry.Status = ParticipantStatus.Joined;
                 roleplay.ParticipatingUsers.Add(participantEntry);
             }
             else
@@ -466,8 +465,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             if (participantEntry is null)
             {
                 participantEntry = _database.CreateProxy<RoleplayParticipant>(roleplay, invitedUser);
-                participantEntry.Status = ParticipantStatus.Invited;
+                _database.Update(participantEntry);
 
+                participantEntry.Status = ParticipantStatus.Invited;
                 roleplay.ParticipatingUsers.Add(participantEntry);
             }
             else

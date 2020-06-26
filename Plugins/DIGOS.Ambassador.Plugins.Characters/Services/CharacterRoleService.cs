@@ -103,9 +103,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var server = getServerResult.Entity;
 
             var characterRole = _database.CreateProxy<CharacterRole>(server, (long)role.Id, access);
-
             _database.CharacterRoles.Update(characterRole);
-            await _database.SaveChangesAsync();
 
             return characterRole;
         }
@@ -126,7 +124,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             );
 
             _database.CharacterRoles.Remove(role);
-            await _database.SaveChangesAsync();
 
             var guild = await _client.GetGuildAsync((ulong)role.Server.DiscordID);
             if (guild is null)
@@ -212,7 +209,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             role.Access = access;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -261,8 +257,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             character.Role = characterRole;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -292,7 +286,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Role = null;
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }

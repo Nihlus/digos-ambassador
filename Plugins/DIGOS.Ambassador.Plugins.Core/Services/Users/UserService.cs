@@ -139,8 +139,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             }
 
             var newUser = _database.CreateProxy<User>((long)discordUser.Id);
-
             _database.Users.Update(newUser);
+
             return newUser;
         }
 

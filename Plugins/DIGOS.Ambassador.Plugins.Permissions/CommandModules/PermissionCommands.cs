@@ -136,7 +136,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [RequireContext(Guild)]
         public async Task ListGrantedPermissionsAsync(IUser discordUser)
         {
-            var userPermissions = _permissions.GetApplicableUserPermissions(this.Context.Guild, discordUser);
+            var userPermissions = await _permissions.GetApplicableUserPermissionsAsync(this.Context.Guild, discordUser);
 
             var permissions = _permissionRegistry.RegisteredPermissions
                 .Where(r => userPermissions.Any(u => u.Permission == r.UniqueIdentifier))

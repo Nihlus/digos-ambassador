@@ -153,7 +153,9 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             string summary
         )
         {
-            var dossier = new Dossier(title, summary);
+            var dossier = _database.CreateProxy<Dossier>(title, summary);
+            _database.Dossiers.Update(dossier);
+
             var setTitleResult = await SetDossierTitleAsync(dossier, title);
             if (!setTitleResult.IsSuccess)
             {
@@ -166,7 +168,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
                 return CreateEntityResult<Dossier>.FromError(setSummary);
             }
 
-            await _database.Dossiers.AddAsync(dossier);
             return CreateEntityResult<Dossier>.FromSuccess((await GetDossierByTitleAsync(title)).Entity);
         }
 

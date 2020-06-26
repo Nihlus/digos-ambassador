@@ -127,9 +127,10 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
                 );
             }
 
-            var server = Server.CreateDefault(discordServer);
+            var server = _database.CreateProxy<Server>((long)discordServer.Id);
+            _database.Servers.Update(server);
 
-            await _database.Servers.AddAsync(server);
+            server.IsNSFW = true;
 
             return RetrieveEntityResult<Server>.FromSuccess(server);
         }

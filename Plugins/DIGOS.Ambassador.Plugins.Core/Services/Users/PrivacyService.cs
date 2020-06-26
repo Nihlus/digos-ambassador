@@ -167,7 +167,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         {
             var consents = await _database.UserConsents.UnifiedQueryAsync
             (
-                q => q.Where(uc => uc.DiscordID == (long)discordUser.Id && uc.HasConsented)
+                q => q.Where(uc => uc.DiscordID == (long)discordUser.Id)
             );
 
             var consent = consents.SingleOrDefault();
@@ -191,9 +191,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             if (!getConsent.IsSuccess)
             {
                 var userConsent = _database.CreateProxy<UserConsent>((long)discordUser.Id);
-                userConsent.HasConsented = true;
-
                 _database.UserConsents.Update(userConsent);
+
+                userConsent.HasConsented = true;
             }
             else
             {

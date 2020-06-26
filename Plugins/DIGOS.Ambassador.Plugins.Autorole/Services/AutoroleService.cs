@@ -138,14 +138,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var server = getServer.Entity;
 
             var autorole = _database.CreateProxy<AutoroleConfiguration>(server, discordRole);
-            if (autorole is null)
-            {
-                return CreateEntityResult<AutoroleConfiguration>.FromError
-                (
-                    "Failed to create a valid proxy for the autorole."
-                );
-            }
-
             _database.Autoroles.Update(autorole);
 
             return autorole;
@@ -342,8 +334,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             var user = getUser.Entity;
-            var newConfirmation = _database.CreateProxy<AutoroleConfirmation>(autorole, user, false);
 
+            var newConfirmation = _database.CreateProxy<AutoroleConfirmation>(autorole, user, false);
             _database.AutoroleConfirmations.Update(newConfirmation);
 
             return newConfirmation;
@@ -564,8 +556,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             var server = getServer.Entity;
-            var newSettings = _database.CreateProxy<AutoroleServerSettings>(server);
 
+            var newSettings = _database.CreateProxy<AutoroleServerSettings>(server);
             _database.AutoroleServerSettings.Update(newSettings);
 
             return newSettings;

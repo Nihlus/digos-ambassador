@@ -819,8 +819,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             var image = _database.CreateProxy<Image>(imageName, imageUrl, imageCaption);
-            image.IsNSFW = isNSFW;
+            _database.Images.Update(image);
 
+            image.IsNSFW = isNSFW;
             character.Images.Add(image);
 
             return image;

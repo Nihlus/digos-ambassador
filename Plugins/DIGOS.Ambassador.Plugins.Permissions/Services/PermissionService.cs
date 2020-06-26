@@ -122,8 +122,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             permission.IsGranted = true;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -186,8 +184,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             }
 
             permission.IsGranted = true;
-
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -258,8 +254,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             permission.IsGranted = false;
 
-            await _database.SaveChangesAsync();
-
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -322,8 +316,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             }
 
             permission.IsGranted = false;
-
-            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -399,13 +391,19 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             }
 
             // Check if the user has the permission applied to themselves
-            var userPermission = await GetApplicableUserPermissions(discordServer, discordUser)
-                .FirstOrDefaultAsync
+            var userPermissions = await GetApplicableUserPermissionsAsync
+            (
+                discordServer,
+                discordUser,
+                q => q.Where
                 (
                     p =>
                         p.Permission == requiredPermission.UniqueIdentifier &&
                         p.Target == target
-                );
+                )
+            );
+
+            var userPermission = userPermissions.SingleOrDefault();
 
             if (!(userPermission is null))
             {
@@ -431,16 +429,23 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// </summary>
         /// <param name="discordServer">The server the user is on.</param>
         /// <param name="discordUser">The user.</param>
+        /// <param name="query">Additional query parameters.</param>
         /// <returns>An object representing the query.</returns>
-        public IQueryable<UserPermission> GetApplicableUserPermissions
+        public async Task<IEnumerable<UserPermission>> GetApplicableUserPermissionsAsync
         (
             IGuild discordServer,
-            IUser discordUser
+            IUser discordUser,
+            Func<IQueryable<UserPermission>, IQueryable<UserPermission>>? query = null
         )
         {
-            return _database.UserPermissions.AsQueryable()
-                .Where(p => p.ServerID == (long)discordServer.Id)
-                .Where(p => p.UserID == (long)discordUser.Id);
+            query ??= q => q;
+
+            return await _database.UserPermissions.UnifiedQueryAsync
+            (
+                q => query(q
+                    .Where(p => p.ServerID == (long)discordServer.Id)
+                    .Where(p => p.UserID == (long)discordUser.Id))
+            );
         }
 
         /// <summary>
@@ -482,30 +487,22 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 throw new ArgumentException("Invalid permission target.", nameof(target));
             }
 
-            var localPermission = _database.RolePermissions.FirstOrDefault
+            var rolePermissions = await _database.RolePermissions.UnifiedQueryAsync
             (
-                p =>
-                    p.RoleID == (long)discordRole.Id &&
-                    p.Permission == permission.UniqueIdentifier &&
-                    p.Target == target
+                q => q.Where
+                (
+                    p =>
+                        p.RoleID == (long)discordRole.Id &&
+                        p.Permission == permission.UniqueIdentifier &&
+                        p.Target == target
+                )
             );
 
-            if (!(localPermission is null))
-            {
-                return localPermission;
-            }
+            var rolePermission = rolePermissions.SingleOrDefault();
 
-            var dbPermission = await _database.RolePermissions.AsQueryable().FirstOrDefaultAsync
-            (
-                p =>
-                    p.RoleID == (long)discordRole.Id &&
-                    p.Permission == permission.UniqueIdentifier &&
-                    p.Target == target
-            );
-
-            if (!(dbPermission is null))
+            if (!(rolePermission is null))
             {
-                return dbPermission;
+                return rolePermission;
             }
 
             var newPermission = _database.CreateProxy<RolePermission>
@@ -515,9 +512,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 target
             );
 
-            newPermission.IsGranted = permission.IsGrantedByDefaultTo(target);
-
             _database.RolePermissions.Update(newPermission);
+            newPermission.IsGranted = permission.IsGrantedByDefaultTo(target);
 
             return newPermission;
         }
@@ -543,18 +539,23 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 throw new ArgumentException("Invalid permission target.", nameof(target));
             }
 
-            var existingPermission = await _database.UserPermissions.AsQueryable().FirstOrDefaultAsync
+            var userPermissions = await _database.UserPermissions.UnifiedQueryAsync
             (
-                p =>
-                    p.ServerID == (long)discordGuild.Id &&
-                    p.UserID == (long)discordUser.Id &&
-                    p.Permission == permission.UniqueIdentifier &&
-                    p.Target == target
+                q => q.Where
+                (
+                    p =>
+                        p.ServerID == (long)discordGuild.Id &&
+                        p.UserID == (long)discordUser.Id &&
+                        p.Permission == permission.UniqueIdentifier &&
+                        p.Target == target
+                )
             );
 
-            if (!(existingPermission is null))
+            var userPermission = userPermissions.SingleOrDefault();
+
+            if (!(userPermission is null))
             {
-                return RetrieveEntityResult<UserPermission>.FromSuccess(existingPermission);
+                return userPermission;
             }
 
             var newPermission = _database.CreateProxy<UserPermission>
@@ -565,9 +566,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 target
             );
 
-            newPermission.IsGranted = permission.IsGrantedByDefaultTo(target);
-
             _database.UserPermissions.Update(newPermission);
+            newPermission.IsGranted = permission.IsGrantedByDefaultTo(target);
 
             return newPermission;
         }

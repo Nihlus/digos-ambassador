@@ -96,7 +96,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var user = getUser.Entity;
 
             var newStatistics = _database.CreateProxy<UserStatistics>(user);
-
             _database.UserStatistics.Update(newStatistics);
 
             return newStatistics;
@@ -137,10 +136,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             var server = getServer.Entity;
 
-            // Since we're adding to the database indirectly, an attach is required here.
-            _database.Attach(server);
-
             var newServerStatistics = _database.CreateProxy<UserServerStatistics>(server);
+            _database.Update(newServerStatistics);
 
             statistics.ServerStatistics.Add(newServerStatistics);
 
@@ -177,7 +174,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             var newStats = _database.CreateProxy<UserChannelStatistics>(discordChannel);
+            _database.Update(newStats);
+
             serverStats.ChannelStatistics.Add(newStats);
+
             return newStats;
         }
 
