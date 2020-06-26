@@ -726,13 +726,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
                 var user = getUserResult.Entity;
 
-                protectionEntry = new UserProtectionEntry(protection, user)
-                {
-                    Type = ListingType.Whitelist
-                };
-
-                // Ensure we don't try to add the user we got from another context
+                protectionEntry = _database.CreateProxy<UserProtectionEntry>(protection, user);
                 _database.Update(protectionEntry);
+
+                protectionEntry.Type = ListingType.Whitelist;
                 protection.UserListing.Add(protectionEntry);
             }
             else
@@ -784,13 +781,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
                 var user = getUserResult.Entity;
 
-                protectionEntry = new UserProtectionEntry(protection, user)
-                {
-                    Type = ListingType.Blacklist
-                };
-
-                // Ensure we don't try to add the user we got from another context
+                protectionEntry = _database.CreateProxy<UserProtectionEntry>(protection, user);
                 _database.Update(protectionEntry);
+
+                protectionEntry.Type = ListingType.Blacklist;
                 protection.UserListing.Add(protectionEntry);
             }
             else
