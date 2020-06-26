@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
@@ -214,43 +216,59 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Gets a queryable list of characters on the given guild.
         /// </summary>
         /// <param name="guild">The guild.</param>
+        /// <param name="query">Additional query statements.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IQueryable<Character>>> GetCharacters(IGuild guild)
+        public async Task<RetrieveEntityResult<IEnumerable<Character>>> GetCharactersAsync
+        (
+            IGuild guild,
+            Func<IQueryable<Character>, IQueryable<Character>>? query = null
+        )
         {
             var getServer = await _servers.GetOrRegisterServerAsync(guild);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<IQueryable<Character>>.FromError(getServer);
+                return RetrieveEntityResult<IEnumerable<Character>>.FromError(getServer);
             }
 
             var server = getServer.Entity;
 
-            return RetrieveEntityResult<IQueryable<Character>>.FromSuccess(_characters.GetCharacters(server));
+            return RetrieveEntityResult<IEnumerable<Character>>.FromSuccess
+            (
+                await _characters.GetCharactersAsync(server, query)
+            );
         }
 
         /// <summary>
         /// Gets a queryable list of characters belonging to the given user on their guild.
         /// </summary>
         /// <param name="guildUser">The user.</param>
+        /// <param name="query">Additional query statements.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IQueryable<Character>>> GetUserCharactersAsync(IGuildUser guildUser)
+        public async Task<RetrieveEntityResult<IEnumerable<Character>>> GetUserCharactersAsync
+        (
+            IGuildUser guildUser,
+            Func<IQueryable<Character>, IQueryable<Character>>? query = null
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
             {
-                return RetrieveEntityResult<IQueryable<Character>>.FromError(getUser);
+                return RetrieveEntityResult<IEnumerable<Character>>.FromError(getUser);
             }
 
             var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<IQueryable<Character>>.FromError(getServer);
+                return RetrieveEntityResult<IEnumerable<Character>>.FromError(getServer);
             }
 
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return RetrieveEntityResult<IQueryable<Character>>.FromSuccess(_characters.GetUserCharacters(user, server));
+            return RetrieveEntityResult<IEnumerable<Character>>.FromSuccess
+            (
+                await _characters.GetUserCharactersAsync(user, server, query)
+            );
         }
 
         /// <summary>
@@ -336,7 +354,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return RetrieveEntityResult<Character>.FromError(getUserCharacters);
             }
 
-            var userCharacters = await getUserCharacters.Entity.ToListAsync();
+            var userCharacters = getUserCharacters.Entity.ToList();
             if (userCharacters.Count == 0)
             {
                 return RetrieveEntityResult<Character>.FromError("The user doesn't have any characters.");

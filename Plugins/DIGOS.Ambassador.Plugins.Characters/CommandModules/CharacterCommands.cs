@@ -235,7 +235,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 return;
             }
 
-            var characters = await getCharacters.Entity.ToListAsync();
+            var characters = getCharacters.Entity.ToList();
 
             var embeds = new List<EmbedBuilder>();
             foreach (var character in characters)
@@ -462,7 +462,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 return;
             }
 
-            var characters = await getCharacters.Entity.ToListAsync();
+            var characters = getCharacters.Entity.ToList();
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Your characters";

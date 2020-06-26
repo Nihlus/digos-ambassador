@@ -26,6 +26,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Core.Services.TransientState;
@@ -195,11 +196,14 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         [Pure]
         public async Task<bool> IsDossierTitleUniqueAsync(string dossierTitle)
         {
-            return await _database.Dossiers.AsQueryable().Select(d => d.Title)
-            .AllAsync
+            var dossiers = await _database.Dossiers.UnifiedQueryAsync
             (
-                p => !p.ToLower().Equals(dossierTitle.ToLower())
+                q => q.Where(d => d.Title.ToLowerInvariant() == dossierTitle.ToLowerInvariant())
             );
+
+            var dossier = dossiers.SingleOrDefault();
+
+            return dossier is null;
         }
 
         /// <summary>
@@ -210,17 +214,19 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         [Pure]
         public async Task<RetrieveEntityResult<Dossier>> GetDossierByTitleAsync(string title)
         {
-            var dossier = await _database.Dossiers.AsQueryable().FirstOrDefaultAsync
+            var dossiers = await _database.Dossiers.UnifiedQueryAsync
             (
-                d => string.Equals(d.Title.ToLower(), title.ToLower())
+                q => q.Where(d => d.Title.ToLowerInvariant() == title.ToLowerInvariant())
             );
 
-            if (dossier is null)
+            var dossier = dossiers.SingleOrDefault();
+
+            if (!(dossier is null))
             {
-                return RetrieveEntityResult<Dossier>.FromError("No dossier with that title found.");
+                return dossier;
             }
 
-            return RetrieveEntityResult<Dossier>.FromSuccess(dossier);
+            return RetrieveEntityResult<Dossier>.FromError("No dossier with that title found.");
         }
 
         /// <summary>

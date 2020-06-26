@@ -185,7 +185,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 return;
             }
 
-            var roleplays = await getRoleplays.Entity.Where(r => r.IsPublic).ToListAsync();
+            var roleplays = getRoleplays.Entity.Where(r => r.IsPublic).ToList();
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Available Roleplays";
@@ -239,7 +239,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 return;
             }
 
-            var roleplays = await getUserRoleplays.Entity.ToListAsync();
+            var roleplays = getUserRoleplays.Entity.ToList();
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Your roleplays";
@@ -1007,7 +1007,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 return;
             }
 
-            var roleplays = await getRoleplays.Entity.ToListAsync();
+            var roleplays = getRoleplays.Entity.ToList();
             foreach (var roleplay in roleplays)
             {
                 var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync
@@ -1083,7 +1083,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 return;
             }
 
-            var roleplays = await getRoleplays.Entity.ToListAsync();
+            var roleplays = getRoleplays.Entity.ToList();
 
             foreach (var roleplay in roleplays)
             {

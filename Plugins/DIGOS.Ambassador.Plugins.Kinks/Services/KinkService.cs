@@ -20,10 +20,12 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -80,7 +82,25 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public async Task<RetrieveEntityResult<Kink>> GetKinkByNameAsync(string name)
         {
-            return await _database.Kinks.SelectFromBestLevenshteinMatchAsync(x => x, k => k.Name, name);
+            // Bit of a special and annoying case
+            var localKink = await _database.Kinks.Local.AsQueryable().SelectFromBestLevenshteinMatchAsync
+            (
+                x => x,
+                k => k.Name,
+                name
+            );
+
+            if (localKink.IsSuccess)
+            {
+                return localKink;
+            }
+
+            return await _database.Kinks.SelectFromBestLevenshteinMatchAsync
+            (
+                x => x,
+                k => k.Name,
+                name
+            );
         }
 
         /// <summary>
@@ -143,20 +163,29 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// Gets the given user's kink preferences.
         /// </summary>
         /// <param name="discordUser">The user.</param>
+        /// <param name="query">Additional query statements.</param>
         /// <returns>The user's kinks.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<IQueryable<UserKink>>> GetUserKinksAsync(IUser discordUser)
+        public async Task<RetrieveEntityResult<IEnumerable<UserKink>>> GetUserKinksAsync
+        (
+            IUser discordUser,
+            Func<IQueryable<UserKink>, IQueryable<UserKink>>? query = null
+        )
         {
+            query ??= q => q;
+
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
             {
-                return RetrieveEntityResult<IQueryable<UserKink>>.FromError(getUserResult);
+                return RetrieveEntityResult<IEnumerable<UserKink>>.FromError(getUserResult);
             }
 
             var user = getUserResult.Entity;
-            var userKinks = _database.UserKinks.AsQueryable().Where(k => k.User == user);
 
-            return RetrieveEntityResult<IQueryable<UserKink>>.FromSuccess(userKinks);
+            return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess
+            (
+                await _database.UserKinks.UnifiedQueryAsync(q => q.Where(k => k.User == user))
+            );
         }
 
         /// <summary>
@@ -253,7 +282,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             }
 
             var userKinks = getUserKinksResult.Entity;
-            var userKink = await userKinks.FirstOrDefaultAsync(k => k.Kink.FListID == onlineKinkID);
+            var userKink = userKinks.FirstOrDefault(k => k.Kink.FListID == onlineKinkID);
 
             if (!(userKink is null))
             {
@@ -303,10 +332,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
 
             var user = getUserResult.Entity;
 
-            var userKink = new UserKink(user, kink);
-
+            var userKink = _database.CreateProxy<UserKink>(user, kink);
             _database.UserKinks.Update(userKink);
-            return CreateEntityResult<UserKink>.FromSuccess(userKink);
+
+            return userKink;
         }
 
         /// <summary>
@@ -316,9 +345,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public async Task<IEnumerable<KinkCategory>> GetKinkCategoriesAsync()
         {
-            return (await _database.Kinks.AsQueryable().Select(k => k.Category).ToListAsync())
-                .OrderBy(k => k.ToString())
-                .Distinct();
+            var categories = await _database.Kinks.UnifiedQueryAsync
+            (
+                q => q.Select(k => k.Category)
+            );
+
+            return categories.OrderBy(k => k.ToString());
         }
 
         /// <summary>
@@ -327,15 +359,21 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="onlineKinkID">The F-List kink ID.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<Kink>> GetKinkByFListIDAsync(int onlineKinkID)
+        public async Task<RetrieveEntityResult<Kink>> GetKinkByFListIDAsync(long onlineKinkID)
         {
-            var kink = await _database.Kinks.AsQueryable().FirstOrDefaultAsync(k => k.FListID == onlineKinkID);
-            if (kink is null)
+            var kinks = await _database.Kinks.UnifiedQueryAsync
+            (
+                q => q.Where(k => k.FListID == onlineKinkID)
+            );
+
+            var kink = kinks.SingleOrDefault();
+
+            if (!(kink is null))
             {
-                return RetrieveEntityResult<Kink>.FromError("No kink with that ID found.");
+                return kink;
             }
 
-            return RetrieveEntityResult<Kink>.FromSuccess(kink);
+            return RetrieveEntityResult<Kink>.FromError("No kink with that ID found.");
         }
 
         /// <summary>
@@ -346,8 +384,16 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public async Task<RetrieveEntityResult<IEnumerable<Kink>>> GetKinksByCategoryAsync(KinkCategory category)
         {
-            var group = await _database.Kinks.AsQueryable().Where(k => k.Category == category).ToListAsync();
-            if (group is null || !group.Any())
+            var kinks = await _database.Kinks.UnifiedQueryAsync
+            (
+                q => q
+                    .Where(k => k.Category == category)
+                    .OrderBy(g => g.Category.ToString())
+            );
+
+            var enumeratedKinks = kinks.ToList();
+
+            if (!enumeratedKinks.Any())
             {
                 return RetrieveEntityResult<IEnumerable<Kink>>.FromError
                 (
@@ -355,7 +401,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
                 );
             }
 
-            return RetrieveEntityResult<IEnumerable<Kink>>.FromSuccess(group.OrderBy(g => g.Category.ToString()));
+            return enumeratedKinks;
         }
 
         /// <summary>
@@ -379,8 +425,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
 
             var userKinks = getUserKinksResult.Entity;
 
-            var group = await userKinks.Where(k => k.Kink.Category == category).ToListAsync();
-            if (group is null || !group.Any())
+            var group = userKinks.Where(k => k.Kink.Category == category).ToList();
+            if (!group.Any())
             {
                 return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess(new UserKink[] { });
             }
@@ -403,7 +449,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
 
             var user = getUserResult.Entity;
 
-            _database.UserKinks.RemoveRange(_database.UserKinks.AsQueryable().Where(k => k.User == user));
+            var kinksToRemove = await _database.UserKinks.UnifiedQueryAsync
+            (
+                q => q.Where(k => k.User == user)
+            );
+
+            _database.UserKinks.RemoveRange(kinksToRemove);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -521,15 +572,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             var alteredKinks = 0;
             foreach (var kink in newKinks)
             {
-                if (!await _database.Kinks.AsQueryable().AnyAsync(k => k.FListID == kink.FListID))
+                var entry = _database.Kinks.Update(kink);
+                if (entry.State != EntityState.Unchanged)
                 {
-                    await _database.Kinks.AddAsync(kink);
-
-                    var entry = _database.Entry(kink);
-                    if (entry.State != EntityState.Unchanged)
-                    {
-                        ++alteredKinks;
-                    }
+                    ++alteredKinks;
                 }
             }
 

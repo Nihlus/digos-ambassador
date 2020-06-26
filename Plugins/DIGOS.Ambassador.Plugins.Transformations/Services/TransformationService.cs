@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Characters.Model;
@@ -41,6 +42,7 @@ using Discord.Commands;
 using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Remora.Results;
 using PureAttribute = JetBrains.Annotations.PureAttribute;
@@ -114,8 +116,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             _database.Appearances.Update(defaultAppearance);
 
-            // Requery the database
-            return await GetOrCreateDefaultAppearanceAsync(character);
+            return defaultAppearance;
         }
 
         /// <summary>
@@ -126,14 +127,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure]
         private async Task<RetrieveEntityResult<Appearance>> GetDefaultAppearanceAsync(Character character)
         {
-            var defaultAppearance = await _database.Appearances.AsQueryable().FirstOrDefaultAsync
+            var appearances = await _database.Appearances.UnifiedQueryAsync
             (
-                da => da.Character == character && da.IsDefault
+                q => q.Where(da => da.Character == character && da.IsDefault)
             );
 
-            if (!(defaultAppearance is null))
+            var appearance = appearances.SingleOrDefault();
+
+            if (!(appearance is null))
             {
-                return RetrieveEntityResult<Appearance>.FromSuccess(defaultAppearance);
+                return appearance;
             }
 
             return RetrieveEntityResult<Appearance>.FromError("The character doesn't have a default appearance.");
@@ -170,8 +173,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             _database.Appearances.Update(currentAppearance);
 
-            // Requery the database
-            return await GetOrCreateCurrentAppearanceAsync(character);
+            return currentAppearance;
         }
 
         /// <summary>
@@ -182,17 +184,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure]
         private async Task<RetrieveEntityResult<Appearance>> GetCurrentAppearanceAsync(Character character)
         {
-            var currentAppearance = await _database.Appearances.AsQueryable().FirstOrDefaultAsync
+            var appearances = await _database.Appearances.UnifiedQueryAsync
             (
-                da => da.Character == character && da.IsCurrent
+                q => q.Where(da => da.Character == character && da.IsCurrent)
             );
 
-            if (!(currentAppearance is null))
+            var appearance = appearances.SingleOrDefault();
+
+            if (!(appearance is null))
             {
-                return RetrieveEntityResult<Appearance>.FromSuccess(currentAppearance);
+                return appearance;
             }
 
-            return RetrieveEntityResult<Appearance>.FromError("The character doesn't have current appearance.");
+            return RetrieveEntityResult<Appearance>.FromError("The character doesn't have a current appearance.");
         }
 
         /// <summary>
@@ -534,8 +538,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure]
         public async Task<IReadOnlyList<Species>> GetAvailableSpeciesAsync()
         {
-            return await _database.Species.AsQueryable()
-                .ToListAsync();
+            return (await _database.Species.UnifiedQueryAsync(q => q)).ToList();
         }
 
         /// <summary>
@@ -546,8 +549,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure]
         public async Task<IReadOnlyList<Transformation>> GetAvailableTransformationsAsync(Bodypart bodyPart)
         {
-            return await _database.Transformations.AsQueryable()
-                .Where(tf => tf.Part == bodyPart).ToListAsync();
+            var transformations = await _database.Transformations.UnifiedQueryAsync
+            (
+                q => q.Where(tf => tf.Part == bodyPart)
+            );
+
+            return transformations.ToList();
         }
 
         /// <summary>
@@ -804,12 +811,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             IUser discordUser
         )
         {
-            var protection = await _database.GlobalUserProtections.AsQueryable()
-            .FirstOrDefaultAsync(p => p.User.DiscordID == (long)discordUser.Id);
+            var protections = await _database.GlobalUserProtections.UnifiedQueryAsync
+            (
+                q => q.Where(p => p.User.DiscordID == (long)discordUser.Id)
+            );
+
+            var protection = protections.SingleOrDefault();
 
             if (!(protection is null))
             {
-                return RetrieveEntityResult<GlobalUserProtection>.FromSuccess(protection);
+                return protection;
             }
 
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
@@ -820,8 +831,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var user = getUserResult.Entity;
 
-            protection = new GlobalUserProtection(user);
-
+            protection = _database.CreateProxy<GlobalUserProtection>(user);
             _database.GlobalUserProtections.Update(protection);
 
             return RetrieveEntityResult<GlobalUserProtection>.FromSuccess(protection);
@@ -839,15 +849,26 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             IGuild guild
         )
         {
-            var protection = await _database.ServerUserProtections.AsQueryable().FirstOrDefaultAsync
+            var localProtection = _database.ServerUserProtections.FirstOrDefault
             (
                 p =>
                     p.User.DiscordID == (long)discordUser.Id && p.Server.DiscordID == (long)guild.Id
             );
 
-            if (!(protection is null))
+            if (!(localProtection is null))
             {
-                return RetrieveEntityResult<ServerUserProtection>.FromSuccess(protection);
+                return localProtection;
+            }
+
+            var dbProtection = await _database.ServerUserProtections.AsQueryable().FirstOrDefaultAsync
+            (
+                p =>
+                    p.User.DiscordID == (long)discordUser.Id && p.Server.DiscordID == (long)guild.Id
+            );
+
+            if (!(dbProtection is null))
+            {
+                return dbProtection;
             }
 
             var getServerResult = await _servers.GetOrRegisterServerAsync(guild);
@@ -866,11 +887,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var globalProtection = getGlobalProtectionResult.Entity;
 
-            protection = ServerUserProtection.CreateDefault(globalProtection, server);
+            dbProtection = ServerUserProtection.CreateDefault(globalProtection, server);
 
-            _database.ServerUserProtections.Update(protection);
+            _database.ServerUserProtections.Update(dbProtection);
 
-            return RetrieveEntityResult<ServerUserProtection>.FromSuccess(protection);
+            return RetrieveEntityResult<ServerUserProtection>.FromSuccess(dbProtection);
         }
 
         /// <summary>
@@ -1024,11 +1045,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 bodyparts.Add(bodypart);
             }
 
-            var transformations = await _database.Transformations.AsQueryable()
-                .Where(tf => bodyparts.Contains(tf.Part) && tf.Species.Name.ToLower().Equals(species.Name.ToLower()))
-                .ToListAsync();
+            var transformations = await _database.Transformations.UnifiedQueryAsync
+            (
+                q => q
+                    .Where(tf => bodyparts.Contains(tf.Part))
+                    .Where(tf => tf.Species.Name.ToLower().Equals(species.Name.ToLower()))
+            );
 
-            if (!transformations.Any())
+            var enumeratedTransformations = transformations.ToList();
+
+            if (!enumeratedTransformations.Any())
             {
                 return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromError
                 (
@@ -1036,7 +1062,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 );
             }
 
-            return RetrieveEntityResult<IReadOnlyList<Transformation>>.FromSuccess(transformations);
+            return enumeratedTransformations;
         }
 
         /// <summary>
@@ -1083,17 +1109,19 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             string speciesName
         )
         {
-            var species = await _database.Species.AsQueryable().FirstOrDefaultAsync
+            var matchingSpecies = await _database.Species.UnifiedQueryAsync
             (
-                s => string.Equals(s.Name.ToLower(), speciesName.ToLower())
+                q => q.Where(s => string.Equals(s.Name.ToLower(), speciesName.ToLower()))
             );
 
-            if (species is null)
+            var species = matchingSpecies.SingleOrDefault();
+
+            if (!(species is null))
             {
-                return RetrieveEntityResult<Species>.FromError("There is no species with that name in the database.");
+                return species;
             }
 
-            return RetrieveEntityResult<Species>.FromSuccess(species);
+            return RetrieveEntityResult<Species>.FromError("There is no species with that name in the database.");
         }
 
         /// <summary>
@@ -1107,10 +1135,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             string speciesName
         )
         {
-            return !await _database.Species.AsQueryable().AnyAsync
+            var matchingSpecies = await _database.Species.UnifiedQueryAsync
             (
-                s => string.Equals(s.Name.ToLower(), speciesName.ToLower())
+                q => q.Where(s => string.Equals(s.Name.ToLower(), speciesName.ToLower()))
             );
+
+            return !matchingSpecies.Any();
         }
 
         /// <summary>

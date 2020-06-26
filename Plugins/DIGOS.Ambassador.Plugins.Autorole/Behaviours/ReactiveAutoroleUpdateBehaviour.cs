@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 return;
             }
 
-            var guildAutoroles = await autoroles.GetAutoroles(textChannel.Guild).ToListAsync();
+            var guildAutoroles = (await autoroles.GetAutorolesAsync(textChannel.Guild)).ToList();
             if (guildAutoroles.Count == 0)
             {
                 return;
@@ -207,7 +207,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 yield break;
             }
 
-            var guildAutoroles = await autoroles.GetAutoroles(textChannel.Guild).ToListAsync();
+            var guildAutoroles = (await autoroles.GetAutorolesAsync(textChannel.Guild)).ToList();
             if (guildAutoroles.Count == 0)
             {
                 yield break;

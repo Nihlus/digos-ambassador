@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             var autoroles = tickServices.GetRequiredService<AutoroleService>();
             var autoroleUpdates = tickServices.GetRequiredService<AutoroleUpdateService>();
 
-            foreach (var autorole in await autoroles.GetAutoroles().ToListAsync(ct))
+            foreach (var autorole in await autoroles.GetAutorolesAsync())
             {
                 if (ct.IsCancellationRequested)
                 {

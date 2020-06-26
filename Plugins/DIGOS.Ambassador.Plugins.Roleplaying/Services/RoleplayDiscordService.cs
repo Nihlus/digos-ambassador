@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
@@ -92,17 +93,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="guild">The guild.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IQueryable<Roleplay>>> GetRoleplaysAsync(IGuild guild)
+        public async Task<RetrieveEntityResult<IEnumerable<Roleplay>>> GetRoleplaysAsync(IGuild guild)
         {
             var getServer = await _servers.GetOrRegisterServerAsync(guild);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<IQueryable<Roleplay>>.FromError(getServer);
+                return RetrieveEntityResult<IEnumerable<Roleplay>>.FromError(getServer);
             }
 
             var server = getServer.Entity;
 
-            return RetrieveEntityResult<IQueryable<Roleplay>>.FromSuccess(_roleplays.GetRoleplays(server));
+            var roleplays = await _roleplays.GetRoleplaysAsync(server);
+            return RetrieveEntityResult<IEnumerable<Roleplay>>.FromSuccess(roleplays);
         }
 
         /// <summary>
@@ -110,7 +112,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="guildUser">The guild user.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IQueryable<Roleplay>>> GetUserRoleplaysAsync(IGuildUser guildUser)
+        public async Task<RetrieveEntityResult<IEnumerable<Roleplay>>> GetUserRoleplaysAsync(IGuildUser guildUser)
         {
             var getGuildRoleplays = await GetRoleplaysAsync(guildUser.Guild);
             if (!getGuildRoleplays.IsSuccess)
@@ -121,13 +123,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
             {
-                return RetrieveEntityResult<IQueryable<Roleplay>>.FromError(getUser);
+                return RetrieveEntityResult<IEnumerable<Roleplay>>.FromError(getUser);
             }
 
             var user = getUser.Entity;
             var guildRoleplays = getGuildRoleplays.Entity;
 
-            return RetrieveEntityResult<IQueryable<Roleplay>>.FromSuccess(guildRoleplays.Where(r => r.Owner == user));
+            return RetrieveEntityResult<IEnumerable<Roleplay>>.FromSuccess(guildRoleplays.Where(r => r.Owner == user));
         }
 
         /// <summary>
@@ -592,7 +594,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             var server = getServer.Entity;
 
-            var roleplay = await _roleplays.GetRoleplays(server).AsQueryable().FirstOrDefaultAsync
+            var roleplay = (await _roleplays.GetRoleplaysAsync(server)).FirstOrDefault
             (
                 rp => rp.IsActive && rp.ActiveChannelID == (long)textChannel.Id
             );
@@ -676,7 +678,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             var server = getServer.Entity;
 
-            return await _roleplays.GetRoleplays(server).AsQueryable().AnyAsync
+            return (await _roleplays.GetRoleplaysAsync(server)).Any
             (
                 rp => rp.IsActive && rp.ActiveChannelID == (long)textChannel.Id
             );

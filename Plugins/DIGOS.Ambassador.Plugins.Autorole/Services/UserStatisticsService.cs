@@ -23,6 +23,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
@@ -75,16 +76,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             IUser discordUser
         )
         {
-            var existingStatistics = await _database.UserStatistics.AsQueryable().FirstOrDefaultAsync
+            var statistics = await _database.UserStatistics.UnifiedQueryAsync
             (
-                s => s.User.DiscordID == (long)discordUser.Id
+                q => q.Where(s => s.User.DiscordID == (long)discordUser.Id)
             );
 
-            if (!(existingStatistics is null))
-            {
-                return existingStatistics;
-            }
+            var statistic = statistics.SingleOrDefault();
 
+            if (!(statistic is null))
+            {
+                return statistic;
+            }
             var getUser = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUser.IsSuccess)
             {

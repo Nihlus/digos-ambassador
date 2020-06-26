@@ -20,8 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
@@ -95,20 +97,22 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             IGuild discordServer
         )
         {
-            var entity = await _database.ServerSettings.FirstOrDefaultAsync
+            var settings = await _database.ServerSettings.UnifiedQueryAsync
             (
-                s => s.Server.DiscordID == (long)discordServer.Id
+                q => q.Where(s => s.Server.DiscordID == (long)discordServer.Id)
             );
 
-            if (entity is null)
+            var setting = settings.SingleOrDefault();
+
+            if (!(setting is null))
             {
-                return RetrieveEntityResult<ServerModerationSettings>.FromError
-                (
-                    "The server doesn't have any settings."
-                );
+                return setting;
             }
 
-            return entity;
+            return RetrieveEntityResult<ServerModerationSettings>.FromError
+            (
+                "The server doesn't have any settings."
+            );
         }
 
         /// <summary>
@@ -134,8 +138,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             var server = getServer.Entity;
-            var settings = new ServerModerationSettings(server);
 
+            var settings = _database.CreateProxy<ServerModerationSettings>(server);
             _database.ServerSettings.Update(settings);
 
             return settings;

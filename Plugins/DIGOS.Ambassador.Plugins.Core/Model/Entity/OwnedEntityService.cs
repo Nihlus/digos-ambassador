@@ -23,12 +23,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Humanizer;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
@@ -56,37 +54,33 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="entityName">The entity name to check.</param>
         /// <returns>true if the name is unique; otherwise, false.</returns>
         [Pure]
-        public async Task<bool> IsEntityNameUniqueForUserAsync
+        public bool IsEntityNameUniqueForUser
         (
-            IQueryable<IOwnedNamedEntity> userEntities,
+            IReadOnlyCollection<IOwnedNamedEntity> userEntities,
             string entityName
         )
         {
-            if (await userEntities.CountAsync() <= 0)
+            if (userEntities.Count <= 0)
             {
                 return true;
             }
 
-            return !await userEntities.AnyAsync(ch => string.Equals(ch.Name.ToLower(), entityName.ToLower()));
+            return !userEntities.Any(ch => string.Equals(ch.Name.ToLower(), entityName.ToLower()));
         }
 
         /// <summary>
         /// Transfers ownership of the given entity to the specified user.
         /// </summary>
-        /// <param name="db">The database where the entities are stored.</param>
         /// <param name="newOwner">The new owner.</param>
         /// <param name="newOwnerEntities">The entities that the user already owns.</param>
         /// <param name="entity">The entity to transfer.</param>
-        /// <typeparam name="TContext">The database context to use.</typeparam>
         /// <returns>An entity modification result, which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> TransferEntityOwnershipAsync<TContext>
+        public ModifyEntityResult TransferEntityOwnership
         (
-            TContext db,
             User newOwner,
-            IQueryable<IOwnedNamedEntity> newOwnerEntities,
+            IReadOnlyCollection<IOwnedNamedEntity> newOwnerEntities,
             IOwnedNamedEntity entity
         )
-            where TContext : DbContext
         {
             if (entity.IsOwner(newOwner))
             {
@@ -107,8 +101,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
             }
 
             entity.Owner = newOwner;
-
-            await db.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }

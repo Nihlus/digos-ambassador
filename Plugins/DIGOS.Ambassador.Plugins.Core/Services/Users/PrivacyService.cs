@@ -20,9 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord.Feedback;
@@ -32,6 +34,7 @@ using Discord;
 using Discord.Net;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Logging;
 using Remora.Results;
 using Zio;
@@ -145,9 +148,36 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         [Pure]
         public async Task<bool> HasUserConsentedAsync(IUser discordUser)
         {
-            var userConsent = await _database.UserConsents.FirstOrDefaultAsync(uc => uc.DiscordID == (long)discordUser.Id);
+            var consents = await _database.UserConsents.UnifiedQueryAsync
+            (
+                q => q.Where(uc => uc.DiscordID == (long)discordUser.Id && uc.HasConsented)
+            );
 
-            return !(userConsent is null) && userConsent.HasConsented;
+            var consent = consents.SingleOrDefault();
+
+            return !(consent is null);
+        }
+
+        /// <summary>
+        /// Gets a consent entity for the given user.
+        /// </summary>
+        /// <param name="discordUser">The user.</param>
+        /// <returns>A retrieval result which may or may not have succeeded.</returns>
+        public async Task<RetrieveEntityResult<UserConsent>> GetUserConsentAsync(IUser discordUser)
+        {
+            var consents = await _database.UserConsents.UnifiedQueryAsync
+            (
+                q => q.Where(uc => uc.DiscordID == (long)discordUser.Id && uc.HasConsented)
+            );
+
+            var consent = consents.SingleOrDefault();
+
+            if (!(consent is null))
+            {
+                return consent;
+            }
+
+            return RetrieveEntityResult<UserConsent>.FromError("The given user doesn't have a consent entity.");
         }
 
         /// <summary>
@@ -157,19 +187,17 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <returns>A task that must be awaited.</returns>
         public async Task GrantUserConsentAsync(IUser discordUser)
         {
-            var userConsent = await _database.UserConsents.FirstOrDefaultAsync(uc => uc.DiscordID == (long)discordUser.Id);
-
-            if (userConsent is null)
+            var getConsent = await GetUserConsentAsync(discordUser);
+            if (!getConsent.IsSuccess)
             {
-                userConsent = new UserConsent((long)discordUser.Id)
-                {
-                    HasConsented = true
-                };
+                var userConsent = _database.CreateProxy<UserConsent>((long)discordUser.Id);
+                userConsent.HasConsented = true;
 
-                await _database.UserConsents.AddAsync(userConsent);
+                _database.UserConsents.Update(userConsent);
             }
             else
             {
+                var userConsent = getConsent.Entity;
                 userConsent.HasConsented = true;
             }
         }
@@ -181,16 +209,13 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <returns>A task that must be awaited.</returns>
         public async Task<ModifyEntityResult> RevokeUserConsentAsync(IUser discordUser)
         {
-            var userConsent = await _database.UserConsents.FirstOrDefaultAsync
-            (
-                uc => uc.DiscordID == (long)discordUser.Id
-            );
-
-            if (userConsent is null)
+            var getConsent = await GetUserConsentAsync(discordUser);
+            if (!getConsent.IsSuccess)
             {
                 return ModifyEntityResult.FromError("The user has not consented.");
             }
 
+            var userConsent = getConsent.Entity;
             userConsent.HasConsented = false;
 
             return ModifyEntityResult.FromSuccess();

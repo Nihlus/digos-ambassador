@@ -20,8 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
@@ -66,18 +68,19 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             Server server
         )
         {
-            var existingSettings = await _database.ServerSettings.AsQueryable().FirstOrDefaultAsync
+            var settings = await _database.ServerSettings.UnifiedQueryAsync
             (
-                s => s.Server == server
+                q => q.Where(s => s.Server == server)
             );
 
-            if (!(existingSettings is null))
+            var setting = settings.SingleOrDefault();
+
+            if (!(setting is null))
             {
-                return RetrieveEntityResult<ServerRoleplaySettings>.FromSuccess(existingSettings);
+                return setting;
             }
 
             var newSettings = _database.CreateProxy<ServerRoleplaySettings>(server);
-
             _database.ServerSettings.Update(newSettings);
 
             return newSettings;

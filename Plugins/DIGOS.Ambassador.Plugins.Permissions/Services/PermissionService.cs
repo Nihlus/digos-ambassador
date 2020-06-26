@@ -25,12 +25,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using MoreLinq.Extensions;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -383,13 +385,13 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             var hasPermission = false;
 
             // Check if the user is part of any roles which this permission applies to
-            var rolePermission = GetApplicableRolePermissions(discordUser)
-                .FirstOrDefault
-                (
-                    p =>
-                        p.Permission == requiredPermission.UniqueIdentifier &&
-                        p.Target == target
-                );
+            var rolePermissions = await GetApplicableRolePermissionsAsync(discordUser);
+            var rolePermission = rolePermissions.FirstOrDefault
+            (
+                p =>
+                    p.Permission == requiredPermission.UniqueIdentifier &&
+                    p.Target == target
+            );
 
             if (!(rolePermission is null))
             {
@@ -446,18 +448,19 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// </summary>
         /// <param name="discordUser">The user.</param>
         /// <returns>An object representing the query.</returns>
-        public IEnumerable<RolePermission> GetApplicableRolePermissions
+        public async Task<IEnumerable<RolePermission>> GetApplicableRolePermissionsAsync
         (
             IGuildUser discordUser
         )
         {
             var userRoles = discordUser.RoleIds.Select(r => (long)r).ToList();
 
-            var rolePermissions = _database.RolePermissions.AsQueryable()
-                .Where(p => userRoles.Contains(p.RoleID))
-                .ToList();
+            var permissions = await _database.RolePermissions.UnifiedQueryAsync
+            (
+                q => q.Where(p => userRoles.Contains(p.RoleID))
+            );
 
-            return rolePermissions.OrderBy(p => userRoles.IndexOf(p.RoleID));
+            return permissions.OrderBy(p => userRoles.IndexOf(p.RoleID));
         }
 
         /// <summary>
@@ -479,7 +482,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 throw new ArgumentException("Invalid permission target.", nameof(target));
             }
 
-            var existingPermission = await _database.RolePermissions.AsQueryable().FirstOrDefaultAsync
+            var localPermission = _database.RolePermissions.FirstOrDefault
             (
                 p =>
                     p.RoleID == (long)discordRole.Id &&
@@ -487,9 +490,22 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                     p.Target == target
             );
 
-            if (!(existingPermission is null))
+            if (!(localPermission is null))
             {
-                return RetrieveEntityResult<RolePermission>.FromSuccess(existingPermission);
+                return localPermission;
+            }
+
+            var dbPermission = await _database.RolePermissions.AsQueryable().FirstOrDefaultAsync
+            (
+                p =>
+                    p.RoleID == (long)discordRole.Id &&
+                    p.Permission == permission.UniqueIdentifier &&
+                    p.Target == target
+            );
+
+            if (!(dbPermission is null))
+            {
+                return dbPermission;
             }
 
             var newPermission = _database.CreateProxy<RolePermission>

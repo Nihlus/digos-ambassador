@@ -21,8 +21,10 @@
 //
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Model;
@@ -62,7 +64,13 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         [Pure]
         public async Task<bool> IsServerKnownAsync(IGuild discordServer)
         {
-            return await _database.Servers.AnyAsync(u => u.DiscordID == (long)discordServer.Id);
+            var servers = await _database.Servers.UnifiedQueryAsync
+            (
+                q => q.Where(s => s.DiscordID == (long)discordServer.Id)
+            );
+
+            var server = servers.SingleOrDefault();
+            return !(server is null);
         }
 
         /// <summary>
@@ -88,13 +96,19 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         [Pure]
         public async Task<RetrieveEntityResult<Server>> GetServerAsync(IGuild discordServer)
         {
-            var server = await _database.Servers.FirstOrDefaultAsync(u => u.DiscordID == (long)discordServer.Id);
-            if (server is null)
+            var servers = await _database.Servers.UnifiedQueryAsync
+            (
+                q => q.Where(u => u.DiscordID == (long)discordServer.Id)
+            );
+
+            var server = servers.SingleOrDefault();
+
+            if (!(server is null))
             {
-                return RetrieveEntityResult<Server>.FromError("That server has not been registered in the database.");
+                return server;
             }
 
-            return RetrieveEntityResult<Server>.FromSuccess(server);
+            return RetrieveEntityResult<Server>.FromError("That server has not been registered in the database.");
         }
 
         /// <summary>

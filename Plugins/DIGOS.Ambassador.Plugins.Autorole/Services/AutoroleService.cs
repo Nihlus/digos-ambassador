@@ -21,9 +21,11 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
@@ -78,9 +80,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// </summary>
         /// <param name="discordRole">The discord role.</param>
         /// <returns>true if the given role has an autorole; otherwise, false.</returns>
-        public ValueTask<bool> HasAutoroleAsync(IRole discordRole)
+        public async ValueTask<bool> HasAutoroleAsync(IRole discordRole)
         {
-            return _database.Autoroles.AsAsyncEnumerable().AnyAsync(ar => ar.DiscordRoleID == (long)discordRole.Id);
+            var roles = await _database.Autoroles.UnifiedQueryAsync
+            (
+                q => q.Where(ar => ar.DiscordRoleID == (long)discordRole.Id)
+            );
+
+            return roles.Any();
         }
 
         /// <summary>
@@ -90,20 +97,21 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<AutoroleConfiguration>> GetAutoroleAsync(IRole discordRole)
         {
-            var autorole = await _database.Autoroles.AsAsyncEnumerable().FirstOrDefaultAsync
+            var autoroles = await _database.Autoroles.UnifiedQueryAsync
             (
-                ar => ar.DiscordRoleID == (long)discordRole.Id
+                q => q.Where(ar => ar.DiscordRoleID == (long)discordRole.Id)
             );
 
-            if (autorole is null)
+            var autorole = autoroles.SingleOrDefault();
+            if (!(autorole is null))
             {
-                return RetrieveEntityResult<AutoroleConfiguration>.FromError
-                (
-                    "No existing autorole configuration could be found."
-                );
+                return autorole;
             }
 
-            return autorole;
+            return RetrieveEntityResult<AutoroleConfiguration>.FromError
+            (
+                "No existing autorole configuration could be found."
+            );
         }
 
         /// <summary>
@@ -313,14 +321,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 );
             }
 
-            var existingConfirmation = await _database.AutoroleConfirmations.AsQueryable().FirstOrDefaultAsync
+            var confirmations = await _database.AutoroleConfirmations.UnifiedQueryAsync
             (
-                ac => ac.User.DiscordID == (long)discordUser.Id
+                q => q
+                    .Where(ac => ac.Autorole == autorole)
+                    .Where(ac => ac.User.DiscordID == (long)discordUser.Id)
             );
 
-            if (!(existingConfirmation is null))
+            var confirmation = confirmations.SingleOrDefault();
+
+            if (!(confirmation is null))
             {
-                return existingConfirmation;
+                return confirmation;
             }
 
             var getUser = await _users.GetOrRegisterUserAsync(discordUser);
@@ -383,10 +395,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return ModifyEntityResult.FromError("The autorole doesn't require explicit affirmation.");
             }
 
-            var qualifyingUsers = await _database.AutoroleConfirmations.AsQueryable()
-                .Where(a => a.Autorole == autorole)
-                .Where(a => !a.IsConfirmed)
-                .ToListAsync();
+            var qualifyingUsers = await _database.AutoroleConfirmations.UnifiedQueryAsync
+            (
+                q => q
+                    .Where(a => a.Autorole == autorole)
+                    .Where(a => !a.IsConfirmed)
+            );
 
             foreach (var qualifyingUser in qualifyingUsers)
             {
@@ -477,19 +491,22 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// Gets all autoroles in the database, scoped to the given server.
         /// </summary>
         /// <param name="guild">The Discord guild.</param>
+        /// <param name="query">Additional query statements.</param>
         /// <returns>The autoroles.</returns>
-        public IQueryable<AutoroleConfiguration> GetAutoroles(IGuild guild)
+        public async Task<IEnumerable<AutoroleConfiguration>> GetAutorolesAsync
+        (
+            IGuild? guild = null,
+            Func<IQueryable<AutoroleConfiguration>, IQueryable<AutoroleConfiguration>>? query = null
+        )
         {
-            return _database.Autoroles.AsQueryable().Where(a => a.Server.DiscordID == (long)guild.Id);
-        }
+            query ??= q => q;
 
-        /// <summary>
-        /// Gets all autoroles in the database.
-        /// </summary>
-        /// <returns>The autoroles.</returns>
-        public IQueryable<AutoroleConfiguration> GetAutoroles()
-        {
-            return _database.Autoroles.AsQueryable();
+            if (!(guild is null))
+            {
+                query = q => q.Where(a => a.Server.DiscordID == (long)guild.Id);
+            }
+
+            return await _database.Autoroles.UnifiedQueryAsync(query);
         }
 
         /// <summary>
@@ -528,14 +545,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             IGuild guild
         )
         {
-            var existingSettings = await _database.AutoroleServerSettings.AsQueryable().FirstOrDefaultAsync
+            var settings = await _database.AutoroleServerSettings.UnifiedQueryAsync
             (
-                s => s.Server.DiscordID == (long)guild.Id
+                q => q.Where(s => s.Server.DiscordID == (long)guild.Id)
             );
 
-            if (!(existingSettings is null))
+            var setting = settings.SingleOrDefault();
+
+            if (!(setting is null))
             {
-                return existingSettings;
+                return setting;
             }
 
             var getServer = await _servers.GetOrRegisterServerAsync(guild);

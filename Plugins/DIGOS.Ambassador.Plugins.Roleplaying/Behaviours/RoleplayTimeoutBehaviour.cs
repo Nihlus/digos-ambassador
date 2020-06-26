@@ -87,11 +87,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     continue;
                 }
 
-                var timedOutRoleplays = await getRoleplays.Entity
+                var timedOutRoleplays = getRoleplays.Entity
                     .Where(r => r.IsActive)
                     .Where(r => r.LastUpdated.HasValue)
                     .Where(r => DateTime.Now - r.LastUpdated > TimeSpan.FromHours(72))
-                    .ToListAsync(ct);
+                    .ToList();
 
                 foreach (var roleplay in timedOutRoleplays)
                 {

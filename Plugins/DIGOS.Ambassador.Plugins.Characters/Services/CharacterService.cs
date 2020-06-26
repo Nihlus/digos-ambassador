@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -232,17 +233,15 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return RetrieveEntityResult<Character>.FromError("The user hasn't assumed a character.");
             }
 
-            var currentCharacter = await GetUserCharacters(user, server).FirstOrDefaultAsync
-            (
-                ch => ch.IsCurrent
-            );
+            var currentCharacter = (await GetUserCharactersAsync(user, server, q => q.Where(ch => ch.IsCurrent)))
+                .SingleOrDefault();
 
-            if (currentCharacter is null)
+            if (!(currentCharacter is null))
             {
-                return RetrieveEntityResult<Character>.FromError("Failed to retrieve a current character.");
+                return currentCharacter;
             }
 
-            return RetrieveEntityResult<Character>.FromSuccess(currentCharacter);
+            return RetrieveEntityResult<Character>.FromError("Failed to retrieve a current character.");
         }
 
         /// <summary>
@@ -260,7 +259,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         {
             server = _database.NormalizeReference(server);
 
-            if (await GetCharacters(server).CountAsync(ch => string.Equals(ch.Name.ToLower(), name.ToLower())) > 1)
+            var characters = (await GetCharactersAsync
+            (
+                server,
+                q => q.Where(ch => string.Equals(ch.Name.ToLower(), name.ToLower()))
+            )).ToList();
+
+            if (characters.Count > 1)
             {
                 return RetrieveEntityResult<Character>.FromError
                 (
@@ -268,30 +273,56 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 );
             }
 
-            var character = GetCharacters(server).FirstOrDefault
-            (
-                ch => string.Equals(ch.Name.ToLower(), name.ToLower())
-            );
+            var character = characters.FirstOrDefault();
 
-            if (character is null)
+            if (!(character is null))
             {
-                return RetrieveEntityResult<Character>.FromError("No character with that name found.");
+                return character;
             }
 
-            return RetrieveEntityResult<Character>.FromSuccess(character);
+            return RetrieveEntityResult<Character>.FromError("No character with that name found.");
         }
 
         /// <summary>
         /// Gets the characters on the given server.
         /// </summary>
         /// <param name="server">The server to scope the search to.</param>
+        /// <param name="query">Additional query statements.</param>
         /// <returns>A queryable set of characters.</returns>
         [Pure]
-        public IQueryable<Character> GetCharacters(Server server)
+        public Task<IEnumerable<Character>> GetCharactersAsync
+        (
+            Server server,
+            Func<IQueryable<Character>, IQueryable<Character>>? query = null
+        )
         {
+            query ??= q => q;
             server = _database.NormalizeReference(server);
 
-            return _database.Characters.AsQueryable().Where(c => c.Server == server);
+            return _database.Characters.UnifiedQueryAsync(q => query(q.Where(a => a.Server == server)));
+        }
+
+        /// <summary>
+        /// Get the characters owned by the given user.
+        /// </summary>
+        /// <param name="user">The user to get the characters of.</param>
+        /// <param name="server">The server to scope the search to.</param>
+        /// <param name="query">Additional query statements.</param>
+        /// <returns>A queryable list of characters belonging to the user.</returns>
+        [Pure]
+        public async Task<IEnumerable<Character>> GetUserCharactersAsync
+        (
+            User user,
+            Server server,
+            Func<IQueryable<Character>, IQueryable<Character>>? query = null
+        )
+        {
+            query ??= q => q;
+
+            user = _database.NormalizeReference(user);
+            server = _database.NormalizeReference(server);
+
+            return await GetCharactersAsync(server, q => query(q.Where(ch => ch.Owner == user)));
         }
 
         /// <summary>
@@ -312,14 +343,18 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            var character = await GetUserCharacters(user, server).FirstOrDefaultAsync
+            var characters = await GetUserCharactersAsync
             (
-                ch => string.Equals(ch.Name.ToLower(), name.ToLower())
+                user,
+                server,
+                q => q.Where(ch => string.Equals(ch.Name.ToLower(), name.ToLower()))
             );
+
+            var character = characters.SingleOrDefault();
 
             if (!(character is null))
             {
-                return RetrieveEntityResult<Character>.FromSuccess(character);
+                return character;
             }
 
             return RetrieveEntityResult<Character>.FromError("The user doesn't own a character with that name.");
@@ -388,10 +423,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            return await GetUserCharacters(user, server).AnyAsync
-            (
-                c => c.IsCurrent
-            );
+            var characters = await GetUserCharactersAsync(user, server, q => q.Where(c => c.IsCurrent));
+            return characters.Any();
         }
 
         /// <summary>
@@ -405,14 +438,15 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            var defaultCharacter = await GetUserCharacters(user, server).FirstOrDefaultAsync(c => c.IsDefault);
+            var characters = await GetUserCharactersAsync(user, server, q => q.Where(ch => ch.IsDefault));
+            var defaultCharacter = characters.SingleOrDefault();
 
-            if (defaultCharacter is null)
+            if (!(defaultCharacter is null))
             {
-                return RetrieveEntityResult<Character>.FromError("The user doesn't have a default character.");
+                return defaultCharacter;
             }
 
-            return RetrieveEntityResult<Character>.FromSuccess(defaultCharacter);
+            return RetrieveEntityResult<Character>.FromError("The user doesn't have a default character.");
         }
 
         /// <summary>
@@ -711,34 +745,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             newOwner = _database.NormalizeReference(newOwner);
             server = _database.NormalizeReference(server);
 
-            var newOwnerCharacters = GetUserCharacters(newOwner, server);
-            return await _ownedEntities.TransferEntityOwnershipAsync
+            var newOwnerCharacters = (await GetUserCharactersAsync(newOwner, server)).ToList();
+            return _ownedEntities.TransferEntityOwnership
             (
-                _database,
                 newOwner,
                 newOwnerCharacters,
                 character
             );
-        }
-
-        /// <summary>
-        /// Get the characters owned by the given user.
-        /// </summary>
-        /// <param name="user">The user to get the characters of.</param>
-        /// <param name="server">The server to scope the search to.</param>
-        /// <returns>A queryable list of characters belonging to the user.</returns>
-        [Pure]
-        public IQueryable<Character> GetUserCharacters
-        (
-            User user,
-            Server server
-        )
-        {
-            user = _database.NormalizeReference(user);
-            server = _database.NormalizeReference(server);
-
-            var characters = GetCharacters(server).Where(ch => ch.Owner.DiscordID == user.DiscordID);
-            return characters;
         }
 
         /// <summary>
@@ -759,8 +772,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            var userCharacters = GetUserCharacters(user, server);
-            return await _ownedEntities.IsEntityNameUniqueForUserAsync(userCharacters, characterName);
+            var userCharacters = (await GetUserCharactersAsync(user, server)).ToList();
+            return _ownedEntities.IsEntityNameUniqueForUser(userCharacters, characterName);
         }
 
         /// <summary>

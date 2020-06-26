@@ -153,7 +153,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
             }
 
             var characters = getCharacters.Entity;
-            var characterNames = await characters.Select(c => c.Name).ToListAsync();
+            var characterNames = characters.Select(c => c.Name).ToList();
 
             string? characterName;
             string? displayName;

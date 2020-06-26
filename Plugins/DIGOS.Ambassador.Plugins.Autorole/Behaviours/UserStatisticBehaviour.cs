@@ -177,7 +177,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             using var eventScope = this.Services.CreateScope();
             var autoroles = eventScope.ServiceProvider.GetRequiredService<AutoroleService>();
 
-            var autorolesOnServer = autoroles.GetAutoroles(guildUser.Guild);
+            var autorolesOnServer = (await autoroles.GetAutorolesAsync(guildUser.Guild)).ToList();
 
             var wantsToUpdateChannelMessageCounts =
                 autorolesOnServer.Any(a => a.Conditions.Any(c => c is MessageCountInChannelCondition));

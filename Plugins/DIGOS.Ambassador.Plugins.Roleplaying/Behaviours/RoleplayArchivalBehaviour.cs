@@ -92,11 +92,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
                 var guildRoleplays = getGuildRoleplays.Entity;
 
-                var roleplays = await guildRoleplays
+                var roleplays = guildRoleplays
                     .Where(r => r.DedicatedChannelID.HasValue)
                     .Where(r => r.LastUpdated.HasValue)
                     .Where(r => DateTime.Now - r.LastUpdated > TimeSpan.FromDays(28))
-                    .ToListAsync(ct);
+                    .ToList();
 
                 foreach (var roleplay in roleplays)
                 {

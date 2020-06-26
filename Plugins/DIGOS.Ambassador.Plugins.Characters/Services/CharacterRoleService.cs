@@ -22,6 +22,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Plugins.Characters.Model;
@@ -116,10 +117,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <returns>A deletion result which may or may not have succeeded.</returns>
         public async Task<DeleteEntityResult> DeleteCharacterRoleAsync(CharacterRole role)
         {
-            var currentCharactersWithRole = await _characters.GetCharacters(role.Server)
-                .Where(c => c.Role == role)
-                .Where(c => c.IsCurrent)
-                .ToListAsync();
+            var currentCharactersWithRole = await _characters.GetCharactersAsync
+            (
+                role.Server,
+                q => q
+                    .Where(c => c.Role == role)
+                    .Where(c => c.IsCurrent)
+            );
 
             _database.CharacterRoles.Remove(role);
             await _database.SaveChangesAsync();
@@ -156,20 +160,22 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<CharacterRole>> GetCharacterRoleAsync(IRole role)
         {
-            var characterRole = await _database.CharacterRoles.AsQueryable().FirstOrDefaultAsync
+            var characterRoles = await _database.CharacterRoles.UnifiedQueryAsync
             (
-                r => r.Server.DiscordID == (long)role.Guild.Id && r.DiscordID == (long)role.Id
+                q => q.Where(r => r.Server.DiscordID == (long)role.Guild.Id && r.DiscordID == (long)role.Id)
             );
 
-            if (characterRole is null)
+            var characterRole = characterRoles.SingleOrDefault();
+
+            if (!(characterRole is null))
             {
-                return RetrieveEntityResult<CharacterRole>.FromError
-                (
-                    "That role is not registered as a character role."
-                );
+                return characterRole;
             }
 
-            return characterRole;
+            return RetrieveEntityResult<CharacterRole>.FromError
+            (
+                "That role is not registered as a character role."
+            );
         }
 
         /// <summary>

@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
                 var guildRoleplays = getRoleplays.Entity;
 
-                var activeRoleplays = await guildRoleplays.Where(r => r.DedicatedChannelID.HasValue).ToListAsync();
+                var activeRoleplays = guildRoleplays.Where(r => r.DedicatedChannelID.HasValue).ToList();
                 foreach (var activeRoleplay in activeRoleplays)
                 {
                     var channel = guild.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID!.Value);

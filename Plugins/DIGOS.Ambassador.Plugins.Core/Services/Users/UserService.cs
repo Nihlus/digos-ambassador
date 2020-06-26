@@ -21,8 +21,10 @@
 //
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Model;
@@ -62,7 +64,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         [Pure]
         public async Task<bool> IsUserKnownAsync(IUser discordUser)
         {
-            return await _database.Users.AnyAsync(u => u.DiscordID == (long)discordUser.Id);
+            var users = await _database.Users.UnifiedQueryAsync
+            (
+                q => q.Where(u => u.DiscordID == (long)discordUser.Id)
+            );
+
+            var user = users.SingleOrDefault();
+
+            return !(user is null);
         }
 
         /// <summary>
@@ -91,18 +100,18 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         [Pure]
         public async Task<RetrieveEntityResult<User>> GetUserAsync(IUser discordUser)
         {
-            var user = await _database.Users.FirstOrDefaultAsync
+            var users = await _database.Users.UnifiedQueryAsync
             (
-                u =>
-                    u.DiscordID == (long)discordUser.Id
+                q => q.Where(u => u.DiscordID == (long)discordUser.Id)
             );
 
-            if (user is null)
+            var user = users.SingleOrDefault();
+            if (!(user is null))
             {
-                return RetrieveEntityResult<User>.FromError("Unknown user.");
+                return user;
             }
 
-            return RetrieveEntityResult<User>.FromSuccess(user);
+            return RetrieveEntityResult<User>.FromError("Unknown user.");
         }
 
         /// <summary>

@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -206,11 +207,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         {
             server = _database.NormalizeReference(server);
 
-            if
+            var roleplays = await GetRoleplaysAsync
             (
-                await _database.Roleplays.AsQueryable()
-                    .CountAsync(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower())) > 1
-            )
+                server,
+                q => q.Where(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower()))
+            );
+
+            var enumeratedRoleplays = roleplays.ToList();
+
+            if (enumeratedRoleplays.Count > 1)
             {
                 return RetrieveEntityResult<Roleplay>.FromError
                 (
@@ -218,15 +223,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 );
             }
 
-            var roleplay = GetRoleplays(server)
-                .FirstOrDefault(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower()));
+            var roleplay = enumeratedRoleplays.SingleOrDefault();
 
-            if (roleplay is null)
+            if (!(roleplay is null))
             {
-                return RetrieveEntityResult<Roleplay>.FromError("No roleplay with that name found.");
+                return roleplay;
             }
 
-            return RetrieveEntityResult<Roleplay>.FromSuccess(roleplay);
+            return RetrieveEntityResult<Roleplay>.FromError("No roleplay with that name found.");
         }
 
         /// <summary>
@@ -247,31 +251,27 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            var userRoleplays = GetUserRoleplays(user, server);
-            return await _ownedEntities.IsEntityNameUniqueForUserAsync(userRoleplays, roleplayName);
+            var userRoleplays = await GetUserRoleplaysAsync(user, server);
+            return _ownedEntities.IsEntityNameUniqueForUser(userRoleplays.ToList(), roleplayName);
         }
 
         /// <summary>
         /// Gets the roleplays on the given server.
         /// </summary>
         /// <param name="server">The server to scope the search to.</param>
+        /// <param name="query">Additional query statements.</param>
         /// <returns>A queryable list of roleplays on the given server.</returns>
         [Pure]
-        public IQueryable<Roleplay> GetRoleplays(Server? server = null)
+        public async Task<IEnumerable<Roleplay>> GetRoleplaysAsync
+        (
+            Server server,
+            Func<IQueryable<Roleplay>, IQueryable<Roleplay>>? query = null
+        )
         {
-            if (server is null)
-            {
-                return _database.Roleplays;
-            }
-
+            query ??= q => q;
             server = _database.NormalizeReference(server);
 
-            return _database.Roleplays.AsQueryable()
-            .Where
-            (
-                rp =>
-                    rp.Server == server
-            );
+            return await _database.Roleplays.UnifiedQueryAsync(q => query(q.Where(rp => rp.Server == server)));
         }
 
         /// <summary>
@@ -279,18 +279,21 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="user">The user to get the roleplays of.</param>
         /// <param name="server">The server that the search is scoped to.</param>
+        /// <param name="query">Additional query statements.</param>
         /// <returns>A queryable list of roleplays belonging to the user.</returns>
         [Pure]
-        public IQueryable<Roleplay> GetUserRoleplays(User user, Server server)
+        public Task<IEnumerable<Roleplay>> GetUserRoleplaysAsync
+        (
+            User user,
+            Server server,
+            Func<IQueryable<Roleplay>, IQueryable<Roleplay>>? query = null
+        )
         {
+            query ??= q => q;
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            return GetRoleplays(server).Where
-            (
-                rp =>
-                    rp.Owner == user
-            );
+            return GetRoleplaysAsync(server, q => query(q.Where(rp => rp.Owner == user)));
         }
 
         /// <summary>
@@ -311,20 +314,21 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             roleplayOwner = _database.NormalizeReference(roleplayOwner);
             server = _database.NormalizeReference(server);
 
-            var roleplay = await GetRoleplays(server)
-            .FirstOrDefaultAsync
+            var userRoleplays = await GetUserRoleplaysAsync
             (
-                rp =>
-                    rp.Name.ToLower().Equals(roleplayName.ToLower()) &&
-                    rp.Owner == roleplayOwner
+                roleplayOwner,
+                server,
+                q => q.Where(rp => rp.Name.ToLower().Equals(roleplayName.ToLower()))
             );
 
-            if (roleplay is null)
+            var roleplay = userRoleplays.SingleOrDefault();
+
+            if (!(roleplay is null))
             {
-                return RetrieveEntityResult<Roleplay>.FromError("You don't own a roleplay with that name.");
+                return roleplay;
             }
 
-            return RetrieveEntityResult<Roleplay>.FromSuccess(roleplay);
+            return RetrieveEntityResult<Roleplay>.FromError("You don't own a roleplay with that name.");
         }
 
         /// <summary>
@@ -484,12 +488,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         {
             newOwner = _database.NormalizeReference(newOwner);
 
-            var newOwnerRoleplays = GetUserRoleplays(newOwner, roleplay.Server);
-            return await _ownedEntities.TransferEntityOwnershipAsync
+            var newOwnerRoleplays = await GetUserRoleplaysAsync(newOwner, roleplay.Server);
+            return _ownedEntities.TransferEntityOwnership
             (
-                _database,
                 newOwner,
-                newOwnerRoleplays,
+                newOwnerRoleplays.ToList(),
                 roleplay
             );
         }
