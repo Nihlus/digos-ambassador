@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 var result = await this.Transformations.UpdateTransformationDatabaseAsync();
 
                 Assert.True(result.IsSuccess);
-                Assert.NotEmpty(this.Database.Species);
+                Assert.NotEmpty(this.Database.Species.Local);
             }
         }
     }

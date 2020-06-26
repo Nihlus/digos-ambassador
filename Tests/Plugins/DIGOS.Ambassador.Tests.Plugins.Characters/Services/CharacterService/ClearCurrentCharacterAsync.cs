@@ -51,7 +51,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 );
 
                 this.Database.Characters.Update(_character);
-                this.Database.SaveChangesAsync();
             }
 
             [Fact]
@@ -66,7 +65,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task ReturnsSuccessfulResultIfCharacterIsCurrent()
             {
                 _character.IsCurrent = true;
-                await this.Database.SaveChangesAsync();
 
                 var result = await this.Characters.ClearCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
@@ -77,7 +75,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task RemovesCorrectServerFromCharacter()
             {
                 _character.IsCurrent = true;
-                await this.Database.SaveChangesAsync();
 
                 await this.Characters.ClearCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 

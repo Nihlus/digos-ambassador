@@ -53,7 +53,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 Assert.True(result.IsSuccess);
                 Assert.True(result.WasModified);
-                Assert.Equal(expected, this.Database.ServerUserProtections.First().Type);
+                Assert.Equal(expected, this.Database.ServerUserProtections.Local.First().Type);
             }
 
             [Fact]

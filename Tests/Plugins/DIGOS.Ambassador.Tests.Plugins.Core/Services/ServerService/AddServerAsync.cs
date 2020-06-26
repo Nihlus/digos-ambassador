@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
@@ -56,7 +57,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Servers.AddServerAsync(_discordGuild);
 
-                var server = await this.Database.Servers.FirstOrDefaultAsync();
+                var server = this.Database.Servers.Local.FirstOrDefault();
 
                 Assert.NotNull(server);
                 Assert.Equal((long)_discordGuild.Id, server.DiscordID);

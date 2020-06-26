@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
@@ -48,7 +49,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-                Assert.NotEmpty(this.Database.UserConsents);
+                Assert.NotEmpty(this.Database.UserConsents.Local);
             }
 
             [Fact]
@@ -56,7 +57,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-                var consent = await this.Database.UserConsents.FirstOrDefaultAsync();
+                var consent = this.Database.UserConsents.Local.FirstOrDefault();
 
                 Assert.NotNull(consent);
                 Assert.Equal((long)_discordUser.Id, consent.DiscordID);
@@ -68,13 +69,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-                var firstConsent = await this.Database.UserConsents.FirstAsync();
+                var firstConsent = this.Database.UserConsents.Local.First();
 
                 await this.Privacy.RevokeUserConsentAsync(_discordUser);
 
                 await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-                var secondConsent = await this.Database.UserConsents.FirstAsync();
+                var secondConsent = this.Database.UserConsents.Local.First();
 
                 Assert.Same(firstConsent, secondConsent);
 

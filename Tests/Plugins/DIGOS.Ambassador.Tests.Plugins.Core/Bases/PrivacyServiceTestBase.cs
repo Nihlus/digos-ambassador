@@ -55,18 +55,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         protected CoreDatabaseContext Database { get; private set; } = null!;
 
         /// <inheritdoc />
-        public virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        public virtual Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
             serviceCollection.AddDbContext<CoreDatabaseContext>(ConfigureOptions<CoreDatabaseContext>);
@@ -87,6 +75,19 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             this.Database.Database.Create();
 
             this.Privacy = serviceProvider.GetRequiredService<PrivacyService>();
+        }
+
+        /// <inheritdoc />
+        public virtual Task InitializeAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public async Task DisposeAsync()
+        {
+            this.Privacy.SaveChanges();
+            await this.Privacy.DisposeAsync();
         }
     }
 }

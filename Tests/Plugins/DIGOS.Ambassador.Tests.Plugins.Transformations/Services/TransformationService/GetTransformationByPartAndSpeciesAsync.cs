@@ -38,11 +38,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class GetTransformationByPartAndSpeciesAsync : TransformationServiceTestBase
         {
-            private Species _templateSpecies = null!;
+            private readonly Species _templateSpecies;
 
-            protected override async Task InitializeTestAsync()
+            public GetTransformationByPartAndSpeciesAsync()
             {
-                _templateSpecies = await this.Database.Species.AsQueryable().FirstAsync(s => s.Name == "template");
+                _templateSpecies = this.Database.Species.Local.First(s => s.Name == "template");
             }
 
             [Fact]

@@ -52,8 +52,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _guild
                 );
 
-                Assert.NotEmpty(this.Database.ServerUserProtections);
-                Assert.Same(result.Entity, this.Database.ServerUserProtections.First());
+                Assert.NotEmpty(this.Database.ServerUserProtections.Local);
+                Assert.Same(result.Entity, this.Database.ServerUserProtections.Local.First());
             }
 
             [Fact]
@@ -112,7 +112,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 };
 
                 this.Database.GlobalUserProtections.Update(globalSetting);
-                await this.Database.SaveChangesAsync();
 
                 var localSetting = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (

@@ -40,8 +40,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 var result = await this.Characters.CreateCharacterAsync(this.DefaultOwner, this.DefaultServer, "Test");
 
                 Assert.True(result.IsSuccess);
-                Assert.NotEmpty(this.Database.Characters);
-                Assert.Equal("Test", this.Database.Characters.First().Name);
+
+                Assert.NotEmpty(this.Database.Characters.Local);
+                Assert.Equal("Test", this.Database.Characters.Local.First().Name);
             }
         }
     }

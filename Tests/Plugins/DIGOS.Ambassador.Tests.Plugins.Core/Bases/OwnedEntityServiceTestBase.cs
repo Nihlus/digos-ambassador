@@ -21,6 +21,8 @@
 //
 
 using System;
+using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -29,6 +31,7 @@ using DIGOS.Ambassador.Tests.TestBases;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Core
@@ -36,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
     /// <summary>
     /// Serves as a test base for owned entity service tests.
     /// </summary>
-    public abstract class OwnedEntityServiceTestBase : DatabaseProvidingTestBase
+    public abstract class OwnedEntityServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
     {
         /// <summary>
         /// Gets the database.
@@ -73,6 +76,19 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 
             this.Entities = serviceProvider.GetRequiredService<OwnedEntityService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();
+        }
+
+        /// <inheritdoc />
+        public virtual Task InitializeAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public async Task DisposeAsync()
+        {
+            this.Users.SaveChanges();
+            await this.Users.DisposeAsync();
         }
     }
 }

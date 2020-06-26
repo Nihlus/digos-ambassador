@@ -65,8 +65,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 // Set up mocked database users
                 _originalDBUser = (await this.Users.AddUserAsync(_originalUser)).Entity;
                 _newDBUser = (await this.Users.AddUserAsync(_newUser)).Entity;
-
-                await this.Database.SaveChangesAsync();
             }
 
             [Fact]

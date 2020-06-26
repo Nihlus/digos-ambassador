@@ -37,6 +37,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             public async Task ReturnsNonEmptySetForUpdatedDatabase()
             {
                 await this.Transformations.UpdateTransformationDatabaseAsync();
+
                 var result = await this.Transformations.GetAvailableSpeciesAsync();
 
                 Assert.NotEmpty(result);

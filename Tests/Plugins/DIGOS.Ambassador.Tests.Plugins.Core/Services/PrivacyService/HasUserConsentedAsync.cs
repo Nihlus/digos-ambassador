@@ -46,6 +46,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             public async Task ReturnsTrueIfUserHasConsented()
             {
                 await this.Privacy.GrantUserConsentAsync(_discordUser);
+
                 var result = await this.Privacy.HasUserConsentedAsync(_discordUser);
 
                 Assert.True(result);

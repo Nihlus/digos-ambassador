@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Tests.Extensions;
@@ -29,6 +30,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Permissions
@@ -37,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
     /// Serves as a test base for permission service tests.
     /// </summary>
     [PublicAPI]
-    public abstract class PermissionServiceTestBase : DatabaseProvidingTestBase
+    public abstract class PermissionServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
     {
         /// <summary>
         /// Gets the permission service instance.
@@ -66,6 +68,19 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
             this.Database.Database.Create();
 
             this.Permissions = serviceProvider.GetRequiredService<PermissionService>();
+        }
+
+        /// <inheritdoc />
+        public Task InitializeAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public async Task DisposeAsync()
+        {
+            this.Permissions.SaveChanges();
+            await this.Permissions.DisposeAsync();
         }
     }
 }

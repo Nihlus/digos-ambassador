@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.BanService
             {
                 await this.Bans.CreateBanAsync(_author, _guildUser, "Dummy thicc");
 
-                Assert.NotEmpty(this.Database.UserBans);
+                Assert.NotEmpty(this.Database.UserBans.Local);
             }
 
             [Fact]

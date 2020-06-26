@@ -50,6 +50,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
             public async Task ReturnsUnsuccessfulIfThresholdIsSame()
             {
                 await this.Moderation.SetWarningThresholdAsync(_guild, 1);
+
                 var result = await this.Moderation.SetWarningThresholdAsync(_guild, 1);
 
                 Assert.False(result.IsSuccess);

@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
@@ -34,6 +35,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
@@ -42,7 +44,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
     /// Serves as a test base for roleplay service tests.
     /// </summary>
     [PublicAPI]
-    public abstract class RoleplayServiceTestBase : DatabaseProvidingTestBase
+    public abstract class RoleplayServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
     {
         /// <summary>
         /// Gets the database.
@@ -80,6 +82,19 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
             this.Database.Database.Create();
 
             this.Roleplays = serviceProvider.GetRequiredService<RoleplayService>();
+        }
+
+        /// <inheritdoc />
+        public virtual Task InitializeAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public async Task DisposeAsync()
+        {
+            this.Roleplays.SaveChanges();
+            await this.Roleplays.DisposeAsync();
         }
     }
 }

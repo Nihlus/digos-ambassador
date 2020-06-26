@@ -52,6 +52,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
             public async Task ReturnsSuccessfulIfAnotherChannelIsSet()
             {
                 await this.Moderation.SetMonitoringChannelAsync(_guild, _anotherChannel);
+
                 var result = await this.Moderation.SetMonitoringChannelAsync(_guild, _channel);
 
                 Assert.True(result.IsSuccess);
@@ -61,6 +62,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
             public async Task ReturnsUnsuccessfulIfSameChannelIsSet()
             {
                 await this.Moderation.SetMonitoringChannelAsync(_guild, _channel);
+
                 var result = await this.Moderation.SetMonitoringChannelAsync(_guild, _channel);
 
                 Assert.False(result.IsSuccess);

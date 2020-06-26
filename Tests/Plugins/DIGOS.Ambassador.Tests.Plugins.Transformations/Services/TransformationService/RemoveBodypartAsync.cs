@@ -33,6 +33,7 @@ using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 
@@ -86,11 +87,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _owner,
                     _guild
                 );
+
                 protection.Entity.HasOptedIn = true;
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                var character = new Character
+                var character = this.CharacterDatabase.CreateProxy<Character>
                 (
                     owner,
                     new Server(0),
@@ -103,9 +105,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 );
 
                 this.CharacterDatabase.Characters.Update(character);
-                await this.CharacterDatabase.SaveChangesAsync();
 
-                _character = this.CharacterDatabase.Characters.First();
+                _character = this.CharacterDatabase.Characters.Local.First();
 
                 // Set up the default appearance
                 var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateCurrentAppearanceAsync

@@ -24,6 +24,7 @@
 #pragma warning disable CS1591
 #pragma warning disable SA1649
 
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
@@ -37,11 +38,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class IsPartAndSpeciesCombinationUniqueAsync : TransformationServiceTestBase
         {
-            private Species _templateSpecies = null!;
+            private readonly Species _templateSpecies;
 
-            protected override async Task InitializeTestAsync()
+            public IsPartAndSpeciesCombinationUniqueAsync()
             {
-                _templateSpecies = await this.Database.Species.FirstAsync(s => s.Name == "template");
+                _templateSpecies = this.Database.Species.Local.First(s => s.Name == "template");
             }
 
             [Fact]

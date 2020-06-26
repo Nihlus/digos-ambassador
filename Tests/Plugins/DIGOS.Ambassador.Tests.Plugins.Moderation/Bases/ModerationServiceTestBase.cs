@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
@@ -31,6 +32,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
@@ -39,7 +41,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
     /// Serves as a test base for moderation service tests.
     /// </summary>
     [PublicAPI]
-    public class ModerationServiceTestBase : DatabaseProvidingTestBase
+    public class ModerationServiceTestBase : DatabaseProvidingTestBase, IAsyncLifetime
     {
         /// <summary>
         /// Gets the database context.
@@ -75,6 +77,19 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
 
             this.Database = moderationDatabase;
             this.Moderation = serviceProvider.GetRequiredService<ModerationService>();
+        }
+
+        /// <inheritdoc />
+        public virtual Task InitializeAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public async Task DisposeAsync()
+        {
+            this.Moderation.SaveChanges();
+            await this.Moderation.DisposeAsync();
         }
     }
 }

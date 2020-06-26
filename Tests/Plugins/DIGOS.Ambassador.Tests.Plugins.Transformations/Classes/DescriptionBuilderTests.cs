@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             var pronounService = new PronounService();
             pronounService.WithPronounProvider(new FemininePronounProvider());
 
-            var characterService = new CharacterService(null!, null!, null!, pronounService);
+            var characterService = new CharacterService(null!, null!, null!, pronounService, null!);
 
             var serviceProvider = new ServiceCollection()
                 .AddSingleton(pronounService)

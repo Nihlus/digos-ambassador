@@ -137,8 +137,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _guild
                 );
                 protection.Entity.HasOptedIn = true;
-
-                await this.Database.SaveChangesAsync();
             }
         }
     }

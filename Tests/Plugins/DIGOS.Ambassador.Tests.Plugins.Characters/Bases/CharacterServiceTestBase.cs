@@ -129,8 +129,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 character.IsNSFW = isNSFW.Value;
             }
 
-            this.Database.Update(character);
-            await this.Database.SaveChangesAsync();
+            this.Database.Characters.Update(character);
 
             return character;
         }
@@ -170,11 +169,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             this.Commands = serviceProvider.GetRequiredService<CommandService>();
 
             this.DefaultOwner = this.Database.CreateProxy<User>(0);
-            this.DefaultServer = this.Database.CreateProxy<Server>(1);
-
             this.Database.Update(this.DefaultOwner);
+
+            this.DefaultServer = this.Database.CreateProxy<Server>(1);
             this.Database.Update(this.DefaultServer);
-            this.Database.SaveChanges();
 
             // Default pronouns
             var pronounService = serviceProvider.GetRequiredService<PronounService>();
@@ -188,9 +186,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         }
 
         /// <inheritdoc />
-        public virtual Task DisposeAsync()
+        public async Task DisposeAsync()
         {
-            return Task.CompletedTask;
+            this.Characters.SaveChanges();
+            await this.Characters.DisposeAsync();
         }
     }
 }

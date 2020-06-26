@@ -54,7 +54,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 );
 
                 this.Database.Characters.Update(_character);
-                await this.Database.SaveChangesAsync();
             }
 
             [Fact]

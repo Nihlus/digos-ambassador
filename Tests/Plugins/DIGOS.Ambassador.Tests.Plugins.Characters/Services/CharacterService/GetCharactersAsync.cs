@@ -63,8 +63,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                     )
                 );
 
-                await this.Database.SaveChangesAsync();
-
                 var result = await this.Characters.GetCharactersAsync(this.DefaultServer);
 
                 Assert.NotEmpty(result);
@@ -88,8 +86,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                         string.Empty
                     )
                 );
-
-                this.Database.SaveChanges();
 
                 var result = await this.Characters.GetCharactersAsync(this.DefaultServer);
 
@@ -143,8 +139,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                         string.Empty
                     )
                 );
-
-                this.Database.SaveChanges();
 
                 var result = await this.Characters.GetCharactersAsync(this.DefaultServer);
 

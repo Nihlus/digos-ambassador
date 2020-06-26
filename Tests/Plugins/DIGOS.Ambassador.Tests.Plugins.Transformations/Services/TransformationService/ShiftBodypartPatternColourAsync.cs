@@ -30,12 +30,12 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
-using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
 using Discord.Commands;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             public ShiftBodypartPatternColourAsync()
             {
                 var mockedGuild = new Mock<IGuild>();
-                mockedGuild.Setup(g => g.Id).Returns(1);
+                mockedGuild.Setup(g => g.Id).Returns(2);
                 mockedGuild.Setup
                 (
                     c =>
@@ -115,10 +115,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 // Create a test character
                 var owner = (await this.Users.GetOrRegisterUserAsync(_owner)).Entity;
-                var character = new Character
+                var server = (await this.Servers.GetOrRegisterServerAsync(_guild)).Entity;
+
+                _character = this.CharacterDatabase.CreateProxy<Character>
                 (
                     owner,
-                    new Server(0),
+                    server,
                     string.Empty,
                     string.Empty,
                     string.Empty,
@@ -127,10 +129,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     "They"
                 );
 
-                this.CharacterDatabase.Characters.Update(character);
-                await this.CharacterDatabase.SaveChangesAsync();
-
-                _character = this.CharacterDatabase.Characters.First();
+                this.CharacterDatabase.Characters.Update(_character);
 
                 if (!Colour.TryParse("dull white", out var patternColour))
                 {

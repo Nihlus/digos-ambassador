@@ -45,8 +45,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 var result = await this.Transformations.GetOrCreateGlobalUserProtectionAsync(_user);
 
-                Assert.NotEmpty(this.Database.GlobalUserProtections);
-                Assert.Same(result.Entity, this.Database.GlobalUserProtections.First());
+                Assert.NotEmpty(this.Database.GlobalUserProtections.Local);
+                Assert.Same(result.Entity, this.Database.GlobalUserProtections.Local.First());
             }
 
             [Fact]

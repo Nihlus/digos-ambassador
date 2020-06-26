@@ -52,18 +52,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         protected CoreDatabaseContext Database { get; private set; } = null!;
 
         /// <inheritdoc />
-        public virtual Task InitializeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
-        public virtual Task DisposeAsync()
-        {
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)
         {
             serviceCollection
@@ -81,6 +69,19 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             this.Database.Database.Create();
 
             this.Users = serviceProvider.GetRequiredService<UserService>();
+        }
+
+        /// <inheritdoc />
+        public virtual Task InitializeAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc />
+        public async Task DisposeAsync()
+        {
+            this.Users.SaveChanges();
+            await this.Users.DisposeAsync();
         }
     }
 }

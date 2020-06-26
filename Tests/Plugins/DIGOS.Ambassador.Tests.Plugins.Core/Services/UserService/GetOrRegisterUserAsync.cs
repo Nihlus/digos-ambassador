@@ -72,6 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             public async Task ReturnsCorrectUserIfUserHasBeenRegistered()
             {
                 await this.Users.AddUserAsync(_discordUser);
+
                 var result = await this.Users.GetOrRegisterUserAsync(_discordUser);
                 var user = result.Entity;
 

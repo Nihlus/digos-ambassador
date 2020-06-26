@@ -50,13 +50,15 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
             public async Task ActuallyCreatesSettings()
             {
                 await this.Moderation.CreateServerSettingsAsync(_guild);
-                Assert.NotEmpty(this.Database.ServerSettings);
+
+                Assert.NotEmpty(this.Database.ServerSettings.Local);
             }
 
             [Fact]
             public async Task ReturnsUnsuccessfulIfSettingsExist()
             {
                 await this.Moderation.CreateServerSettingsAsync(_guild);
+
                 var result = await this.Moderation.CreateServerSettingsAsync(_guild);
 
                 Assert.False(result.IsSuccess);

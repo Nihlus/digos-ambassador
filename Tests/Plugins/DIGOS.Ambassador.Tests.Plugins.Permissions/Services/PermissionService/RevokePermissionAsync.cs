@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Tests.Plugins.Permissions.Data;
@@ -106,7 +107,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.Self
                 );
 
-                var permission = await this.Database.UserPermissions.FirstOrDefaultAsync();
+                var permission = this.Database.UserPermissions.Local.FirstOrDefault();
 
                 Assert.NotNull(permission);
                 Assert.False(permission.IsGranted);
@@ -227,7 +228,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = await this.Database.UserPermissions.FirstOrDefaultAsync
+                var selfPermission = this.Database.UserPermissions.Local.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Self
                 );
@@ -235,7 +236,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                 Assert.NotNull(selfPermission);
                 Assert.False(selfPermission.IsGranted);
 
-                var otherPermission = await this.Database.UserPermissions.FirstOrDefaultAsync
+                var otherPermission = this.Database.UserPermissions.Local.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Other
                 );
@@ -263,7 +264,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = await this.Database.UserPermissions.FirstOrDefaultAsync
+                var selfPermission = this.Database.UserPermissions.Local.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Self
                 );
@@ -291,7 +292,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var otherPermission = await this.Database.UserPermissions.FirstOrDefaultAsync
+                var otherPermission = this.Database.UserPermissions.Local.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Other
                 );
@@ -363,7 +364,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.Self
                 );
 
-                var permission = await this.Database.RolePermissions.FirstOrDefaultAsync();
+                var permission = this.Database.RolePermissions.Local.FirstOrDefault();
 
                 Assert.NotNull(permission);
                 Assert.False(permission.IsGranted);
@@ -473,7 +474,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = await this.Database.RolePermissions.FirstOrDefaultAsync
+                var selfPermission = this.Database.RolePermissions.Local.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Self
                 );
@@ -481,7 +482,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                 Assert.NotNull(selfPermission);
                 Assert.False(selfPermission.IsGranted);
 
-                var otherPermission = await this.Database.RolePermissions.FirstOrDefaultAsync
+                var otherPermission = this.Database.RolePermissions.Local.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Other
                 );
@@ -507,7 +508,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = await this.Database.RolePermissions.FirstOrDefaultAsync
+                var selfPermission = this.Database.RolePermissions.Local.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Self
                 );
@@ -533,7 +534,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var otherPermission = await this.Database.RolePermissions.FirstOrDefaultAsync
+                var otherPermission = this.Database.RolePermissions.Local.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Other
                 );

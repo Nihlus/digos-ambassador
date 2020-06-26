@@ -71,7 +71,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
             public async Task ReturnsCorrectSettingsIfSettingsDoNotExist()
             {
                 var actual = (await this.Moderation.GetOrCreateServerSettingsAsync(_guild)).Entity;
-                var expected = this.Database.ServerSettings.First();
+
+                var expected = this.Database.ServerSettings.Local.First();
 
                 Assert.Same(expected, actual);
             }

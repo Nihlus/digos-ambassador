@@ -22,6 +22,7 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
@@ -58,6 +59,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         protected CharactersDatabaseContext CharacterDatabase { get; private set; } = null!;
 
         /// <summary>
+        /// Gets the core database.
+        /// </summary>
+        protected CoreDatabaseContext CoreDatabase { get; private set; } = null!;
+
+        /// <summary>
         /// Gets the transformation service object.
         /// </summary>
         protected TransformationService Transformations { get; private set; } = null!;
@@ -66,6 +72,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         /// Gets the user service.
         /// </summary>
         protected UserService Users { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the server service.
+        /// </summary>
+        protected ServerService Servers { get; private set; } = null!;
 
         /// <inheritdoc />
         protected override void RegisterServices(IServiceCollection serviceCollection)
@@ -95,8 +106,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         /// <inheritdoc />
         protected override void ConfigureServices(IServiceProvider serviceProvider)
         {
-            var coreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
-            coreDatabase.Database.Create();
+            this.CoreDatabase = serviceProvider.GetRequiredService<CoreDatabaseContext>();
+            this.CoreDatabase.Database.Create();
 
             this.CharacterDatabase = serviceProvider.GetRequiredService<CharactersDatabaseContext>();
             this.CharacterDatabase.Database.Create();
@@ -106,6 +117,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
             this.Transformations = serviceProvider.GetRequiredService<TransformationService>();
             this.Users = serviceProvider.GetRequiredService<UserService>();
+            this.Servers = serviceProvider.GetRequiredService<ServerService>();
 
             var pronouns = serviceProvider.GetRequiredService<PronounService>();
             pronouns.WithPronounProvider(new TheyPronounProvider());
@@ -115,6 +127,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         public async Task InitializeAsync()
         {
             await this.Transformations.UpdateTransformationDatabaseAsync();
+
             await InitializeTestAsync();
         }
 
@@ -128,9 +141,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         }
 
         /// <inheritdoc />
-        public virtual Task DisposeAsync()
+        public virtual async Task DisposeAsync()
         {
-            return Task.CompletedTask;
+            this.Transformations.SaveChanges();
+            await this.Transformations.DisposeAsync();
         }
     }
 }

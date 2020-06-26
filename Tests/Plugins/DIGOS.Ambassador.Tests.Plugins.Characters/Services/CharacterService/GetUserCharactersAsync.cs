@@ -59,7 +59,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 );
 
                 this.Database.Characters.Update(anotherCharacter);
-                this.Database.SaveChanges();
 
                 var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
                 Assert.Empty(result);
@@ -81,7 +80,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 );
 
                 this.Database.Characters.Update(anotherCharacter);
-                await this.Database.SaveChangesAsync();
 
                 var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
                 Assert.Empty(result);
@@ -103,7 +101,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 );
 
                 this.Database.Characters.Update(anotherCharacter);
-                this.Database.SaveChanges();
 
                 var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
                 Assert.NotEmpty(result);
@@ -125,7 +122,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 );
 
                 this.Database.Characters.Update(anotherCharacter);
-                this.Database.SaveChanges();
 
                 var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
                 Assert.Collection(result, c => Assert.Same(anotherCharacter, c));
@@ -136,10 +132,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 var character1 = await CreateCharacterAsync(name: "dummy1");
                 var character2 = await CreateCharacterAsync(name: "dummy2");
-
-                this.Database.Update(character1);
-                this.Database.Update(character2);
-                await this.Database.SaveChangesAsync();
 
                 var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
 

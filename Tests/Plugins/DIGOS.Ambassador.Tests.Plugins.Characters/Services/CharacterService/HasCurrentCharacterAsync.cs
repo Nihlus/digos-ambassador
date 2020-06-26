@@ -55,8 +55,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 var character = await CreateCharacterAsync();
                 character.IsCurrent = true;
 
-                await this.Database.SaveChangesAsync();
-
                 var result = await this.Characters.HasCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 
                 Assert.True(result);
