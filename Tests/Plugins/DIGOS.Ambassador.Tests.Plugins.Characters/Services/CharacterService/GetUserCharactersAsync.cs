@@ -1,5 +1,5 @@
 //
-//  GetUserCharacters.cs
+//  GetUserCharactersAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -35,16 +35,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public partial class CharacterServiceTests
     {
-        public class GetUserCharacters : CharacterServiceTestBase
+        public class GetUserCharactersAsync : CharacterServiceTestBase
         {
             [Fact]
-            public void ReturnsEmptySetFromEmptyDatabase()
+            public async Task ReturnsEmptySetFromEmptyDatabase()
             {
-                Assert.Empty(this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer));
+                Assert.Empty(await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer));
             }
 
             [Fact]
-            public void ReturnsEmptySetFromDatabaseWithCharactersWithNoMatchingOwner()
+            public async Task ReturnsEmptySetFromDatabaseWithCharactersWithNoMatchingOwner()
             {
                 var anotherCharacter = new Character
                 (
@@ -61,12 +61,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 this.Database.Characters.Update(anotherCharacter);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer);
+                var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
                 Assert.Empty(result);
             }
 
             [Fact]
-            public void ReturnsEmptySetFromDatabaseWithCharactersWithMatchingOwnerButNoMatchingServer()
+            public async Task ReturnsEmptySetFromDatabaseWithCharactersWithMatchingOwnerButNoMatchingServer()
             {
                 var anotherCharacter = new Character
                 (
@@ -81,14 +81,14 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 );
 
                 this.Database.Characters.Update(anotherCharacter);
-                this.Database.SaveChanges();
+                await this.Database.SaveChangesAsync();
 
-                var result = this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer);
+                var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
                 Assert.Empty(result);
             }
 
             [Fact]
-            public void ReturnsNonEmptySetFromDatabaseWithCharactersWithMatchingOwner()
+            public async Task ReturnsNonEmptySetFromDatabaseWithCharactersWithMatchingOwner()
             {
                 var anotherCharacter = new Character
                 (
@@ -105,12 +105,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 this.Database.Characters.Update(anotherCharacter);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer);
+                var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
                 Assert.NotEmpty(result);
             }
 
             [Fact]
-            public void ReturnsCorrectCharacterFromDatabase()
+            public async Task ReturnsCorrectCharacterFromDatabase()
             {
                 var anotherCharacter = new Character
                 (
@@ -127,7 +127,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 this.Database.Characters.Update(anotherCharacter);
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer);
+                var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
                 Assert.Collection(result, c => Assert.Same(anotherCharacter, c));
             }
 
@@ -141,7 +141,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 this.Database.Update(character2);
                 await this.Database.SaveChangesAsync();
 
-                var result = this.Characters.GetUserCharacters(this.DefaultOwner, this.DefaultServer);
+                var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
 
                 Assert.Equal(2, result.Count());
                 Assert.Contains(character1, result);

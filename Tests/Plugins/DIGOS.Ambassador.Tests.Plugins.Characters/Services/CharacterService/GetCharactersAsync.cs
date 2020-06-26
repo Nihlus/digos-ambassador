@@ -1,5 +1,5 @@
 //
-//  GetCharacters.cs
+//  GetCharactersAsync.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,6 +21,7 @@
 //
 
 using System.Linq;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using Xunit;
@@ -34,18 +35,18 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 {
     public static partial class CharacterServiceTests
     {
-        public class GetCharacters : CharacterServiceTestBase
+        public class GetCharactersAsync : CharacterServiceTestBase
         {
             [Fact]
-            public void ReturnsNoCharactersFromEmptyDatabase()
+            public async Task ReturnsNoCharactersFromEmptyDatabase()
             {
-                var result = this.Characters.GetCharacters(this.DefaultServer);
+                var result = await this.Characters.GetCharactersAsync(this.DefaultServer);
 
                 Assert.Empty(result);
             }
 
             [Fact]
-            public void ReturnsSingleCharacterFromSingleCharacter()
+            public async Task ReturnsSingleCharacterFromSingleCharacter()
             {
                 this.Database.Characters.Update
                 (
@@ -62,16 +63,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                     )
                 );
 
-                this.Database.SaveChanges();
+                await this.Database.SaveChangesAsync();
 
-                var result = this.Characters.GetCharacters(this.DefaultServer);
+                var result = await this.Characters.GetCharactersAsync(this.DefaultServer);
 
                 Assert.NotEmpty(result);
                 Assert.Single(result);
             }
 
             [Fact]
-            public void ReturnsNoCharacterFromSingleCharacterWhenRequestedServerIsDifferent()
+            public async Task ReturnsNoCharacterFromSingleCharacterWhenRequestedServerIsDifferent()
             {
                 this.Database.Characters.Update
                 (
@@ -90,20 +91,20 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetCharacters(this.DefaultServer);
+                var result = await this.Characters.GetCharactersAsync(this.DefaultServer);
 
                 Assert.Empty(result);
             }
 
             [Fact]
-            public void ReturnsCorrectCharactersFromDatabase()
+            public async Task ReturnsCorrectCharactersFromDatabase()
             {
                 this.Database.Characters.Update
                 (
                     new Character
                     (
                         this.DefaultOwner,
-                        new Server(1),
+                        new Server(2),
                         "dummy",
                         string.Empty,
                         string.Empty,
@@ -145,7 +146,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 this.Database.SaveChanges();
 
-                var result = this.Characters.GetCharacters(this.DefaultServer);
+                var result = await this.Characters.GetCharactersAsync(this.DefaultServer);
 
                 Assert.NotEmpty(result);
                 Assert.Equal(2, result.Count());
