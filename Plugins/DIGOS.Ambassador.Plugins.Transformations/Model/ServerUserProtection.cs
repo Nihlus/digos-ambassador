@@ -82,25 +82,5 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
 
             this.Type = ProtectionType.Blacklist;
         }
-
-        /// <summary>
-        /// Creates a default server-specific protection object based on the given global protection data.
-        /// </summary>
-        /// <param name="globalProtection">The global protection data.</param>
-        /// <param name="server">The server that the protection should be valid for.</param>
-        /// <returns>A server-specific protection object.</returns>
-        [Pure]
-        public static ServerUserProtection CreateDefault
-        (
-            GlobalUserProtection globalProtection,
-            Server server
-        )
-        {
-            return new ServerUserProtection(server, globalProtection.User)
-            {
-                Type = globalProtection.DefaultType,
-                HasOptedIn = globalProtection.DefaultOptIn
-            };
-        }
     }
 }

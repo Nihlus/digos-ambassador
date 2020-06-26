@@ -843,26 +843,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             IGuild guild
         )
         {
-            var localProtection = _database.ServerUserProtections.FirstOrDefault
+            var protections = await _database.ServerUserProtections.UnifiedQueryAsync
             (
-                p =>
-                    p.User.DiscordID == (long)discordUser.Id && p.Server.DiscordID == (long)guild.Id
+                q => q.Where(p => p.User.DiscordID == (long)discordUser.Id && p.Server.DiscordID == (long)guild.Id)
             );
 
-            if (!(localProtection is null))
-            {
-                return localProtection;
-            }
+            var protection = protections.SingleOrDefault();
 
-            var dbProtection = await _database.ServerUserProtections.AsQueryable().FirstOrDefaultAsync
-            (
-                p =>
-                    p.User.DiscordID == (long)discordUser.Id && p.Server.DiscordID == (long)guild.Id
-            );
-
-            if (!(dbProtection is null))
+            if (!(protection is null))
             {
-                return dbProtection;
+                return protection;
             }
 
             var getServerResult = await _servers.GetOrRegisterServerAsync(guild);
@@ -881,11 +871,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
 
             var globalProtection = getGlobalProtectionResult.Entity;
 
-            dbProtection = ServerUserProtection.CreateDefault(globalProtection, server);
+            var newProtection = _database.CreateProxy<ServerUserProtection>(server, globalProtection.User);
+            _database.ServerUserProtections.Update(newProtection);
 
-            _database.ServerUserProtections.Update(dbProtection);
+            newProtection.Type = globalProtection.DefaultType;
+            newProtection.HasOptedIn = globalProtection.DefaultOptIn;
 
-            return RetrieveEntityResult<ServerUserProtection>.FromSuccess(dbProtection);
+            return newProtection;
         }
 
         /// <summary>
