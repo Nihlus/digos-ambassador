@@ -908,7 +908,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 if (await IsSpeciesNameUniqueAsync(species.Name))
                 {
                     // Add a new species
-                    await _database.Species.AddAsync(species);
+                    _database.Species.Update(species);
                     ++addedSpecies;
                 }
                 else
@@ -945,7 +945,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                     if (await IsPartAndSpeciesCombinationUniqueAsync(transformation.Part, transformation.Species))
                     {
                         // Add a new transformation
-                        await _database.Transformations.AddAsync(transformation);
+                        _database.Transformations.Update(transformation);
                         ++addedTransformations;
                     }
                     else
