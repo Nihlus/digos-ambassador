@@ -1,5 +1,5 @@
 //
-//  IsEntityNameUniqueForUserAsync.cs
+//  IsEntityNameUniqueForUser.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -21,10 +21,8 @@
 //
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
-using MockQueryable.Moq;
 using Moq;
 using Xunit;
 
@@ -36,7 +34,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     public partial class OwnedEntityServiceTests
     {
-        public class IsEntityNameUniqueForUserAsync : OwnedEntityServiceTestBase
+        public class IsEntityNameUniqueForUser : OwnedEntityServiceTestBase
         {
             [Fact]
             public async Task ReturnsTrueForEmptySet()
@@ -44,9 +42,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 var entityMock = new Mock<IOwnedNamedEntity>();
                 entityMock.Setup(e => e.Name).Returns("Test");
 
-                var queryable = new List<IOwnedNamedEntity>().AsQueryable().BuildMock().Object;
-
-                var result = await this.Entities.IsEntityNameUniqueForUserAsync(queryable, "Test2");
+                var list = new List<IOwnedNamedEntity>();
+                var result = this.Entities.IsEntityNameUniqueForUser(list, "Test2");
 
                 Assert.True(result);
             }
@@ -58,9 +55,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 entityMock.Setup(e => e.Name).Returns("Test");
 
                 var collection = new List<IOwnedNamedEntity> { entityMock.Object };
-                var queryable = collection.AsQueryable().BuildMock().Object;
-
-                var result = await this.Entities.IsEntityNameUniqueForUserAsync(queryable, "Test2");
+                var result = this.Entities.IsEntityNameUniqueForUser(collection, "Test2");
 
                 Assert.True(result);
             }
@@ -72,9 +67,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 entityMock.Setup(e => e.Name).Returns("Test");
 
                 var collection = new List<IOwnedNamedEntity> { entityMock.Object };
-                var queryable = collection.AsQueryable().BuildMock().Object;
-
-                var result = await this.Entities.IsEntityNameUniqueForUserAsync(queryable, "Test");
+                var result = this.Entities.IsEntityNameUniqueForUser(collection, "Test");
 
                 Assert.False(result);
             }
@@ -86,9 +79,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 entityMock.Setup(e => e.Name).Returns("Test");
 
                 var collection = new List<IOwnedNamedEntity> { entityMock.Object };
-                var queryable = collection.AsQueryable().BuildMock().Object;
-
-                var result = await this.Entities.IsEntityNameUniqueForUserAsync(queryable, "TEST");
+                var result = this.Entities.IsEntityNameUniqueForUser(collection, "TEST");
 
                 Assert.False(result);
             }

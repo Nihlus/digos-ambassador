@@ -1,5 +1,5 @@
 //
-//  TransferEntityOwnershipAsync.cs
+//  TransferEntityOwnership.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -89,9 +89,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 
                 // Set up the list of entities owned by the new owner
                 var collection = new List<IOwnedNamedEntity> { entityMock.Object };
-                var ownerEntities = collection.AsQueryable().BuildMock().Object;
 
-                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _originalDBUser, ownerEntities, entityMock.Object);
+                var result = this.Entities.TransferEntityOwnership(_originalDBUser, collection, entityMock.Object);
                 Assert.False(result.IsSuccess);
             }
 
@@ -109,9 +108,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 
                 // Set up the list of entities owned by the new owner
                 var collection = new List<IOwnedNamedEntity> { entityOwnedByNew.Object };
-                var ownerEntities = collection.AsQueryable().BuildMock().Object;
 
-                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _newDBUser, ownerEntities, entityOwnedByOriginal.Object);
+                var result = this.Entities.TransferEntityOwnership(_newDBUser, collection, entityOwnedByOriginal.Object);
                 Assert.False(result.IsSuccess);
             }
 
@@ -133,9 +131,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 
                 // Set up the list of entities owned by the new owner
                 var collection = new List<IOwnedNamedEntity> { entityOwnedByNew };
-                var ownerEntities = collection.AsQueryable().BuildMock().Object;
 
-                var result = await this.Entities.TransferEntityOwnershipAsync(this.Database, _newDBUser, ownerEntities, entityOwnedByOriginal);
+                var result = this.Entities.TransferEntityOwnership(_newDBUser, collection, entityOwnedByOriginal);
                 Assert.True(result.IsSuccess);
                 Assert.Same(_newDBUser, entityOwnedByOriginal.Owner);
                 Assert.True(result.WasModified);
