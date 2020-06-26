@@ -20,11 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Core.Database.Contexts;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Core.Model
@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
     /// Represents the database model of the core plugin.
     /// </summary>
     [PublicAPI]
-    public class CoreDatabaseContext : SchemaAwareDbContext
+    public class CoreDatabaseContext : FilteredSchemaDbContext
     {
         private const string SchemaName = "Core";
 
@@ -56,7 +56,10 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
         /// Initializes a new instance of the <see cref="CoreDatabaseContext"/> class.
         /// </summary>
         /// <param name="contextOptions">The context options.</param>
-        public CoreDatabaseContext(DbContextOptions<CoreDatabaseContext> contextOptions)
+        public CoreDatabaseContext
+        (
+            DbContextOptions<CoreDatabaseContext> contextOptions
+        )
             : base(SchemaName, contextOptions)
         {
         }

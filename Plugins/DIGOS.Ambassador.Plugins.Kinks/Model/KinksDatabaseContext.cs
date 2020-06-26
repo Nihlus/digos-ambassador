@@ -20,9 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Core.Database.Contexts;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Kinks.Model
@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
     /// Represents the database model of the dossier plugin.
     /// </summary>
     [PublicAPI]
-    public class KinksDatabaseContext : SchemaAwareDbContext
+    public class KinksDatabaseContext : FilteredSchemaDbContext
     {
         private const string SchemaName = "KinkModule";
 

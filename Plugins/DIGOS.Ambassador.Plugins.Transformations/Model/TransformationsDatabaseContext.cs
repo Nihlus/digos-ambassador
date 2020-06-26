@@ -21,10 +21,10 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Core.Database.Contexts;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Transformations.Model
@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
     /// Represents the database model of the dossier plugin.
     /// </summary>
     [PublicAPI]
-    public class TransformationsDatabaseContext : SchemaAwareDbContext
+    public class TransformationsDatabaseContext : FilteredSchemaDbContext
     {
         private const string SchemaName = "TransformationModule";
 
@@ -67,7 +67,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
         /// </summary>
         /// <param name="contextOptions">The context options.</param>
         [SuppressMessage("ReSharper", "NotNullMemberIsNotInitialized", Justification = "Initialized by EF Core.")]
-        public TransformationsDatabaseContext(DbContextOptions<TransformationsDatabaseContext> contextOptions)
+        public TransformationsDatabaseContext
+        (
+            DbContextOptions<TransformationsDatabaseContext> contextOptions
+        )
             : base(SchemaName, contextOptions)
         {
         }
