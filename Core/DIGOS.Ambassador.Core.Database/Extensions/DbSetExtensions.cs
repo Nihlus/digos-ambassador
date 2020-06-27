@@ -75,10 +75,10 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
         )
             where TEntity : class
         {
-            var localMatches = query(dbSet.Local.AsQueryable());
+            var localMatches = query(dbSet.Local.AsQueryable()).ToList();
             var dbMatches = await query(dbSet).ToListAsync();
 
-            return dbMatches.Union(localMatches);
+            return dbMatches.Union(localMatches).ToList();
         }
     }
 }
