@@ -28,7 +28,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Model;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -38,11 +37,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class GetTransformationByPartAndSpeciesAsync : TransformationServiceTestBase
         {
-            private readonly Species _templateSpecies;
+            private Species _templateSpecies = null!;
 
-            public GetTransformationByPartAndSpeciesAsync()
+            protected override async Task InitializeTestAsync()
             {
-                _templateSpecies = this.Database.Species.Local.First(s => s.Name == "template");
+                await base.InitializeTestAsync();
+                _templateSpecies = this.Database.Species.First(s => s.Name == "template");
             }
 
             [Fact]

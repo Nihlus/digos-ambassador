@@ -128,6 +128,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         {
             await this.Transformations.UpdateTransformationDatabaseAsync();
 
+            // One of the few times we actually need to to this
+            await this.Database.SaveChangesAsync();
+
             await InitializeTestAsync();
         }
 

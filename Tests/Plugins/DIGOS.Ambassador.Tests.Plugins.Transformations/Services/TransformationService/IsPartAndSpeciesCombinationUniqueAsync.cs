@@ -38,11 +38,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
     {
         public class IsPartAndSpeciesCombinationUniqueAsync : TransformationServiceTestBase
         {
-            private readonly Species _templateSpecies;
+            private Species _templateSpecies = null!;
 
-            public IsPartAndSpeciesCombinationUniqueAsync()
+            protected override async Task InitializeTestAsync()
             {
-                _templateSpecies = this.Database.Species.Local.First(s => s.Name == "template");
+                await base.InitializeTestAsync();
+                _templateSpecies = this.Database.Species.First(s => s.Name == "template");
             }
 
             [Fact]
