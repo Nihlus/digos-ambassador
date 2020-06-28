@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Characters.Model;
@@ -30,7 +31,6 @@ using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     return;
                 }
 
-                var serverRoles = getServerRolesResult.Entity;
+                var serverRoles = getServerRolesResult.Entity.ToList();
 
                 var eb = _feedback.CreateEmbedBase();
 
@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                     " instead of the actual mention. The ID is listed below along with the role name."
                 );
 
-                if (!await serverRoles.AnyAsync())
+                if (!serverRoles.Any())
                 {
                     eb.WithFooter("There aren't any character roles available in this server.");
                 }

@@ -155,6 +155,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return CreateEntityResult<Character>.FromError(modifyEntityResult);
             }
 
+            await _database.SaveChangesAsync();
+
             return character;
         }
 
@@ -166,6 +168,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         public async Task<DeleteEntityResult> DeleteCharacterAsync(Character character)
         {
             _database.Characters.Remove(character);
+            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -374,6 +377,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             await ClearCurrentCharacterAsync(user, server);
 
             character.IsCurrent = true;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -397,6 +401,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var currentCharacter = getCurrentCharacter.Entity;
             currentCharacter.IsCurrent = false;
+
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -473,6 +479,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.IsDefault = true;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -495,6 +502,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             getDefaultCharacterResult.Entity.IsDefault = false;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -532,6 +540,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Name = name;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -564,6 +573,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.AvatarUrl = avatarUrl;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -596,6 +606,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Nickname = nickname;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -628,6 +639,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Summary = summary;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -659,6 +671,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError("The description is too long. It can be at most 1000 characters.");
             }
             character.Description = description;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -693,6 +706,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var pronounProvider = getPronounProviderResult.Entity;
             character.PronounProviderFamily = pronounProvider.Family;
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -718,6 +733,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.IsNSFW = isNSFW;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -818,6 +834,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             image.IsNSFW = isNSFW;
             character.Images.Add(image);
 
+            await _database.SaveChangesAsync();
+
             return image;
         }
 
@@ -835,6 +853,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Images.Remove(image);
+            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }

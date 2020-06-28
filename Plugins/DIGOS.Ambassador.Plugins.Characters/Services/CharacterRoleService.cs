@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
@@ -98,7 +99,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var server = getServerResult.Entity;
 
             var characterRole = _database.CreateProxy<CharacterRole>(server, (long)role.Id, access);
+
             _database.CharacterRoles.Update(characterRole);
+            await _database.SaveChangesAsync();
 
             return characterRole;
         }
@@ -142,6 +145,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     return DeleteEntityResult.FromError(removeRole);
                 }
             }
+
+            await _database.SaveChangesAsync();
+
             return DeleteEntityResult.FromSuccess();
         }
 
@@ -152,12 +158,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<CharacterRole>> GetCharacterRoleAsync(IRole role)
         {
-            var characterRoles = await _database.CharacterRoles.ServersideQueryAsync
+            var characterRole = await _database.CharacterRoles.ServersideQueryAsync
             (
-                q => q.Where(r => r.Server.DiscordID == (long)role.Guild.Id && r.DiscordID == (long)role.Id)
+                q => q
+                    .Where(r => r.Server.DiscordID == (long)role.Guild.Id && r.DiscordID == (long)role.Id)
+                    .SingleOrDefaultAsync()
             );
-
-            var characterRole = characterRoles.SingleOrDefault();
 
             if (!(characterRole is null))
             {
@@ -175,19 +181,23 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="guild">The Discord guild.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IQueryable<CharacterRole>>> GetCharacterRolesAsync(IGuild guild)
+        public async Task<RetrieveEntityResult<IEnumerable<CharacterRole>>> GetCharacterRolesAsync(IGuild guild)
         {
             var getServerResult = await _servers.GetOrRegisterServerAsync(guild);
             if (!getServerResult.IsSuccess)
             {
-                return RetrieveEntityResult<IQueryable<CharacterRole>>.FromError(getServerResult);
+                return RetrieveEntityResult<IEnumerable<CharacterRole>>.FromError(getServerResult);
             }
 
             var server = getServerResult.Entity;
 
-            var roles = _database.CharacterRoles.AsQueryable().Where(r => r.Server == server);
+            var roles = await _database.CharacterRoles.ServersideQueryAsync
+            (
+                q => q
+                    .Where(r => r.Server == server)
+            );
 
-            return RetrieveEntityResult<IQueryable<CharacterRole>>.FromSuccess(roles);
+            return RetrieveEntityResult<IEnumerable<CharacterRole>>.FromSuccess(roles);
         }
 
         /// <summary>
@@ -204,6 +214,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             role.Access = access;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -251,6 +262,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Role = characterRole;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -281,6 +293,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Role = null;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
