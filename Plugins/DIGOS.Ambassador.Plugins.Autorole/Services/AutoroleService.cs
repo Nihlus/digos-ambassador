@@ -76,12 +76,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <returns>true if the given role has an autorole; otherwise, false.</returns>
         public async ValueTask<bool> HasAutoroleAsync(IRole discordRole)
         {
-            var roles = await _database.Autoroles.ServersideQueryAsync
+            return await _database.Autoroles.ServersideQueryAsync
             (
-                q => q.Where(ar => ar.DiscordRoleID == (long)discordRole.Id)
+                q => q
+                    .Where(ar => ar.DiscordRoleID == (long)discordRole.Id)
+                    .AnyAsync()
             );
-
-            return roles.Any();
         }
 
         /// <summary>
@@ -91,12 +91,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<AutoroleConfiguration>> GetAutoroleAsync(IRole discordRole)
         {
-            var autoroles = await _database.Autoroles.ServersideQueryAsync
+            var autorole = await _database.Autoroles.ServersideQueryAsync
             (
-                q => q.Where(ar => ar.DiscordRoleID == (long)discordRole.Id)
+                q => q
+                    .Where(ar => ar.DiscordRoleID == (long)discordRole.Id)
+                    .SingleOrDefaultAsync()
             );
 
-            var autorole = autoroles.SingleOrDefault();
             if (!(autorole is null))
             {
                 return autorole;
@@ -132,7 +133,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var server = getServer.Entity;
 
             var autorole = _database.CreateProxy<AutoroleConfiguration>(server, discordRole);
+
             _database.Autoroles.Update(autorole);
+            await _database.SaveChangesAsync();
 
             return autorole;
         }
@@ -145,6 +148,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         public async Task<DeleteEntityResult> DeleteAutoroleAsync(AutoroleConfiguration autorole)
         {
             _database.Autoroles.Remove(autorole);
+            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -167,6 +171,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             autorole.IsEnabled = true;
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -183,6 +189,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             autorole.IsEnabled = false;
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -210,6 +218,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             autorole.Conditions.Remove(condition);
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -235,6 +244,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             autorole.Conditions.Add(condition);
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -284,6 +294,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         )
         {
             _database.AutoroleConfirmations.Remove(confirmation);
+            await _database.SaveChangesAsync();
+
             return DeleteEntityResult.FromSuccess();
         }
 
@@ -307,14 +319,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 );
             }
 
-            var confirmations = await _database.AutoroleConfirmations.ServersideQueryAsync
+            var confirmation = await _database.AutoroleConfirmations.ServersideQueryAsync
             (
                 q => q
                     .Where(ac => ac.Autorole == autorole)
                     .Where(ac => ac.User.DiscordID == (long)discordUser.Id)
+                    .SingleOrDefaultAsync()
             );
-
-            var confirmation = confirmations.SingleOrDefault();
 
             if (!(confirmation is null))
             {
@@ -330,7 +341,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var user = getUser.Entity;
 
             var newConfirmation = _database.CreateProxy<AutoroleConfirmation>(autorole, user, false);
+
             _database.AutoroleConfirmations.Update(newConfirmation);
+            await _database.SaveChangesAsync();
 
             return newConfirmation;
         }
@@ -365,6 +378,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             condition.IsConfirmed = true;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -392,6 +406,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             {
                 qualifyingUser.IsConfirmed = true;
             }
+
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -429,6 +445,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             condition.IsConfirmed = false;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -518,6 +535,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             autorole.RequiresConfirmation = requireAffirmation;
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -533,14 +552,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         {
             var settings = await _database.AutoroleServerSettings.ServersideQueryAsync
             (
-                q => q.Where(s => s.Server.DiscordID == (long)guild.Id)
+                q => q
+                    .Where(s => s.Server.DiscordID == (long)guild.Id)
+                    .SingleOrDefaultAsync()
             );
 
-            var setting = settings.SingleOrDefault();
-
-            if (!(setting is null))
+            if (!(settings is null))
             {
-                return setting;
+                return settings;
             }
 
             var getServer = await _servers.GetOrRegisterServerAsync(guild);
@@ -552,7 +571,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var server = getServer.Entity;
 
             var newSettings = _database.CreateProxy<AutoroleServerSettings>(server);
+
             _database.AutoroleServerSettings.Update(newSettings);
+            await _database.SaveChangesAsync();
 
             return newSettings;
         }
@@ -583,6 +604,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             settings.AffirmationRequiredNotificationChannelID = (long)textChannel.Id;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -611,6 +633,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             settings.AffirmationRequiredNotificationChannelID = null;
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -620,22 +644,25 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// </summary>
         /// <param name="autoroleConfiguration">The autorole.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public RetrieveEntityResult<IQueryable<User>> GetUnconfirmedUsers
+        public async Task<RetrieveEntityResult<IEnumerable<User>>> GetUnconfirmedUsersAsync
         (
             AutoroleConfiguration autoroleConfiguration
         )
         {
             if (!autoroleConfiguration.RequiresConfirmation)
             {
-                return RetrieveEntityResult<IQueryable<User>>.FromError("The autorole doesn't require confirmation.");
+                return RetrieveEntityResult<IEnumerable<User>>.FromError("The autorole doesn't require confirmation.");
             }
 
-            return RetrieveEntityResult<IQueryable<User>>.FromSuccess
+            return RetrieveEntityResult<IEnumerable<User>>.FromSuccess
             (
-                _database.AutoroleConfirmations.AsQueryable()
+                await _database.AutoroleConfirmations.ServersideQueryAsync
+                (
+                    q => q
                     .Where(ac => ac.Autorole == autoroleConfiguration)
                     .Where(ac => !ac.IsConfirmed)
                     .Select(ac => ac.User)
+                )
             );
         }
     }

@@ -72,15 +72,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         {
             var statistics = await _database.UserStatistics.ServersideQueryAsync
             (
-                q => q.Where(s => s.User.DiscordID == (long)discordUser.Id)
+                q => q
+                    .Where(s => s.User.DiscordID == (long)discordUser.Id)
+                    .SingleOrDefaultAsync()
             );
 
-            var statistic = statistics.SingleOrDefault();
-
-            if (!(statistic is null))
+            if (!(statistics is null))
             {
-                return statistic;
+                return statistics;
             }
+
             var getUser = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUser.IsSuccess)
             {
@@ -90,7 +91,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var user = getUser.Entity;
 
             var newStatistics = _database.CreateProxy<UserStatistics>(user);
+
             _database.UserStatistics.Update(newStatistics);
+            await _database.SaveChangesAsync();
 
             return newStatistics;
         }
@@ -131,9 +134,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var server = getServer.Entity;
 
             var newServerStatistics = _database.CreateProxy<UserServerStatistics>(server);
-            _database.Update(newServerStatistics);
 
+            _database.Update(newServerStatistics);
             statistics.ServerStatistics.Add(newServerStatistics);
+
+            await _database.SaveChangesAsync();
 
             return newServerStatistics;
         }
@@ -168,9 +173,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             var newStats = _database.CreateProxy<UserChannelStatistics>(discordChannel);
-            _database.Update(newStats);
 
+            _database.Update(newStats);
             serverStats.ChannelStatistics.Add(newStats);
+
+            await _database.SaveChangesAsync();
 
             return newStats;
         }

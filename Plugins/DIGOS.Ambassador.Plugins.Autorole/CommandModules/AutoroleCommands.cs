@@ -371,14 +371,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
         public async Task ListUnconfirmedUsersAsync(AutoroleConfiguration autorole)
         {
-            var getUsers = _autoroles.GetUnconfirmedUsers(autorole);
+            var getUsers = await _autoroles.GetUnconfirmedUsersAsync(autorole);
             if (!getUsers.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getUsers.ErrorReason);
                 return;
             }
 
-            var users = await getUsers.Entity.ToListAsync();
+            var users = getUsers.Entity.ToList();
             var discordUsers = await Task.WhenAll
             (
                 users.Select(u => this.Context.Guild.GetUserAsync((ulong)u.DiscordID))
