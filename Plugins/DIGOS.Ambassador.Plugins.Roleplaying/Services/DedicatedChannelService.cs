@@ -115,31 +115,28 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             var settings = getSettingsResult.Entity;
 
-            if (!(settings.DedicatedRoleplayChannelsCategory is null))
-            {
-                var categoryChannelCount = (await guild.GetTextChannelsAsync())
-                    .Count(c => c.CategoryId == (ulong)settings.DedicatedRoleplayChannelsCategory);
-
-                if (categoryChannelCount >= 50)
-                {
-                    return CreateEntityResult<ITextChannel>.FromError
-                    (
-                        "The server's roleplaying category has reached its maximum number of channels. Try " +
-                        "contacting the server's owners and either removing some old roleplays or setting up " +
-                        "a new category."
-                    );
-                }
-            }
-
-            Optional<ulong?> categoryId;
             if (settings.DedicatedRoleplayChannelsCategory is null)
             {
-                categoryId = null;
+                return CreateEntityResult<ITextChannel>.FromError
+                (
+                    "No dedicated channel category has been configured."
+                );
             }
-            else
+
+            var categoryChannelCount = (await guild.GetTextChannelsAsync())
+                .Count(c => c.CategoryId == (ulong)settings.DedicatedRoleplayChannelsCategory);
+
+            if (categoryChannelCount >= 50)
             {
-                categoryId = (ulong?)settings.DedicatedRoleplayChannelsCategory;
+                return CreateEntityResult<ITextChannel>.FromError
+                (
+                    "The server's roleplaying category has reached its maximum number of channels. Try " +
+                    "contacting the server's owners and either removing some old roleplays or setting up " +
+                    "a new category."
+                );
             }
+
+            Optional<ulong?> categoryId = (ulong?)settings.DedicatedRoleplayChannelsCategory;
 
             var dedicatedChannel = await guild.CreateTextChannelAsync
             (
