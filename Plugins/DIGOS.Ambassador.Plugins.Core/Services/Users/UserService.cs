@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         [Pure]
         public async Task<bool> IsUserKnownAsync(IUser discordUser)
         {
-            var users = await _database.Users.UnifiedQueryAsync
+            var users = await _database.Users.ServersideQueryAsync
             (
                 q => q.Where(u => u.DiscordID == (long)discordUser.Id)
             );
@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         [Pure]
         public async Task<RetrieveEntityResult<User>> GetUserAsync(IUser discordUser)
         {
-            var users = await _database.Users.UnifiedQueryAsync
+            var users = await _database.Users.ServersideQueryAsync
             (
                 q => q.Where(u => u.DiscordID == (long)discordUser.Id)
             );

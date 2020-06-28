@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             Server server
         )
         {
-            var settings = await _database.ServerSettings.UnifiedQueryAsync
+            var settings = await _database.ServerSettings.ServersideQueryAsync
             (
                 q => q.Where(s => s.Server == server)
             );

@@ -76,7 +76,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <returns>true if the given role has an autorole; otherwise, false.</returns>
         public async ValueTask<bool> HasAutoroleAsync(IRole discordRole)
         {
-            var roles = await _database.Autoroles.UnifiedQueryAsync
+            var roles = await _database.Autoroles.ServersideQueryAsync
             (
                 q => q.Where(ar => ar.DiscordRoleID == (long)discordRole.Id)
             );
@@ -91,7 +91,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<AutoroleConfiguration>> GetAutoroleAsync(IRole discordRole)
         {
-            var autoroles = await _database.Autoroles.UnifiedQueryAsync
+            var autoroles = await _database.Autoroles.ServersideQueryAsync
             (
                 q => q.Where(ar => ar.DiscordRoleID == (long)discordRole.Id)
             );
@@ -307,7 +307,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 );
             }
 
-            var confirmations = await _database.AutoroleConfirmations.UnifiedQueryAsync
+            var confirmations = await _database.AutoroleConfirmations.ServersideQueryAsync
             (
                 q => q
                     .Where(ac => ac.Autorole == autorole)
@@ -381,7 +381,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return ModifyEntityResult.FromError("The autorole doesn't require explicit affirmation.");
             }
 
-            var qualifyingUsers = await _database.AutoroleConfirmations.UnifiedQueryAsync
+            var qualifyingUsers = await _database.AutoroleConfirmations.ServersideQueryAsync
             (
                 q => q
                     .Where(a => a.Autorole == autorole)
@@ -492,7 +492,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 query = q => q.Where(a => a.Server.DiscordID == (long)guild.Id);
             }
 
-            return await _database.Autoroles.UnifiedQueryAsync(query);
+            return await _database.Autoroles.ServersideQueryAsync(query);
         }
 
         /// <summary>
@@ -531,7 +531,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             IGuild guild
         )
         {
-            var settings = await _database.AutoroleServerSettings.UnifiedQueryAsync
+            var settings = await _database.AutoroleServerSettings.ServersideQueryAsync
             (
                 q => q.Where(s => s.Server.DiscordID == (long)guild.Id)
             );

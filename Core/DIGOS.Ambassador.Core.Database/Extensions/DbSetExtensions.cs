@@ -35,16 +35,16 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
     public static class DbSetExtensions
     {
         /// <summary>
-        /// Performs a unified query against the database set, including both local and database entities.
+        /// Performs a serverside query against the database set, fully materializing it after finishing.
         /// </summary>
         /// <param name="dbSet">The database set.</param>
         /// <param name="query">The query. This query runs serverside where possible. Any clientside operations must be
         /// performed on the resulting <see cref="IEnumerable{T}"/>.</param>
         /// <param name="ct">A cancellation token.</param>
         /// <typeparam name="TEntity">The entity type.</typeparam>
-        /// <typeparam name="TOut">The output entity type.</typeparam>
-        /// <returns>The queried entity set.</returns>
-        public static async Task<IEnumerable<TOut>> UnifiedQueryAsync<TEntity, TOut>
+        /// <typeparam name="TOut">The output type.</typeparam>
+        /// <returns>The final query.</returns>
+        public static async Task<IEnumerable<TOut>> ServersideQueryAsync<TEntity, TOut>
         (
             this DbSet<TEntity> dbSet,
             Func<IQueryable<TEntity>, CancellationToken, IQueryable<TOut>> query,
@@ -53,10 +53,7 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
             where TEntity : class
             where TOut : class
         {
-            var localMatches = query(dbSet.Local.AsQueryable(), ct);
-            var dbMatches = await query(dbSet, ct).ToListAsync(ct);
-
-            return dbMatches.Union(localMatches);
+            return await query(dbSet, ct).ToListAsync(ct);
         }
 
         /// <summary>
@@ -66,19 +63,16 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
         /// <param name="query">The query. This query runs serverside where possible. Any clientside operations must be
         /// performed on the resulting <see cref="IEnumerable{T}"/>.</param>
         /// <typeparam name="TEntity">The entity type.</typeparam>
-        /// <typeparam name="TOut">The resulting entity type.</typeparam>
-        /// <returns>The queried entity set.</returns>
-        public static async Task<IEnumerable<TOut>> UnifiedQueryAsync<TEntity, TOut>
+        /// <typeparam name="TOut">The resulting type.</typeparam>
+        /// <returns>The final query result.</returns>
+        public static async Task<IEnumerable<TOut>> ServersideQueryAsync<TEntity, TOut>
         (
             this DbSet<TEntity> dbSet,
             Func<IQueryable<TEntity>, IQueryable<TOut>> query
         )
             where TEntity : class
         {
-            var localMatches = query(dbSet.Local.AsQueryable()).ToList();
-            var dbMatches = await query(dbSet).ToListAsync();
-
-            return dbMatches.Union(localMatches).ToList();
+            return await query(dbSet).ToListAsync();
         }
     }
 }

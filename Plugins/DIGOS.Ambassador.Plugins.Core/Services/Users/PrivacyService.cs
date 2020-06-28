@@ -141,7 +141,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         [Pure]
         public async Task<bool> HasUserConsentedAsync(IUser discordUser)
         {
-            var consents = await _database.UserConsents.UnifiedQueryAsync
+            var consents = await _database.UserConsents.ServersideQueryAsync
             (
                 q => q.Where(uc => uc.DiscordID == (long)discordUser.Id && uc.HasConsented)
             );
@@ -158,7 +158,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<UserConsent>> GetUserConsentAsync(IUser discordUser)
         {
-            var consents = await _database.UserConsents.UnifiedQueryAsync
+            var consents = await _database.UserConsents.ServersideQueryAsync
             (
                 q => q.Where(uc => uc.DiscordID == (long)discordUser.Id)
             );

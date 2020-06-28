@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<CharacterRole>> GetCharacterRoleAsync(IRole role)
         {
-            var characterRoles = await _database.CharacterRoles.UnifiedQueryAsync
+            var characterRoles = await _database.CharacterRoles.ServersideQueryAsync
             (
                 q => q.Where(r => r.Server.DiscordID == (long)role.Guild.Id && r.DiscordID == (long)role.Id)
             );

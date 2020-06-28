@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         [Pure]
         public async Task<bool> IsServerKnownAsync(IGuild discordServer)
         {
-            var servers = await _database.Servers.UnifiedQueryAsync
+            var servers = await _database.Servers.ServersideQueryAsync
             (
                 q => q.Where(s => s.DiscordID == (long)discordServer.Id)
             );
@@ -91,7 +91,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         [Pure]
         public async Task<RetrieveEntityResult<Server>> GetServerAsync(IGuild discordServer)
         {
-            var servers = await _database.Servers.UnifiedQueryAsync
+            var servers = await _database.Servers.ServersideQueryAsync
             (
                 q => q.Where(u => u.DiscordID == (long)discordServer.Id)
             );

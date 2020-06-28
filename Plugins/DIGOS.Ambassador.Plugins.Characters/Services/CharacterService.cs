@@ -293,7 +293,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             query ??= q => q;
             server = _database.NormalizeReference(server);
 
-            return _database.Characters.UnifiedQueryAsync(q => query(q.Where(a => a.Server == server)));
+            return _database.Characters.ServersideQueryAsync(q => query(q.Where(a => a.Server == server)));
         }
 
         /// <summary>

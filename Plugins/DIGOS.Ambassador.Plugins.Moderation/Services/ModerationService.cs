@@ -91,7 +91,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             IGuild discordServer
         )
         {
-            var settings = await _database.ServerSettings.UnifiedQueryAsync
+            var settings = await _database.ServerSettings.ServersideQueryAsync
             (
                 q => q.Where(s => s.Server.DiscordID == (long)discordServer.Id)
             );

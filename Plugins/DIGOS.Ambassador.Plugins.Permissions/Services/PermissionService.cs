@@ -434,7 +434,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         {
             query ??= q => q;
 
-            return await _database.UserPermissions.UnifiedQueryAsync
+            return await _database.UserPermissions.ServersideQueryAsync
             (
                 q => query(q
                     .Where(p => p.ServerID == (long)discordServer.Id)
@@ -454,7 +454,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         {
             var userRoles = discordUser.RoleIds.Select(r => (long)r).ToList();
 
-            var permissions = await _database.RolePermissions.UnifiedQueryAsync
+            var permissions = await _database.RolePermissions.ServersideQueryAsync
             (
                 q => q.Where(p => userRoles.Contains(p.RoleID))
             );
@@ -481,7 +481,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 throw new ArgumentException("Invalid permission target.", nameof(target));
             }
 
-            var rolePermissions = await _database.RolePermissions.UnifiedQueryAsync
+            var rolePermissions = await _database.RolePermissions.ServersideQueryAsync
             (
                 q => q.Where
                 (
@@ -533,7 +533,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 throw new ArgumentException("Invalid permission target.", nameof(target));
             }
 
-            var userPermissions = await _database.UserPermissions.UnifiedQueryAsync
+            var userPermissions = await _database.UserPermissions.ServersideQueryAsync
             (
                 q => q.Where
                 (

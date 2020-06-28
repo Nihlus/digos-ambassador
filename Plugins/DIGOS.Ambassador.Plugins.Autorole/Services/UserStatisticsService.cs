@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             IUser discordUser
         )
         {
-            var statistics = await _database.UserStatistics.UnifiedQueryAsync
+            var statistics = await _database.UserStatistics.ServersideQueryAsync
             (
                 q => q.Where(s => s.User.DiscordID == (long)discordUser.Id)
             );

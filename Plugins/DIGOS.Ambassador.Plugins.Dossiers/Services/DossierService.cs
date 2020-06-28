@@ -191,7 +191,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         [Pure]
         public async Task<bool> IsDossierTitleUniqueAsync(string dossierTitle)
         {
-            var dossiers = await _database.Dossiers.UnifiedQueryAsync
+            var dossiers = await _database.Dossiers.ServersideQueryAsync
             (
                 q => q.Where(d => d.Title.ToLowerInvariant() == dossierTitle.ToLowerInvariant())
             );
@@ -209,7 +209,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         [Pure]
         public async Task<RetrieveEntityResult<Dossier>> GetDossierByTitleAsync(string title)
         {
-            var dossiers = await _database.Dossiers.UnifiedQueryAsync
+            var dossiers = await _database.Dossiers.ServersideQueryAsync
             (
                 q => q.Where(d => d.Title.ToLowerInvariant() == title.ToLowerInvariant())
             );

@@ -259,7 +259,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             query ??= q => q;
             server = _database.NormalizeReference(server);
 
-            return await _database.Roleplays.UnifiedQueryAsync(q => query(q.Where(rp => rp.Server == server)));
+            return await _database.Roleplays.ServersideQueryAsync(q => query(q.Where(rp => rp.Server == server)));
         }
 
         /// <summary>

@@ -120,7 +120,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure]
         private async Task<RetrieveEntityResult<Appearance>> GetDefaultAppearanceAsync(Character character)
         {
-            var appearances = await _database.Appearances.UnifiedQueryAsync
+            var appearances = await _database.Appearances.ServersideQueryAsync
             (
                 q => q.Where(da => da.Character == character && da.IsDefault)
             );
@@ -177,7 +177,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure]
         private async Task<RetrieveEntityResult<Appearance>> GetCurrentAppearanceAsync(Character character)
         {
-            var appearances = await _database.Appearances.UnifiedQueryAsync
+            var appearances = await _database.Appearances.ServersideQueryAsync
             (
                 q => q.Where(da => da.Character == character && da.IsCurrent)
             );
@@ -531,7 +531,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure]
         public async Task<IReadOnlyList<Species>> GetAvailableSpeciesAsync()
         {
-            return (await _database.Species.UnifiedQueryAsync(q => q)).ToList();
+            return (await _database.Species.ServersideQueryAsync(q => q)).ToList();
         }
 
         /// <summary>
@@ -542,7 +542,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         [Pure]
         public async Task<IReadOnlyList<Transformation>> GetAvailableTransformationsAsync(Bodypart bodyPart)
         {
-            var transformations = await _database.Transformations.UnifiedQueryAsync
+            var transformations = await _database.Transformations.ServersideQueryAsync
             (
                 q => q.Where(tf => tf.Part == bodyPart)
             );
@@ -798,7 +798,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             IUser discordUser
         )
         {
-            var protections = await _database.GlobalUserProtections.UnifiedQueryAsync
+            var protections = await _database.GlobalUserProtections.ServersideQueryAsync
             (
                 q => q.Where(p => p.User.DiscordID == (long)discordUser.Id)
             );
@@ -836,7 +836,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             IGuild guild
         )
         {
-            var protections = await _database.ServerUserProtections.UnifiedQueryAsync
+            var protections = await _database.ServerUserProtections.ServersideQueryAsync
             (
                 q => q.Where(p => p.User.DiscordID == (long)discordUser.Id && p.Server.DiscordID == (long)guild.Id)
             );
@@ -1024,7 +1024,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 bodyparts.Add(bodypart);
             }
 
-            var transformations = await _database.Transformations.UnifiedQueryAsync
+            var transformations = await _database.Transformations.ServersideQueryAsync
             (
                 q => q
                     .Where(tf => bodyparts.Contains(tf.Part))
@@ -1088,7 +1088,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             string speciesName
         )
         {
-            var matchingSpecies = await _database.Species.UnifiedQueryAsync
+            var matchingSpecies = await _database.Species.ServersideQueryAsync
             (
                 q => q.Where(s => string.Equals(s.Name.ToLower(), speciesName.ToLower()))
             );
@@ -1114,7 +1114,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             string speciesName
         )
         {
-            var matchingSpecies = await _database.Species.UnifiedQueryAsync
+            var matchingSpecies = await _database.Species.ServersideQueryAsync
             (
                 q => q.Where(s => string.Equals(s.Name.ToLower(), speciesName.ToLower()))
             );

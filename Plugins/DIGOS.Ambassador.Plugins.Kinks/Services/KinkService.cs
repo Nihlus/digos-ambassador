@@ -178,7 +178,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
 
             return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess
             (
-                await _database.UserKinks.UnifiedQueryAsync(q => q.Where(k => k.User == user))
+                await _database.UserKinks.ServersideQueryAsync(q => q.Where(k => k.User == user))
             );
         }
 
@@ -339,7 +339,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public async Task<IEnumerable<KinkCategory>> GetKinkCategoriesAsync()
         {
-            var categories = await _database.Kinks.UnifiedQueryAsync
+            var categories = await _database.Kinks.ServersideQueryAsync
             (
                 q => q.Select(k => k.Category)
             );
@@ -355,7 +355,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public async Task<RetrieveEntityResult<Kink>> GetKinkByFListIDAsync(long onlineKinkID)
         {
-            var kinks = await _database.Kinks.UnifiedQueryAsync
+            var kinks = await _database.Kinks.ServersideQueryAsync
             (
                 q => q.Where(k => k.FListID == onlineKinkID)
             );
@@ -378,7 +378,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public async Task<RetrieveEntityResult<IEnumerable<Kink>>> GetKinksByCategoryAsync(KinkCategory category)
         {
-            var kinks = await _database.Kinks.UnifiedQueryAsync
+            var kinks = await _database.Kinks.ServersideQueryAsync
             (
                 q => q
                     .Where(k => k.Category == category)
@@ -443,7 +443,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
 
             var user = getUserResult.Entity;
 
-            var kinksToRemove = await _database.UserKinks.UnifiedQueryAsync
+            var kinksToRemove = await _database.UserKinks.ServersideQueryAsync
             (
                 q => q.Where(k => k.User == user)
             );
