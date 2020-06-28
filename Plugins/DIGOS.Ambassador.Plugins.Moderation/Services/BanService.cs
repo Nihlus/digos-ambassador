@@ -180,6 +180,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 }
             }
 
+            await _database.SaveChangesAsync();
+
             return ban;
         }
 
@@ -212,6 +214,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             ban.Reason = reason;
             ban.NotifyUpdate();
 
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -234,6 +238,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             ban.MessageID = messageID;
             ban.NotifyUpdate();
+
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -263,6 +269,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             ban.ExpiresOn = expiresOn;
             ban.NotifyUpdate();
 
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -282,6 +290,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             _database.UserBans.Remove(ban);
+            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }

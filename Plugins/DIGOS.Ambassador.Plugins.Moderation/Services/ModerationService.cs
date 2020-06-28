@@ -93,14 +93,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             var settings = await _database.ServerSettings.ServersideQueryAsync
             (
-                q => q.Where(s => s.Server.DiscordID == (long)discordServer.Id)
+                q => q
+                    .Where(s => s.Server.DiscordID == (long)discordServer.Id)
+                    .SingleOrDefaultAsync()
             );
 
-            var setting = settings.SingleOrDefault();
-
-            if (!(setting is null))
+            if (!(settings is null))
             {
-                return setting;
+                return settings;
             }
 
             return RetrieveEntityResult<ServerModerationSettings>.FromError
@@ -136,6 +136,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var settings = _database.CreateProxy<ServerModerationSettings>(server);
             _database.ServerSettings.Update(settings);
 
+            await _database.SaveChangesAsync();
+
             return settings;
         }
 
@@ -165,6 +167,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             settings.ModerationLogChannel = (long)channel.Id;
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -194,6 +198,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             settings.MonitoringChannel = (long)channel.Id;
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -223,6 +229,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             settings.WarningThreshold = warningThreshold;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }

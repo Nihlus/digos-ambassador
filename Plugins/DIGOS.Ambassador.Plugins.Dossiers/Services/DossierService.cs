@@ -162,7 +162,9 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
                 return CreateEntityResult<Dossier>.FromError(setSummary);
             }
 
-            return CreateEntityResult<Dossier>.FromSuccess((await GetDossierByTitleAsync(title)).Entity);
+            await _database.SaveChangesAsync();
+
+            return dossier;
         }
 
         /// <summary>
@@ -179,6 +181,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             }
 
             _database.Dossiers.Remove(dossier);
+            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -191,14 +194,14 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         [Pure]
         public async Task<bool> IsDossierTitleUniqueAsync(string dossierTitle)
         {
-            var dossiers = await _database.Dossiers.ServersideQueryAsync
+            var hasDossier = await _database.Dossiers.ServersideQueryAsync
             (
-                q => q.Where(d => d.Title.ToLowerInvariant() == dossierTitle.ToLowerInvariant())
+                q => q
+                    .Where(d => d.Title.ToLowerInvariant() == dossierTitle.ToLowerInvariant())
+                    .AnyAsync()
             );
 
-            var dossier = dossiers.SingleOrDefault();
-
-            return dossier is null;
+            return !hasDossier;
         }
 
         /// <summary>
@@ -209,12 +212,12 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         [Pure]
         public async Task<RetrieveEntityResult<Dossier>> GetDossierByTitleAsync(string title)
         {
-            var dossiers = await _database.Dossiers.ServersideQueryAsync
+            var dossier = await _database.Dossiers.ServersideQueryAsync
             (
-                q => q.Where(d => d.Title.ToLowerInvariant() == title.ToLowerInvariant())
+                q => q
+                    .Where(d => d.Title.ToLowerInvariant() == title.ToLowerInvariant())
+                    .SingleOrDefaultAsync()
             );
-
-            var dossier = dossiers.SingleOrDefault();
 
             if (!(dossier is null))
             {
@@ -266,6 +269,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             }
 
             dossier.Title = newTitle;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -288,6 +292,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             }
 
             dossier.Summary = newSummary;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -321,6 +326,8 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             {
                 return ModifyEntityResult.FromError(e.Message);
             }
+
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }

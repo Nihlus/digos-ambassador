@@ -61,18 +61,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         {
             var settings = await _database.ServerSettings.ServersideQueryAsync
             (
-                q => q.Where(s => s.Server == server)
+                q => q
+                    .Where(s => s.Server == server)
+                    .SingleOrDefaultAsync()
             );
 
-            var setting = settings.SingleOrDefault();
-
-            if (!(setting is null))
+            if (!(settings is null))
             {
-                return setting;
+                return settings;
             }
 
             var newSettings = _database.CreateProxy<ServerRoleplaySettings>(server);
             _database.ServerSettings.Update(newSettings);
+
+            await _database.SaveChangesAsync();
 
             return newSettings;
         }
@@ -108,6 +110,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             settings.ArchiveChannel = channelId;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -148,6 +151,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             settings.DefaultUserRole = roleId;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -183,6 +187,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             settings.DedicatedRoleplayChannelsCategory = categoryId;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }

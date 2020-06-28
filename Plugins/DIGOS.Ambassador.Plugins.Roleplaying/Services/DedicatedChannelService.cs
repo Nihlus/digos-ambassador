@@ -151,6 +151,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return CreateEntityResult<ITextChannel>.FromError(resetPermissions);
             }
 
+            await _database.SaveChangesAsync();
+
             return CreateEntityResult<ITextChannel>.FromSuccess(dedicatedChannel);
         }
 
@@ -251,6 +253,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             roleplay.DedicatedChannelID = null;
+            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }

@@ -76,19 +76,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public async Task<RetrieveEntityResult<Kink>> GetKinkByNameAsync(string name)
         {
-            // Bit of a special and annoying case
-            var localKink = await _database.Kinks.Local.AsQueryable().SelectFromBestLevenshteinMatchAsync
-            (
-                x => x,
-                k => k.Name,
-                name
-            );
-
-            if (localKink.IsSuccess)
-            {
-                return localKink;
-            }
-
             return await _database.Kinks.SelectFromBestLevenshteinMatchAsync
             (
                 x => x,
@@ -178,7 +165,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
 
             return RetrieveEntityResult<IEnumerable<UserKink>>.FromSuccess
             (
-                await _database.UserKinks.ServersideQueryAsync(q => q.Where(k => k.User == user))
+                await _database.UserKinks.ServersideQueryAsync(q => query(q.Where(k => k.User == user)))
             );
         }
 
@@ -246,6 +233,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         )
         {
             userKink.Preference = preference;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -329,6 +317,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             var userKink = _database.CreateProxy<UserKink>(user, kink);
             _database.UserKinks.Update(userKink);
 
+            await _database.SaveChangesAsync();
+
             return userKink;
         }
 
@@ -355,12 +345,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         [Pure]
         public async Task<RetrieveEntityResult<Kink>> GetKinkByFListIDAsync(long onlineKinkID)
         {
-            var kinks = await _database.Kinks.ServersideQueryAsync
+            var kink = await _database.Kinks.ServersideQueryAsync
             (
-                q => q.Where(k => k.FListID == onlineKinkID)
+                q => q
+                    .Where(k => k.FListID == onlineKinkID)
+                    .SingleOrDefaultAsync()
             );
-
-            var kink = kinks.SingleOrDefault();
 
             if (!(kink is null))
             {
@@ -382,10 +372,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             (
                 q => q
                     .Where(k => k.Category == category)
-                    .OrderBy(g => g.Category.ToString())
             );
 
-            var enumeratedKinks = kinks.ToList();
+            var enumeratedKinks = kinks
+                .OrderBy(g => g.Category.ToString())
+                .ToList();
 
             if (!enumeratedKinks.Any())
             {
@@ -449,6 +440,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             );
 
             _database.UserKinks.RemoveRange(kinksToRemove);
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -572,6 +564,8 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
                     ++alteredKinks;
                 }
             }
+
+            await _database.SaveChangesAsync();
 
             return alteredKinks;
         }

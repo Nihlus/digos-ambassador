@@ -115,6 +115,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             }
 
             permission.IsGranted = true;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -178,6 +179,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             }
 
             permission.IsGranted = true;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -247,6 +249,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             }
 
             permission.IsGranted = false;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -310,6 +313,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             }
 
             permission.IsGranted = false;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -509,6 +513,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             _database.RolePermissions.Update(newPermission);
             newPermission.IsGranted = permission.IsGrantedByDefaultTo(target);
 
+            await _database.SaveChangesAsync();
+
             return newPermission;
         }
 
@@ -562,6 +568,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             _database.UserPermissions.Update(newPermission);
             newPermission.IsGranted = permission.IsGrantedByDefaultTo(target);
+
+            await _database.SaveChangesAsync();
 
             return newPermission;
         }

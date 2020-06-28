@@ -144,6 +144,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 return CreateEntityResult<UserNote>.FromError(setContent);
             }
 
+            await _database.SaveChangesAsync();
+
             return note;
         }
 
@@ -176,6 +178,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             note.Content = content;
             note.NotifyUpdate();
 
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -195,6 +199,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             _database.UserNotes.Remove(note);
+            await _database.SaveChangesAsync();
+
             return DeleteEntityResult.FromSuccess();
         }
     }

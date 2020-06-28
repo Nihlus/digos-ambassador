@@ -180,6 +180,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 }
             }
 
+            await _database.SaveChangesAsync();
+
             return warning;
         }
 
@@ -212,6 +214,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             warning.Reason = reason;
             warning.NotifyUpdate();
 
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -234,6 +238,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             warning.MessageID = messageID;
             warning.NotifyUpdate();
+
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -263,6 +269,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             warning.ExpiresOn = expiresOn;
             warning.NotifyUpdate();
 
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -282,6 +290,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             _database.UserWarnings.Remove(warning);
+            await _database.SaveChangesAsync();
 
             return DeleteEntityResult.FromSuccess();
         }
