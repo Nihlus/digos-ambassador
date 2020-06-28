@@ -26,7 +26,6 @@ using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Tests.Plugins.Permissions.Data;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
-using Microsoft.EntityFrameworkCore;
 using Xunit;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 

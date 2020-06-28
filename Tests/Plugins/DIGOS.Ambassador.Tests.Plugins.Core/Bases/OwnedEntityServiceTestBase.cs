@@ -22,7 +22,6 @@
 
 using System;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;

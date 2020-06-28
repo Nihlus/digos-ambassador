@@ -24,7 +24,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Tests.Utility;
 using Discord;
-using Microsoft.EntityFrameworkCore;
 using Moq;
 using Xunit;
 

@@ -21,12 +21,10 @@
 //
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Discord;
-using MockQueryable.Moq;
 using Moq;
 using Xunit;
 

@@ -25,7 +25,6 @@
 #pragma warning disable SA1649
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;

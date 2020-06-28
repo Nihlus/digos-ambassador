@@ -33,7 +33,6 @@ using Discord;
 using Discord.Net;
 using Discord.WebSocket;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;

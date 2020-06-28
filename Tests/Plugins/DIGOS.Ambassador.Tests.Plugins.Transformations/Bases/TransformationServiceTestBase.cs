@@ -22,7 +22,6 @@
 
 using System;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Database;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;

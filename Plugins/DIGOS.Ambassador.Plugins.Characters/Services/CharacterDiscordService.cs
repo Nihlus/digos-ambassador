@@ -33,8 +33,6 @@ using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord;
 using Discord.Commands;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Remora.Results;
 
 using Image = DIGOS.Ambassador.Plugins.Characters.Model.Data.Image;
