@@ -953,6 +953,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
                 }
             }
 
+            await _database.SaveChangesAsync();
+
             uint addedTransformations = 0;
             uint updatedTransformations = 0;
 
