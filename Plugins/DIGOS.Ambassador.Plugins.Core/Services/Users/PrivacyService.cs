@@ -141,12 +141,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         [Pure]
         public async Task<bool> HasUserConsentedAsync(IUser discordUser)
         {
-            var consents = await _database.UserConsents.ServersideQueryAsync
+            var consent = await _database.UserConsents.ServersideQueryAsync
             (
-                q => q.Where(uc => uc.DiscordID == (long)discordUser.Id && uc.HasConsented)
+                q => q
+                    .Where(uc => uc.DiscordID == (long)discordUser.Id && uc.HasConsented)
+                    .SingleOrDefaultAsync()
             );
-
-            var consent = consents.SingleOrDefault();
 
             return !(consent is null);
         }
@@ -158,12 +158,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<UserConsent>> GetUserConsentAsync(IUser discordUser)
         {
-            var consents = await _database.UserConsents.ServersideQueryAsync
+            var consent = await _database.UserConsents.ServersideQueryAsync
             (
-                q => q.Where(uc => uc.DiscordID == (long)discordUser.Id)
+                q => q
+                    .Where(uc => uc.DiscordID == (long)discordUser.Id)
+                    .SingleOrDefaultAsync()
             );
-
-            var consent = consents.SingleOrDefault();
 
             if (!(consent is null))
             {
@@ -193,6 +193,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                 var userConsent = getConsent.Entity;
                 userConsent.HasConsented = true;
             }
+
+            await _database.SaveChangesAsync();
         }
 
         /// <summary>
@@ -210,6 +212,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
 
             var userConsent = getConsent.Entity;
             userConsent.HasConsented = false;
+
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }

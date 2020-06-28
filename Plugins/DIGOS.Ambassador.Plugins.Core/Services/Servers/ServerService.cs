@@ -59,13 +59,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         [Pure]
         public async Task<bool> IsServerKnownAsync(IGuild discordServer)
         {
-            var servers = await _database.Servers.ServersideQueryAsync
+            var hasServer = await _database.Servers.ServersideQueryAsync
             (
-                q => q.Where(s => s.DiscordID == (long)discordServer.Id)
+                q => q
+                    .Where(s => s.DiscordID == (long)discordServer.Id)
+                    .AnyAsync()
             );
 
-            var server = servers.SingleOrDefault();
-            return !(server is null);
+            return hasServer;
         }
 
         /// <summary>
@@ -91,12 +92,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         [Pure]
         public async Task<RetrieveEntityResult<Server>> GetServerAsync(IGuild discordServer)
         {
-            var servers = await _database.Servers.ServersideQueryAsync
+            var server = await _database.Servers.ServersideQueryAsync
             (
-                q => q.Where(u => u.DiscordID == (long)discordServer.Id)
+                q => q
+                    .Where(u => u.DiscordID == (long)discordServer.Id)
+                    .SingleOrDefaultAsync()
             );
-
-            var server = servers.SingleOrDefault();
 
             if (!(server is null))
             {
@@ -126,6 +127,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             _database.Servers.Update(server);
 
             server.IsNSFW = true;
+
+            await _database.SaveChangesAsync();
 
             return RetrieveEntityResult<Server>.FromSuccess(server);
         }
@@ -183,6 +186,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.Description = description;
+            await _database.SaveChangesAsync();
+
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -239,6 +244,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.JoinMessage = joinMessage;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -264,6 +270,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.IsNSFW = isNsfw;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -289,6 +296,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.SendJoinMessage = sendJoinMessage;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }

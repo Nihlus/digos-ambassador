@@ -59,14 +59,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         [Pure]
         public async Task<bool> IsUserKnownAsync(IUser discordUser)
         {
-            var users = await _database.Users.ServersideQueryAsync
+            var hasUser = await _database.Users.ServersideQueryAsync
             (
-                q => q.Where(u => u.DiscordID == (long)discordUser.Id)
+                q => q
+                    .Where(u => u.DiscordID == (long)discordUser.Id)
+                    .AnyAsync()
             );
 
-            var user = users.SingleOrDefault();
-
-            return !(user is null);
+            return hasUser;
         }
 
         /// <summary>
@@ -95,12 +95,13 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         [Pure]
         public async Task<RetrieveEntityResult<User>> GetUserAsync(IUser discordUser)
         {
-            var users = await _database.Users.ServersideQueryAsync
+            var user = await _database.Users.ServersideQueryAsync
             (
-                q => q.Where(u => u.DiscordID == (long)discordUser.Id)
+                q => q
+                    .Where(u => u.DiscordID == (long)discordUser.Id)
+                    .SingleOrDefaultAsync()
             );
 
-            var user = users.SingleOrDefault();
             if (!(user is null))
             {
                 return user;
@@ -134,7 +135,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             }
 
             var newUser = _database.CreateProxy<User>((long)discordUser.Id);
+
             _database.Users.Update(newUser);
+            await _database.SaveChangesAsync();
 
             return newUser;
         }
@@ -158,6 +161,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             }
 
             user.Timezone = timezoneOffset;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -186,6 +190,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             }
 
             user.Bio = bio;
+            await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
         }
