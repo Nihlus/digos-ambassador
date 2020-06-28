@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public override async Task InitializeAsync()
             {
-                _character = await CreateCharacterAsync(avatarUrl: AvatarURL);
+                _character = CreateCharacter(avatarUrl: AvatarURL);
             }
 
             [Fact]

@@ -105,6 +105,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 );
 
                 this.CharacterDatabase.Characters.Update(character);
+                await this.CharacterDatabase.SaveChangesAsync();
 
                 _character = this.CharacterDatabase.Characters.First();
 

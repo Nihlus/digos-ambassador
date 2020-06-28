@@ -99,7 +99,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         /// <param name="pronouns">The pronouns.</param>
         /// <param name="isNSFW">Whether the character is NSFW.</param>
         /// <returns>The character.</returns>
-        protected async Task<Character> CreateCharacterAsync
+        protected Character CreateCharacter
         (
             User? owner = null,
             Server? server = null,
@@ -130,6 +130,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             }
 
             this.Database.Characters.Update(character);
+            this.Database.SaveChanges();
 
             return character;
         }
@@ -173,6 +174,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             this.DefaultServer = this.Database.CreateProxy<Server>(1);
             this.Database.Update(this.DefaultServer);
+
+            this.Database.SaveChanges();
 
             // Default pronouns
             var pronounService = serviceProvider.GetRequiredService<PronounService>();

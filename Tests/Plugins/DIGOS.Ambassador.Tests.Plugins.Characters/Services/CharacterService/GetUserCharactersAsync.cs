@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsEmptySetFromDatabaseWithCharactersWithNoMatchingOwner()
             {
-                var anotherCharacter = new Character
+                var anotherCharacter = CreateCharacter
                 (
                     new User(1),
                     this.DefaultServer,
@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsEmptySetFromDatabaseWithCharactersWithMatchingOwnerButNoMatchingServer()
             {
-                var anotherCharacter = new Character
+                var anotherCharacter = CreateCharacter
                 (
                     this.DefaultOwner,
                     new Server(2),
@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsNonEmptySetFromDatabaseWithCharactersWithMatchingOwner()
             {
-                var anotherCharacter = new Character
+                var anotherCharacter = CreateCharacter
                 (
                     this.DefaultOwner,
                     this.DefaultServer,
@@ -109,7 +109,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsCorrectCharacterFromDatabase()
             {
-                var anotherCharacter = new Character
+                var anotherCharacter = CreateCharacter
                 (
                     this.DefaultOwner,
                     this.DefaultServer,
@@ -130,8 +130,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsCorrectMultipleCharactersFromDatabase()
             {
-                var character1 = await CreateCharacterAsync(name: "dummy1");
-                var character2 = await CreateCharacterAsync(name: "dummy2");
+                var character1 = CreateCharacter(name: "dummy1");
+                var character2 = CreateCharacter(name: "dummy2");
 
                 var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
 

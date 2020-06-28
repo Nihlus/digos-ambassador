@@ -48,19 +48,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSingleCharacterFromSingleCharacter()
             {
-                this.Database.Characters.Update
+                CreateCharacter
                 (
-                    new Character
-                    (
-                        this.DefaultOwner,
-                        this.DefaultServer,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty
-                    )
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
                 );
 
                 var result = await this.Characters.GetCharactersAsync(this.DefaultServer);
@@ -72,19 +69,16 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsNoCharacterFromSingleCharacterWhenRequestedServerIsDifferent()
             {
-                this.Database.Characters.Update
+                CreateCharacter
                 (
-                    new Character
-                    (
-                        this.DefaultOwner,
-                        new Server(2),
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty
-                    )
+                    this.DefaultOwner,
+                    new Server(2),
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
                 );
 
                 var result = await this.Characters.GetCharactersAsync(this.DefaultServer);
@@ -95,49 +89,40 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsCorrectCharactersFromDatabase()
             {
-                this.Database.Characters.Update
+                CreateCharacter
                 (
-                    new Character
-                    (
-                        this.DefaultOwner,
-                        new Server(2),
-                        "dummy",
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty
-                    )
+                    this.DefaultOwner,
+                    new Server(2),
+                    "dummy",
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
                 );
 
-                this.Database.Characters.Update
+                CreateCharacter
                 (
-                    new Character
-                    (
-                        this.DefaultOwner,
-                        this.DefaultServer,
-                        "dummy1",
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty
-                    )
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    "dummy1",
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
                 );
 
-                this.Database.Characters.Update
+                CreateCharacter
                 (
-                    new Character
-                    (
-                        this.DefaultOwner,
-                        this.DefaultServer,
-                        "dummy2",
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty,
-                        string.Empty
-                    )
+                    this.DefaultOwner,
+                    this.DefaultServer,
+                    "dummy2",
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty
                 );
 
                 var result = await this.Characters.GetCharactersAsync(this.DefaultServer);

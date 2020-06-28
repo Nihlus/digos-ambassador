@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public override async Task InitializeAsync()
             {
-                _character = await CreateCharacterAsync(isNSFW: IsNSFW);
+                _character = CreateCharacter(isNSFW: IsNSFW);
             }
 
             [Fact]

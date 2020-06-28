@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public override async Task InitializeAsync()
             {
-                await CreateCharacterAsync(name: CharacterName);
+                CreateCharacter(name: CharacterName);
             }
 
             [Fact]

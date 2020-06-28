@@ -112,6 +112,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 };
 
                 this.Database.GlobalUserProtections.Update(globalSetting);
+                await this.Database.SaveChangesAsync();
 
                 var localSetting = await this.Transformations.GetOrCreateServerUserProtectionAsync
                 (

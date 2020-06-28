@@ -52,8 +52,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsTrueIfUserHasAnActiveCharacter()
             {
-                var character = await CreateCharacterAsync();
+                var character = CreateCharacter();
+
                 character.IsCurrent = true;
+                await this.Database.SaveChangesAsync();
 
                 var result = await this.Characters.HasCurrentCharacterAsync(this.DefaultOwner, this.DefaultServer);
 

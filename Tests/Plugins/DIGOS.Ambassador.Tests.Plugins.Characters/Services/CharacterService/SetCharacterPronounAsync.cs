@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 this.Services.GetRequiredService<PronounService>().WithPronounProvider(new FemininePronounProvider());
                 this.Services.GetRequiredService<PronounService>().WithPronounProvider(new ZeHirPronounProvider());
 
-                _character = await CreateCharacterAsync(pronouns: PronounFamily);
+                _character = CreateCharacter(pronouns: PronounFamily);
             }
 
             [Fact]

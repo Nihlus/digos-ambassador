@@ -35,11 +35,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     {
         public class DeleteCharacterAsync : CharacterServiceTestBase
         {
-            private Character _character = null!;
+            private readonly Character _character;
 
-            public override async Task InitializeAsync()
+            public DeleteCharacterAsync()
             {
-                _character = new Character
+                _character = CreateCharacter
                 (
                     this.DefaultOwner,
                     this.DefaultServer,
@@ -50,8 +50,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                     string.Empty,
                     string.Empty
                 );
-
-                this.Database.Characters.Update(_character);
             }
 
             [Fact]

@@ -38,7 +38,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             public GetCurrentCharacterAsync()
             {
-                _character = new Character
+                _character = CreateCharacter
                 (
                     this.DefaultOwner,
                     this.DefaultServer,
@@ -49,8 +49,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                     string.Empty,
                     string.Empty
                 );
-
-                this.Database.Characters.Update(_character);
             }
 
             [Fact]

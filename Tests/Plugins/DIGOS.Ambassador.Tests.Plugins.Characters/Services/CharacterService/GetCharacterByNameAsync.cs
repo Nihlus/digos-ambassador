@@ -38,11 +38,11 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         {
             private const string CharacterName = "Test";
 
-            private Character _character = null!;
+            private readonly Character _character;
 
-            public override async Task InitializeAsync()
+            public GetCharacterByNameAsync()
             {
-                _character = new Character
+                _character = CreateCharacter
                 (
                     this.DefaultOwner,
                     this.DefaultServer,
@@ -53,8 +53,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                     string.Empty,
                     string.Empty
                 );
-
-                this.Database.Characters.Update(_character);
             }
 
             [Fact]
@@ -68,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfMoreThanOneCharacterWithThatNameExists()
             {
-                var anotherCharacter = new Character
+                var anotherCharacter = CreateCharacter
                 (
                     new User(1),
                     this.DefaultServer,
@@ -79,8 +77,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                     string.Empty,
                     string.Empty
                 );
-
-                this.Database.Characters.Update(anotherCharacter);
 
                 var result = await this.Characters.GetCharacterByNameAsync(this.DefaultServer, CharacterName);
 
