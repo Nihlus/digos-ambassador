@@ -21,9 +21,9 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
-using DIGOS.Ambassador.Core.Database.Contexts;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Permissions.Model
@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
     /// Represents the database model of the dossier plugin.
     /// </summary>
     [PublicAPI]
-    public class PermissionsDatabaseContext : FilteredSchemaDbContext
+    public class PermissionsDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "PermissionModule";
 

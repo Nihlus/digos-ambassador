@@ -19,11 +19,10 @@
 //  You should have received a copy of the GNU Affero General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-
-using DIGOS.Ambassador.Core.Database.Contexts;
 using DIGOS.Ambassador.Plugins.Characters.Model.Data;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Characters.Model
@@ -32,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
     /// Represents the database model of the dossier plugin.
     /// </summary>
     [PublicAPI]
-    public class CharactersDatabaseContext : FilteredSchemaDbContext
+    public class CharactersDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "CharacterModule";
 

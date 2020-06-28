@@ -19,13 +19,12 @@
 //  You should have received a copy of the GNU Affero General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-
-using DIGOS.Ambassador.Core.Database.Contexts;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Autorole.Model
@@ -34,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
     /// Represents the database model of the dossier plugin.
     /// </summary>
     [PublicAPI]
-    public class AutoroleDatabaseContext : FilteredSchemaDbContext
+    public class AutoroleDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "AutoroleModule";
 

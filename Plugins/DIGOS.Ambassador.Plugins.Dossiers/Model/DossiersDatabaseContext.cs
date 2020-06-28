@@ -19,10 +19,9 @@
 //  You should have received a copy of the GNU Affero General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-
-using DIGOS.Ambassador.Core.Database.Contexts;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Dossiers.Model
@@ -31,7 +30,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Model
     /// Represents the database model of the dossier plugin.
     /// </summary>
     [PublicAPI]
-    public class DossiersDatabaseContext : FilteredSchemaDbContext
+    public class DossiersDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "DossierModule";
 

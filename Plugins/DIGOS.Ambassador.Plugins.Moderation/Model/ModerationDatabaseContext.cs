@@ -21,9 +21,9 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
-using DIGOS.Ambassador.Core.Database.Contexts;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Moderation.Model
@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
     /// Represents the database model of the dossier plugin.
     /// </summary>
     [PublicAPI]
-    public class ModerationDatabaseContext : FilteredSchemaDbContext
+    public class ModerationDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "ModerationModule";
 
