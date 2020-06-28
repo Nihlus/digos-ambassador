@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Servers.AddServerAsync(_discordGuild);
 
-                var server = this.Database.Servers.Local.FirstOrDefault();
+                var server = this.Database.Servers.FirstOrDefault();
 
                 Assert.NotNull(server);
                 Assert.Equal((long)_discordGuild.Id, server.DiscordID);

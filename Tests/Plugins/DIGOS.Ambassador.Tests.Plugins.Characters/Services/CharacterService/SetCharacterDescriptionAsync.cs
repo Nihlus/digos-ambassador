@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 const string newDescription = "An uncool person";
                 await this.Characters.SetCharacterDescriptionAsync(_character, newDescription);
 
-                var character = this.Database.Characters.Local.First();
+                var character = this.Database.Characters.First();
                 Assert.Equal(newDescription, character.Description);
             }
         }

@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 const string newNickname = "Bobby";
                 await this.Characters.SetCharacterNicknameAsync(_character, newNickname);
 
-                var character = this.Database.Characters.Local.First();
+                var character = this.Database.Characters.First();
                 Assert.Equal(newNickname, character.Nickname);
             }
         }

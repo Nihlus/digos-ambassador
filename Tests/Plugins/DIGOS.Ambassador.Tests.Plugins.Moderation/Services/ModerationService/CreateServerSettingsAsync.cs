@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
             {
                 await this.Moderation.CreateServerSettingsAsync(_guild);
 
-                Assert.NotEmpty(this.Database.ServerSettings.Local);
+                Assert.NotEmpty(this.Database.ServerSettings);
             }
 
             [Fact]

@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-                Assert.NotEmpty(this.Database.UserConsents.Local);
+                Assert.NotEmpty(this.Database.UserConsents);
             }
 
             [Fact]
@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-                var consent = this.Database.UserConsents.Local.FirstOrDefault();
+                var consent = this.Database.UserConsents.FirstOrDefault();
 
                 Assert.NotNull(consent);
                 Assert.Equal((long)_discordUser.Id, consent.DiscordID);
@@ -68,13 +68,13 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-                var firstConsent = this.Database.UserConsents.Local.First();
+                var firstConsent = this.Database.UserConsents.First();
 
                 await this.Privacy.RevokeUserConsentAsync(_discordUser);
 
                 await this.Privacy.GrantUserConsentAsync(_discordUser);
 
-                var secondConsent = this.Database.UserConsents.Local.First();
+                var secondConsent = this.Database.UserConsents.First();
 
                 Assert.Same(firstConsent, secondConsent);
 

@@ -106,7 +106,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
 
                 this.CharacterDatabase.Characters.Update(character);
 
-                _character = this.CharacterDatabase.Characters.Local.First();
+                _character = this.CharacterDatabase.Characters.First();
 
                 // Set up the default appearance
                 var getAppearanceConfigurationResult = await this.Transformations.GetOrCreateCurrentAppearanceAsync

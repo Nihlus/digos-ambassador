@@ -85,7 +85,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 const string newURL = "http://www.myfunkyavatars.com/avatar.png";
                 await this.Characters.SetCharacterAvatarAsync(_character, newURL);
 
-                var character = this.Database.Characters.Local.First();
+                var character = this.Database.Characters.First();
                 Assert.Equal(newURL, character.AvatarUrl);
             }
         }

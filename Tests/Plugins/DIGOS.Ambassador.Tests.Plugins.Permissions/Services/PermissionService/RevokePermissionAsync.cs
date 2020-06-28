@@ -106,7 +106,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.Self
                 );
 
-                var permission = this.Database.UserPermissions.Local.FirstOrDefault();
+                var permission = this.Database.UserPermissions.FirstOrDefault();
 
                 Assert.NotNull(permission);
                 Assert.False(permission.IsGranted);
@@ -227,7 +227,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = this.Database.UserPermissions.Local.FirstOrDefault
+                var selfPermission = this.Database.UserPermissions.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Self
                 );
@@ -235,7 +235,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                 Assert.NotNull(selfPermission);
                 Assert.False(selfPermission.IsGranted);
 
-                var otherPermission = this.Database.UserPermissions.Local.FirstOrDefault
+                var otherPermission = this.Database.UserPermissions.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Other
                 );
@@ -263,7 +263,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = this.Database.UserPermissions.Local.FirstOrDefault
+                var selfPermission = this.Database.UserPermissions.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Self
                 );
@@ -291,7 +291,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var otherPermission = this.Database.UserPermissions.Local.FirstOrDefault
+                var otherPermission = this.Database.UserPermissions.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Other
                 );
@@ -363,7 +363,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.Self
                 );
 
-                var permission = this.Database.RolePermissions.Local.FirstOrDefault();
+                var permission = this.Database.RolePermissions.FirstOrDefault();
 
                 Assert.NotNull(permission);
                 Assert.False(permission.IsGranted);
@@ -473,7 +473,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = this.Database.RolePermissions.Local.FirstOrDefault
+                var selfPermission = this.Database.RolePermissions.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Self
                 );
@@ -481,7 +481,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                 Assert.NotNull(selfPermission);
                 Assert.False(selfPermission.IsGranted);
 
-                var otherPermission = this.Database.RolePermissions.Local.FirstOrDefault
+                var otherPermission = this.Database.RolePermissions.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Other
                 );
@@ -507,7 +507,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var selfPermission = this.Database.RolePermissions.Local.FirstOrDefault
+                var selfPermission = this.Database.RolePermissions.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Self
                 );
@@ -533,7 +533,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
                     PermissionTarget.All
                 );
 
-                var otherPermission = this.Database.RolePermissions.Local.FirstOrDefault
+                var otherPermission = this.Database.RolePermissions.FirstOrDefault
                 (
                     p => p.Target == PermissionTarget.Other
                 );

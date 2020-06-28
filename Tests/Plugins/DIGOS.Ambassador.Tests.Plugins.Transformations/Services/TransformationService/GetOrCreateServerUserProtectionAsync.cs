@@ -52,8 +52,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                     _guild
                 );
 
-                Assert.NotEmpty(this.Database.ServerUserProtections.Local);
-                Assert.Same(result.Entity, this.Database.ServerUserProtections.Local.First());
+                Assert.NotEmpty(this.Database.ServerUserProtections);
+                Assert.Same(result.Entity, this.Database.ServerUserProtections.First());
             }
 
             [Fact]

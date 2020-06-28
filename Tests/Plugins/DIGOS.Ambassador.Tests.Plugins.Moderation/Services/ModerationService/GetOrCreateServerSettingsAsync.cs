@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.ModerationService
             {
                 var actual = (await this.Moderation.GetOrCreateServerSettingsAsync(_guild)).Entity;
 
-                var expected = this.Database.ServerSettings.Local.First();
+                var expected = this.Database.ServerSettings.First();
 
                 Assert.Same(expected, actual);
             }

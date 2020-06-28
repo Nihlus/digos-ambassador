@@ -47,9 +47,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
                 Assert.True(result.IsSuccess);
                 Assert.True(result.WasModified);
 
-                Assert.NotEmpty(this.Database.GlobalUserProtections.Local.First().Blacklist);
+                Assert.NotEmpty(this.Database.GlobalUserProtections.First().Blacklist);
 
-                Assert.Equal((long)_blacklistedUser.Id, this.Database.GlobalUserProtections.Local.First().Blacklist.First().DiscordID);
+                Assert.Equal((long)_blacklistedUser.Id, this.Database.GlobalUserProtections.First().Blacklist.First().DiscordID);
             }
 
             [Fact]

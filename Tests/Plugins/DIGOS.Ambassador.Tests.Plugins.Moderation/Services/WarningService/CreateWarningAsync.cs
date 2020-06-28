@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.WarningService
             {
                 await this.Warnings.CreateWarningAsync(_author, _guildUser, "Dummy thicc");
 
-                Assert.NotEmpty(this.Database.UserWarnings.Local);
+                Assert.NotEmpty(this.Database.UserWarnings);
             }
 
             [Fact]

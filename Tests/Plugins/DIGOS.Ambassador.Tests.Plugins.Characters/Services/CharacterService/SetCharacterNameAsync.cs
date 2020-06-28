@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 await this.Characters.SetCharacterNameAsync(_character, validName);
 
-                var character = this.Database.Characters.Local.First();
+                var character = this.Database.Characters.First();
                 Assert.Equal(validName, character.Name);
             }
         }

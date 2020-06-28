@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             {
                 await this.Users.AddUserAsync(_discordUser);
 
-                var user = this.Database.Users.Local.FirstOrDefault();
+                var user = this.Database.Users.FirstOrDefault();
 
                 Assert.NotNull(user);
                 Assert.Equal((long)_discordUser.Id, user.DiscordID);

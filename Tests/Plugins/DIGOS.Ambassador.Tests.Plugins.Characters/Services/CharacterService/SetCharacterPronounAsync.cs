@@ -98,7 +98,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 const string newPronounFamily = "Ze and hir";
                 await this.Characters.SetCharacterPronounsAsync(_character, newPronounFamily);
 
-                var character = this.Database.Characters.Local.First();
+                var character = this.Database.Characters.First();
                 Assert.Equal(newPronounFamily, character.PronounProviderFamily);
             }
         }

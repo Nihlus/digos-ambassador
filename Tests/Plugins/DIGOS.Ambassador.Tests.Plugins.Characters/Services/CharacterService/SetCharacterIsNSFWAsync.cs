@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 const bool newIsNSFW = true;
                 await this.Characters.SetCharacterIsNSFWAsync(_character, newIsNSFW);
 
-                var character = this.Database.Characters.Local.First();
+                var character = this.Database.Characters.First();
                 Assert.Equal(newIsNSFW, character.IsNSFW);
             }
         }

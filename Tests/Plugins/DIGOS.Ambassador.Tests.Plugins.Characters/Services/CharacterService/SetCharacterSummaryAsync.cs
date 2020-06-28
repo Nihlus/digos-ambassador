@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 const string newSummary = "An uncool person";
                 await this.Characters.SetCharacterSummaryAsync(_character, newSummary);
 
-                var character = this.Database.Characters.Local.First();
+                var character = this.Database.Characters.First();
                 Assert.Equal(newSummary, character.Summary);
             }
         }

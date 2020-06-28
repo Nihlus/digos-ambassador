@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Services.NoteService
             {
                 await this.Notes.CreateNoteAsync(_author, _guildUser, "Dummy thicc");
 
-                Assert.NotEmpty(this.Database.UserNotes.Local);
+                Assert.NotEmpty(this.Database.UserNotes);
             }
         }
     }

@@ -68,7 +68,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 
                 await this.Privacy.RevokeUserConsentAsync(_discordUser);
 
-                var consent = this.Database.UserConsents.Local.First();
+                var consent = this.Database.UserConsents.First();
 
                 Assert.False(consent.HasConsented);
             }

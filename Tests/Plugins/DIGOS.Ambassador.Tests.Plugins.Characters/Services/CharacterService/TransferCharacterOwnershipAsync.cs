@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 await this.Characters.TransferCharacterOwnershipAsync(_newOwner, this.DefaultServer, _character);
 
-                var character = this.Database.Characters.Local.First();
+                var character = this.Database.Characters.First();
                 Assert.Equal(_newOwner, character.Owner);
             }
         }
