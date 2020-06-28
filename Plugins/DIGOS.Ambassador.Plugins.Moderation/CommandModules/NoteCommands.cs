@@ -144,8 +144,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var note = addNote.Entity;
             await _feedback.SendConfirmationAsync(this.Context, $"Note added (ID {note.ID}).");
             await _logging.NotifyUserNoteAddedAsync(note);
-
-            _notes.SaveChanges();
         }
 
         /// <summary>
@@ -178,8 +176,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
             await _logging.NotifyUserNoteRemovedAsync(note, rescinder);
-
-            _notes.SaveChanges();
         }
     }
 }

@@ -26,7 +26,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using Discord;
 using JetBrains.Annotations;
@@ -42,7 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
     /// Encapsulates business logic for permissions.
     /// </summary>
     [PublicAPI]
-    public sealed class PermissionService : AbstractTransientStateService
+    public sealed class PermissionService
     {
         private readonly PermissionsDatabaseContext _database;
 
@@ -50,9 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         /// Initializes a new instance of the <see cref="PermissionService"/> class.
         /// </summary>
         /// <param name="database">The database.</param>
-        /// <param name="log">The logging instance.</param>
-        public PermissionService(PermissionsDatabaseContext database, ILogger<AbstractTransientStateService> log)
-            : base(log)
+        public PermissionService(PermissionsDatabaseContext database)
         {
             _database = database;
         }
@@ -570,18 +567,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             newPermission.IsGranted = permission.IsGrantedByDefaultTo(target);
 
             return newPermission;
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

@@ -23,7 +23,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
@@ -38,7 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
     /// <summary>
     /// Contains business logic for linking Discord roles to characters.
     /// </summary>
-    public class CharacterRoleService : AbstractTransientStateService
+    public class CharacterRoleService
     {
         private readonly CharactersDatabaseContext _database;
         private readonly UserService _users;
@@ -56,7 +55,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="characters">The character service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="client">The discord client.</param>
-        /// <param name="log">The logging instance.</param>
         public CharacterRoleService
         (
             CharactersDatabaseContext database,
@@ -64,10 +62,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             DiscordService discord,
             CharacterService characters,
             UserService users,
-            IDiscordClient client,
-            ILogger<AbstractTransientStateService> log
+            IDiscordClient client
         )
-            : base(log, servers, characters, users)
         {
             _database = database;
             _servers = servers;

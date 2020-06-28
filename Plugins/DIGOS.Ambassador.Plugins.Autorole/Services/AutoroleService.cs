@@ -26,7 +26,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -44,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
     /// Handles business logic for autoroles.
     /// </summary>
     [PublicAPI]
-    public sealed class AutoroleService : AbstractTransientStateService
+    public sealed class AutoroleService
     {
         private readonly AutoroleDatabaseContext _database;
         private readonly ServerService _servers;
@@ -58,16 +57,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="servers">The server service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="serviceProvider">The service provider.</param>
-        /// <param name="log">The logging instance.</param>
         public AutoroleService
         (
             AutoroleDatabaseContext database,
             ServerService servers,
             UserService users,
-            IServiceProvider serviceProvider,
-            ILogger<AbstractTransientStateService> log
+            IServiceProvider serviceProvider
         )
-            : base(log, servers, users)
         {
             _database = database;
             _servers = servers;
@@ -643,18 +639,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                     .Where(ac => !ac.IsConfirmed)
                     .Select(ac => ac.User)
             );
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

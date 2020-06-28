@@ -283,7 +283,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 }
             }
 
-            userStatistics.SaveChanges();
             return OperationResult.FromSuccess();
         }
 

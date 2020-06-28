@@ -128,9 +128,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         {
             await this.Transformations.UpdateTransformationDatabaseAsync();
 
-            // One of the few times we actually need to to this
-            await this.Database.SaveChangesAsync();
-
             await InitializeTestAsync();
         }
 
@@ -144,10 +141,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
         }
 
         /// <inheritdoc />
-        public virtual async Task DisposeAsync()
+        public Task DisposeAsync()
         {
-            this.Transformations.SaveChanges();
-            await this.Transformations.DisposeAsync();
+            return Task.CompletedTask;
         }
     }
 }

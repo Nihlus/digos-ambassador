@@ -26,7 +26,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -45,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
     /// Handles privacy-related logic.
     /// </summary>
     [PublicAPI]
-    public sealed class PrivacyService : AbstractTransientStateService
+    public sealed class PrivacyService
     {
         private readonly CoreDatabaseContext _database;
 
@@ -59,15 +58,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="database">The core database.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="content">The content service.</param>
-        /// <param name="log">The logging instance.</param>
         public PrivacyService
         (
             CoreDatabaseContext database,
             UserFeedbackService feedback,
-            ContentService content,
-            ILogger<AbstractTransientStateService> log
+            ContentService content
         )
-            : base(log)
         {
             _database = database;
             _feedback = feedback;
@@ -219,18 +215,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             userConsent.HasConsented = false;
 
             return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

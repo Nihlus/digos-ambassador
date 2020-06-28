@@ -340,7 +340,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 await _feedback.SendEmbedAsync(notificationChannel, embed.Build());
 
                 autoroleConfirmation.HasNotificationBeenSent = true;
-                autoroles.SaveChanges();
             }
             catch (HttpException hex) when (hex.WasCausedByMissingPermission())
             {

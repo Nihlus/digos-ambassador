@@ -26,7 +26,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Kinks.Extensions;
@@ -45,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
     /// Service class for user kinks.
     /// </summary>
     [PublicAPI]
-    public sealed class KinkService : AbstractTransientStateService
+    public sealed class KinkService
     {
         private readonly KinksDatabaseContext _database;
 
@@ -59,15 +58,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
         /// <param name="feedback">The feedback service.</param>
         /// <param name="users">The user service.</param>
         /// <param name="database">The database.</param>
-        /// <param name="log">The logging instance.</param>
         public KinkService
         (
             UserFeedbackService feedback,
             UserService users,
-            KinksDatabaseContext database,
-            ILogger<AbstractTransientStateService> log
+            KinksDatabaseContext database
         )
-            : base(log, users)
         {
             _feedback = feedback;
             _users = users;
@@ -580,18 +576,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             }
 
             return alteredKinks;
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

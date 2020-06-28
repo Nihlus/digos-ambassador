@@ -29,7 +29,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Dossiers.Extensions;
 using DIGOS.Ambassador.Plugins.Dossiers.Model;
 using DIGOS.Ambassador.Plugins.Dossiers.Signatures;
@@ -47,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
     /// Handles dossier management.
     /// </summary>
     [PublicAPI]
-    public sealed class DossierService : AbstractTransientStateService
+    public sealed class DossierService
     {
         [ProvidesContext]
         private readonly DossiersDatabaseContext _database;
@@ -64,14 +63,11 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
         /// </summary>
         /// <param name="content">The content service.</param>
         /// <param name="database">The dossier database context.</param>
-        /// <param name="log">The logging instance.</param>
         public DossierService
         (
             ContentService content,
-            DossiersDatabaseContext database,
-            ILogger<AbstractTransientStateService> log
+            DossiersDatabaseContext database
         )
-            : base(log)
         {
             _content = content;
             _database = database;
@@ -389,18 +385,6 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.Services
             }
 
             return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

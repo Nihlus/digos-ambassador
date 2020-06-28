@@ -24,7 +24,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord;
@@ -39,7 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// Business logic for server-specific roleplay settings.
     /// </summary>
     [PublicAPI]
-    public class RoleplayServerSettingsService : AbstractTransientStateService
+    public class RoleplayServerSettingsService
     {
         private readonly RoleplayingDatabaseContext _database;
 
@@ -47,13 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// Initializes a new instance of the <see cref="RoleplayServerSettingsService"/> class.
         /// </summary>
         /// <param name="database">The database context.</param>
-        /// <param name="log">The logging instance.</param>
-        public RoleplayServerSettingsService
-        (
-            RoleplayingDatabaseContext database,
-            ILogger<AbstractTransientStateService> log
-        )
-            : base(log)
+        public RoleplayServerSettingsService(RoleplayingDatabaseContext database)
         {
             _database = database;
         }
@@ -194,18 +187,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             settings.DedicatedRoleplayChannelsCategory = categoryId;
 
             return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

@@ -28,7 +28,6 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Model.Data;
@@ -46,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
     /// <summary>
     /// Acts as an interface for accessing and modifying user characters.
     /// </summary>
-    public sealed class CharacterService : AbstractTransientStateService
+    public sealed class CharacterService
     {
         private readonly CharactersDatabaseContext _database;
         private readonly OwnedEntityService _ownedEntities;
@@ -60,16 +59,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="content">The content service.</param>
         /// <param name="database">The core database.</param>
         /// <param name="pronouns">The pronoun service.</param>
-        /// <param name="log">The logging instance.</param>
         public CharacterService
         (
             OwnedEntityService entityService,
             ContentService content,
             CharactersDatabaseContext database,
-            PronounService pronouns,
-            ILogger<AbstractTransientStateService> log
+            PronounService pronouns
         )
-            : base(log)
         {
             _ownedEntities = entityService;
             _content = content;
@@ -843,18 +839,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             character.Images.Remove(image);
 
             return DeleteEntityResult.FromSuccess();
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

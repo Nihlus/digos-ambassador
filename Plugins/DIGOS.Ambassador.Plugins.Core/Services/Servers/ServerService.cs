@@ -26,7 +26,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using Discord;
@@ -41,7 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
     /// Handles modification of server settings.
     /// </summary>
     [PublicAPI]
-    public sealed class ServerService : AbstractTransientStateService
+    public sealed class ServerService
     {
         private readonly CoreDatabaseContext _database;
 
@@ -49,9 +48,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// Initializes a new instance of the <see cref="ServerService"/> class.
         /// </summary>
         /// <param name="database">The core database.</param>
-        /// <param name="log">The logging instance.</param>
-        public ServerService(CoreDatabaseContext database, ILogger<AbstractTransientStateService> log)
-            : base(log)
+        public ServerService(CoreDatabaseContext database)
         {
             _database = database;
         }
@@ -296,18 +293,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             server.SendJoinMessage = sendJoinMessage;
 
             return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

@@ -95,7 +95,6 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         {
             await _privacy.GrantUserConsentAsync(this.Context.User);
             await _feedback.SendConfirmationAsync(this.Context, "Thank you! Enjoy using the bot :smiley:");
-            _privacy.SaveChanges();
         }
 
         /// <summary>
@@ -116,8 +115,6 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 "delete your existing data, or get a copy of it, please contact the privacy contact individual (use " +
                 "!privacy contact to get their contact information)."
             );
-
-            _privacy.SaveChanges();
         }
 
         /// <summary>

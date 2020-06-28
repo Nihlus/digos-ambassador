@@ -91,10 +91,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Roleplaying
         }
 
         /// <inheritdoc />
-        public async Task DisposeAsync()
+        public Task DisposeAsync()
         {
-            this.Roleplays.SaveChanges();
-            await this.Roleplays.DisposeAsync();
+            return Task.CompletedTask;
         }
     }
 }

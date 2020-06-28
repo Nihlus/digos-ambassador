@@ -27,7 +27,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -53,7 +52,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
     /// Handles transformations of users and their characters.
     /// </summary>
     [PublicAPI]
-    public sealed class TransformationService : AbstractTransientStateService
+    public sealed class TransformationService
     {
         private readonly TransformationsDatabaseContext _database;
         private readonly UserService _users;
@@ -70,17 +69,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
         /// <param name="servers">The server service.</param>
         /// <param name="database">The database.</param>
         /// <param name="descriptionBuilder">The description builder.</param>
-        /// <param name="log">The logging instance.</param>
         public TransformationService
         (
             ContentService content,
             UserService users,
             ServerService servers,
             TransformationsDatabaseContext database,
-            TransformationDescriptionBuilder descriptionBuilder,
-            ILogger<AbstractTransientStateService> log
+            TransformationDescriptionBuilder descriptionBuilder
         )
-            : base(log, users, servers)
         {
             _content = content;
             _users = users;
@@ -1204,18 +1200,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services
             protection.DefaultOptIn = shouldOptIn;
 
             return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

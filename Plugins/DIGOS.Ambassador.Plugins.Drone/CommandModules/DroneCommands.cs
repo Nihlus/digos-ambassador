@@ -88,7 +88,6 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, _content.GetRandomConfirmationMessage());
-            _drone.SaveChanges();
         }
     }
 }

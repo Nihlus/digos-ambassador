@@ -24,7 +24,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
@@ -40,7 +39,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     /// Acts as an interface for accessing and modifying notes.
     /// </summary>
     [PublicAPI]
-    public sealed class NoteService : AbstractTransientStateService
+    public sealed class NoteService
     {
         private readonly ModerationDatabaseContext _database;
         private readonly ServerService _servers;
@@ -52,15 +51,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="database">The database context.</param>
         /// <param name="servers">The server service.</param>
         /// <param name="users">The user service.</param>
-        /// <param name="log">The logging instance.</param>
         public NoteService
         (
             ModerationDatabaseContext database,
             ServerService servers,
-            UserService users,
-            ILogger<AbstractTransientStateService> log
+            UserService users
         )
-            : base(log, servers, users)
         {
             _database = database;
             _servers = servers;
@@ -202,18 +198,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             _database.UserNotes.Remove(note);
             return DeleteEntityResult.FromSuccess();
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
@@ -45,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
     /// <summary>
     /// Handles Discord-facing business logic.
     /// </summary>
-    public class CharacterDiscordService : AbstractTransientStateService
+    public class CharacterDiscordService
     {
         private readonly CharacterService _characters;
         private readonly CharacterRoleService _characterRoles;
@@ -65,7 +64,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="ownedEntities">The owned entity service.</param>
         /// <param name="discord">The Discord service.</param>
         /// <param name="characterRoles">The character role service.</param>
-        /// <param name="log">The logging instance.</param>
         public CharacterDiscordService
         (
             CharacterService characters,
@@ -74,10 +72,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CommandService commands,
             OwnedEntityService ownedEntities,
             DiscordService discord,
-            CharacterRoleService characterRoles,
-            ILogger<AbstractTransientStateService> log
+            CharacterRoleService characterRoles
         )
-            : base(log, characters, characterRoles, users, servers)
         {
             _characters = characters;
             _users = users;

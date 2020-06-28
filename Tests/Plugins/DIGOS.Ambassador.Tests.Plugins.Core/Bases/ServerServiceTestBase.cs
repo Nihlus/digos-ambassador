@@ -78,10 +78,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         }
 
         /// <inheritdoc />
-        public async Task DisposeAsync()
+        public Task DisposeAsync()
         {
-            this.Servers.SaveChanges();
-            await this.Servers.DisposeAsync();
+            return Task.CompletedTask;
         }
     }
 }

@@ -100,7 +100,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Character name set.");
-                _characters.SaveChanges();
             }
 
             /// <summary>
@@ -155,7 +154,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Character avatar set.");
-                _characters.SaveChanges();
             }
 
             /// <summary>
@@ -190,7 +188,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Character nickname set.");
-                _characters.SaveChanges();
             }
 
             /// <summary>
@@ -218,7 +215,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Character summary set.");
-                _characters.SaveChanges();
             }
 
             /// <summary>
@@ -277,7 +273,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Character description set.");
-                _characters.SaveChanges();
             }
 
             /// <summary>
@@ -305,7 +300,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, $"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
-                _characters.SaveChanges();
             }
 
             /// <summary>
@@ -334,7 +328,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Preferred pronoun set.");
-                _characters.SaveChanges();
             }
 
             /// <summary>
@@ -393,7 +386,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Character role set.");
-                _characterRoles.SaveChanges();
             }
 
             /// <summary>
@@ -437,7 +429,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Default character set.");
-                _characters.SaveChanges();
             }
         }
     }

@@ -26,7 +26,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Discord;
@@ -41,7 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
     /// Handles user-related logic.
     /// </summary>
     [PublicAPI]
-    public sealed class UserService : AbstractTransientStateService
+    public sealed class UserService
     {
         private readonly CoreDatabaseContext _database;
 
@@ -49,9 +48,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// Initializes a new instance of the <see cref="UserService"/> class.
         /// </summary>
         /// <param name="database">The core database.</param>
-        /// <param name="log">The logging instance.</param>
-        public UserService(CoreDatabaseContext database, ILogger<AbstractTransientStateService> log)
-            : base(log)
+        public UserService(CoreDatabaseContext database)
         {
             _database = database;
         }
@@ -193,18 +190,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             user.Bio = bio;
 
             return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

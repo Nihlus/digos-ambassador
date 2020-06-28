@@ -86,10 +86,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Moderation.Bases
         }
 
         /// <inheritdoc />
-        public async Task DisposeAsync()
+        public Task DisposeAsync()
         {
-            this.Moderation.SaveChanges();
-            await this.Moderation.DisposeAsync();
+            return Task.CompletedTask;
         }
     }
 }

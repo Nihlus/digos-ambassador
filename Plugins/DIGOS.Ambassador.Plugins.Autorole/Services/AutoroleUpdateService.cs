@@ -23,7 +23,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Results;
@@ -38,7 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
     /// <summary>
     /// Handles business logic for updating of autoroles.
     /// </summary>
-    public class AutoroleUpdateService : AbstractTransientStateService
+    public class AutoroleUpdateService
     {
         private readonly DiscordSocketClient _discordClient;
         private readonly AutoroleService _autoroles;
@@ -48,14 +47,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// </summary>
         /// <param name="discordClient">The Discord client.</param>
         /// <param name="autoroles">The autorole service.</param>
-        /// <param name="log">The logging instance.</param>
         public AutoroleUpdateService
         (
             DiscordSocketClient discordClient,
-            AutoroleService autoroles,
-            ILogger<AbstractTransientStateService> log
+            AutoroleService autoroles
         )
-            : base(log, autoroles)
         {
             _discordClient = discordClient;
             _autoroles = autoroles;

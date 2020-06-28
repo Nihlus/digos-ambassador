@@ -24,7 +24,6 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
@@ -39,7 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// Business logic for managing dedicated roleplay channels.
     /// </summary>
     [PublicAPI]
-    public class DedicatedChannelService : AbstractTransientStateService
+    public class DedicatedChannelService
     {
         private readonly RoleplayingDatabaseContext _database;
         private readonly IDiscordClient _client;
@@ -53,16 +52,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="servers">The server service.</param>
         /// <param name="serverSettings">The server settings service.</param>
         /// <param name="database">The database context.</param>
-        /// <param name="log">The logging instance.</param>
         public DedicatedChannelService
         (
             IDiscordClient client,
             ServerService servers,
             RoleplayServerSettingsService serverSettings,
-            RoleplayingDatabaseContext database,
-            ILogger<AbstractTransientStateService> log
+            RoleplayingDatabaseContext database
         )
-            : base(log, servers, serverSettings)
         {
             _client = client;
             _servers = servers;
@@ -719,18 +715,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

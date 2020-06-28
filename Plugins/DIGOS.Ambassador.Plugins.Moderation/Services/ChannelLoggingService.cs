@@ -21,7 +21,6 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
@@ -36,7 +35,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     /// <summary>
     /// Assists in logging various events to the configured log channels.
     /// </summary>
-    public sealed class ChannelLoggingService : AbstractTransientStateService
+    public sealed class ChannelLoggingService
     {
         private readonly ModerationService _moderation;
         private readonly DiscordSocketClient _client;
@@ -51,16 +50,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="client">The Discord client in use.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="quotes">The quote service.</param>
-        /// <param name="log">The logging instance.</param>
         public ChannelLoggingService
         (
             ModerationService moderation,
             DiscordSocketClient client,
             UserFeedbackService feedback,
-            QuoteService quotes,
-            ILogger<AbstractTransientStateService> log
+            QuoteService quotes
         )
-            : base(log, moderation)
         {
             _moderation = moderation;
             _client = client;

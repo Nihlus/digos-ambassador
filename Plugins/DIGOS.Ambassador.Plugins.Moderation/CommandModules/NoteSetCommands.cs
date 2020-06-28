@@ -89,7 +89,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, "Note contents updated.");
-                _notes.SaveChanges();
             }
         }
     }

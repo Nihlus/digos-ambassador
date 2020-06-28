@@ -77,10 +77,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Permissions
         }
 
         /// <inheritdoc />
-        public async Task DisposeAsync()
+        public Task DisposeAsync()
         {
-            this.Permissions.SaveChanges();
-            await this.Permissions.DisposeAsync();
+            return Task.CompletedTask;
         }
     }
 }

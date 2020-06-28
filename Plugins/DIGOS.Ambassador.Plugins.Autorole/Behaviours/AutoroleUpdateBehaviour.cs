@@ -131,9 +131,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 }
             }
 
-            autoroles.SaveChanges();
-            autoroleUpdates.SaveChanges();
-
             await Task.Delay(TimeSpan.FromSeconds(1), ct);
 
             return OperationResult.FromSuccess();

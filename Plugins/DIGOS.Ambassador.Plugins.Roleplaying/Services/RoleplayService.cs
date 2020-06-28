@@ -26,7 +26,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -41,7 +40,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// <summary>
     /// Acts as an interface for accessing, enabling, and disabling ongoing roleplays.
     /// </summary>
-    public sealed class RoleplayService : AbstractTransientStateService
+    public sealed class RoleplayService
     {
         private readonly RoleplayingDatabaseContext _database;
         private readonly OwnedEntityService _ownedEntities;
@@ -51,14 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="entityService">The application's owned entity service.</param>
         /// <param name="database">The database.</param>
-        /// <param name="log">The logging instance.</param>
-        public RoleplayService
-        (
-            OwnedEntityService entityService,
-            RoleplayingDatabaseContext database,
-            ILogger<AbstractTransientStateService> log
-        )
-            : base(log)
+        public RoleplayService(OwnedEntityService entityService, RoleplayingDatabaseContext database)
         {
             _ownedEntities = entityService;
             _database = database;
@@ -612,18 +604,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             roleplay.ActiveChannelID = null;
 
             return ModifyEntityResult.FromSuccess();
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }

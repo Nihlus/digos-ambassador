@@ -92,7 +92,6 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
 
             var user = getUserResult.Entity;
             await ShowUserInfoAsync(discordUser, user);
-            _users.SaveChanges();
         }
 
         /// <summary>
@@ -231,7 +230,6 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, $"Bio of {discordUser.Mention} updated.");
-                _users.SaveChanges();
             }
 
             /// <summary>
@@ -275,7 +273,6 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 }
 
                 await _feedback.SendConfirmationAsync(this.Context, $"Timezone of {discordUser.Mention} updated.");
-                _users.SaveChanges();
             }
         }
     }

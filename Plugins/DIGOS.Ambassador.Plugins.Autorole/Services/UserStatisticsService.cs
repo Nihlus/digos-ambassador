@@ -24,7 +24,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Core.Services.TransientState;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
@@ -39,7 +38,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
     /// <summary>
     /// Business logic class for user statistics.
     /// </summary>
-    public sealed class UserStatisticsService : AbstractTransientStateService
+    public sealed class UserStatisticsService
     {
         private readonly AutoroleDatabaseContext _database;
         private readonly UserService _users;
@@ -51,15 +50,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="database">The database.</param>
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
-        /// <param name="log">The logging instance.</param>
         public UserStatisticsService
         (
             AutoroleDatabaseContext database,
             UserService users,
-            ServerService servers,
-            ILogger<AbstractTransientStateService> log
+            ServerService servers
         )
-            : base(log, users, servers)
         {
             _database = database;
             _users = users;
@@ -179,18 +175,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             serverStats.ChannelStatistics.Add(newStats);
 
             return newStats;
-        }
-
-        /// <inheritdoc/>
-        protected override void OnSavingChanges()
-        {
-            _database.SaveChanges();
-        }
-
-        /// <inheritdoc/>
-        protected override async ValueTask OnSavingChangesAsync(CancellationToken ct = default)
-        {
-            await _database.SaveChangesAsync(ct);
         }
     }
 }
