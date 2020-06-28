@@ -60,7 +60,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         }
 
         /// <inheritdoc/>
-        protected override async Task MessageUpdated
+        protected override async Task<OperationResult> MessageUpdatedAsync
         (
             Cacheable<IMessage, ulong> oldMessage,
             SocketMessage newMessage,
@@ -69,34 +69,34 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         {
             if (newMessage.Author.IsBot || newMessage.Author.IsWebhook)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             if (!(newMessage.Author is IGuildUser guildUser))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             using var eventScope = this.Services.CreateScope();
             var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
-            await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
+            return await UpdateLastActivityTimestampForUserAsync(userStatistics, guildUser);
         }
 
         /// <inheritdoc/>
-        protected override async Task UserJoined(SocketGuildUser user)
+        protected override async Task<OperationResult> UserJoinedAsync(SocketGuildUser user)
         {
             if (user.IsBot || user.IsWebhook)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             using var eventScope = this.Services.CreateScope();
             var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
-            await UpdateLastActivityTimestampForUser(userStatistics, user);
+            return await UpdateLastActivityTimestampForUserAsync(userStatistics, user);
         }
 
         /// <inheritdoc/>
-        protected override async Task ReactionAdded
+        protected override async Task<OperationResult> ReactionAddedAsync
         (
             Cacheable<IUserMessage, ulong> message,
             ISocketMessageChannel channel,
@@ -106,21 +106,21 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             var reactingUser = await channel.GetUserAsync(reaction.UserId);
             if (reactingUser.IsBot || reactingUser.IsWebhook)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             if (!(reactingUser is IGuildUser guildUser))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             using var eventScope = this.Services.CreateScope();
             var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
-            await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
+            return await UpdateLastActivityTimestampForUserAsync(userStatistics, guildUser);
         }
 
         /// <inheritdoc/>
-        protected override async Task UserVoiceStateUpdated
+        protected override async Task<OperationResult> UserVoiceStateUpdatedAsync
         (
             SocketUser user,
             SocketVoiceState oldState,
@@ -129,48 +129,52 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         {
             if (user.IsBot || user.IsWebhook)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             if (!(user is IGuildUser guildUser))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             using var eventScope = this.Services.CreateScope();
             var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
-            await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
+            return await UpdateLastActivityTimestampForUserAsync(userStatistics, guildUser);
         }
 
         /// <inheritdoc/>
-        protected override async Task GuildMemberUpdated(SocketGuildUser oldMember, SocketGuildUser newMember)
+        protected override async Task<OperationResult> GuildMemberUpdatedAsync
+        (
+            SocketGuildUser oldMember,
+            SocketGuildUser newMember
+        )
         {
             if (newMember.IsBot || newMember.IsWebhook)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             using var eventScope = this.Services.CreateScope();
             var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
-            await UpdateLastActivityTimestampForUser(userStatistics, newMember);
+            return await UpdateLastActivityTimestampForUserAsync(userStatistics, newMember);
         }
 
         /// <inheritdoc/>
-        protected override async Task MessageReceived(SocketMessage message)
+        protected override async Task<OperationResult> MessageReceivedAsync(SocketMessage message)
         {
             if (message.Author.IsBot || message.Author.IsWebhook)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             if (!(message.Author is SocketGuildUser guildUser))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             if (!(message.Channel is SocketTextChannel textChannel))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             // First, let's get some valid service instances
@@ -195,11 +199,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 !wantsToUpdateLastActivityTime
             )
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
-            await UpdateLastActivityTimestampForUser(userStatistics, guildUser);
+            var updateResult = await UpdateLastActivityTimestampForUserAsync(userStatistics, guildUser);
+            if (!updateResult.IsSuccess)
+            {
+                return OperationResult.FromError(updateResult);
+            }
 
             if (wantsToUpdateChannelMessageCounts)
             {
@@ -212,7 +220,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 if (!getChannelStats.IsSuccess)
                 {
                     this.Log.LogError(getChannelStats.Exception, getChannelStats.ErrorReason);
-                    return;
+                    return OperationResult.FromError(getChannelStats);
                 }
 
                 var channelStats = getChannelStats.Entity;
@@ -230,6 +238,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                     else if (!(countResult.Exception is null))
                     {
                         this.Log.LogError(countResult.Exception, "Message counting failed.");
+                        return OperationResult.FromError(countResult);
                     }
                 }
             }
@@ -240,7 +249,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 if (!getGlobalStats.IsSuccess)
                 {
                     this.Log.LogError(getGlobalStats.Exception, getGlobalStats.ErrorReason);
-                    return;
+                    return OperationResult.FromError(getGlobalStats);
                 }
 
                 var globalStats = getGlobalStats.Entity;
@@ -261,6 +270,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                             if (!(countResult.Exception is null))
                             {
                                 this.Log.LogError(countResult.Exception, "Message counting failed.");
+                                return OperationResult.FromError(countResult);
                             }
 
                             continue;
@@ -274,6 +284,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             }
 
             userStatistics.SaveChanges();
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -282,7 +293,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         /// <param name="userStatistics">The statistics service.</param>
         /// <param name="guildUser">The guild user.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task UpdateLastActivityTimestampForUser
+        private async Task<OperationResult> UpdateLastActivityTimestampForUserAsync
         (
             UserStatisticsService userStatistics,
             IGuildUser guildUser
@@ -292,11 +303,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             if (!getGlobalStats.IsSuccess)
             {
                 this.Log.LogError(getGlobalStats.Exception, getGlobalStats.ErrorReason);
-                return;
+                return OperationResult.FromError(getGlobalStats);
             }
 
             var globalStats = getGlobalStats.Entity;
             globalStats.LastActivityTime = DateTimeOffset.UtcNow;
+
+            return OperationResult.FromSuccess();
         }
 
         private async Task<RetrieveEntityResult<Task<long>>> CountUserMessagesAsync(IMessageChannel channel, IUser user)

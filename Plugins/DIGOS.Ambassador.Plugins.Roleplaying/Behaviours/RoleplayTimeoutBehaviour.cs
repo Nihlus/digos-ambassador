@@ -36,6 +36,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 {
@@ -70,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         }
 
         /// <inheritdoc/>
-        protected override async Task OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
+        protected override async Task<OperationResult> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
             var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
 
@@ -78,7 +79,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             {
                 if (ct.IsCancellationRequested)
                 {
-                    return;
+                    return OperationResult.FromError("Operation was cancelled.");
                 }
 
                 var getRoleplays = await roleplayService.GetRoleplaysAsync(guild);
@@ -97,22 +98,27 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 {
                     if (ct.IsCancellationRequested)
                     {
-                        return;
+                        return OperationResult.FromError("Operation was cancelled.");
                     }
 
                     var stopRoleplay = await roleplayService.StopRoleplayAsync(roleplay);
                     if (!stopRoleplay.IsSuccess)
                     {
-                        this.Log.LogWarning(stopRoleplay.Exception, stopRoleplay.ErrorReason);
+                        return OperationResult.FromError(stopRoleplay);
                     }
 
-                    await NotifyOwner(roleplay);
+                    var notifyResult = await NotifyOwnerAsync(roleplay);
+                    if (!notifyResult.IsSuccess)
+                    {
+                        return OperationResult.FromError(notifyResult);
+                    }
                 }
             }
 
             roleplayService.SaveChanges();
 
             await Task.Delay(TimeSpan.FromSeconds(5), ct);
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -120,12 +126,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task NotifyOwner(Roleplay roleplay)
+        private async Task<OperationResult> NotifyOwnerAsync(Roleplay roleplay)
         {
             var owner = this.Client.GetUser((ulong)roleplay.Owner.DiscordID);
             if (owner is null)
             {
-                return;
+                return OperationResult.FromError("Failed to get the owner.");
             }
 
             var notification = this.Feedback.CreateEmbedBase();
@@ -147,6 +153,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             {
                 // Nom nom nom
             }
+
+            return OperationResult.FromSuccess();
         }
     }
 }

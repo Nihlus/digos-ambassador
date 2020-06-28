@@ -37,6 +37,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 {
@@ -69,7 +70,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         }
 
         /// <inheritdoc />
-        protected override async Task OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
+        protected override async Task<OperationResult> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
             var autoroles = tickServices.GetRequiredService<AutoroleService>();
             var autoroleUpdates = tickServices.GetRequiredService<AutoroleUpdateService>();
@@ -78,7 +79,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             {
                 if (ct.IsCancellationRequested)
                 {
-                    return;
+                    return OperationResult.FromError("Operation was cancelled.");
                 }
 
                 var guild = this.Client.GetGuild((ulong)autorole.Server.DiscordID);
@@ -109,7 +110,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 {
                     if (ct.IsCancellationRequested)
                     {
-                        return;
+                        return OperationResult.FromError("Operation was cancelled.");
                     }
 
                     var updateResult = await autoroleUpdates.UpdateAutoroleForUserAsync(autorole, user);
@@ -134,6 +135,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             autoroleUpdates.SaveChanges();
 
             await Task.Delay(TimeSpan.FromSeconds(1), ct);
+
+            return OperationResult.FromSuccess();
         }
 
         private async Task NotifyUserNeedsAffirmation

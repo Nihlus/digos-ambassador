@@ -116,25 +116,26 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         }
 
         /// <inheritdoc />
-        protected override async Task<IUserMessage> OnDisplayAsync(IMessageChannel channel)
+        protected override async Task<CreateEntityResult<IUserMessage>> OnDisplayAsync(IMessageChannel channel)
         {
             if (!(this.Message is null))
             {
-                throw new InvalidOperationException("The wizard is already active in a channel.");
+                return CreateEntityResult<IUserMessage>.FromError("The wizard is already active in a channel.");
             }
 
             _categories = (await _kinks.GetKinkCategoriesAsync()).ToList();
             _state = KinkWizardState.CategorySelection;
 
-            return await channel.SendMessageAsync(string.Empty, embed: _loadingEmbed);
+            var message = await channel.SendMessageAsync(string.Empty, embed: _loadingEmbed);
+            return CreateEntityResult<IUserMessage>.FromSuccess(message);
         }
 
         /// <inheritdoc />
-        protected override async Task OnUpdateAsync()
+        protected override async Task<OperationResult> OnUpdateAsync()
         {
             if (this.Message is null)
             {
-                return;
+                return OperationResult.FromError("The message hasn't been sent yet.");
             }
 
             await this.Message.ModifyAsync(m => m.Embed = _loadingEmbed);
@@ -165,57 +166,46 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             {
                 await userMessage.ModifyAsync(m => m.Embed = newEmbed);
             }
+
+            return OperationResult.FromSuccess();
         }
 
         /// <remarks>
         /// This override forwards to the added handler, letting removed reactions act the same as added reactions.
         /// </remarks>
         /// <inheritdoc/>
-        protected override Task OnInteractionRemovedAsync(SocketReaction reaction) =>
+        protected override Task<OperationResult> OnInteractionRemovedAsync(SocketReaction reaction) =>
             OnInteractionAddedAsync(reaction);
 
         /// <inheritdoc/>
-        protected override async Task OnInteractionAddedAsync(SocketReaction reaction)
+        protected override async Task<OperationResult> OnInteractionAddedAsync(SocketReaction reaction)
         {
             if (reaction.Emote.Equals(Exit))
             {
-                await this.Interactivity.DeleteInteractiveMessageAsync(this);
+                return await this.Interactivity.DeleteInteractiveMessageAsync(this);
             }
 
             if (reaction.Emote.Equals(Info))
             {
-                await DisplayHelpTextAsync();
-                return;
+                return await DisplayHelpTextAsync();
             }
 
-            switch (_state)
+            return _state switch
             {
-                case KinkWizardState.CategorySelection:
-                {
-                    await ConsumeCategoryInteractionAsync(reaction);
-                    return;
-                }
-                case KinkWizardState.KinkPreference:
-                {
-                    await ConsumePreferenceInteractionAsync(reaction);
-                    return;
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-            }
+                KinkWizardState.CategorySelection => await ConsumeCategoryInteractionAsync(reaction),
+                KinkWizardState.KinkPreference => await ConsumePreferenceInteractionAsync(reaction),
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
 
-        private async Task ConsumePreferenceInteractionAsync(SocketReaction reaction)
+        private async Task<OperationResult> ConsumePreferenceInteractionAsync(SocketReaction reaction)
         {
             var emote = reaction.Emote;
 
             if (emote.Equals(Back))
             {
                 _state = KinkWizardState.CategorySelection;
-                await UpdateAsync();
-                return;
+                return await UpdateAsync();
             }
 
             KinkPreference? preference = null;
@@ -244,31 +234,33 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
                 preference = KinkPreference.NoPreference;
             }
 
-            if (!(preference is null))
+            if (preference is null)
             {
-                await SetCurrentKinkPreference(preference.Value);
-
-                var getNextKinkResult = await _kinks.GetNextKinkByCurrentFListIDAsync(_currentFListKinkID);
-                if (!getNextKinkResult.IsSuccess)
-                {
-                    _currentFListKinkID = -1;
-                    _state = KinkWizardState.CategorySelection;
-                    await _feedback.SendConfirmationAndDeleteAsync(this.MessageContext, "All done in that category!");
-                }
-                else
-                {
-                    _currentFListKinkID = (int)getNextKinkResult.Entity.FListID;
-                }
-
-                await UpdateAsync();
+                return OperationResult.FromError("Unknown preference.");
             }
+
+            await SetCurrentKinkPreference(preference.Value);
+
+            var getNextKinkResult = await _kinks.GetNextKinkByCurrentFListIDAsync(_currentFListKinkID);
+            if (!getNextKinkResult.IsSuccess)
+            {
+                _currentFListKinkID = -1;
+                _state = KinkWizardState.CategorySelection;
+                await _feedback.SendConfirmationAndDeleteAsync(this.MessageContext, "All done in that category!");
+            }
+            else
+            {
+                _currentFListKinkID = (int)getNextKinkResult.Entity.FListID;
+            }
+
+            return await UpdateAsync();
         }
 
-        private async Task ConsumeCategoryInteractionAsync(SocketReaction reaction)
+        private async Task<OperationResult> ConsumeCategoryInteractionAsync(SocketReaction reaction)
         {
             if (this.Message is null || this.Channel is null)
             {
-                return;
+                return OperationResult.FromError("The message hasn't been sent yet.");
             }
 
             var emote = reaction.Emote;
@@ -277,7 +269,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             {
                 if (_currentCategoryOffset + 3 >= _categories.Count)
                 {
-                    return;
+                    return OperationResult.FromError("We're at the end of the pages.");
                 }
 
                 _currentCategoryOffset += 3;
@@ -287,7 +279,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
                 if (_currentCategoryOffset - 3 < 0)
                 {
                     _currentCategoryOffset = 0;
-                    return;
+                    return OperationResult.FromSuccess();
                 }
 
                 _currentCategoryOffset -= 3;
@@ -296,7 +288,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             {
                 if (_currentCategoryOffset == 0)
                 {
-                    return;
+                    return OperationResult.FromError("We're at the end of the pages.");
                 }
 
                 _currentCategoryOffset = 0;
@@ -315,7 +307,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
 
                 if (newOffset <= _currentCategoryOffset)
                 {
-                    return;
+                    return OperationResult.FromError("We're at the end of the pages.");
                 }
 
                 _currentCategoryOffset = newOffset;
@@ -333,7 +325,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
                         TimeSpan.FromSeconds(10)
                     );
 
-                    return;
+                    return OperationResult.FromSuccess();
                 }
 
                 await _feedback.SendConfirmationAndDeleteAsync
@@ -350,24 +342,28 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
                     TimeSpan.FromSeconds(45)
                 );
 
-                if (messageResult.IsSuccess)
+                if (!messageResult.IsSuccess)
                 {
-                    var tryStartCategoryResult = await OpenCategory(messageResult.Entity.Content);
-                    if (!tryStartCategoryResult.IsSuccess)
-                    {
-                        await _feedback.SendWarningAndDeleteAsync
-                        (
-                            this.MessageContext,
-                            tryStartCategoryResult.ErrorReason,
-                            TimeSpan.FromSeconds(10)
-                        );
-
-                        return;
-                    }
+                    return await UpdateAsync();
                 }
+
+                var tryStartCategoryResult = await OpenCategory(messageResult.Entity.Content);
+                if (tryStartCategoryResult.IsSuccess)
+                {
+                    return await UpdateAsync();
+                }
+
+                await _feedback.SendWarningAndDeleteAsync
+                (
+                    this.MessageContext,
+                    tryStartCategoryResult.ErrorReason,
+                    TimeSpan.FromSeconds(10)
+                );
+
+                return OperationResult.FromError(tryStartCategoryResult);
             }
 
-            await UpdateAsync();
+            return await UpdateAsync();
         }
 
         private async Task<ModifyEntityResult> OpenCategory(string categoryName)
@@ -403,11 +399,11 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
         }
 
         [SuppressMessage("Style", "SA1118", Justification = "Large text blocks.")]
-        private async Task DisplayHelpTextAsync()
+        private async Task<OperationResult> DisplayHelpTextAsync()
         {
             if (this.Message is null || this.Channel is null)
             {
-                return;
+                return OperationResult.FromError("The message hasn't been sent yet.");
             }
 
             var eb = new EmbedBuilder();
@@ -454,6 +450,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
             }
 
             await _feedback.SendEmbedAndDeleteAsync(this.Channel, eb.Build(), TimeSpan.FromSeconds(30));
+            return OperationResult.FromSuccess();
         }
 
         private async Task SetCurrentKinkPreference(KinkPreference preference)

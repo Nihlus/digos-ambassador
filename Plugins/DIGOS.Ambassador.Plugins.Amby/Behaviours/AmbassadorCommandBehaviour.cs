@@ -107,21 +107,13 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
         {
             switch (result.Error)
             {
+                case CommandError.UnknownCommand:
+                {
+                    break;
+                }
                 case CommandError.Exception:
                 {
                     await HandleInternalErrorAsync(context, result);
-                    break;
-                }
-            }
-        }
-
-        /// <inheritdoc />
-        protected override async Task AfterCommandAsync(SocketCommandContext context, int commandStart, IResult result)
-        {
-            switch (result.Error)
-            {
-                case CommandError.UnknownCommand:
-                {
                     break;
                 }
                 case CommandError.ObjectNotFound:

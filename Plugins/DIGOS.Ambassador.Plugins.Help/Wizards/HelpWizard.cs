@@ -216,17 +216,20 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
         }
 
         /// <inheritdoc/>
-        protected override async Task<IUserMessage> OnDisplayAsync(IMessageChannel channel)
+        protected override async Task<CreateEntityResult<IUserMessage>> OnDisplayAsync(IMessageChannel channel)
         {
-            return await channel.SendMessageAsync(string.Empty, embed: _loadingEmbed);
+            return CreateEntityResult<IUserMessage>.FromSuccess
+            (
+                await channel.SendMessageAsync(string.Empty, embed: _loadingEmbed)
+            );
         }
 
         /// <inheritdoc />
-        protected override async Task OnUpdateAsync()
+        protected override async Task<OperationResult> OnUpdateAsync()
         {
             if (this.Message is null)
             {
-                return;
+                return OperationResult.FromError("The message hasn't been sent yet.");
             }
 
             await this.Message.ModifyAsync(m => m.Embed = _loadingEmbed);
@@ -258,6 +261,8 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
             {
                 await userMessage.ModifyAsync(m => m.Embed = newEmbed);
             }
+
+            return OperationResult.FromSuccess();
         }
 
         /// <inheritdoc/>
@@ -325,74 +330,60 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
         /// This override forwards to the added handler, letting removed reactions act the same as added reactions.
         /// </remarks>
         /// <inheritdoc/>
-        protected override Task OnInteractionRemovedAsync(SocketReaction reaction) =>
+        protected override Task<OperationResult> OnInteractionRemovedAsync(SocketReaction reaction) =>
             OnInteractionAddedAsync(reaction);
 
         /// <inheritdoc/>
-        protected override async Task OnInteractionAddedAsync(SocketReaction reaction)
+        protected override async Task<OperationResult> OnInteractionAddedAsync(SocketReaction reaction)
         {
             if (reaction.Emote.Equals(Exit))
             {
-                await this.Interactivity.DeleteInteractiveMessageAsync(this);
+                return await this.Interactivity.DeleteInteractiveMessageAsync(this);
             }
 
             if (reaction.Emote.Equals(Info))
             {
-                await DisplayHelpTextAsync();
-                return;
+                return await DisplayHelpTextAsync();
             }
 
-            switch (_state)
+            return _state switch
             {
-                case HelpWizardState.ModuleListing:
-                {
-                    await ConsumeModuleListInteractionAsync(reaction);
-                    return;
-                }
-                case HelpWizardState.CommandListing:
-                {
-                    await ConsumeCommandListInteractionAsync(reaction);
-                    return;
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-            }
+                HelpWizardState.ModuleListing => await ConsumeModuleListInteractionAsync(reaction),
+                HelpWizardState.CommandListing => await ConsumeCommandListInteractionAsync(reaction),
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
 
-        private async Task ConsumeCommandListInteractionAsync(SocketReaction reaction)
+        private async Task<OperationResult> ConsumeCommandListInteractionAsync(SocketReaction reaction)
         {
             if (this.Message is null || this.Channel is null)
             {
-                return;
+                return OperationResult.FromError("The message hasn't been sent yet.");
             }
 
             var emote = reaction.Emote;
 
             if (!this.AcceptedEmotes.Contains(emote))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             if (emote.Equals(Back))
             {
                 _state = HelpWizardState.ModuleListing;
-                await UpdateAsync();
-
-                return;
+                return await UpdateAsync();
             }
 
             if (emote.Equals(Next))
             {
                 if (_currentModule is null)
                 {
-                    return;
+                    return OperationResult.FromError("There's no current module.");
                 }
 
                 if (_commandListOffset + 1 > _commandListPages[_currentModule].Count - 1)
                 {
-                    return;
+                    return OperationResult.FromError("We're at the end of the pages.");
                 }
 
                 _commandListOffset++;
@@ -401,7 +392,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
             {
                 if (_commandListOffset - 1 < 0)
                 {
-                    return;
+                    return OperationResult.FromError("We're at the end of the pages.");
                 }
 
                 _commandListOffset--;
@@ -414,7 +405,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
             {
                 if (_currentModule is null)
                 {
-                    return;
+                    return OperationResult.FromError("There's no current module.");
                 }
 
                 _commandListOffset = _commandListPages[_currentModule].Count - 1;
@@ -423,7 +414,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
             {
                 if (_currentModule is null)
                 {
-                    return;
+                    return OperationResult.FromError("There's no current module.");
                 }
 
                 bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
@@ -437,7 +428,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
                         TimeSpan.FromSeconds(10)
                     );
 
-                    return;
+                    return OperationResult.FromSuccess();
                 }
 
                 await _feedback.SendConfirmationAndDeleteAsync
@@ -494,28 +485,28 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
                 }
             }
 
-            await UpdateAsync();
+            return await UpdateAsync();
         }
 
-        private async Task ConsumeModuleListInteractionAsync(SocketReaction reaction)
+        private async Task<OperationResult> ConsumeModuleListInteractionAsync(SocketReaction reaction)
         {
             if (this.Message is null || this.Channel is null)
             {
-                return;
+                return OperationResult.FromError("The message hasn't been sent yet.");
             }
 
             var emote = reaction.Emote;
 
             if (!this.AcceptedEmotes.Contains(emote))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             if (emote.Equals(Next))
             {
                 if (_moduleListOffset + 1 > _moduleListPages.Count - 1)
                 {
-                    return;
+                    return OperationResult.FromError("We're at the end of the pages.");
                 }
 
                 _moduleListOffset++;
@@ -524,7 +515,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
             {
                 if (_moduleListOffset - 1 < 0)
                 {
-                    return;
+                    return OperationResult.FromError("We're at the end of the pages.");
                 }
 
                 _moduleListOffset--;
@@ -550,7 +541,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
                         TimeSpan.FromSeconds(10)
                     );
 
-                    return;
+                    return OperationResult.FromSuccess();
                 }
 
                 await _feedback.SendConfirmationAndDeleteAsync
@@ -567,24 +558,28 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
                     TimeSpan.FromSeconds(45)
                 );
 
-                if (messageResult.IsSuccess)
+                if (!messageResult.IsSuccess)
                 {
-                    var tryStartCategoryResult = await OpenModule(messageResult.Entity.Content);
-                    if (!tryStartCategoryResult.IsSuccess)
-                    {
-                        await _feedback.SendWarningAndDeleteAsync
-                        (
-                            this.MessageContext,
-                            tryStartCategoryResult.ErrorReason,
-                            TimeSpan.FromSeconds(10)
-                        );
-
-                        return;
-                    }
+                    return await UpdateAsync();
                 }
+
+                var tryStartCategoryResult = await OpenModule(messageResult.Entity.Content);
+                if (tryStartCategoryResult.IsSuccess)
+                {
+                    return await UpdateAsync();
+                }
+
+                await _feedback.SendWarningAndDeleteAsync
+                (
+                    this.MessageContext,
+                    tryStartCategoryResult.ErrorReason,
+                    TimeSpan.FromSeconds(10)
+                );
+
+                return OperationResult.FromSuccess();
             }
 
-            await UpdateAsync();
+            return await UpdateAsync();
         }
 
         /// <summary>
@@ -624,11 +619,11 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
         }
 
         [SuppressMessage("Style", "SA1118", Justification = "Large text blocks.")]
-        private async Task DisplayHelpTextAsync()
+        private async Task<OperationResult> DisplayHelpTextAsync()
         {
             if (this.Message is null || this.Channel is null)
             {
-                return;
+                return OperationResult.FromError("The message hasn't been sent yet.");
             }
 
             var eb = new EmbedBuilder();
@@ -671,6 +666,7 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
             }
 
             await _feedback.SendEmbedAndDeleteAsync(this.Channel, eb.Build(), TimeSpan.FromSeconds(30));
+            return OperationResult.FromSuccess();
         }
 
         /// <inheritdoc/>

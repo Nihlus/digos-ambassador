@@ -31,6 +31,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 {
@@ -57,7 +58,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
         }
 
         /// <inheritdoc/>
-        protected override async Task OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
+        protected override async Task<OperationResult> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
             var warningService = tickServices.GetRequiredService<WarningService>();
             var banService = tickServices.GetRequiredService<BanService>();
@@ -69,7 +70,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
             {
                 if (ct.IsCancellationRequested)
                 {
-                    return;
+                    return OperationResult.FromError("Operation was cancelled.");
                 }
 
                 // Using .HasValue instead of .IsTemporary here to allow server-side evaluation
@@ -78,7 +79,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 {
                     if (ct.IsCancellationRequested)
                     {
-                        return;
+                        return OperationResult.FromError("Operation was cancelled.");
                     }
 
                     if (!(warning.ExpiresOn <= now))
@@ -87,9 +88,17 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     }
 
                     var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
-                    await loggingService.NotifyUserWarningRemoved(warning, rescinder);
+                    var notifyResult = await loggingService.NotifyUserWarningRemovedAsync(warning, rescinder);
+                    if (!notifyResult.IsSuccess)
+                    {
+                        return OperationResult.FromError(notifyResult);
+                    }
 
-                    await warningService.DeleteWarningAsync(warning);
+                    var deleteResult = await warningService.DeleteWarningAsync(warning);
+                    if (!deleteResult.IsSuccess)
+                    {
+                        return OperationResult.FromError(deleteResult);
+                    }
                 }
 
                 if (!guild.GetUser(this.Client.CurrentUser.Id).GuildPermissions.BanMembers)
@@ -104,7 +113,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 {
                     if (ct.IsCancellationRequested)
                     {
-                        return;
+                        return OperationResult.FromError("Operation was cancelled.");
                     }
 
                     if (!(ban.ExpiresOn <= now))
@@ -113,14 +122,24 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     }
 
                     var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
-                    await loggingService.NotifyUserUnbanned(ban, rescinder);
+                    var notifyResult = await loggingService.NotifyUserUnbannedAsync(ban, rescinder);
+                    if (!notifyResult.IsSuccess)
+                    {
+                        return OperationResult.FromError(notifyResult);
+                    }
 
-                    await banService.DeleteBanAsync(ban);
+                    var deleteResult = await banService.DeleteBanAsync(ban);
+                    if (!deleteResult.IsSuccess)
+                    {
+                        return OperationResult.FromError(deleteResult);
+                    }
+
                     await guild.RemoveBanAsync((ulong)ban.User.DiscordID);
                 }
             }
 
             await Task.Delay(TimeSpan.FromHours(1), ct);
+            return OperationResult.FromSuccess();
         }
     }
 }

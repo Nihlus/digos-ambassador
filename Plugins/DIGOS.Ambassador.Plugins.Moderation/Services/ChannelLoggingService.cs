@@ -73,13 +73,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="ban">The ban.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserBanned(UserBan ban)
+        public async Task<OperationResult> NotifyUserBannedAsync(UserBan ban)
         {
             var guild = _client.GetGuild((ulong)ban.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
             if (!getChannel.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -98,6 +98,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             );
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
+
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -106,13 +108,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="ban">The ban.</param>
         /// <param name="rescinder">The person who rescinded the ban.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserUnbanned(UserBan ban, IGuildUser rescinder)
+        public async Task<OperationResult> NotifyUserUnbannedAsync(UserBan ban, IGuildUser rescinder)
         {
             var guild = _client.GetGuild((ulong)ban.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
             if (!getChannel.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -129,6 +131,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             eb.WithDescription($"{bannedUser.Mention} (ID {bannedUser.Id}) was unbanned {whoDidIt}.");
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
+
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -136,13 +140,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="warning">The warning.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserWarningAdded(UserWarning warning)
+        public async Task<OperationResult> NotifyUserWarningAddedAsync(UserWarning warning)
         {
             var guild = _client.GetGuild((ulong)warning.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
             if (!getChannel.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -161,6 +165,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             );
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -169,13 +174,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="warning">The warning.</param>
         /// <param name="rescinder">The person who rescinded the warning.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserWarningRemoved(UserWarning warning, IGuildUser rescinder)
+        public async Task<OperationResult> NotifyUserWarningRemovedAsync(UserWarning warning, IGuildUser rescinder)
         {
             var guild = _client.GetGuild((ulong)warning.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
             if (!getChannel.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -195,6 +200,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             );
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -202,13 +208,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="note">The note.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserNoteAdded(UserNote note)
+        public async Task<OperationResult> NotifyUserNoteAddedAsync(UserNote note)
         {
             var guild = _client.GetGuild((ulong)note.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
             if (!getChannel.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -227,6 +233,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             );
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -235,13 +242,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="note">The note.</param>
         /// <param name="remover">The person that removed the note.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserNoteRemoved(UserNote note, IGuildUser remover)
+        public async Task<OperationResult> NotifyUserNoteRemovedAsync(UserNote note, IGuildUser remover)
         {
             var guild = _client.GetGuild((ulong)note.Server.DiscordID);
             var getChannel = await GetModerationLogChannelAsync(guild);
             if (!getChannel.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -257,6 +264,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             );
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -264,12 +272,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="user">The user that left.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserLeft(IGuildUser user)
+        public async Task<OperationResult> NotifyUserLeftAsync(IGuildUser user)
         {
             var getChannel = await GetMonitoringChannelAsync(user.Guild);
             if (!getChannel.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -280,6 +288,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             eb.WithDescription($"{user.Mention} left the server.");
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
+
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -289,7 +299,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="oldUsername">The old username.</param>
         /// <param name="newUsername">The new username.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserUsernameChanged
+        public async Task<OperationResult> NotifyUserUsernameChangedAsync
         (
             IGuildUser user,
             string oldUsername,
@@ -299,7 +309,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var getChannel = await GetMonitoringChannelAsync(user.Guild);
             if (!getChannel.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -310,6 +320,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             eb.WithDescription($"{user.Mention} changed their username from {oldUsername} to {newUsername}.");
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -319,7 +330,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="oldDiscriminator">The old discriminator.</param>
         /// <param name="newDiscriminator">The new discriminator.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyUserDiscriminatorChanged
+        public async Task<OperationResult> NotifyUserDiscriminatorChangedAsync
         (
             IGuildUser user,
             string oldDiscriminator,
@@ -329,7 +340,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var getChannel = await GetMonitoringChannelAsync(user.Guild);
             if (!getChannel.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -340,6 +351,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             eb.WithDescription($"{user.Mention} changed their discriminator from {oldDiscriminator} to {newDiscriminator}.");
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -348,23 +360,23 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="message">The deleted message.</param>
         /// <param name="messageChannel">The channel the message was deleted from.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task NotifyMessageDeleted(IMessage message, ISocketMessageChannel messageChannel)
+        public async Task<OperationResult> NotifyMessageDeletedAsync(IMessage message, ISocketMessageChannel messageChannel)
         {
             if (!(messageChannel is ITextChannel textChannel))
             {
-                return;
+                return OperationResult.FromError("The channel was not a text channel.");
             }
 
             // We don't care about bot messages
             if (message.Author.IsBot | message.Author.IsWebhook)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var getChannel = await GetMonitoringChannelAsync(textChannel.Guild);
             if (!getChannel.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -394,6 +406,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
             await _feedback.SendEmbedAsync(channel, quote.Build());
+
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>

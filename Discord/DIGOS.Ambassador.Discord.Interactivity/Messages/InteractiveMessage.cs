@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Interactivity.Messages
 {
@@ -71,36 +72,43 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         }
 
         /// <inheritdoc/>
-        public async Task SendAsync(InteractivityService service, IMessageChannel channel)
+        public async Task<OperationResult> SendAsync(InteractivityService service, IMessageChannel channel)
         {
             this.Channel = channel;
-            this.Message = await DisplayAsync(channel);
+            var displayResult = await DisplayAsync(channel);
+            if (!displayResult.IsSuccess)
+            {
+                return OperationResult.FromError(displayResult);
+            }
 
-            await UpdateAsync();
+            this.Message = displayResult.Entity;
+
+            return await UpdateAsync();
         }
 
         /// <inheritdoc />
-        public Task DeleteAsync()
+        public async Task<OperationResult> DeleteAsync()
         {
             if (this.Message is null)
             {
-                throw new InvalidOperationException("The message hasn't been sent yet.");
+                return OperationResult.FromError("The message hasn't been sent yet.");
             }
 
             this.IsDeleting = true;
 
-            return this.Message.DeleteAsync();
+            await this.Message.DeleteAsync();
+            return OperationResult.FromSuccess();
         }
 
         /// <inheritdoc/>
-        public async Task HandleAddedInteractionAsync(SocketReaction reaction)
+        public async Task<OperationResult> HandleAddedInteractionAsync(SocketReaction reaction)
         {
             if (this.IsDeleting)
             {
-                return;
+                return OperationResult.FromError("The message is being deleted.");
             }
 
-            await OnInteractionAddedAsync(reaction);
+            return await OnInteractionAddedAsync(reaction);
         }
 
         /// <summary>
@@ -108,20 +116,20 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// </summary>
         /// <param name="reaction">The reaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected virtual Task OnInteractionAddedAsync(SocketReaction reaction)
+        protected virtual Task<OperationResult> OnInteractionAddedAsync(SocketReaction reaction)
         {
-            return Task.CompletedTask;
+            return Task.FromResult(OperationResult.FromSuccess());
         }
 
         /// <inheritdoc/>
-        public async Task HandleRemovedInteractionAsync(SocketReaction reaction)
+        public async Task<OperationResult> HandleRemovedInteractionAsync(SocketReaction reaction)
         {
             if (this.IsDeleting)
             {
-                return;
+                return OperationResult.FromError("The message is being deleted.");
             }
 
-            await OnInteractionRemovedAsync(reaction);
+            return await OnInteractionRemovedAsync(reaction);
         }
 
         /// <summary>
@@ -129,32 +137,32 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// </summary>
         /// <param name="reaction">The reaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected virtual Task OnInteractionRemovedAsync(SocketReaction reaction)
+        protected virtual Task<OperationResult> OnInteractionRemovedAsync(SocketReaction reaction)
         {
-            return Task.CompletedTask;
+            return Task.FromResult(OperationResult.FromSuccess());
         }
 
         /// <summary>
         /// Updates the message contents.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected async Task UpdateAsync()
+        protected async Task<OperationResult> UpdateAsync()
         {
             if (this.IsDeleting)
             {
-                return;
+                return OperationResult.FromError("The message is being deleted.");
             }
 
-            await OnUpdateAsync();
+            return await OnUpdateAsync();
         }
 
         /// <summary>
         /// Updates the message contents.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected virtual Task OnUpdateAsync()
+        protected virtual Task<OperationResult> OnUpdateAsync()
         {
-            return Task.CompletedTask;
+            return Task.FromResult(OperationResult.FromSuccess());
         }
 
         /// <summary>
@@ -162,11 +170,11 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// </summary>
         /// <param name="channel">The channel.</param>
         /// <returns>The displayed message.</returns>
-        private async Task<IUserMessage?> DisplayAsync(IMessageChannel channel)
+        private async Task<CreateEntityResult<IUserMessage>> DisplayAsync(IMessageChannel channel)
         {
             if (this.IsDeleting)
             {
-                return null;
+                return CreateEntityResult<IUserMessage>.FromError("The message is being deleted.");
             }
 
             return await OnDisplayAsync(channel);
@@ -177,6 +185,6 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// </summary>
         /// <param name="channel">The channel.</param>
         /// <returns>The displayed message.</returns>
-        protected abstract Task<IUserMessage> OnDisplayAsync(IMessageChannel channel);
+        protected abstract Task<CreateEntityResult<IUserMessage>> OnDisplayAsync(IMessageChannel channel);
     }
 }

@@ -34,6 +34,7 @@ using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
 {
@@ -70,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
         }
 
         /// <inheritdoc />
-        protected override async Task MessageUpdated
+        protected override async Task<OperationResult> MessageUpdatedAsync
         (
             Cacheable<IMessage, ulong> oldMessage,
             SocketMessage? updatedMessage,
@@ -79,47 +80,49 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
         {
             if (updatedMessage is null)
             {
-                return;
+                return OperationResult.FromError("The message was null.");
             }
 
             // Ignore all changes except text changes
-            var isTextUpdate = updatedMessage.EditedTimestamp.HasValue && (updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes());
+            var isTextUpdate = updatedMessage.EditedTimestamp.HasValue &&
+                               updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
+
             if (!isTextUpdate)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
-            await MessageReceived(updatedMessage);
+            return await MessageReceivedAsync(updatedMessage);
         }
 
         /// <inheritdoc />
-        protected override async Task MessageReceived(SocketMessage arg)
+        protected override async Task<OperationResult> MessageReceivedAsync(SocketMessage arg)
         {
             if (!(arg is SocketUserMessage message))
             {
-                return;
+                return OperationResult.FromError("The message was not a user message.");
             }
 
             if (!(message.Author is SocketGuildUser guildUser))
             {
-                return;
+                return OperationResult.FromError("The author was not a guild user.");
             }
 
             if ((arg.Author.IsBot && !arg.Author.IsMe(this.Client)) || arg.Author.IsWebhook)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var discard = 0;
 
             if (message.HasCharPrefix('!', ref discard))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             if (message.HasMentionPrefix(this.Client.CurrentUser, ref discard))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             foreach (Match? match in Pattern.Matches(message.Content))
@@ -147,7 +150,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
                 var quotedMessage = await quotedMessageChannel.GetMessageAsync(messageId);
                 if (quotedMessage == null || IsQuote(quotedMessage))
                 {
-                    return;
+                    return OperationResult.FromSuccess();
                 }
 
                 if (message.Channel is IGuildChannel messageGuildChannel)
@@ -176,6 +179,8 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
                     }
                 }
             }
+
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>

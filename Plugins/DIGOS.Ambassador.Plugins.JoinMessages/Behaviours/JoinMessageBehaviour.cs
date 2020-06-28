@@ -30,6 +30,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.JoinMessages.Behaviours
 {
@@ -60,7 +61,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Behaviours
         }
 
         /// <inheritdoc />
-        protected override async Task UserJoined(SocketGuildUser user)
+        protected override async Task<OperationResult> UserJoinedAsync(SocketGuildUser user)
         {
             using var scope = this.Services.CreateScope();
             var serverService = scope.ServiceProvider.GetRequiredService<ServerService>();
@@ -68,20 +69,20 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Behaviours
             var getServerResult = await serverService.GetOrRegisterServerAsync(user.Guild);
             if (!getServerResult.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getServerResult);
             }
 
             var server = getServerResult.Entity;
 
             if (!server.SendJoinMessage)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var getJoinMessageResult = serverService.GetJoinMessage(server);
             if (!getJoinMessageResult.IsSuccess)
             {
-                return;
+                return OperationResult.FromError(getJoinMessageResult);
             }
 
             var userChannel = await user.GetOrCreateDMChannelAsync();
@@ -122,6 +123,8 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Behaviours
                     }
                 }
             }
+
+            return OperationResult.FromSuccess();
         }
     }
 }

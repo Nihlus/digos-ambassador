@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Interactivity.Messages
 {
@@ -47,26 +48,26 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// <param name="service">The interactivity service that manages this message.</param>
         /// <param name="channel">The channel.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task SendAsync(InteractivityService service, IMessageChannel channel);
+        Task<OperationResult> SendAsync(InteractivityService service, IMessageChannel channel);
 
         /// <summary>
         /// Deletes the interactive message.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task DeleteAsync();
+        Task<OperationResult> DeleteAsync();
 
         /// <summary>
         /// Handles an added interaction, performing tasks as needed.
         /// </summary>
         /// <param name="reaction">The added interaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task HandleAddedInteractionAsync(SocketReaction reaction);
+        Task<OperationResult> HandleAddedInteractionAsync(SocketReaction reaction);
 
         /// <summary>
         /// Handles a removed interaction, performing tasks as needed.
         /// </summary>
         /// <param name="reaction">The removed interaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task HandleRemovedInteractionAsync(SocketReaction reaction);
+        Task<OperationResult> HandleRemovedInteractionAsync(SocketReaction reaction);
     }
 }

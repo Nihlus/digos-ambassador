@@ -33,6 +33,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 {
@@ -62,7 +63,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// Ensures active roleplays are rescanned on startup in order to catch missed messages.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected override async Task Connected()
+        protected override async Task<OperationResult> ConnectedAsync()
         {
             using var connectionScope = this.Services.CreateScope();
             var roleplayService = connectionScope.ServiceProvider.GetRequiredService<RoleplayDiscordService>();
@@ -112,41 +113,49 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     }
                 }
             }
+
+            return OperationResult.FromSuccess();
         }
 
         /// <inheritdoc />
-        protected override async Task MessageReceived(SocketMessage arg)
+        protected override async Task<OperationResult> MessageReceivedAsync(SocketMessage arg)
         {
             if (!(arg is SocketUserMessage message))
             {
-                return;
+                return OperationResult.FromError("The message was not a user message.");
             }
 
             if (arg.Author.IsBot || arg.Author.IsWebhook)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var discard = 0;
 
             if (message.HasCharPrefix('!', ref discard))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             if (message.HasMentionPrefix(this.Client.CurrentUser, ref discard))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             using var messageScope = this.Services.CreateScope();
             var roleplayService = messageScope.ServiceProvider.GetRequiredService<RoleplayDiscordService>();
 
-            await roleplayService.ConsumeMessageAsync(message);
+            var consumeResult = await roleplayService.ConsumeMessageAsync(message);
+            if (!consumeResult.IsSuccess)
+            {
+                return OperationResult.FromError(consumeResult);
+            }
+
+            return OperationResult.FromSuccess();
         }
 
         /// <inheritdoc />
-        protected override async Task MessageUpdated
+        protected override async Task<OperationResult> MessageUpdatedAsync
         (
             Cacheable<IMessage, ulong> oldMessage,
             SocketMessage updatedMessage,
@@ -159,10 +168,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
             if (!isTextUpdate)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
-            await MessageReceived(updatedMessage);
+            return await MessageReceivedAsync(updatedMessage);
         }
     }
 }

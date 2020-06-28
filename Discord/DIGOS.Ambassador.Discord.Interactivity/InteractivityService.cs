@@ -166,7 +166,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// </summary>
         /// <param name="message">The message to delete.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task DeleteInteractiveMessageAsync(IInteractiveMessage message)
+        public Task<OperationResult> DeleteInteractiveMessageAsync(IInteractiveMessage message)
         {
             _trackedMessages.Remove(message);
             return message.DeleteAsync();
@@ -177,7 +177,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// </summary>
         /// <param name="message">The deleted message.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task OnMessageDeleted
+        internal async Task<OperationResult> OnMessageDeletedAsync
         (
             Cacheable<IMessage, ulong> message
         )
@@ -185,7 +185,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             var userMessage = await message.GetOrDownloadAsync();
             if (userMessage is null)
             {
-                return;
+                return OperationResult.FromError("Failed to get the message.");
             }
 
             var deletedMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
@@ -193,6 +193,8 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             {
                 _trackedMessages.Remove(deletedMessage);
             }
+
+            return OperationResult.FromSuccess();
         }
 
         /// <summary>
@@ -200,9 +202,9 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// </summary>
         /// <param name="message">The message.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal Task OnMessageReceived(SocketMessage message)
+        internal Task<OperationResult> OnMessageReceivedAsync(SocketMessage message)
         {
-            return Task.CompletedTask;
+            return Task.FromResult(OperationResult.FromSuccess());
         }
 
         /// <summary>
@@ -211,7 +213,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <param name="message">The message the reaction was removed to.</param>
         /// <param name="reaction">The removed reaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task OnReactionRemoved
+        internal async Task<OperationResult> OnReactionRemovedAsync
         (
             Cacheable<IUserMessage, ulong> message,
             SocketReaction reaction
@@ -219,20 +221,27 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         {
             if (reaction.User.IsSpecified && reaction.User.Value.IsMe(this.Client))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var userMessage = await message.GetOrDownloadAsync();
             if (userMessage is null)
             {
-                return;
+                return OperationResult.FromError("Failed to get the message.");
             }
 
             var relevantMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
             var handlerTasks = relevantMessages
                 .Select(relevantMessage => relevantMessage.HandleRemovedInteractionAsync(reaction));
 
-            await Task.WhenAll(handlerTasks);
+            var handlerResults = await Task.WhenAll(handlerTasks);
+            var failedResult = handlerResults.FirstOrDefault(r => !r.IsSuccess);
+            if (failedResult is null)
+            {
+                return OperationResult.FromSuccess();
+            }
+
+            return OperationResult.FromError(failedResult);
         }
 
         /// <summary>
@@ -241,7 +250,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <param name="message">The message the reaction was added to.</param>
         /// <param name="reaction">The added reaction.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task OnReactionAdded
+        internal async Task<OperationResult> OnReactionAddedAsync
         (
             Cacheable<IUserMessage, ulong> message,
             SocketReaction reaction
@@ -249,20 +258,27 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         {
             if (reaction.User.IsSpecified && reaction.User.Value.IsMe(this.Client))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var userMessage = await message.GetOrDownloadAsync();
             if (userMessage is null)
             {
-                return;
+                return OperationResult.FromError("Failed to get the message.");
             }
 
             var relevantMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
             var handlerTasks = relevantMessages
                 .Select(relevantMessage => relevantMessage.HandleAddedInteractionAsync(reaction)).ToList();
 
-            await Task.WhenAll(handlerTasks);
+            var handlerResults = await Task.WhenAll(handlerTasks);
+            var failedResult = handlerResults.FirstOrDefault(r => !r.IsSuccess);
+            if (failedResult is null)
+            {
+                return OperationResult.FromSuccess();
+            }
+
+            return OperationResult.FromError(failedResult);
         }
     }
 }

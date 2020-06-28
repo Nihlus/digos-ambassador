@@ -28,6 +28,7 @@ using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 {
@@ -54,48 +55,68 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
         }
 
         /// <inheritdoc />
-        protected override async Task UserLeft(SocketGuildUser user)
+        protected override async Task<OperationResult> UserLeftAsync(SocketGuildUser user)
         {
             using var scope = this.Services.CreateScope();
             var loggingService = scope.ServiceProvider.GetRequiredService<ChannelLoggingService>();
 
-            await loggingService.NotifyUserLeft(user);
+            return await loggingService.NotifyUserLeftAsync(user);
         }
 
         /// <inheritdoc />
-        protected override async Task GuildMemberUpdated(SocketGuildUser oldMember, SocketGuildUser newMember)
+        protected override async Task<OperationResult> GuildMemberUpdatedAsync
+        (
+            SocketGuildUser oldMember,
+            SocketGuildUser newMember
+        )
         {
             using var scope = this.Services.CreateScope();
             var loggingService = scope.ServiceProvider.GetRequiredService<ChannelLoggingService>();
 
             if (oldMember.Username != newMember.Username)
             {
-                await loggingService.NotifyUserUsernameChanged(newMember, oldMember.Username, newMember.Username);
+                var notifyResult = await loggingService.NotifyUserUsernameChangedAsync
+                (
+                    newMember,
+                    oldMember.Username,
+                    newMember.Username
+                );
+
+                if (!notifyResult.IsSuccess)
+                {
+                    return OperationResult.FromError(notifyResult);
+                }
             }
 
             if (oldMember.Discriminator != newMember.Discriminator)
             {
-                await loggingService.NotifyUserDiscriminatorChanged
+                return await loggingService.NotifyUserDiscriminatorChangedAsync
                 (
                     newMember,
                     oldMember.Discriminator,
                     newMember.Discriminator
                 );
             }
+
+            return OperationResult.FromSuccess();
         }
 
         /// <inheritdoc />
-        protected override async Task MessageDeleted(Cacheable<IMessage, ulong> message, ISocketMessageChannel channel)
+        protected override async Task<OperationResult> MessageDeletedAsync
+        (
+            Cacheable<IMessage, ulong> message,
+            ISocketMessageChannel channel
+        )
         {
             if (!message.HasValue)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             using var scope = this.Services.CreateScope();
             var loggingService = scope.ServiceProvider.GetRequiredService<ChannelLoggingService>();
 
-            await loggingService.NotifyMessageDeleted(message.Value, channel);
+            return await loggingService.NotifyMessageDeletedAsync(message.Value, channel);
         }
     }
 }

@@ -176,7 +176,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             await this.Context.Guild.AddBanAsync((ulong)ban.User.DiscordID, reason: reason);
             await _feedback.SendConfirmationAsync(this.Context, $"User banned (ban ID {ban.ID}).");
 
-            await _logging.NotifyUserBanned(ban);
+            await _logging.NotifyUserBannedAsync(ban);
             _bans.SaveChanges();
         }
 
@@ -211,7 +211,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             await _feedback.SendConfirmationAsync(this.Context, "Ban rescinded.");
 
             var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
-            await _logging.NotifyUserUnbanned(ban, rescinder);
+            await _logging.NotifyUserUnbannedAsync(ban, rescinder);
 
             _bans.SaveChanges();
         }

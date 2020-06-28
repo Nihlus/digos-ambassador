@@ -37,6 +37,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 {
@@ -68,7 +69,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         }
 
         /// <inheritdoc />
-        protected override async Task MessageReceived(SocketMessage message)
+        protected override async Task<OperationResult> MessageReceivedAsync(SocketMessage message)
         {
             using var eventScope = this.Services.CreateScope();
             var autoroles = eventScope.ServiceProvider.GetRequiredService<AutoroleService>();
@@ -76,18 +77,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             if (!(message.Channel is ITextChannel textChannel))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             if (!(message.Author is IGuildUser guildUser))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var guildAutoroles = (await autoroles.GetAutorolesAsync(textChannel.Guild)).ToList();
             if (guildAutoroles.Count == 0)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var relevantAutoroles = guildAutoroles.Where
@@ -113,10 +114,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             if (relevantAutoroles.Count == 0)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
-            await UpdateRelevantAutorolesForUserAsync
+            return await UpdateRelevantAutorolesForUserAsync
             (
                 autoroles,
                 autoroleUpdates,
@@ -126,7 +127,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         }
 
         /// <inheritdoc/>
-        protected override async Task ReactionsCleared
+        protected override async Task<OperationResult> ReactionsClearedAsync
         (
             Cacheable<IUserMessage, ulong> message,
             ISocketMessageChannel channel
@@ -140,15 +141,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             if (!(realMessage.Author is IGuildUser guildUser))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var relevantAutoroles = GetRelevantReactionAutoroles(autoroles, message);
-            await UpdateRelevantAutorolesForUserAsync(autoroles, autoroleUpdates, relevantAutoroles, guildUser);
+            return await UpdateRelevantAutorolesForUserAsync(autoroles, autoroleUpdates, relevantAutoroles, guildUser);
         }
 
         /// <inheritdoc/>
-        protected override async Task ReactionRemoved
+        protected override async Task<OperationResult> ReactionRemovedAsync
         (
             Cacheable<IUserMessage, ulong> message,
             ISocketMessageChannel channel,
@@ -163,15 +164,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             if (!(realMessage.Author is IGuildUser guildUser))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var relevantAutoroles = GetRelevantReactionAutoroles(autoroles, message, reaction);
-            await UpdateRelevantAutorolesForUserAsync(autoroles, autoroleUpdates, relevantAutoroles, guildUser);
+            return await UpdateRelevantAutorolesForUserAsync(autoroles, autoroleUpdates, relevantAutoroles, guildUser);
         }
 
         /// <inheritdoc />
-        protected override async Task ReactionAdded
+        protected override async Task<OperationResult> ReactionAddedAsync
         (
             Cacheable<IUserMessage, ulong> message,
             ISocketMessageChannel channel,
@@ -186,11 +187,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             if (!(realMessage.Author is IGuildUser guildUser))
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var relevantAutoroles = GetRelevantReactionAutoroles(autoroles, message, reaction);
-            await UpdateRelevantAutorolesForUserAsync(autoroles, autoroleUpdates, relevantAutoroles, guildUser);
+            return await UpdateRelevantAutorolesForUserAsync(autoroles, autoroleUpdates, relevantAutoroles, guildUser);
         }
 
         private async IAsyncEnumerable<AutoroleConfiguration> GetRelevantReactionAutoroles
@@ -250,7 +251,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             }
         }
 
-        private async Task UpdateRelevantAutorolesForUserAsync
+        private async Task<OperationResult> UpdateRelevantAutorolesForUserAsync
         (
             AutoroleService autoroles,
             AutoroleUpdateService autoroleUpdates,
@@ -276,6 +277,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                     }
                 }
             }
+
+            return OperationResult.FromSuccess();
         }
 
         private async Task NotifyUserNeedsAffirmation

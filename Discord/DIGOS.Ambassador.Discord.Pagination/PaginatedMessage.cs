@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Discord;
 using Discord.WebSocket;
+using Remora.Results;
 
 // ReSharper disable AssignmentIsFullyDiscarded
 namespace DIGOS.Ambassador.Discord.Pagination
@@ -91,11 +92,11 @@ namespace DIGOS.Ambassador.Discord.Pagination
         public abstract Embed BuildEmbed(int page);
 
         /// <inheritdoc/>
-        protected override async Task<IUserMessage> OnDisplayAsync(IMessageChannel channel)
+        protected override async Task<CreateEntityResult<IUserMessage>> OnDisplayAsync(IMessageChannel channel)
         {
             if (!this.Pages.Any())
             {
-                throw new InvalidOperationException("The pager is empty.");
+                return CreateEntityResult<IUserMessage>.FromError("The pager is empty.");
             }
 
             var embed = BuildEmbed(_currentPage - 1);
@@ -128,28 +129,28 @@ namespace DIGOS.Ambassador.Discord.Pagination
 
             await message.AddReactionAsync(this.Appearance.Stop);
 
-            return message;
+            return CreateEntityResult<IUserMessage>.FromSuccess(message);
         }
 
         /// <remarks>
         /// This override forwards to the added handler, letting removed reactions act the same as added reactions.
         /// </remarks>
         /// <inheritdoc/>
-        protected override Task OnInteractionRemovedAsync(SocketReaction reaction) =>
+        protected override Task<OperationResult> OnInteractionRemovedAsync(SocketReaction reaction) =>
             OnInteractionAddedAsync(reaction);
 
         /// <inheritdoc/>
-        protected override async Task OnInteractionAddedAsync(SocketReaction reaction)
+        protected override async Task<OperationResult> OnInteractionAddedAsync(SocketReaction reaction)
         {
             if (this.Message is null || this.Channel is null)
             {
-                return;
+                return OperationResult.FromError("The message hasn't been sent yet.");
             }
 
             if (!reaction.User.IsSpecified)
             {
                 // Ignore unspecified users
-                return;
+                return OperationResult.FromError("The user was unspecified.");
             }
 
             var interactingUser = reaction.User.Value;
@@ -160,13 +161,13 @@ namespace DIGOS.Ambassador.Discord.Pagination
                     // If the user has permission to manage messages, they should be allowed to interact in all cases
                     if (!guildUser.GetPermissions(this.Channel as IGuildChannel).ManageMessages)
                     {
-                        return;
+                        return OperationResult.FromSuccess();
                     }
                 }
                 else
                 {
                     // We only allow interactions from the user who created the message
-                    return;
+                    return OperationResult.FromSuccess();
                 }
             }
 
@@ -180,7 +181,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             {
                 if (_currentPage >= this.Pages.Count)
                 {
-                    return;
+                    return OperationResult.FromSuccess();
                 }
 
                 ++_currentPage;
@@ -189,7 +190,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             {
                 if (_currentPage <= 1)
                 {
-                    return;
+                    return OperationResult.FromSuccess();
                 }
 
                 --_currentPage;
@@ -200,8 +201,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             }
             else if (emote.Equals(this.Appearance.Stop))
             {
-                await this.Interactivity.DeleteInteractiveMessageAsync(this);
-                return;
+                return await this.Interactivity.DeleteInteractiveMessageAsync(this);
             }
             else if (emote.Equals(this.Appearance.Jump))
             {
@@ -210,7 +210,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
                 var responseResult = await this.Interactivity.GetNextMessageAsync(this.Channel, Filter, TimeSpan.FromSeconds(15));
                 if (!responseResult.IsSuccess)
                 {
-                    return;
+                    return OperationResult.FromError(responseResult);
                 }
 
                 var response = responseResult.Entity;
@@ -222,12 +222,11 @@ namespace DIGOS.Ambassador.Discord.Pagination
                     var eb = this.Feedback.CreateFeedbackEmbed(response.Author, Color.DarkPurple, "Please specify a page to jump to.");
 
                     await this.Feedback.SendEmbedAndDeleteAsync(this.Channel, eb);
-                    return;
+                    return OperationResult.FromSuccess();
                 }
 
                 _currentPage = request;
                 await response.DeleteAsync();
-                await UpdateAsync();
             }
             else if (emote.Equals(this.Appearance.Help))
             {
@@ -235,10 +234,10 @@ namespace DIGOS.Ambassador.Discord.Pagination
                 var eb = this.Feedback.CreateFeedbackEmbed(user, Color.DarkPurple, this.Appearance.HelpText);
 
                 await this.Feedback.SendEmbedAndDeleteAsync(this.Channel, eb, this.Appearance.InfoTimeout);
-                return;
+                return OperationResult.FromSuccess();
             }
 
-            await UpdateAsync();
+            return await UpdateAsync();
         }
 
         private async Task<bool> CanManageMessages()
@@ -255,7 +254,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         }
 
         /// <inheritdoc/>
-        protected override async Task OnUpdateAsync()
+        protected override async Task<OperationResult> OnUpdateAsync()
         {
             var embed = BuildEmbed(_currentPage - 1);
 
@@ -264,6 +263,8 @@ namespace DIGOS.Ambassador.Discord.Pagination
             {
                 await userMessage.ModifyAsync(m => m.Embed = embed);
             }
+
+            return OperationResult.FromSuccess();
         }
     }
 }

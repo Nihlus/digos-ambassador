@@ -26,6 +26,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Interactivity.Behaviours
 {
@@ -56,41 +57,41 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Behaviours
         }
 
         /// <inheritdoc />
-        protected override async Task ReactionRemoved
+        protected override async Task<OperationResult> ReactionRemovedAsync
         (
             Cacheable<IUserMessage, ulong> message,
             ISocketMessageChannel channel,
             SocketReaction reaction
         )
         {
-            await _interactivity.OnReactionRemoved(message, reaction);
+            return await _interactivity.OnReactionRemovedAsync(message, reaction);
         }
 
         /// <inheritdoc />
-        protected override async Task ReactionAdded
+        protected override async Task<OperationResult> ReactionAddedAsync
         (
             Cacheable<IUserMessage, ulong> message,
             ISocketMessageChannel channel,
             SocketReaction reaction
         )
         {
-            await _interactivity.OnReactionAdded(message, reaction);
+            return await _interactivity.OnReactionAddedAsync(message, reaction);
         }
 
         /// <inheritdoc />
-        protected override async Task MessageDeleted
+        protected override async Task<OperationResult> MessageDeletedAsync
         (
             Cacheable<IMessage, ulong> message,
             ISocketMessageChannel channel
         )
         {
-            await _interactivity.OnMessageDeleted(message);
+            return await _interactivity.OnMessageDeletedAsync(message);
         }
 
         /// <inheritdoc />
-        protected override async Task MessageReceived(SocketMessage message)
+        protected override async Task<OperationResult> MessageReceivedAsync(SocketMessage message)
         {
-            await _interactivity.OnMessageReceived(message);
+            return await _interactivity.OnMessageReceivedAsync(message);
         }
     }
 }
