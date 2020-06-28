@@ -74,5 +74,45 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
         {
             return await query(dbSet).ToListAsync();
         }
+
+        /// <summary>
+        /// Performs a serverside query against the database set, fully materializing it after finishing.
+        /// </summary>
+        /// <param name="dbSet">The database set.</param>
+        /// <param name="query">The query. This query runs serverside where possible. Any clientside operations must be
+        /// performed on the resulting <see cref="IEnumerable{T}"/>.</param>
+        /// <param name="ct">A cancellation token.</param>
+        /// <typeparam name="TEntity">The entity type.</typeparam>
+        /// <typeparam name="TOut">The output type.</typeparam>
+        /// <returns>The final query.</returns>
+        public static async Task<TOut> ServersideQueryAsync<TEntity, TOut>
+        (
+            this DbSet<TEntity> dbSet,
+            Func<IQueryable<TEntity>, CancellationToken, Task<TOut>> query,
+            CancellationToken ct
+        )
+            where TEntity : class
+        {
+            return await query(dbSet, ct);
+        }
+
+        /// <summary>
+        /// Performs a unified query against the database set, including both local and database entities.
+        /// </summary>
+        /// <param name="dbSet">The database set.</param>
+        /// <param name="query">The query. This query runs serverside where possible. Any clientside operations must be
+        /// performed on the resulting <see cref="IEnumerable{T}"/>.</param>
+        /// <typeparam name="TEntity">The entity type.</typeparam>
+        /// <typeparam name="TOut">The resulting type.</typeparam>
+        /// <returns>The final query result.</returns>
+        public static async Task<TOut> ServersideQueryAsync<TEntity, TOut>
+        (
+            this DbSet<TEntity> dbSet,
+            Func<IQueryable<TEntity>, Task<TOut>> query
+        )
+            where TEntity : class
+        {
+            return await query(dbSet);
+        }
     }
 }
