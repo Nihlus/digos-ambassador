@@ -148,7 +148,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                     .SingleOrDefaultAsync()
             );
 
-            return !(consent is null);
+            return !(consent is null) && consent.HasConsented;
         }
 
         /// <summary>
