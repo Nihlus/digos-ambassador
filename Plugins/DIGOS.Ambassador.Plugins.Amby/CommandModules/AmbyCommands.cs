@@ -83,9 +83,14 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [Command("contact")]
         [Summary("Instructs Amby to contact a user over DM.")]
         [RequireContext(Guild)]
-        [RequireUserPermission(GuildPermission.MentionEveryone)]
         public async Task ContactUserAsync(IUser discordUser)
         {
+            if (this.Context.User is IGuildUser guildUser && !guildUser.GuildPermissions.MentionEveryone)
+            {
+                await _feedback.SendErrorAsync(this.Context, "You need to be able to mention everyone to do that.");
+                return;
+            }
+
             if (discordUser.Id == this.Context.Client.CurrentUser.Id)
             {
                 await _feedback.SendErrorAsync(this.Context, "That's a splendid idea - at least then, I'd get an intelligent reply.");
