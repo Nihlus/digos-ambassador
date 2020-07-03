@@ -226,7 +226,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             /// <param name="revokedTarget">The target that is to be revoked.</param>
             [Command]
             [Summary("Grant yourself the given permission.")]
-            [RequirePermission(typeof(RevokePermission), PermissionTarget.Self)]
+            [RequirePermission(typeof(GrantPermission), PermissionTarget.Self)]
             public async Task Default
             (
                 string permissionName,
