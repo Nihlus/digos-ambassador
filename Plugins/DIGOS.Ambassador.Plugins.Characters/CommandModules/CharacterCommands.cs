@@ -451,7 +451,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         {
             discordUser ??= this.Context.Message.Author;
 
-            var getCharacters = await _characters.GetUserCharactersAsync((IGuildUser)this.Context.User);
+            var getCharacters = await _characters.GetUserCharactersAsync((IGuildUser)discordUser);
             if (!getCharacters.IsSuccess)
             {
                 await _feedback.SendErrorAsync(this.Context, getCharacters.ErrorReason);
