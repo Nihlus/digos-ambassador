@@ -135,7 +135,15 @@ namespace DIGOS.Ambassador.Discord.Pagination
                 var fields = enumeratedItems.Select
                 (
                     i =>
-                        new EmbedFieldBuilder().WithName(titleSelector(i)).WithValue(valueSelector(i))
+                        new EmbedFieldBuilder()
+                        .WithName
+                        (
+                            string.IsNullOrWhiteSpace(titleSelector(i)) ? "Not set" : titleSelector(i)
+                        )
+                        .WithValue
+                        (
+                            string.IsNullOrWhiteSpace(valueSelector(i)) ? "Not set" : valueSelector(i)
+                        )
                 );
 
                 pages = PageFactory.FromFields(fields);
