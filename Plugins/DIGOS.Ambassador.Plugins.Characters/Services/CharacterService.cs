@@ -557,6 +557,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             string avatarUrl
         )
         {
+            avatarUrl = avatarUrl.Unquote(new[] { '<', '>' });
+
             if (string.IsNullOrWhiteSpace(avatarUrl))
             {
                 return ModifyEntityResult.FromError("You need to provide a new avatar url.");
