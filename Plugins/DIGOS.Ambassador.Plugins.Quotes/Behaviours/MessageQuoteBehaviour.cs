@@ -125,7 +125,13 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
                 return OperationResult.FromSuccess();
             }
 
-            foreach (Match? match in Pattern.Matches(message.Content))
+            if (IsQuote(message))
+            {
+                return OperationResult.FromSuccess();
+            }
+
+            var matches = Pattern.Matches(message.Content);
+            foreach (Match? match in matches)
             {
                 if (match is null)
                 {
@@ -153,17 +159,6 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
                     return OperationResult.FromSuccess();
                 }
 
-                if (message.Channel is IGuildChannel messageGuildChannel)
-                {
-                    var guildBotUser = await messageGuildChannel.Guild.GetUserAsync(this.Client.CurrentUser.Id);
-
-                    // It's just a single quote link, so we'll delete it
-                    if (message.Content == match.Value && guildBotUser.GuildPermissions.ManageMessages)
-                    {
-                        await message.DeleteAsync();
-                    }
-                }
-
                 var embed = _quotes.CreateMessageQuote(quotedMessage, guildUser);
                 embed.WithTimestamp(quotedMessage.Timestamp);
 
@@ -178,6 +173,23 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
                         throw;
                     }
                 }
+            }
+
+            if (!(message.Channel is IGuildChannel messageGuildChannel))
+            {
+                return OperationResult.FromSuccess();
+            }
+
+            var guildBotUser = await messageGuildChannel.Guild.GetUserAsync(this.Client.CurrentUser.Id);
+
+            var messageCharacterCount = message.Content.Select(c => !char.IsWhiteSpace(c)).Count();
+            var matchesCharacterCount = matches.Sum(m => m.Length);
+
+            // If the message consists of just links (i.e, no other text outside of the links, not counting
+            // whitespace), we'll delete it
+            if (messageCharacterCount == matchesCharacterCount && guildBotUser.GuildPermissions.ManageMessages)
+            {
+                await message.DeleteAsync();
             }
 
             return OperationResult.FromSuccess();
