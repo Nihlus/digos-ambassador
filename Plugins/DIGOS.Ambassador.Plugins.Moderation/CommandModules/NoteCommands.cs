@@ -165,6 +165,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             var note = getNote.Entity;
 
+            // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
+            // navigation properties can't be evaluated
+            var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
+            var notifyResult = await _logging.NotifyUserNoteRemovedAsync(note, rescinder);
+            if (!notifyResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, notifyResult.ErrorReason);
+                return;
+            }
+
             var deleteNote = await _notes.DeleteNoteAsync(note);
             if (!deleteNote.IsSuccess)
             {
@@ -173,9 +183,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             }
 
             await _feedback.SendConfirmationAsync(this.Context, "Note deleted.");
-
-            var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
-            await _logging.NotifyUserNoteRemovedAsync(note, rescinder);
         }
     }
 }

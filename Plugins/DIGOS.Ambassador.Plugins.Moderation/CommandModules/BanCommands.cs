@@ -173,10 +173,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             var ban = addBan.Entity;
 
+            var notifyResult = await _logging.NotifyUserBannedAsync(ban);
+            if (!notifyResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, notifyResult.ErrorReason);
+                return;
+            }
+
             await this.Context.Guild.AddBanAsync((ulong)ban.User.DiscordID, reason: reason);
             await _feedback.SendConfirmationAsync(this.Context, $"User banned (ban ID {ban.ID}).");
-
-            await _logging.NotifyUserBannedAsync(ban);
         }
 
         /// <summary>
@@ -199,6 +204,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             var ban = getBan.Entity;
 
+            // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
+            // navigation properties can't be evaluated
+            var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
+            var notifyResult = await _logging.NotifyUserUnbannedAsync(ban, rescinder);
+            if (!notifyResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, notifyResult.ErrorReason);
+                return;
+            }
+
             var deleteBan = await _bans.DeleteBanAsync(ban);
             if (!deleteBan.IsSuccess)
             {
@@ -208,9 +223,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 
             await this.Context.Guild.RemoveBanAsync((ulong)ban.User.DiscordID);
             await _feedback.SendConfirmationAsync(this.Context, "Ban rescinded.");
-
-            var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
-            await _logging.NotifyUserUnbannedAsync(ban, rescinder);
         }
     }
 }

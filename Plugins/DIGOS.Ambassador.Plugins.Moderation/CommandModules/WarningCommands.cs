@@ -174,7 +174,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var warning = addWarning.Entity;
             await _feedback.SendConfirmationAsync(this.Context, $"Warning added (ID {warning.ID}).");
 
-            await _logging.NotifyUserWarningAddedAsync(warning);
+            var notifyResult = await _logging.NotifyUserWarningAddedAsync(warning);
+            if (!notifyResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, notifyResult.ErrorReason);
+                return;
+            }
 
             var getSettings = await _moderation.GetOrCreateServerSettingsAsync(this.Context.Guild);
             if (!getSettings.IsSuccess)
@@ -216,7 +221,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             // This has to be done before the warning is actually deleted - otherwise, the lazy loader is removed and
             // navigation properties can't be evaluated
             var rescinder = await this.Context.Guild.GetUserAsync(this.Context.User.Id);
-            await _logging.NotifyUserWarningRemovedAsync(warning, rescinder);
+            var notifyResult = await _logging.NotifyUserWarningRemovedAsync(warning, rescinder);
+            if (!notifyResult.IsSuccess)
+            {
+                await _feedback.SendErrorAsync(this.Context, notifyResult.ErrorReason);
+                return;
+            }
 
             var deleteWarning = await _warnings.DeleteWarningAsync(warning);
             if (!deleteWarning.IsSuccess)
