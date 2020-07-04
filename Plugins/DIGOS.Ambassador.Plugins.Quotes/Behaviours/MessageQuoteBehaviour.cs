@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
     {
         private static readonly Regex Pattern = new Regex
         (
-            @"https?://(?:(?:ptb|canary)\.)?discordapp\.com/channels/(?<GuildId>\d+)/(?<ChannelId>\d+)/(?<MessageId>\d+)",
+            @"(?<!<)https?://(?:(?:ptb|canary)\.)?discordapp\.com/channels/(?<GuildId>\d+)/(?<ChannelId>\d+)/(?<MessageId>\d+)(?!>)",
             RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
         );
 
