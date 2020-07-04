@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Utility
     public class CaseInsensitiveStringEqualityComparer : IEqualityComparer<string>
     {
         /// <inheritdoc />
-        public bool Equals(string x, string y)
+        public bool Equals(string? x, string? y)
         {
             if (x is null && y is null)
             {
