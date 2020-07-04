@@ -119,7 +119,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     }
 
                     var condition = getCondition.Entity;
-                    condition.RequiredTime = time;
+                    var modifyResult = await _autoroles.ModifyConditionAsync
+                    (
+                        condition,
+                        c =>
+                        {
+                            condition.RequiredTime = time;
+                        }
+                    );
+
+                    if (!modifyResult.IsSuccess)
+                    {
+                        return modifyResult.ToRuntimeResult();
+                    }
 
                     return RuntimeCommandResult.FromSuccess("Condition updated.");
                 }

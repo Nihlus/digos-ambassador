@@ -665,5 +665,25 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 )
             );
         }
+
+        /// <summary>
+        /// Modifies the given condition using the given function, saving the results after.
+        /// </summary>
+        /// <param name="condition">The condition to modify.</param>
+        /// <param name="modificationAction">The action to apply.</param>
+        /// <typeparam name="TCondition">The condition type.</typeparam>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> ModifyConditionAsync<TCondition>
+        (
+            TCondition condition,
+            Action<TCondition> modificationAction
+        )
+            where TCondition : AutoroleCondition
+        {
+            modificationAction(condition);
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
     }
 }

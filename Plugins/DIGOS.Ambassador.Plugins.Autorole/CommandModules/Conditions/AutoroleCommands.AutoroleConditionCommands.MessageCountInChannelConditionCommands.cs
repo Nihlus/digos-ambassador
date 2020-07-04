@@ -119,8 +119,20 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     }
 
                     var condition = getCondition.Entity;
-                    condition.RequiredCount = count;
-                    condition.SourceID = (long)channel.Id;
+                    var modifyResult = await _autoroles.ModifyConditionAsync
+                    (
+                        condition,
+                        c =>
+                        {
+                            condition.RequiredCount = count;
+                            condition.SourceID = (long)channel.Id;
+                        }
+                    );
+
+                    if (!modifyResult.IsSuccess)
+                    {
+                        return modifyResult.ToRuntimeResult();
+                    }
 
                     return RuntimeCommandResult.FromSuccess("Condition updated.");
                 }

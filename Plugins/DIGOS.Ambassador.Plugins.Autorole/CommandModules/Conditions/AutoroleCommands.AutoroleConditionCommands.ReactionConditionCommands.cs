@@ -130,8 +130,20 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     }
 
                     var condition = getCondition.Entity;
-                    condition.MessageID = (long)message.Id;
-                    condition.EmoteName = emote.Name;
+                    var modifyResult = await _autoroles.ModifyConditionAsync
+                    (
+                        condition,
+                        c =>
+                        {
+                            condition.MessageID = (long)message.Id;
+                            condition.EmoteName = emote.Name;
+                        }
+                    );
+
+                    if (!modifyResult.IsSuccess)
+                    {
+                        return modifyResult.ToRuntimeResult();
+                    }
 
                     return RuntimeCommandResult.FromSuccess("Condition updated.");
                 }

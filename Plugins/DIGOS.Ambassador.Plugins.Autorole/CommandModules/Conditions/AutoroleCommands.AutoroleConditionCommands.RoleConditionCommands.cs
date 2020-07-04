@@ -119,7 +119,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     }
 
                     var condition = getCondition.Entity;
-                    condition.RoleID = (long)role.Id;
+                    var modifyResult = await _autoroles.ModifyConditionAsync
+                    (
+                        condition,
+                        c =>
+                        {
+                            condition.RoleID = (long)role.Id;
+                        }
+                    );
+
+                    if (!modifyResult.IsSuccess)
+                    {
+                        return modifyResult.ToRuntimeResult();
+                    }
 
                     return RuntimeCommandResult.FromSuccess("Condition updated.");
                 }
