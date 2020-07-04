@@ -22,11 +22,13 @@
 
 using System;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using Discord;
+using Discord.Net;
 using JetBrains.Annotations;
 using Remora.Results;
 
@@ -145,10 +147,27 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             roleplay.DedicatedChannelID = (long)dedicatedChannel.Id;
 
-            var resetPermissions = await ResetChannelPermissionsAsync(dedicatedChannel, roleplay);
-            if (!resetPermissions.IsSuccess)
+            // This can fail in all manner of ways because of Discord.NET. Try, catch, etc...
+            try
             {
-                return CreateEntityResult<ITextChannel>.FromError(resetPermissions);
+                var resetPermissions = await ResetChannelPermissionsAsync(dedicatedChannel, roleplay);
+                if (!resetPermissions.IsSuccess)
+                {
+                    return CreateEntityResult<ITextChannel>.FromError(resetPermissions);
+                }
+            }
+            catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
+            {
+                return CreateEntityResult<ITextChannel>.FromError
+                (
+                    "Failed to update channel permissions. Does the bot have permissions to manage permissions on new" +
+                    "channels?"
+                );
+            }
+            catch (Exception ex)
+            {
+                await dedicatedChannel.DeleteAsync();
+                return CreateEntityResult<ITextChannel>.FromError(ex);
             }
 
             await _database.SaveChangesAsync();
@@ -420,6 +439,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return clear;
             }
 
+            // Then, ensure the bot has full access to the channel
+            var botDiscordUser = await guild.GetUserAsync(_client.CurrentUser.Id);
+            var allowAll = OverwritePermissions.AllowAll(channel);
+
+            await channel.AddPermissionOverwriteAsync(botDiscordUser, allowAll);
+
             // Next, apply default role settings
             var configureDefault = await ConfigureDefaultUserRolePermissions(guild, channel);
             if (!configureDefault.IsSuccess)
@@ -427,13 +452,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return configureDefault;
             }
 
-            // Finally, ensure the bot has full access to the channel
-            var botDiscordUser = await guild.GetUserAsync(_client.CurrentUser.Id);
-            var allowAll = OverwritePermissions.AllowAll(channel);
-
-            await channel.AddPermissionOverwriteAsync(botDiscordUser, allowAll);
-
-            // Then, set up permission overrides for participants
+            // Finally, set up permission overrides for participants
             var updateParticipants = await UpdateParticipantPermissionsAsync(guild, roleplay);
             if (!updateParticipants.IsSuccess)
             {
