@@ -25,6 +25,8 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Permissions;
@@ -71,7 +73,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Command("info")]
         [Summary("Shows known information about the invoking user.")]
         [RequirePermission(typeof(ShowUserInfo), PermissionTarget.Self)]
-        public async Task ShowInfoAsync() => await ShowInfoAsync(this.Context.User);
+        public async Task<RuntimeResult> ShowInfoAsync() => await ShowInfoAsync(this.Context.User);
 
         /// <summary>
         /// Shows known information about the mentioned user.
@@ -81,17 +83,18 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Command("info")]
         [Summary("Shows known information about the target user.")]
         [RequirePermission(typeof(ShowUserInfo), PermissionTarget.Other)]
-        public async Task ShowInfoAsync(IUser discordUser)
+        public async Task<RuntimeResult> ShowInfoAsync(IUser discordUser)
         {
             var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
             if (!getUserResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
-                return;
+                return getUserResult.ToRuntimeResult();
             }
 
             var user = getUserResult.Entity;
             await ShowUserInfoAsync(discordUser, user);
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -198,7 +201,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Command("bio")]
             [Summary("Sets the invoking user's bio.")]
             [RequirePermission(typeof(EditUserInfo), PermissionTarget.Self)]
-            public async Task SetUserBioAsync(string bio) => await SetUserBioAsync(this.Context.User, bio);
+            public async Task<RuntimeResult> SetUserBioAsync(string bio) => await SetUserBioAsync(this.Context.User, bio);
 
             /// <summary>
             /// Sets the target user's bio.
@@ -210,14 +213,13 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Summary("Sets the target user's bio.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditUserInfo), PermissionTarget.Other)]
-            public async Task SetUserBioAsync(IUser discordUser, string bio)
+            public async Task<RuntimeResult> SetUserBioAsync(IUser discordUser, string bio)
             {
                 // Add the user to the user database if they're not already in it
                 var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
                 if (!getUserResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
-                    return;
+                    return getUserResult.ToRuntimeResult();
                 }
 
                 var user = getUserResult.Entity;
@@ -225,11 +227,10 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var setBioResult = await _users.SetUserBioAsync(user, bio);
                 if (!setBioResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setBioResult.ErrorReason);
-                    return;
+                    return setBioResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, $"Bio of {discordUser.Mention} updated.");
+                return RuntimeCommandResult.FromSuccess($"Bio of {discordUser.Mention} updated.");
             }
 
             /// <summary>
@@ -240,7 +241,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Command("timezone")]
             [Summary("Sets the invoking user's UTC timezone hour offset.")]
             [RequirePermission(typeof(EditUserInfo), PermissionTarget.Self)]
-            public async Task SetUserTimezoneAsync(int timezone)
+            public async Task<RuntimeResult> SetUserTimezoneAsync(int timezone)
                 => await SetUserTimezoneAsync(this.Context.User, timezone);
 
             /// <summary>
@@ -253,14 +254,13 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Summary("Sets the target user's UTC timezone hour offset.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditUserInfo), PermissionTarget.Other)]
-            public async Task SetUserTimezoneAsync(IUser discordUser, int timezone)
+            public async Task<RuntimeResult> SetUserTimezoneAsync(IUser discordUser, int timezone)
             {
                 // Add the user to the user database if they're not already in it
                 var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
                 if (!getUserResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getUserResult.ErrorReason);
-                    return;
+                    return getUserResult.ToRuntimeResult();
                 }
 
                 var user = getUserResult.Entity;
@@ -268,11 +268,10 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var setTimezoneResult = await _users.SetUserTimezoneAsync(user, timezone);
                 if (!setTimezoneResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setTimezoneResult.ErrorReason);
-                    return;
+                    return setTimezoneResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, $"Timezone of {discordUser.Mention} updated.");
+                return RuntimeCommandResult.FromSuccess($"Timezone of {discordUser.Mention} updated.");
             }
         }
     }
