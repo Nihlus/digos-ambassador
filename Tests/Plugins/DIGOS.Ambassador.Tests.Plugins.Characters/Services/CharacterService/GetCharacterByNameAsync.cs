@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfMoreThanOneCharacterWithThatNameExists()
             {
-                var anotherCharacter = CreateCharacter
+                CreateCharacter
                 (
                     new User(1),
                     this.DefaultServer,

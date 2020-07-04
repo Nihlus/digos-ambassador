@@ -21,7 +21,6 @@
 //
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using Moq;
 using Xunit;
@@ -37,19 +36,18 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
         public class IsEntityNameUniqueForUser : OwnedEntityServiceTestBase
         {
             [Fact]
-            public async Task ReturnsTrueForEmptySet()
+            public void ReturnsTrueForEmptySet()
             {
                 var entityMock = new Mock<IOwnedNamedEntity>();
                 entityMock.Setup(e => e.Name).Returns("Test");
 
-                var list = new List<IOwnedNamedEntity>();
-                var result = this.Entities.IsEntityNameUniqueForUser(list, "Test2");
+                var result = this.Entities.IsEntityNameUniqueForUser(new List<IOwnedNamedEntity>(), "Test2");
 
                 Assert.True(result);
             }
 
             [Fact]
-            public async Task ReturnsTrueForUniqueName()
+            public void ReturnsTrueForUniqueName()
             {
                 var entityMock = new Mock<IOwnedNamedEntity>();
                 entityMock.Setup(e => e.Name).Returns("Test");
@@ -61,7 +59,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             }
 
             [Fact]
-            public async Task ReturnsFalseForNonUniqueName()
+            public void ReturnsFalseForNonUniqueName()
             {
                 var entityMock = new Mock<IOwnedNamedEntity>();
                 entityMock.Setup(e => e.Name).Returns("Test");
@@ -73,7 +71,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             }
 
             [Fact]
-            public async Task ReturnsFalseForNonUniqueNameAndIsCaseInsensitive()
+            public void ReturnsFalseForNonUniqueNameAndIsCaseInsensitive()
             {
                 var entityMock = new Mock<IOwnedNamedEntity>();
                 entityMock.Setup(e => e.Name).Returns("Test");

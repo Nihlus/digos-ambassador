@@ -39,9 +39,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         {
             private const string Description = "A cool person";
 
-            private Character _character = null!;
+            private readonly Character _character;
 
-            public override async Task InitializeAsync()
+            public SetCharacterDescriptionAsync()
             {
                 _character = CreateCharacter(description: Description);
             }

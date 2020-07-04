@@ -38,9 +38,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         {
             private const bool IsNSFW = false;
 
-            private Character _character = null!;
+            private readonly Character _character;
 
-            public override async Task InitializeAsync()
+            public SetCharacterIsNSFWAsync()
             {
                 _character = CreateCharacter(isNSFW: IsNSFW);
             }

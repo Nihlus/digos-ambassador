@@ -36,10 +36,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     {
         public class TransferCharacterOwnershipAsync : CharacterServiceTestBase
         {
-            private Character _character = null!;
-            private User _newOwner = null!;
+            private readonly Character _character;
+            private readonly User _newOwner;
 
-            public override async Task InitializeAsync()
+            public TransferCharacterOwnershipAsync()
             {
                 _character = CreateCharacter();
                 _newOwner = new User(1);

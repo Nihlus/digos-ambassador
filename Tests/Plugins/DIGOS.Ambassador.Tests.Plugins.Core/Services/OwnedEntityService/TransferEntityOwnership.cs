@@ -37,7 +37,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
 {
     public partial class OwnedEntityServiceTests
     {
-        public class TransferEntityOwnershipAsync : OwnedEntityServiceTestBase, IAsyncLifetime
+        public class TransferEntityOwnershipAsync : OwnedEntityServiceTestBase
         {
             private readonly IUser _originalUser;
             private readonly IUser _newUser;
@@ -58,15 +58,17 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 _newUser = newUserMock.Object;
             }
 
-            public async Task InitializeAsync()
+            public override async Task InitializeAsync()
             {
+                await base.InitializeAsync();
+
                 // Set up mocked database users
                 _originalDBUser = (await this.Users.AddUserAsync(_originalUser)).Entity;
                 _newDBUser = (await this.Users.AddUserAsync(_newUser)).Entity;
             }
 
             [Fact]
-            public async Task ReturnsErrorIfUserAlreadyOwnsTheEntity()
+            public void ReturnsErrorIfUserAlreadyOwnsTheEntity()
             {
                 // Set up entity owned by the original user
                 var entityMock = new Mock<IOwnedNamedEntity>();
@@ -91,7 +93,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             }
 
             [Fact]
-            public async Task ReturnsErrorIfUserAlreadyOwnsAnEntityWithTheSameName()
+            public void ReturnsErrorIfUserAlreadyOwnsAnEntityWithTheSameName()
             {
                 // Set up the entities owned by the users
                 var entityOwnedByOriginal = new Mock<IOwnedNamedEntity>();
@@ -110,7 +112,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
             }
 
             [Fact]
-            public async Task IsSuccessfulIfUserDoesNotOwnTheEntityAndDoesNotOwnAnEntityWithTheSameName()
+            public void IsSuccessfulIfUserDoesNotOwnTheEntityAndDoesNotOwnAnEntityWithTheSameName()
             {
                 // Set up the entities owned by the users
                 var entityOwnedByOriginalMock = new Mock<IOwnedNamedEntity>();
@@ -132,11 +134,6 @@ namespace DIGOS.Ambassador.Tests.Plugins.Core
                 Assert.True(result.IsSuccess);
                 Assert.Same(_newDBUser, entityOwnedByOriginal.Owner);
                 Assert.True(result.WasModified);
-            }
-
-            public Task DisposeAsync()
-            {
-                return Task.CompletedTask;
             }
         }
     }

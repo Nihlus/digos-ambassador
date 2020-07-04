@@ -41,9 +41,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         {
             private const string PronounFamily = "Feminine";
 
-            private Character _character = null!;
+            private readonly Character _character;
 
-            public override async Task InitializeAsync()
+            public SetCharacterPronounsAsync()
             {
                 this.Services.GetRequiredService<PronounService>().WithPronounProvider(new FemininePronounProvider());
                 this.Services.GetRequiredService<PronounService>().WithPronounProvider(new ZeHirPronounProvider());

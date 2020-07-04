@@ -39,9 +39,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         {
             private const string AvatarURL = "http://fake.com/avatar.png";
 
-            private Character _character = null!;
+            private readonly Character _character;
 
-            public override async Task InitializeAsync()
+            public SetCharacterAvatarAsync()
             {
                 _character = CreateCharacter(avatarUrl: AvatarURL);
             }

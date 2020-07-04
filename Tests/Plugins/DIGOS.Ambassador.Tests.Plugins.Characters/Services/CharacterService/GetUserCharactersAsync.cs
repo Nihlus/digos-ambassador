@@ -22,7 +22,6 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using Xunit;
@@ -133,9 +132,10 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 var character1 = CreateCharacter(name: "dummy1");
                 var character2 = CreateCharacter(name: "dummy2");
 
-                var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
+                var result = (await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer))
+                    .ToList();
 
-                Assert.Equal(2, result.Count());
+                Assert.Equal(2, result.Count);
                 Assert.Contains(character1, result);
                 Assert.Contains(character2, result);
             }

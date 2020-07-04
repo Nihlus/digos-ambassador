@@ -22,7 +22,6 @@
 
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using Xunit;
 
@@ -60,7 +59,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                     string.Empty
                 );
 
-                var result = await this.Characters.GetCharactersAsync(this.DefaultServer);
+                var result = (await this.Characters.GetCharactersAsync(this.DefaultServer)).ToList();
 
                 Assert.NotEmpty(result);
                 Assert.Single(result);
@@ -125,7 +124,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                     string.Empty
                 );
 
-                var result = await this.Characters.GetCharactersAsync(this.DefaultServer);
+                var result = (await this.Characters.GetCharactersAsync(this.DefaultServer)).ToList();
 
                 Assert.NotEmpty(result);
                 Assert.Equal(2, result.Count());

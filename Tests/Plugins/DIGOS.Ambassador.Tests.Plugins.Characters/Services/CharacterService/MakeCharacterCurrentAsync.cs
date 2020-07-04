@@ -34,9 +34,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
     {
         public class MakeCharacterCurrentAsync : CharacterServiceTestBase
         {
-            private Character _character = null!;
+            private readonly Character _character;
 
-            public override async Task InitializeAsync()
+            public MakeCharacterCurrentAsync()
             {
                 _character = CreateCharacter();
             }
