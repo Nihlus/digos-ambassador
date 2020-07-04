@@ -21,6 +21,8 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Permissions;
@@ -69,7 +71,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Summary("Shows general information about the current server.")]
         [RequireContext(Guild)]
         [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
-        public async Task ShowServerAsync()
+        public async Task<RuntimeResult> ShowServerAsync()
         {
             var eb = _feedback.CreateEmbedBase();
 
@@ -78,8 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
             if (!getServerResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
-                return;
+                return getServerResult.ToRuntimeResult();
             }
 
             var server = getServerResult.Entity;
@@ -121,6 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             eb.AddField("First-join Message", content);
 
             await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -131,13 +133,12 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Summary("Shows the server's join message.")]
         [RequireContext(Guild)]
         [RequirePermission(typeof(ShowServerInfo), PermissionTarget.Self)]
-        public async Task ShowJoinMessageAsync()
+        public async Task<RuntimeResult> ShowJoinMessageAsync()
         {
             var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
             if (!getServerResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
-                return;
+                return getServerResult.ToRuntimeResult();
             }
 
             var server = getServerResult.Entity;
@@ -145,8 +146,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var getJoinMessageResult = _servers.GetJoinMessage(server);
             if (!getJoinMessageResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getJoinMessageResult.ErrorReason);
-                return;
+                return getJoinMessageResult.ToRuntimeResult();
             }
 
             var eb = _feedback.CreateEmbedBase();
@@ -155,6 +155,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             eb.WithDescription(getJoinMessageResult.Entity);
 
             await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -164,18 +165,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Group("set")]
         public class SetCommands : ModuleBase
         {
-            private readonly UserFeedbackService _feedback;
             private readonly ServerService _servers;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
             /// <param name="database">A database context from the context pool.</param>
-            /// <param name="feedback">The user feedback service.</param>
             /// <param name="servers">The servers service.</param>
-            public SetCommands(CoreDatabaseContext database, UserFeedbackService feedback, ServerService servers)
+            public SetCommands(CoreDatabaseContext database, ServerService servers)
             {
-                _feedback = feedback;
                 _servers = servers;
             }
 
@@ -188,13 +186,12 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Summary("Sets the server's description.")]
             [RequireContext(Guild)]
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task SetDescriptionAsync(string newDescription)
+            public async Task<RuntimeResult> SetDescriptionAsync(string newDescription)
             {
                 var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
                 if (!getServerResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
-                    return;
+                    return getServerResult.ToRuntimeResult();
                 }
 
                 var server = getServerResult.Entity;
@@ -202,11 +199,10 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var result = await _servers.SetDescriptionAsync(server, newDescription);
                 if (!result.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
+                    return result.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Server description set.");
+                return RuntimeCommandResult.FromSuccess("Server description set.");
             }
 
             /// <summary>
@@ -218,13 +214,12 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Summary("Sets the server's first-join message.")]
             [RequireContext(Guild)]
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task SetJoinMessageAsync(string newJoinMessage)
+            public async Task<RuntimeResult> SetJoinMessageAsync(string newJoinMessage)
             {
                 var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
                 if (!getServerResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
-                    return;
+                    return getServerResult.ToRuntimeResult();
                 }
 
                 var server = getServerResult.Entity;
@@ -232,11 +227,10 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var result = await _servers.SetJoinMessageAsync(server, newJoinMessage);
                 if (!result.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
+                    return result.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Server first-join message set.");
+                return RuntimeCommandResult.FromSuccess("Server first-join message set.");
             }
 
             /// <summary>
@@ -248,13 +242,12 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Summary("Sets whether the server is NSFW.")]
             [RequireContext(Guild)]
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task SetIsNSFWAsync(bool isNsfw)
+            public async Task<RuntimeResult> SetIsNSFWAsync(bool isNsfw)
             {
                 var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
                 if (!getServerResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
-                    return;
+                    return getServerResult.ToRuntimeResult();
                 }
 
                 var server = getServerResult.Entity;
@@ -262,13 +255,11 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var result = await _servers.SetIsNSFWAsync(server, isNsfw);
                 if (!result.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
+                    return result.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync
+                return RuntimeCommandResult.FromSuccess
                 (
-                    this.Context,
                     $"The server is {(isNsfw ? "now set as NSFW" : "no longer NSFW")}."
                 );
             }
@@ -282,13 +273,12 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             [Summary("Sets whether the bot sends join messages to new users.")]
             [RequireContext(Guild)]
             [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
-            public async Task SetSendJoinMessagesAsync(bool sendJoinMessage)
+            public async Task<RuntimeResult> SetSendJoinMessagesAsync(bool sendJoinMessage)
             {
                 var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
                 if (!getServerResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
-                    return;
+                    return getServerResult.ToRuntimeResult();
                 }
 
                 var server = getServerResult.Entity;
@@ -296,19 +286,14 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var result = await _servers.SetSendJoinMessageAsync(server, sendJoinMessage);
                 if (!result.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
+                    return result.ToRuntimeResult();
                 }
 
                 var willDo = sendJoinMessage
                     ? "will now send first-join messages to new users"
                     : "no longer sends first-join messages";
 
-                await _feedback.SendConfirmationAsync
-                (
-                    this.Context,
-                    $"The server {willDo}."
-                );
+                return RuntimeCommandResult.FromSuccess($"The server {willDo}.");
             }
         }
     }

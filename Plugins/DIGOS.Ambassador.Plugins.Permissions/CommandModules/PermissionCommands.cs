@@ -25,6 +25,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
@@ -88,7 +90,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// </summary>
         [Command("list")]
         [Summary("Lists all available permissions.")]
-        public async Task ListPermissionsAsync()
+        public async Task<RuntimeResult> ListPermissionsAsync()
         {
             var availablePermissions = _permissionRegistry.RegisteredPermissions
                 .OrderBy(p => p.GetType().Name)
@@ -117,6 +119,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -125,7 +129,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [Command("list-granted")]
         [Summary("Lists all permissions that have been granted to the invoking user.")]
         [RequireContext(Guild)]
-        public Task ListGrantedPermissionsAsync() => ListGrantedPermissionsAsync(this.Context.User);
+        public Task<RuntimeResult> ListGrantedPermissionsAsync() => ListGrantedPermissionsAsync(this.Context.User);
 
         /// <summary>
         /// Lists all permissions that have been granted to target user.
@@ -134,7 +138,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         [Command("list-granted")]
         [Summary("Lists all permissions that have been granted to target user.")]
         [RequireContext(Guild)]
-        public async Task ListGrantedPermissionsAsync(IUser discordUser)
+        public async Task<RuntimeResult> ListGrantedPermissionsAsync(IUser discordUser)
         {
             var userPermissions = await _permissions.GetApplicableUserPermissionsAsync(this.Context.Guild, discordUser);
 
@@ -186,6 +190,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -227,7 +233,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             [Command]
             [Summary("Grant yourself the given permission.")]
             [RequirePermission(typeof(GrantPermission), PermissionTarget.Self)]
-            public async Task Default
+            public async Task<RuntimeResult> Default
             (
                 string permissionName,
                 [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
@@ -244,7 +250,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             [Command]
             [Summary("Grant the targeted user the given permission.")]
             [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
-            public async Task Default
+            public async Task<RuntimeResult> Default
             (
                 IUser discordUser,
                 string permissionName,
@@ -255,8 +261,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                 var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
                 if (!getPermissionResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getPermissionResult.ErrorReason);
-                    return;
+                    return getPermissionResult.ToRuntimeResult();
                 }
 
                 var permission = getPermissionResult.Entity;
@@ -270,13 +275,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
 
                 if (!grantPermissionResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, grantPermissionResult.ErrorReason);
-                    return;
+                    return grantPermissionResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync
+                return RuntimeCommandResult.FromSuccess
                 (
-                    this.Context,
                     $"{permission.FriendlyName} granted to {discordUser.Mention}."
                 );
             }
@@ -290,7 +293,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             [Command]
             [Summary("Grant the targeted role the given permission.")]
             [RequirePermission(typeof(GrantPermission), PermissionTarget.Other)]
-            public async Task Default
+            public async Task<RuntimeResult> Default
             (
                 IRole discordRole,
                 string permissionName,
@@ -301,8 +304,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                 var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
                 if (!getPermissionResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getPermissionResult.ErrorReason);
-                    return;
+                    return getPermissionResult.ToRuntimeResult();
                 }
 
                 var permission = getPermissionResult.Entity;
@@ -315,13 +317,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
 
                 if (!grantPermissionResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, grantPermissionResult.ErrorReason);
-                    return;
+                    return grantPermissionResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync
+                return RuntimeCommandResult.FromSuccess
                 (
-                    this.Context,
                     $"{permission.FriendlyName} granted to {MentionUtils.MentionRole(discordRole.Id)}."
                 );
             }
@@ -366,7 +366,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             [Command]
             [Summary("Revoke the given permission from yourself.")]
             [RequirePermission(typeof(RevokePermission), PermissionTarget.Self)]
-            public async Task Default
+            public async Task<RuntimeResult> Default
             (
                 string permissionName,
                 [OverrideTypeReader(typeof(HumanizerEnumTypeReader<PermissionTarget>))]
@@ -383,7 +383,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             [Command]
             [Summary("Revoke the given permission from the targeted user.")]
             [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]
-            public async Task Default
+            public async Task<RuntimeResult> Default
             (
                 IUser discordUser,
                 string permissionName,
@@ -394,8 +394,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                 var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
                 if (!getPermissionResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getPermissionResult.ErrorReason);
-                    return;
+                    return getPermissionResult.ToRuntimeResult();
                 }
 
                 var permission = getPermissionResult.Entity;
@@ -409,13 +408,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
 
                 if (!revokePermissionResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, revokePermissionResult.ErrorReason);
-                    return;
+                    return revokePermissionResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync
+                return RuntimeCommandResult.FromSuccess
                 (
-                    this.Context,
                     $"{permission.FriendlyName} revoked from {discordUser.Mention}."
                 );
             }
@@ -429,7 +426,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
             [Command]
             [Summary("Revoke the given permission from the targeted role.")]
             [RequirePermission(typeof(RevokePermission), PermissionTarget.Other)]
-            public async Task Default
+            public async Task<RuntimeResult> Default
             (
                 IRole discordRole,
                 string permissionName,
@@ -440,8 +437,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                 var getPermissionResult = _permissionRegistry.GetPermission(permissionName);
                 if (!getPermissionResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getPermissionResult.ErrorReason);
-                    return;
+                    return getPermissionResult.ToRuntimeResult();
                 }
 
                 var permission = getPermissionResult.Entity;
@@ -454,13 +450,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
 
                 if (!revokePermissionResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, revokePermissionResult.ErrorReason);
-                    return;
+                    return revokePermissionResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync
+                return RuntimeCommandResult.FromSuccess
                 (
-                    this.Context,
                     $"{permission.FriendlyName} revoked from {MentionUtils.MentionRole(discordRole.Id)}."
                 );
             }

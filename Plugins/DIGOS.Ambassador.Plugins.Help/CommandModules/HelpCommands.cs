@@ -26,6 +26,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Plugins.Help.Services;
@@ -77,7 +78,7 @@ namespace DIGOS.Ambassador.Plugins.Help.CommandModules
         [UsedImplicitly]
         [Command]
         [Summary("Lists available command modules.")]
-        public async Task HelpAsync()
+        public async Task<RuntimeResult> HelpAsync()
         {
             var modules = _commands.Modules.Where(m => !m.IsSubmodule).ToList();
             var helpWizard = new HelpWizard(modules, _interactive, _feedback, _help, this.Context.User);
@@ -89,6 +90,8 @@ namespace DIGOS.Ambassador.Plugins.Help.CommandModules
                 helpWizard,
                 TimeSpan.FromMinutes(30)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -99,7 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Help.CommandModules
         [UsedImplicitly]
         [Command]
         [Summary("Lists available commands that match the given search text.")]
-        public async Task HelpAsync([Remainder] string searchText)
+        public async Task<RuntimeResult> HelpAsync([Remainder] string searchText)
         {
             searchText = searchText.Unquote();
 
@@ -130,26 +133,29 @@ namespace DIGOS.Ambassador.Plugins.Help.CommandModules
                     TimeSpan.FromMinutes(30)
                 );
 
-                return;
+                return RuntimeCommandResult.FromSuccess();
             }
 
             var commandSearchTerms = topLevelModules.SelectMany(m => m.GetAllCommands().SelectMany(c => c.Aliases));
             var findCommandResult = commandSearchTerms.BestLevenshteinMatch(searchText, 0.5);
-            if (findCommandResult.IsSuccess)
+            if (!findCommandResult.IsSuccess)
             {
-                var foundAlias = findCommandResult.Entity;
-
-                var commandGroup = topLevelModules
-                    .Select(m => m.GetAllCommands().Where(c => c.Aliases.Contains(findCommandResult.Entity)))
-                    .First(l => l.Any())
-                    .Where(c => c.Aliases.Contains(foundAlias))
-                    .GroupBy(c => c.Aliases.OrderByDescending(a => a).First())
-                    .First();
-
-                var eb = _help.CreateDetailedCommandInfoEmbed(commandGroup);
-
-                await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
+                return findCommandResult.ToRuntimeResult();
             }
+
+            var foundAlias = findCommandResult.Entity;
+
+            var commandGroup = topLevelModules
+                .Select(m => m.GetAllCommands().Where(c => c.Aliases.Contains(findCommandResult.Entity)))
+                .First(l => l.Any())
+                .Where(c => c.Aliases.Contains(foundAlias))
+                .GroupBy(c => c.Aliases.OrderByDescending(a => a).First())
+                .First();
+
+            var eb = _help.CreateDetailedCommandInfoEmbed(commandGroup);
+
+            await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
+            return RuntimeCommandResult.FromSuccess();
         }
     }
 }

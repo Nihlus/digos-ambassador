@@ -21,7 +21,8 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
@@ -47,24 +48,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Group("set")]
             public class ServerSetCommands : ModuleBase
             {
-                private readonly UserFeedbackService _feedback;
                 private readonly ServerService _servers;
                 private readonly RoleplayServerSettingsService _serverSettings;
 
                 /// <summary>
                 /// Initializes a new instance of the <see cref="ServerSetCommands"/> class.
                 /// </summary>
-                /// <param name="feedback">The user feedback service.</param>
                 /// <param name="serverSettings">The server settings service.</param>
                 /// <param name="servers">The server service.</param>
                 public ServerSetCommands
                 (
-                    UserFeedbackService feedback,
                     RoleplayServerSettingsService serverSettings,
                     ServerService servers
                 )
                 {
-                    _feedback = feedback;
                     _serverSettings = serverSettings;
                     _servers = servers;
                 }
@@ -78,13 +75,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 [Summary("Sets the channel category to use for dedicated roleplays.")]
                 [RequireContext(Guild)]
                 [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-                public async Task SetDedicatedRoleplayChannelCategory(ICategoryChannel category)
+                public async Task<RuntimeResult> SetDedicatedRoleplayChannelCategory(ICategoryChannel category)
                 {
                     var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
                     if (!getServerResult.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
-                        return;
+                        return getServerResult.ToRuntimeResult();
                     }
 
                     var server = getServerResult.Entity;
@@ -97,11 +93,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                     if (!result.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                        return;
+                        return result.ToRuntimeResult();
                     }
 
-                    await _feedback.SendConfirmationAsync(this.Context, "Dedicated channel category set.");
+                    return RuntimeCommandResult.FromSuccess("Dedicated channel category set.");
                 }
 
                 /// <summary>
@@ -113,13 +108,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 [Summary("Sets the channel to use for archival of roleplays.")]
                 [RequireContext(Guild)]
                 [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-                public async Task SetArchiveChannelAsync(ITextChannel channel)
+                public async Task<RuntimeResult> SetArchiveChannelAsync(ITextChannel channel)
                 {
                     var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
                     if (!getServerResult.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
-                        return;
+                        return getServerResult.ToRuntimeResult();
                     }
 
                     var server = getServerResult.Entity;
@@ -132,11 +126,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                     if (!result.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                        return;
+                        return result.ToRuntimeResult();
                     }
 
-                    await _feedback.SendConfirmationAsync(this.Context, "Archive channel set.");
+                    return RuntimeCommandResult.FromSuccess("Archive channel set.");
                 }
 
                 /// <summary>
@@ -148,13 +141,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 [Summary("Sets the role to use as a default @everyone role in dynamic roleplays.")]
                 [RequireContext(Guild)]
                 [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-                public async Task SetDefaultUserRole(IRole role)
+                public async Task<RuntimeResult> SetDefaultUserRole(IRole role)
                 {
                     var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
                     if (!getServerResult.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
-                        return;
+                        return getServerResult.ToRuntimeResult();
                     }
 
                     var server = getServerResult.Entity;
@@ -167,11 +159,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                     if (!result.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                        return;
+                        return result.ToRuntimeResult();
                     }
 
-                    await _feedback.SendConfirmationAsync(this.Context, "Default user role set.");
+                    return RuntimeCommandResult.FromSuccess("Default user role set.");
                 }
             }
         }

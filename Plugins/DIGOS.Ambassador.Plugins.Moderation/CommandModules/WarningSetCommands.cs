@@ -22,6 +22,8 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
@@ -73,13 +75,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Summary("Sets the reason for the warning.")]
             [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
             [RequireContext(ContextType.Guild)]
-            public async Task SetWarningReasonAsync(long warningID, string newReason)
+            public async Task<RuntimeResult> SetWarningReasonAsync(long warningID, string newReason)
             {
                 var getWarning = await _warnings.GetWarningAsync(this.Context.Guild, warningID);
                 if (!getWarning.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getWarning.ErrorReason);
-                    return;
+                    return getWarning.ToRuntimeResult();
                 }
 
                 var warning = getWarning.Entity;
@@ -87,11 +88,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setContents = await _warnings.SetWarningReasonAsync(warning, newReason);
                 if (!setContents.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setContents.ErrorReason);
-                    return;
+                    return setContents.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Warning reason updated.");
+                return RuntimeCommandResult.FromSuccess("Warning reason updated.");
             }
 
             /// <summary>
@@ -103,13 +103,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Summary("Sets the contextually relevant message for the warning.")]
             [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
             [RequireContext(ContextType.Guild)]
-            public async Task SetWarningContextMessageAsync(long warningID, IMessage newMessage)
+            public async Task<RuntimeResult> SetWarningContextMessageAsync(long warningID, IMessage newMessage)
             {
                 var getWarning = await _warnings.GetWarningAsync(this.Context.Guild, warningID);
                 if (!getWarning.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getWarning.ErrorReason);
-                    return;
+                    return getWarning.ToRuntimeResult();
                 }
 
                 var warning = getWarning.Entity;
@@ -117,11 +116,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setMessage = await _warnings.SetWarningContextMessageAsync(warning, (long)newMessage.Id);
                 if (!setMessage.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setMessage.ErrorReason);
-                    return;
+                    return setMessage.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Warning context message updated.");
+                return RuntimeCommandResult.FromSuccess("Warning context message updated.");
             }
 
             /// <summary>
@@ -133,13 +131,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Summary("Sets the duration of the warning.")]
             [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
             [RequireContext(ContextType.Guild)]
-            public async Task SetWarningDurationAsync(long warningID, TimeSpan newDuration)
+            public async Task<RuntimeResult> SetWarningDurationAsync(long warningID, TimeSpan newDuration)
             {
                 var getWarning = await _warnings.GetWarningAsync(this.Context.Guild, warningID);
                 if (!getWarning.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getWarning.ErrorReason);
-                    return;
+                    return getWarning.ToRuntimeResult();
                 }
 
                 var warning = getWarning.Entity;
@@ -149,11 +146,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setExpiration = await _warnings.SetWarningExpiryDateAsync(warning, newExpiration);
                 if (!setExpiration.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setExpiration.ErrorReason);
-                    return;
+                    return setExpiration.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Warning duration updated.");
+                return RuntimeCommandResult.FromSuccess("Warning duration updated.");
             }
         }
     }

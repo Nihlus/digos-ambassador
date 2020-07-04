@@ -22,6 +22,7 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
@@ -65,13 +66,14 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandModules
         [Alias("guild", "server")]
         [Summary("Displays statistics about the current guild.")]
         [RequireContext(Guild)]
-        public async Task ShowServerStatsAsync()
+        public async Task<RuntimeResult> ShowServerStatsAsync()
         {
             var guild = this.Context.Guild;
 
             var eb = CreateGuildInfoEmbed(guild);
 
             await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -83,7 +85,7 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandModules
         [Summary("Displays statistics about all guilds the bot has joined.")]
         [RequireContext(DM)]
         [RequireOwner]
-        public async Task ShowServersStatsAsync()
+        public async Task<RuntimeResult> ShowServersStatsAsync()
         {
             var guilds = await this.Context.Client.GetGuildsAsync();
             var pages = guilds.Select(CreateGuildInfoEmbed);
@@ -96,6 +98,8 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandModules
                 _feedback,
                 paginatedMessage
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>

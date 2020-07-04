@@ -21,6 +21,8 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using Discord;
@@ -66,15 +68,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Command("settings")]
             [Summary("Shows the server's moderation settings.")]
             [RequireContext(ContextType.Guild)]
-            public async Task ShowServerSettingsAsync()
+            public async Task<RuntimeResult> ShowServerSettingsAsync()
             {
                 var guild = this.Context.Guild;
 
                 var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guild);
                 if (!getSettings.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getSettings.ErrorReason);
-                    return;
+                    return getSettings.ToRuntimeResult();
                 }
 
                 var settings = getSettings.Entity;
@@ -98,6 +99,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 eb.AddField("Warning Threshold", settings.WarningThreshold);
 
                 await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+                return RuntimeCommandResult.FromSuccess();
             }
         }
     }

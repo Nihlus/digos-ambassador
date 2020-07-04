@@ -243,44 +243,46 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 }
             }
 
-            if (wantsToUpdateServerMessageCounts)
+            if (!wantsToUpdateServerMessageCounts)
             {
-                var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser);
-                if (!getGlobalStats.IsSuccess)
-                {
-                    this.Log.LogError(getGlobalStats.Exception, getGlobalStats.ErrorReason);
-                    return OperationResult.FromError(getGlobalStats);
-                }
+                return OperationResult.FromSuccess();
+            }
 
-                var globalStats = getGlobalStats.Entity;
+            var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser);
+            if (!getGlobalStats.IsSuccess)
+            {
+                this.Log.LogError(getGlobalStats.Exception, getGlobalStats.ErrorReason);
+                return OperationResult.FromError(getGlobalStats);
+            }
 
-                if (globalStats.TotalMessageCount.HasValue)
+            var globalStats = getGlobalStats.Entity;
+
+            if (globalStats.TotalMessageCount.HasValue)
+            {
+                globalStats.TotalMessageCount += 1;
+            }
+            else
+            {
+                // Compute the first-time sum
+                long sum = 0;
+                foreach (var guildChannel in guildUser.Guild.TextChannels)
                 {
-                    globalStats.TotalMessageCount += 1;
-                }
-                else
-                {
-                    // Compute the first-time sum
-                    long sum = 0;
-                    foreach (var guildChannel in guildUser.Guild.TextChannels)
+                    var countResult = await CountUserMessagesAsync(guildChannel, guildUser);
+                    if (!countResult.IsSuccess)
                     {
-                        var countResult = await CountUserMessagesAsync(guildChannel, guildUser);
-                        if (!countResult.IsSuccess)
+                        if (!(countResult.Exception is null))
                         {
-                            if (!(countResult.Exception is null))
-                            {
-                                this.Log.LogError(countResult.Exception, "Message counting failed.");
-                                return OperationResult.FromError(countResult);
-                            }
-
-                            continue;
+                            this.Log.LogError(countResult.Exception, "Message counting failed.");
+                            return OperationResult.FromError(countResult);
                         }
 
-                        sum += await countResult.Entity;
+                        continue;
                     }
 
-                    globalStats.TotalMessageCount = sum;
+                    sum += await countResult.Entity;
                 }
+
+                globalStats.TotalMessageCount = sum;
             }
 
             return OperationResult.FromSuccess();

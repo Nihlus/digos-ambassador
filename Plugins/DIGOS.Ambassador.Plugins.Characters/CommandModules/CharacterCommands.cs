@@ -29,6 +29,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
@@ -107,7 +108,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Alias("available-pronouns", "pronouns")]
         [Command("available-pronouns")]
         [Summary("Shows available pronoun families that can be used with characters.")]
-        public async Task ShowAvailablePronounFamiliesAsync()
+        public async Task<RuntimeResult> ShowAvailablePronounFamiliesAsync()
         {
             EmbedFieldBuilder CreatePronounField(IPronounProvider pronounProvider)
             {
@@ -129,8 +130,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             var pronounProviders = _pronouns.GetAvailablePronounProviders().ToList();
             if (!pronounProviders.Any())
             {
-                await _feedback.SendErrorAsync(this.Context, "There doesn't seem to be any pronouns available.");
-                return;
+                return RuntimeCommandResult.FromError("There doesn't seem to be any pronouns available.");
             }
 
             var fields = pronounProviders.Select(CreatePronounField);
@@ -158,6 +158,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5.0)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -168,13 +170,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("show")]
         [Summary("Shows quick information about your current character.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ShowCharacterAsync()
+        public async Task<RuntimeResult> ShowCharacterAsync()
         {
             var retrieveCurrentCharacterResult = await _characters.GetCurrentCharacterAsync((IGuildUser)this.Context.User);
             if (!retrieveCurrentCharacterResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, retrieveCurrentCharacterResult.ErrorReason);
-                return;
+                return retrieveCurrentCharacterResult.ToRuntimeResult();
             }
 
             var character = retrieveCurrentCharacterResult.Entity;
@@ -188,6 +189,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             }
 
             await ShowCharacterAsync(character, eb);
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -200,10 +202,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("show")]
         [Summary("Shows quick information about a character.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ShowCharacterAsync(Character character)
+        public async Task<RuntimeResult> ShowCharacterAsync(Character character)
         {
             var eb = await CreateCharacterInfoEmbedAsync(character);
+
             await ShowCharacterAsync(character, eb);
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -214,7 +218,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("view-characters")]
         [Summary("Shows a gallery of all your characters.")]
         [RequireContext(ContextType.Guild)]
-        public Task ShowCharactersAsync() => ShowCharactersAsync(this.Context.User);
+        public Task<RuntimeResult> ShowCharactersAsync() => ShowCharactersAsync(this.Context.User);
 
         /// <summary>
         /// Shows a gallery of all the user's characters.
@@ -225,13 +229,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("view-characters")]
         [Summary("Shows a gallery of all the user's characters.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ShowCharactersAsync(IUser discordUser)
+        public async Task<RuntimeResult> ShowCharactersAsync(IUser discordUser)
         {
             var getCharacters = await _characters.GetUserCharactersAsync((IGuildUser)this.Context.User);
             if (!getCharacters.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getCharacters.ErrorReason);
-                return;
+                return getCharacters.ToRuntimeResult();
             }
 
             var characters = getCharacters.Entity.ToList();
@@ -274,6 +277,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5.0)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         private async Task ShowCharacterAsync(Character character, EmbedBuilder eb)
@@ -373,7 +378,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Summary("Creates a new character.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(CreateCharacter), PermissionTarget.Self)]
-        public async Task CreateCharacterAsync
+        public async Task<RuntimeResult> CreateCharacterAsync
         (
             string characterName,
             string? characterNickname = null,
@@ -396,14 +401,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             if (!createCharacterResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, createCharacterResult.ErrorReason);
-                return;
+                return createCharacterResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync
-            (
-                this.Context, $"Character \"{createCharacterResult.Entity.Name}\" created."
-            );
+            return RuntimeCommandResult.FromSuccess($"Character \"{createCharacterResult.Entity.Name}\" created.");
         }
 
         /// <summary>
@@ -415,7 +416,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Summary("Deletes the named character.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(DeleteCharacter), PermissionTarget.Self)]
-        public async Task DeleteCharacterAsync
+        public async Task<RuntimeResult> DeleteCharacterAsync
         (
             [RequireEntityOwnerOrPermission(typeof(DeleteCharacter), PermissionTarget.Other)]
             Character character
@@ -424,18 +425,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             var owner = await this.Context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
             if (owner is null)
             {
-                await _feedback.SendErrorAsync(this.Context, "Failed to get the owner of the character.");
-                return;
+                return RuntimeCommandResult.FromError("Failed to get the owner of the character.");
             }
 
             var deleteResult = await _characters.DeleteCharacterAsync(owner, character);
             if (!deleteResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, deleteResult.ErrorReason);
-                return;
+                return deleteResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"Character \"{character.Name}\" deleted.");
+            return RuntimeCommandResult.FromSuccess($"Character \"{character.Name}\" deleted.");
         }
 
         /// <summary>
@@ -447,15 +446,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("list-owned")]
         [Summary("Lists the characters owned by a given user.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ListOwnedCharactersAsync(IUser? discordUser = null)
+        public async Task<RuntimeResult> ListOwnedCharactersAsync(IUser? discordUser = null)
         {
             discordUser ??= this.Context.Message.Author;
 
             var getCharacters = await _characters.GetUserCharactersAsync((IGuildUser)discordUser);
             if (!getCharacters.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getCharacters.ErrorReason);
-                return;
+                return getCharacters.ToRuntimeResult();
             }
 
             var characters = getCharacters.Entity.ToList();
@@ -482,6 +480,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5.0)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -492,17 +492,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("random")]
         [Summary("Switches the user's current character to a different one, picked at random.")]
         [RequireContext(ContextType.Guild)]
-        public async Task AssumeRandomCharacterFormAsync()
+        public async Task<RuntimeResult> AssumeRandomCharacterFormAsync()
         {
             var getRandom = await _characters.GetRandomUserCharacterAsync((IGuildUser)this.Context.User);
             if (!getRandom.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getRandom.ErrorReason);
-                return;
+                return getRandom.ToRuntimeResult();
             }
 
             var randomCharacter = getRandom.Entity;
-            await AssumeCharacterFormAsync(randomCharacter);
+            return await AssumeCharacterFormAsync(randomCharacter);
         }
 
         /// <summary>
@@ -515,7 +514,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Summary("Sets the named character as the user's current character.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(AssumeCharacter), PermissionTarget.Self)]
-        public async Task AssumeCharacterFormAsync
+        public async Task<RuntimeResult> AssumeCharacterFormAsync
         (
             [RequireEntityOwnerOrPermission(typeof(AssumeCharacter), PermissionTarget.Other)]
             Character character
@@ -524,13 +523,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             var makeCurrent = await _characters.MakeCharacterCurrentAsync((IGuildUser)this.Context.User, character);
             if (!makeCurrent.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, makeCurrent.ErrorReason);
-                return;
+                return makeCurrent.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync
+            return RuntimeCommandResult.FromSuccess
             (
-                this.Context,
                 $"{this.Context.Message.Author.Username} shimmers and morphs into {character.Name}."
             );
         }
@@ -543,16 +540,15 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("clear-default")]
         [Summary("Clears your default form.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ClearDefaultCharacterAsync()
+        public async Task<RuntimeResult> ClearDefaultCharacterAsync()
         {
             var result = await _characters.ClearDefaultCharacterAsync((IGuildUser)this.Context.User);
             if (!result.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                return;
+                return result.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Default character cleared.");
+            return RuntimeCommandResult.FromSuccess("Default character cleared.");
         }
 
         /// <summary>
@@ -563,26 +559,23 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("clear")]
         [Summary("Clears any active characters from you, restoring your default form.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ClearCharacterFormAsync()
+        public async Task<RuntimeResult> ClearCharacterFormAsync()
         {
             // First, let's try dropping to a default form instead.
             var getDefaultCharacter = await _characters.GetDefaultCharacterAsync((IGuildUser)this.Context.User);
             if (getDefaultCharacter.IsSuccess)
             {
                 var defaultCharacter = getDefaultCharacter.Entity;
-                await AssumeCharacterFormAsync(defaultCharacter);
-
-                return;
+                return await AssumeCharacterFormAsync(defaultCharacter);
             }
 
             var result = await _characters.ClearCurrentCharacterAsync((IGuildUser)this.Context.User);
             if (!result.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                return;
+                return result.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Character cleared.");
+            return RuntimeCommandResult.FromSuccess("Character cleared.");
         }
 
         /// <summary>
@@ -594,12 +587,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("view-gallery")]
         [Summary("View the images in a character's gallery.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ViewCharacterGalleryAsync(Character character)
+        public async Task<RuntimeResult> ViewCharacterGalleryAsync(Character character)
         {
             if (character.Images.Count <= 0)
             {
-                await _feedback.SendErrorAsync(this.Context, "There are no images in that character's gallery.");
-                return;
+                return RuntimeCommandResult.FromError("There are no images in that character's gallery.");
             }
 
             var gallery = new PaginatedGallery(_feedback, _interactivity, this.Context.User)
@@ -619,6 +611,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 gallery,
                 TimeSpan.FromMinutes(5.0)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -629,7 +623,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Command("list-images")]
         [Summary("Lists the images in a character's gallery.")]
         [RequireContext(ContextType.Guild)]
-        public async Task ListImagesAsync(Character character)
+        public async Task<RuntimeResult> ListImagesAsync(Character character)
         {
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Images in character gallery";
@@ -652,6 +646,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5.0)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -666,7 +662,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Summary("Adds an attached image to a character's gallery.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-        public async Task AddImageAsync
+        public async Task<RuntimeResult> AddImageAsync
         (
             [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
             Character character,
@@ -678,8 +674,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             var hasAtLeastOneAttachment = this.Context.Message.Attachments.Any();
             if (!hasAtLeastOneAttachment)
             {
-                await _feedback.SendErrorAsync(this.Context, "You need to attach an image.");
-                return;
+                return RuntimeCommandResult.FromError("You need to attach an image.");
             }
 
             // Check that it's an image
@@ -688,15 +683,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             if (!firstAttachmentIsImage)
             {
-                await _feedback.SendErrorAsync(this.Context, "You need to attach an image.");
-                return;
+                return RuntimeCommandResult.FromError("You need to attach an image.");
             }
             var imageUrl = firstAttachment.Url;
 
             imageName = (imageName ?? Path.GetFileNameWithoutExtension(firstAttachment.Filename))
                         ?? firstAttachment.Url.GetHashCode().ToString();
 
-            await AddImageAsync(character, imageName, imageUrl, imageCaption, isNSFW);
+            return await AddImageAsync(character, imageName, imageUrl, imageCaption, isNSFW);
         }
 
         /// <summary>
@@ -712,7 +706,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Summary("Adds a linked image to a character's gallery.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-        public async Task AddImageAsync
+        public async Task<RuntimeResult> AddImageAsync
         (
             [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
             Character character,
@@ -733,15 +727,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             if (!addImageResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, addImageResult.ErrorReason);
-                return;
+                return addImageResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync
-            (
-                this.Context,
-                $"Added \"{imageName}\" to {character.Name}'s gallery."
-            );
+            return RuntimeCommandResult.FromSuccess($"Added \"{imageName}\" to {character.Name}'s gallery.");
         }
 
         /// <summary>
@@ -755,7 +744,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Summary("Removes an image from a character's gallery.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-        public async Task RemoveImageAsync
+        public async Task<RuntimeResult> RemoveImageAsync
         (
             [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
             Character character,
@@ -765,18 +754,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             var image = character.Images.FirstOrDefault(i => string.Equals(imageName.ToLower(), i.Name.ToLower()));
             if (image is null)
             {
-                await _feedback.SendErrorAsync(this.Context, "The character doesn't have an image with that name.");
-                return;
+                return RuntimeCommandResult.FromError("The character doesn't have an image with that name.");
             }
 
             var removeImageResult = await _characters.RemoveImageFromCharacterAsync(character, image);
             if (!removeImageResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, removeImageResult.ErrorReason);
-                return;
+                return removeImageResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Image removed.");
+            return RuntimeCommandResult.FromSuccess("Image removed.");
         }
 
         /// <summary>
@@ -790,7 +777,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         [Summary("Transfers ownership of the named character to another user.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(TransferCharacter), PermissionTarget.Self)]
-        public async Task TransferCharacterOwnershipAsync
+        public async Task<RuntimeResult> TransferCharacterOwnershipAsync
         (
             IUser newOwner,
             [RequireEntityOwnerOrPermission(typeof(TransferCharacter), PermissionTarget.Other)]
@@ -804,11 +791,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
             if (!transferResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, transferResult.ErrorReason);
-                return;
+                return transferResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Character ownership transferred.");
+            return RuntimeCommandResult.FromSuccess("Character ownership transferred.");
         }
     }
 }

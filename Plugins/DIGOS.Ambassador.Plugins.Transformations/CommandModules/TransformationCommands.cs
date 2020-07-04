@@ -25,6 +25,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
@@ -100,7 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command]
         [Summary("Transforms the given bodypart into the given species on yourself.")]
         [RequireContext(Guild)]
-        public async Task ShiftAsync
+        public async Task<RuntimeResult> ShiftAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
@@ -120,7 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command]
         [Summary("Transforms the given bodypart into the given species on yourself.")]
         [RequireContext(Guild)]
-        public async Task ShiftAsync
+        public async Task<RuntimeResult> ShiftAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart,
@@ -139,7 +141,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command]
         [Summary("Transforms the given bodypart of the target user into the given species.")]
         [RequireContext(Guild)]
-        public async Task ShiftAsync
+        public async Task<RuntimeResult> ShiftAsync
         (
             IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
@@ -160,7 +162,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command]
         [Summary("Transforms the given bodypart of the target user into the given species.")]
         [RequireContext(Guild)]
-        public async Task ShiftAsync
+        public async Task<RuntimeResult> ShiftAsync
         (
             IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
@@ -173,8 +175,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-                return;
+                return getCurrentCharacterResult.ToRuntimeResult();
             }
 
             var character = getCurrentCharacterResult.Entity;
@@ -191,11 +192,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             if (!result.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                return;
+                return result.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, result.ShiftMessage!);
+            return RuntimeCommandResult.FromSuccess(result.ShiftMessage!);
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("colour")]
         [Summary("Transforms the base colour of the given bodypart on yourself into the given colour.")]
         [RequireContext(Guild)]
-        public async Task ShiftColourAsync
+        public async Task<RuntimeResult> ShiftColourAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
@@ -227,7 +227,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("colour")]
         [Summary("Transforms the base colour of the given bodypart on yourself into the given colour.")]
         [RequireContext(Guild)]
-        public async Task ShiftColourAsync
+        public async Task<RuntimeResult> ShiftColourAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodypart,
@@ -245,7 +245,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Summary("Transforms the base colour of the given bodypart on the target user into the given colour.")]
         [Command("colour")]
         [RequireContext(Guild)]
-        public async Task ShiftColourAsync
+        public async Task<RuntimeResult> ShiftColourAsync
         (
             IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
@@ -265,7 +265,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Summary("Transforms the base colour of the given bodypart on the target user into the given colour.")]
         [Command("colour")]
         [RequireContext(Guild)]
-        public async Task ShiftColourAsync
+        public async Task<RuntimeResult> ShiftColourAsync
         (
             IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
@@ -278,8 +278,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-                return;
+                return getCurrentCharacterResult.ToRuntimeResult();
             }
 
             var character = getCurrentCharacterResult.Entity;
@@ -295,11 +294,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             if (!shiftPartResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
-                return;
+                return shiftPartResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage!);
+            return RuntimeCommandResult.FromSuccess(shiftPartResult.ShiftMessage!);
         }
 
         /// <summary>
@@ -312,7 +310,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("pattern")]
         [Summary("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
         [RequireContext(Guild)]
-        public async Task ShiftPatternAsync
+        public async Task<RuntimeResult> ShiftPatternAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodypart,
@@ -333,7 +331,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("pattern")]
         [Summary("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
         [RequireContext(Guild)]
-        public async Task ShiftPatternAsync
+        public async Task<RuntimeResult> ShiftPatternAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
@@ -356,7 +354,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("pattern")]
         [Summary("Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.")]
         [RequireContext(Guild)]
-        public async Task ShiftPatternAsync
+        public async Task<RuntimeResult> ShiftPatternAsync
         (
             IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
@@ -379,7 +377,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("pattern")]
         [Summary("Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.")]
         [RequireContext(Guild)]
-        public async Task ShiftPatternAsync
+        public async Task<RuntimeResult> ShiftPatternAsync
         (
             IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
@@ -394,8 +392,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-                return;
+                return getCurrentCharacterResult.ToRuntimeResult();
             }
 
             var character = getCurrentCharacterResult.Entity;
@@ -412,11 +409,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             if (!shiftPartResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
-                return;
+                return shiftPartResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage!);
+            return RuntimeCommandResult.FromSuccess(shiftPartResult.ShiftMessage!);
         }
 
         /// <summary>
@@ -429,7 +425,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("pattern-colour")]
         [Summary("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
         [RequireContext(Guild)]
-        public async Task ShiftPatternColourAsync
+        public async Task<RuntimeResult> ShiftPatternColourAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
             Chirality chirality,
@@ -448,7 +444,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("pattern-colour")]
         [Summary("Transforms the colour of the pattern on the given bodypart on yourself to the given colour.")]
         [RequireContext(Guild)]
-        public async Task ShiftPatternColourAsync
+        public async Task<RuntimeResult> ShiftPatternColourAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodypart,
@@ -466,7 +462,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("pattern-colour")]
         [Summary("Transforms the colour of the pattern on the given bodypart on the target user to the given colour.")]
         [RequireContext(Guild)]
-        public async Task ShiftPatternColourAsync
+        public async Task<RuntimeResult> ShiftPatternColourAsync
         (
             IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
@@ -486,7 +482,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("pattern-colour")]
         [Summary("Transforms the colour of the pattern on the given bodypart on the target user to the given colour.")]
         [RequireContext(Guild)]
-        public async Task ShiftPatternColourAsync
+        public async Task<RuntimeResult> ShiftPatternColourAsync
         (
             IGuildUser target,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Chirality>))]
@@ -499,8 +495,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync(target);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-                return;
+                return getCurrentCharacterResult.ToRuntimeResult();
             }
 
             var character = getCurrentCharacterResult.Entity;
@@ -516,11 +511,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             if (!shiftPartResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, shiftPartResult.ErrorReason);
-                return;
+                return shiftPartResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, shiftPartResult.ShiftMessage!);
+            return RuntimeCommandResult.FromSuccess(shiftPartResult.ShiftMessage!);
         }
 
         /// <summary>
@@ -530,7 +524,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Alias("list-available", "list-species", "species", "list")]
         [Command("list-available")]
         [Summary("Lists the available transformation species.")]
-        public async Task ListAvailableTransformationsAsync()
+        public async Task<RuntimeResult> ListAvailableTransformationsAsync()
         {
             var availableSpecies = await _transformation.GetAvailableSpeciesAsync();
 
@@ -566,6 +560,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5.0)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -575,7 +571,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Alias("list-bodyparts", "bodyparts", "parts")]
         [Command("parts")]
         [Summary("Lists the available bodyparts.")]
-        public async Task ListAvailableBodypartsAsync()
+        public async Task<RuntimeResult> ListAvailableBodypartsAsync()
         {
             var parts = Enum.GetValues(typeof(Bodypart))
                 .Cast<Bodypart>()
@@ -616,6 +612,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             );
 
             await _interactivity.SendInteractiveMessageAsync(this.Context.Channel, paginatedMessage);
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -625,7 +622,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Alias("list-colours", "list-shades", "colours", "shades")]
         [Command("colours")]
         [Summary("Lists the available colours.")]
-        public async Task ListAvailableShadesAsync()
+        public async Task<RuntimeResult> ListAvailableShadesAsync()
         {
             var parts = Enum.GetValues(typeof(Shade))
                 .Cast<Shade>()
@@ -648,6 +645,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             );
 
             await _interactivity.SendInteractiveMessageAsync(this.Context.Channel, paginatedMessage);
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -657,7 +655,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Alias("list-colour-modifiers", "list-shade-modifiers", "colour-modifiers", "shade-modifiers")]
         [Command("colour-modifiers")]
         [Summary("Lists the available colour modifiers.")]
-        public async Task ListAvailableShadeModifiersAsync()
+        public async Task<RuntimeResult> ListAvailableShadeModifiersAsync()
         {
             var parts = Enum.GetValues(typeof(ShadeModifier))
                 .Cast<ShadeModifier>()
@@ -680,6 +678,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             );
 
             await _interactivity.SendInteractiveMessageAsync(this.Context.Channel, paginatedMessage);
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -689,7 +688,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Alias("list-patterns", "patterns")]
         [Command("colour-patterns")]
         [Summary("Lists the available patterns.")]
-        public async Task ListAvailablePatternsAsync()
+        public async Task<RuntimeResult> ListAvailablePatternsAsync()
         {
             var parts = Enum.GetValues(typeof(Pattern))
                 .Cast<Pattern>()
@@ -712,6 +711,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             );
 
             await _interactivity.SendInteractiveMessageAsync(this.Context.Channel, paginatedMessage);
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -722,7 +722,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Alias("list-available", "list-species", "species", "list")]
         [Command("list-available")]
         [Summary("Lists the available transformations for a given bodypart.")]
-        public async Task ListAvailableTransformationsAsync
+        public async Task<RuntimeResult> ListAvailableTransformationsAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<Bodypart>))]
             Bodypart bodyPart
@@ -749,6 +749,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             }
 
             await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -758,16 +759,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("describe")]
         [Summary("Describes the current physical appearance of the current character.")]
         [RequireContext(Guild)]
-        public async Task DescribeCharacterAsync()
+        public async Task<RuntimeResult> DescribeCharacterAsync()
         {
             var result = await _characters.GetCurrentCharacterAsync((IGuildUser)this.Context.User);
             if (!result.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                return;
+                return result.ToRuntimeResult();
             }
 
-            await DescribeCharacterAsync(result.Entity);
+            return await DescribeCharacterAsync(result.Entity);
         }
 
         /// <summary>
@@ -778,7 +778,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("describe")]
         [Summary("Describes the current physical appearance of a character.")]
         [RequireContext(Guild)]
-        public async Task DescribeCharacterAsync(Character character)
+        public async Task<RuntimeResult> DescribeCharacterAsync(Character character)
         {
             var generateDescriptionAsync = await _transformation.GenerateCharacterDescriptionAsync
             (character
@@ -786,8 +786,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
 
             if (!generateDescriptionAsync.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, generateDescriptionAsync.ErrorReason);
-                return;
+                return generateDescriptionAsync.ToRuntimeResult();
             }
 
             var eb = new EmbedBuilder();
@@ -818,6 +817,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 description,
                 false
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -828,24 +829,22 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("reset")]
         [Summary("Resets your form to your default one.")]
         [RequireContext(Guild)]
-        public async Task ResetFormAsync()
+        public async Task<RuntimeResult> ResetFormAsync()
         {
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync((IGuildUser)this.Context.User);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-                return;
+                return getCurrentCharacterResult.ToRuntimeResult();
             }
 
             var character = getCurrentCharacterResult.Entity;
             var resetFormResult = await _transformation.ResetCharacterFormAsync(character);
             if (!resetFormResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, resetFormResult.ErrorReason);
-                return;
+                return resetFormResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Character form reset.");
+            return RuntimeCommandResult.FromSuccess("Character form reset.");
         }
 
         /// <summary>
@@ -856,13 +855,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("set-default")]
         [Summary("Sets your current appearance as your current character's default one.")]
         [RequireContext(Guild)]
-        public async Task SetCurrentAppearanceAsDefaultAsync()
+        public async Task<RuntimeResult> SetCurrentAppearanceAsDefaultAsync()
         {
             var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync((IGuildUser)this.Context.User);
             if (!getCurrentCharacterResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getCurrentCharacterResult.ErrorReason);
-                return;
+                return getCurrentCharacterResult.ToRuntimeResult();
             }
 
             var character = getCurrentCharacterResult.Entity;
@@ -870,13 +868,11 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             var setDefaultAppearanceResult = await _transformation.SetCurrentAppearanceAsDefaultForCharacterAsync(character);
             if (!setDefaultAppearanceResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, setDefaultAppearanceResult.ErrorReason);
-                return;
+                return setDefaultAppearanceResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync
+            return RuntimeCommandResult.FromSuccess
             (
-                this.Context,
                 "Current appearance saved as the default one of this character."
             );
         }
@@ -889,18 +885,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("default-opt-in")]
         [Summary("Sets your default setting for opting in or out of transformations on servers you join.")]
         [RequireContext(Guild)]
-        public async Task SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
+        public async Task<RuntimeResult> SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
         {
             var setDefaultOptInResult = await _transformation.SetDefaultOptInAsync(this.Context.User, shouldOptIn);
             if (!setDefaultOptInResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, setDefaultOptInResult.ErrorReason);
-                return;
+                return setDefaultOptInResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync
+            return RuntimeCommandResult.FromSuccess
             (
-                this.Context,
                 $"You're now opted {(shouldOptIn ? "in" : "out")} by default on new servers."
             );
         }
@@ -912,16 +906,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("opt-in")]
         [Summary("Opts into the transformation module on this server.")]
         [RequireContext(Guild)]
-        public async Task OptInToTransformationsAsync()
+        public async Task<RuntimeResult> OptInToTransformationsAsync()
         {
             var optInResult = await _transformation.OptInUserAsync(this.Context.User, this.Context.Guild);
             if (!optInResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, optInResult.ErrorReason);
-                return;
+                return optInResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Opted into transformations. Have fun!");
+            return RuntimeCommandResult.FromSuccess("Opted into transformations. Have fun!");
         }
 
         /// <summary>
@@ -931,16 +924,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("opt-out")]
         [Summary("Opts out of the transformation module on this server.")]
         [RequireContext(Guild)]
-        public async Task OptOutOfTransformationsAsync()
+        public async Task<RuntimeResult> OptOutOfTransformationsAsync()
         {
             var optOutResult = await _transformation.OptOutUserAsync(this.Context.User, this.Context.Guild);
             if (!optOutResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, optOutResult.ErrorReason);
-                return;
+                return optOutResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Opted out of transformations.");
+            return RuntimeCommandResult.FromSuccess("Opted out of transformations.");
         }
 
         /// <summary>
@@ -950,18 +942,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("default-protection")]
         [Summary("Sets your default protection type for transformations on servers you join. Available types are Whitelist and Blacklist.")]
-        public async Task SetDefaultProtectionTypeAsync(ProtectionType protectionType)
+        public async Task<RuntimeResult> SetDefaultProtectionTypeAsync(ProtectionType protectionType)
         {
             var setProtectionTypeResult = await _transformation.SetDefaultProtectionTypeAsync(this.Context.User, protectionType);
             if (!setProtectionTypeResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, setProtectionTypeResult.ErrorReason);
-                return;
+                return setProtectionTypeResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync
+            return RuntimeCommandResult.FromSuccess
             (
-                this.Context,
                 $"Default protection type set to \"{protectionType.Humanize()}\""
             );
         }
@@ -974,18 +964,16 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("protection")]
         [Summary("Sets your protection type for transformations. Available types are Whitelist and Blacklist.")]
         [RequireContext(Guild)]
-        public async Task SetProtectionTypeAsync(ProtectionType protectionType)
+        public async Task<RuntimeResult> SetProtectionTypeAsync(ProtectionType protectionType)
         {
             var setProtectionTypeResult = await _transformation.SetServerProtectionTypeAsync(this.Context.User, this.Context.Guild, protectionType);
             if (!setProtectionTypeResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, setProtectionTypeResult.ErrorReason);
-                return;
+                return setProtectionTypeResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync
+            return RuntimeCommandResult.FromSuccess
             (
-                this.Context,
                 $"Protection type set to \"{protectionType.Humanize()}\""
             );
         }
@@ -997,16 +985,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("whitelist")]
         [Summary("Whitelists a user, allowing them to transform you.")]
-        public async Task WhitelistUserAsync(IUser user)
+        public async Task<RuntimeResult> WhitelistUserAsync(IUser user)
         {
             var whitelistUserResult = await _transformation.WhitelistUserAsync(this.Context.User, user);
             if (!whitelistUserResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, whitelistUserResult.ErrorReason);
-                return;
+                return whitelistUserResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "User whitelisted.");
+            return RuntimeCommandResult.FromSuccess("User whitelisted.");
         }
 
         /// <summary>
@@ -1016,16 +1003,15 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [UsedImplicitly]
         [Command("blacklist")]
         [Summary("Blacklists a user, preventing them from transforming you.")]
-        public async Task BlacklistUserAsync(IUser user)
+        public async Task<RuntimeResult> BlacklistUserAsync(IUser user)
         {
             var blacklistUserResult = await _transformation.BlacklistUserAsync(this.Context.User, user);
             if (!blacklistUserResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, blacklistUserResult.ErrorReason);
-                return;
+                return blacklistUserResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "User whitelisted.");
+            return RuntimeCommandResult.FromSuccess("User whitelisted.");
         }
 
         /// <summary>
@@ -1035,13 +1021,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         [Command("update-db")]
         [Summary("Updates the transformation database with the bundled definitions.")]
         [RequireOwner]
-        public async Task UpdateTransformationDatabaseAsync()
+        public async Task<RuntimeResult> UpdateTransformationDatabaseAsync()
         {
             var updateTransformationsResult = await _transformation.UpdateTransformationDatabaseAsync();
             if (!updateTransformationsResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, updateTransformationsResult.ErrorReason);
-                return;
+                return updateTransformationsResult.ToRuntimeResult();
             }
 
             var confirmationText =
@@ -1050,7 +1035,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
                 $"{updateTransformationsResult.SpeciesUpdated} species updated, " +
                 $"and {updateTransformationsResult.TransformationsUpdated} transformations updated.";
 
-            await _feedback.SendConfirmationAsync(this.Context, confirmationText);
+            return RuntimeCommandResult.FromSuccess(confirmationText);
         }
     }
 }

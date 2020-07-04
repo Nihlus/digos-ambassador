@@ -24,6 +24,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
@@ -34,7 +36,6 @@ using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -82,16 +83,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Summary("Creates a new autorole configuration for the given Discord role.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(CreateAutorole), PermissionTarget.Self)]
-        public async Task CreateAutoroleAsync(IRole discordRole)
+        public async Task<RuntimeResult> CreateAutoroleAsync(IRole discordRole)
         {
             var create = await _autoroles.CreateAutoroleAsync(discordRole);
             if (!create.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, create.ErrorReason);
-                return;
+                return create.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Autorole configuration created.");
+            return RuntimeCommandResult.FromSuccess("Autorole configuration created.");
         }
 
         /// <summary>
@@ -104,16 +104,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Summary("Deletes an existing autorole configuration for the given Discord role.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(DeleteAutorole), PermissionTarget.Self)]
-        public async Task DeleteAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<RuntimeResult> DeleteAutoroleAsync(AutoroleConfiguration autorole)
         {
             var deleteAutorole = await _autoroles.DeleteAutoroleAsync(autorole);
             if (!deleteAutorole.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, deleteAutorole.ErrorReason);
-                return;
+                return deleteAutorole.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Autorole configuration deleted.");
+            return RuntimeCommandResult.FromSuccess("Autorole configuration deleted.");
         }
 
         /// <summary>
@@ -126,16 +125,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Summary("Enables the given autorole, allowing it to be added to users.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-        public async Task EnableAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<RuntimeResult> EnableAutoroleAsync(AutoroleConfiguration autorole)
         {
             var enableAutorole = await _autoroles.EnableAutoroleAsync(autorole);
             if (!enableAutorole.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, enableAutorole.ErrorReason);
-                return;
+                return enableAutorole.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Autorole enabled.");
+            return RuntimeCommandResult.FromSuccess("Autorole enabled.");
         }
 
         /// <summary>
@@ -148,16 +146,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Summary("Disables the given autorole, preventing it from being added to users.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-        public async Task DisableAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<RuntimeResult> DisableAutoroleAsync(AutoroleConfiguration autorole)
         {
             var disableAutorole = await _autoroles.DisableAutoroleAsync(autorole);
             if (!disableAutorole.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, disableAutorole.ErrorReason);
-                return;
+                return disableAutorole.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Autorole disabled.");
+            return RuntimeCommandResult.FromSuccess("Autorole disabled.");
         }
 
         /// <summary>
@@ -170,7 +167,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Summary("Show the settings for the given autorole.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(ViewAutorole), PermissionTarget.Self)]
-        public async Task ShowAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<RuntimeResult> ShowAutoroleAsync(AutoroleConfiguration autorole)
         {
             var paginatedEmbed = new PaginatedEmbed(_feedback, _interactivity, this.Context.User)
             {
@@ -189,7 +186,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 baseEmbed.Footer = null;
 
                 await _feedback.SendEmbedAsync(this.Context.Channel, baseEmbed.Build());
-                return;
+                return RuntimeCommandResult.FromSuccess();
             }
 
             var conditionFields = autorole.Conditions.Select
@@ -208,6 +205,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -219,7 +218,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Summary("Lists configured autoroles.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(ViewAutorole), PermissionTarget.Self)]
-        public async Task ListAutorolesAsync()
+        public async Task<RuntimeResult> ListAutorolesAsync()
         {
             var autoroles = new List<AutoroleConfiguration>();
             foreach (var role in this.Context.Guild.Roles)
@@ -250,6 +249,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 pager,
                 TimeSpan.FromMinutes(5)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -263,7 +264,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Summary("Affirms a user's qualification for an autorole.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
-        public async Task AffirmAutoroleForUserAsync
+        public async Task<RuntimeResult> AffirmAutoroleForUserAsync
         (
             AutoroleConfiguration autorole,
             IUser user
@@ -272,11 +273,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var affirmResult = await _autoroles.AffirmAutoroleAsync(autorole, user);
             if (!affirmResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, affirmResult.ErrorReason);
-                return;
+                return affirmResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Qualification affirmed.");
+            return RuntimeCommandResult.FromSuccess("Qualification affirmed.");
         }
 
         /// <summary>
@@ -289,16 +289,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Summary("Affirms all currently qualifying users for the given autorole.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
-        public async Task AffirmAutoroleForAllAsync(AutoroleConfiguration autorole)
+        public async Task<RuntimeResult> AffirmAutoroleForAllAsync(AutoroleConfiguration autorole)
         {
             var affirmResult = await _autoroles.AffirmAutoroleForAllAsync(autorole);
             if (!affirmResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, affirmResult.ErrorReason);
-                return;
+                return affirmResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Qualifications affirmed.");
+            return RuntimeCommandResult.FromSuccess("Qualifications affirmed.");
         }
 
         /// <summary>
@@ -312,7 +311,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Summary("Denies a user's qualification for an autorole.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.Self)]
-        public async Task DenyAutoroleForUserAsync
+        public async Task<RuntimeResult> DenyAutoroleForUserAsync
         (
             AutoroleConfiguration autorole,
             IUser user
@@ -321,11 +320,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var denyResult = await _autoroles.DenyAutoroleAsync(autorole, user);
             if (!denyResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, denyResult.ErrorReason);
-                return;
+                return denyResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Qualification denied.");
+            return RuntimeCommandResult.FromSuccess("Qualification denied.");
         }
 
         /// <summary>
@@ -339,7 +337,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Summary("Sets whether the given autorole require confirmation for the assignment after a user has qualified.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-        public async Task SetAffirmationRequirementAsync
+        public async Task<RuntimeResult> SetAffirmationRequirementAsync
         (
             AutoroleConfiguration autorole,
             bool requireAffirmation = true
@@ -348,8 +346,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var setRequirementResult = await _autoroles.SetAffirmationRequiredAsync(autorole, requireAffirmation);
             if (!setRequirementResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, setRequirementResult.ErrorReason);
-                return;
+                return setRequirementResult.ToRuntimeResult();
             }
 
             await _feedback.SendConfirmationAsync
@@ -357,6 +354,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 this.Context,
                 requireAffirmation ? "Affirmation is now required." : "Affirmation is no longer required."
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -369,13 +368,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [Summary("Lists users that haven't been confirmed yet for the given autorole.")]
         [RequireContext(ContextType.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
-        public async Task ListUnconfirmedUsersAsync(AutoroleConfiguration autorole)
+        public async Task<RuntimeResult> ListUnconfirmedUsersAsync(AutoroleConfiguration autorole)
         {
             var getUsers = await _autoroles.GetUnconfirmedUsersAsync(autorole);
             if (!getUsers.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getUsers.ErrorReason);
-                return;
+                return getUsers.ToRuntimeResult();
             }
 
             var users = getUsers.Entity.ToList();
@@ -401,6 +399,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 listMessage,
                 TimeSpan.FromMinutes(5)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
     }
 }

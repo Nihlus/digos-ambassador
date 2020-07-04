@@ -22,6 +22,8 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
 using DIGOS.Ambassador.Plugins.Core.Model;
@@ -78,9 +80,10 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Summary("Requests a copy of the privacy policy.")]
         [RequireContext(DM)]
         [PrivacyExempt]
-        public async Task RequestPolicyAsync()
+        public async Task<RuntimeResult> RequestPolicyAsync()
         {
             await _privacy.SendPrivacyPolicyAsync(this.Context.Channel);
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -91,10 +94,15 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Summary("Grants consent to store user data.")]
         [RequireContext(DM)]
         [PrivacyExempt]
-        public async Task GrantConsentAsync()
+        public async Task<RuntimeResult> GrantConsentAsync()
         {
-            await _privacy.GrantUserConsentAsync(this.Context.User);
-            await _feedback.SendConfirmationAsync(this.Context, "Thank you! Enjoy using the bot :smiley:");
+            var grantResult = await _privacy.GrantUserConsentAsync(this.Context.User);
+            if (!grantResult.IsSuccess)
+            {
+                return grantResult.ToRuntimeResult();
+            }
+
+            return RuntimeCommandResult.FromSuccess("Thank you! Enjoy using the bot :smiley:");
         }
 
         /// <summary>
@@ -105,12 +113,16 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Summary("Revokes consent to store user data.")]
         [RequireContext(DM)]
         [PrivacyExempt]
-        public async Task RevokeConsentAsync()
+        public async Task<RuntimeResult> RevokeConsentAsync()
         {
-            await _privacy.RevokeUserConsentAsync(this.Context.User);
-            await _feedback.SendConfirmationAsync
+            var revokeResult = await _privacy.RevokeUserConsentAsync(this.Context.User);
+            if (!revokeResult.IsSuccess)
+            {
+                return revokeResult.ToRuntimeResult();
+            }
+
+            return RuntimeCommandResult.FromSuccess
             (
-                this.Context,
                 "Consent revoked - no more information will be stored about you from now on. If you would like to " +
                 "delete your existing data, or get a copy of it, please contact the privacy contact individual (use " +
                 "!privacy contact to get their contact information)."
@@ -125,7 +137,7 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         [Summary("Displays contact information for the privacy contact person.")]
         [RequireContext(DM)]
         [PrivacyExempt]
-        public async Task DisplayContactAsync()
+        public async Task<RuntimeResult> DisplayContactAsync()
         {
             const string avatarURL = "https://i.imgur.com/2E334jS.jpg";
             var discordUser = _client.GetUser("Jax", "7487");
@@ -143,6 +155,8 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
             var embed = eb.Build();
 
             await this.Context.Channel.SendMessageAsync(string.Empty, embed: embed);
+
+            return RuntimeCommandResult.FromSuccess();
         }
     }
 }

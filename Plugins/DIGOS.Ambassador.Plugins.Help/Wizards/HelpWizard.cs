@@ -445,43 +445,45 @@ namespace DIGOS.Ambassador.Plugins.Help.Wizards
                     TimeSpan.FromSeconds(45)
                 );
 
-                if (messageResult.IsSuccess)
+                if (!messageResult.IsSuccess)
                 {
-                    var searchText = messageResult.Entity.Content;
-                    var commandSearchTerms = _currentModule
-                        .GetAllCommands()
-                        .Select(c => c.GetFullCommand());
+                    return await UpdateAsync();
+                }
 
-                    var findCommandResult = commandSearchTerms.BestLevenshteinMatch(searchText, 0.5);
-                    if (findCommandResult.IsSuccess)
-                    {
-                        var foundName = findCommandResult.Entity;
+                var searchText = messageResult.Entity.Content;
+                var commandSearchTerms = _currentModule
+                    .GetAllCommands()
+                    .Select(c => c.GetFullCommand());
 
-                        var commandGroup = _currentModule.Commands
-                            .Where(c => c.GetFullCommand() == foundName)
-                            .GroupBy(c => c.Aliases.OrderByDescending(a => a).First())
-                            .First();
+                var findCommandResult = commandSearchTerms.BestLevenshteinMatch(searchText, 0.5);
+                if (findCommandResult.IsSuccess)
+                {
+                    var foundName = findCommandResult.Entity;
 
-                        var eb = _help.CreateDetailedCommandInfoEmbed(commandGroup);
+                    var commandGroup = _currentModule.Commands
+                        .Where(c => c.GetFullCommand() == foundName)
+                        .GroupBy(c => c.Aliases.OrderByDescending(a => a).First())
+                        .First();
 
-                        await _feedback.SendEmbedAndDeleteAsync
-                        (
-                            this.Channel,
-                            eb.Build(),
-                            TimeSpan.FromSeconds(45)
-                        );
-                    }
-                    else
-                    {
-                        var eb = _feedback.CreateEmbedBase(Color.Orange);
-                        eb.WithDescription("I couldn't find a sufficiently close command to that.");
+                    var eb = _help.CreateDetailedCommandInfoEmbed(commandGroup);
 
-                        await _feedback.SendEmbedAndDeleteAsync
-                        (
-                            this.Channel,
-                            eb.Build()
-                        );
-                    }
+                    await _feedback.SendEmbedAndDeleteAsync
+                    (
+                        this.Channel,
+                        eb.Build(),
+                        TimeSpan.FromSeconds(45)
+                    );
+                }
+                else
+                {
+                    var eb = _feedback.CreateEmbedBase(Color.Orange);
+                    eb.WithDescription("I couldn't find a sufficiently close command to that.");
+
+                    await _feedback.SendEmbedAndDeleteAsync
+                    (
+                        this.Channel,
+                        eb.Build()
+                    );
                 }
             }
 

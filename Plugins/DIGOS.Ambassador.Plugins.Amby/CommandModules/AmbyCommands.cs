@@ -22,6 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Amby.Services;
 using Discord;
@@ -73,7 +74,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [Command("contact")]
         [Summary("Instructs Amby to contact you over DM.")]
         [RequireContext(Guild)]
-        public async Task ContactSelfAsync() => await ContactUserAsync(this.Context.User);
+        public async Task<RuntimeResult> ContactSelfAsync() => await ContactUserAsync(this.Context.User);
 
         /// <summary>
         /// Instructs Amby to contact a user over DM.
@@ -83,31 +84,35 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [Command("contact")]
         [Summary("Instructs Amby to contact a user over DM.")]
         [RequireContext(Guild)]
-        public async Task ContactUserAsync(IUser discordUser)
+        public async Task<RuntimeResult> ContactUserAsync(IUser discordUser)
         {
             if (this.Context.User is IGuildUser guildUser && !guildUser.GuildPermissions.MentionEveryone)
             {
-                await _feedback.SendErrorAsync(this.Context, "You need to be able to mention everyone to do that.");
-                return;
+                return RuntimeCommandResult.FromError("You need to be able to mention everyone to do that.");
             }
 
             if (discordUser.Id == this.Context.Client.CurrentUser.Id)
             {
-                await _feedback.SendErrorAsync(this.Context, "That's a splendid idea - at least then, I'd get an intelligent reply.");
-                return;
+                return RuntimeCommandResult.FromError
+                (
+                    "That's a splendid idea - at least then, I'd get an intelligent reply."
+                );
             }
 
             if (discordUser.IsBot)
             {
-                await _feedback.SendErrorAsync(this.Context, "I could do that, but I doubt I'd get a reply.");
-                return;
+                return RuntimeCommandResult.FromError("I could do that, but I doubt I'd get a reply.");
             }
+
+            var contactMessage = $"Hello there, {discordUser.Mention}. I've been instructed to initiate... " +
+                                 $"negotiations... with you. \nA good place to start would be the \"!help <topic>\" " +
+                                 $"command.";
 
             var eb = _feedback.CreateFeedbackEmbed
             (
                 discordUser,
                 Color.DarkPurple,
-                $"Hello there, {discordUser.Mention}. I've been instructed to initiate... negotiations... with you. \nA good place to start would be the \"!help <topic>\" command."
+                contactMessage
             );
 
             var userDMChannel = await discordUser.GetOrCreateDMChannelAsync();
@@ -117,14 +122,14 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
             }
             catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
             {
-                return;
+                return RuntimeCommandResult.FromError(hex.Message);
             }
             finally
             {
                 await userDMChannel.CloseAsync();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "User contacted.");
+            return RuntimeCommandResult.FromSuccess("User contacted.");
         }
 
         /// <summary>
@@ -133,19 +138,17 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("sass")]
         [Summary("Sasses the user in a DIGOS fashion.")]
-        public async Task SassAsync()
+        public async Task<RuntimeResult> SassAsync()
         {
             var isNsfwChannel = this.Context.Channel is ITextChannel textChannel && textChannel.IsNsfw;
             var getSassResult = await _sass.GetSassAsync(isNsfwChannel);
             if (!getSassResult.IsSuccess)
             {
-                await _feedback.SendConfirmationAsync(this.Context, getSassResult.ErrorReason);
-                return;
+                return getSassResult.ToRuntimeResult();
             }
 
             var sass = getSassResult.Entity;
-
-            await _feedback.SendConfirmationAsync(this.Context, sass);
+            return RuntimeCommandResult.FromSuccess(sass);
         }
 
         /// <summary>
@@ -154,12 +157,13 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("bweh")]
         [Summary("Bweh!")]
-        public async Task BwehAsync()
+        public async Task<RuntimeResult> BwehAsync()
         {
             var eb = _feedback.CreateEmbedBase();
             eb.WithImageUrl(_portraits.BwehUri.ToString());
 
             await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -168,9 +172,9 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("boop")]
         [Summary("Boops you.")]
-        public async Task BoopAsync()
+        public Task<RuntimeResult> BoopAsync()
         {
-            await _feedback.SendConfirmationAsync(this.Context, "*boop*");
+            return Task.FromResult<RuntimeResult>(RuntimeCommandResult.FromSuccess("*boop*"));
         }
 
         /// <summary>
@@ -179,9 +183,9 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("bap")]
         [Summary("Baps you.")]
-        public async Task BapAsync()
+        public Task<RuntimeResult> BapAsync()
         {
-            await _feedback.SendConfirmationAsync(this.Context, "**baps**");
+            return Task.FromResult<RuntimeResult>(RuntimeCommandResult.FromSuccess("**baps**"));
         }
 
         /// <summary>
@@ -191,17 +195,15 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("boop")]
         [Summary("Boops the user.")]
-        public async Task BoopAsync(IUser target)
+        public async Task<RuntimeResult> BoopAsync(IUser target)
         {
-            if (target.IsMe(this.Context.Client))
+            if (!target.IsMe(this.Context.Client))
             {
-                await _feedback.SendConfirmationAsync(this.Context, "...seriously?");
-                await _feedback.SendConfirmationAsync(this.Context, $"*boops {this.Context.User.Mention}*");
-
-                return;
+                return RuntimeCommandResult.FromSuccess($"*boops {target.Mention}*");
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"*boops {target.Mention}*");
+            await _feedback.SendConfirmationAsync(this.Context, "...seriously?");
+            return RuntimeCommandResult.FromSuccess($"*boops {this.Context.User.Mention}*");
         }
 
         /// <summary>
@@ -211,17 +213,15 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [UsedImplicitly]
         [Command("bap")]
         [Summary("Baps the user.")]
-        public async Task BapAsync(IUser target)
+        public async Task<RuntimeResult> BapAsync(IUser target)
         {
-            if (target.IsMe(this.Context.Client))
+            if (!target.IsMe(this.Context.Client))
             {
-                await _feedback.SendConfirmationAsync(this.Context, "...seriously?");
-                await _feedback.SendConfirmationAsync(this.Context, $"**baps {this.Context.User.Mention}**");
-
-                return;
+                return RuntimeCommandResult.FromSuccess($"**baps {target.Mention}**");
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"**baps {target.Mention}**");
+            await _feedback.SendConfirmationAsync(this.Context, "...seriously?");
+            return RuntimeCommandResult.FromSuccess($"**baps {this.Context.User.Mention}**");
         }
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         [Alias("info", "information", "about")]
         [Command("info")]
         [Summary("Shows some information about Amby's metaworkings.")]
-        public async Task InfoAsync()
+        public async Task<RuntimeResult> InfoAsync()
         {
             var eb = _feedback.CreateEmbedBase();
 
@@ -260,6 +260,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
             );
 
             await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, eb.Build());
+            return RuntimeCommandResult.FromSuccess();
         }
     }
 }

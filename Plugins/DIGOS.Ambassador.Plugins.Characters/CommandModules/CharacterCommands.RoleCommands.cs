@@ -22,6 +22,8 @@
 
 using System.Linq;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Permissions;
@@ -70,13 +72,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [UsedImplicitly]
             [Command("list")]
             [RequireContext(ContextType.Guild)]
-            public async Task ListAvailableRolesAsync()
+            public async Task<RuntimeResult> ListAvailableRolesAsync()
             {
                 var getServerRolesResult = await _characterRoles.GetCharacterRolesAsync(this.Context.Guild);
                 if (!getServerRolesResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getServerRolesResult.ErrorReason);
-                    return;
+                    return getServerRolesResult.ToRuntimeResult();
                 }
 
                 var serverRoles = getServerRolesResult.Entity.ToList();
@@ -121,6 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 }
 
                 await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+                return RuntimeCommandResult.FromSuccess();
             }
 
             /// <summary>
@@ -133,7 +135,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Creates a new character role linked to a Discord role.")]
             [RequireContext(ContextType.Guild)]
             [RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "You must be allowed to manage roles.")]
-            public async Task CreateCharacterRoleAsync
+            public async Task<RuntimeResult> CreateCharacterRoleAsync
             (
                 IRole discordRole,
                 RoleAccess access = RoleAccess.Open
@@ -147,11 +149,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
                 if (!createRoleResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, createRoleResult.ErrorReason);
-                    return;
+                    return createRoleResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Character role created.");
+                return RuntimeCommandResult.FromSuccess("Character role created.");
             }
 
             /// <summary>
@@ -164,7 +165,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Deletes the character role for a given discord role.")]
             [RequireContext(ContextType.Guild)]
             [RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "You must be allowed to manage roles.")]
-            public async Task DeleteCharacterRoleAsync
+            public async Task<RuntimeResult> DeleteCharacterRoleAsync
             (
                 IRole discordRole
             )
@@ -172,18 +173,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 var getExistingRoleResult = await _characterRoles.GetCharacterRoleAsync(discordRole);
                 if (!getExistingRoleResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getExistingRoleResult.ErrorReason);
-                    return;
+                    return getExistingRoleResult.ToRuntimeResult();
                 }
 
                 var deleteRoleResult = await _characterRoles.DeleteCharacterRoleAsync(getExistingRoleResult.Entity);
                 if (!deleteRoleResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, deleteRoleResult.ErrorReason);
-                    return;
+                    return deleteRoleResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Character role deleted.");
+                return RuntimeCommandResult.FromSuccess("Character role deleted.");
             }
 
             /// <summary>
@@ -196,7 +195,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Sets the access conditions for the given role.")]
             [RequireContext(ContextType.Guild)]
             [RequireUserPermission(GuildPermission.ManageRoles, ErrorMessage = "You must be allowed to manage roles.")]
-            public async Task SetCharacterRoleAccessAsync
+            public async Task<RuntimeResult> SetCharacterRoleAccessAsync
             (
                 IRole discordRole,
                 RoleAccess access
@@ -205,8 +204,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 var getExistingRoleResult = await _characterRoles.GetCharacterRoleAsync(discordRole);
                 if (!getExistingRoleResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getExistingRoleResult.ErrorReason);
-                    return;
+                    return getExistingRoleResult.ToRuntimeResult();
                 }
 
                 var setRoleAccessResult = await _characterRoles.SetCharacterRoleAccessAsync
@@ -217,14 +215,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
                 if (!setRoleAccessResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setRoleAccessResult.ErrorReason);
-                    return;
+                    return setRoleAccessResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync
-                (
-                    this.Context, "Character role access conditions set."
-                );
+                return RuntimeCommandResult.FromSuccess("Character role access conditions set.");
             }
 
             /// <summary>
@@ -236,7 +230,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Clears the role from a character.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-            public async Task ClearCharacterRoleAsync
+            public async Task<RuntimeResult> ClearCharacterRoleAsync
             (
                 [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character
@@ -245,11 +239,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 var result = await _characterRoles.ClearCharacterRoleAsync((IGuildUser)this.Context.User, character);
                 if (!result.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
+                    return result.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Character role cleared.");
+                return RuntimeCommandResult.FromSuccess("Character role cleared.");
             }
         }
     }

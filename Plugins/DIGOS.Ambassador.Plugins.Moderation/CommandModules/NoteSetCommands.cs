@@ -21,6 +21,8 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
@@ -70,13 +72,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Summary("Sets the contents of the note.")]
             [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
             [RequireContext(ContextType.Guild)]
-            public async Task SetNoteContentsAsync(long noteID, string newContents)
+            public async Task<RuntimeResult> SetNoteContentsAsync(long noteID, string newContents)
             {
                 var getNote = await _notes.GetNoteAsync(this.Context.Guild, noteID);
                 if (!getNote.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getNote.ErrorReason);
-                    return;
+                    return getNote.ToRuntimeResult();
                 }
 
                 var note = getNote.Entity;
@@ -84,11 +85,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setContents = await _notes.SetNoteContentsAsync(note, newContents);
                 if (!setContents.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setContents.ErrorReason);
-                    return;
+                    return setContents.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Note contents updated.");
+                return RuntimeCommandResult.FromSuccess("Note contents updated.");
             }
         }
     }

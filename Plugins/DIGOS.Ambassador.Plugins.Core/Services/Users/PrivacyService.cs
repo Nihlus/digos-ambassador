@@ -178,23 +178,27 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="discordUser">The user that has granted consent.</param>
         /// <returns>A task that must be awaited.</returns>
-        public async Task GrantUserConsentAsync(IUser discordUser)
+        public async Task<CreateEntityResult<UserConsent>> GrantUserConsentAsync(IUser discordUser)
         {
             var getConsent = await GetUserConsentAsync(discordUser);
+
+            UserConsent userConsent;
             if (!getConsent.IsSuccess)
             {
-                var userConsent = _database.CreateProxy<UserConsent>((long)discordUser.Id);
+                userConsent = _database.CreateProxy<UserConsent>((long)discordUser.Id);
                 _database.UserConsents.Update(userConsent);
 
                 userConsent.HasConsented = true;
             }
             else
             {
-                var userConsent = getConsent.Entity;
+                userConsent = getConsent.Entity;
                 userConsent.HasConsented = true;
             }
 
             await _database.SaveChangesAsync();
+
+            return userConsent;
         }
 
         /// <summary>

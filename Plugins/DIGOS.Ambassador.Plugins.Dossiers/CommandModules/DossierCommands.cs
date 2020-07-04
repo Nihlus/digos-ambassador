@@ -22,7 +22,8 @@
 
 using System;
 using System.Threading.Tasks;
-
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
@@ -72,7 +73,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
         [UsedImplicitly]
         [Command("list")]
         [Summary("Lists the available dossiers.")]
-        public async Task ListDossiersAsync()
+        public async Task<RuntimeResult> ListDossiersAsync()
         {
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Dossier Database";
@@ -80,8 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             var getDossiersResult = _dossiers.GetDossiers();
             if (!getDossiersResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getDossiersResult.ErrorReason);
-                return;
+                return getDossiersResult.ToRuntimeResult();
             }
 
             var dossiers = getDossiersResult.Entity;
@@ -104,6 +104,8 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5.0)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -114,13 +116,12 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
         [Alias("view", "show")]
         [Command("view")]
         [Summary("Views the named dossier.")]
-        public async Task ViewDossierAsync(string title)
+        public async Task<RuntimeResult> ViewDossierAsync(string title)
         {
             var getDossierResult = await _dossiers.GetDossierByTitleAsync(title);
             if (!getDossierResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-                return;
+                return getDossierResult.ToRuntimeResult();
             }
 
             var dossier = getDossierResult.Entity;
@@ -131,12 +132,13 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             var dossierDataResult = _dossiers.GetDossierStream(dossier);
             if (!dossierDataResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, dossierDataResult.ErrorReason);
-                return;
+                return dossierDataResult.ToRuntimeResult();
             }
 
             await using var dossierData = dossierDataResult.Entity;
             await this.Context.Channel.SendFileAsync(dossierData, $"{dossier.Title}.pdf");
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         private Embed BuildDossierEmbed(Dossier dossier)
@@ -158,13 +160,12 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
         [Command("add")]
         [Summary("Adds a new dossier with the given title and summary. A PDF with the full dossier can be attached.")]
         [RequireOwner]
-        public async Task AddDossierAsync(string title, string summary = "No summary set.")
+        public async Task<RuntimeResult> AddDossierAsync(string title, string summary = "No summary set.")
         {
             var dossierCreationResult = await _dossiers.CreateDossierAsync(title, summary);
             if (!dossierCreationResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, dossierCreationResult.ErrorReason);
-                return;
+                return dossierCreationResult.ToRuntimeResult();
             }
 
             var dossier = dossierCreationResult.Entity;
@@ -172,11 +173,10 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             var modifyResult = await _dossiers.SetDossierDataAsync(dossier, this.Context);
             if (!modifyResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-                return;
+                return modifyResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" added.");
+            return RuntimeCommandResult.FromSuccess($"Dossier \"{dossier.Title}\" added.");
         }
 
         /// <summary>
@@ -188,24 +188,22 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
         [Command("remove")]
         [Summary("Removes the dossier with the given title.")]
         [RequireOwner]
-        public async Task RemoveDossierAsync(string title)
+        public async Task<RuntimeResult> RemoveDossierAsync(string title)
         {
             var getDossierResult = await _dossiers.GetDossierByTitleAsync(title);
             if (!getDossierResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-                return;
+                return getDossierResult.ToRuntimeResult();
             }
 
             var dossier = getDossierResult.Entity;
             var deleteDossierResult = await _dossiers.DeleteDossierAsync(dossier);
             if (!deleteDossierResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-                return;
+                return getDossierResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"Dossier \"{dossier.Title}\" deleted.");
+            return RuntimeCommandResult.FromSuccess($"Dossier \"{dossier.Title}\" deleted.");
         }
 
         /// <summary>
@@ -214,17 +212,14 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
         [Group("set")]
         public class SetCommands : ModuleBase
         {
-            private readonly UserFeedbackService _feedback;
             private readonly DossierService _dossiers;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
-            /// <param name="feedback">The feedback service.</param>
             /// <param name="dossiers">The dossier service.</param>
-            public SetCommands(UserFeedbackService feedback, DossierService dossiers)
+            public SetCommands(DossierService dossiers)
             {
-                _feedback = feedback;
                 _dossiers = dossiers;
             }
 
@@ -237,13 +232,12 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             [Command("title")]
             [Summary("Sets the title of the given dossier.")]
             [RequireOwner]
-            public async Task SetTitleAsync(string title, string newTitle)
+            public async Task<RuntimeResult> SetTitleAsync(string title, string newTitle)
             {
                 var getDossierResult = await _dossiers.GetDossierByTitleAsync(title);
                 if (!getDossierResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-                    return;
+                    return getDossierResult.ToRuntimeResult();
                 }
 
                 var dossier = getDossierResult.Entity;
@@ -251,11 +245,10 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
                 var modifyResult = await _dossiers.SetDossierTitleAsync(dossier, newTitle);
                 if (!modifyResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-                    return;
+                    return modifyResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "New dossier title set.");
+                return RuntimeCommandResult.FromSuccess("New dossier title set.");
             }
 
             /// <summary>
@@ -267,13 +260,12 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             [Command("summary")]
             [Summary("Sets the summary of the given dossier.")]
             [RequireOwner]
-            public async Task SetSummaryAsync(string title, string newSummary)
+            public async Task<RuntimeResult> SetSummaryAsync(string title, string newSummary)
             {
                 var getDossierResult = await _dossiers.GetDossierByTitleAsync(title);
                 if (!getDossierResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-                    return;
+                    return getDossierResult.ToRuntimeResult();
                 }
 
                 var dossier = getDossierResult.Entity;
@@ -281,11 +273,10 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
                 var modifyResult = await _dossiers.SetDossierSummaryAsync(dossier, newSummary);
                 if (!modifyResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-                    return;
+                    return modifyResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "New dossier summary set.");
+                return RuntimeCommandResult.FromSuccess("New dossier summary set.");
             }
 
             /// <summary>
@@ -296,13 +287,12 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             [Command("data")]
             [Summary("Sets the data of the given dossier. Attach a PDF to the command.")]
             [RequireOwner]
-            public async Task SetFileAsync(string title)
+            public async Task<RuntimeResult> SetFileAsync(string title)
             {
                 var getDossierResult = await _dossiers.GetDossierByTitleAsync(title);
                 if (!getDossierResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getDossierResult.ErrorReason);
-                    return;
+                    return getDossierResult.ToRuntimeResult();
                 }
 
                 var dossier = getDossierResult.Entity;
@@ -310,11 +300,10 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
                 var modifyResult = await _dossiers.SetDossierDataAsync(dossier, this.Context);
                 if (!modifyResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, modifyResult.ErrorReason);
-                    return;
+                    return modifyResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Dossier data set.");
+                return RuntimeCommandResult.FromSuccess("Dossier data set.");
             }
         }
     }

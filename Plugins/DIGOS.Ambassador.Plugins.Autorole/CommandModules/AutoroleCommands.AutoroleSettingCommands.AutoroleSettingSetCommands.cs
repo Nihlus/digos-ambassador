@@ -21,6 +21,8 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
@@ -47,7 +49,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             public class AutoroleSettingSetCommands : ModuleBase
             {
                 private readonly AutoroleService _autoroles;
-                private readonly UserFeedbackService _feedback;
 
                 /// <summary>
                 /// Initializes a new instance of the <see cref="AutoroleSettingSetCommands"/> class.
@@ -57,7 +58,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 public AutoroleSettingSetCommands(AutoroleService autoroles, UserFeedbackService feedback)
                 {
                     _autoroles = autoroles;
-                    _feedback = feedback;
                 }
 
                 /// <summary>
@@ -70,12 +70,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 [Summary("Sets the confirmation notification channel.")]
                 [RequireContext(ContextType.Guild)]
                 [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
-                public async Task SetAffirmationNotificationChannel(IChannel channel)
+                public async Task<RuntimeResult> SetAffirmationNotificationChannel(IChannel channel)
                 {
                     if (!(channel is ITextChannel textChannel))
                     {
-                        await _feedback.SendErrorAsync(this.Context, "That's not a text channel.");
-                        return;
+                        return RuntimeCommandResult.FromError("That's not a text channel.");
                     }
 
                     var setResult = await _autoroles.SetAffirmationNotificationChannelAsync
@@ -86,11 +85,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
                     if (!setResult.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, setResult.ErrorReason);
-                        return;
+                        return setResult.ToRuntimeResult();
                     }
 
-                    await _feedback.SendConfirmationAsync(this.Context, "Channel set.");
+                    return RuntimeCommandResult.FromSuccess("Channel set.");
                 }
             }
         }

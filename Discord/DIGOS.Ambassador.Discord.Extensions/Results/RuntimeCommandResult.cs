@@ -57,6 +57,16 @@ namespace DIGOS.Ambassador.Discord.Extensions.Results
         /// <summary>
         /// Initializes a new instance of the <see cref="RuntimeCommandResult"/> class.
         /// </summary>
+        /// <param name="error">The error type.</param>
+        /// <param name="errorMessage">The error message.</param>
+        private RuntimeCommandResult(CommandError error, string errorMessage)
+            : base(error, errorMessage)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RuntimeCommandResult"/> class.
+        /// </summary>
         /// <param name="baseResult">The error type.</param>
         public RuntimeCommandResult(IResult baseResult)
             : base
@@ -66,6 +76,16 @@ namespace DIGOS.Ambassador.Discord.Extensions.Results
             )
         {
             this.BaseResult = baseResult;
+        }
+
+        /// <summary>
+        /// Creates a new failed result.
+        /// </summary>
+        /// <param name="errorMessage">The error message.</param>
+        /// <returns>The failed result.</returns>
+        public static RuntimeCommandResult FromError(string errorMessage)
+        {
+            return new RuntimeCommandResult(CommandError.Unsuccessful, errorMessage);
         }
 
         /// <summary>

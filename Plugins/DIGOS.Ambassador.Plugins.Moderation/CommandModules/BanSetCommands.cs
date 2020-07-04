@@ -22,6 +22,8 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
@@ -73,13 +75,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Summary("Sets the reason for the ban.")]
             [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
             [RequireContext(ContextType.Guild)]
-            public async Task SetBanReasonAsync(long banID, string newReason)
+            public async Task<RuntimeResult> SetBanReasonAsync(long banID, string newReason)
             {
                 var getBan = await _bans.GetBanAsync(this.Context.Guild, banID);
                 if (!getBan.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getBan.ErrorReason);
-                    return;
+                    return getBan.ToRuntimeResult();
                 }
 
                 var ban = getBan.Entity;
@@ -87,11 +88,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setContents = await _bans.SetBanReasonAsync(ban, newReason);
                 if (!setContents.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setContents.ErrorReason);
-                    return;
+                    return setContents.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Ban reason updated.");
+                return RuntimeCommandResult.FromSuccess("Ban reason updated.");
             }
 
             /// <summary>
@@ -103,13 +103,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Summary("Sets the contextually relevant message for the ban.")]
             [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
             [RequireContext(ContextType.Guild)]
-            public async Task SetBanContextMessageAsync(long banID, IMessage newMessage)
+            public async Task<RuntimeResult> SetBanContextMessageAsync(long banID, IMessage newMessage)
             {
                 var getBan = await _bans.GetBanAsync(this.Context.Guild, banID);
                 if (!getBan.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getBan.ErrorReason);
-                    return;
+                    return getBan.ToRuntimeResult();
                 }
 
                 var ban = getBan.Entity;
@@ -117,11 +116,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setMessage = await _bans.SetBanContextMessageAsync(ban, (long)newMessage.Id);
                 if (!setMessage.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setMessage.ErrorReason);
-                    return;
+                    return setMessage.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Ban context message updated.");
+                return RuntimeCommandResult.FromSuccess("Ban context message updated.");
             }
 
             /// <summary>
@@ -133,13 +131,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             [Summary("Sets the duration of the ban.")]
             [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
             [RequireContext(ContextType.Guild)]
-            public async Task SetBanDurationAsync(long banID, TimeSpan newDuration)
+            public async Task<RuntimeResult> SetBanDurationAsync(long banID, TimeSpan newDuration)
             {
                 var getBan = await _bans.GetBanAsync(this.Context.Guild, banID);
                 if (!getBan.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getBan.ErrorReason);
-                    return;
+                    return getBan.ToRuntimeResult();
                 }
 
                 var ban = getBan.Entity;
@@ -149,11 +146,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setExpiration = await _bans.SetBanExpiryDateAsync(ban, newExpiration);
                 if (!setExpiration.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setExpiration.ErrorReason);
-                    return;
+                    return setExpiration.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Ban duration updated.");
+                return RuntimeCommandResult.FromSuccess("Ban duration updated.");
             }
         }
     }

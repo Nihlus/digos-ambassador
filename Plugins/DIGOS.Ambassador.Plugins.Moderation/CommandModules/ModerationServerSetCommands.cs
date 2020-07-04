@@ -21,6 +21,8 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
@@ -72,16 +74,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 [Summary("Sets the moderation log channel.")]
                 [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
                 [RequireContext(ContextType.Guild)]
-                public async Task SetModerationLogChannelAsync(ITextChannel channel)
+                public async Task<RuntimeResult> SetModerationLogChannelAsync(ITextChannel channel)
                 {
                     var setChannel = await _moderation.SetModerationLogChannelAsync(this.Context.Guild, channel);
                     if (!setChannel.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, setChannel.ErrorReason);
-                        return;
+                        return setChannel.ToRuntimeResult();
                     }
 
-                    await _feedback.SendConfirmationAsync(this.Context, "Channel set.");
+                    return RuntimeCommandResult.FromSuccess("Channel set.");
                 }
 
                 /// <summary>
@@ -92,16 +93,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 [Summary("Sets the event monitoring channel.")]
                 [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
                 [RequireContext(ContextType.Guild)]
-                public async Task SetMonitoringChannelAsync(ITextChannel channel)
+                public async Task<RuntimeResult> SetMonitoringChannelAsync(ITextChannel channel)
                 {
                     var setChannel = await _moderation.SetMonitoringChannelAsync(this.Context.Guild, channel);
                     if (!setChannel.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, setChannel.ErrorReason);
-                        return;
+                        return setChannel.ToRuntimeResult();
                     }
 
-                    await _feedback.SendConfirmationAsync(this.Context, "Channel set.");
+                    return RuntimeCommandResult.FromSuccess("Channel set.");
                 }
 
                 /// <summary>
@@ -112,16 +112,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 [Summary("Sets the warning threshold.")]
                 [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
                 [RequireContext(ContextType.Guild)]
-                public async Task SetWarningThresholdAsync(int threshold)
+                public async Task<RuntimeResult> SetWarningThresholdAsync(int threshold)
                 {
                     var setChannel = await _moderation.SetWarningThresholdAsync(this.Context.Guild, threshold);
                     if (!setChannel.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, setChannel.ErrorReason);
-                        return;
+                        return setChannel.ToRuntimeResult();
                     }
 
-                    await _feedback.SendConfirmationAsync(this.Context, "Threshold set.");
+                    return RuntimeCommandResult.FromSuccess("Threshold set.");
                 }
             }
         }

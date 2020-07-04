@@ -13,6 +13,7 @@
     <!-- Workaround for https://github.com/aspnet/EntityFrameworkCore/issues/19426 -->
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />
       <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
     </ItemGroup>
 

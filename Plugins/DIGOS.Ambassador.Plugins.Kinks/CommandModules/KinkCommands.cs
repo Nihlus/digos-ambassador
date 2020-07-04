@@ -25,6 +25,8 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
@@ -79,19 +81,19 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [UsedImplicitly]
         [Command("info")]
         [Summary("Shows information about the named kink.")]
-        public async Task ShowKinkAsync(string kinkName)
+        public async Task<RuntimeResult> ShowKinkAsync(string kinkName)
         {
             var getKinkInfoResult = await _kinks.GetKinkByNameAsync(kinkName);
             if (!getKinkInfoResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getKinkInfoResult.ErrorReason);
-                return;
+                return getKinkInfoResult.ToRuntimeResult();
             }
 
             var kink = getKinkInfoResult.Entity;
             var display = _kinks.BuildKinkInfoEmbed(kink);
 
             await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display);
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -102,7 +104,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [Alias("show", "preference")]
         [Command("show")]
         [Summary("Shows your preference for the named kink.")]
-        public async Task ShowKinkPreferenceAsync(string kinkName)
+        public async Task<RuntimeResult> ShowKinkPreferenceAsync(string kinkName)
             => await ShowKinkPreferenceAsync(this.Context.User, kinkName);
 
         /// <summary>
@@ -114,19 +116,19 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [Alias("show", "preference")]
         [Command("show")]
         [Summary("Shows the user's preference for the named kink.")]
-        public async Task ShowKinkPreferenceAsync(IUser user, string kinkName)
+        public async Task<RuntimeResult> ShowKinkPreferenceAsync(IUser user, string kinkName)
         {
             var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(user, kinkName);
             if (!getUserKinkResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getUserKinkResult.ErrorReason);
-                return;
+                return getUserKinkResult.ToRuntimeResult();
             }
 
             var userKink = getUserKinkResult.Entity;
             var display = _kinks.BuildUserKinkInfoEmbedBase(userKink);
 
             await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display.Build());
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -136,13 +138,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [UsedImplicitly]
         [Command("overlap")]
         [Summary("Shows the kinks which overlap between you and the given user.")]
-        public async Task ShowKinkOverlap(IUser otherUser)
+        public async Task<RuntimeResult> ShowKinkOverlap(IUser otherUser)
         {
             var getUserKinksResult = await _kinks.GetUserKinksAsync(this.Context.User);
             if (!getUserKinksResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getUserKinksResult.ErrorReason);
-                return;
+                return getUserKinksResult.ToRuntimeResult();
             }
 
             var userKinks = getUserKinksResult.Entity;
@@ -150,8 +151,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
             var getOtherUserKinksResult = await _kinks.GetUserKinksAsync(otherUser);
             if (!getOtherUserKinksResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getOtherUserKinksResult.ErrorReason);
-                return;
+                return getOtherUserKinksResult.ToRuntimeResult();
             }
 
             var otherUserKinks = getOtherUserKinksResult.Entity;
@@ -160,8 +160,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
 
             if (!overlap.Any())
             {
-                await _feedback.SendErrorAsync(this.Context, "You don't overlap anywhere.");
-                return;
+                return RuntimeCommandResult.FromSuccess("You don't overlap anywhere.");
             }
 
             var kinkOverlapPages = _kinks.BuildKinkOverlapEmbeds(this.Context.User, otherUser, overlap);
@@ -169,6 +168,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
                 .WithPages(kinkOverlapPages);
 
             await _interactivity.SendPrivateInteractiveMessageAsync(this.Context, _feedback, paginatedMessage);
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [UsedImplicitly]
         [Command("by-preference")]
         [Summary("Shows your kinks with the given preference.")]
-        public async Task ShowKinksByPreferenceAsync
+        public async Task<RuntimeResult> ShowKinksByPreferenceAsync
         (
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
             KinkPreference preference
@@ -193,7 +193,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [UsedImplicitly]
         [Command("by-preference")]
         [Summary("Shows the given user's kinks with the given preference.")]
-        public async Task ShowKinksByPreferenceAsync
+        public async Task<RuntimeResult> ShowKinksByPreferenceAsync
         (
             IUser otherUser,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
@@ -203,8 +203,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
             var getUserKinksResult = await _kinks.GetUserKinksAsync(otherUser);
             if (!getUserKinksResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getUserKinksResult.ErrorReason);
-                return;
+                return getUserKinksResult.ToRuntimeResult();
             }
 
             var userKinks = getUserKinksResult.Entity;
@@ -213,8 +212,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
 
             if (!withPreference.Any())
             {
-                await _feedback.SendErrorAsync(this.Context, "The user doesn't have any kinks with that preference.");
-                return;
+                return RuntimeCommandResult.FromError("The user doesn't have any kinks with that preference.");
             }
 
             var paginatedKinkPages = _kinks.BuildPaginatedUserKinkEmbeds(withPreference);
@@ -222,6 +220,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
                 .WithPages(paginatedKinkPages);
 
             await _interactivity.SendPrivateInteractiveMessageAsync(this.Context, _feedback, paginatedMessage);
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -232,7 +231,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [UsedImplicitly]
         [Command("preference")]
         [Summary("Sets your preference for the given kink.")]
-        public async Task SetKinkPreferenceAsync
+        public async Task<RuntimeResult> SetKinkPreferenceAsync
         (
             string kinkName,
             [OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
@@ -242,19 +241,17 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
             var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(this.Context.User, kinkName);
             if (!getUserKinkResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getUserKinkResult.ErrorReason);
-                return;
+                return getUserKinkResult.ToRuntimeResult();
             }
 
             var userKink = getUserKinkResult.Entity;
             var setKinkPreferenceResult = await _kinks.SetKinkPreferenceAsync(userKink, preference);
             if (!setKinkPreferenceResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, setKinkPreferenceResult.ErrorReason);
-                return;
+                return setKinkPreferenceResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Preference set.");
+            return RuntimeCommandResult.FromSuccess("Preference set.");
         }
 
         /// <summary>
@@ -263,7 +260,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [UsedImplicitly]
         [Command("wizard")]
         [Summary("Runs an interactive wizard for setting kink preferences.")]
-        public async Task RunKinkWizardAsync()
+        public async Task<RuntimeResult> RunKinkWizardAsync()
         {
             var wizard = new KinkWizard
             (
@@ -274,6 +271,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
             );
 
             await _interactivity.SendPrivateInteractiveMessageAsync(this.Context, _feedback, wizard);
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -285,7 +283,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [Summary("Updates the kink database with data from F-list.")]
         [RequireContext(ContextType.DM)]
         [RequireOwner]
-        public async Task UpdateKinkDatabaseAsync()
+        public async Task<RuntimeResult> UpdateKinkDatabaseAsync()
         {
             await _feedback.SendConfirmationAsync(this.Context, "Updating kinks...");
 
@@ -312,24 +310,21 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
                 }
                 catch (OperationCanceledException)
                 {
-                    await _feedback.SendErrorAsync(this.Context, "Could not connect to F-list: Operation timed out.");
-                    return;
+                    return RuntimeCommandResult.FromError("Could not connect to F-list: Operation timed out.");
                 }
             }
 
             var kinkCollection = JsonConvert.DeserializeObject<KinkCollection>(json);
             if (kinkCollection.KinkCategories is null)
             {
-                await _feedback.SendErrorAsync(this.Context, $"Received an error from F-List: {kinkCollection.Error}");
-                return;
+                return RuntimeCommandResult.FromError($"Received an error from F-List: {kinkCollection.Error}");
             }
 
             foreach (var kinkSection in kinkCollection.KinkCategories)
             {
                 if (!Enum.TryParse<KinkCategory>(kinkSection.Key, out var kinkCategory))
                 {
-                    await _feedback.SendErrorAsync(this.Context, "Failed to parse kink category.");
-                    return;
+                    return RuntimeCommandResult.FromError("Failed to parse kink category.");
                 }
 
                 updatedKinkCount += await _kinks.UpdateKinksAsync(kinkSection.Value.Kinks.Select
@@ -338,7 +333,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
                 ));
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, $"Done. {updatedKinkCount} kinks updated.");
+            return RuntimeCommandResult.FromSuccess($"Done. {updatedKinkCount} kinks updated.");
         }
 
         /// <summary>
@@ -347,10 +342,15 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         [UsedImplicitly]
         [Command("reset")]
         [Summary("Resets all your kink preferences.")]
-        public async Task ResetKinksAsync()
+        public async Task<RuntimeResult> ResetKinksAsync()
         {
-            await _kinks.ResetUserKinksAsync(this.Context.User);
-            await _feedback.SendConfirmationAsync(this.Context, "Preferences reset.");
+            var resetResult = await _kinks.ResetUserKinksAsync(this.Context.User);
+            if (!resetResult.IsSuccess)
+            {
+                return resetResult.ToRuntimeResult();
+            }
+
+            return RuntimeCommandResult.FromSuccess("Preferences reset.");
         }
     }
 }

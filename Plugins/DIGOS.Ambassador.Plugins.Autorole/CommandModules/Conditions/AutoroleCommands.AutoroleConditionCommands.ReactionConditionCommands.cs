@@ -21,7 +21,8 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
@@ -48,17 +49,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             public class ReactionConditionCommands : ModuleBase
             {
                 private readonly AutoroleService _autoroles;
-                private readonly UserFeedbackService _feedback;
 
                 /// <summary>
                 /// Initializes a new instance of the <see cref="ReactionConditionCommands"/> class.
                 /// </summary>
                 /// <param name="autoroles">The autorole service.</param>
-                /// <param name="feedback">The feedback service.</param>
-                public ReactionConditionCommands(AutoroleService autoroles, UserFeedbackService feedback)
+                public ReactionConditionCommands(AutoroleService autoroles)
                 {
                     _autoroles = autoroles;
-                    _feedback = feedback;
                 }
 
                 /// <summary>
@@ -72,7 +70,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 [Summary("Adds an instance of the condition to the role.")]
                 [RequireContext(ContextType.Guild)]
                 [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task AddConditionAsync
+                public async Task<RuntimeResult> AddConditionAsync
                 (
                     AutoroleConfiguration autorole,
                     [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
@@ -88,18 +86,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
                     if (condition is null)
                     {
-                        await _feedback.SendErrorAsync(this.Context, "Failed to create a condition object. Yikes!");
-                        return;
+                        return RuntimeCommandResult.FromError("Failed to create a condition object. Yikes!");
                     }
 
                     var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
                     if (!addCondition.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, addCondition.ErrorReason);
-                        return;
+                        return addCondition.ToRuntimeResult();
                     }
 
-                    await _feedback.SendConfirmationAsync(this.Context, "Condition added.");
+                    return RuntimeCommandResult.FromSuccess("Condition added.");
                 }
 
                 /// <summary>
@@ -114,7 +110,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 [Summary("Modifies an instance of the condition on the role.")]
                 [RequireContext(ContextType.Guild)]
                 [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task ModifyConditionAsync
+                public async Task<RuntimeResult> ModifyConditionAsync
                 (
                     AutoroleConfiguration autorole,
                     long conditionID,
@@ -130,15 +126,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
                     if (!getCondition.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, getCondition.ErrorReason);
-                        return;
+                        return getCondition.ToRuntimeResult();
                     }
 
                     var condition = getCondition.Entity;
                     condition.MessageID = (long)message.Id;
                     condition.EmoteName = emote.Name;
 
-                    await _feedback.SendConfirmationAsync(this.Context, "Condition updated.");
+                    return RuntimeCommandResult.FromSuccess("Condition updated.");
                 }
             }
         }

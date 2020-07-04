@@ -180,16 +180,13 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         public class SetCommands : ModuleBase
         {
             private readonly UserService _users;
-            private readonly UserFeedbackService _feedback;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
-            /// <param name="feedback">The user feedback service.</param>
             /// <param name="users">The user service.</param>
-            public SetCommands(UserFeedbackService feedback, UserService users)
+            public SetCommands(UserService users)
             {
-                _feedback = feedback;
                 _users = users;
             }
 

@@ -25,7 +25,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord;
-using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Permissions;
 using DIGOS.Ambassador.Plugins.Characters.Services;
@@ -50,7 +51,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
         public class SetCommands : ModuleBase
         {
             private readonly DiscordService _discord;
-            private readonly UserFeedbackService _feedback;
             private readonly CharacterDiscordService _characters;
             private readonly CharacterRoleService _characterRoles;
 
@@ -58,19 +58,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
             /// <param name="discordService">The Discord integration service.</param>
-            /// <param name="feedbackService">The feedback service.</param>
             /// <param name="characterService">The character service.</param>
             /// <param name="characterRoles">The character role service.</param>
             public SetCommands
             (
                 DiscordService discordService,
-                UserFeedbackService feedbackService,
                 CharacterDiscordService characterService,
                 CharacterRoleService characterRoles
             )
             {
                 _discord = discordService;
-                _feedback = feedbackService;
                 _characters = characterService;
                 _characterRoles = characterRoles;
             }
@@ -85,7 +82,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Sets the name of a character.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-            public async Task SetCharacterNameAsync
+            public async Task<RuntimeResult> SetCharacterNameAsync
             (
                 [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
@@ -95,11 +92,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 var setNameResult = await _characters.SetCharacterNameAsync(character, newCharacterName);
                 if (!setNameResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setNameResult.ErrorReason);
-                    return;
+                    return setNameResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Character name set.");
+                return RuntimeCommandResult.FromSuccess("Character name set.");
             }
 
             /// <summary>
@@ -112,7 +108,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Sets the avatar of a character. You can attach an image instead of passing a url as a parameter.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-            public async Task SetCharacterAvatarAsync
+            public async Task<RuntimeResult> SetCharacterAvatarAsync
             (
                 [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
@@ -123,8 +119,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 {
                     if (!this.Context.Message.Attachments.Any())
                     {
-                        await _feedback.SendErrorAsync(this.Context, "You need to attach an image or provide a url.");
-                        return;
+                        return RuntimeCommandResult.FromError("You need to attach an image or provide a url.");
                     }
 
                     var newAvatar = this.Context.Message.Attachments.First();
@@ -149,11 +144,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
                 if (!result.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
+                    return result.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Character avatar set.");
+                return RuntimeCommandResult.FromSuccess("Character avatar set.");
             }
 
             /// <summary>
@@ -167,7 +161,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Sets the nickname that the user should have when the character is active.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-            public async Task SetCharacterNicknameAsync
+            public async Task<RuntimeResult> SetCharacterNicknameAsync
             (
                 [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
@@ -183,11 +177,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
                 if (!setNickResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setNickResult.ErrorReason);
-                    return;
+                    return setNickResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Character nickname set.");
+                return RuntimeCommandResult.FromSuccess("Character nickname set.");
             }
 
             /// <summary>
@@ -200,7 +193,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Sets the summary of a character.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-            public async Task SetCharacterSummaryAsync
+            public async Task<RuntimeResult> SetCharacterSummaryAsync
             (
                 [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
@@ -210,11 +203,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 var setSummaryResult = await _characters.SetCharacterSummaryAsync(character, newCharacterSummary);
                 if (!setSummaryResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setSummaryResult.ErrorReason);
-                    return;
+                    return setSummaryResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Character summary set.");
+                return RuntimeCommandResult.FromSuccess("Character summary set.");
             }
 
             /// <summary>
@@ -228,7 +220,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Sets the description of a character. You can attach a plaintext document instead of passing the contents as a parameter.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-            public async Task SetCharacterDescriptionAsync
+            public async Task<RuntimeResult> SetCharacterDescriptionAsync
             (
                 [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
@@ -239,21 +231,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 {
                     if (!this.Context.Message.Attachments.Any())
                     {
-                        await _feedback.SendErrorAsync
+                        return RuntimeCommandResult.FromError
                         (
-                            this.Context,
                             "You need to attach a plaintext document or provide an in-message description."
                         );
-
-                        return;
                     }
 
                     var newDescription = this.Context.Message.Attachments.First();
                     var getAttachmentStreamResult = await _discord.GetAttachmentStreamAsync(newDescription);
                     if (!getAttachmentStreamResult.IsSuccess)
                     {
-                        await _feedback.SendErrorAsync(this.Context, getAttachmentStreamResult.ErrorReason);
-                        return;
+                        return getAttachmentStreamResult.ToRuntimeResult();
                     }
 
                     using var sr = new StreamReader(getAttachmentStreamResult.Entity);
@@ -268,11 +256,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
 
                 if (!setDescriptionResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setDescriptionResult.ErrorReason);
-                    return;
+                    return setDescriptionResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Character description set.");
+                return RuntimeCommandResult.FromSuccess("Character description set.");
             }
 
             /// <summary>
@@ -285,7 +272,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Sets whether or not a character is NSFW.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-            public async Task SetCharacterIsNSFWAsync
+            public async Task<RuntimeResult> SetCharacterIsNSFWAsync
             (
                 [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
@@ -295,11 +282,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 var setNSFW = await _characters.SetCharacterIsNSFWAsync(character, isNSFW);
                 if (!setNSFW.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setNSFW.ErrorReason);
-                    return;
+                    return setNSFW.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, $"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
+                return RuntimeCommandResult.FromSuccess($"Character set to {(isNSFW ? "NSFW" : "SFW")}.");
             }
 
             /// <summary>
@@ -313,7 +299,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Sets the preferred pronoun of a character.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-            public async Task SetCharacterPronounAsync
+            public async Task<RuntimeResult> SetCharacterPronounAsync
             (
                 [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
@@ -323,11 +309,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 var result = await _characters.SetCharacterPronounsAsync(character, pronounFamily);
                 if (!result.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
+                    return result.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Preferred pronoun set.");
+                return RuntimeCommandResult.FromSuccess("Preferred pronoun set.");
             }
 
             /// <summary>
@@ -340,7 +325,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Summary("Sets the given character's display role.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditCharacter), PermissionTarget.Self)]
-            public async Task SetCharacterRoleAsync
+            public async Task<RuntimeResult> SetCharacterRoleAsync
             (
                 [RequireEntityOwnerOrPermission(typeof(EditCharacter), PermissionTarget.Other)]
                 Character character,
@@ -350,8 +335,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 var getRoleResult = await _characterRoles.GetCharacterRoleAsync(discordRole);
                 if (!getRoleResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getRoleResult.ErrorReason);
-                    return;
+                    return getRoleResult.ToRuntimeResult();
                 }
 
                 var commandInvoker = (IGuildUser)this.Context.User;
@@ -361,31 +345,26 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 {
                     if (!commandInvoker.GuildPermissions.ManageRoles)
                     {
-                        await _feedback.SendErrorAsync
+                        return RuntimeCommandResult.FromError
                         (
-                            this.Context,
                             "That role is restricted, and you must be able to manage roles to use it."
                         );
-
-                        return;
                     }
                 }
 
                 var owner = await this.Context.Guild.GetUserAsync((ulong)character.Owner.DiscordID);
                 if (owner is null)
                 {
-                    await _feedback.SendErrorAsync(this.Context, "Failed to get the owner as a guild user.");
-                    return;
+                    return RuntimeCommandResult.FromError("Failed to get the owner as a guild user.");
                 }
 
                 var setRoleResult = await _characterRoles.SetCharacterRoleAsync(owner, character, role);
                 if (!setRoleResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, setRoleResult.ErrorReason);
-                    return;
+                    return setRoleResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Character role set.");
+                return RuntimeCommandResult.FromSuccess("Character role set.");
             }
 
             /// <summary>
@@ -395,16 +374,15 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("default")]
             [Summary("Sets your default form to your current character.")]
             [RequireContext(ContextType.Guild)]
-            public async Task SetDefaultCharacterAsync()
+            public async Task<RuntimeResult> SetDefaultCharacterAsync()
             {
                 var result = await _characters.GetCurrentCharacterAsync((IGuildUser)this.Context.User);
                 if (!result.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
+                    return result.ToRuntimeResult();
                 }
 
-                await SetDefaultCharacterAsync(result.Entity);
+                return await SetDefaultCharacterAsync(result.Entity);
             }
 
             /// <summary>
@@ -415,7 +393,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
             [Command("default")]
             [Summary("Sets your default form to the given character.")]
             [RequireContext(ContextType.Guild)]
-            public async Task SetDefaultCharacterAsync
+            public async Task<RuntimeResult> SetDefaultCharacterAsync
             (
                 [RequireEntityOwner]
                 Character character
@@ -424,11 +402,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.CommandModules
                 var result = await _characters.SetDefaultCharacterAsync((IGuildUser)this.Context.User, character);
                 if (!result.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
+                    return result.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Default character set.");
+                return RuntimeCommandResult.FromSuccess("Default character set.");
             }
         }
     }

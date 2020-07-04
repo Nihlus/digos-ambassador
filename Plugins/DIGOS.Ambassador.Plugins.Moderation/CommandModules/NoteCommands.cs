@@ -22,6 +22,8 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
@@ -82,7 +84,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Lists the notes attached to the given user.")]
         [RequirePermission(typeof(ManageNotes), PermissionTarget.Other)]
         [RequireContext(ContextType.Guild)]
-        public async Task ListNotesAsync(IGuildUser user)
+        public async Task<RuntimeResult> ListNotesAsync(IGuildUser user)
         {
             var notes = _notes.GetNotes(user);
 
@@ -121,6 +123,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -132,18 +136,18 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Adds a note to the given user.")]
         [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
         [RequireContext(ContextType.Guild)]
-        public async Task AddNoteAsync(IGuildUser user, string content)
+        public async Task<RuntimeResult> AddNoteAsync(IGuildUser user, string content)
         {
             var addNote = await _notes.CreateNoteAsync(this.Context.User, user, content);
             if (!addNote.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, addNote.ErrorReason);
-                return;
+                return addNote.ToRuntimeResult();
             }
 
             var note = addNote.Entity;
-            await _feedback.SendConfirmationAsync(this.Context, $"Note added (ID {note.ID}).");
+
             await _logging.NotifyUserNoteAddedAsync(note);
+            return RuntimeCommandResult.FromSuccess($"Note added (ID {note.ID}).");
         }
 
         /// <summary>
@@ -154,13 +158,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Deletes the given note.")]
         [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
         [RequireContext(ContextType.Guild)]
-        public async Task DeleteNoteAsync(long noteID)
+        public async Task<RuntimeResult> DeleteNoteAsync(long noteID)
         {
             var getNote = await _notes.GetNoteAsync(this.Context.Guild, noteID);
             if (!getNote.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getNote.ErrorReason);
-                return;
+                return getNote.ToRuntimeResult();
             }
 
             var note = getNote.Entity;
@@ -171,18 +174,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var notifyResult = await _logging.NotifyUserNoteRemovedAsync(note, rescinder);
             if (!notifyResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, notifyResult.ErrorReason);
-                return;
+                return notifyResult.ToRuntimeResult();
             }
 
             var deleteNote = await _notes.DeleteNoteAsync(note);
             if (!deleteNote.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, deleteNote.ErrorReason);
-                return;
+                return deleteNote.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Note deleted.");
+            return RuntimeCommandResult.FromSuccess("Note deleted.");
         }
     }
 }

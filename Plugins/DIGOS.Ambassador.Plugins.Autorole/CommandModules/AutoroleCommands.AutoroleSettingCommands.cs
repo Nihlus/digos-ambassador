@@ -21,6 +21,8 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
@@ -67,13 +69,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Summary("Shows the server-wide autorole settings.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(ShowAutoroleServerSettings), PermissionTarget.Self)]
-            public async Task ShowSettingsAsync()
+            public async Task<RuntimeResult> ShowSettingsAsync()
             {
                 var getSettings = await _autoroles.GetOrCreateServerSettingsAsync(this.Context.Guild);
                 if (!getSettings.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getSettings.ErrorReason);
-                    return;
+                    return getSettings.ToRuntimeResult();
                 }
 
                 var settings = getSettings.Entity;
@@ -87,6 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     .AddField("Confirmation Notification Channel", notificationChannelValue);
 
                 await _feedback.SendEmbedAsync(this.Context.Channel, embed.Build());
+                return RuntimeCommandResult.FromSuccess();
             }
 
             /// <summary>
@@ -98,7 +100,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             [Summary("clears the confirmation notification channel.")]
             [RequireContext(ContextType.Guild)]
             [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
-            public async Task ClearAffirmationNotificationChannel()
+            public async Task<RuntimeResult> ClearAffirmationNotificationChannel()
             {
                 var clearResult = await _autoroles.ClearAffirmationNotificationChannelAsync
                 (
@@ -107,11 +109,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
                 if (!clearResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, clearResult.ErrorReason);
-                    return;
+                    return clearResult.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Channel cleared.");
+                return RuntimeCommandResult.FromSuccess("Channel cleared.");
             }
         }
     }

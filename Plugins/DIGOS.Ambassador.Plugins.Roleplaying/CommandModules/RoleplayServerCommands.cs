@@ -21,7 +21,8 @@
 //
 
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
@@ -46,23 +47,19 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Summary("Server-related commands, such as viewing or editing info about a specific server.")]
         public partial class RoleplayServerCommands : ModuleBase
         {
-            private readonly UserFeedbackService _feedback;
             private readonly ServerService _servers;
             private readonly RoleplayServerSettingsService _serverSettings;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="RoleplayServerCommands"/> class.
             /// </summary>
-            /// <param name="feedback">The user feedback service.</param>
             /// <param name="serverSettings">The roleplaying server settings service.</param>
             /// <param name="servers">The server service.</param>
             public RoleplayServerCommands
             (
-                UserFeedbackService feedback,
                 RoleplayServerSettingsService serverSettings,
                 ServerService servers)
             {
-                _feedback = feedback;
                 _serverSettings = serverSettings;
                 _servers = servers;
             }
@@ -75,13 +72,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Summary("Clears the channel category to use for dedicated roleplays.")]
             [RequireContext(Guild)]
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task ClearDedicatedRoleplayChannelCategory()
+            public async Task<RuntimeResult> ClearDedicatedRoleplayChannelCategory()
             {
                 var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
                 if (!getServerResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
-                    return;
+                    return getServerResult.ToRuntimeResult();
                 }
 
                 var server = getServerResult.Entity;
@@ -90,11 +86,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 if (!result.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
+                    return result.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Dedicated channel category cleared.");
+                return RuntimeCommandResult.FromSuccess("Dedicated channel category cleared.");
             }
 
             /// <summary>
@@ -105,13 +100,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [Summary("Clears the role to use as a default @everyone role in dynamic roleplays.")]
             [RequireContext(Guild)]
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
-            public async Task SetDefaultUserRole()
+            public async Task<RuntimeResult> SetDefaultUserRole()
             {
                 var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
                 if (!getServerResult.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, getServerResult.ErrorReason);
-                    return;
+                    return getServerResult.ToRuntimeResult();
                 }
 
                 var server = getServerResult.Entity;
@@ -124,11 +118,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 if (!result.IsSuccess)
                 {
-                    await _feedback.SendErrorAsync(this.Context, result.ErrorReason);
-                    return;
+                    return result.ToRuntimeResult();
                 }
 
-                await _feedback.SendConfirmationAsync(this.Context, "Default user role cleared.");
+                return RuntimeCommandResult.FromSuccess("Default user role cleared.");
             }
         }
     }

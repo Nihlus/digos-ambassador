@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.JumboEmotes.EmojiTools;
 using Discord;
@@ -61,7 +62,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules
         [UsedImplicitly]
         [Command("jumbo")]
         [Summary("Sends a jumbo version of the given emote to the chat, if available.")]
-        public async Task JumboAsync(string emoteName)
+        public async Task<RuntimeResult> JumboAsync(string emoteName)
         {
             string emoteUrl;
 
@@ -119,17 +120,16 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules
 
             using var client = new HttpClient();
             var response = await client.GetAsync(emoteUrl, HttpCompletionOption.ResponseHeadersRead);
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
-                var eb = _feedback.CreateEmbedBase();
-                eb.WithImageUrl(emoteUrl);
+                return RuntimeCommandResult.FromError("Sorry, I couldn't find that emote.");
+            }
 
-                await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
-            }
-            else
-            {
-                await _feedback.SendWarningAsync(this.Context, "Sorry, I couldn't find that emote.");
-            }
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithImageUrl(emoteUrl);
+
+            await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            return RuntimeCommandResult.FromSuccess();
         }
     }
 }

@@ -22,6 +22,8 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
@@ -89,7 +91,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Lists the warnings attached to the given user.")]
         [RequirePermission(typeof(ManageWarnings), PermissionTarget.Other)]
         [RequireContext(ContextType.Guild)]
-        public async Task ListWarningsAsync(IGuildUser user)
+        public async Task<RuntimeResult> ListWarningsAsync(IGuildUser user)
         {
             var warnings = _warnings.GetWarnings(user);
 
@@ -138,6 +140,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -151,7 +155,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Priority(int.MinValue)]
         [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
         [RequireContext(ContextType.Guild)]
-        public async Task AddWarningAsync
+        public async Task<RuntimeResult> AddWarningAsync
         (
             IGuildUser user,
             string reason,
@@ -167,27 +171,23 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var addWarning = await _warnings.CreateWarningAsync(this.Context.User, user, reason, expiresOn: expiresOn);
             if (!addWarning.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, addWarning.ErrorReason);
-                return;
+                return addWarning.ToRuntimeResult();
             }
 
             var warning = addWarning.Entity;
-            await _feedback.SendConfirmationAsync(this.Context, $"Warning added (ID {warning.ID}).");
+            var getSettings = await _moderation.GetOrCreateServerSettingsAsync(this.Context.Guild);
+            if (!getSettings.IsSuccess)
+            {
+                return getSettings.ToRuntimeResult();
+            }
+
+            var settings = getSettings.Entity;
 
             var notifyResult = await _logging.NotifyUserWarningAddedAsync(warning);
             if (!notifyResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, notifyResult.ErrorReason);
-                return;
+                return notifyResult.ToRuntimeResult();
             }
-
-            var getSettings = await _moderation.GetOrCreateServerSettingsAsync(this.Context.Guild);
-            if (!getSettings.IsSuccess)
-            {
-                return;
-            }
-
-            var settings = getSettings.Entity;
 
             var warningCount = await _warnings.GetWarnings(user).CountAsync();
             if (warningCount >= settings.WarningThreshold)
@@ -197,6 +197,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                     this.Context, $"The warned user now has {warningCount} warnings. Consider further action."
                 );
             }
+
+            return RuntimeCommandResult.FromSuccess($"Warning added (ID {warning.ID}).");
         }
 
         /// <summary>
@@ -207,13 +209,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Deletes the given warning.")]
         [RequirePermission(typeof(ManageWarnings), PermissionTarget.All)]
         [RequireContext(ContextType.Guild)]
-        public async Task DeleteWarningAsync(long warningID)
+        public async Task<RuntimeResult> DeleteWarningAsync(long warningID)
         {
             var getWarning = await _warnings.GetWarningAsync(this.Context.Guild, warningID);
             if (!getWarning.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getWarning.ErrorReason);
-                return;
+                return getWarning.ToRuntimeResult();
             }
 
             var warning = getWarning.Entity;
@@ -224,18 +225,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var notifyResult = await _logging.NotifyUserWarningRemovedAsync(warning, rescinder);
             if (!notifyResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, notifyResult.ErrorReason);
-                return;
+                return notifyResult.ToRuntimeResult();
             }
 
             var deleteWarning = await _warnings.DeleteWarningAsync(warning);
             if (!deleteWarning.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, deleteWarning.ErrorReason);
-                return;
+                return deleteWarning.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, "Warning deleted.");
+            return RuntimeCommandResult.FromSuccess("Warning deleted.");
         }
     }
 }

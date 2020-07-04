@@ -22,6 +22,8 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
@@ -88,7 +90,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [Summary("Lists the bans attached to the given user.")]
         [RequirePermission(typeof(ManageBans), PermissionTarget.Other)]
         [RequireContext(ContextType.Guild)]
-        public async Task ListBansAsync(IGuildUser user)
+        public async Task<RuntimeResult> ListBansAsync(IGuildUser user)
         {
             var bans = _bans.GetBans(user);
 
@@ -137,6 +139,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 paginatedEmbed,
                 TimeSpan.FromMinutes(5)
             );
+
+            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -151,7 +155,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
         [RequireBotPermission(GuildPermission.BanMembers)]
         [RequireContext(ContextType.Guild)]
-        public async Task AddBanAsync
+        public async Task<RuntimeResult> AddBanAsync
         (
             IGuildUser user,
             string reason,
@@ -167,8 +171,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var addBan = await _bans.CreateBanAsync(this.Context.User, user, reason, expiresOn: expiresOn);
             if (!addBan.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, addBan.ErrorReason);
-                return;
+                return addBan.ToRuntimeResult();
             }
 
             var ban = addBan.Entity;
@@ -176,12 +179,11 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var notifyResult = await _logging.NotifyUserBannedAsync(ban);
             if (!notifyResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, notifyResult.ErrorReason);
-                return;
+                return notifyResult.ToRuntimeResult();
             }
 
             await this.Context.Guild.AddBanAsync((ulong)ban.User.DiscordID, reason: reason);
-            await _feedback.SendConfirmationAsync(this.Context, $"User banned (ban ID {ban.ID}).");
+            return RuntimeCommandResult.FromSuccess($"User banned (ban ID {ban.ID}).");
         }
 
         /// <summary>
@@ -193,13 +195,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [RequirePermission(typeof(ManageBans), PermissionTarget.All)]
         [RequireBotPermission(GuildPermission.BanMembers)]
         [RequireContext(ContextType.Guild)]
-        public async Task DeleteBanAsync(long banID)
+        public async Task<RuntimeResult> DeleteBanAsync(long banID)
         {
             var getBan = await _bans.GetBanAsync(this.Context.Guild, banID);
             if (!getBan.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, getBan.ErrorReason);
-                return;
+                return getBan.ToRuntimeResult();
             }
 
             var ban = getBan.Entity;
@@ -210,19 +211,17 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             var notifyResult = await _logging.NotifyUserUnbannedAsync(ban, rescinder);
             if (!notifyResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, notifyResult.ErrorReason);
-                return;
+                return notifyResult.ToRuntimeResult();
             }
 
             var deleteBan = await _bans.DeleteBanAsync(ban);
             if (!deleteBan.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, deleteBan.ErrorReason);
-                return;
+                return deleteBan.ToRuntimeResult();
             }
 
             await this.Context.Guild.RemoveBanAsync((ulong)ban.User.DiscordID);
-            await _feedback.SendConfirmationAsync(this.Context, "Ban rescinded.");
+            return RuntimeCommandResult.FromSuccess("Ban rescinded.");
         }
     }
 }

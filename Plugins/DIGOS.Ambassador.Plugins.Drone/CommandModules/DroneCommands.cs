@@ -22,6 +22,8 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Drone.Extensions;
 using DIGOS.Ambassador.Plugins.Drone.Services;
@@ -66,12 +68,11 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
         [RequireContext(ContextType.Guild)]
         [RequireNsfw]
         [Summary("Drones the target user.")]
-        public async Task DroneAsync(IGuildUser user)
+        public async Task<RuntimeResult> DroneAsync(IGuildUser user)
         {
             if (!(this.Context.User is IGuildUser target))
             {
-                await _feedback.SendErrorAsync(this.Context, "The target user wasn't a guild user.");
-                return;
+                return RuntimeCommandResult.FromError("The target user wasn't a guild user.");
             }
 
             var droneMessage = user == target
@@ -83,11 +84,10 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
             var droneResult = await _drone.DroneUserAsync(target);
             if (!droneResult.IsSuccess)
             {
-                await _feedback.SendErrorAsync(this.Context, droneResult.ErrorReason);
-                return;
+                return droneResult.ToRuntimeResult();
             }
 
-            await _feedback.SendConfirmationAsync(this.Context, _content.GetRandomConfirmationMessage());
+            return RuntimeCommandResult.FromSuccess(_content.GetRandomConfirmationMessage());
         }
     }
 }
