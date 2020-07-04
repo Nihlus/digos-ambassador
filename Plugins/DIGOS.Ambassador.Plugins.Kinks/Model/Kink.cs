@@ -75,7 +75,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
 
         /// <inheritdoc />
         [Pure]
-        public bool Equals(Kink other)
+        public bool Equals(Kink? other)
         {
             if (ReferenceEquals(null, other))
             {
