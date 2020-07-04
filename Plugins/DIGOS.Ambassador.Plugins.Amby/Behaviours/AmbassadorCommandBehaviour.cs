@@ -29,6 +29,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Amby.Services;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
@@ -98,6 +99,33 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
         }
 
         /// <inheritdoc />
+        protected override async Task OnCommandSucceededAsync
+        (
+            SocketCommandContext context,
+            int commandStart,
+            IResult result
+        )
+        {
+            if (!(result is RuntimeCommandResult runtimeCommandResult))
+            {
+                return;
+            }
+
+            if (!result.IsSuccess)
+            {
+                this.Log.LogWarning("An unsuccessful message bubbled up to the successful command handling. Bug?");
+                return;
+            }
+
+            if (runtimeCommandResult.SuccessMessage is null)
+            {
+                return;
+            }
+
+            await _feedback.SendConfirmationAsync(context, runtimeCommandResult.SuccessMessage);
+        }
+
+        /// <inheritdoc />
         protected override async Task OnCommandFailedAsync
         (
             SocketCommandContext context,
@@ -111,6 +139,11 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
                 {
                     await HandleInternalErrorAsync(context, executeResult);
                     break;
+                }
+                case RuntimeCommandResult runtimeResult:
+                {
+                    await _feedback.SendErrorAsync(context, runtimeResult.Reason);
+                    return;
                 }
             }
 
@@ -129,38 +162,50 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
                 {
                     var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
 
-                    try
+                    await SendPrivateMessageAsync(context, result.ErrorReason);
+                    var searchResult = this.Commands.Search(context, commandStart);
+                    if (searchResult.Commands.Any())
                     {
-                        var errorEmbed = _feedback.CreateFeedbackEmbed
+                        await userDMChannel.SendMessageAsync
                         (
-                            context.User,
-                            Color.Red,
-                            result.ErrorReason
+                            string.Empty,
+                            false,
+                            _help.CreateCommandUsageEmbed(searchResult.Commands)
                         );
-
-                        await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
-
-                        var searchResult = this.Commands.Search(context, commandStart);
-                        if (searchResult.Commands.Any())
-                        {
-                            await userDMChannel.SendMessageAsync
-                            (
-                                string.Empty,
-                                false,
-                                _help.CreateCommandUsageEmbed(searchResult.Commands)
-                            );
-                        }
-                    }
-                    catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
-                    {
-                    }
-                    finally
-                    {
-                        await userDMChannel.CloseAsync();
                     }
 
                     break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Sends a private message to the user in the given context.
+        /// </summary>
+        /// <param name="context">The context.</param>
+        /// <param name="contents">The contents of the message to send.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        private async Task SendPrivateMessageAsync(SocketCommandContext context, string contents)
+        {
+            var userDMChannel = await context.Message.Author.GetOrCreateDMChannelAsync();
+
+            try
+            {
+                var errorEmbed = _feedback.CreateFeedbackEmbed
+                (
+                    context.User,
+                    Color.Red,
+                    contents
+                );
+
+                await userDMChannel.SendMessageAsync(string.Empty, false, errorEmbed);
+            }
+            catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
+            {
+            }
+            finally
+            {
+                await userDMChannel.CloseAsync();
             }
         }
 
