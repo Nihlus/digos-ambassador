@@ -108,7 +108,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
                 return OperationResult.FromError("The author was not a guild user.");
             }
 
-            if ((arg.Author.IsBot && !arg.Author.IsMe(this.Client)) || arg.Author.IsWebhook)
+            if (arg.Author.IsBot || arg.Author.IsWebhook)
             {
                 return OperationResult.FromSuccess();
             }
