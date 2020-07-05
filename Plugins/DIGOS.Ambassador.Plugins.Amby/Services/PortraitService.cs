@@ -39,12 +39,18 @@ namespace DIGOS.Ambassador.Plugins.Amby.Services
             this.AmbyPortraitUri = new Uri(content.BaseCDNUri, "portraits/amby-irbynx-3.png");
             this.BrokenAmbyUri = new Uri(content.BaseCDNUri, "portraits/maintenance.png");
             this.BwehUri = new Uri(content.BaseCDNUri, "portraits/bweh.png");
+            this.MowUri = new Uri(content.BaseCDNUri, "portraits/mow.png");
         }
 
         /// <summary>
         /// Gets the <see cref="Uri"/> pointing to a proper bweh.
         /// </summary>
         public Uri BwehUri { get; }
+
+        /// <summary>
+        /// Gets the <see cref="Uri"/> pointing to a proper mow.
+        /// </summary>
+        public Uri MowUri { get; }
 
         /// <summary>
         /// Gets the <see cref="Uri"/> pointing to a portrait of Amby.

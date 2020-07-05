@@ -30,6 +30,14 @@ Sasses the user in a DIGOS fashion.
 
 ---
 
+### *mow*
+#### Overloads
+**`!mow`**
+
+Mow!
+
+---
+
 ### *bweh*
 #### Overloads
 **`!bweh`**

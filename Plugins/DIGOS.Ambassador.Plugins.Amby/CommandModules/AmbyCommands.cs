@@ -152,6 +152,21 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
         }
 
         /// <summary>
+        /// Mow! A silly command.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("mow")]
+        [Summary("Mow!")]
+        public async Task<RuntimeResult> MowAsync()
+        {
+            var eb = _feedback.CreateEmbedBase();
+            eb.WithImageUrl(_portraits.MowUri.ToString());
+
+            await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            return RuntimeCommandResult.FromSuccess();
+        }
+
+        /// <summary>
         /// Bweh! A silly command.
         /// </summary>
         [UsedImplicitly]
