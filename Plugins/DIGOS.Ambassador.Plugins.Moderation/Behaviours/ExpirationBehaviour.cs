@@ -151,7 +151,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 
             if (!(ban.ExpiresOn <= DateTime.UtcNow))
             {
-                return OperationResult.FromError("The warning doesn't need to be rescinded.");
+                return OperationResult.FromSuccess();
             }
 
             var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
