@@ -41,22 +41,18 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
         public static TEntity NormalizeReference<TEntity>(this DbContext context, TEntity entity)
             where TEntity : class, IEFEntity
         {
-            return entity;
-
-            if (entity.ID != 0)
-            {
-                context.Attach(entity);
-                return entity;
-            }
-
             var existingEntityEntry = context.ChangeTracker.Entries<TEntity>().FirstOrDefault
             (
                 e => e.Entity.ID == entity.ID
             );
 
-            return existingEntityEntry is null
-                ? entity
-                : existingEntityEntry.Entity;
+            if (!(existingEntityEntry is null))
+            {
+                return existingEntityEntry.Entity;
+            }
+
+            context.Attach(entity);
+            return entity;
         }
     }
 }
