@@ -160,8 +160,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             {
                 return CreateEntityResult<ITextChannel>.FromError
                 (
-                    "Failed to update channel permissions. Does the bot have permissions to manage permissions on new" +
-                    "channels?"
+                    "Failed to update channel permissions. Does the bot have permissions to manage permissions on " +
+                    "new channels?"
                 );
             }
             catch (Exception ex)
