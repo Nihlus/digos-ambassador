@@ -132,7 +132,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 }
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(1), ct);
             return OperationResult.FromSuccess();
         }
 

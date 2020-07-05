@@ -50,6 +50,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// </summary>
         private UserFeedbackService Feedback { get; }
 
+        /// <inheritdoc/>
+        protected override TimeSpan TickDelay => TimeSpan.FromMinutes(1);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayTimeoutBehaviour"/> class.
         /// </summary>
@@ -114,7 +117,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 }
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(5), ct);
             return OperationResult.FromSuccess();
         }
 

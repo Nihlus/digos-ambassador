@@ -7,7 +7,7 @@
 
     <ItemGroup>
       <PackageReference Include="Discord.Net.Commands" Version="2.2.0" />
-      <PackageReference Include="Remora.Plugins.Abstractions" Version="2.1.2" />
+      <PackageReference Include="Remora.Plugins.Abstractions" Version="2.1.3-beta1" />
     </ItemGroup>
 
     <ItemGroup>
