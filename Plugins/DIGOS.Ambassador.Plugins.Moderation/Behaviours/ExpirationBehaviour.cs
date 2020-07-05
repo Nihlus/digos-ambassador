@@ -22,9 +22,13 @@
 
 using System;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
+using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
+using Discord.Net;
 using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -64,8 +68,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
             var banService = tickServices.GetRequiredService<BanService>();
             var loggingService = tickServices.GetRequiredService<ChannelLoggingService>();
 
-            var now = DateTime.UtcNow;
-
             foreach (var guild in this.Client.Guilds)
             {
                 if (ct.IsCancellationRequested)
@@ -77,27 +79,24 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var warnings = await warningService.GetWarnings(guild).Where(w => w.ExpiresOn.HasValue).ToListAsync(ct);
                 foreach (var warning in warnings)
                 {
-                    if (ct.IsCancellationRequested)
-                    {
-                        return OperationResult.FromError("Operation was cancelled.");
-                    }
+                    using var warningTransaction = new TransactionScope
+                    (
+                        TransactionScopeOption.Required,
+                        TransactionScopeAsyncFlowOption.Enabled
+                    );
 
-                    if (!(warning.ExpiresOn <= now))
-                    {
-                        continue;
-                    }
+                    var rescindWarningResult = await RescindWarningAsync
+                    (
+                        loggingService,
+                        warningService,
+                        guild,
+                        warning,
+                        ct
+                    );
 
-                    var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
-                    var notifyResult = await loggingService.NotifyUserWarningRemovedAsync(warning, rescinder);
-                    if (!notifyResult.IsSuccess)
+                    if (rescindWarningResult.IsSuccess)
                     {
-                        return OperationResult.FromError(notifyResult);
-                    }
-
-                    var deleteResult = await warningService.DeleteWarningAsync(warning);
-                    if (!deleteResult.IsSuccess)
-                    {
-                        return OperationResult.FromError(deleteResult);
+                        warningTransaction.Complete();
                     }
                 }
 
@@ -111,34 +110,113 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var bans = await banService.GetBans(guild).Where(b => b.ExpiresOn.HasValue).ToListAsync(ct);
                 foreach (var ban in bans)
                 {
-                    if (ct.IsCancellationRequested)
-                    {
-                        return OperationResult.FromError("Operation was cancelled.");
-                    }
+                    using var banTransaction = new TransactionScope
+                    (
+                        TransactionScopeOption.Required,
+                        TransactionScopeAsyncFlowOption.Enabled
+                    );
 
-                    if (!(ban.ExpiresOn <= now))
-                    {
-                        continue;
-                    }
+                    var rescindBanResult = await RescindBanAsync
+                    (
+                        loggingService,
+                        banService,
+                        guild,
+                        ban,
+                        ct
+                    );
 
-                    var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
-                    var notifyResult = await loggingService.NotifyUserUnbannedAsync(ban, rescinder);
-                    if (!notifyResult.IsSuccess)
+                    if (rescindBanResult.IsSuccess)
                     {
-                        return OperationResult.FromError(notifyResult);
+                        banTransaction.Complete();
                     }
-
-                    var deleteResult = await banService.DeleteBanAsync(ban);
-                    if (!deleteResult.IsSuccess)
-                    {
-                        return OperationResult.FromError(deleteResult);
-                    }
-
-                    await guild.RemoveBanAsync((ulong)ban.User.DiscordID);
                 }
             }
 
-            await Task.Delay(TimeSpan.FromHours(1), ct);
+            await Task.Delay(TimeSpan.FromSeconds(1), ct);
+            return OperationResult.FromSuccess();
+        }
+
+        private async Task<OperationResult> RescindBanAsync
+        (
+            ChannelLoggingService loggingService,
+            BanService bans,
+            SocketGuild guild,
+            UserBan ban,
+            CancellationToken ct
+        )
+        {
+            if (ct.IsCancellationRequested)
+            {
+                return OperationResult.FromError("Operation was cancelled.");
+            }
+
+            if (!(ban.ExpiresOn <= DateTime.UtcNow))
+            {
+                return OperationResult.FromError("The warning doesn't need to be rescinded.");
+            }
+
+            var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
+            var notifyResult = await loggingService.NotifyUserUnbannedAsync(ban, rescinder);
+            if (!notifyResult.IsSuccess)
+            {
+                return OperationResult.FromError(notifyResult);
+            }
+
+            var deleteResult = await bans.DeleteBanAsync(ban);
+            if (!deleteResult.IsSuccess)
+            {
+                return OperationResult.FromError(deleteResult);
+            }
+
+            try
+            {
+                await guild.RemoveBanAsync((ulong)ban.User.DiscordID);
+            }
+            catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.NotFound)
+            {
+                // Already unbanned
+                return OperationResult.FromSuccess();
+            }
+            catch (Exception ex)
+            {
+                return OperationResult.FromError(ex);
+            }
+
+            return OperationResult.FromSuccess();
+        }
+
+        private async Task<OperationResult> RescindWarningAsync
+        (
+            ChannelLoggingService loggingService,
+            WarningService warnings,
+            SocketGuild guild,
+            UserWarning warning,
+            CancellationToken ct
+        )
+        {
+            if (ct.IsCancellationRequested)
+            {
+                return OperationResult.FromError("Operation was cancelled.");
+            }
+
+            if (!(warning.ExpiresOn <= DateTime.UtcNow))
+            {
+                return OperationResult.FromError("The ban doesn't need to be rescinded.");
+            }
+
+            var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
+            var notifyResult = await loggingService.NotifyUserWarningRemovedAsync(warning, rescinder);
+            if (!notifyResult.IsSuccess)
+            {
+                return OperationResult.FromError(notifyResult);
+            }
+
+            var deleteResult = await warnings.DeleteWarningAsync(warning);
+            if (!deleteResult.IsSuccess)
+            {
+                return OperationResult.FromError(deleteResult);
+            }
+
             return OperationResult.FromSuccess();
         }
     }

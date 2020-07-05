@@ -122,8 +122,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 ? "(expired)"
                 : $"by {rescinder.Mention}";
 
-            var bannedUser = guild.GetUser((ulong)ban.User.DiscordID);
-            eb.WithDescription($"{bannedUser.Mention} (ID {bannedUser.Id}) was unbanned {whoDidIt}.");
+            var bannedID = (ulong)ban.User.DiscordID;
+            eb.WithDescription($"{MentionUtils.MentionUser(bannedID)} (ID {bannedID}) was unbanned {whoDidIt}.");
 
             await _feedback.SendEmbedAsync(channel, eb.Build());
 
