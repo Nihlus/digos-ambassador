@@ -123,7 +123,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                     {
                         case AutoroleUpdateStatus.RequiresAffirmation:
                         {
-                            await NotifyUserNeedsAffirmation(autoroles, guild, autorole, user);
+                            var notifyResult = await NotifyUserNeedsAffirmation(autoroles, guild, autorole, user);
+                            if (!notifyResult.IsSuccess)
+                            {
+                                this.Log.LogError(notifyResult.Exception, notifyResult.ErrorReason);
+                            }
+
                             break;
                         }
                     }
@@ -133,7 +138,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             return OperationResult.FromSuccess();
         }
 
-        private async Task NotifyUserNeedsAffirmation
+        private async Task<OperationResult> NotifyUserNeedsAffirmation
         (
             AutoroleService autoroles,
             SocketGuild guild,
@@ -144,22 +149,20 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             var getAutoroleConfirmation = await autoroles.GetOrCreateAutoroleConfirmationAsync(autorole, user);
             if (!getAutoroleConfirmation.IsSuccess)
             {
-                this.Log.LogError(getAutoroleConfirmation.Exception, getAutoroleConfirmation.ErrorReason);
-                return;
+                return OperationResult.FromError(getAutoroleConfirmation);
             }
 
             var autoroleConfirmation = getAutoroleConfirmation.Entity;
 
             if (autoroleConfirmation.HasNotificationBeenSent)
             {
-                return;
+                return OperationResult.FromSuccess();
             }
 
             var getSettings = await autoroles.GetOrCreateServerSettingsAsync(guild);
             if (!getSettings.IsSuccess)
             {
-                this.Log.LogError(getSettings.Exception, getSettings.ErrorReason);
-                return;
+                return OperationResult.FromError(getSettings);
             }
 
             var settings = getSettings.Entity;
@@ -167,13 +170,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             var notificationChannelID = settings.AffirmationRequiredNotificationChannelID;
             if (notificationChannelID is null)
             {
-                return;
+                return OperationResult.FromError("There's no notification channel set.");
             }
 
             var notificationChannel = guild.GetTextChannel((ulong)notificationChannelID.Value);
             if (notificationChannel is null)
             {
-                return;
+                return OperationResult.FromError("The notification channel is set, but does not exist.");
             }
 
             var embed = _feedback.CreateEmbedBase()
@@ -192,11 +195,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             {
                 await _feedback.SendEmbedAsync(notificationChannel, embed.Build());
 
-                autoroleConfirmation.HasNotificationBeenSent = true;
+                var setResult = await autoroles.SetHasNotificationBeenSentAsync(autoroleConfirmation, true);
+                if (!setResult.IsSuccess)
+                {
+                    return OperationResult.FromError(setResult);
+                }
             }
             catch (HttpException hex) when (hex.WasCausedByMissingPermission())
             {
+                return OperationResult.FromError(hex);
             }
+
+            return OperationResult.FromSuccess();
         }
     }
 }

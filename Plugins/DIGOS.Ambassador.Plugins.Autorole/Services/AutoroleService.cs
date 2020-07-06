@@ -685,5 +685,23 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             return ModifyEntityResult.FromSuccess();
         }
+
+        /// <summary>
+        /// Sets whether the notification for the given confirmation has been sent.
+        /// </summary>
+        /// <param name="autoroleConfirmation">The confirmation.</param>
+        /// <param name="hasNotificationBeenSent">Whether the notification has been sent.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetHasNotificationBeenSentAsync
+        (
+            AutoroleConfirmation autoroleConfirmation,
+            bool hasNotificationBeenSent
+        )
+        {
+            autoroleConfirmation.HasNotificationBeenSent = hasNotificationBeenSent;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
     }
 }
