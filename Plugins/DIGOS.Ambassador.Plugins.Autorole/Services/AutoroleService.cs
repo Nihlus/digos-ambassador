@@ -436,7 +436,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             var condition = getCondition.Entity;
-            if (condition.IsConfirmed)
+            if (!condition.IsConfirmed)
             {
                 return ModifyEntityResult.FromError
                 (
