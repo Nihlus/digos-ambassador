@@ -154,6 +154,33 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         }
 
         /// <summary>
+        /// Clears the join message.
+        /// </summary>
+        [UsedImplicitly]
+        [Command("clear-join-message")]
+        [Summary("Clears the join message.")]
+        [RequireContext(Guild)]
+        [RequirePermission(typeof(EditServerInfo), PermissionTarget.Self)]
+        public async Task<RuntimeResult> ClearJoinMessageAsync()
+        {
+            var getServerResult = await _servers.GetOrRegisterServerAsync(this.Context.Guild);
+            if (!getServerResult.IsSuccess)
+            {
+                return getServerResult.ToRuntimeResult();
+            }
+
+            var server = getServerResult.Entity;
+
+            var result = await _servers.ClearJoinMessageAsync(server);
+            if (!result.IsSuccess)
+            {
+                return result.ToRuntimeResult();
+            }
+
+            return RuntimeCommandResult.FromSuccess("Join message cleared.");
+        }
+
+        /// <summary>
         /// Server info setter commands.
         /// </summary>
         [UsedImplicitly]

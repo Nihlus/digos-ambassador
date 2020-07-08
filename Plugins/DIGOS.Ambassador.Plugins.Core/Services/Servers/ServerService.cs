@@ -300,5 +300,23 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
 
             return ModifyEntityResult.FromSuccess();
         }
+
+        /// <summary>
+        /// Clears the first-join message, if one is set.
+        /// </summary>
+        /// <param name="server">The server.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> ClearJoinMessageAsync(Server server)
+        {
+            if (server.JoinMessage is null)
+            {
+                return ModifyEntityResult.FromError("No join message has been set.");
+            }
+
+            server.JoinMessage = null;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
     }
 }
