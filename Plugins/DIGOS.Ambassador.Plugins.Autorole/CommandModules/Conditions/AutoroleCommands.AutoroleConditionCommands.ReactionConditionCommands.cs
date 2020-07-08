@@ -114,6 +114,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 (
                     AutoroleConfiguration autorole,
                     long conditionID,
+                    [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
                     IMessage message,
                     IEmote emote
                 )
