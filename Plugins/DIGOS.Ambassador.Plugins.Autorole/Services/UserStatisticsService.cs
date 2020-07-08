@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
@@ -180,6 +181,55 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             await _database.SaveChangesAsync();
 
             return newStats;
+        }
+
+        /// <summary>
+        /// Sets the message count for the given channel statistic entity.
+        /// </summary>
+        /// <param name="channelStats">The channel statistics.</param>
+        /// <param name="channelMessageCount">The new message count.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetChannelMessageCountAsync
+        (
+            UserChannelStatistics channelStats,
+            long? channelMessageCount
+        )
+        {
+            channelStats.MessageCount = channelMessageCount;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Sets the message count for the given server statistic entity.
+        /// </summary>
+        /// <param name="globalStats">The server statistics.</param>
+        /// <param name="totalMessageCount">The new message count.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> SetTotalMessageCountAsync
+        (
+            UserServerStatistics globalStats,
+            long? totalMessageCount
+        )
+        {
+            globalStats.TotalMessageCount = totalMessageCount;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
+        }
+
+        /// <summary>
+        /// Updates the timestamp of the given server statistic entity to the current time.
+        /// </summary>
+        /// <param name="globalStats">The server statistics.</param>
+        /// <returns>A modification result which may or may not have succeeded.</returns>
+        public async Task<ModifyEntityResult> UpdateTimestampAsync(UserServerStatistics globalStats)
+        {
+            globalStats.LastActivityTime = DateTimeOffset.UtcNow;
+            await _database.SaveChangesAsync();
+
+            return ModifyEntityResult.FromSuccess();
         }
     }
 }

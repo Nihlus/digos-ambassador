@@ -21,8 +21,10 @@
 //
 
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
@@ -183,14 +185,20 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             var autorolesOnServer = (await autoroles.GetAutorolesAsync(guildUser.Guild)).ToList();
 
-            var wantsToUpdateChannelMessageCounts =
-                autorolesOnServer.Any(a => a.Conditions.Any(c => c is MessageCountInChannelCondition));
+            var wantsToUpdateChannelMessageCounts = autorolesOnServer.Any
+            (
+                a => a.Conditions.Any(c => c is MessageCountInChannelCondition)
+            );
 
-            var wantsToUpdateServerMessageCounts =
-                autorolesOnServer.Any(a => a.Conditions.Any(c => c is MessageCountInGuildCondition));
+            var wantsToUpdateServerMessageCounts = autorolesOnServer.Any
+            (
+                a => a.Conditions.Any(c => c is MessageCountInGuildCondition)
+            );
 
-            var wantsToUpdateLastActivityTime =
-                autorolesOnServer.Any(a => a.Conditions.Any(c => c is TimeSinceLastActivityCondition));
+            var wantsToUpdateLastActivityTime = autorolesOnServer.Any
+            (
+                a => a.Conditions.Any(c => c is TimeSinceLastActivityCondition)
+            );
 
             if
             (
@@ -203,6 +211,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             }
 
             var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
+
             var updateResult = await UpdateLastActivityTimestampForUserAsync(userStatistics, guildUser);
             if (!updateResult.IsSuccess)
             {
@@ -211,55 +220,43 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             if (wantsToUpdateChannelMessageCounts)
             {
-                var getChannelStats = await userStatistics.GetOrCreateUserChannelStatisticsAsync
-                (
-                    guildUser,
-                    textChannel
-                );
-
-                if (!getChannelStats.IsSuccess)
+                var updateChannelCountResult = await UpdateChannelMessageCountAsync(userStatistics, guildUser, textChannel);
+                if (!updateChannelCountResult.IsSuccess)
                 {
-                    this.Log.LogError(getChannelStats.Exception, getChannelStats.ErrorReason);
-                    return OperationResult.FromError(getChannelStats);
-                }
-
-                var channelStats = getChannelStats.Entity;
-                if (channelStats.MessageCount.HasValue)
-                {
-                    channelStats.MessageCount += 1;
-                }
-                else
-                {
-                    var countResult = await CountUserMessagesAsync(textChannel, guildUser);
-                    if (countResult.IsSuccess)
-                    {
-                        channelStats.MessageCount = await countResult.Entity;
-                    }
-                    else if (!(countResult.Exception is null))
-                    {
-                        this.Log.LogError(countResult.Exception, "Message counting failed.");
-                        return OperationResult.FromError(countResult);
-                    }
+                    return OperationResult.FromError(updateChannelCountResult);
                 }
             }
 
-            if (!wantsToUpdateServerMessageCounts)
+            if (wantsToUpdateServerMessageCounts)
             {
-                return OperationResult.FromSuccess();
+                var updateServerCountResult = await UpdateServerMessageCountAsync(userStatistics, guildUser);
+                if (!updateServerCountResult.IsSuccess)
+                {
+                    return OperationResult.FromError(updateServerCountResult);
+                }
             }
 
+            return OperationResult.FromSuccess();
+        }
+
+        private async Task<OperationResult> UpdateServerMessageCountAsync
+        (
+            UserStatisticsService userStatistics,
+            SocketGuildUser guildUser
+        )
+        {
             var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser);
             if (!getGlobalStats.IsSuccess)
             {
-                this.Log.LogError(getGlobalStats.Exception, getGlobalStats.ErrorReason);
                 return OperationResult.FromError(getGlobalStats);
             }
 
             var globalStats = getGlobalStats.Entity;
 
-            if (globalStats.TotalMessageCount.HasValue)
+            long? totalMessageCount;
+            if (!(globalStats.TotalMessageCount is null))
             {
-                globalStats.TotalMessageCount += 1;
+                totalMessageCount = globalStats.TotalMessageCount.Value + 1;
             }
             else
             {
@@ -268,21 +265,80 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 foreach (var guildChannel in guildUser.Guild.TextChannels)
                 {
                     var countResult = await CountUserMessagesAsync(guildChannel, guildUser);
-                    if (!countResult.IsSuccess)
+                    if (countResult.IsSuccess)
                     {
-                        if (!(countResult.Exception is null))
-                        {
-                            this.Log.LogError(countResult.Exception, "Message counting failed.");
-                            return OperationResult.FromError(countResult);
-                        }
-
-                        continue;
+                        sum += countResult.Entity;
                     }
-
-                    sum += await countResult.Entity;
+                    else if (!(countResult.Exception is null))
+                    {
+                        return OperationResult.FromError(countResult);
+                    }
                 }
 
-                globalStats.TotalMessageCount = sum;
+                totalMessageCount = sum;
+            }
+
+            var setResult = await userStatistics.SetTotalMessageCountAsync
+            (
+                globalStats,
+                totalMessageCount
+            );
+
+            if (!setResult.IsSuccess)
+            {
+                return OperationResult.FromError(setResult);
+            }
+
+            return OperationResult.FromSuccess();
+        }
+
+        private async Task<OperationResult> UpdateChannelMessageCountAsync
+        (
+            UserStatisticsService userStatistics,
+            SocketGuildUser guildUser,
+            SocketTextChannel textChannel
+        )
+        {
+            var getChannelStats = await userStatistics.GetOrCreateUserChannelStatisticsAsync
+            (
+                guildUser,
+                textChannel
+            );
+
+            if (!getChannelStats.IsSuccess)
+            {
+                return OperationResult.FromError(getChannelStats);
+            }
+
+            var channelStats = getChannelStats.Entity;
+
+            long channelMessageCount = 0;
+            if (!(channelStats.MessageCount is null))
+            {
+                channelMessageCount = channelStats.MessageCount.Value + 1;
+            }
+            else
+            {
+                var countResult = await CountUserMessagesAsync(textChannel, guildUser);
+                if (countResult.IsSuccess)
+                {
+                    channelMessageCount = countResult.Entity;
+                }
+                else if (!(countResult.Exception is null))
+                {
+                    return OperationResult.FromError(countResult);
+                }
+            }
+
+            var setChannelCountResult = await userStatistics.SetChannelMessageCountAsync
+            (
+                channelStats,
+                channelMessageCount
+            );
+
+            if (!setChannelCountResult.IsSuccess)
+            {
+                return OperationResult.FromError(setChannelCountResult);
             }
 
             return OperationResult.FromSuccess();
@@ -308,12 +364,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             }
 
             var globalStats = getGlobalStats.Entity;
-            globalStats.LastActivityTime = DateTimeOffset.UtcNow;
+
+            var updateTimestamp = await userStatistics.UpdateTimestampAsync(globalStats);
+            if (!updateTimestamp.IsSuccess)
+            {
+                return OperationResult.FromError(updateTimestamp);
+            }
 
             return OperationResult.FromSuccess();
         }
 
-        private async Task<RetrieveEntityResult<Task<long>>> CountUserMessagesAsync(IMessageChannel channel, IUser user)
+        private async Task<RetrieveEntityResult<long>> CountUserMessagesAsync(IMessageChannel channel, IUser user)
         {
             long sum = 0;
             try
@@ -321,7 +382,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 var latestMessage = (await channel.GetMessagesAsync(1).FlattenAsync()).FirstOrDefault();
                 if (latestMessage is null)
                 {
-                    return RetrieveEntityResult<Task<long>>.FromError("No messages in channel.");
+                    return 0;
                 }
 
                 // We'll explicitly include the latest message, since it'd get ignored otherwise
@@ -362,14 +423,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             }
             catch (HttpException hex) when (hex.WasCausedByMissingPermission())
             {
-                return RetrieveEntityResult<Task<long>>.FromError("No permissions to read the channel.");
+                return RetrieveEntityResult<long>.FromError("No permissions to read the channel.");
             }
             catch (Exception ex)
             {
-                return RetrieveEntityResult<Task<long>>.FromError(ex);
+                return RetrieveEntityResult<long>.FromError(ex);
             }
 
-            return Task.FromResult(sum);
+            return sum;
         }
     }
 }
