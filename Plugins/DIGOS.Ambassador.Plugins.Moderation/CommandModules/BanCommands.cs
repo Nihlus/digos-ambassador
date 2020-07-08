@@ -32,6 +32,7 @@ using DIGOS.Ambassador.Plugins.Moderation.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using JetBrains.Annotations;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -83,16 +84,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         }
 
         /// <summary>
-        /// Lists the bans attached to the given user.
+        /// Lists the bans on the server.
         /// </summary>
-        /// <param name="user">The user.</param>
         [Command("list")]
-        [Summary("Lists the bans attached to the given user.")]
+        [Summary("Lists the bans on the server.")]
         [RequirePermission(typeof(ManageBans), PermissionTarget.Other)]
         [RequireContext(ContextType.Guild)]
-        public async Task<RuntimeResult> ListBansAsync(IGuildUser user)
+        public async Task<RuntimeResult> ListBansAsync()
         {
-            var bans = _bans.GetBans(user);
+            var bans = _bans.GetBans(this.Context.Guild);
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Bans";
@@ -106,7 +106,20 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 bans,
                 async (eb, ban) =>
                 {
-                    eb.WithTitle($"Ban #{ban.ID} for {user.Username}:{user.Discriminator}");
+                    IUser? bannedUser = null;
+                    if (this.Context.Client is DiscordSocketClient socketClient)
+                    {
+                        bannedUser = await socketClient.Rest.GetUserAsync((ulong)ban.User.DiscordID);
+                    }
+
+                    if (bannedUser is null)
+                    {
+                        eb.WithTitle($"Ban #{ban.ID} for user with ID {ban.User.DiscordID}");
+                    }
+                    else
+                    {
+                        eb.WithTitle($"Ban #{ban.ID} for {bannedUser.Username}:{bannedUser.Discriminator}");
+                    }
 
                     var author = await this.Context.Guild.GetUserAsync((ulong)ban.Author.DiscordID);
                     eb.WithAuthor(author);

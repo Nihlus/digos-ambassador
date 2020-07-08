@@ -11,13 +11,9 @@ Ban-related commands, such as viewing or editing info about a specific ban.
 ## Commands
 ### *list*
 #### Overloads
-**`!ban list @Ada`**
+**`!ban list`**
 
-Lists the bans attached to the given user.
-
-| Name | Type | Optional |
-| --- | --- | --- |
-| user | IGuildUser | `no` |
+Lists the bans on the server.
 
 ---
 
