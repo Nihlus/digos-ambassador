@@ -186,7 +186,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
 
             if (user.Bio == bio)
             {
-                return ModifyEntityResult.FromError("That's already your bio.'");
+                return ModifyEntityResult.FromError("That's already your bio.");
             }
 
             user.Bio = bio;
