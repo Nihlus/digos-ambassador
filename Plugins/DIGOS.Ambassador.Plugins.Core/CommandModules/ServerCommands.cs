@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Permissions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
@@ -108,18 +109,12 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
 
             eb.AddField("Permission Warnings", server.SuppressPermissionWarnings ? "On" : "Off", true);
             eb.AddField("NSFW", server.IsNSFW ? "Yes" : "No");
-
-            string content;
-            if (server.SendJoinMessage)
-            {
-                content = server.JoinMessage is null ? "Yes (no join message set)" : "Yes";
-            }
-            else
-            {
-                content = server.JoinMessage is null ? "No" : "No (join message set)";
-            }
-
-            eb.AddField("First-join Message", content);
+            eb.AddField("Send first-join message", server.SendJoinMessage ? "Yes" : "No");
+            eb.AddField
+            (
+                "First-join message",
+                server.JoinMessage is null ? "Not set" : server.JoinMessage.Ellipsize(1024)
+            );
 
             await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
             return RuntimeCommandResult.FromSuccess();
