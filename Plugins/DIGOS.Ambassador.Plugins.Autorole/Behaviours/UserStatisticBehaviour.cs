@@ -21,10 +21,8 @@
 //
 
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Transactions;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
