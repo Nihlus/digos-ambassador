@@ -1,5 +1,5 @@
 //
-// AutoroleCommands.AutoroleConditionCommands.TimeSinceLastActivityConditionCommands.cs
+//  TimeSinceJoinConditionCommands.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -42,19 +42,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public partial class AutoroleConditionCommands
         {
             /// <summary>
-            /// Contains commands for adding or modifying a condition based on a certain time having passed since the
-            /// user's last activity.
+            /// Contains commands for adding or modifying a condition based having been a certain time in a server.
             /// </summary>
-            [Group("time-since-last-activity")]
-            public class TimeSinceLastActivityConditionCommands : ModuleBase
+            [Group("time-since-join")]
+            public class TimeSinceJoinConditionCommands : ModuleBase
             {
                 private readonly AutoroleService _autoroles;
 
                 /// <summary>
-                /// Initializes a new instance of the <see cref="TimeSinceLastActivityConditionCommands"/> class.
+                /// Initializes a new instance of the <see cref="TimeSinceJoinConditionCommands"/> class.
                 /// </summary>
                 /// <param name="autoroles">The autorole service.</param>
-                public TimeSinceLastActivityConditionCommands(AutoroleService autoroles)
+                public TimeSinceJoinConditionCommands(AutoroleService autoroles)
                 {
                     _autoroles = autoroles;
                 }
@@ -71,7 +70,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
                 public async Task<RuntimeResult> AddConditionAsync(AutoroleConfiguration autorole, TimeSpan time)
                 {
-                    var condition = _autoroles.CreateConditionProxy<TimeSinceLastActivityCondition>
+                    var condition = _autoroles.CreateConditionProxy<TimeSinceJoinCondition>
                     (
                         time
                     );
@@ -108,7 +107,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                     TimeSpan time
                 )
                 {
-                    var getCondition = _autoroles.GetCondition<TimeSinceLastActivityCondition>
+                    var getCondition = _autoroles.GetCondition<TimeSinceJoinCondition>
                     (
                         autorole,
                         conditionID

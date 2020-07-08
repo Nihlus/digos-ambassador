@@ -1,5 +1,5 @@
 //
-//  AutoroleCommands.AutoroleConditionCommands.RoleConditionCommands.cs
+//  ReactionConditionCommands.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -23,6 +23,7 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Extensions.Results;
+using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
@@ -42,18 +43,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public partial class AutoroleConditionCommands
         {
             /// <summary>
-            /// Contains commands for adding or modifying a condition based on having a certain role.
+            /// Contains commands for adding or modifying a condition based on a certain reaction to a message.
             /// </summary>
-            [Group("role")]
-            public class RoleConditionCommands : ModuleBase
+            [Group("reaction")]
+            public class ReactionConditionCommands : ModuleBase
             {
                 private readonly AutoroleService _autoroles;
 
                 /// <summary>
-                /// Initializes a new instance of the <see cref="RoleConditionCommands"/> class.
+                /// Initializes a new instance of the <see cref="ReactionConditionCommands"/> class.
                 /// </summary>
                 /// <param name="autoroles">The autorole service.</param>
-                public RoleConditionCommands(AutoroleService autoroles)
+                public ReactionConditionCommands(AutoroleService autoroles)
                 {
                     _autoroles = autoroles;
                 }
@@ -62,17 +63,25 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// Adds an instance of the condition to the role.
                 /// </summary>
                 /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="role">The role.</param>
+                /// <param name="message">The message.</param>
+                /// <param name="emote">The emote.</param>
                 [UsedImplicitly]
                 [Command]
                 [Summary("Adds an instance of the condition to the role.")]
                 [RequireContext(ContextType.Guild)]
                 [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> AddConditionAsync(AutoroleConfiguration autorole, IRole role)
+                public async Task<RuntimeResult> AddConditionAsync
+                (
+                    AutoroleConfiguration autorole,
+                    [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
+                    IMessage message,
+                    IEmote emote
+                )
                 {
-                    var condition = _autoroles.CreateConditionProxy<RoleCondition>
+                    var condition = _autoroles.CreateConditionProxy<ReactionCondition>
                     (
-                        role
+                        message,
+                        emote
                     );
 
                     if (condition is null)
@@ -94,7 +103,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// </summary>
                 /// <param name="autorole">The autorole configuration.</param>
                 /// <param name="conditionID">The ID of the condition.</param>
-                /// <param name="role">The discord role.</param>
+                /// <param name="message">The message.</param>
+                /// <param name="emote">The emote.</param>
                 [UsedImplicitly]
                 [Command]
                 [Summary("Modifies an instance of the condition on the role.")]
@@ -104,10 +114,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 (
                     AutoroleConfiguration autorole,
                     long conditionID,
-                    IRole role
+                    [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
+                    IMessage message,
+                    IEmote emote
                 )
                 {
-                    var getCondition = _autoroles.GetCondition<RoleCondition>
+                    var getCondition = _autoroles.GetCondition<ReactionCondition>
                     (
                         autorole,
                         conditionID
@@ -124,7 +136,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                         condition,
                         c =>
                         {
-                            condition.RoleID = (long)role.Id;
+                            condition.MessageID = (long)message.Id;
+                            condition.EmoteName = emote.Name;
                         }
                     );
 

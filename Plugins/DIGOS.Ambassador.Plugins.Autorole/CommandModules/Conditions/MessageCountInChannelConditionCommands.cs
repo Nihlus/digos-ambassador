@@ -1,5 +1,5 @@
 //
-//  AutoroleCommands.AutoroleConditionCommands.ReactionConditionCommands.cs
+//  MessageCountInChannelConditionCommands.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -23,7 +23,6 @@
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Extensions.Results;
-using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
@@ -43,18 +42,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public partial class AutoroleConditionCommands
         {
             /// <summary>
-            /// Contains commands for adding or modifying a condition based on a certain reaction to a message.
+            /// Contains commands for adding or modifying a condition based on a certain number of messages in a
+            /// channel.
             /// </summary>
-            [Group("reaction")]
-            public class ReactionConditionCommands : ModuleBase
+            [Group("total-messages-in")]
+            public class MessageCountInChannelConditionCommands : ModuleBase
             {
                 private readonly AutoroleService _autoroles;
 
                 /// <summary>
-                /// Initializes a new instance of the <see cref="ReactionConditionCommands"/> class.
+                /// Initializes a new instance of the <see cref="MessageCountInChannelConditionCommands"/> class.
                 /// </summary>
                 /// <param name="autoroles">The autorole service.</param>
-                public ReactionConditionCommands(AutoroleService autoroles)
+                public MessageCountInChannelConditionCommands(AutoroleService autoroles)
                 {
                     _autoroles = autoroles;
                 }
@@ -63,27 +63,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// Adds an instance of the condition to the role.
                 /// </summary>
                 /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="message">The message.</param>
-                /// <param name="emote">The emote.</param>
+                /// <param name="channel">The Discord channel.</param>
+                /// <param name="count">The message count.</param>
                 [UsedImplicitly]
                 [Command]
                 [Summary("Adds an instance of the condition to the role.")]
                 [RequireContext(ContextType.Guild)]
                 [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> AddConditionAsync
-                (
-                    AutoroleConfiguration autorole,
-                    [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
-                    IMessage message,
-                    IEmote emote
-                )
+                public async Task<RuntimeResult> AddConditionAsync(AutoroleConfiguration autorole, ITextChannel channel, long count)
                 {
-                    var condition = _autoroles.CreateConditionProxy<ReactionCondition>
-                    (
-                        message,
-                        emote
-                    );
-
+                    var condition = _autoroles.CreateConditionProxy<MessageCountInChannelCondition>(channel, count);
                     if (condition is null)
                     {
                         return RuntimeCommandResult.FromError("Failed to create a condition object. Yikes!");
@@ -103,8 +92,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// </summary>
                 /// <param name="autorole">The autorole configuration.</param>
                 /// <param name="conditionID">The ID of the condition.</param>
-                /// <param name="message">The message.</param>
-                /// <param name="emote">The emote.</param>
+                /// <param name="channel">The Discord channel.</param>
+                /// <param name="count">The message count.</param>
                 [UsedImplicitly]
                 [Command]
                 [Summary("Modifies an instance of the condition on the role.")]
@@ -114,12 +103,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 (
                     AutoroleConfiguration autorole,
                     long conditionID,
-                    [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
-                    IMessage message,
-                    IEmote emote
+                    ITextChannel channel,
+                    long count
                 )
                 {
-                    var getCondition = _autoroles.GetCondition<ReactionCondition>
+                    var getCondition = _autoroles.GetCondition<MessageCountInChannelCondition>
                     (
                         autorole,
                         conditionID
@@ -136,8 +124,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                         condition,
                         c =>
                         {
-                            condition.MessageID = (long)message.Id;
-                            condition.EmoteName = emote.Name;
+                            condition.RequiredCount = count;
+                            condition.SourceID = (long)channel.Id;
                         }
                     );
 
