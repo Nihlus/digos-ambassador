@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Discord;
 using Remora.Results;
@@ -50,7 +51,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         /// </summary>
         /// <param name="services">The service provider.</param>
         /// <param name="discordUser">The Discord user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>true if the condition is fulfilled; otherwise, false.</returns>
-        Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser);
+        Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
+        (
+            IServiceProvider services,
+            IGuildUser discordUser,
+            CancellationToken ct = default
+        );
     }
 }

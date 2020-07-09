@@ -31,13 +31,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
     /// is case-insensitive.
     /// </summary>
     [PublicAPI]
-    public interface IOwnedNamedEntity
+    public interface IOwnedNamedEntity : IOwnedEntity
     {
-        /// <summary>
-        /// Gets or sets the user that owns this entity.
-        /// </summary>
-        User Owner { get; set; }
-
         /// <summary>
         /// Gets the user-unique name of the entity.
         /// </summary>

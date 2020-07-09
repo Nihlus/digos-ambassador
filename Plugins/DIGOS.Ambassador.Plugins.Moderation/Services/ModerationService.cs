@@ -21,6 +21,7 @@
 //
 
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
@@ -60,19 +61,21 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// Gets or creates the settings entity for the given Discord guild.
         /// </summary>
         /// <param name="discordServer">The server.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<ServerModerationSettings>> GetOrCreateServerSettingsAsync
         (
-            IGuild discordServer
+            IGuild discordServer,
+            CancellationToken ct = default
         )
         {
-            var getExistingEntry = await GetServerSettingsAsync(discordServer);
+            var getExistingEntry = await GetServerSettingsAsync(discordServer, ct);
             if (getExistingEntry.IsSuccess)
             {
                 return getExistingEntry.Entity;
             }
 
-            var createSettings = await CreateServerSettingsAsync(discordServer);
+            var createSettings = await CreateServerSettingsAsync(discordServer, ct);
             if (!createSettings.IsSuccess)
             {
                 return RetrieveEntityResult<ServerModerationSettings>.FromError(createSettings);
@@ -85,17 +88,19 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// Gets the settings for the given Discord guild.
         /// </summary>
         /// <param name="discordServer">The server.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<ServerModerationSettings>> GetServerSettingsAsync
         (
-            IGuild discordServer
+            IGuild discordServer,
+            CancellationToken ct = default
         )
         {
             var settings = await _database.ServerSettings.ServersideQueryAsync
             (
                 q => q
                     .Where(s => s.Server.DiscordID == (long)discordServer.Id)
-                    .SingleOrDefaultAsync()
+                    .SingleOrDefaultAsync(ct)
             );
 
             if (!(settings is null))
@@ -113,19 +118,21 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// Creates the settings for the given Discord guild.
         /// </summary>
         /// <param name="discordServer">The server.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<ServerModerationSettings>> CreateServerSettingsAsync
         (
-            IGuild discordServer
+            IGuild discordServer,
+            CancellationToken ct = default
         )
         {
-            var existingEntity = await GetServerSettingsAsync(discordServer);
+            var existingEntity = await GetServerSettingsAsync(discordServer, ct);
             if (existingEntity.IsSuccess)
             {
                 return CreateEntityResult<ServerModerationSettings>.FromError("That server already has settings.");
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(discordServer);
+            var getServer = await _servers.GetOrRegisterServerAsync(discordServer, ct);
             if (!getServer.IsSuccess)
             {
                 return CreateEntityResult<ServerModerationSettings>.FromError(getServer);
@@ -136,7 +143,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var settings = _database.CreateProxy<ServerModerationSettings>(server);
             _database.ServerSettings.Update(settings);
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return settings;
         }
@@ -146,14 +153,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="guild">The server.</param>
         /// <param name="channel">The channel.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetModerationLogChannelAsync
         (
             IGuild guild,
-            ITextChannel channel
+            ITextChannel channel,
+            CancellationToken ct = default
         )
         {
-            var getSettings = await GetOrCreateServerSettingsAsync(guild);
+            var getSettings = await GetOrCreateServerSettingsAsync(guild, ct);
             if (!getSettings.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getSettings);
@@ -167,7 +176,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             settings.ModerationLogChannel = (long)channel.Id;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -177,14 +186,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="guild">The server.</param>
         /// <param name="channel">The channel.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetMonitoringChannelAsync
         (
             IGuild guild,
-            ITextChannel channel
+            ITextChannel channel,
+            CancellationToken ct = default
         )
         {
-            var getSettings = await GetOrCreateServerSettingsAsync(guild);
+            var getSettings = await GetOrCreateServerSettingsAsync(guild, ct);
             if (!getSettings.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getSettings);
@@ -198,7 +209,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             settings.MonitoringChannel = (long)channel.Id;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -208,14 +219,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="guild">The server.</param>
         /// <param name="warningThreshold">The warning threshold.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetWarningThresholdAsync
         (
             IGuild guild,
-            int warningThreshold
+            int warningThreshold,
+            CancellationToken ct = default
         )
         {
-            var getSettings = await GetOrCreateServerSettingsAsync(guild);
+            var getSettings = await GetOrCreateServerSettingsAsync(guild, ct);
             if (!getSettings.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getSettings);
@@ -229,7 +242,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             settings.WarningThreshold = warningThreshold;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }

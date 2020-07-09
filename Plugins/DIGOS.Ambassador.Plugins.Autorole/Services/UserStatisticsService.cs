@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
@@ -65,17 +66,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// Gets or creates a set of statistics for a given user.
         /// </summary>
         /// <param name="discordUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<UserStatistics>> GetOrCreateUserStatisticsAsync
         (
-            IUser discordUser
+            IUser discordUser,
+            CancellationToken ct = default
         )
         {
             var statistics = await _database.UserStatistics.ServersideQueryAsync
             (
                 q => q
                     .Where(s => s.User.DiscordID == (long)discordUser.Id)
-                    .SingleOrDefaultAsync()
+                    .SingleOrDefaultAsync(ct)
             );
 
             if (!(statistics is null))
@@ -94,7 +97,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var newStatistics = _database.CreateProxy<UserStatistics>(user);
 
             _database.UserStatistics.Update(newStatistics);
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return newStatistics;
         }
@@ -103,13 +106,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// Gets or creates a set of per-server statistics for a given user.
         /// </summary>
         /// <param name="discordUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<UserServerStatistics>> GetOrCreateUserServerStatisticsAsync
         (
-            IGuildUser discordUser
+            IGuildUser discordUser,
+            CancellationToken ct = default
         )
         {
-            var getStatistics = await GetOrCreateUserStatisticsAsync(discordUser);
+            var getStatistics = await GetOrCreateUserStatisticsAsync(discordUser, ct);
             if (!getStatistics.IsSuccess)
             {
                 return CreateEntityResult<UserServerStatistics>.FromError(getStatistics);
@@ -139,7 +144,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             _database.Update(newServerStatistics);
             statistics.ServerStatistics.Add(newServerStatistics);
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return newServerStatistics;
         }
@@ -149,14 +154,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// </summary>
         /// <param name="discordUser">The user.</param>
         /// <param name="discordChannel">The channel.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<UserChannelStatistics>> GetOrCreateUserChannelStatisticsAsync
         (
             IGuildUser discordUser,
-            ITextChannel discordChannel
+            ITextChannel discordChannel,
+            CancellationToken ct = default
         )
         {
-            var getServerStats = await GetOrCreateUserServerStatisticsAsync(discordUser);
+            var getServerStats = await GetOrCreateUserServerStatisticsAsync(discordUser, ct);
             if (!getServerStats.IsSuccess)
             {
                 return CreateEntityResult<UserChannelStatistics>.FromError(getServerStats);
@@ -178,7 +185,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             _database.Update(newStats);
             serverStats.ChannelStatistics.Add(newStats);
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return newStats;
         }
@@ -188,15 +195,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// </summary>
         /// <param name="channelStats">The channel statistics.</param>
         /// <param name="channelMessageCount">The new message count.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetChannelMessageCountAsync
         (
             UserChannelStatistics channelStats,
-            long? channelMessageCount
+            long? channelMessageCount,
+            CancellationToken ct = default
         )
         {
             channelStats.MessageCount = channelMessageCount;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -206,15 +215,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// </summary>
         /// <param name="globalStats">The server statistics.</param>
         /// <param name="totalMessageCount">The new message count.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetTotalMessageCountAsync
         (
             UserServerStatistics globalStats,
-            long? totalMessageCount
+            long? totalMessageCount,
+            CancellationToken ct = default
         )
         {
             globalStats.TotalMessageCount = totalMessageCount;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -223,8 +234,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// Updates the timestamp of the given server statistic entity to the current time.
         /// </summary>
         /// <param name="globalStats">The server statistics.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> UpdateTimestampAsync(UserServerStatistics globalStats)
+        public async Task<ModifyEntityResult> UpdateTimestampAsync
+        (
+            UserServerStatistics globalStats,
+            CancellationToken ct = default
+        )
         {
             var now = DateTimeOffset.UtcNow;
             if (globalStats.LastActivityTime == now)
@@ -233,7 +249,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             globalStats.LastActivityTime = now;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }

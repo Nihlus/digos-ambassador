@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using JetBrains.Annotations;
@@ -48,6 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
         /// <param name="tolerance">
         /// The percentile distance tolerance for results. The distance must be below this value.
         /// </param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <typeparam name="TSource">The source type of the enumerable.</typeparam>
         /// <typeparam name="TResult">The resulting type.</typeparam>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
@@ -58,12 +60,15 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
             Func<TSource, TResult> selector,
             Expression<Func<TSource, string>> stringSelector,
             string search,
-            double tolerance = 0.25
+            double tolerance = 0.25,
+            CancellationToken ct = default
         )
             where TResult : class
             where TSource : class
         {
-            var matchResult = (await @this.Select(stringSelector).ToListAsync()).BestLevenshteinMatch(search, tolerance);
+            var matchResult = (await @this.Select(stringSelector).ToListAsync(ct))
+                .BestLevenshteinMatch(search, tolerance);
+
             if (!matchResult.IsSuccess)
             {
                 return RetrieveEntityResult<TResult>.FromError(matchResult);
@@ -73,7 +78,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Extensions
 
             var selectorFunc = stringSelector.Compile();
 
-            var selectedObject = await @this.FirstOrDefaultAsync(i => selectorFunc(i) == selectedString);
+            var selectedObject = await @this.FirstOrDefaultAsync(i => selectorFunc(i) == selectedString, ct);
             if (selectedObject is null)
             {
                 return RetrieveEntityResult<TResult>.FromError("No matching object for the selector found.");

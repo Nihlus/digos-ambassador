@@ -22,6 +22,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
@@ -61,11 +63,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// the autorole is removed from that user.
         /// </summary>
         /// <param name="autorole">The autorole.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>
         /// A modification result which may or may not have succeeded. If any individual autorole update fails, this
         /// result will also indicate failure. That does not mean that *all* updates failed, however.
         /// </returns>
-        public async IAsyncEnumerable<AutoroleUpdateResult> UpdateAutoroleAsync(AutoroleConfiguration autorole)
+        public async IAsyncEnumerable<AutoroleUpdateResult> UpdateAutoroleAsync
+        (
+            AutoroleConfiguration autorole,
+            [EnumeratorCancellation] CancellationToken ct = default
+        )
         {
             var guild = _discordClient.GetGuild((ulong)autorole.Server.DiscordID);
             if (guild is null)
@@ -81,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             foreach (var user in guild.Users)
             {
-                yield return await UpdateAutoroleForUserAsync(autorole, user);
+                yield return await UpdateAutoroleForUserAsync(autorole, user, ct);
             }
         }
 
@@ -91,10 +98,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// </summary>
         /// <param name="autorole">The autorole.</param>
         /// <param name="guildUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<AutoroleUpdateResult> UpdateAutoroleForUserAsync
         (
-            AutoroleConfiguration autorole, IGuildUser guildUser
+            AutoroleConfiguration autorole,
+            IGuildUser guildUser,
+            CancellationToken ct = default
         )
         {
             if (!autorole.IsEnabled)
@@ -114,7 +124,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             }
 
             var userHasRole = guildUser.RoleIds.Contains(role.Id);
-            var getIsUserQualified = await _autoroles.IsUserQualifiedForAutoroleAsync(autorole, guildUser);
+            var getIsUserQualified = await _autoroles.IsUserQualifiedForAutoroleAsync(autorole, guildUser, ct);
             if (!getIsUserQualified.IsSuccess)
             {
                 return AutoroleUpdateResult.FromError(getIsUserQualified);
@@ -133,7 +143,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 {
                     await guildUser.RemoveRoleAsync(role);
 
-                    var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync(autorole, guildUser);
+                    var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync
+                    (
+                        autorole,
+                        guildUser,
+                        ct
+                    );
+
                     if (!getConfirmation.IsSuccess)
                     {
                         return Removed;
@@ -141,7 +157,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
                     // Remove any existing affirmation
                     var confirmation = getConfirmation.Entity;
-                    var removeConfirmation = await _autoroles.RemoveAutoroleConfirmationAsync(confirmation);
+                    var removeConfirmation = await _autoroles.RemoveAutoroleConfirmationAsync(confirmation, ct);
                     if (!removeConfirmation.IsSuccess)
                     {
                         return AutoroleUpdateResult.FromError(removeConfirmation);
@@ -166,7 +182,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             {
                 if (autorole.RequiresConfirmation)
                 {
-                    var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync(autorole, guildUser);
+                    var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync
+                    (
+                        autorole,
+                        guildUser,
+                        ct
+                    );
+
                     if (!getConfirmation.IsSuccess)
                     {
                         return AutoroleUpdateResult.FromError("Couldn't get a valid confirmation entry for the user.");

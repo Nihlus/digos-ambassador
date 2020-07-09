@@ -31,7 +31,6 @@ using DIGOS.Ambassador.Plugins.Moderation.Services;
 using Discord.Net;
 using Discord.WebSocket;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Discord.Behaviours;
@@ -75,9 +74,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     return OperationResult.FromError("Operation was cancelled.");
                 }
 
-                // Using .HasValue instead of .IsTemporary here to allow server-side evaluation
-                var warnings = await warningService.GetWarnings(guild).Where(w => w.ExpiresOn.HasValue).ToListAsync(ct);
-                foreach (var warning in warnings)
+                var warnings = await warningService.GetWarningsAsync(guild, ct);
+                foreach (var warning in warnings.Where(w => w.IsTemporary))
                 {
                     using var warningTransaction = new TransactionScope
                     (
@@ -106,9 +104,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     continue;
                 }
 
-                // Using .HasValue instead of .IsTemporary here to allow server-side evaluation
-                var bans = await banService.GetBans(guild).Where(b => b.ExpiresOn.HasValue).ToListAsync(ct);
-                foreach (var ban in bans)
+                var bans = await banService.GetBansAsync(guild, ct);
+                foreach (var ban in bans.Where(b => b.IsTemporary))
                 {
                     using var banTransaction = new TransactionScope
                     (
@@ -161,7 +158,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 return OperationResult.FromError(notifyResult);
             }
 
-            var deleteResult = await bans.DeleteBanAsync(ban);
+            var deleteResult = await bans.DeleteBanAsync(ban, ct);
             if (!deleteResult.IsSuccess)
             {
                 return OperationResult.FromError(deleteResult);
@@ -210,7 +207,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 return OperationResult.FromError(notifyResult);
             }
 
-            var deleteResult = await warnings.DeleteWarningAsync(warning);
+            var deleteResult = await warnings.DeleteWarningAsync(warning, ct);
             if (!deleteResult.IsSuccess)
             {
                 return OperationResult.FromError(deleteResult);

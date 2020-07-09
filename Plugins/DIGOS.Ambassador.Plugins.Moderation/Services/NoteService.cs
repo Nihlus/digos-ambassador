@@ -20,14 +20,16 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using Discord;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Results;
 
@@ -36,7 +38,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     /// <summary>
     /// Acts as an interface for accessing and modifying notes.
     /// </summary>
-    [PublicAPI]
     public sealed class NoteService
     {
         private readonly ModerationDatabaseContext _database;
@@ -65,12 +66,17 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// Gets the notes attached to the given user.
         /// </summary>
         /// <param name="user">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>The notes.</returns>
-        public IQueryable<UserNote> GetNotes(IGuildUser user)
+        public Task<IReadOnlyList<UserNote>> GetNotesAsync(IGuildUser user, CancellationToken ct = default)
         {
-            return _database.UserNotes.AsQueryable().Where
+            return _database.UserNotes.ServersideQueryAsync
             (
-                n => n.User.DiscordID == (long)user.Id && n.Server.DiscordID == (long)user.Guild.Id
+                q => q.Where
+                (
+                    n => n.User.DiscordID == (long)user.Id && n.Server.DiscordID == (long)user.Guild.Id
+                ),
+                ct
             );
         }
 
@@ -79,14 +85,23 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="server">The server the note is on.</param>
         /// <param name="noteID">The note ID.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<UserNote>> GetNoteAsync(IGuild server, long noteID)
+        public async Task<RetrieveEntityResult<UserNote>> GetNoteAsync
+        (
+            IGuild server,
+            long noteID,
+            CancellationToken ct = default
+        )
         {
             // The server isn't strictly required here, but it prevents leaking notes between servers.
-            var note = await _database.UserNotes.AsQueryable().FirstOrDefaultAsync
+            var note = await _database.UserNotes.ServersideQueryAsync
             (
-                n => n.ID == noteID &&
-                     n.Server.DiscordID == (long)server.Id
+                q => q.FirstOrDefaultAsync
+                (
+                    n => n.ID == noteID && n.Server.DiscordID == (long)server.Id,
+                    ct
+                )
             );
 
             if (note is null)
@@ -103,15 +118,17 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="authorUser">The author of the note.</param>
         /// <param name="guildUser">The user.</param>
         /// <param name="content">The content of the note.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<UserNote>> CreateNoteAsync
         (
             IUser authorUser,
             IGuildUser guildUser,
-            string content
+            string content,
+            CancellationToken ct = default
         )
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return CreateEntityResult<UserNote>.FromError(getServer);
@@ -119,7 +136,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var server = getServer.Entity;
 
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return CreateEntityResult<UserNote>.FromError(getUser);
@@ -127,7 +144,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             var user = getUser.Entity;
 
-            var getAuthor = await _users.GetOrRegisterUserAsync(authorUser);
+            var getAuthor = await _users.GetOrRegisterUserAsync(authorUser, ct);
             if (!getAuthor.IsSuccess)
             {
                 return CreateEntityResult<UserNote>.FromError(getAuthor);
@@ -138,13 +155,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var note = _database.CreateProxy<UserNote>(server, user, author, string.Empty);
             _database.UserNotes.Update(note);
 
-            var setContent = await SetNoteContentsAsync(note, content);
+            var setContent = await SetNoteContentsAsync(note, content, ct);
             if (!setContent.IsSuccess)
             {
                 return CreateEntityResult<UserNote>.FromError(setContent);
             }
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return note;
         }
@@ -154,8 +171,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="note">The note.</param>
         /// <param name="content">The content.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetNoteContentsAsync(UserNote note, string content)
+        public async Task<ModifyEntityResult> SetNoteContentsAsync
+        (
+            UserNote note,
+            string content,
+            CancellationToken ct = default
+        )
         {
             if (content.IsNullOrWhitespace())
             {
@@ -178,7 +201,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             note.Content = content;
             note.NotifyUpdate();
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -187,8 +210,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// Deletes the given note.
         /// </summary>
         /// <param name="note">The note to delete.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may note have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteNoteAsync(UserNote note)
+        public async Task<DeleteEntityResult> DeleteNoteAsync
+        (
+            UserNote note,
+            CancellationToken ct = default
+        )
         {
             if (!_database.UserNotes.Any(n => n.ID == note.ID))
             {
@@ -199,7 +227,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             }
 
             _database.UserNotes.Remove(note);
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return DeleteEntityResult.FromSuccess();
         }

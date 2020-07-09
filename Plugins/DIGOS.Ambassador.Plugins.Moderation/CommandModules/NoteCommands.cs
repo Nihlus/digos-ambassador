@@ -48,11 +48,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
     public partial class NoteCommands : ModuleBase
     {
         private readonly NoteService _notes;
-
         private readonly UserFeedbackService _feedback;
-
         private readonly InteractivityService _interactivity;
-
         private readonly ChannelLoggingService _logging;
 
         /// <summary>
@@ -86,7 +83,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task<RuntimeResult> ListNotesAsync(IGuildUser user)
         {
-            var notes = _notes.GetNotes(user);
+            var notes = await _notes.GetNotesAsync(user);
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Notes";

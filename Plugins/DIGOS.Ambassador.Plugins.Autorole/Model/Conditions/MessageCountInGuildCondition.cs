@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
@@ -64,15 +65,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override async Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser
+        public override async Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser
+            IGuildUser discordUser,
+            CancellationToken ct = default
         )
         {
             var statistics = services.GetRequiredService<UserStatisticsService>();
 
-            var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(discordUser);
+            var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(discordUser, ct);
             if (!getUserStatistics.IsSuccess)
             {
                 return RetrieveEntityResult<bool>.FromError(getUserStatistics);

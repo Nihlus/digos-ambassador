@@ -22,6 +22,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Entities;
 using Discord;
@@ -44,10 +45,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         public abstract bool HasSameConditionsAs(IAutoroleCondition autoroleCondition);
 
         /// <inheritdoc/>
-        public abstract Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser
+        public abstract Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser
+            IGuildUser discordUser,
+            CancellationToken ct = default
         );
     }
 }

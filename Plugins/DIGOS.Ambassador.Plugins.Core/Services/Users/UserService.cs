@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
@@ -55,15 +56,20 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// Determines whether or not a Discord user is stored in the database.
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns><value>true</value> if the user is stored; otherwise, <value>false</value>.</returns>
         [Pure]
-        public async Task<bool> IsUserKnownAsync(IUser discordUser)
+        public async Task<bool> IsUserKnownAsync
+        (
+            IUser discordUser,
+            CancellationToken ct = default
+        )
         {
             var hasUser = await _database.Users.ServersideQueryAsync
             (
                 q => q
                     .Where(u => u.DiscordID == (long)discordUser.Id)
-                    .AnyAsync()
+                    .AnyAsync(ct)
             );
 
             return hasUser;
@@ -73,33 +79,40 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// Gets an existing set of information about a Discord user, or registers them with the database if one is not found.
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>Stored information about the user.</returns>
         public async Task<RetrieveEntityResult<User>> GetOrRegisterUserAsync
         (
-            IUser discordUser
+            IUser discordUser,
+            CancellationToken ct = default
         )
         {
-            if (!await IsUserKnownAsync(discordUser))
+            if (!await IsUserKnownAsync(discordUser, ct))
             {
-                return await AddUserAsync(discordUser);
+                return await AddUserAsync(discordUser, ct);
             }
 
-            return await GetUserAsync(discordUser);
+            return await GetUserAsync(discordUser, ct);
         }
 
         /// <summary>
         /// Gets a stored user from the database that matches the given Discord user.
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>Stored information about the user.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<User>> GetUserAsync(IUser discordUser)
+        public async Task<RetrieveEntityResult<User>> GetUserAsync
+        (
+            IUser discordUser,
+            CancellationToken ct = default
+        )
         {
             var user = await _database.Users.ServersideQueryAsync
             (
                 q => q
                     .Where(u => u.DiscordID == (long)discordUser.Id)
-                    .SingleOrDefaultAsync()
+                    .SingleOrDefaultAsync(ct)
             );
 
             if (!(user is null))
@@ -114,9 +127,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// Adds a Discord user to the database.
         /// </summary>
         /// <param name="discordUser">The Discord user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>The freshly created information about the user.</returns>
         /// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
-        public async Task<RetrieveEntityResult<User>> AddUserAsync(IUser discordUser)
+        public async Task<RetrieveEntityResult<User>> AddUserAsync
+        (
+            IUser discordUser,
+            CancellationToken ct = default
+        )
         {
             if (discordUser.IsBot || discordUser.IsWebhook)
             {
@@ -126,7 +144,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                 );
             }
 
-            if (await IsUserKnownAsync(discordUser))
+            if (await IsUserKnownAsync(discordUser, ct))
             {
                 return RetrieveEntityResult<User>.FromError
                 (
@@ -137,7 +155,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             var newUser = _database.CreateProxy<User>((long)discordUser.Id);
 
             _database.Users.Update(newUser);
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return newUser;
         }
@@ -147,8 +165,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="user">The user.</param>
         /// <param name="timezoneOffset">The timezone.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<ModifyEntityResult> SetUserTimezoneAsync(User user, int timezoneOffset)
+        public async Task<ModifyEntityResult> SetUserTimezoneAsync
+        (
+            User user,
+            int timezoneOffset,
+            CancellationToken ct = default
+        )
         {
             if (timezoneOffset < -12 || timezoneOffset > 14)
             {
@@ -161,7 +185,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             }
 
             user.Timezone = timezoneOffset;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -171,8 +195,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// </summary>
         /// <param name="user">The user.</param>
         /// <param name="bio">The bio.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<ModifyEntityResult> SetUserBioAsync(User user, string bio)
+        public async Task<ModifyEntityResult> SetUserBioAsync
+        (
+            User user,
+            string bio,
+            CancellationToken ct = default
+        )
         {
             if (bio.IsNullOrWhitespace())
             {
@@ -190,7 +220,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             }
 
             user.Bio = bio;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }

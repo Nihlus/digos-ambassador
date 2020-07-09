@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
@@ -50,10 +51,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser
+        public override Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser
+            IGuildUser discordUser,
+            CancellationToken ct = default
         )
         {
             if (discordUser.JoinedAt is null)

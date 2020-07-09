@@ -39,7 +39,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsEmptySetFromEmptyDatabase()
             {
-                Assert.Empty(await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer));
+                Assert.Empty(await this.Characters.GetUserCharactersAsync(this.DefaultServer, this.DefaultOwner));
             }
 
             [Fact]
@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 this.Database.Characters.Update(anotherCharacter);
 
-                var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
+                var result = await this.Characters.GetUserCharactersAsync(this.DefaultServer, this.DefaultOwner);
                 Assert.Empty(result);
             }
 
@@ -80,7 +80,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 this.Database.Characters.Update(anotherCharacter);
 
-                var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
+                var result = await this.Characters.GetUserCharactersAsync(this.DefaultServer, this.DefaultOwner);
                 Assert.Empty(result);
             }
 
@@ -101,7 +101,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 this.Database.Characters.Update(anotherCharacter);
 
-                var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
+                var result = await this.Characters.GetUserCharactersAsync(this.DefaultServer, this.DefaultOwner);
                 Assert.NotEmpty(result);
             }
 
@@ -122,7 +122,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
                 this.Database.Characters.Update(anotherCharacter);
 
-                var result = await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer);
+                var result = await this.Characters.GetUserCharactersAsync(this.DefaultServer, this.DefaultOwner);
                 Assert.Collection(result, c => Assert.Same(anotherCharacter, c));
             }
 
@@ -132,7 +132,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 var character1 = CreateCharacter(name: "dummy1");
                 var character2 = CreateCharacter(name: "dummy2");
 
-                var result = (await this.Characters.GetUserCharactersAsync(this.DefaultOwner, this.DefaultServer))
+                var result = (await this.Characters.GetUserCharactersAsync(this.DefaultServer, this.DefaultOwner))
                     .ToList();
 
                 Assert.Equal(2, result.Count);

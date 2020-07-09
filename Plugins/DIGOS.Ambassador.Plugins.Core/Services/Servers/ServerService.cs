@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
@@ -55,15 +56,20 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// Determines whether or not a Discord server is stored in the database.
         /// </summary>
         /// <param name="discordServer">The Discord server.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns><value>true</value> if the server is stored; otherwise, <value>false</value>.</returns>
         [Pure]
-        public async Task<bool> IsServerKnownAsync(IGuild discordServer)
+        public async Task<bool> IsServerKnownAsync
+        (
+            IGuild discordServer,
+            CancellationToken ct = default
+        )
         {
             var hasServer = await _database.Servers.ServersideQueryAsync
             (
                 q => q
                     .Where(s => s.DiscordID == (long)discordServer.Id)
-                    .AnyAsync()
+                    .AnyAsync(ct)
             );
 
             return hasServer;
@@ -73,30 +79,40 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// Gets an existing set of information about a Discord server, or registers it with the database if one is not found.
         /// </summary>
         /// <param name="discordServer">The Discord server.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>Stored information about the server.</returns>
-        public async Task<RetrieveEntityResult<Server>> GetOrRegisterServerAsync(IGuild discordServer)
+        public async Task<RetrieveEntityResult<Server>> GetOrRegisterServerAsync
+        (
+            IGuild discordServer,
+            CancellationToken ct = default
+        )
         {
-            if (!await IsServerKnownAsync(discordServer))
+            if (!await IsServerKnownAsync(discordServer, ct))
             {
-                return await AddServerAsync(discordServer);
+                return await AddServerAsync(discordServer, ct);
             }
 
-            return await GetServerAsync(discordServer);
+            return await GetServerAsync(discordServer, ct);
         }
 
         /// <summary>
         /// Gets a stored server from the database that matches the given Discord server.
         /// </summary>
         /// <param name="discordServer">The Discord server.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>Stored information about the server.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<Server>> GetServerAsync(IGuild discordServer)
+        public async Task<RetrieveEntityResult<Server>> GetServerAsync
+        (
+            IGuild discordServer,
+            CancellationToken ct = default
+        )
         {
             var server = await _database.Servers.ServersideQueryAsync
             (
                 q => q
                     .Where(u => u.DiscordID == (long)discordServer.Id)
-                    .SingleOrDefaultAsync()
+                    .SingleOrDefaultAsync(ct)
             );
 
             if (!(server is null))
@@ -111,11 +127,16 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// Adds a Discord server to the database.
         /// </summary>
         /// <param name="discordServer">The Discord server.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>The freshly created information about the server.</returns>
         /// <exception cref="ArgumentException">Thrown if the server already exists in the database.</exception>
-        public async Task<RetrieveEntityResult<Server>> AddServerAsync(IGuild discordServer)
+        public async Task<RetrieveEntityResult<Server>> AddServerAsync
+        (
+            IGuild discordServer,
+            CancellationToken ct = default
+        )
         {
-            if (await IsServerKnownAsync(discordServer))
+            if (await IsServerKnownAsync(discordServer, ct))
             {
                 return RetrieveEntityResult<Server>.FromError
                 (
@@ -128,7 +149,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
 
             server.IsNSFW = true;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return RetrieveEntityResult<Server>.FromSuccess(server);
         }
@@ -137,9 +158,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// Gets the description of the server.
         /// </summary>
         /// <param name="server">The server.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public RetrieveEntityResult<string> GetDescription(Server server)
+        public RetrieveEntityResult<string> GetDescription
+        (
+            Server server,
+            CancellationToken ct = default
+        )
         {
             if (server.Description.IsNullOrWhitespace())
             {
@@ -154,11 +180,13 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// </summary>
         /// <param name="server">The server.</param>
         /// <param name="description">The new description.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetDescriptionAsync
         (
             Server server,
-            string description
+            string description,
+            CancellationToken ct = default
         )
         {
             if (description.IsNullOrWhitespace())
@@ -186,7 +214,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.Description = description;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -195,9 +223,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// Gets the server's join message.
         /// </summary>
         /// <param name="server">The server.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public RetrieveEntityResult<string> GetJoinMessage(Server server)
+        public RetrieveEntityResult<string> GetJoinMessage
+        (
+            Server server,
+            CancellationToken ct = default
+        )
         {
             if (server.JoinMessage.IsNullOrWhitespace())
             {
@@ -212,11 +245,13 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// </summary>
         /// <param name="server">The server.</param>
         /// <param name="joinMessage">The new join message.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetJoinMessageAsync
         (
             Server server,
-            string joinMessage
+            string joinMessage,
+            CancellationToken ct = default
         )
         {
             if (joinMessage.IsNullOrWhitespace())
@@ -244,7 +279,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.JoinMessage = joinMessage;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -254,11 +289,13 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// </summary>
         /// <param name="server">The server.</param>
         /// <param name="isNsfw">Whether or not the server is NSFW.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetIsNSFWAsync
         (
             Server server,
-            bool isNsfw
+            bool isNsfw,
+            CancellationToken ct = default
         )
         {
             if (server.IsNSFW == isNsfw)
@@ -270,7 +307,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.IsNSFW = isNsfw;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -280,11 +317,13 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// </summary>
         /// <param name="server">The server.</param>
         /// <param name="sendJoinMessage">Whether or not the server should send join messages.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetSendJoinMessageAsync
         (
             Server server,
-            bool sendJoinMessage
+            bool sendJoinMessage,
+            CancellationToken ct = default
         )
         {
             if (server.SendJoinMessage == sendJoinMessage)
@@ -296,7 +335,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.SendJoinMessage = sendJoinMessage;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -305,8 +344,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// Clears the first-join message, if one is set.
         /// </summary>
         /// <param name="server">The server.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ClearJoinMessageAsync(Server server)
+        public async Task<ModifyEntityResult> ClearJoinMessageAsync(Server server, CancellationToken ct = default)
         {
             if (server.JoinMessage is null)
             {
@@ -314,7 +354,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
             }
 
             server.JoinMessage = null;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }

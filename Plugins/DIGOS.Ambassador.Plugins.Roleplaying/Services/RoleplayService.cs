@@ -23,8 +23,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -63,6 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="roleplaySummary">The summary of the roleplay.</param>
         /// <param name="isNSFW">Whether or not the roleplay is NSFW.</param>
         /// <param name="isPublic">Whether or not the roleplay is public.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have been successful.</returns>
         public async Task<CreateEntityResult<Roleplay>> CreateRoleplayAsync
         (
@@ -71,7 +74,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             string roleplayName,
             string roleplaySummary,
             bool isNSFW,
-            bool isPublic
+            bool isPublic,
+            CancellationToken ct = default
         )
         {
             owner = _database.NormalizeReference(owner);
@@ -87,13 +91,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             ownerParticipant.Status = ParticipantStatus.Joined;
             roleplay.ParticipatingUsers.Add(ownerParticipant);
 
-            var setNameResult = await SetRoleplayNameAsync(roleplay, roleplayName);
+            var setNameResult = await SetRoleplayNameAsync(roleplay, roleplayName, ct);
             if (!setNameResult.IsSuccess)
             {
                 return CreateEntityResult<Roleplay>.FromError(setNameResult);
             }
 
-            var setSummaryResult = await SetRoleplaySummaryAsync(roleplay, roleplaySummary);
+            var setSummaryResult = await SetRoleplaySummaryAsync(roleplay, roleplaySummary, ct);
             if (!setSummaryResult.IsSuccess)
             {
                 return CreateEntityResult<Roleplay>.FromError(setSummaryResult);
@@ -102,7 +106,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             roleplay.IsNSFW = isNSFW;
             roleplay.IsPublic = isPublic;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return roleplay;
         }
@@ -111,11 +115,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// Deletes the given roleplay.
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteRoleplayAsync(Roleplay roleplay)
+        public async Task<DeleteEntityResult> DeleteRoleplayAsync
+        (
+            Roleplay roleplay,
+            CancellationToken ct = default
+        )
         {
             _database.Roleplays.Remove(roleplay);
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -125,8 +134,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <param name="channelID">The Discord ID of the channel.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> StartRoleplayAsync(Roleplay roleplay, long channelID)
+        public async Task<ModifyEntityResult> StartRoleplayAsync
+        (
+            Roleplay roleplay,
+            long channelID,
+            CancellationToken ct = default
+        )
         {
             if (roleplay.IsActive && roleplay.ActiveChannelID == channelID)
             {
@@ -137,7 +152,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             roleplay.IsActive = true;
             roleplay.LastUpdated = DateTime.Now;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -151,6 +166,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="timestamp">The timestamp of the message.</param>
         /// <param name="authorNickname">The nickname of the author at the time of sending.</param>
         /// <param name="contents">The contents of the message.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A task wrapping the update action.</returns>
         public async Task<ModifyEntityResult> AddOrUpdateMessageInRoleplayAsync
         (
@@ -159,7 +175,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             long messageID,
             DateTimeOffset timestamp,
             string authorNickname,
-            string contents
+            string contents,
+            CancellationToken ct = default
         )
         {
             author = _database.NormalizeReference(author);
@@ -178,7 +195,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 // Update roleplay timestamp
                 roleplay.LastUpdated = DateTime.Now;
 
-                await _database.SaveChangesAsync();
+                await _database.SaveChangesAsync(ct);
                 return ModifyEntityResult.FromSuccess();
             }
 
@@ -190,7 +207,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             // Update roleplay timestamp
             roleplay.LastUpdated = DateTime.Now;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -199,15 +216,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplayName">The name of the roleplay.</param>
         /// <param name="server">The server that the search is scoped to.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync(string roleplayName, Server server)
+        public async Task<RetrieveEntityResult<Roleplay>> GetNamedRoleplayAsync
+        (
+            string roleplayName,
+            Server server,
+            CancellationToken ct = default
+        )
         {
             server = _database.NormalizeReference(server);
 
-            var roleplays = await GetRoleplaysAsync
+            var roleplays = await _database.Roleplays.ServerScopedServersideQueryAsync
             (
                 server,
-                q => q.Where(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower()))
+                q => q.Where(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower())),
+                ct
             );
 
             var enumeratedRoleplays = roleplays.ToList();
@@ -236,19 +260,21 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="user">The user to check.</param>
         /// <param name="roleplayName">The roleplay name to check.</param>
         /// <param name="server">The server to scope the roleplays to.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>true if the name is unique; otherwise, false.</returns>
         [Pure]
         public async Task<bool> IsRoleplayNameUniqueForUserAsync
         (
             User user,
             string roleplayName,
-            Server server
+            Server server,
+            CancellationToken ct = default
         )
         {
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            var userRoleplays = await GetUserRoleplaysAsync(user, server);
+            var userRoleplays = await GetUserRoleplaysAsync(user, server, ct);
             return _ownedEntities.IsEntityNameUniqueForUser(userRoleplays.ToList(), roleplayName);
         }
 
@@ -256,19 +282,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// Gets the roleplays on the given server.
         /// </summary>
         /// <param name="server">The server to scope the search to.</param>
-        /// <param name="query">Additional query statements.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A queryable list of roleplays on the given server.</returns>
         [Pure]
-        public async Task<IEnumerable<Roleplay>> GetRoleplaysAsync
+        public async Task<IReadOnlyList<Roleplay>> GetRoleplaysAsync
         (
             Server server,
-            Func<IQueryable<Roleplay>, IQueryable<Roleplay>>? query = null
+            CancellationToken ct = default
         )
         {
-            query ??= q => q;
             server = _database.NormalizeReference(server);
 
-            return await _database.Roleplays.ServersideQueryAsync(q => query(q.Where(rp => rp.Server == server)));
+            return await _database.Roleplays.ServerScopedServersideQueryAsync(server, q => q, ct);
         }
 
         /// <summary>
@@ -276,21 +301,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="user">The user to get the roleplays of.</param>
         /// <param name="server">The server that the search is scoped to.</param>
-        /// <param name="query">Additional query statements.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A queryable list of roleplays belonging to the user.</returns>
         [Pure]
-        public Task<IEnumerable<Roleplay>> GetUserRoleplaysAsync
+        public Task<IReadOnlyList<Roleplay>> GetUserRoleplaysAsync
         (
             User user,
             Server server,
-            Func<IQueryable<Roleplay>, IQueryable<Roleplay>>? query = null
+            CancellationToken ct = default
         )
         {
-            query ??= q => q;
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            return GetRoleplaysAsync(server, q => query(q.Where(rp => rp.Owner == user)));
+            return _database.Roleplays.UserScopedServersideQueryAsync(user, server, q => q, ct);
         }
 
         /// <summary>
@@ -299,23 +323,26 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="server">The server of the user.</param>
         /// <param name="roleplayOwner">The user to get the roleplay from.</param>
         /// <param name="roleplayName">The name of the roleplay.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
         public async Task<RetrieveEntityResult<Roleplay>> GetUserRoleplayByNameAsync
         (
             Server server,
             User roleplayOwner,
-            string roleplayName
+            string roleplayName,
+            CancellationToken ct = default
         )
         {
             roleplayOwner = _database.NormalizeReference(roleplayOwner);
             server = _database.NormalizeReference(server);
 
-            var userRoleplays = await GetUserRoleplaysAsync
+            var userRoleplays = await _database.Roleplays.UserScopedServersideQueryAsync
             (
                 roleplayOwner,
                 server,
-                q => q.Where(rp => rp.Name.ToLower().Equals(roleplayName.ToLower()))
+                q => q.Where(rp => rp.Name.ToLower().Equals(roleplayName.ToLower())),
+                ct
             );
 
             var roleplay = userRoleplays.SingleOrDefault();
@@ -333,8 +360,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay to remove the user from.</param>
         /// <param name="kickedUser">The user to remove from the roleplay.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> KickUserFromRoleplayAsync(Roleplay roleplay, User kickedUser)
+        public async Task<ModifyEntityResult> KickUserFromRoleplayAsync
+        (
+            Roleplay roleplay,
+            User kickedUser,
+            CancellationToken ct = default
+        )
         {
             kickedUser = _database.NormalizeReference(kickedUser);
 
@@ -348,7 +381,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             if (!roleplay.HasJoined(kickedUser))
             {
-                var removeUserResult = await RemoveUserFromRoleplayAsync(roleplay, kickedUser);
+                var removeUserResult = await RemoveUserFromRoleplayAsync(roleplay, kickedUser, ct);
                 if (!removeUserResult.IsSuccess)
                 {
                     return ModifyEntityResult.FromError(removeUserResult);
@@ -358,7 +391,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var participantEntry = roleplay.JoinedUsers.First(p => p.User == kickedUser);
             participantEntry.Status = ParticipantStatus.Kicked;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -367,8 +400,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay to remove the user from.</param>
         /// <param name="removedUser">The user to remove from the roleplay.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> RemoveUserFromRoleplayAsync(Roleplay roleplay, User removedUser)
+        public async Task<DeleteEntityResult> RemoveUserFromRoleplayAsync
+        (
+            Roleplay roleplay,
+            User removedUser,
+            CancellationToken ct = default
+        )
         {
             removedUser = _database.NormalizeReference(removedUser);
 
@@ -385,7 +424,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var participantEntry = roleplay.JoinedUsers.FirstOrDefault(p => p.User == removedUser);
             roleplay.ParticipatingUsers.Remove(participantEntry);
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
             return DeleteEntityResult.FromSuccess();
         }
 
@@ -394,11 +433,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay to add the user to.</param>
         /// <param name="newUser">The user to add to the roleplay.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<RoleplayParticipant>> AddUserToRoleplayAsync
         (
             Roleplay roleplay,
-            User newUser
+            User newUser,
+            CancellationToken ct = default
         )
         {
             newUser = _database.NormalizeReference(newUser);
@@ -439,7 +480,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 participantEntry.Status = ParticipantStatus.Joined;
             }
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
             return participantEntry;
         }
 
@@ -448,8 +489,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay to invite the user to.</param>
         /// <param name="invitedUser">The user to invite.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> InviteUserToRoleplayAsync(Roleplay roleplay, User invitedUser)
+        public async Task<ModifyEntityResult> InviteUserToRoleplayAsync
+        (
+            Roleplay roleplay,
+            User invitedUser,
+            CancellationToken ct = default
+        )
         {
             invitedUser = _database.NormalizeReference(invitedUser);
 
@@ -477,7 +524,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 participantEntry.Status = ParticipantStatus.Invited;
             }
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -486,12 +533,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="newOwner">The new owner.</param>
         /// <param name="roleplay">The roleplay to transfer.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> TransferRoleplayOwnershipAsync(User newOwner, Roleplay roleplay)
+        public async Task<ModifyEntityResult> TransferRoleplayOwnershipAsync
+        (
+            User newOwner,
+            Roleplay roleplay,
+            CancellationToken ct = default
+        )
         {
             newOwner = _database.NormalizeReference(newOwner);
 
-            var newOwnerRoleplays = await GetUserRoleplaysAsync(newOwner, roleplay.Server);
+            var newOwnerRoleplays = await GetUserRoleplaysAsync(newOwner, roleplay.Server, ct);
             var transferResult = _ownedEntities.TransferEntityOwnership
             (
                 newOwner,
@@ -501,7 +554,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             if (transferResult.IsSuccess)
             {
-                await _database.SaveChangesAsync();
+                await _database.SaveChangesAsync(ct);
             }
 
             return transferResult;
@@ -512,8 +565,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay to set the name of.</param>
         /// <param name="newRoleplayName">The new name.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetRoleplayNameAsync(Roleplay roleplay, string newRoleplayName)
+        public async Task<ModifyEntityResult> SetRoleplayNameAsync
+        (
+            Roleplay roleplay,
+            string newRoleplayName,
+            CancellationToken ct = default
+        )
         {
             if (string.IsNullOrWhiteSpace(newRoleplayName))
             {
@@ -525,14 +584,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return ModifyEntityResult.FromError("The name may not contain double quotes.");
             }
 
-            if (!await IsRoleplayNameUniqueForUserAsync(roleplay.Owner, newRoleplayName, roleplay.Server))
+            if (!await IsRoleplayNameUniqueForUserAsync(roleplay.Owner, newRoleplayName, roleplay.Server, ct))
             {
                 return ModifyEntityResult.FromError("You already have a roleplay with that name.");
             }
 
             roleplay.Name = newRoleplayName;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -541,8 +600,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay to set the summary of.</param>
         /// <param name="newRoleplaySummary">The new summary.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetRoleplaySummaryAsync(Roleplay roleplay, string newRoleplaySummary)
+        public async Task<ModifyEntityResult> SetRoleplaySummaryAsync
+        (
+            Roleplay roleplay,
+            string newRoleplaySummary,
+            CancellationToken ct = default
+        )
         {
             if (string.IsNullOrWhiteSpace(newRoleplaySummary))
             {
@@ -551,7 +616,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             roleplay.Summary = newRoleplaySummary;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -560,8 +625,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay to set the value in.</param>
         /// <param name="isNSFW">The new value.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetRoleplayIsNSFWAsync(Roleplay roleplay, bool isNSFW)
+        public async Task<ModifyEntityResult> SetRoleplayIsNSFWAsync
+        (
+            Roleplay roleplay,
+            bool isNSFW,
+            CancellationToken ct = default
+        )
         {
             if (roleplay.IsNSFW == isNSFW)
             {
@@ -575,7 +646,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             roleplay.IsNSFW = isNSFW;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -584,8 +655,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay to set the value in.</param>
         /// <param name="isPublic">The new value.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetRoleplayIsPublicAsync(Roleplay roleplay, bool isPublic)
+        public async Task<ModifyEntityResult> SetRoleplayIsPublicAsync
+        (
+            Roleplay roleplay,
+            bool isPublic,
+            CancellationToken ct = default
+        )
         {
             if (roleplay.IsPublic == isPublic)
             {
@@ -594,7 +671,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             roleplay.IsPublic = isPublic;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -602,12 +679,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// Refreshes the timestamp on the given roleplay.
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        public async Task<ModifyEntityResult> RefreshRoleplayAsync(Roleplay roleplay)
+        public async Task<ModifyEntityResult> RefreshRoleplayAsync
+        (
+            Roleplay roleplay,
+            CancellationToken ct = default
+        )
         {
             roleplay.LastUpdated = DateTime.Now;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
             return ModifyEntityResult.FromSuccess();
         }
 
@@ -615,8 +697,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// Stops the given roleplay.
         /// </summary>
         /// <param name="roleplay">The roleplay to stop.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<ModifyEntityResult> StopRoleplayAsync(Roleplay roleplay)
+        public async Task<ModifyEntityResult> StopRoleplayAsync
+        (
+            Roleplay roleplay,
+            CancellationToken ct = default
+        )
         {
             if (!roleplay.IsActive)
             {
@@ -626,7 +713,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             roleplay.IsActive = false;
             roleplay.ActiveChannelID = null;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
             return ModifyEntityResult.FromSuccess();
         }
     }

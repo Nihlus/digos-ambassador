@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
     /// </summary>
     [PublicAPI]
     [Table("CharacterRoles", Schema = "CharacterModule")]
-    public class CharacterRole : EFEntity
+    public class CharacterRole : EFEntity, IServerEntity
     {
         /// <summary>
         /// Gets the server that the role is on.

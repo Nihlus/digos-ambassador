@@ -50,13 +50,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
     public partial class BanCommands : ModuleBase
     {
         private readonly ModerationService _moderation;
-
         private readonly BanService _bans;
-
         private readonly UserFeedbackService _feedback;
-
         private readonly InteractivityService _interactivity;
-
         private readonly ChannelLoggingService _logging;
 
         /// <summary>
@@ -92,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task<RuntimeResult> ListBansAsync()
         {
-            var bans = _bans.GetBans(this.Context.Guild);
+            var bans = await _bans.GetBansAsync(this.Context.Guild);
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Bans";

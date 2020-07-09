@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             var autoroles = tickServices.GetRequiredService<AutoroleService>();
             var autoroleUpdates = tickServices.GetRequiredService<AutoroleUpdateService>();
 
-            foreach (var autorole in await autoroles.GetAutorolesAsync())
+            foreach (var autorole in await autoroles.GetAutorolesAsync(ct: ct))
             {
                 if (ct.IsCancellationRequested)
                 {
@@ -112,7 +112,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                         return OperationResult.FromError("Operation was cancelled.");
                     }
 
-                    var updateResult = await autoroleUpdates.UpdateAutoroleForUserAsync(autorole, user);
+                    var updateResult = await autoroleUpdates.UpdateAutoroleForUserAsync(autorole, user, ct);
                     if (!updateResult.IsSuccess)
                     {
                         this.Log.LogError(updateResult.Exception, updateResult.ErrorReason);

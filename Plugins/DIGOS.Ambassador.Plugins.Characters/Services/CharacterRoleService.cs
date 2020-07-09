@@ -22,10 +22,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Discord;
@@ -78,10 +80,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="role">The discord role.</param>
         /// <param name="access">The access conditions.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<CharacterRole>> CreateCharacterRoleAsync(IRole role, RoleAccess access)
+        public async Task<CreateEntityResult<CharacterRole>> CreateCharacterRoleAsync
+        (
+            IRole role,
+            RoleAccess access,
+            CancellationToken ct = default
+        )
         {
-            var getExistingRoleResult = await GetCharacterRoleAsync(role);
+            var getExistingRoleResult = await GetCharacterRoleAsync(role, ct);
             if (getExistingRoleResult.IsSuccess)
             {
                 return CreateEntityResult<CharacterRole>.FromError
@@ -90,7 +98,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 );
             }
 
-            var getServerResult = await _servers.GetOrRegisterServerAsync(role.Guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(role.Guild, ct);
             if (!getServerResult.IsSuccess)
             {
                 return CreateEntityResult<CharacterRole>.FromError(getServerResult);
@@ -101,7 +109,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var characterRole = _database.CreateProxy<CharacterRole>(server, (long)role.Id, access);
 
             _database.CharacterRoles.Update(characterRole);
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return characterRole;
         }
@@ -110,15 +118,23 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Deletes the character role for the given Discord role.
         /// </summary>
         /// <param name="role">The character role.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteCharacterRoleAsync(CharacterRole role)
+        public async Task<DeleteEntityResult> DeleteCharacterRoleAsync
+        (
+            CharacterRole role,
+            CancellationToken ct = default
+        )
         {
-            var currentCharactersWithRole = await _characters.GetCharactersAsync
+            var currentOwnersWithRole = await _database.Characters.ServerScopedServersideQueryAsync
             (
                 role.Server,
                 q => q
                     .Where(c => c.Role == role)
                     .Where(c => c.IsCurrent)
+                    .Select(c => c.Owner)
+                    .Distinct(),
+                ct
             );
 
             _database.CharacterRoles.Remove(role);
@@ -129,9 +145,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return DeleteEntityResult.FromError("Could not retrieve the guild the role was on.");
             }
 
-            foreach (var character in currentCharactersWithRole)
+            foreach (var characterOwner in currentOwnersWithRole)
             {
-                var owner = await guild.GetUserAsync((ulong)character.Owner.DiscordID);
+                var owner = await guild.GetUserAsync((ulong)characterOwner.DiscordID);
                 var discordRole = guild.GetRole((ulong)role.DiscordID);
 
                 if (owner is null || discordRole is null)
@@ -146,7 +162,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 }
             }
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return DeleteEntityResult.FromSuccess();
         }
@@ -155,14 +171,19 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Gets an existing character role from the database.
         /// </summary>
         /// <param name="role">The discord role.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<CharacterRole>> GetCharacterRoleAsync(IRole role)
+        public async Task<RetrieveEntityResult<CharacterRole>> GetCharacterRoleAsync
+        (
+            IRole role,
+            CancellationToken ct = default
+        )
         {
             var characterRole = await _database.CharacterRoles.ServersideQueryAsync
             (
                 q => q
                     .Where(r => r.Server.DiscordID == (long)role.Guild.Id && r.DiscordID == (long)role.Id)
-                    .SingleOrDefaultAsync()
+                    .SingleOrDefaultAsync(ct)
             );
 
             if (!(characterRole is null))
@@ -180,24 +201,30 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Gets the roles available on the given server.
         /// </summary>
         /// <param name="guild">The Discord guild.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IEnumerable<CharacterRole>>> GetCharacterRolesAsync(IGuild guild)
+        public async Task<RetrieveEntityResult<IReadOnlyList<CharacterRole>>> GetCharacterRolesAsync
+        (
+            IGuild guild,
+            CancellationToken ct = default
+        )
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(guild);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guild, ct);
             if (!getServerResult.IsSuccess)
             {
-                return RetrieveEntityResult<IEnumerable<CharacterRole>>.FromError(getServerResult);
+                return RetrieveEntityResult<IReadOnlyList<CharacterRole>>.FromError(getServerResult);
             }
 
             var server = getServerResult.Entity;
 
-            var roles = await _database.CharacterRoles.ServersideQueryAsync
+            var roles = await _database.CharacterRoles.ServerScopedServersideQueryAsync
             (
-                q => q
-                    .Where(r => r.Server == server)
+                server,
+                q => q,
+                ct
             );
 
-            return RetrieveEntityResult<IEnumerable<CharacterRole>>.FromSuccess(roles);
+            return RetrieveEntityResult<IReadOnlyList<CharacterRole>>.FromSuccess(roles);
         }
 
         /// <summary>
@@ -205,8 +232,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="role">The character role.</param>
         /// <param name="access">The access conditions.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterRoleAccessAsync(CharacterRole role, RoleAccess access)
+        public async Task<ModifyEntityResult> SetCharacterRoleAccessAsync
+        (
+            CharacterRole role,
+            RoleAccess access,
+            CancellationToken ct = default
+        )
         {
             if (role.Access == access)
             {
@@ -214,7 +247,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             role.Access = access;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -225,8 +258,15 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="guildUser">The owner of the character.</param>
         /// <param name="character">The character.</param>
         /// <param name="characterRole">The role to set.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterRoleAsync(IGuildUser guildUser, Character character, CharacterRole characterRole)
+        public async Task<ModifyEntityResult> SetCharacterRoleAsync
+        (
+            IGuildUser guildUser,
+            Character character,
+            CharacterRole characterRole,
+            CancellationToken ct = default
+        )
         {
             if (character.Role == characterRole)
             {
@@ -262,7 +302,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Role = characterRole;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -272,8 +312,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="owner">The character's owner.</param>
         /// <param name="character">The character.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ClearCharacterRoleAsync(IGuildUser owner, Character character)
+        public async Task<ModifyEntityResult> ClearCharacterRoleAsync
+        (
+            IGuildUser owner,
+            Character character,
+            CancellationToken ct = default
+        )
         {
             if (character.Role is null)
             {
@@ -293,7 +339,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             character.Role = null;
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
@@ -303,11 +349,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="guildUser">The user.</param>
         /// <param name="previousCharacter">The character they previously were.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> UpdateUserRolesAsync
         (
             IGuildUser guildUser,
-            Character? previousCharacter = null
+            Character? previousCharacter = null,
+            CancellationToken ct = default
         )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
@@ -316,7 +364,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getServer);
@@ -325,7 +373,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            var getNewCharacter = await _characters.GetCurrentCharacterAsync(user, server);
+            var getNewCharacter = await _characters.GetCurrentCharacterAsync(user, server, ct);
             if (!getNewCharacter.IsSuccess)
             {
                 // Clear any old role

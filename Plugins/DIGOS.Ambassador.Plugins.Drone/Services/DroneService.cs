@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Characters.Model;
@@ -68,10 +69,15 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
         /// Drones the given user, creating a randomized sharkdrone character for them and forcing them into that form.
         /// </summary>
         /// <param name="guildUser">The user to drone.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<Character>> DroneUserAsync(IGuildUser guildUser)
+        public async Task<CreateEntityResult<Character>> DroneUserAsync
+        (
+            IGuildUser guildUser,
+            CancellationToken ct = default
+        )
         {
-            var createGeneratedIdentity = await GenerateDroneIdentityAsync(guildUser);
+            var createGeneratedIdentity = await GenerateDroneIdentityAsync(guildUser, ct);
             if (!createGeneratedIdentity.IsSuccess)
             {
                 return CreateEntityResult<Character>.FromError(createGeneratedIdentity);
@@ -86,7 +92,8 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
                 nickname,
                 _content.GetRandomDroneSummary(),
                 _content.GetRandomDroneDescription(),
-                new FemininePronounProvider().Family
+                new FemininePronounProvider().Family,
+                ct
             );
 
             if (!generatedCharacterResult.IsSuccess)
@@ -103,7 +110,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
 
             if (!(droneRole is null))
             {
-                var getCharacterRole = await _characterRoles.GetCharacterRoleAsync(droneRole);
+                var getCharacterRole = await _characterRoles.GetCharacterRoleAsync(droneRole, ct);
                 if (getCharacterRole.IsSuccess)
                 {
                     var characterRole = getCharacterRole.Entity;
@@ -111,7 +118,8 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
                     (
                         guildUser,
                         character,
-                        characterRole
+                        characterRole,
+                        ct
                     );
 
                     if (!setCharacterRole.IsSuccess)
@@ -121,7 +129,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
                 }
             }
 
-            var becomeCharacterResult = await _characters.MakeCharacterCurrentAsync(guildUser, character);
+            var becomeCharacterResult = await _characters.MakeCharacterCurrentAsync(guildUser, character, ct);
             if (!becomeCharacterResult.IsSuccess)
             {
                 return CreateEntityResult<Character>.FromError(becomeCharacterResult);
@@ -134,13 +142,15 @@ namespace DIGOS.Ambassador.Plugins.Drone.Services
         /// Generates a drone name.
         /// </summary>
         /// <param name="guildUser">The Discord user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>The generated identity.</returns>
         private async Task<CreateEntityResult<(string Name, string Nickname)>> GenerateDroneIdentityAsync
         (
-            IGuildUser guildUser
+            IGuildUser guildUser,
+            CancellationToken ct = default
         )
         {
-            var getCharacters = await _characters.GetUserCharactersAsync(guildUser);
+            var getCharacters = await _characters.GetUserCharactersAsync(guildUser, ct);
             if (!getCharacters.IsSuccess)
             {
                 return CreateEntityResult<(string Name, string Nickname)>.FromError(getCharacters);

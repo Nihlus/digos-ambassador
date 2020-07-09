@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
@@ -78,7 +79,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser(IServiceProvider services, IGuildUser discordUser)
+        public override Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
+        (
+            IServiceProvider services,
+            IGuildUser discordUser,
+            CancellationToken ct = default
+        )
         {
             return Task.FromResult
             (

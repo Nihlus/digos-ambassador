@@ -33,7 +33,6 @@ using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
 using Discord;
 using Discord.Commands;
 using JetBrains.Annotations;
-using Microsoft.EntityFrameworkCore;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -50,13 +49,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
     public partial class WarningCommands : ModuleBase
     {
         private readonly ModerationService _moderation;
-
         private readonly WarningService _warnings;
-
         private readonly UserFeedbackService _feedback;
-
         private readonly InteractivityService _interactivity;
-
         private readonly ChannelLoggingService _logging;
 
         /// <summary>
@@ -93,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         [RequireContext(ContextType.Guild)]
         public async Task<RuntimeResult> ListWarningsAsync(IGuildUser user)
         {
-            var warnings = _warnings.GetWarnings(user);
+            var warnings = await _warnings.GetWarningsAsync(user);
 
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Warnings";
@@ -189,12 +184,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 return notifyResult.ToRuntimeResult();
             }
 
-            var warningCount = await _warnings.GetWarnings(user).CountAsync();
-            if (warningCount >= settings.WarningThreshold)
+            var warnings = await _warnings.GetWarningsAsync(user);
+            if (warnings.Count >= settings.WarningThreshold)
             {
                 await _feedback.SendWarningAsync
                 (
-                    this.Context, $"The warned user now has {warningCount} warnings. Consider further action."
+                    this.Context, $"The warned user now has {warnings.Count} warnings. Consider further action."
                 );
             }
 

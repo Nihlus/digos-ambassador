@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
@@ -96,10 +97,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc/>
-        public override async Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUser
+        public override async Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser
+            IGuildUser discordUser,
+            CancellationToken ct = default
         )
         {
             var channel = await discordUser.Guild.GetTextChannelAsync((ulong)this.ChannelID);
@@ -124,7 +126,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
 
             var reactionData = reactions[emojiKey];
             var reactionUsers = message.GetReactionUsersAsync(emojiKey, reactionData.ReactionCount);
-            await foreach (var userBatch in reactionUsers)
+            await foreach (var userBatch in reactionUsers.WithCancellation(ct))
             {
                 if (userBatch.Any(user => user.Id == discordUser.Id))
                 {

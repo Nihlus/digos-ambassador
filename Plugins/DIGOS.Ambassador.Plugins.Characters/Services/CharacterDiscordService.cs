@@ -20,9 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Discord;
@@ -87,8 +87,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="guildUser">The user.</param>
         /// <param name="name">The name.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<bool>> IsNameUniqueForUserAsync(IGuildUser guildUser, string name)
+        public async Task<RetrieveEntityResult<bool>> IsNameUniqueForUserAsync
+        (
+            IGuildUser guildUser,
+            string name,
+            CancellationToken ct = default
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
@@ -96,7 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return RetrieveEntityResult<bool>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return RetrieveEntityResult<bool>.FromError(getServer);
@@ -105,7 +111,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return await _characters.IsNameUniqueForUserAsync(user, server, name);
+            return await _characters.IsNameUniqueForUserAsync(user, server, name, ct);
         }
 
         /// <summary>
@@ -118,6 +124,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="summary">The summary of the character.</param>
         /// <param name="description">The full description of the character.</param>
         /// <param name="pronounFamily">The pronoun family of the character.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have been successful.</returns>
         public async Task<CreateEntityResult<Character>> CreateCharacterAsync
         (
@@ -127,7 +134,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             string? nickname = null,
             string? summary = null,
             string? description = null,
-            string? pronounFamily = null
+            string? pronounFamily = null,
+            CancellationToken ct = default
         )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
@@ -136,7 +144,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return CreateEntityResult<Character>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return CreateEntityResult<Character>.FromError(getServer);
@@ -154,7 +162,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 nickname,
                 summary,
                 description,
-                pronounFamily
+                pronounFamily,
+                ct
             );
         }
 
@@ -163,17 +172,23 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="guildUser">The user that owns the character.</param>
         /// <param name="character">The character to delete.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteCharacterAsync(IGuildUser guildUser, Character character)
+        public async Task<DeleteEntityResult> DeleteCharacterAsync
+        (
+            IGuildUser guildUser,
+            Character character,
+            CancellationToken ct = default
+        )
         {
-            var getCurrentCharacter = await _characters.GetCurrentCharacterAsync(character.Owner, character.Server);
+            var getCurrentCharacter = await _characters.GetCurrentCharacterAsync(character.Owner, character.Server, ct);
             if (getCurrentCharacter.IsSuccess)
             {
                 // Forcibly load the role so we can access it later
                 _ = getCurrentCharacter.Entity.Role;
             }
 
-            var deleteCharacter = await _characters.DeleteCharacterAsync(character);
+            var deleteCharacter = await _characters.DeleteCharacterAsync(character, ct);
             if (!deleteCharacter.IsSuccess)
             {
                 return deleteCharacter;
@@ -191,13 +206,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             // Update the user's nickname
-            var updateNickname = await UpdateUserNickname(guildUser);
+            var updateNickname = await UpdateUserNickname(guildUser, ct);
             if (!updateNickname.IsSuccess)
             {
                 return DeleteEntityResult.FromError(updateNickname);
             }
 
-            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, getCurrentCharacter.Entity);
+            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, getCurrentCharacter.Entity, ct);
             if (!updateRoles.IsSuccess)
             {
                 return DeleteEntityResult.FromError(updateRoles);
@@ -207,41 +222,15 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         }
 
         /// <summary>
-        /// Gets a queryable list of characters on the given guild.
-        /// </summary>
-        /// <param name="guild">The guild.</param>
-        /// <param name="query">Additional query statements.</param>
-        /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IEnumerable<Character>>> GetCharactersAsync
-        (
-            IGuild guild,
-            Func<IQueryable<Character>, IQueryable<Character>>? query = null
-        )
-        {
-            var getServer = await _servers.GetOrRegisterServerAsync(guild);
-            if (!getServer.IsSuccess)
-            {
-                return RetrieveEntityResult<IEnumerable<Character>>.FromError(getServer);
-            }
-
-            var server = getServer.Entity;
-
-            return RetrieveEntityResult<IEnumerable<Character>>.FromSuccess
-            (
-                await _characters.GetCharactersAsync(server, query)
-            );
-        }
-
-        /// <summary>
         /// Gets a queryable list of characters belonging to the given user on their guild.
         /// </summary>
         /// <param name="guildUser">The user.</param>
-        /// <param name="query">Additional query statements.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<IEnumerable<Character>>> GetUserCharactersAsync
         (
             IGuildUser guildUser,
-            Func<IQueryable<Character>, IQueryable<Character>>? query = null
+            CancellationToken ct = default
         )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
@@ -250,7 +239,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return RetrieveEntityResult<IEnumerable<Character>>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return RetrieveEntityResult<IEnumerable<Character>>.FromError(getServer);
@@ -261,7 +250,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             return RetrieveEntityResult<IEnumerable<Character>>.FromSuccess
             (
-                await _characters.GetUserCharactersAsync(user, server, query)
+                await _characters.GetUserCharactersAsync(server, user, ct)
             );
         }
 
@@ -269,8 +258,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Gets the current character of the given user.
         /// </summary>
         /// <param name="guildUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync(IGuildUser guildUser)
+        public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync
+        (
+            IGuildUser guildUser,
+            CancellationToken ct = default
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
@@ -278,7 +272,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return RetrieveEntityResult<Character>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getServer);
@@ -287,7 +281,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return await _characters.GetCurrentCharacterAsync(user, server);
+            return await _characters.GetCurrentCharacterAsync(user, server, ct);
         }
 
         /// <summary>
@@ -295,10 +289,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="guild">The guild the character is on.</param>
         /// <param name="name">The name of the character.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Character>> GetCharacterByNameAsync(IGuild guild, string name)
+        public async Task<RetrieveEntityResult<Character>> GetCharacterByNameAsync
+        (
+            IGuild guild,
+            string name,
+            CancellationToken ct = default
+        )
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guild, ct);
             if (!getServer.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getServer);
@@ -306,7 +306,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var server = getServer.Entity;
 
-            return await _characters.GetCharacterByNameAsync(server, name);
+            return await _characters.GetCharacterByNameAsync(server, name, ct);
         }
 
         /// <summary>
@@ -314,8 +314,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="guildUser">The user.</param>
         /// <param name="name">The name of the character.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Character>> GetUserCharacterByName(IGuildUser guildUser, string name)
+        public async Task<RetrieveEntityResult<Character>> GetUserCharacterByName
+        (
+            IGuildUser guildUser,
+            string name,
+            CancellationToken ct = default
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
@@ -323,7 +329,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return RetrieveEntityResult<Character>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getServer);
@@ -332,17 +338,22 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return await _characters.GetUserCharacterByNameAsync(user, server, name);
+            return await _characters.GetUserCharacterByNameAsync(user, server, name, ct);
         }
 
         /// <summary>
         /// Gets a random character from the user's characters.
         /// </summary>
         /// <param name="guildUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Character>> GetRandomUserCharacterAsync(IGuildUser guildUser)
+        public async Task<RetrieveEntityResult<Character>> GetRandomUserCharacterAsync
+        (
+            IGuildUser guildUser,
+            CancellationToken ct = default
+        )
         {
-            var getUserCharacters = await GetUserCharactersAsync(guildUser);
+            var getUserCharacters = await GetUserCharactersAsync(guildUser, ct);
             if (!getUserCharacters.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getUserCharacters);
@@ -359,7 +370,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return RetrieveEntityResult<Character>.FromError("The user only has one character.");
             }
 
-            var getCurrentCharacter = await GetCurrentCharacterAsync(guildUser);
+            var getCurrentCharacter = await GetCurrentCharacterAsync(guildUser, ct);
             if (!getCurrentCharacter.IsSuccess)
             {
                 return userCharacters.PickRandom();
@@ -377,15 +388,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="guild">The guild the user is on.</param>
         /// <param name="guildUser">The user.</param>
         /// <param name="name">The name of the character.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
         (
             IGuild guild,
             IGuildUser? guildUser,
-            string? name
+            string? name,
+            CancellationToken ct = default
         )
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guild, ct);
             if (!getServer.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getServer);
@@ -395,7 +408,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (guildUser is null)
             {
-                return await _characters.GetBestMatchingCharacterAsync(server, null, name);
+                return await _characters.GetBestMatchingCharacterAsync(server, null, name, ct);
             }
 
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
@@ -406,7 +419,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             var user = getUser.Entity;
 
-            return await _characters.GetBestMatchingCharacterAsync(server, user, name);
+            return await _characters.GetBestMatchingCharacterAsync(server, user, name, ct);
         }
 
         /// <summary>
@@ -414,13 +427,19 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="character">The character.</param>
         /// <param name="name">The new name.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterNameAsync(Character character, string name)
+        public async Task<ModifyEntityResult> SetCharacterNameAsync
+        (
+            Character character,
+            string name,
+            CancellationToken ct = default
+        )
         {
             var commandModule = _commands.Modules.FirstOrDefault(m => m.Name == "character");
             if (commandModule is null)
             {
-                return await _characters.SetCharacterNameAsync(character, name);
+                return await _characters.SetCharacterNameAsync(character, name, ct);
             }
 
             var validNameResult = _ownedEntities.IsEntityNameValid(commandModule.GetAllCommandNames(), name);
@@ -429,7 +448,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError(validNameResult);
             }
 
-            return await _characters.SetCharacterNameAsync(character, name);
+            return await _characters.SetCharacterNameAsync(character, name, ct);
         }
 
         /// <summary>
@@ -437,10 +456,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="character">The character.</param>
         /// <param name="avatarUrl">The new avatar.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterAvatarAsync(Character character, string avatarUrl)
+        public async Task<ModifyEntityResult> SetCharacterAvatarAsync
+        (
+            Character character,
+            string avatarUrl,
+            CancellationToken ct = default
+        )
         {
-            return await _characters.SetCharacterAvatarAsync(character, avatarUrl);
+            return await _characters.SetCharacterAvatarAsync(character, avatarUrl, ct);
         }
 
         /// <summary>
@@ -449,21 +474,23 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="guildUser">The owner of the character.</param>
         /// <param name="character">The character.</param>
         /// <param name="nickname">The new nickname.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> SetCharacterNicknameAsync
         (
             IGuildUser guildUser,
             Character character,
-            string nickname
+            string nickname,
+            CancellationToken ct = default
         )
         {
-            var setNickname = await _characters.SetCharacterNicknameAsync(character, nickname);
+            var setNickname = await _characters.SetCharacterNicknameAsync(character, nickname, ct);
             if (!setNickname.IsSuccess)
             {
                 return setNickname;
             }
 
-            var getCurrentCharacter = await GetCurrentCharacterAsync(guildUser);
+            var getCurrentCharacter = await GetCurrentCharacterAsync(guildUser, ct);
             if (!getCurrentCharacter.IsSuccess)
             {
                 return ModifyEntityResult.FromSuccess();
@@ -475,7 +502,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromSuccess();
             }
 
-            return await UpdateUserNickname(guildUser);
+            return await UpdateUserNickname(guildUser, ct);
         }
 
         /// <summary>
@@ -483,10 +510,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="character">The character.</param>
         /// <param name="summary">The new summary.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterSummaryAsync(Character character, string summary)
+        public async Task<ModifyEntityResult> SetCharacterSummaryAsync
+        (
+            Character character,
+            string summary,
+            CancellationToken ct = default
+        )
         {
-            return await _characters.SetCharacterSummaryAsync(character, summary);
+            return await _characters.SetCharacterSummaryAsync(character, summary, ct);
         }
 
         /// <summary>
@@ -494,10 +527,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="character">The character.</param>
         /// <param name="description">The new description.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterDescriptionAsync(Character character, string description)
+        public async Task<ModifyEntityResult> SetCharacterDescriptionAsync
+        (
+            Character character,
+            string description,
+            CancellationToken ct = default
+        )
         {
-            return await _characters.SetCharacterDescriptionAsync(character, description);
+            return await _characters.SetCharacterDescriptionAsync(character, description, ct);
         }
 
         /// <summary>
@@ -505,10 +544,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="character">The character.</param>
         /// <param name="pronounFamily">The new pronoun family.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterPronounsAsync(Character character, string pronounFamily)
+        public async Task<ModifyEntityResult> SetCharacterPronounsAsync
+        (
+            Character character,
+            string pronounFamily,
+            CancellationToken ct = default
+        )
         {
-            return await _characters.SetCharacterPronounsAsync(character, pronounFamily);
+            return await _characters.SetCharacterPronounsAsync(character, pronounFamily, ct);
         }
 
         /// <summary>
@@ -516,10 +561,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="character">The character.</param>
         /// <param name="isNSFW">Whether the character is NSFW.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterIsNSFWAsync(Character character, bool isNSFW)
+        public async Task<ModifyEntityResult> SetCharacterIsNSFWAsync
+        (
+            Character character,
+            bool isNSFW,
+            CancellationToken ct = default
+        )
         {
-            return await _characters.SetCharacterIsNSFWAsync(character, isNSFW);
+            return await _characters.SetCharacterIsNSFWAsync(character, isNSFW, ct);
         }
 
         /// <summary>
@@ -530,6 +581,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="imageUrl">The url of the image.</param>
         /// <param name="imageCaption">The caption of the image.</param>
         /// <param name="isNSFW">Whether or not the image is NSFW.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
         public async Task<CreateEntityResult<Image>> AddImageToCharacterAsync
         (
@@ -537,10 +589,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             string imageName,
             string imageUrl,
             string? imageCaption = null,
-            bool isNSFW = false
+            bool isNSFW = false,
+            CancellationToken ct = default
         )
         {
-            return await _characters.AddImageToCharacterAsync(character, imageName, imageUrl, imageCaption, isNSFW);
+            return await _characters.AddImageToCharacterAsync(character, imageName, imageUrl, imageCaption, isNSFW, ct);
         }
 
         /// <summary>
@@ -548,10 +601,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="character">The character to remove the image from.</param>
         /// <param name="image">The image.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> RemoveImageFromCharacterAsync(Character character, Image image)
+        public async Task<DeleteEntityResult> RemoveImageFromCharacterAsync
+        (
+            Character character,
+            Image image,
+            CancellationToken ct = default
+        )
         {
-            return await _characters.RemoveImageFromCharacterAsync(character, image);
+            return await _characters.RemoveImageFromCharacterAsync(character, image, ct);
         }
 
         /// <summary>
@@ -559,8 +618,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="guildUser">The user.</param>
         /// <param name="character">The character.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> MakeCharacterCurrentAsync(IGuildUser guildUser, Character character)
+        public async Task<ModifyEntityResult> MakeCharacterCurrentAsync
+        (
+            IGuildUser guildUser,
+            Character character,
+            CancellationToken ct = default
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
@@ -568,7 +633,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getServer);
@@ -577,23 +642,23 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            var getOriginalCharacter = await _characters.GetCurrentCharacterAsync(user, server);
+            var getOriginalCharacter = await _characters.GetCurrentCharacterAsync(user, server, ct);
 
-            var makeCurrent = await _characters.MakeCharacterCurrentAsync(user, server, character);
+            var makeCurrent = await _characters.MakeCharacterCurrentAsync(user, server, character, ct);
             if (!makeCurrent.IsSuccess)
             {
                 return makeCurrent;
             }
 
             // Update the user's nickname
-            var updateNickname = await UpdateUserNickname(guildUser);
+            var updateNickname = await UpdateUserNickname(guildUser, ct);
             if (!updateNickname.IsSuccess)
             {
                 return updateNickname;
             }
 
             var originalCharacter = getOriginalCharacter.IsSuccess ? getOriginalCharacter.Entity : null;
-            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, originalCharacter);
+            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, originalCharacter, ct);
             if (!updateRoles.IsSuccess)
             {
                 return updateRoles;
@@ -606,8 +671,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Clears any current character in the server from the given user.
         /// </summary>
         /// <param name="guildUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ClearCurrentCharacterAsync(IGuildUser guildUser)
+        public async Task<ModifyEntityResult> ClearCurrentCharacterAsync
+        (
+            IGuildUser guildUser,
+            CancellationToken ct = default
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
@@ -615,7 +685,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getServer);
@@ -624,23 +694,23 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            var getOriginalCharacter = await _characters.GetCurrentCharacterAsync(user, server);
+            var getOriginalCharacter = await _characters.GetCurrentCharacterAsync(user, server, ct);
 
-            var clearResult = await _characters.ClearCurrentCharacterAsync(user, server);
+            var clearResult = await _characters.ClearCurrentCharacterAsync(user, server, ct);
             if (!clearResult.IsSuccess)
             {
                 return clearResult;
             }
 
             // Update the user's nickname
-            var updateNickname = await UpdateUserNickname(guildUser);
+            var updateNickname = await UpdateUserNickname(guildUser, ct);
             if (!updateNickname.IsSuccess)
             {
                 return updateNickname;
             }
 
             var originalCharacter = getOriginalCharacter.IsSuccess ? getOriginalCharacter.Entity : null;
-            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, originalCharacter);
+            var updateRoles = await _characterRoles.UpdateUserRolesAsync(guildUser, originalCharacter, ct);
             if (!updateRoles.IsSuccess)
             {
                 return updateRoles;
@@ -653,8 +723,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Updates the user's current nickname based on their character.
         /// </summary>
         /// <param name="guildUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        private async Task<ModifyEntityResult> UpdateUserNickname(IGuildUser guildUser)
+        private async Task<ModifyEntityResult> UpdateUserNickname
+        (
+            IGuildUser guildUser,
+            CancellationToken ct = default
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
@@ -662,7 +737,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getServer);
@@ -672,7 +747,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var server = getServer.Entity;
 
             string newNick;
-            var getNewCharacter = await _characters.GetCurrentCharacterAsync(user, server);
+            var getNewCharacter = await _characters.GetCurrentCharacterAsync(user, server, ct);
             if (getNewCharacter.IsSuccess)
             {
                 var newCharacter = getNewCharacter.Entity;
@@ -698,8 +773,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Determines whether the given user has a current character on the server.
         /// </summary>
         /// <param name="guildUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<bool>> HasCurrentCharacterAsync(IGuildUser guildUser)
+        public async Task<RetrieveEntityResult<bool>> HasCurrentCharacterAsync
+        (
+            IGuildUser guildUser,
+            CancellationToken ct = default
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
@@ -707,7 +787,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return RetrieveEntityResult<bool>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return RetrieveEntityResult<bool>.FromError(getServer);
@@ -716,7 +796,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return await _characters.HasCurrentCharacterAsync(user, server);
+            return await _characters.HasCurrentCharacterAsync(user, server, ct);
         }
 
         /// <summary>
@@ -724,8 +804,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="guildUser">The user.</param>
         /// <param name="character">The character.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetDefaultCharacterAsync(IGuildUser guildUser, Character character)
+        public async Task<ModifyEntityResult> SetDefaultCharacterAsync
+        (
+            IGuildUser guildUser,
+            Character character,
+            CancellationToken ct = default
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
@@ -733,7 +819,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getServer);
@@ -742,15 +828,20 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return await _characters.SetDefaultCharacterAsync(user, server, character);
+            return await _characters.SetDefaultCharacterAsync(user, server, character, ct);
         }
 
         /// <summary>
         /// Gets the given user's default character.
         /// </summary>
         /// <param name="guildUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<Character>> GetDefaultCharacterAsync(IGuildUser guildUser)
+        public async Task<RetrieveEntityResult<Character>> GetDefaultCharacterAsync
+        (
+            IGuildUser guildUser,
+            CancellationToken ct = default
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
@@ -758,7 +849,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return RetrieveEntityResult<Character>.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getServer);
@@ -767,15 +858,20 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return await _characters.GetDefaultCharacterAsync(user, server);
+            return await _characters.GetDefaultCharacterAsync(user, server, ct);
         }
 
         /// <summary>
         /// Clears the given user's default character.
         /// </summary>
         /// <param name="guildUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ClearDefaultCharacterAsync(IGuildUser guildUser)
+        public async Task<ModifyEntityResult> ClearDefaultCharacterAsync
+        (
+            IGuildUser guildUser,
+            CancellationToken ct = default
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(guildUser);
             if (!getUser.IsSuccess)
@@ -783,7 +879,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getServer);
@@ -792,7 +888,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return await _characters.ClearDefaultCharacterAsync(user, server);
+            return await _characters.ClearDefaultCharacterAsync(user, server, ct);
         }
 
         /// <summary>
@@ -800,8 +896,14 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// </summary>
         /// <param name="newOwner">The new owner.</param>
         /// <param name="character">The character to transfer.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> TransferCharacterOwnershipAsync(IGuildUser newOwner, Character character)
+        public async Task<ModifyEntityResult> TransferCharacterOwnershipAsync
+        (
+            IGuildUser newOwner,
+            Character character,
+            CancellationToken ct = default
+        )
         {
             var getUser = await _users.GetOrRegisterUserAsync(newOwner);
             if (!getUser.IsSuccess)
@@ -809,7 +911,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(newOwner.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(newOwner.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getServer);
@@ -818,7 +920,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var user = getUser.Entity;
             var server = getServer.Entity;
 
-            return await _characters.TransferCharacterOwnershipAsync(user, server, character);
+            return await _characters.TransferCharacterOwnershipAsync(user, server, character, ct);
         }
     }
 }

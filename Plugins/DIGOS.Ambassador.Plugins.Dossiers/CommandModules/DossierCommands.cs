@@ -78,13 +78,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
             var appearance = PaginatedAppearanceOptions.Default;
             appearance.Title = "Dossier Database";
 
-            var getDossiersResult = _dossiers.GetDossiers();
-            if (!getDossiersResult.IsSuccess)
-            {
-                return getDossiersResult.ToRuntimeResult();
-            }
-
-            var dossiers = getDossiersResult.Entity;
+            var dossiers = await _dossiers.GetDossiersAsync();
 
             var paginatedEmbed = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
@@ -170,7 +164,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
 
             var dossier = dossierCreationResult.Entity;
 
-            var modifyResult = await _dossiers.SetDossierDataAsync(dossier, this.Context);
+            var modifyResult = await _dossiers.SetDossierDataAsync(dossier, this.Context.Message);
             if (!modifyResult.IsSuccess)
             {
                 return modifyResult.ToRuntimeResult();
@@ -297,7 +291,7 @@ namespace DIGOS.Ambassador.Plugins.Dossiers.CommandModules
 
                 var dossier = getDossierResult.Entity;
 
-                var modifyResult = await _dossiers.SetDossierDataAsync(dossier, this.Context);
+                var modifyResult = await _dossiers.SetDossierDataAsync(dossier, this.Context.Message);
                 if (!modifyResult.IsSuccess)
                 {
                     return modifyResult.ToRuntimeResult();

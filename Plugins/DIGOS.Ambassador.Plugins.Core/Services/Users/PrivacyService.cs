@@ -22,6 +22,7 @@
 
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Services;
@@ -44,9 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
     public sealed class PrivacyService
     {
         private readonly CoreDatabaseContext _database;
-
         private readonly UserFeedbackService _feedback;
-
         private readonly ContentService _content;
 
         /// <summary>
@@ -137,15 +136,20 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// Determines whether or not the given user has granted consent to store user data.
         /// </summary>
         /// <param name="discordUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>true if the user has granted consent; Otherwise, false.</returns>
         [Pure]
-        public async Task<bool> HasUserConsentedAsync(IUser discordUser)
+        public async Task<bool> HasUserConsentedAsync
+        (
+            IUser discordUser,
+            CancellationToken ct = default
+        )
         {
             var consent = await _database.UserConsents.ServersideQueryAsync
             (
                 q => q
                     .Where(uc => uc.DiscordID == (long)discordUser.Id && uc.HasConsented)
-                    .SingleOrDefaultAsync()
+                    .SingleOrDefaultAsync(ct)
             );
 
             return !(consent is null) && consent.HasConsented;
@@ -155,14 +159,19 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// Gets a consent entity for the given user.
         /// </summary>
         /// <param name="discordUser">The user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<UserConsent>> GetUserConsentAsync(IUser discordUser)
+        public async Task<RetrieveEntityResult<UserConsent>> GetUserConsentAsync
+        (
+            IUser discordUser,
+            CancellationToken ct = default
+        )
         {
             var consent = await _database.UserConsents.ServersideQueryAsync
             (
                 q => q
                     .Where(uc => uc.DiscordID == (long)discordUser.Id)
-                    .SingleOrDefaultAsync()
+                    .SingleOrDefaultAsync(ct)
             );
 
             if (!(consent is null))
@@ -177,10 +186,15 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// Grants consent to store user data for a given user.
         /// </summary>
         /// <param name="discordUser">The user that has granted consent.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A task that must be awaited.</returns>
-        public async Task<CreateEntityResult<UserConsent>> GrantUserConsentAsync(IUser discordUser)
+        public async Task<CreateEntityResult<UserConsent>> GrantUserConsentAsync
+        (
+            IUser discordUser,
+            CancellationToken ct = default
+        )
         {
-            var getConsent = await GetUserConsentAsync(discordUser);
+            var getConsent = await GetUserConsentAsync(discordUser, ct);
 
             UserConsent userConsent;
             if (!getConsent.IsSuccess)
@@ -196,7 +210,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                 userConsent.HasConsented = true;
             }
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return userConsent;
         }
@@ -205,10 +219,15 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// Revokes consent to store user data for a given user.
         /// </summary>
         /// <param name="discordUser">The user that has revoked consent.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A task that must be awaited.</returns>
-        public async Task<ModifyEntityResult> RevokeUserConsentAsync(IUser discordUser)
+        public async Task<ModifyEntityResult> RevokeUserConsentAsync
+        (
+            IUser discordUser,
+            CancellationToken ct = default
+        )
         {
-            var getConsent = await GetUserConsentAsync(discordUser);
+            var getConsent = await GetUserConsentAsync(discordUser, ct);
             if (!getConsent.IsSuccess)
             {
                 return ModifyEntityResult.FromError("The user has not consented.");
@@ -217,7 +236,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
             var userConsent = getConsent.Entity;
             userConsent.HasConsented = false;
 
-            await _database.SaveChangesAsync();
+            await _database.SaveChangesAsync(ct);
 
             return ModifyEntityResult.FromSuccess();
         }
