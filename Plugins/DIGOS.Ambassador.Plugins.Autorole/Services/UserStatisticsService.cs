@@ -226,7 +226,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<ModifyEntityResult> UpdateTimestampAsync(UserServerStatistics globalStats)
         {
-            globalStats.LastActivityTime = DateTimeOffset.UtcNow;
+            var now = DateTimeOffset.UtcNow;
+            if (globalStats.LastActivityTime == now)
+            {
+                return ModifyEntityResult.FromError("That's already the latest timestamp.");
+            }
+
+            globalStats.LastActivityTime = now;
             await _database.SaveChangesAsync();
 
             return ModifyEntityResult.FromSuccess();
