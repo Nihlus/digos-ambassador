@@ -20,9 +20,12 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.Net;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.Net;
 using Discord.WebSocket;
 using Remora.Results;
 
@@ -95,7 +98,15 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
 
             this.IsDeleting = true;
 
-            await this.Message.DeleteAsync();
+            // Messages may already have been deleted; that is a no-op.
+            try
+            {
+                await this.Message.DeleteAsync();
+            }
+            catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.NotFound)
+            {
+            }
+
             return OperationResult.FromSuccess();
         }
 
