@@ -86,7 +86,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return statistics;
             }
 
-            var getUser = await _users.GetOrRegisterUserAsync(discordUser);
+            var getUser = await _users.GetOrRegisterUserAsync(discordUser, ct);
             if (!getUser.IsSuccess)
             {
                 return CreateEntityResult<UserStatistics>.FromError(getUser);
@@ -131,7 +131,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return existingServerStatistics;
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(discordUser.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(discordUser.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return CreateEntityResult<UserServerStatistics>.FromError(getServer);

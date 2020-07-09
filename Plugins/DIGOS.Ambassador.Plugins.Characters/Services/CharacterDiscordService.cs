@@ -96,7 +96,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return RetrieveEntityResult<bool>.FromError(getUser);
@@ -138,7 +138,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return CreateEntityResult<Character>.FromError(getUser);
@@ -233,7 +233,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return RetrieveEntityResult<IEnumerable<Character>>.FromError(getUser);
@@ -266,7 +266,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getUser);
@@ -323,7 +323,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getUser);
@@ -411,7 +411,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return await _characters.GetBestMatchingCharacterAsync(server, null, name, ct);
             }
 
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getUser);
@@ -627,7 +627,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getUser);
@@ -679,7 +679,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getUser);
@@ -731,7 +731,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getUser);
@@ -781,7 +781,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return RetrieveEntityResult<bool>.FromError(getUser);
@@ -813,7 +813,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getUser);
@@ -843,7 +843,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return RetrieveEntityResult<Character>.FromError(getUser);
@@ -873,7 +873,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getUser);
@@ -905,7 +905,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(newOwner);
+            var getUser = await _users.GetOrRegisterUserAsync(newOwner, ct);
             if (!getUser.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getUser);

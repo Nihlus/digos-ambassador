@@ -358,7 +358,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser);
+            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
             if (!getUser.IsSuccess)
             {
                 return ModifyEntityResult.FromError(getUser);

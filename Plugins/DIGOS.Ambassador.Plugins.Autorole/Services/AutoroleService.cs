@@ -140,7 +140,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 );
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(discordRole.Guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(discordRole.Guild, ct);
             if (!getServer.IsSuccess)
             {
                 return CreateEntityResult<AutoroleConfiguration>.FromError(getServer);
@@ -375,7 +375,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return confirmation;
             }
 
-            var getUser = await _users.GetOrRegisterUserAsync(discordUser);
+            var getUser = await _users.GetOrRegisterUserAsync(discordUser, ct);
             if (!getUser.IsSuccess)
             {
                 return RetrieveEntityResult<AutoroleConfirmation>.FromError(getUser);
@@ -623,7 +623,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return settings;
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guild, ct);
             if (!getServer.IsSuccess)
             {
                 return RetrieveEntityResult<AutoroleServerSettings>.FromError(getServer);
