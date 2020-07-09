@@ -95,6 +95,11 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
                 return OperationResult.FromError("The message hasn't been sent yet.");
             }
 
+            if (this.IsDeleting)
+            {
+                return OperationResult.FromSuccess();
+            }
+
             this.IsDeleting = true;
 
             // Messages may already have been deleted; that is a no-op.
