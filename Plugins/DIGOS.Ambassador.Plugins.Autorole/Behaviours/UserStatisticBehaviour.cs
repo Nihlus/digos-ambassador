@@ -22,6 +22,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
@@ -240,10 +241,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         private async Task<OperationResult> UpdateServerMessageCountAsync
         (
             UserStatisticsService userStatistics,
-            SocketGuildUser guildUser
+            SocketGuildUser guildUser,
+            CancellationToken ct = default
         )
         {
-            var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser);
+            var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser, ct);
             if (!getGlobalStats.IsSuccess)
             {
                 return OperationResult.FromError(getGlobalStats);
@@ -262,7 +264,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 long sum = 0;
                 foreach (var guildChannel in guildUser.Guild.TextChannels)
                 {
-                    var countResult = await CountUserMessagesAsync(guildChannel, guildUser);
+                    if (ct.IsCancellationRequested)
+                    {
+                        return OperationResult.FromError("Operation was cancelled.");
+                    }
+
+                    var countResult = await CountUserMessagesAsync(guildChannel, guildUser, ct);
                     if (countResult.IsSuccess)
                     {
                         sum += countResult.Entity;
@@ -279,7 +286,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             var setResult = await userStatistics.SetTotalMessageCountAsync
             (
                 globalStats,
-                totalMessageCount
+                totalMessageCount,
+                ct
             );
 
             if (!setResult.IsSuccess)
@@ -294,13 +302,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         (
             UserStatisticsService userStatistics,
             SocketGuildUser guildUser,
-            SocketTextChannel textChannel
+            SocketTextChannel textChannel,
+            CancellationToken ct = default
         )
         {
             var getChannelStats = await userStatistics.GetOrCreateUserChannelStatisticsAsync
             (
                 guildUser,
-                textChannel
+                textChannel,
+                ct
             );
 
             if (!getChannelStats.IsSuccess)
@@ -317,7 +327,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             }
             else
             {
-                var countResult = await CountUserMessagesAsync(textChannel, guildUser);
+                var countResult = await CountUserMessagesAsync(textChannel, guildUser, ct);
                 if (countResult.IsSuccess)
                 {
                     channelMessageCount = countResult.Entity;
@@ -331,7 +341,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             var setChannelCountResult = await userStatistics.SetChannelMessageCountAsync
             (
                 channelStats,
-                channelMessageCount
+                channelMessageCount,
+                ct
             );
 
             if (!setChannelCountResult.IsSuccess)
@@ -347,14 +358,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         /// </summary>
         /// <param name="userStatistics">The statistics service.</param>
         /// <param name="guildUser">The guild user.</param>
+        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task<OperationResult> UpdateLastActivityTimestampForUserAsync
         (
             UserStatisticsService userStatistics,
-            IGuildUser guildUser
+            IGuildUser guildUser,
+            CancellationToken ct = default
         )
         {
-            var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser);
+            var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser, ct);
             if (!getGlobalStats.IsSuccess)
             {
                 this.Log.LogError(getGlobalStats.Exception, getGlobalStats.ErrorReason);
@@ -363,7 +376,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             var globalStats = getGlobalStats.Entity;
 
-            var updateTimestamp = await userStatistics.UpdateTimestampAsync(globalStats);
+            var updateTimestamp = await userStatistics.UpdateTimestampAsync(globalStats, ct);
             if (!updateTimestamp.IsSuccess)
             {
                 return OperationResult.FromError(updateTimestamp);
@@ -372,7 +385,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             return OperationResult.FromSuccess();
         }
 
-        private async Task<RetrieveEntityResult<long>> CountUserMessagesAsync(IMessageChannel channel, IUser user)
+        private async Task<RetrieveEntityResult<long>> CountUserMessagesAsync
+        (
+            IMessageChannel channel,
+            IUser user,
+            CancellationToken ct = default
+        )
         {
             long sum = 0;
             try
@@ -391,11 +409,21 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
                 while (true)
                 {
+                    if (ct.IsCancellationRequested)
+                    {
+                        return RetrieveEntityResult<long>.FromError("Operation was cancelled.");
+                    }
+
                     var channelMessages = channel.GetMessagesAsync(latestMessage, Direction.Before);
 
                     var processedBatches = 0;
-                    await foreach (var channelMessageBatch in channelMessages)
+                    await foreach (var channelMessageBatch in channelMessages.WithCancellation(ct))
                     {
+                        if (ct.IsCancellationRequested)
+                        {
+                            return RetrieveEntityResult<long>.FromError("Operation was cancelled.");
+                        }
+
                         if (channelMessageBatch.Count == 0)
                         {
                             continue;
@@ -403,6 +431,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
                         foreach (var channelMessage in channelMessageBatch)
                         {
+                            if (ct.IsCancellationRequested)
+                            {
+                                return RetrieveEntityResult<long>.FromError("Operation was cancelled.");
+                            }
+
                             latestMessage = channelMessage;
                             if (latestMessage.Author.Id == user.Id)
                             {
