@@ -543,19 +543,25 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
             var dedicatedChannel = result.Entity;
 
-            if (roleplay.IsActive && roleplay.ActiveChannelID != (long)dedicatedChannel.Id)
+            if (!roleplay.IsActive || roleplay.ActiveChannelID == (long)dedicatedChannel.Id)
             {
-                var stopResult = await StopRoleplayAsync(roleplay);
-                if (!stopResult.IsSuccess)
-                {
-                    return stopResult;
-                }
+                return RuntimeCommandResult.FromSuccess
+                (
+                    $"All done! Your roleplay now has a dedicated channel at " +
+                    $"{MentionUtils.MentionChannel(dedicatedChannel.Id)}."
+                );
+            }
 
-                var startResult = await StartRoleplayAsync(roleplay);
-                if (!startResult.IsSuccess)
-                {
-                    return startResult;
-                }
+            var stopResult = await StopRoleplayAsync(roleplay);
+            if (!stopResult.IsSuccess)
+            {
+                return stopResult;
+            }
+
+            var startResult = await StartRoleplayAsync(roleplay);
+            if (!startResult.IsSuccess)
+            {
+                return startResult;
             }
 
             return RuntimeCommandResult.FromSuccess

@@ -226,13 +226,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                 }
             }
 
-            if (wantsToUpdateServerMessageCounts)
+            if (!wantsToUpdateServerMessageCounts)
             {
-                var updateServerCountResult = await UpdateServerMessageCountAsync(userStatistics, guildUser);
-                if (!updateServerCountResult.IsSuccess)
-                {
-                    return OperationResult.FromError(updateServerCountResult);
-                }
+                return OperationResult.FromSuccess();
+            }
+
+            var updateServerCountResult = await UpdateServerMessageCountAsync(userStatistics, guildUser);
+            if (!updateServerCountResult.IsSuccess)
+            {
+                return OperationResult.FromError(updateServerCountResult);
             }
 
             return OperationResult.FromSuccess();

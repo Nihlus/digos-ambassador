@@ -95,11 +95,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     roleplay
                 );
 
-                if (getDedicatedChannelResult.IsSuccess)
+                if (!getDedicatedChannelResult.IsSuccess)
                 {
-                    var dedicatedChannel = getDedicatedChannelResult.Entity;
-                    await dedicatedChannel.ModifyAsync(p => p.Name = $"{roleplay.Name}-rp");
+                    return RuntimeCommandResult.FromSuccess("Roleplay name set.");
                 }
+
+                var dedicatedChannel = getDedicatedChannelResult.Entity;
+                await dedicatedChannel.ModifyAsync(p => p.Name = $"{roleplay.Name}-rp");
 
                 return RuntimeCommandResult.FromSuccess("Roleplay name set.");
             }
