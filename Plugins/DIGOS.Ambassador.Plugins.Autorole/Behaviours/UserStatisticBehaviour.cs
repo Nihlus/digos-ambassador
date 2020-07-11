@@ -376,6 +376,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             CancellationToken ct = default
         )
         {
+            // TODO: I'm worried about a memory leak here. Inspect and change in the future.
             var userSemaphore = _timestampSemaphores.GetOrAdd(guildUser.Id, u => new SemaphoreSlim(1, 1));
             if (userSemaphore.CurrentCount == 0)
             {
