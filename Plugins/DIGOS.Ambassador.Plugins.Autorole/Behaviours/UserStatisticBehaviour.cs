@@ -26,6 +26,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Plugins.Autorole.Concurrency;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using Discord;
@@ -48,7 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         /// <summary>
         /// Holds a set of semaphores for user IDs.
         /// </summary>
-        private readonly ConcurrentDictionary<ulong, SemaphoreSlim> _timestampSemaphores;
+        private readonly ConcurrentDictionary<ulong, TimedSemaphoreSlim> _timestampSemaphores;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserStatisticBehaviour"/> class.
@@ -64,7 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         )
             : base(client, serviceScope, logger)
         {
-            _timestampSemaphores = new ConcurrentDictionary<ulong, SemaphoreSlim>();
+            _timestampSemaphores = new ConcurrentDictionary<ulong, TimedSemaphoreSlim>();
         }
 
         /// <inheritdoc/>
@@ -376,9 +377,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             CancellationToken ct = default
         )
         {
-            // TODO: I'm worried about a memory leak here. Inspect and change in the future.
-            var userSemaphore = _timestampSemaphores.GetOrAdd(guildUser.Id, u => new SemaphoreSlim(1, 1));
-            if (userSemaphore.CurrentCount == 0)
+            var userSemaphore = _timestampSemaphores.GetOrAdd(guildUser.Id, u => new TimedSemaphoreSlim(1, 1));
+            if (userSemaphore.Semaphore.CurrentCount == 0)
             {
                 // Someone else is already updating the timestamp right now
                 return OperationResult.FromSuccess();
@@ -386,7 +386,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
             try
             {
-                await userSemaphore.WaitAsync(ct);
+                await userSemaphore.Semaphore.WaitAsync(ct);
+                userSemaphore.UpdateTimestamp();
 
                 var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser, ct);
                 if (!getGlobalStats.IsSuccess)
@@ -407,7 +408,53 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             }
             finally
             {
-                userSemaphore.Release();
+                userSemaphore.Semaphore.Release();
+
+                await CleanSemaphoresAsync(ct);
+            }
+        }
+
+        /// <summary>
+        /// Removes old semaphore entries from the internal cache.
+        /// </summary>
+        /// <param name="ct">The cancellation token.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        private async Task CleanSemaphoresAsync(CancellationToken ct)
+        {
+            // Clean up old semaphores
+            var keys = _timestampSemaphores.Keys;
+            foreach (var key in keys)
+            {
+                if (ct.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                if (!_timestampSemaphores.TryGetValue(key, out var value))
+                {
+                    // Doesn't exist, or someone is using it
+                    continue;
+                }
+
+                if (value.Semaphore.CurrentCount == 0)
+                {
+                    // Someone is using this
+                    continue;
+                }
+
+                try
+                {
+                    await value.Semaphore.WaitAsync(ct);
+
+                    if ((DateTimeOffset.UtcNow - value.Timestamp) > TimeSpan.FromMinutes(15))
+                    {
+                        _timestampSemaphores.TryRemove(key, out _);
+                    }
+                }
+                finally
+                {
+                    value.Semaphore.Release();
+                }
             }
         }
 
