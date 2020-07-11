@@ -248,6 +248,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return ModifyEntityResult.FromError("That's already the latest timestamp.");
             }
 
+            if (globalStats.LastActivityTime < now)
+            {
+                return ModifyEntityResult.FromError("That timestamp is earlier than the current timestamp.");
+            }
+
             globalStats.LastActivityTime = now;
             await _database.SaveChangesAsync(ct);
 

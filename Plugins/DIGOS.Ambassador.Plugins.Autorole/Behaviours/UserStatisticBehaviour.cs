@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,6 +46,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
     internal sealed class UserStatisticBehaviour : ClientEventBehaviour<UserStatisticBehaviour>
     {
         /// <summary>
+        /// Holds a set of semaphores for user IDs.
+        /// </summary>
+        private readonly ConcurrentDictionary<ulong, SemaphoreSlim> _timestampSemaphores;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="UserStatisticBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
@@ -58,6 +64,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         )
             : base(client, serviceScope, logger)
         {
+            _timestampSemaphores = new ConcurrentDictionary<ulong, SemaphoreSlim>();
         }
 
         /// <inheritdoc/>
@@ -369,22 +376,38 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
             CancellationToken ct = default
         )
         {
-            var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser, ct);
-            if (!getGlobalStats.IsSuccess)
+            var userSemaphore = _timestampSemaphores.GetOrAdd(guildUser.Id, u => new SemaphoreSlim(1, 1));
+            if (userSemaphore.CurrentCount == 0)
             {
-                this.Log.LogError(getGlobalStats.Exception, getGlobalStats.ErrorReason);
-                return OperationResult.FromError(getGlobalStats);
+                // Someone else is already updating the timestamp right now
+                return OperationResult.FromSuccess();
             }
 
-            var globalStats = getGlobalStats.Entity;
-
-            var updateTimestamp = await userStatistics.UpdateTimestampAsync(globalStats, ct);
-            if (!updateTimestamp.IsSuccess)
+            try
             {
-                return OperationResult.FromError(updateTimestamp);
-            }
+                await userSemaphore.WaitAsync(ct);
 
-            return OperationResult.FromSuccess();
+                var getGlobalStats = await userStatistics.GetOrCreateUserServerStatisticsAsync(guildUser, ct);
+                if (!getGlobalStats.IsSuccess)
+                {
+                    this.Log.LogError(getGlobalStats.Exception, getGlobalStats.ErrorReason);
+                    return OperationResult.FromError(getGlobalStats);
+                }
+
+                var globalStats = getGlobalStats.Entity;
+
+                var updateTimestamp = await userStatistics.UpdateTimestampAsync(globalStats, ct);
+                if (!updateTimestamp.IsSuccess)
+                {
+                    return OperationResult.FromError(updateTimestamp);
+                }
+
+                return OperationResult.FromSuccess();
+            }
+            finally
+            {
+                userSemaphore.Release();
+            }
         }
 
         private async Task<RetrieveEntityResult<long>> CountUserMessagesAsync
