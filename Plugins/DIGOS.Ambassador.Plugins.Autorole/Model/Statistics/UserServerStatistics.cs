@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics
         /// <summary>
         /// Gets the last time the user performed a tracked activity on the server.
         /// </summary>
-        public DateTimeOffset? LastActivityTime { get; internal set; }
+        public DateTime? LastActivityTime { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserServerStatistics"/> class.

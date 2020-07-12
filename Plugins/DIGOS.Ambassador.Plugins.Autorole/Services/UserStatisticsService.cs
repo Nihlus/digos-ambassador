@@ -242,13 +242,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             CancellationToken ct = default
         )
         {
-            var now = DateTimeOffset.UtcNow;
+            var now = DateTime.UtcNow;
             if (globalStats.LastActivityTime == now)
             {
                 return ModifyEntityResult.FromError("That's already the latest timestamp.");
             }
 
-            if (globalStats.LastActivityTime < now)
+            if (globalStats.LastActivityTime > now)
             {
                 return ModifyEntityResult.FromError("That timestamp is earlier than the current timestamp.");
             }
