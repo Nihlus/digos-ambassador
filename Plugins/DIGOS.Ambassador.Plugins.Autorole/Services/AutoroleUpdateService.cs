@@ -120,7 +120,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var role = guildUser.Guild.GetRole((ulong)autorole.DiscordRoleID);
             if (role is null)
             {
-                return AutoroleUpdateResult.FromError("The relevant role could not be found. Deleted?");
+                // If the role can't be found any longer, we disable it
+                var disableAutoroleAsync = await _autoroles.DisableAutoroleAsync(autorole, ct);
+                if (!disableAutoroleAsync.IsSuccess)
+                {
+                    return AutoroleUpdateResult.FromError(disableAutoroleAsync);
+                }
+
+                return Disabled;
             }
 
             var userHasRole = guildUser.RoleIds.Contains(role.Id);
