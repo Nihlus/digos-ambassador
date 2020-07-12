@@ -152,23 +152,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         }
 
         /// <inheritdoc/>
-        protected override async Task<OperationResult> GuildMemberUpdatedAsync
-        (
-            SocketGuildUser oldMember,
-            SocketGuildUser newMember
-        )
-        {
-            if (newMember.IsBot || newMember.IsWebhook)
-            {
-                return OperationResult.FromSuccess();
-            }
-
-            using var eventScope = this.Services.CreateScope();
-            var userStatistics = eventScope.ServiceProvider.GetRequiredService<UserStatisticsService>();
-            return await UpdateLastActivityTimestampForUserAsync(userStatistics, newMember);
-        }
-
-        /// <inheritdoc/>
         protected override async Task<OperationResult> MessageReceivedAsync(SocketMessage message)
         {
             if (message.Author.IsBot || message.Author.IsWebhook)
