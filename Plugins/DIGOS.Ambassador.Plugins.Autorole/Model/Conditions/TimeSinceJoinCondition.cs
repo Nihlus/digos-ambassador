@@ -66,11 +66,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
                 );
             }
 
-            var timeSinceJoin = DateTime.UtcNow - discordUser.JoinedAt;
+            var timeSinceJoin = DateTime.UtcNow - discordUser.JoinedAt.Value.UtcDateTime;
 
             return Task.FromResult
             (
-                RetrieveEntityResult<bool>.FromSuccess(timeSinceJoin <= this.RequiredTime)
+                RetrieveEntityResult<bool>.FromSuccess(timeSinceJoin >= this.RequiredTime)
             );
         }
     }
