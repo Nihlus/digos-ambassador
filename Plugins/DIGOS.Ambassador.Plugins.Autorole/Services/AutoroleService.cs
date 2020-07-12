@@ -517,20 +517,23 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             CancellationToken ct = default
         )
         {
-            var results = await Task.WhenAll
-            (
-                autorole.Conditions.Select
-                (
-                    c => c.IsConditionFulfilledForUserAsync(_serviceProvider, user, ct)
-                )
-            );
-
-            if (results.Any(r => !r.IsSuccess))
+            foreach (var condition in autorole.Conditions)
             {
-                return RetrieveEntityResult<bool>.FromError("One or more conditions were indeterminate.");
+                var isFulfilledResult = await condition.IsConditionFulfilledForUserAsync(_serviceProvider, user, ct);
+                if (!isFulfilledResult.IsSuccess)
+                {
+                    return RetrieveEntityResult<bool>.FromError("One or more conditions were indeterminate.");
+                }
+
+                var isFulfilled = isFulfilledResult.Entity;
+
+                if (!isFulfilled)
+                {
+                    return false;
+                }
             }
 
-            return results.All(r => r.Entity);
+            return true;
         }
 
         /// <summary>
