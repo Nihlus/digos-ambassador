@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task ReturnsUnsuccessfulResultIfNicknameIsNull()
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Characters.SetCharacterNicknameAsync(_character, null);
+                var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNicknameIsEmpty()
             {
-                var result = await this.Characters.SetCharacterNicknameAsync(_character, string.Empty);
+                var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNicknameIsTheSameAsTheCurrentNickname()
             {
-                var result = await this.Characters.SetCharacterNicknameAsync(_character, Nickname);
+                var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, Nickname);
 
                 Assert.False(result.IsSuccess);
             }
@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNewNicknameIsLongerThan32Characters()
             {
-                var result = await this.Characters.SetCharacterNicknameAsync(_character, new string('a', 33));
+                var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, new string('a', 33));
 
                 Assert.False(result.IsSuccess);
             }
@@ -82,7 +82,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfNicknameIsAccepted()
             {
-                var result = await this.Characters.SetCharacterNicknameAsync(_character, "Bobby");
+                var result = await this.CharacterEditor.SetCharacterNicknameAsync(_character, "Bobby");
 
                 Assert.True(result.IsSuccess);
             }
@@ -91,7 +91,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task SetsNickname()
             {
                 const string newNickname = "Bobby";
-                await this.Characters.SetCharacterNicknameAsync(_character, newNickname);
+                await this.CharacterEditor.SetCharacterNicknameAsync(_character, newNickname);
 
                 var character = this.Database.Characters.First();
                 Assert.Equal(newNickname, character.Nickname);

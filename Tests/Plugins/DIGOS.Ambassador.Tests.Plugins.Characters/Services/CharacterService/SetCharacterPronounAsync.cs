@@ -55,7 +55,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task ReturnsUnsuccessfulResultIfPronounIsNull()
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Characters.SetCharacterPronounsAsync(_character, null);
+                var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -63,7 +63,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfPronounIsEmpty()
             {
-                var result = await this.Characters.SetCharacterPronounsAsync(_character, string.Empty);
+                var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfPronounIsTheSameAsTheCurrentPronoun()
             {
-                var result = await this.Characters.SetCharacterPronounsAsync(_character, PronounFamily);
+                var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, PronounFamily);
 
                 Assert.False(result.IsSuccess);
             }
@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNoMatchingPronounProviderIsFound()
             {
-                var result = await this.Characters.SetCharacterPronounsAsync(_character, "ahwooooga");
+                var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, "ahwooooga");
 
                 Assert.False(result.IsSuccess);
             }
@@ -87,7 +87,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfPronounIsAccepted()
             {
-                var result = await this.Characters.SetCharacterPronounsAsync(_character, "Ze and hir");
+                var result = await this.CharacterEditor.SetCharacterPronounsAsync(_character, "Ze and hir");
 
                 Assert.True(result.IsSuccess);
             }
@@ -96,7 +96,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task SetsPronoun()
             {
                 const string newPronounFamily = "Ze and hir";
-                await this.Characters.SetCharacterPronounsAsync(_character, newPronounFamily);
+                await this.CharacterEditor.SetCharacterPronounsAsync(_character, newPronounFamily);
 
                 var character = this.Database.Characters.First();
                 Assert.Equal(newPronounFamily, character.PronounProviderFamily);

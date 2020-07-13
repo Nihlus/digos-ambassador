@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
+using DIGOS.Ambassador.Plugins.Characters.Services.Interfaces;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
@@ -69,7 +70,12 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
         /// <summary>
         /// Gets the character service object.
         /// </summary>
-        protected CharacterService Characters { get; private set; } = null!;
+        protected ICharacterService Characters { get; private set; } = null!;
+
+        /// <summary>
+        /// Gets the character service object.
+        /// </summary>
+        protected ICharacterEditor CharacterEditor { get; private set; } = null!;
 
         /// <summary>
         /// Gets the user service.
@@ -151,6 +157,8 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
                 .AddScoped<UserService>()
                 .AddScoped<OwnedEntityService>()
                 .AddScoped<CharacterService>()
+                .AddScoped<ICharacterService>(s => s.GetRequiredService<CharacterService>())
+                .AddScoped<ICharacterEditor>(s => s.GetRequiredService<CharacterService>())
                 .AddLogging(c => c.AddProvider(NullLoggerProvider.Instance));
         }
 
@@ -165,7 +173,9 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
 
             this.Database = charactersDatabase;
 
-            this.Characters = serviceProvider.GetRequiredService<CharacterService>();
+            this.Characters = serviceProvider.GetRequiredService<ICharacterService>();
+            this.CharacterEditor = serviceProvider.GetRequiredService<ICharacterEditor>();
+
             this.Users = serviceProvider.GetRequiredService<UserService>();
             this.Commands = serviceProvider.GetRequiredService<CommandService>();
 

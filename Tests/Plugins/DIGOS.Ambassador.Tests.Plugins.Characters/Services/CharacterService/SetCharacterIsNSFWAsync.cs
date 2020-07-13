@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfIsNSFWIsTheSameAsTheCurrentIsNSFW()
             {
-                var result = await this.Characters.SetCharacterIsNSFWAsync(_character, IsNSFW);
+                var result = await this.CharacterEditor.SetCharacterIsNSFWAsync(_character, IsNSFW);
 
                 Assert.False(result.IsSuccess);
             }
@@ -56,7 +56,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfIsNSFWIsAccepted()
             {
-                var result = await this.Characters.SetCharacterIsNSFWAsync(_character, true);
+                var result = await this.CharacterEditor.SetCharacterIsNSFWAsync(_character, true);
 
                 Assert.True(result.IsSuccess);
             }
@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task SetsIsNSFW()
             {
                 const bool newIsNSFW = true;
-                await this.Characters.SetCharacterIsNSFWAsync(_character, newIsNSFW);
+                await this.CharacterEditor.SetCharacterIsNSFWAsync(_character, newIsNSFW);
 
                 var character = this.Database.Characters.First();
                 Assert.Equal(newIsNSFW, character.IsNSFW);

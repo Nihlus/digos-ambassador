@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Characters;
 using DIGOS.Ambassador.Plugins.Characters.CommandModules;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
+using DIGOS.Ambassador.Plugins.Characters.Services.Interfaces;
 using DIGOS.Ambassador.Plugins.Characters.Services.Pronouns;
 using DIGOS.Ambassador.Plugins.Characters.TypeReaders;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
@@ -64,6 +65,8 @@ namespace DIGOS.Ambassador.Plugins.Characters
             serviceCollection
                 .AddSingleton<PronounService>()
                 .AddScoped<CharacterService>()
+                .AddScoped<ICharacterService>(s => s.GetRequiredService<CharacterService>())
+                .AddScoped<ICharacterEditor>(s => s.GetRequiredService<CharacterService>())
                 .AddScoped<CharacterDiscordService>()
                 .AddScoped<CharacterRoleService>()
                 .AddConfiguredSchemaAwareDbContextPool<CharactersDatabaseContext>();

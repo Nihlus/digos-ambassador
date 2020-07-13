@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task ReturnsUnsuccessfulResultIfAvatarURLIsNull()
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Characters.SetCharacterAvatarAsync(_character, null);
+                var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfAvatarURLIsEmpty()
             {
-                var result = await this.Characters.SetCharacterAvatarAsync(_character, string.Empty);
+                var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfAvatarURLIsTheSameAsTheCurrentURL()
             {
-                var result = await this.Characters.SetCharacterAvatarAsync(_character, AvatarURL);
+                var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, AvatarURL);
 
                 Assert.False(result.IsSuccess);
             }
@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfURLIsAccepted()
             {
-                var result = await this.Characters.SetCharacterAvatarAsync(_character, "http://www.myfunkyavatars.com/avatar.png");
+                var result = await this.CharacterEditor.SetCharacterAvatarAsync(_character, "http://www.myfunkyavatars.com/avatar.png");
 
                 Assert.True(result.IsSuccess);
             }
@@ -83,7 +83,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task SetsURL()
             {
                 const string newURL = "http://www.myfunkyavatars.com/avatar.png";
-                await this.Characters.SetCharacterAvatarAsync(_character, newURL);
+                await this.CharacterEditor.SetCharacterAvatarAsync(_character, newURL);
 
                 var character = this.Database.Characters.First();
                 Assert.Equal(newURL, character.AvatarUrl);

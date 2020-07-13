@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task ReturnsUnsuccessfulResultIfSummaryIsNull()
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Characters.SetCharacterSummaryAsync(_character, null);
+                var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfSummaryIsEmpty()
             {
-                var result = await this.Characters.SetCharacterSummaryAsync(_character, string.Empty);
+                var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfSummaryIsTheSameAsTheCurrentSummary()
             {
-                var result = await this.Characters.SetCharacterSummaryAsync(_character, Summary);
+                var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, Summary);
 
                 Assert.False(result.IsSuccess);
             }
@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNewSummaryIsLongerThan240Characters()
             {
-                var result = await this.Characters.SetCharacterSummaryAsync(_character, new string('a', 241));
+                var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, new string('a', 241));
 
                 Assert.False(result.IsSuccess);
             }
@@ -82,7 +82,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfSummaryIsAccepted()
             {
-                var result = await this.Characters.SetCharacterSummaryAsync(_character, "Bobby");
+                var result = await this.CharacterEditor.SetCharacterSummaryAsync(_character, "Bobby");
 
                 Assert.True(result.IsSuccess);
             }
@@ -91,7 +91,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task SetsSummary()
             {
                 const string newSummary = "An uncool person";
-                await this.Characters.SetCharacterSummaryAsync(_character, newSummary);
+                await this.CharacterEditor.SetCharacterSummaryAsync(_character, newSummary);
 
                 var character = this.Database.Characters.First();
                 Assert.Equal(newSummary, character.Summary);

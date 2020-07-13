@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Characters.Services.Interfaces;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -45,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         private readonly UserService _users;
         private readonly ServerService _servers;
         private readonly DiscordService _discord;
-        private readonly CharacterService _characters;
+        private readonly ICharacterService _characters;
         private readonly IDiscordClient _client;
 
         /// <summary>
@@ -62,7 +63,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CharactersDatabaseContext database,
             ServerService servers,
             DiscordService discord,
-            CharacterService characters,
+            ICharacterService characters,
             UserService users,
             IDiscordClient client
         )

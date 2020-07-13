@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Discord;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
+using DIGOS.Ambassador.Plugins.Characters.Services.Interfaces;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
@@ -44,7 +45,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
     /// </summary>
     public class CharacterDiscordService
     {
-        private readonly CharacterService _characters;
+        private readonly ICharacterService _characters;
+        private readonly ICharacterEditor _characterEditor;
+
         private readonly CharacterRoleService _characterRoles;
         private readonly CommandService _commands;
         private readonly OwnedEntityService _ownedEntities;
@@ -56,6 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// Initializes a new instance of the <see cref="CharacterDiscordService"/> class.
         /// </summary>
         /// <param name="characters">The character service.</param>
+        /// <param name="characterEditor">The character editor.</param>
         /// <param name="users">The user service.</param>
         /// <param name="servers">The server service.</param>
         /// <param name="commands">The command service.</param>
@@ -64,7 +68,8 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="characterRoles">The character role service.</param>
         public CharacterDiscordService
         (
-            CharacterService characters,
+            ICharacterService characters,
+            ICharacterEditor characterEditor,
             UserService users,
             ServerService servers,
             CommandService commands,
@@ -74,6 +79,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         )
         {
             _characters = characters;
+            _characterEditor = characterEditor;
             _users = users;
             _servers = servers;
             _commands = commands;
@@ -439,7 +445,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var commandModule = _commands.Modules.FirstOrDefault(m => m.Name == "character");
             if (commandModule is null)
             {
-                return await _characters.SetCharacterNameAsync(character, name, ct);
+                return await _characterEditor.SetCharacterNameAsync(character, name, ct);
             }
 
             var validNameResult = _ownedEntities.IsEntityNameValid(commandModule.GetAllCommandNames(), name);
@@ -448,7 +454,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return ModifyEntityResult.FromError(validNameResult);
             }
 
-            return await _characters.SetCharacterNameAsync(character, name, ct);
+            return await _characterEditor.SetCharacterNameAsync(character, name, ct);
         }
 
         /// <summary>
@@ -465,7 +471,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            return await _characters.SetCharacterAvatarAsync(character, avatarUrl, ct);
+            return await _characterEditor.SetCharacterAvatarAsync(character, avatarUrl, ct);
         }
 
         /// <summary>
@@ -484,7 +490,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var setNickname = await _characters.SetCharacterNicknameAsync(character, nickname, ct);
+            var setNickname = await _characterEditor.SetCharacterNicknameAsync(character, nickname, ct);
             if (!setNickname.IsSuccess)
             {
                 return setNickname;
@@ -512,15 +518,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="summary">The new summary.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterSummaryAsync
+        public Task<ModifyEntityResult> SetCharacterSummaryAsync
         (
             Character character,
             string summary,
             CancellationToken ct = default
-        )
-        {
-            return await _characters.SetCharacterSummaryAsync(character, summary, ct);
-        }
+        ) => _characterEditor.SetCharacterSummaryAsync(character, summary, ct);
 
         /// <summary>
         /// Sets the description of the given character.
@@ -529,15 +532,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="description">The new description.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterDescriptionAsync
+        public Task<ModifyEntityResult> SetCharacterDescriptionAsync
         (
             Character character,
             string description,
             CancellationToken ct = default
-        )
-        {
-            return await _characters.SetCharacterDescriptionAsync(character, description, ct);
-        }
+        ) => _characterEditor.SetCharacterDescriptionAsync(character, description, ct);
 
         /// <summary>
         /// Sets the preferred pronouns of the given character.
@@ -546,15 +546,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="pronounFamily">The new pronoun family.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterPronounsAsync
+        public Task<ModifyEntityResult> SetCharacterPronounsAsync
         (
             Character character,
             string pronounFamily,
             CancellationToken ct = default
-        )
-        {
-            return await _characters.SetCharacterPronounsAsync(character, pronounFamily, ct);
-        }
+        ) => _characterEditor.SetCharacterPronounsAsync(character, pronounFamily, ct);
 
         /// <summary>
         /// Sets whether the character is NSFW.
@@ -563,15 +560,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="isNSFW">Whether the character is NSFW.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterIsNSFWAsync
+        public Task<ModifyEntityResult> SetCharacterIsNSFWAsync
         (
             Character character,
             bool isNSFW,
             CancellationToken ct = default
-        )
-        {
-            return await _characters.SetCharacterIsNSFWAsync(character, isNSFW, ct);
-        }
+        ) => _characterEditor.SetCharacterIsNSFWAsync(character, isNSFW, ct);
 
         /// <summary>
         /// Adds the given image with the given metadata to the given character.
@@ -583,7 +577,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="isNSFW">Whether or not the image is NSFW.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<Image>> AddImageToCharacterAsync
+        public Task<CreateEntityResult<Image>> AddImageToCharacterAsync
         (
             Character character,
             string imageName,
@@ -591,10 +585,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             string? imageCaption = null,
             bool isNSFW = false,
             CancellationToken ct = default
-        )
-        {
-            return await _characters.AddImageToCharacterAsync(character, imageName, imageUrl, imageCaption, isNSFW, ct);
-        }
+        ) => _characterEditor.AddImageToCharacterAsync(character, imageName, imageUrl, imageCaption, isNSFW, ct);
 
         /// <summary>
         /// Removes the given image from the given character.
@@ -603,15 +594,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="image">The image.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> RemoveImageFromCharacterAsync
+        public Task<DeleteEntityResult> RemoveImageFromCharacterAsync
         (
             Character character,
             Image image,
             CancellationToken ct = default
-        )
-        {
-            return await _characters.RemoveImageFromCharacterAsync(character, image, ct);
-        }
+        ) => _characterEditor.RemoveImageFromCharacterAsync(character, image, ct);
 
         /// <summary>
         /// Makes the given character the given user's current character.

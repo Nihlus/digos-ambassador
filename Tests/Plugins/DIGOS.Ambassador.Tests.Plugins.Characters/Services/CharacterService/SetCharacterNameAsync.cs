@@ -51,7 +51,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task ReturnsUnsuccessfulResultIfNameIsNull()
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Characters.SetCharacterNameAsync(_character, null);
+                var result = await this.CharacterEditor.SetCharacterNameAsync(_character, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNameIsEmpty()
             {
-                var result = await this.Characters.SetCharacterNameAsync(_character, string.Empty);
+                var result = await this.CharacterEditor.SetCharacterNameAsync(_character, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfCharacterAlreadyHasThatName()
             {
-                var result = await this.Characters.SetCharacterNameAsync(_character, CharacterName);
+                var result = await this.CharacterEditor.SetCharacterNameAsync(_character, CharacterName);
 
                 Assert.False(result.IsSuccess);
             }
@@ -75,7 +75,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfNameIsNotUnique()
             {
-                var result = await this.Characters.SetCharacterNameAsync(_character, AnotherCharacterName);
+                var result = await this.CharacterEditor.SetCharacterNameAsync(_character, AnotherCharacterName);
 
                 Assert.False(result.IsSuccess);
             }
@@ -83,7 +83,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfNameIsAccepted()
             {
-                var result = await this.Characters.SetCharacterNameAsync(_character, "Jeff");
+                var result = await this.CharacterEditor.SetCharacterNameAsync(_character, "Jeff");
 
                 Assert.True(result.IsSuccess);
             }
@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             {
                 const string validName = "Jeff";
 
-                await this.Characters.SetCharacterNameAsync(_character, validName);
+                await this.CharacterEditor.SetCharacterNameAsync(_character, validName);
 
                 var character = this.Database.Characters.First();
                 Assert.Equal(validName, character.Name);

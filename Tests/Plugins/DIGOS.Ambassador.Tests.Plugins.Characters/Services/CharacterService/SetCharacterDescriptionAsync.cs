@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task ReturnsUnsuccessfulResultIfDescriptionIsNull()
             {
                 // ReSharper disable once AssignNullToNotNullAttribute
-                var result = await this.Characters.SetCharacterDescriptionAsync(_character, null);
+                var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, null);
 
                 Assert.False(result.IsSuccess);
             }
@@ -58,7 +58,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfDescriptionIsEmpty()
             {
-                var result = await this.Characters.SetCharacterDescriptionAsync(_character, string.Empty);
+                var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, string.Empty);
 
                 Assert.False(result.IsSuccess);
             }
@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsUnsuccessfulResultIfDescriptionIsTheSameAsTheCurrentDescription()
             {
-                var result = await this.Characters.SetCharacterDescriptionAsync(_character, Description);
+                var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, Description);
 
                 Assert.False(result.IsSuccess);
             }
@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             [Fact]
             public async Task ReturnsSuccessfulResultIfDescriptionIsAccepted()
             {
-                var result = await this.Characters.SetCharacterDescriptionAsync(_character, "Bobby");
+                var result = await this.CharacterEditor.SetCharacterDescriptionAsync(_character, "Bobby");
 
                 Assert.True(result.IsSuccess);
             }
@@ -83,7 +83,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Characters
             public async Task SetsDescription()
             {
                 const string newDescription = "An uncool person";
-                await this.Characters.SetCharacterDescriptionAsync(_character, newDescription);
+                await this.CharacterEditor.SetCharacterDescriptionAsync(_character, newDescription);
 
                 var character = this.Database.Characters.First();
                 Assert.Equal(newDescription, character.Description);
