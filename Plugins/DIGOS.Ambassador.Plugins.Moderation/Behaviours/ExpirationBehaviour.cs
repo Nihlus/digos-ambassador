@@ -77,12 +77,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var warnings = await warningService.GetWarningsAsync(guild, ct);
                 foreach (var warning in warnings.Where(w => w.IsTemporary))
                 {
-                    using var warningTransaction = new TransactionScope
-                    (
-                        TransactionScopeOption.Required,
-                        TransactionScopeAsyncFlowOption.Enabled
-                    );
-
                     var rescindWarningResult = await RescindWarningAsync
                     (
                         loggingService,
@@ -92,9 +86,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                         ct
                     );
 
-                    if (rescindWarningResult.IsSuccess)
+                    if (!rescindWarningResult.IsSuccess)
                     {
-                        warningTransaction.Complete();
+                        this.Log.LogWarning(rescindWarningResult.Exception, rescindWarningResult.ErrorReason);
                     }
                 }
 
@@ -107,12 +101,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var bans = await banService.GetBansAsync(guild, ct);
                 foreach (var ban in bans.Where(b => b.IsTemporary))
                 {
-                    using var banTransaction = new TransactionScope
-                    (
-                        TransactionScopeOption.Required,
-                        TransactionScopeAsyncFlowOption.Enabled
-                    );
-
                     var rescindBanResult = await RescindBanAsync
                     (
                         loggingService,
@@ -122,9 +110,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                         ct
                     );
 
-                    if (rescindBanResult.IsSuccess)
+                    if (!rescindBanResult.IsSuccess)
                     {
-                        banTransaction.Complete();
+                        this.Log.LogWarning(rescindBanResult.Exception, rescindBanResult.ErrorReason);
                     }
                 }
             }
