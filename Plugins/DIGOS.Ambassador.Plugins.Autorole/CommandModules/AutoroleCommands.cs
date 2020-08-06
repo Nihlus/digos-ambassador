@@ -379,8 +379,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var users = getUsers.Entity.ToList();
             var discordUsers = await Task.WhenAll
             (
-                users.Select(u => this.Context.Guild.GetUserAsync((ulong)u.DiscordID)).Where(u => !(u is null))
+                users.Select(u => this.Context.Guild.GetUserAsync((ulong)u.DiscordID))
             );
+
+            // Filter out users that are no longer in the guild
+            discordUsers = discordUsers.Where(u => !(u is null)).ToArray();
 
             var listMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
