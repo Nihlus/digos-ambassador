@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 
                     if (!rescindWarningResult.IsSuccess)
                     {
-                        this.Log.LogWarning(rescindWarningResult.Exception, rescindWarningResult.ErrorReason);
+                        this.Log.LogWarning(rescindWarningResult.ErrorReason);
                     }
                 }
 
@@ -112,7 +112,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 
                     if (!rescindBanResult.IsSuccess)
                     {
-                        this.Log.LogWarning(rescindBanResult.Exception, rescindBanResult.ErrorReason);
+                        this.Log.LogWarning(rescindBanResult.ErrorReason);
                     }
                 }
             }
