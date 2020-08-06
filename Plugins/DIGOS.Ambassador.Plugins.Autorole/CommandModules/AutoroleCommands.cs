@@ -379,7 +379,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var users = getUsers.Entity.ToList();
             var discordUsers = await Task.WhenAll
             (
-                users.Select(u => this.Context.Guild.GetUserAsync((ulong)u.DiscordID))
+                users.Select(u => this.Context.Guild.GetUserAsync((ulong)u.DiscordID)).Where(u => !(u is null))
             );
 
             var listMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
@@ -388,7 +388,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 _interactivity,
                 this.Context.User,
                 discordUsers,
-                u => $"{u.Nickname} ({u.Username}#{u.Discriminator} | {u.Id})",
+                u => u.Nickname is null
+                    ? $"({u.Username}#{u.Discriminator} | {u.Id})"
+                    : $"{u.Nickname} ({u.Username}#{u.Discriminator} | {u.Id})",
                 u => "Not confirmed",
                 "There are no users that haven't been confirmed for that role."
             );
