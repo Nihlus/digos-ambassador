@@ -98,10 +98,22 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
                 .WithOne()
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<UserStatistics>()
+                .HasIndex("UserID")
+                .IsUnique();
+
             modelBuilder.Entity<UserServerStatistics>()
                 .HasMany(s => s.ChannelStatistics)
                 .WithOne()
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserServerStatistics>()
+                .HasIndex("ServerID", "UserStatisticsID")
+                .IsUnique();
+
+            modelBuilder.Entity<UserChannelStatistics>()
+                .HasIndex("ChannelID", "UserServerStatisticsID")
+                .IsUnique();
         }
 
         private void ConfigureTimeSinceEventCondition<TTimeSinceEventCondition>(ModelBuilder modelBuilder)
