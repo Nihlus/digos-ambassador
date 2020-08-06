@@ -21,6 +21,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Migrations
                 "delete from \"AutoroleModule\".\"UserStatistics\" where \"ID\" in (select \"ID\" from (select \"ID\", \"UserID\", row_number() over (partition by \"UserID\" order by \"ID\") as Row from \"AutoroleModule\".\"UserStatistics\") dupes where dupes.Row > 1);"
             );
 
+            migrationBuilder.Sql
+            (
+                "delete from \"AutoroleModule\".\"UserServerStatistics\" where \"ID\" in (select \"ID\" from (select \"ID\", \"ServerID\", \"UserStatisticsID\", row_number() over (partition by \"ServerID\", \"UserStatisticsID\" order by \"ID\") as Row from \"AutoroleModule\".\"UserServerStatistics\") dupes where dupes.Row > 1);"
+            );
+
+            migrationBuilder.Sql
+            (
+                "delete from \"AutoroleModule\".\"UserChannelStatistics\" where \"ID\" in (select \"ID\" from (select \"ID\", \"ChannelID\", \"UserServerStatisticsID\", row_number() over (partition by \"ChannelID\", \"UserServerStatisticsID\" order by \"ID\") as Row from \"AutoroleModule\".\"UserChannelStatistics\") dupes where dupes.Row > 1);"
+            );
+
             migrationBuilder.DropIndex(
                 name: "IX_UserStatistics_UserID",
                 schema: "AutoroleModule",
