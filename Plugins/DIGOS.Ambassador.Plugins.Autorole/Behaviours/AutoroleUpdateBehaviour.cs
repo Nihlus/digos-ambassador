@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
@@ -48,6 +49,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
     public class AutoroleUpdateBehaviour : ContinuousDiscordBehaviour<AutoroleUpdateBehaviour>
     {
         private readonly UserFeedbackService _feedback;
+
+        /// <inheritdoc />
+        protected override bool UseTransaction => false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleUpdateBehaviour"/> class.
@@ -107,6 +111,14 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
 
                 foreach (var user in guild.Users.Where(u => !u.IsBot).Where(u => !u.IsWebhook))
                 {
+                    // We'll use a transaction per user to avoid timeouts
+                    using var userTransaction = new TransactionScope
+                    (
+                        TransactionScopeOption.Required,
+                        this.TransactionOptions,
+                        TransactionScopeAsyncFlowOption.Enabled
+                    );
+
                     if (ct.IsCancellationRequested)
                     {
                         return OperationResult.FromError("Operation was cancelled.");

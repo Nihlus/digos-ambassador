@@ -24,6 +24,7 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Xml;
 using DIGOS.Ambassador.Core.Database.Services;
 using DIGOS.Ambassador.Core.Services;

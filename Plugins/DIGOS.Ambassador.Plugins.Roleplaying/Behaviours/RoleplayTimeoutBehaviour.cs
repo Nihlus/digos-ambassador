@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
@@ -52,6 +53,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
         /// <inheritdoc/>
         protected override TimeSpan TickDelay => TimeSpan.FromMinutes(1);
+
+        /// <inheritdoc/>
+        protected override bool UseTransaction => false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayTimeoutBehaviour"/> class.
@@ -103,6 +107,14 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                         return OperationResult.FromError("Operation was cancelled.");
                     }
 
+                    // We'll use a transaction per warning to avoid timeouts
+                    using var timeoutTransaction = new TransactionScope
+                    (
+                        TransactionScopeOption.Required,
+                        this.TransactionOptions,
+                        TransactionScopeAsyncFlowOption.Enabled
+                    );
+
                     var stopRoleplay = await roleplayService.StopRoleplayAsync(roleplay);
                     if (!stopRoleplay.IsSuccess)
                     {
@@ -114,6 +126,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     {
                         return OperationResult.FromError(notifyResult);
                     }
+
+                    timeoutTransaction.Complete();
                 }
             }
 

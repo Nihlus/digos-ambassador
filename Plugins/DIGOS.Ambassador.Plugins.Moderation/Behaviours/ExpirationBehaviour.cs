@@ -44,6 +44,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
     [UsedImplicitly]
     internal sealed class ExpirationBehaviour : ContinuousDiscordBehaviour<ExpirationBehaviour>
     {
+        /// <inheritdoc/>
+        protected override bool UseTransaction => false;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ExpirationBehaviour"/> class.
         /// </summary>
@@ -77,6 +80,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var warnings = await warningService.GetWarningsAsync(guild, ct);
                 foreach (var warning in warnings.Where(w => w.IsTemporary))
                 {
+                    // We'll use a transaction per warning to avoid timeouts
+                    using var warningTransaction = new TransactionScope
+                    (
+                        TransactionScopeOption.Required,
+                        this.TransactionOptions,
+                        TransactionScopeAsyncFlowOption.Enabled
+                    );
+
                     var rescindWarningResult = await RescindWarningIfExpiredAsync
                     (
                         loggingService,
@@ -86,10 +97,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                         ct
                     );
 
-                    if (!rescindWarningResult.IsSuccess)
+                    if (rescindWarningResult.IsSuccess)
                     {
-                        this.Log.LogWarning(rescindWarningResult.ErrorReason);
+                        warningTransaction.Complete();
+                        continue;
                     }
+
+                    this.Log.LogWarning(rescindWarningResult.ErrorReason);
                 }
 
                 if (!guild.GetUser(this.Client.CurrentUser.Id).GuildPermissions.BanMembers)
@@ -101,6 +115,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var bans = await banService.GetBansAsync(guild, ct);
                 foreach (var ban in bans.Where(b => b.IsTemporary))
                 {
+                    // We'll use a transaction per warning to avoid timeouts
+                    using var banTransaction = new TransactionScope
+                    (
+                        TransactionScopeOption.Required,
+                        this.TransactionOptions,
+                        TransactionScopeAsyncFlowOption.Enabled
+                    );
+
                     var rescindBanResult = await RescindBanIfExpiredAsync
                     (
                         loggingService,
@@ -110,10 +132,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                         ct
                     );
 
-                    if (!rescindBanResult.IsSuccess)
+                    if (rescindBanResult.IsSuccess)
                     {
-                        this.Log.LogWarning(rescindBanResult.ErrorReason);
+                        banTransaction.Complete();
+                        continue;
                     }
+
+                    this.Log.LogWarning(rescindBanResult.ErrorReason);
                 }
             }
 
