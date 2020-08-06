@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var warnings = await warningService.GetWarningsAsync(guild, ct);
                 foreach (var warning in warnings.Where(w => w.IsTemporary))
                 {
-                    var rescindWarningResult = await RescindWarningAsync
+                    var rescindWarningResult = await RescindWarningIfExpiredAsync
                     (
                         loggingService,
                         warningService,
@@ -101,7 +101,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                 var bans = await banService.GetBansAsync(guild, ct);
                 foreach (var ban in bans.Where(b => b.IsTemporary))
                 {
-                    var rescindBanResult = await RescindBanAsync
+                    var rescindBanResult = await RescindBanIfExpiredAsync
                     (
                         loggingService,
                         banService,
@@ -120,7 +120,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
             return OperationResult.FromSuccess();
         }
 
-        private async Task<OperationResult> RescindBanAsync
+        private async Task<OperationResult> RescindBanIfExpiredAsync
         (
             ChannelLoggingService loggingService,
             BanService bans,
@@ -136,6 +136,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 
             if (!(ban.ExpiresOn <= DateTime.UtcNow))
             {
+                // No rescinding is needed, so we'll just bail out
                 return OperationResult.FromSuccess();
             }
 
@@ -169,7 +170,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
             return OperationResult.FromSuccess();
         }
 
-        private async Task<OperationResult> RescindWarningAsync
+        private async Task<OperationResult> RescindWarningIfExpiredAsync
         (
             ChannelLoggingService loggingService,
             WarningService warnings,
@@ -185,7 +186,8 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
 
             if (!(warning.ExpiresOn <= DateTime.UtcNow))
             {
-                return OperationResult.FromError("The ban doesn't need to be rescinded.");
+                // No rescinding is needed, so we'll just bail out
+                return OperationResult.FromSuccess();
             }
 
             var rescinder = guild.GetUser(this.Client.CurrentUser.Id);
