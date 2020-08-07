@@ -131,6 +131,11 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
             }
 
             var matches = Pattern.Matches(message.Content);
+            if (matches.Count == 0)
+            {
+                return OperationResult.FromSuccess();
+            }
+
             foreach (Match? match in matches)
             {
                 if (match is null)
