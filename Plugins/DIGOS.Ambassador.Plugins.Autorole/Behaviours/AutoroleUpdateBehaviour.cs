@@ -144,6 +144,8 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
                             break;
                         }
                     }
+
+                    userTransaction.Complete();
                 }
             }
 
