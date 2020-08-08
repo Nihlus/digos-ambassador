@@ -46,21 +46,64 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
         /// <inheritdoc />
         public override async Task<ExportedRoleplay> ExportAsync(Roleplay roleplay)
         {
+            var ownerNickname = $"Unknown user ({roleplay.Owner.DiscordID})";
+
             var owner = await this.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
+            if (!(owner is null))
+            {
+                ownerNickname = owner.Nickname ?? owner.Username;
+            }
+            else
+            {
+                var messageByUser = roleplay.Messages.FirstOrDefault
+                (
+                    m => m.Author == roleplay.Owner
+                );
+
+                if (!(messageByUser is null))
+                {
+                    ownerNickname = messageByUser.AuthorNickname;
+                }
+            }
 
             var filePath = Path.GetTempFileName();
             await using (var of = File.Create(filePath))
             {
                 await using var ofw = new StreamWriter(of);
                 await ofw.WriteLineAsync($"Roleplay name: {roleplay.Name}");
-                await ofw.WriteLineAsync($"Owner: {owner.Username}");
+                await ofw.WriteLineAsync($"Owner: {ownerNickname}");
 
-                var joinedUsers = await Task.WhenAll(roleplay.JoinedUsers.Select(p => this.Guild.GetUserAsync((ulong)p.User.DiscordID)));
+                var joinedUsers = await Task.WhenAll
+                (
+                    roleplay.JoinedUsers.Select
+                    (
+                        async p =>
+                        {
+                            var guildUser = await this.Guild.GetUserAsync((ulong)p.User.DiscordID);
+                            if (!(guildUser is null))
+                            {
+                                return guildUser.Username;
+                            }
+
+                            var messageByUser = roleplay.Messages.FirstOrDefault
+                            (
+                                m => m.Author == p.User
+                            );
+
+                            if (messageByUser is null)
+                            {
+                                return $"Unknown user ({p.User.DiscordID})";
+                            }
+
+                            return messageByUser.AuthorNickname;
+                        }
+                    )
+                );
 
                 await ofw.WriteLineAsync("Participants:");
                 foreach (var participant in joinedUsers)
                 {
-                    await ofw.WriteLineAsync(participant.Username);
+                    await ofw.WriteLineAsync(participant);
                 }
 
                 await ofw.WriteLineAsync();

@@ -67,9 +67,27 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                 writer.Open();
                 pdfDoc.Open();
 
-                var owner = await this.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
+                var ownerNickname = $"Unknown user ({roleplay.Owner.DiscordID})";
 
-                pdfDoc.AddAuthor(owner.Nickname);
+                var owner = await this.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
+                if (!(owner is null))
+                {
+                    ownerNickname = owner.Nickname ?? owner.Username;
+                }
+                else
+                {
+                    var messageByUser = roleplay.Messages.FirstOrDefault
+                    (
+                        m => m.Author == roleplay.Owner
+                    );
+
+                    if (!(messageByUser is null))
+                    {
+                        ownerNickname = messageByUser.AuthorNickname;
+                    }
+                }
+
+                pdfDoc.AddAuthor(ownerNickname);
                 pdfDoc.AddCreationDate();
                 pdfDoc.AddCreator("DIGOS Ambassador");
                 pdfDoc.AddTitle(roleplay.Name);
