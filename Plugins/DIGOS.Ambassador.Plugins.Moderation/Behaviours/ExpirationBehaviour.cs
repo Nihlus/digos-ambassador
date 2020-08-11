@@ -77,6 +77,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     return OperationResult.FromError("Operation was cancelled.");
                 }
 
+                var botUser = guild.GetUser(this.Client.CurrentUser.Id);
+                if (botUser is null)
+                {
+                    // The bot is probably not ready yet
+                    break;
+                }
+
                 var warnings = await warningService.GetWarningsAsync(guild, ct);
                 foreach (var warning in warnings.Where(w => w.IsTemporary))
                 {
@@ -106,7 +113,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
                     this.Log.LogWarning(rescindWarningResult.ErrorReason);
                 }
 
-                if (!guild.GetUser(this.Client.CurrentUser.Id).GuildPermissions.BanMembers)
+                if (!botUser.GuildPermissions.BanMembers)
                 {
                     // No point in trying to rescind bans if the bot doesn't have ban perms
                     continue;
