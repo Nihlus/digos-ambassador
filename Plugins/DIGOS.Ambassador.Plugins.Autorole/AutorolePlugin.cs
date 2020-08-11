@@ -35,6 +35,7 @@ using DIGOS.Ambassador.Plugins.Autorole.TypeReaders;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Discord;
 using Discord.Commands;
+using LazyCache;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours;
@@ -67,6 +68,9 @@ namespace DIGOS.Ambassador.Plugins.Autorole
                 .AddScoped<AutoroleUpdateService>()
                 .AddScoped<UserStatisticsService>()
                 .AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>();
+
+            serviceCollection
+                .AddLazyCache();
         }
 
         /// <inheritdoc />

@@ -21,12 +21,15 @@
 //
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using Discord;
 using JetBrains.Annotations;
+using LazyCache;
+using Microsoft.Extensions.DependencyInjection;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
@@ -125,16 +128,22 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
             }
 
             var reactionData = reactions[emojiKey];
-            var reactionUsers = message.GetReactionUsersAsync(emojiKey, reactionData.ReactionCount);
-            await foreach (var userBatch in reactionUsers.WithCancellation(ct))
+
+            Task<List<IUser>> ReactionUsersFactory()
             {
-                if (userBatch.Any(user => user.Id == discordUser.Id))
-                {
-                    return true;
-                }
+                return message.GetReactionUsersAsync(emojiKey, reactionData.ReactionCount)
+                    .Flatten()
+                    .ToListAsync(ct)
+                    .AsTask();
             }
 
-            return false;
+            // form the cache key
+            var cache = services.GetRequiredService<IAppCache>();
+            var cacheKey = $"{this.MessageID}:{this.EmoteName}";
+
+            var reactionUsers = await cache.GetOrAddAsync(cacheKey, ReactionUsersFactory);
+
+            return reactionUsers.Any(user => user.Id == discordUser.Id);
         }
     }
 }
