@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.6.7" />
+        <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.6.8" />
     </ItemGroup>
 
     <!-- Workaround for a problem with EF Core -->
