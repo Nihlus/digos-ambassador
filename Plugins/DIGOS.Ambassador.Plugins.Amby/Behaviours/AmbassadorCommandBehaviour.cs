@@ -51,7 +51,6 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
     public class AmbassadorCommandBehaviour : CommandBehaviour
     {
         private readonly UserFeedbackService _feedback;
-        private readonly PrivacyService _privacy;
         private readonly ContentService _content;
         private readonly PortraitService _portraits;
         private readonly HelpService _help;
@@ -63,7 +62,6 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
         /// <param name="serviceScope">The service scope in use.</param>
         /// <param name="logger">The logging instance for this type.</param>
         /// <param name="feedback">The feedback service.</param>
-        /// <param name="privacy">The privacy service.</param>
         /// <param name="content">The content service.</param>
         /// <param name="commands">The command service.</param>
         /// <param name="help">The help service.</param>
@@ -74,7 +72,6 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
             IServiceScope serviceScope,
             ILogger<AmbassadorCommandBehaviour> logger,
             UserFeedbackService feedback,
-            PrivacyService privacy,
             ContentService content,
             CommandService commands,
             HelpService help,
@@ -83,7 +80,6 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
             : base(client, serviceScope, logger, commands)
         {
             _feedback = feedback;
-            _privacy = privacy;
             _content = content;
             _help = help;
             _portraits = portraits;
@@ -223,14 +219,16 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
                 return true;
             }
 
-            if (await _privacy.HasUserConsentedAsync(context.User) || IsPrivacyExemptCommand(context, argumentPos))
+            var privacy = this.Services.GetRequiredService<PrivacyService>();
+
+            if (await privacy.HasUserConsentedAsync(context.User) || IsPrivacyExemptCommand(context, argumentPos))
             {
                 return true;
             }
 
             // Ask for consent
             var userDMChannel = await context.User.GetOrCreateDMChannelAsync();
-            var result = await _privacy.RequestConsentAsync(userDMChannel);
+            var result = await privacy.RequestConsentAsync(userDMChannel);
             if (result.IsSuccess)
             {
                 return false;
