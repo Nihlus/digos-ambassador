@@ -29,6 +29,7 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours;
+using Remora.Behaviours.Extensions;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -50,14 +51,18 @@ namespace DIGOS.Ambassador.Plugins.Statistics
         public override string Description => "Provides various commands for view statistics about the bot.";
 
         /// <inheritdoc />
+        public override void ConfigureServices(IServiceCollection serviceCollection)
+        {
+            serviceCollection
+                .AddBehaviour<InteractivityBehaviour>()
+                .AddBehaviour<DelayedActionBehaviour>();
+        }
+
+        /// <inheritdoc />
         public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
             await commands.AddModuleAsync<StatCommands>(serviceProvider);
-
-            var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
-            await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
-            await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }

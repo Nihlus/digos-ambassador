@@ -61,17 +61,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// Initializes a new instance of the <see cref="RoleplayArchivalBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client.</param>
-        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
         /// <param name="feedback">The feedback service.</param>
         public RoleplayArchivalBehaviour
         (
             DiscordSocketClient client,
-            IServiceScope serviceScope,
+            IServiceProvider services,
             ILogger<RoleplayArchivalBehaviour> logger,
             UserFeedbackService feedback
         )
-            : base(client, serviceScope, logger)
+            : base(client, services, logger)
         {
             _feedback = feedback;
         }

@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Plugins.Moderation;
+using DIGOS.Ambassador.Plugins.Moderation.Behaviours;
 using DIGOS.Ambassador.Plugins.Moderation.CommandModules;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
@@ -35,6 +36,7 @@ using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours;
+using Remora.Behaviours.Extensions;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -65,7 +67,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation
                 .AddScoped<NoteService>()
                 .AddScoped<WarningService>()
                 .AddScoped<BanService>()
-                .AddScoped<ChannelLoggingService>();
+                .AddScoped<ChannelLoggingService>()
+                .AddBehaviour<EventLoggingBehaviour>()
+                .AddBehaviour<ExpirationBehaviour>();
         }
 
         /// <inheritdoc />
@@ -88,11 +92,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation
             await commands.AddModuleAsync<NoteCommands>(serviceProvider);
             await commands.AddModuleAsync<WarningCommands>(serviceProvider);
             await commands.AddModuleAsync<BanCommands>(serviceProvider);
-
-            var behaviours = serviceProvider.GetRequiredService<BehaviourService>();
-            await behaviours.AddBehavioursAsync(Assembly.GetExecutingAssembly(), serviceProvider);
-            await behaviours.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
-            await behaviours.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }

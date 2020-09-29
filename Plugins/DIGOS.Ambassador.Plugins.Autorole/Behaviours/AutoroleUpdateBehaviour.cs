@@ -57,17 +57,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         /// Initializes a new instance of the <see cref="AutoroleUpdateBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
-        /// <param name="serviceScope">The service scope.</param>
+        /// <param name="services">The services.</param>
         /// <param name="logger">The logger.</param>
         /// <param name="feedback">The user feedback service.</param>
         public AutoroleUpdateBehaviour
         (
             DiscordSocketClient client,
-            IServiceScope serviceScope,
+            IServiceProvider services,
             ILogger<AutoroleUpdateBehaviour> logger,
             UserFeedbackService feedback
         )
-            : base(client, serviceScope, logger)
+            : base(client, services, logger)
         {
             _feedback = feedback;
         }

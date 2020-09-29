@@ -35,6 +35,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours;
+using Remora.Behaviours.Extensions;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -60,7 +61,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks
         {
             serviceCollection
                 .AddScoped<KinkService>()
-                .AddConfiguredSchemaAwareDbContextPool<KinksDatabaseContext>();
+                .AddConfiguredSchemaAwareDbContextPool<KinksDatabaseContext>()
+                .AddBehaviour<InteractivityBehaviour>()
+                .AddBehaviour<DelayedActionBehaviour>();
         }
 
         /// <inheritdoc />
@@ -69,10 +72,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks
             var commands = serviceProvider.GetRequiredService<CommandService>();
             commands.AddEnumReader<KinkPreference>();
             await commands.AddModuleAsync<KinkCommands>(serviceProvider);
-
-            var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
-            await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
-            await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }

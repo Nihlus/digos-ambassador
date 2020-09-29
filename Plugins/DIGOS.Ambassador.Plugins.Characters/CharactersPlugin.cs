@@ -39,6 +39,7 @@ using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours;
+using Remora.Behaviours.Extensions;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -69,7 +70,9 @@ namespace DIGOS.Ambassador.Plugins.Characters
                 .AddScoped<ICharacterEditor>(s => s.GetRequiredService<CharacterService>())
                 .AddScoped<CharacterDiscordService>()
                 .AddScoped<CharacterRoleService>()
-                .AddConfiguredSchemaAwareDbContextPool<CharactersDatabaseContext>();
+                .AddConfiguredSchemaAwareDbContextPool<CharactersDatabaseContext>()
+                .AddBehaviour<InteractivityBehaviour>()
+                .AddBehaviour<DelayedActionBehaviour>();
         }
 
         /// <inheritdoc />
@@ -94,10 +97,6 @@ namespace DIGOS.Ambassador.Plugins.Characters
 
             var pronounService = serviceProvider.GetRequiredService<PronounService>();
             pronounService.DiscoverPronounProviders();
-
-            var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
-            await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
-            await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }

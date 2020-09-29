@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
@@ -41,17 +42,17 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Behaviours
         /// Initializes a new instance of the <see cref="InteractivityBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client.</param>
-        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
         /// <param name="interactivity">The interactivity service.</param>
         public InteractivityBehaviour
         (
             DiscordSocketClient client,
-            IServiceScope serviceScope,
+            IServiceProvider services,
             ILogger<InteractivityBehaviour> logger,
             InteractivityService interactivity
         )
-            : base(client, serviceScope, logger)
+            : base(client, services, logger)
         {
             _interactivity = interactivity;
         }

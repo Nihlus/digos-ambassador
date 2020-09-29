@@ -41,6 +41,7 @@ using Discord.Commands;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours;
+using Remora.Behaviours.Extensions;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -80,7 +81,9 @@ namespace DIGOS.Ambassador.Plugins.Transformations
                 })
                 .AddScoped<LuaService>()
                 .AddScoped<TransformationService>()
-                .AddConfiguredSchemaAwareDbContextPool<TransformationsDatabaseContext>();
+                .AddConfiguredSchemaAwareDbContextPool<TransformationsDatabaseContext>()
+                .AddBehaviour<InteractivityBehaviour>()
+                .AddBehaviour<DelayedActionBehaviour>();
         }
 
         /// <inheritdoc />
@@ -94,10 +97,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations
             commands.AddEnumReader<Pattern>();
 
             await commands.AddModuleAsync<TransformationCommands>(serviceProvider);
-
-            var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
-            await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
-            await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }

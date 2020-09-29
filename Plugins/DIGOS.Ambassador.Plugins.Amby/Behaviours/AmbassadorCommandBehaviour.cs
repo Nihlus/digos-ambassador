@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
         /// Initializes a new instance of the <see cref="AmbassadorCommandBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
-        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="content">The content service.</param>
@@ -69,7 +69,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
         public AmbassadorCommandBehaviour
         (
             DiscordSocketClient client,
-            IServiceScope serviceScope,
+            IServiceProvider services,
             ILogger<AmbassadorCommandBehaviour> logger,
             UserFeedbackService feedback,
             ContentService content,
@@ -77,7 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
             HelpService help,
             PortraitService portraits
         )
-            : base(client, serviceScope, logger, commands)
+            : base(client, services, logger, commands)
         {
             _feedback = feedback;
             _content = content;

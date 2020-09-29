@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -52,17 +53,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         /// Initializes a new instance of the <see cref="ReactiveAutoroleUpdateBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client.</param>
-        /// <param name="serviceScope">The top-level scope of the behaviour.</param>
+        /// <param name="services">The services.</param>
         /// <param name="logger">The service's logging instance.</param>
         /// <param name="feedback">The user feedback service.</param>
         public ReactiveAutoroleUpdateBehaviour
         (
             DiscordSocketClient client,
-            IServiceScope serviceScope,
+            IServiceProvider services,
             ILogger<ReactiveAutoroleUpdateBehaviour> logger,
             UserFeedbackService feedback
         )
-            : base(client, serviceScope, logger)
+            : base(client, services, logger)
         {
             _feedback = feedback;
         }

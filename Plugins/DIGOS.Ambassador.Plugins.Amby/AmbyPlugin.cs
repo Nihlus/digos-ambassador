@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Plugins.Amby.Services;
 using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours.Extensions;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -54,7 +55,8 @@ namespace DIGOS.Ambassador.Plugins.Amby
         {
             serviceCollection
                 .AddSingleton<PortraitService>()
-                .AddSingleton<SassService>();
+                .AddSingleton<SassService>()
+                .AddBehaviour<AmbassadorCommandBehaviour>();
         }
 
         /// <inheritdoc />
@@ -62,9 +64,6 @@ namespace DIGOS.Ambassador.Plugins.Amby
         {
             var commands = serviceProvider.GetRequiredService<CommandService>();
             await commands.AddModuleAsync<AmbyCommands>(serviceProvider);
-
-            var behaviours = serviceProvider.GetRequiredService<BehaviourService>();
-            await behaviours.AddBehaviourAsync<AmbassadorCommandBehaviour>(serviceProvider);
 
             return true;
         }

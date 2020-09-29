@@ -51,15 +51,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
         /// Initializes a new instance of the <see cref="ExpirationBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client.</param>
-        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
         public ExpirationBehaviour
         (
             DiscordSocketClient client,
-            IServiceScope serviceScope,
+            IServiceProvider services,
             ILogger<ExpirationBehaviour> logger
         )
-            : base(client, serviceScope, logger)
+            : base(client, services, logger)
         {
         }
 

@@ -24,8 +24,10 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.JoinMessages;
+using DIGOS.Ambassador.Plugins.JoinMessages.Behaviours;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours.Extensions;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -47,12 +49,10 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages
         public override string Description => "Provides automatic conversion of message links to JoinMessages.";
 
         /// <inheritdoc />
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
-            var behaviours = serviceProvider.GetRequiredService<BehaviourService>();
-            await behaviours.AddBehavioursAsync(Assembly.GetExecutingAssembly(), serviceProvider);
-
-            return true;
+            serviceCollection
+                .AddBehaviour<JoinMessageBehaviour>();
         }
     }
 }

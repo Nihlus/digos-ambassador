@@ -30,6 +30,7 @@ using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours;
+using Remora.Behaviours.Extensions;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -53,7 +54,10 @@ namespace DIGOS.Ambassador.Plugins.Help
         /// <inheritdoc />
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<HelpService>();
+            serviceCollection
+                .AddSingleton<HelpService>()
+                .AddBehaviour<InteractivityBehaviour>()
+                .AddBehaviour<DelayedActionBehaviour>();
         }
 
         /// <inheritdoc />
@@ -61,10 +65,6 @@ namespace DIGOS.Ambassador.Plugins.Help
         {
             var commandService = serviceProvider.GetRequiredService<CommandService>();
             await commandService.AddModuleAsync<HelpCommands>(serviceProvider);
-
-            var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
-            await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
-            await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }

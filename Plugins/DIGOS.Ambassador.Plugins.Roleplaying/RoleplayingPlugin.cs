@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying;
+using DIGOS.Ambassador.Plugins.Roleplaying.Behaviours;
 using DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
@@ -39,6 +40,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours;
+using Remora.Behaviours.Extensions;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -67,7 +69,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
                 .AddScoped<RoleplayDiscordService>()
                 .AddScoped<RoleplayServerSettingsService>()
                 .AddScoped<DedicatedChannelService>()
-                .AddConfiguredSchemaAwareDbContextPool<RoleplayingDatabaseContext>();
+                .AddConfiguredSchemaAwareDbContextPool<RoleplayingDatabaseContext>()
+                .AddBehaviour<InteractivityBehaviour>()
+                .AddBehaviour<DelayedActionBehaviour>()
+                .AddBehaviour<RoleplayArchivalBehaviour>()
+                .AddBehaviour<RoleplayLoggingBehaviour>()
+                .AddBehaviour<RoleplayTimeoutBehaviour>();
         }
 
         /// <inheritdoc />
@@ -91,11 +98,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
             commands.AddTypeReader<Roleplay>(new RoleplayTypeReader());
 
             await commands.AddModuleAsync<RoleplayCommands>(serviceProvider);
-
-            var behaviours = serviceProvider.GetRequiredService<BehaviourService>();
-            await behaviours.AddBehavioursAsync(Assembly.GetExecutingAssembly(), serviceProvider);
-            await behaviours.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
-            await behaviours.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }

@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
 using Discord;
@@ -42,15 +43,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Behaviours
         /// Initializes a new instance of the <see cref="EventLoggingBehaviour"/> class.
         /// </summary>
         /// <param name="client">The Discord client in use.</param>
-        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
         public EventLoggingBehaviour
         (
             DiscordSocketClient client,
-            IServiceScope serviceScope,
+            IServiceProvider services,
             ILogger<EventLoggingBehaviour> logger
         )
-            : base(client, serviceScope, logger)
+            : base(client, services, logger)
         {
         }
 

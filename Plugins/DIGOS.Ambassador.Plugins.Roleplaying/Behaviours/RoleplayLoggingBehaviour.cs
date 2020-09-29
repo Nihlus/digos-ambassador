@@ -46,15 +46,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// Initializes a new instance of the <see cref="RoleplayLoggingBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
-        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
         public RoleplayLoggingBehaviour
         (
             DiscordSocketClient client,
-            IServiceScope serviceScope,
+            IServiceProvider services,
             ILogger<RoleplayLoggingBehaviour> logger
         )
-            : base(client, serviceScope, logger)
+            : base(client, services, logger)
         {
         }
 

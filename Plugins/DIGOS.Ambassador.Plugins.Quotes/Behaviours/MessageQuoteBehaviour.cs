@@ -55,17 +55,17 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Behaviours
         /// Initializes a new instance of the <see cref="MessageQuoteBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
-        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
         /// <param name="quotes">The feedback service.</param>
         public MessageQuoteBehaviour
         (
             DiscordSocketClient client,
-            IServiceScope serviceScope,
+            IServiceProvider services,
             ILogger<MessageQuoteBehaviour> logger,
             QuoteService quotes
         )
-            : base(client, serviceScope, logger)
+            : base(client, services, logger)
         {
             _quotes = quotes;
         }

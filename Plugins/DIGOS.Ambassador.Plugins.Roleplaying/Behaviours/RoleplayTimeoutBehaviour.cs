@@ -61,17 +61,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// Initializes a new instance of the <see cref="RoleplayTimeoutBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
-        /// <param name="serviceScope">The service scope in use.</param>
+        /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
         /// <param name="feedback">The feedback service.</param>
         public RoleplayTimeoutBehaviour
         (
             DiscordSocketClient client,
-            IServiceScope serviceScope,
+            IServiceProvider services,
             ILogger<RoleplayTimeoutBehaviour> logger,
             UserFeedbackService feedback
         )
-            : base(client, serviceScope, logger)
+            : base(client, services, logger)
         {
             this.Feedback = feedback;
         }

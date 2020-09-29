@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Autorole;
+using DIGOS.Ambassador.Plugins.Autorole.Behaviours;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
 using DIGOS.Ambassador.Plugins.Autorole.TypeReaders;
@@ -39,6 +40,7 @@ using LazyCache;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Behaviours;
+using Remora.Behaviours.Extensions;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -67,7 +69,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole
                 .AddScoped<AutoroleService>()
                 .AddScoped<AutoroleUpdateService>()
                 .AddScoped<UserStatisticsService>()
-                .AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>();
+                .AddConfiguredSchemaAwareDbContextPool<AutoroleDatabaseContext>()
+                .AddBehaviour<AutoroleUpdateBehaviour>()
+                .AddBehaviour<ReactiveAutoroleUpdateBehaviour>()
+                .AddBehaviour<UserStatisticBehaviour>();
 
             serviceCollection
                 .AddLazyCache();
@@ -93,11 +98,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole
             commands.AddTypeReader<IEmote>(new EmojiTypeReader());
 
             await commands.AddModuleAsync<AutoroleCommands>(serviceProvider);
-
-            var behaviourService = serviceProvider.GetRequiredService<BehaviourService>();
-            await behaviourService.AddBehavioursAsync(Assembly.GetExecutingAssembly(), serviceProvider);
-            await behaviourService.AddBehaviourAsync<InteractivityBehaviour>(serviceProvider);
-            await behaviourService.AddBehaviourAsync<DelayedActionBehaviour>(serviceProvider);
 
             return true;
         }

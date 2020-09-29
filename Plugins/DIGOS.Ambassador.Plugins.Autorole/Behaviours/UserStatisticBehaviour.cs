@@ -55,15 +55,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Behaviours
         /// Initializes a new instance of the <see cref="UserStatisticBehaviour"/> class.
         /// </summary>
         /// <param name="client">The discord client.</param>
-        /// <param name="serviceScope">The service scope.</param>
+        /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance.</param>
         public UserStatisticBehaviour
         (
             DiscordSocketClient client,
-            IServiceScope serviceScope,
+            IServiceProvider services,
             ILogger<UserStatisticBehaviour> logger
         )
-            : base(client, serviceScope, logger)
+            : base(client, services, logger)
         {
             _timestampSemaphores = new ConcurrentDictionary<ulong, TimedSemaphoreSlim>();
         }

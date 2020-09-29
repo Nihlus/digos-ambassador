@@ -24,9 +24,11 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Quotes;
+using DIGOS.Ambassador.Plugins.Quotes.Behaviours;
 using DIGOS.Ambassador.Plugins.Quotes.Services;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Behaviours.Extensions;
 using Remora.Behaviours.Services;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
@@ -50,16 +52,9 @@ namespace DIGOS.Ambassador.Plugins.Quotes
         /// <inheritdoc/>
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<QuoteService>();
-        }
-
-        /// <inheritdoc />
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
-        {
-            var behaviours = serviceProvider.GetRequiredService<BehaviourService>();
-            await behaviours.AddBehavioursAsync(Assembly.GetExecutingAssembly(), serviceProvider);
-
-            return true;
+            serviceCollection
+                .AddSingleton<QuoteService>()
+                .AddBehaviour<MessageQuoteBehaviour>();
         }
     }
 }
