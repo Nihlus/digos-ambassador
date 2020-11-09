@@ -6,7 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Remora.Discord.Behaviours" Version="5.0.2" />
         <PackageReference Include="Remora.Results" Version="1.2.0" />
     </ItemGroup>
 

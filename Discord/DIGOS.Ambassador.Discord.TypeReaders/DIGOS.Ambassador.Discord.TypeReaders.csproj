@@ -7,7 +7,6 @@
 
     <ItemGroup>
         <PackageReference Include="Humanizer.Core" Version="2.8.26" />
-        <PackageReference Include="Discord.Net.Commands" Version="2.2.0" />
     </ItemGroup>
 
 </Project>
