@@ -84,7 +84,15 @@ namespace DIGOS.Ambassador
                         .AddSingleton(pluginService)
                         .AddSingleton
                         (
-                            provider => new DiscordSocketClient(new DiscordSocketConfig { MessageCacheSize = 100 })
+                            provider => new DiscordSocketClient
+                            (
+                                new DiscordSocketConfig
+                                {
+                                    MessageCacheSize = 100,
+                                    ShardId = 0,
+                                    TotalShards = 1
+                                }
+                            )
                         )
                         .AddSingleton<IDiscordClient>(s => s.GetRequiredService<DiscordSocketClient>())
                         .AddSingleton<BaseSocketClient>(s => s.GetRequiredService<DiscordSocketClient>())
