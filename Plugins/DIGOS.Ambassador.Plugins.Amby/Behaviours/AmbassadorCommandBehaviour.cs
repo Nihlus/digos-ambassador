@@ -219,7 +219,9 @@ namespace DIGOS.Ambassador.Plugins.Amby.Behaviours
                 return true;
             }
 
-            var privacy = this.Services.GetRequiredService<PrivacyService>();
+            using var scope = this.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            var privacy = services.GetRequiredService<PrivacyService>();
 
             if (await privacy.HasUserConsentedAsync(context.User) || IsPrivacyExemptCommand(context, argumentPos))
             {
