@@ -35,14 +35,4 @@
     <ProjectReference Include="..\Core\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
   </ItemGroup>
 
-  <PropertyGroup>
-    <DocGeneratorAssembly>$(SolutionDir)\DIGOS.Ambassador.Doc\bin\Debug\netcoreapp3.1\DIGOS.Ambassador.Doc.dll</DocGeneratorAssembly>
-    <DocGenerator>dotnet $(DocGeneratorAssembly)</DocGenerator>
-  </PropertyGroup>
-
-  <Target Name="GenerateDocs" AfterTargets="PostBuildEvent" Condition="Exists('$(DocGeneratorAssembly)') And $(IsRunnableTarget)">
-    <Message Text="Generating module documentation..." Importance="normal" />
-    <Exec Command="$(DocGenerator) --assemblies $(OutputPath)$(AssemblyName)$(TargetExt) $(OutputPath)*.Plugins.*.dll --output $(SolutionDir)/docs" ContinueOnError="true" />
-  </Target>
-
 </Project>
