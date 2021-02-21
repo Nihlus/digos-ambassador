@@ -25,20 +25,14 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Xml;
-using DIGOS.Ambassador.Core.Database.Services;
 using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Interactivity;
 using log4net;
 using log4net.Config;
 using log4net.Repository.Hierarchy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Remora.Behaviours.Services;
 using Remora.Discord.Hosting.Extensions;
-using Remora.EntityFrameworkCore.Modular.Services;
 using Remora.Plugins.Services;
 
 namespace DIGOS.Ambassador
@@ -82,7 +76,7 @@ namespace DIGOS.Ambassador
             var token = getBotToken.Entity;
 
             var hostBuilder = Host.CreateDefaultBuilder()
-                .AddDiscordService(() => token)
+                .AddDiscordService(_ => token)
                 .UseSystemd()
                 .ConfigureServices(services =>
                 {
@@ -92,13 +86,6 @@ namespace DIGOS.Ambassador
                         .AddSingleton(pluginService)
                         .AddSingleton(contentService)
                         .AddSingleton(contentFileSystem)
-                        .AddSingleton<BehaviourService>()
-                        .AddSingleton<DiscordService>()
-                        .AddSingleton<UserFeedbackService>()
-                        .AddSingleton<InteractivityService>()
-                        .AddSingleton<DelayedActionService>()
-                        .AddSingleton<SchemaAwareDbContextService>()
-                        .AddSingleton<ContextConfigurationService>()
                         .AddSingleton<Random>();
 
                     var plugins = pluginService.LoadAvailablePlugins();
