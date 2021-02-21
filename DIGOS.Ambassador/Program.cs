@@ -73,7 +73,7 @@ namespace DIGOS.Ambassador
                 throw new InvalidOperationException("No bot token available.");
             }
 
-            var token = getBotToken.Entity;
+            var token = getBotToken.Entity.Trim();
 
             var hostBuilder = Host.CreateDefaultBuilder()
                 .AddDiscordService(_ => token)
