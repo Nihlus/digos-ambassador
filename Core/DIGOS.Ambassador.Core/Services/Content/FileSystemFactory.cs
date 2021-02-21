@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.IO;
 using System.Reflection;
 using Zio;
@@ -41,9 +42,13 @@ namespace DIGOS.Ambassador.Core.Services
             var realFileSystem = new PhysicalFileSystem();
 
             var executingAssemblyLocation = Assembly.GetExecutingAssembly().Location;
-            var executingAssemblyDirectory = Directory.GetParent(executingAssemblyLocation).FullName;
+            var parentDirectory = Directory.GetParent(executingAssemblyLocation)?.FullName;
+            if (parentDirectory is null)
+            {
+                throw new InvalidOperationException();
+            }
 
-            var realContentPath = Path.GetFullPath(Path.Combine(executingAssemblyDirectory, "Content"));
+            var realContentPath = Path.GetFullPath(Path.Combine(parentDirectory, "Content"));
             var zioContentPath = realFileSystem.ConvertPathFromInternal(realContentPath);
 
             if (!realFileSystem.DirectoryExists(zioContentPath))

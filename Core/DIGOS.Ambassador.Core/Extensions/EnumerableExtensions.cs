@@ -44,7 +44,7 @@ namespace DIGOS.Ambassador.Core.Extensions
         /// <param name="tolerance">The percentile distance tolerance for results. The distance must be below this value.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
-        public static RetrieveEntityResult<string> BestLevenshteinMatch
+        public static Result<string> BestLevenshteinMatch
         (
             this IEnumerable<string> @this,
             string search,
@@ -71,11 +71,11 @@ namespace DIGOS.Ambassador.Core.Extensions
             var passing = candidates.Where(c => c.percentile <= tolerance).ToList();
             if (!passing.Any())
             {
-                return RetrieveEntityResult<string>.FromError("No sufficiently close match found.");
+                return new GenericError("No sufficiently close match found.");
             }
 
             var best = passing.MinBy(c => c.distance).First();
-            return RetrieveEntityResult<string>.FromSuccess(best.value);
+            return Result<string>.FromSuccess(best.value);
         }
     }
 }
