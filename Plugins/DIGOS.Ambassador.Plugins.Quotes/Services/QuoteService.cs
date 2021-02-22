@@ -20,10 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
-using Discord;
 using Humanizer;
 using Humanizer.Bytes;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Quotes.Services
 {
@@ -38,24 +42,45 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// <param name="message">The message to quote.</param>
         /// <param name="quotingUser">The user that is quoting the message.</param>
         /// <returns>The quote.</returns>
-        public EmbedBuilder CreateMessageQuote(IMessage message, IMentionable quotingUser)
+        public Embed CreateMessageQuote(IMessage message, Snowflake quotingUser)
         {
-            var eb = new EmbedBuilder();
+            var eb = new Embed();
 
-            if (TryCopyRichEmbed(message, quotingUser, ref eb))
+            // Copy the message's rich embed directly, if it exists
+            var firstEmbed = message.Embeds.FirstOrDefault();
+            if (firstEmbed is not null && firstEmbed.Type.HasValue && firstEmbed.Type.Value is EmbedType.Rich)
             {
-                return eb;
+                var fields = new List<IEmbedField>();
+                if (firstEmbed.Fields.HasValue)
+                {
+                    fields.AddRange(firstEmbed.Fields.Value!);
+                }
+
+                fields.Add(CreateQuoteMarkerField(message, quotingUser));
+
+                return eb with
+                {
+                    Title = firstEmbed.Title,
+                    Type = firstEmbed.Type,
+                    Description = firstEmbed.Description,
+                    Url = firstEmbed.Url,
+                    Timestamp = firstEmbed.Timestamp,
+                    Colour = firstEmbed.Colour,
+                    Footer = firstEmbed.Footer,
+                    Image = firstEmbed.Image,
+                    Thumbnail = firstEmbed.Thumbnail,
+                    Video = firstEmbed.Video,
+                    Provider = firstEmbed.Provider,
+                    Author = firstEmbed.Author,
+                    Fields = fields
+                };
             }
 
-            if (!TryAddImageAttachmentInfo(message, ref eb))
-            {
-                TryAddOtherAttachmentInfo(message, ref eb);
-            }
-
-            AddContent(message, ref eb);
-            AddOtherEmbed(message, ref eb);
-            AddActivity(message, ref eb);
-            AddMeta(message, quotingUser, ref eb);
+            eb = AddAttachmentInfo(message, eb);
+            eb = AddContent(message, eb);
+            eb = AddOtherEmbed(message, eb);
+            eb = AddActivity(message, eb);
+            eb = AddMeta(message, quotingUser, eb);
 
             return eb;
         }
@@ -66,71 +91,31 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
         /// <returns>true if information was added; otherwise, false.</returns>
-        private bool TryAddImageAttachmentInfo(IMessage message, ref EmbedBuilder embed)
-        {
-            var firstAttachment = message.Attachments.FirstOrDefault();
-            if (firstAttachment is null || firstAttachment.Height is null)
-            {
-                return false;
-            }
-
-            embed.WithImageUrl(firstAttachment.Url);
-
-            return true;
-        }
-
-        /// <summary>
-        /// Attempts to add information about an attachment, if it exists.
-        /// </summary>
-        /// <param name="message">The quoted message.</param>
-        /// <param name="embed">The embed to add the information to.</param>
-        private void TryAddOtherAttachmentInfo(IMessage message, ref EmbedBuilder embed)
+        private Embed AddAttachmentInfo(IMessage message, Embed embed)
         {
             var firstAttachment = message.Attachments.FirstOrDefault();
             if (firstAttachment is null)
             {
-                return;
+                return embed;
             }
 
-            embed.AddField($"Attachment (Size: {new ByteSize(firstAttachment.Size)})", firstAttachment.Url);
-        }
-
-        /// <summary>
-        /// Attempts to copy the full rich embed from a message, if it has one.
-        /// </summary>
-        /// <param name="message">The quoted message.</param>
-        /// <param name="executingUser">The user that quoted the message.</param>
-        /// <param name="embed">The embed to replace.</param>
-        /// <returns>true if a rich embed was copied; otherwise, false.</returns>
-        private bool TryCopyRichEmbed
-        (
-            IMessage message,
-            IMentionable executingUser,
-            ref EmbedBuilder embed
-        )
-        {
-            var firstEmbed = message.Embeds.FirstOrDefault();
-            if (firstEmbed?.Type != EmbedType.Rich)
+            if (firstAttachment.Height is not null)
             {
-                return false;
+                return embed with { Image = new EmbedImage(firstAttachment.Url) };
             }
 
-            embed = message.Embeds
-                .First()
-                .ToEmbedBuilder()
-                .AddField
-                (
-                    "Quoted by",
-                    $"{executingUser.Mention} from **[#{message.Channel.Name}]({message.GetJumpUrl()})**",
-                    true
-                );
-
-            if (firstEmbed.Color is null)
+            var fields = new List<IEmbedField>();
+            if (embed.Fields.HasValue)
             {
-                embed.Color = Color.DarkGrey;
+                fields.AddRange(embed.Fields.Value!);
             }
 
-            return true;
+            fields.Add
+            (
+                new EmbedField($"Attachment (Size: {new ByteSize(firstAttachment.Size)})", firstAttachment.Url)
+            );
+
+            return embed with { Fields = fields };
         }
 
         /// <summary>
@@ -138,16 +123,29 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// </summary>
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
-        private void AddActivity(IMessage message, ref EmbedBuilder embed)
+        private Embed AddActivity(IMessage message, Embed embed)
         {
-            if (message.Activity is null)
+            if (!message.Activity.HasValue)
             {
-                return;
+                return embed;
             }
 
-            embed
-                .AddField("Invite Type", message.Activity.Type)
-                .AddField("Party Id", message.Activity.PartyId);
+            var activity = message.Activity.Value;
+
+            var fields = new List<IEmbedField>();
+            if (embed.Fields.HasValue)
+            {
+                fields.AddRange(embed.Fields.Value!);
+            }
+
+            fields.Add(new EmbedField("Invite type", activity!.Type.ToString()));
+
+            if (activity.PartyID.HasValue)
+            {
+                fields.Add(new EmbedField("Party ID", activity!.PartyID.Value!));
+            }
+
+            return embed with { Fields = fields };
         }
 
         /// <summary>
@@ -155,15 +153,31 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// </summary>
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the information to.</param>
-        private void AddOtherEmbed(IMessage message, ref EmbedBuilder embed)
+        private Embed AddOtherEmbed(IMessage message, Embed embed)
         {
             if (!message.Embeds.Any())
             {
-                return;
+                return embed;
             }
 
-            embed
-                .AddField("Embed Type", message.Embeds.First().Type);
+            var firstEmbed = message.Embeds.First();
+            if (!firstEmbed.Type.HasValue)
+            {
+                return embed;
+            }
+
+            var fields = new List<IEmbedField>();
+            if (embed.Fields.HasValue)
+            {
+                fields.AddRange(embed.Fields.Value!);
+            }
+
+            fields.Add(new EmbedField("Embed Type", message.Embeds.First().Type.Value.ToString()));
+
+            return embed with
+            {
+                Fields = fields
+            };
         }
 
         /// <summary>
@@ -171,22 +185,18 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// </summary>
         /// <param name="message">The quoted message.</param>
         /// <param name="embed">The embed to add the content to.</param>
-        private void AddContent(IMessage message, ref EmbedBuilder embed)
+        private Embed AddContent(IMessage message, Embed embed)
         {
             if (string.IsNullOrWhiteSpace(message.Content))
             {
-                return;
+                return embed;
             }
 
-            if (message.Channel is IGuildChannel guildChannel)
+            return embed with
             {
-                var messageUrl = $"https://discordapp.com/channels/" +
-                                 $"{guildChannel.Guild.Id}/{guildChannel.Id}/{message.Id}";
-
-                embed.WithUrl(messageUrl);
-            }
-
-            embed.WithDescription(message.Content);
+                Url = GetJumpUrl(message),
+                Description = message.Content
+            };
         }
 
         /// <summary>
@@ -195,23 +205,56 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         /// <param name="message">The quoted message.</param>
         /// <param name="quotingUser">The quoting user.</param>
         /// <param name="embed">The embed to add the information to.</param>
-        private void AddMeta
+        private Embed AddMeta
         (
             IMessage message,
-            IMentionable quotingUser,
-            ref EmbedBuilder embed
+            Snowflake quotingUser,
+            Embed embed
         )
         {
-            embed
-                .WithAuthor(message.Author)
-                .WithFooter(GetPostedTimeInfo(message))
-                .WithColor(new Color(95, 186, 125))
-                .AddField
-                (
-                    "Quoted by",
-                    $"{quotingUser.Mention} from **[#{message.Channel.Name}]({message.GetJumpUrl()})**",
-                    true
-                );
+            EmbedAuthor author;
+            if (message.Author.Avatar is not null)
+            {
+                author = new EmbedAuthor
+                {
+                    Name = $"<@{message.Author.ID}>",
+                    Url = $"https://cdn.discordsapp.com/avatars/{message.Author.ID}/{message.Author.Avatar.Value}.png"
+                };
+            }
+            else
+            {
+                author = new EmbedAuthor
+                {
+                    Name = $"<@{message.Author.ID}>"
+                };
+            }
+
+            return embed with
+            {
+                Author = author,
+                Footer = new EmbedFooter(GetPostedTimeInfo(message)),
+                Colour = Color.FromArgb(95, 186, 125),
+                Fields = new[]
+                {
+                    CreateQuoteMarkerField(message, quotingUser)
+                }
+            };
+        }
+
+        private static EmbedField CreateQuoteMarkerField(IMessage message, Snowflake quotingUser)
+        {
+            return new
+            (
+                "Quoted by",
+                $"<@{quotingUser}> from **[<#{message.ChannelID}>]({GetJumpUrl(message)})**",
+                true
+            );
+        }
+
+        private static string GetJumpUrl(IMessage message)
+        {
+            var guildID = message.GuildID.HasValue ? message.GuildID.Value.ToString() : "@me";
+            return $"https://discord.com/channels/{guildID}/{message.ChannelID}/{message.ID}";
         }
 
         /// <summary>
@@ -223,7 +266,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         {
             return $"{message.Timestamp.DateTime.ToOrdinalWords()} " +
                    $"at {message.Timestamp:HH:mm}, " +
-                   $"in #{message.Channel.Name}";
+                   $"in <#{message.ChannelID}>";
         }
     }
 }
