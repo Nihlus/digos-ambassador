@@ -97,18 +97,20 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <summary>
         /// Dispatches an added reaction to interested messages.
         /// </summary>
-        /// <param name="id">The ID of the message.</param>
+        /// <param name="userID">The ID of the user who added the reaction.</param>
+        /// <param name="messageID">The ID of the message.</param>
         /// <param name="emoji">The emoji.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A result which may or may not have succeeded.</returns>
         public async Task<Result> OnReactionAddedAsync
         (
-            Snowflake id,
+            Snowflake userID,
+            Snowflake messageID,
             IPartialEmoji emoji,
             CancellationToken ct = default
         )
         {
-            if (!_trackedMessages.TryGetValue(id, out var message))
+            if (!_trackedMessages.TryGetValue(messageID, out var message))
             {
                 return Result.FromSuccess();
             }
@@ -121,7 +123,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             await semaphore.WaitAsync(ct);
             try
             {
-                var result = await message.OnReactionAddedAsync(emoji, ct);
+                var result = await message.OnReactionAddedAsync(userID, emoji, ct);
                 if (!result.IsSuccess)
                 {
                     return result;
@@ -138,13 +140,20 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <summary>
         /// Dispatches a removed reaction to interested messages.
         /// </summary>
-        /// <param name="id">The ID of the message.</param>
+        /// <param name="userID">The ID of the user who removed the reaction.</param>
+        /// <param name="messageID">The ID of the message.</param>
         /// <param name="emoji">The emoji.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A result which may or may not have succeeded.</returns>
-        public async Task<Result> OnReactionRemovedAsync(Snowflake id, IPartialEmoji emoji, CancellationToken ct = default)
+        public async Task<Result> OnReactionRemovedAsync
+        (
+            Snowflake userID,
+            Snowflake messageID,
+            IPartialEmoji emoji,
+            CancellationToken ct = default
+        )
         {
-            if (!_trackedMessages.TryGetValue(id, out var message))
+            if (!_trackedMessages.TryGetValue(messageID, out var message))
             {
                 return Result.FromSuccess();
             }
@@ -157,7 +166,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             await semaphore.WaitAsync(ct);
             try
             {
-                var result = await message.OnReactionRemovedAsync(emoji, ct);
+                var result = await message.OnReactionRemovedAsync(userID, emoji, ct);
                 if (!result.IsSuccess)
                 {
                     return result;

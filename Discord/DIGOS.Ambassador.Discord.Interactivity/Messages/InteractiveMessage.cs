@@ -51,10 +51,20 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         }
 
         /// <inheritdoc/>
-        public abstract Task<Result> OnReactionAddedAsync(IPartialEmoji emoji, CancellationToken ct = default);
+        public abstract Task<Result> OnReactionAddedAsync
+        (
+            Snowflake userID,
+            IPartialEmoji emoji,
+            CancellationToken ct = default
+        );
 
         /// <inheritdoc/>
-        public abstract Task<Result> OnReactionRemovedAsync(IPartialEmoji emoji, CancellationToken ct = default);
+        public abstract Task<Result> OnReactionRemovedAsync
+        (
+            Snowflake userID,
+            IPartialEmoji emoji,
+            CancellationToken ct = default
+        );
 
         /// <inheritdoc />
         public abstract Task<Result> OnAllReactionsRemovedAsync(CancellationToken ct = default);

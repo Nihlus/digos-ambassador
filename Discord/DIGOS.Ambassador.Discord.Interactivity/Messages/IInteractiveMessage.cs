@@ -46,18 +46,25 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// <summary>
         /// Handles an added reaction.
         /// </summary>
+        /// <param name="userID">The ID of the user who added the reaction.</param>
         /// <param name="emoji">The emoji.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A result which may or may not have succeeded.</returns>
-        public Task<Result> OnReactionAddedAsync(IPartialEmoji emoji, CancellationToken ct = default);
+        public Task<Result> OnReactionAddedAsync(Snowflake userID, IPartialEmoji emoji, CancellationToken ct = default);
 
         /// <summary>
         /// Handles a removed reaction.
         /// </summary>
+        /// <param name="userID">The ID of the user who removed the reaction.</param>
         /// <param name="emoji">The emoji.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A result which may or may not have succeeded.</returns>
-        public Task<Result> OnReactionRemovedAsync(IPartialEmoji emoji, CancellationToken ct = default);
+        public Task<Result> OnReactionRemovedAsync
+        (
+            Snowflake userID,
+            IPartialEmoji emoji,
+            CancellationToken ct = default
+        );
 
         /// <summary>
         /// Handles a complete removal of all reactions.

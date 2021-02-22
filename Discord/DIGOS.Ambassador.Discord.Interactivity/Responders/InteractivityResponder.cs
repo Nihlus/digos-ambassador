@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Gateway.Events;
@@ -35,11 +36,10 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Responders
         IResponder<IMessageReactionAdd>,
         IResponder<IMessageReactionRemove>,
         IResponder<IMessageReactionRemoveAll>,
-        IResponder<IMessageReactionRemoveEmoji>,
         IResponder<IMessageDelete>,
         IResponder<IMessageDeleteBulk>
     {
-        private InteractivityService _interactivity;
+        private readonly InteractivityService _interactivity;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InteractivityResponder"/> class.
@@ -52,38 +52,36 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Responders
 
         /// <inheritdoc />
         public Task<Result> RespondAsync(IMessageReactionAdd gatewayEvent, CancellationToken ct = default)
-        {
-            throw new System.NotImplementedException();
-        }
+            => _interactivity.OnReactionAddedAsync(gatewayEvent.UserID, gatewayEvent.MessageID, gatewayEvent.Emoji, ct);
 
         /// <inheritdoc />
         public Task<Result> RespondAsync(IMessageReactionRemove gatewayEvent, CancellationToken ct = default)
-        {
-            throw new System.NotImplementedException();
-        }
+            => _interactivity.OnReactionRemovedAsync
+            (
+                gatewayEvent.UserID,
+                gatewayEvent.MessageID,
+                gatewayEvent.Emoji,
+                ct
+            );
 
         /// <inheritdoc />
         public Task<Result> RespondAsync(IMessageReactionRemoveAll gatewayEvent, CancellationToken ct = default)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        /// <inheritdoc />
-        public Task<Result> RespondAsync(IMessageReactionRemoveEmoji gatewayEvent, CancellationToken ct = default)
-        {
-            throw new System.NotImplementedException();
-        }
+            => _interactivity.OnAllReactionsRemovedAsync(gatewayEvent.MessageID, ct);
 
         /// <inheritdoc />
         public Task<Result> RespondAsync(IMessageDelete gatewayEvent, CancellationToken ct = default)
-        {
-            throw new System.NotImplementedException();
-        }
+            => _interactivity.OnMessageDeletedAsync(gatewayEvent.ID, ct);
 
         /// <inheritdoc />
-        public Task<Result> RespondAsync(IMessageDeleteBulk gatewayEvent, CancellationToken ct = default)
+        public async Task<Result> RespondAsync(IMessageDeleteBulk gatewayEvent, CancellationToken ct = default)
         {
-            throw new System.NotImplementedException();
+            var deletions = gatewayEvent.MessageIDs.Select(id => _interactivity.OnMessageDeletedAsync(id, ct));
+            var results = await Task.WhenAll(deletions);
+
+            var firstFail = results.FirstOrDefault(r => !r.IsSuccess);
+            return firstFail.Equals(default)
+                ? Result.FromSuccess()
+                : firstFail;
         }
     }
 }
