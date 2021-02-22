@@ -41,7 +41,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// <summary>
         /// Gets the ID of the message.
         /// </summary>
-        Snowflake ID { get; }
+        Snowflake MessageID { get; }
 
         /// <summary>
         /// Handles an added reaction.

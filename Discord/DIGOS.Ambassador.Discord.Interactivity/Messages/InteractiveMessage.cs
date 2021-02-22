@@ -37,17 +37,17 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         public Snowflake ChannelID { get; }
 
         /// <inheritdoc />
-        public Snowflake ID { get; }
+        public Snowflake MessageID { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InteractiveMessage"/> class.
         /// </summary>
         /// <param name="channelID">The ID of the channel the message is in.</param>
-        /// <param name="id">The ID of the message.</param>
-        protected InteractiveMessage(Snowflake channelID, Snowflake id)
+        /// <param name="messageID">The ID of the message.</param>
+        protected InteractiveMessage(Snowflake channelID, Snowflake messageID)
         {
             this.ChannelID = channelID;
-            this.ID = id;
+            this.MessageID = messageID;
         }
 
         /// <inheritdoc/>

@@ -23,248 +23,264 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
-using Discord;
-using Discord.WebSocket;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Core;
 using Remora.Results;
 
-// ReSharper disable AssignmentIsFullyDiscarded
 namespace DIGOS.Ambassador.Discord.Pagination
 {
     /// <summary>
     /// A page building class for paginated galleries.
     /// </summary>
-    /// <typeparam name="TContent">The type of content in the pager.</typeparam>
-    /// <typeparam name="TType">The type of the pager.</typeparam>
-    public abstract class PaginatedMessage<TContent, TType> : InteractiveMessage, IPager<TContent, TType>
-        where TType : PaginatedMessage<TContent, TType>
+    public class PaginatedMessage : InteractiveMessage
     {
-        /// <summary>
-        /// Gets the user interaction service.
-        /// </summary>
-        private UserFeedbackService Feedback { get; }
-
-        /// <inheritdoc />
-        public virtual IList<TContent> Pages { get; protected set; } = new List<TContent>();
-
-        /// <inheritdoc />
-        public PaginatedAppearanceOptions Appearance { get; set; } = PaginatedAppearanceOptions.Default;
-
-        private int _currentPage = 1;
+        private readonly IDiscordRestChannelAPI _channelAPI;
+        private readonly UserFeedbackService _feedback;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PaginatedMessage{T1,T2}"/> class.
+        /// Holds the pages in the message.
         /// </summary>
+        private readonly IReadOnlyList<Embed> _pages;
+
+        /// <summary>
+        /// Holds the appearance options.
+        /// </summary>
+        private readonly PaginatedAppearanceOptions _appearance;
+
+        /// <summary>
+        /// Holds the ID of the source user.
+        /// </summary>
+        private readonly Snowflake _sourceUserID;
+
+        /// <summary>
+        /// Holds the names of the reactions, mapped to their emoji.
+        /// </summary>
+        private readonly IReadOnlyDictionary<string, IEmoji> _reactionNames;
+
+        /// <summary>
+        /// Holds the current page index.
+        /// </summary>
+        private int _currentPage;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PaginatedMessage"/> class.
+        /// </summary>
+        /// <param name="channelID">The ID of the channel the message is in.</param>
+        /// <param name="messageID">The ID of the message.</param>
+        /// <param name="channelAPI">The channel API.</param>
         /// <param name="feedbackService">The user feedback service.</param>
-        /// <param name="interactivityService">The interactivity service.</param>
-        /// <param name="sourceUser">The user who caused the interactive message to be created.</param>
+        /// <param name="sourceUserID">The ID of the source user.</param>
+        /// <param name="pages">The pages in the paginated message.</param>
+        /// <param name="appearance">The appearance options.</param>
         protected PaginatedMessage
         (
+            Snowflake channelID,
+            Snowflake messageID,
+            IDiscordRestChannelAPI channelAPI,
             UserFeedbackService feedbackService,
-            InteractivityService interactivityService,
-            IUser sourceUser
+            Snowflake sourceUserID,
+            IReadOnlyList<Embed> pages,
+            PaginatedAppearanceOptions appearance
         )
-            : base(sourceUser, interactivityService)
+            : base(channelID, messageID)
         {
-            this.Feedback = feedbackService;
-            this.Appearance.Color = Color.DarkPurple;
+            _feedback = feedbackService;
+            _sourceUserID = sourceUserID;
+            _pages = pages;
+            _appearance = appearance;
+            _channelAPI = channelAPI;
+
+            _reactionNames = new Dictionary<string, IEmoji>
+            {
+                { GetEmojiName(_appearance.First), _appearance.First },
+                { GetEmojiName(_appearance.Back), _appearance.Back },
+                { GetEmojiName(_appearance.Next), _appearance.Next },
+                { GetEmojiName(_appearance.Last), _appearance.Last },
+                { GetEmojiName(_appearance.Close), _appearance.Close },
+                { GetEmojiName(_appearance.Help), _appearance.Help }
+            };
         }
 
-        /// <inheritdoc/>
-        public virtual TType AppendPage(TContent page)
+        /// <inheritdoc />
+        public override async Task<Result> OnReactionAddedAsync(Snowflake userID, IPartialEmoji emoji, CancellationToken ct = default)
         {
-            this.Pages.Add(page);
-            return (TType)this;
-        }
-
-        /// <inheritdoc/>
-        public virtual TType WithPages(IEnumerable<TContent> pages)
-        {
-            this.Pages = pages.ToList();
-
-            return (TType)this;
-        }
-
-        /// <inheritdoc/>
-        public abstract Embed BuildEmbed(int page);
-
-        /// <inheritdoc/>
-        protected override async Task<CreateEntityResult<IUserMessage>> OnDisplayAsync(IMessageChannel channel)
-        {
-            if (!this.Pages.Any())
+            if (userID != _sourceUserID)
             {
-                return CreateEntityResult<IUserMessage>.FromError("The pager is empty.");
+                // We handled it, but we won't react
+                return Result.FromSuccess();
             }
 
-            var embed = BuildEmbed(_currentPage - 1);
-
-            var message = await channel.SendMessageAsync(string.Empty, embed: embed);
-
-            if (this.Pages.Count > 1)
+            var reactionName = GetPartialEmojiName(emoji);
+            if (!_reactionNames.TryGetValue(reactionName, out var knownEmoji))
             {
-                await message.AddReactionAsync(this.Appearance.First);
-                await message.AddReactionAsync(this.Appearance.Back);
-                await message.AddReactionAsync(this.Appearance.Next);
-                await message.AddReactionAsync(this.Appearance.Last);
+                // This isn't an emoji we react to
+                return Result.FromSuccess();
+            }
 
-                var manageMessages = await CanManageMessages();
+            // Special actions
+            if (knownEmoji.Equals(_appearance.Close))
+            {
+                return await _channelAPI.DeleteMessageAsync(this.ChannelID, this.MessageID, ct);
+            }
 
-                var canJump =
-                    this.Appearance.JumpDisplayCondition == JumpDisplayCondition.Always ||
-                    (this.Appearance.JumpDisplayCondition == JumpDisplayCondition.WithManageMessages && manageMessages);
+            if (knownEmoji.Equals(_appearance.Help))
+            {
+                var sendHelp = await _feedback.SendInfoAsync(this.ChannelID, userID, _appearance.HelpText);
+                var firstFail = sendHelp.FirstOrDefault(r => !r.IsSuccess);
 
-                if (canJump)
+                return firstFail.Equals(default)
+                    ? Result.FromError(firstFail)
+                    : Result.FromSuccess();
+            }
+
+            // Page movement actions
+            if (knownEmoji.Equals(_appearance.First))
+            {
+                _currentPage = 0;
+            }
+
+            if (knownEmoji.Equals(_appearance.Back))
+            {
+                if (_currentPage <= 0)
                 {
-                    await message.AddReactionAsync(this.Appearance.Jump);
-                }
-
-                if (this.Appearance.DisplayInformationIcon)
-                {
-                    await message.AddReactionAsync(this.Appearance.Help);
-                }
-            }
-
-            await message.AddReactionAsync(this.Appearance.Stop);
-
-            return CreateEntityResult<IUserMessage>.FromSuccess(message);
-        }
-
-        /// <remarks>
-        /// This override forwards to the added handler, letting removed reactions act the same as added reactions.
-        /// </remarks>
-        /// <inheritdoc/>
-        protected override Task<OperationResult> OnInteractionRemovedAsync(SocketReaction reaction) =>
-            OnInteractionAddedAsync(reaction);
-
-        /// <inheritdoc/>
-        protected override async Task<OperationResult> OnInteractionAddedAsync(SocketReaction reaction)
-        {
-            if (this.Message is null || this.Channel is null)
-            {
-                return OperationResult.FromError("The message hasn't been sent yet.");
-            }
-
-            if (!reaction.User.IsSpecified)
-            {
-                // Ignore unspecified users
-                return OperationResult.FromError("The user was unspecified.");
-            }
-
-            var interactingUser = reaction.User.Value;
-            if (interactingUser.Id != this.SourceUser.Id)
-            {
-                if (interactingUser is IGuildUser guildUser)
-                {
-                    // If the user has permission to manage messages, they should be allowed to interact in all cases
-                    if (!guildUser.GetPermissions(this.Channel as IGuildChannel).ManageMessages)
-                    {
-                        return OperationResult.FromSuccess();
-                    }
-                }
-                else
-                {
-                    // We only allow interactions from the user who created the message
-                    return OperationResult.FromSuccess();
-                }
-            }
-
-            var emote = reaction.Emote;
-
-            if (emote.Equals(this.Appearance.First))
-            {
-                _currentPage = 1;
-            }
-            else if (emote.Equals(this.Appearance.Next))
-            {
-                if (_currentPage >= this.Pages.Count)
-                {
-                    return OperationResult.FromSuccess();
-                }
-
-                ++_currentPage;
-            }
-            else if (emote.Equals(this.Appearance.Back))
-            {
-                if (_currentPage <= 1)
-                {
-                    return OperationResult.FromSuccess();
+                    return Result.FromSuccess();
                 }
 
                 --_currentPage;
             }
-            else if (emote.Equals(this.Appearance.Last))
-            {
-                _currentPage = this.Pages.Count;
-            }
-            else if (emote.Equals(this.Appearance.Stop))
-            {
-                return await this.Interactivity.DeleteInteractiveMessageAsync(this);
-            }
-            else if (emote.Equals(this.Appearance.Jump))
-            {
-                bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
 
-                var responseResult = await this.Interactivity.GetNextMessageAsync(this.Channel, Filter, TimeSpan.FromSeconds(15));
-                if (!responseResult.IsSuccess)
+            if (knownEmoji.Equals(_appearance.Next))
+            {
+                if (_currentPage >= _pages.Count)
                 {
-                    return OperationResult.FromError(responseResult);
+                    return Result.FromSuccess();
                 }
 
-                var response = responseResult.Entity;
-
-                if (!int.TryParse(response.Content, out var request) || request < 1 || request > this.Pages.Count)
-                {
-                    await response.DeleteAsync();
-
-                    var eb = this.Feedback.CreateFeedbackEmbed(response.Author, Color.DarkPurple, "Please specify a page to jump to.");
-
-                    await this.Feedback.SendEmbedAndDeleteAsync(this.Channel, eb);
-                    return OperationResult.FromSuccess();
-                }
-
-                _currentPage = request;
-                await response.DeleteAsync();
+                ++_currentPage;
             }
-            else if (emote.Equals(this.Appearance.Help))
+
+            if (knownEmoji.Equals(_appearance.Last))
             {
-                var user = this.Interactivity.Client.GetUser(reaction.UserId);
-                var eb = this.Feedback.CreateFeedbackEmbed(user, Color.DarkPurple, this.Appearance.HelpText);
-
-                await this.Feedback.SendEmbedAndDeleteAsync(this.Channel, eb, this.Appearance.InfoTimeout);
-                return OperationResult.FromSuccess();
+                _currentPage = _pages.Count - 1;
             }
 
-            return await UpdateAsync();
+            return await UpdateAsync(ct);
         }
 
-        private async Task<bool> CanManageMessages()
-        {
-            if (!(this.Channel is IGuildChannel guildChannel))
-            {
-                return false;
-            }
+        /// <inheritdoc />
+        public override Task<Result> OnReactionRemovedAsync
+        (
+            Snowflake userID,
+            IPartialEmoji emoji,
+            CancellationToken ct = default
+        )
+            => OnReactionAddedAsync(userID, emoji, ct);
 
-            var botUser = this.Interactivity.Client.CurrentUser;
-            var botGuildUser = await guildChannel.Guild.GetUserAsync(botUser.Id);
-
-            return botGuildUser.GetPermissions(guildChannel).ManageMessages;
-        }
+        /// <inheritdoc />
+        public override Task<Result> OnAllReactionsRemovedAsync(CancellationToken ct = default)
+            => UpdateAsync(ct);
 
         /// <inheritdoc/>
-        protected override async Task<OperationResult> OnUpdateAsync()
+        public override async Task<Result> UpdateAsync(CancellationToken ct = default)
         {
-            var embed = BuildEmbed(_currentPage - 1);
-
-            var userMessage = this.Message;
-            if (userMessage != null)
+            var page = _pages[_currentPage] with
             {
-                await userMessage.ModifyAsync(m => m.Embed = embed);
+                Footer = new EmbedFooter(string.Format(_appearance.FooterFormat, _currentPage + 1, _pages.Count))
+            };
+
+            var modifyMessage = await _channelAPI.EditMessageAsync(this.ChannelID, this.MessageID, embed: page, ct: ct);
+            if (!modifyMessage.IsSuccess)
+            {
+                return Result.FromError(modifyMessage);
             }
 
-            return OperationResult.FromSuccess();
+            var updateButtons = await UpdateReactionButtonsAsync(ct);
+            return updateButtons.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(updateButtons);
+        }
+
+        /// <summary>
+        /// Updates the displayed buttons.
+        /// </summary>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        private async Task<Result> UpdateReactionButtonsAsync(CancellationToken ct = default)
+        {
+            var getMessage = await _channelAPI.GetChannelMessageAsync(this.ChannelID, this.MessageID, ct);
+            if (!getMessage.IsSuccess)
+            {
+                return Result.FromError(getMessage);
+            }
+
+            var message = getMessage.Entity;
+            var existingReactions = message.Reactions;
+
+            var reactions = new[]
+            {
+                GetEmojiName(_appearance.First),
+                GetEmojiName(_appearance.Back),
+                GetEmojiName(_appearance.Next),
+                GetEmojiName(_appearance.Last),
+                GetEmojiName(_appearance.Close),
+                GetEmojiName(_appearance.Help)
+            };
+
+            foreach (var reaction in reactions)
+            {
+                if (existingReactions.HasValue)
+                {
+                    if (existingReactions.Value.Any(r => GetPartialEmojiName(r.Emoji) == reaction))
+                    {
+                        // This one is already added; skip it
+                        continue;
+                    }
+                }
+
+                var addReaction = await _channelAPI.CreateReactionAsync(this.ChannelID, this.MessageID, reaction, ct);
+                if (!addReaction.IsSuccess)
+                {
+                    return addReaction;
+                }
+            }
+
+            return Result.FromSuccess();
+        }
+
+        private string GetEmojiName(IEmoji emoji)
+        {
+            if (emoji.Name is not null)
+            {
+                return emoji.Name;
+            }
+
+            if (!emoji.ID.HasValue)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return emoji.ID.Value.ToString();
+        }
+
+        private string GetPartialEmojiName(IPartialEmoji emoji)
+        {
+            if (emoji.Name.HasValue && emoji.Name.Value is not null)
+            {
+                return emoji.Name.Value;
+            }
+
+            if (!emoji.ID.HasValue)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return emoji.ID.Value.ToString();
         }
     }
 }
