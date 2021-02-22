@@ -39,12 +39,12 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <summary>
         /// Holds a mapping of message IDs to tracked messages.
         /// </summary>
-        private readonly ConcurrentDictionary<Snowflake, IInteractiveMessage> _trackedMessages = new ();
+        private readonly ConcurrentDictionary<Snowflake, IInteractiveMessage> _trackedMessages = new();
 
         /// <summary>
         /// Holds a mapping of tracked messages to synchronization primitives.
         /// </summary>
-        private readonly ConcurrentDictionary<IInteractiveMessage, SemaphoreSlim> _messageSemaphores = new ();
+        private readonly ConcurrentDictionary<IInteractiveMessage, SemaphoreSlim> _messageSemaphores = new();
 
         /// <summary>
         /// Begins tracking the given message.

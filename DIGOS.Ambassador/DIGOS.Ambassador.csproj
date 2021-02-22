@@ -26,8 +26,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="5.0.0" />
-    <PackageReference Include="Remora.Discord.Gateway" Version="3.0.4" />
-    <PackageReference Include="Remora.Discord.Hosting" Version="3.0.4" />
+    <PackageReference Include="Remora.Discord.Gateway" Version="3.0.5" />
+    <PackageReference Include="Remora.Discord.Hosting" Version="3.0.5" />
     <PackageReference Include="Remora.Plugins" Version="2.0.0" />
   </ItemGroup>
 

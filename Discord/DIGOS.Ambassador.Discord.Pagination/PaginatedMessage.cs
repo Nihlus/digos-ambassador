@@ -203,7 +203,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             var updateButtons = await UpdateReactionButtonsAsync(ct);
             return updateButtons.IsSuccess
                 ? Result.FromSuccess()
-                : Result.FromError(updateButtons);
+                : updateButtons;
         }
 
         /// <summary>
