@@ -22,15 +22,20 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.ComponentModel;
+using System.Drawing;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.JumboEmotes.EmojiTools;
-using Discord;
-using Discord.Commands;
 using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -40,56 +45,61 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules
     /// Assorted commands that don't really fit anywhere - just for fun, testing, etc.
     /// </summary>
     [UsedImplicitly]
-    [Name("jumbo")]
-    [Summary("Emote jumbofying commands.")]
-    public class JumboCommands : ModuleBase
+    public class JumboCommands : CommandGroup
     {
-        private readonly UserFeedbackService _feedback;
+        private readonly IDiscordRestChannelAPI _channelAPI;
+        private readonly ICommandContext _context;
+        private readonly HttpClient _httpClient;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JumboCommands"/> class.
         /// </summary>
-        /// <param name="feedback">The user feedback service.</param>
-        public JumboCommands(UserFeedbackService feedback)
+        /// <param name="channelAPI">The Discord channel API.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="httpClient">The HTTP client.</param>
+        public JumboCommands
+        (
+            IDiscordRestChannelAPI channelAPI,
+            ICommandContext context,
+            HttpClient httpClient
+        )
         {
-            _feedback = feedback;
+            _httpClient = httpClient;
+            _channelAPI = channelAPI;
+            _context = context;
         }
 
         /// <summary>
         /// Sends a jumbo version of the given emote to the chat, if available.
         /// </summary>
-        /// <param name="emoteName">The emote.</param>
+        /// <param name="emoji">The emote.</param>
         [UsedImplicitly]
         [Command("jumbo")]
-        [Summary("Sends a jumbo version of the given emote to the chat, if available.")]
-        public async Task<RuntimeResult> JumboAsync(string emoteName)
+        [Description("Sends a jumbo version of the given emote to the chat, if available.")]
+        public async Task<IResult> JumboAsync(IEmoji emoji)
         {
             string emoteUrl;
-
-            var guildEmote = this.Context.Guild?.Emotes.FirstOrDefault
-            (
-                e => e.Name.Equals(emoteName, StringComparison.OrdinalIgnoreCase)
-            );
-
-            if (!(guildEmote is null))
+            if (emoji.ID is not null)
             {
-                emoteUrl = guildEmote.Url;
-            }
-            else if (Emote.TryParse(emoteName, out var emote))
-            {
-                emoteUrl = emote.Url;
+                emoteUrl = $"https://cdn.discordapp.com/emojis/${emoji.ID}.png";
             }
             else
             {
-                if (EmojiMap.Map.TryGetValue(emoteName, out var mappedEmote))
+                if (emoji.Name is null)
                 {
-                    emoteName = mappedEmote;
+                    return Result.FromError(new GenericError("Looks like a bad emoji. Oops!"));
+                }
+
+                var emojiName = emoji.Name;
+                if (EmojiMap.Map.TryGetValue(emoji.Name, out var mappedEmote))
+                {
+                    emojiName = mappedEmote;
                 }
 
                 var hexValues = new List<string>();
-                for (var i = 0; i < emoteName.Length; ++i)
+                for (var i = 0; i < emojiName.Length; ++i)
                 {
-                    var codepoint = char.ConvertToUtf32(emoteName, i);
+                    var codepoint = char.ConvertToUtf32(emojiName, i);
 
                     // 0xFE0F is a variation marker, which explicitly requests a colourful version of the emoji, and
                     // not a monochrome text variant. Since Twemoji only provides the colourful ones, we can safely
@@ -108,7 +118,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules
                     //
                     // If the character is in this span, we have already essentially parsed the next index of the string
                     // as well. Therefore we make sure to skip the next one.
-                    if (char.IsSurrogate(emoteName, i))
+                    if (char.IsSurrogate(emojiName, i))
                     {
                         ++i;
                     }
@@ -118,18 +128,26 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules
                 emoteUrl = $"https://raw.githubusercontent.com/twitter/twemoji/master/assets/72x72/{emojiCode}.png";
             }
 
-            using var client = new HttpClient();
-            var response = await client.GetAsync(emoteUrl, HttpCompletionOption.ResponseHeadersRead);
+            var response = await _httpClient.GetAsync(emoteUrl, HttpCompletionOption.ResponseHeadersRead);
             if (!response.IsSuccessStatusCode)
             {
-                return RuntimeCommandResult.FromError("Sorry, I couldn't find that emote.");
+                return Result.FromError(new GenericError("Sorry, I couldn't find that emote."));
             }
 
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithImageUrl(emoteUrl);
+            var eb = new Embed
+            {
+                Colour = Color.Purple,
+                Image = new EmbedImage { Url = emoteUrl }
+            };
 
-            await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
-            return RuntimeCommandResult.FromSuccess();
+            var sendEmoji = await _channelAPI.CreateMessageAsync
+            (
+                _context.ChannelID,
+                embed: eb,
+                ct: this.CancellationToken
+            );
+
+            return sendEmoji.IsSuccess ? Result.FromSuccess() : Result.FromError(sendEmoji);
         }
     }
 }

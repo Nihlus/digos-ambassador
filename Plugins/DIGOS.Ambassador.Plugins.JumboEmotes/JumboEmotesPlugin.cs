@@ -20,13 +20,11 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.JumboEmotes;
 using DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules;
-using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 
@@ -47,12 +45,10 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes
         public override string Description => "Provides a command for jumbofying emotes.";
 
         /// <inheritdoc />
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
+        public override void ConfigureServices(IServiceCollection serviceCollection)
         {
-            var commands = serviceProvider.GetRequiredService<CommandService>();
-            await commands.AddModuleAsync<JumboCommands>(serviceProvider);
-
-            return true;
+            serviceCollection
+                .AddCommandGroup<JumboCommands>();
         }
     }
 }
