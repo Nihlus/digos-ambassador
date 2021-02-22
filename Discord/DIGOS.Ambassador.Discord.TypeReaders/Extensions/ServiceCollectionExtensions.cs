@@ -1,5 +1,5 @@
 //
-//  CommandServiceExtensions.cs
+//  ServiceCollectionExtensions.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,23 +20,24 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Discord.Commands;
+using Microsoft.Extensions.DependencyInjection;
+using Remora.Commands.Extensions;
 
 namespace DIGOS.Ambassador.Discord.TypeReaders.Extensions
 {
     /// <summary>
-    /// Extensions to the <see cref="CommandService"/> class.
+    /// Extensions to the <see cref="IServiceCollection"/> class.
     /// </summary>
-    public static class CommandServiceExtensions
+    public static class ServiceCollectionExtensions
     {
         /// <summary>
         /// Adds a type reader to the command service based on a <see cref="HumanizerEnumTypeReader{T}"/>.
         /// </summary>
         /// <param name="this">The command service.</param>
         /// <typeparam name="TEnum">The enum type to add.</typeparam>
-        public static void AddEnumReader<TEnum>(this CommandService @this) where TEnum : struct, System.Enum
+        public static void AddEnumReader<TEnum>(this IServiceCollection @this) where TEnum : struct, System.Enum
         {
-            @this.AddTypeReader<TEnum>(new HumanizerEnumTypeReader<TEnum>());
+            @this.AddParser<TEnum, HumanizerEnumTypeReader<TEnum>>();
         }
     }
 }

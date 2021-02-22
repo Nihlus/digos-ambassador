@@ -21,10 +21,13 @@
 //
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
-using Discord.Commands;
 using Humanizer;
 using Humanizer.Configuration;
+using Remora.Commands.Parsers;
+using Remora.Commands.Results;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.TypeReaders
 {
@@ -32,25 +35,22 @@ namespace DIGOS.Ambassador.Discord.TypeReaders
     /// Reads enums using Humanizer's DehumanizeTo function.
     /// </summary>
     /// <typeparam name="T">The enum type.</typeparam>
-    public class HumanizerEnumTypeReader<T> : TypeReader where T : struct, IComparable, IFormattable
+    public class HumanizerEnumTypeReader<T> : AbstractTypeParser<T> where T : struct, Enum
     {
         /// <inheritdoc />
-        public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
+        public override ValueTask<Result<T>> TryParse(string value, CancellationToken ct)
         {
             var defaultLocator = Configurator.EnumDescriptionPropertyLocator;
-            Configurator.EnumDescriptionPropertyLocator = info => false;
+            Configurator.EnumDescriptionPropertyLocator = _ => false;
 
             try
             {
-                var result = input.DehumanizeTo<T>();
-                return Task.FromResult(TypeReaderResult.FromSuccess(result));
+                var result = value.DehumanizeTo<T>();
+                return new ValueTask<Result<T>>(result);
             }
             catch (NoMatchFoundException)
             {
-                var message = $"\"{input}\" isn't something I recognize as a " +
-                              $"{typeof(T).Name.Humanize().Transform(To.LowerCase)}.";
-
-                return Task.FromResult(TypeReaderResult.FromError(CommandError.Unsuccessful, message));
+                return new ValueTask<Result<T>>(new ParsingError<T>(value));
             }
             finally
             {
