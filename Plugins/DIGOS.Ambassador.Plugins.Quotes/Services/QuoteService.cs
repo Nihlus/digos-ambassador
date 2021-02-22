@@ -218,7 +218,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
                 author = new EmbedAuthor
                 {
                     Name = $"<@{message.Author.ID}>",
-                    Url = $"https://cdn.discordsapp.com/avatars/{message.Author.ID}/{message.Author.Avatar.Value}.png"
+                    IconUrl = $"https://cdn.discordapp.com/avatars/{message.Author.ID}/{message.Author.Avatar.Value}.png"
                 };
             }
             else
