@@ -21,14 +21,12 @@
 //
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
-using Discord;
-using Discord.WebSocket;
-using Remora.Behaviours.Services;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Interactivity
@@ -38,247 +36,183 @@ namespace DIGOS.Ambassador.Discord.Interactivity
     /// </summary>
     public class InteractivityService
     {
-        private readonly DelayedActionService _delayedActions;
-        private readonly IList<IInteractiveMessage> _trackedMessages;
+        /// <summary>
+        /// Holds a mapping of message IDs to tracked messages.
+        /// </summary>
+        private readonly ConcurrentDictionary<Snowflake, IInteractiveMessage> _trackedMessages = new ();
 
         /// <summary>
-        /// Gets the client that the service is attached to.
+        /// Holds a mapping of tracked messages to synchronization primitives.
         /// </summary>
-        public BaseSocketClient Client { get; }
+        private readonly ConcurrentDictionary<IInteractiveMessage, SemaphoreSlim> _messageSemaphores = new ();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="InteractivityService"/> class.
+        /// Begins tracking the given message.
         /// </summary>
-        /// <param name="client">The client to listen for messages from.</param>
-        /// <param name="delayedActions">The delayed actions service.</param>
-        public InteractivityService(BaseSocketClient client, DelayedActionService delayedActions)
+        /// <param name="id">The ID of the sent message.</param>
+        /// <param name="message">The interactive message.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public Result TrackMessage(Snowflake id, IInteractiveMessage message)
         {
-            this.Client = client;
-            _delayedActions = delayedActions;
+            if (!_trackedMessages.TryAdd(id, message))
+            {
+                return new GenericError("A message with that ID is already tracked.");
+            }
 
-            _trackedMessages = new List<IInteractiveMessage>();
+            if (!_messageSemaphores.TryAdd(message, new SemaphoreSlim(1, 1)))
+            {
+                return new GenericError("A semaphore is already registered for that message.");
+            }
+
+            return Result.FromSuccess();
         }
 
         /// <summary>
-        /// Gets the next message in the given channel.
+        /// Ceases tracking the message with the given ID.
         /// </summary>
-        /// <param name="channel">The channel to watch for the next message.</param>
-        /// <param name="filter">A filter function that determines if the message should be accepted.</param>
-        /// <param name="timeout">A timeout after which the function will return. Defaults to 15 seconds.</param>
-        /// <returns>A result that may contain the message.</returns>
-        public async Task<RetrieveEntityResult<IUserMessage>> GetNextMessageAsync
+        /// <param name="id">The ID of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public async Task<Result> UntrackMessageAsync(Snowflake id, CancellationToken ct = default)
+        {
+            if (!_trackedMessages.TryRemove(id, out var trackedMessage))
+            {
+                // The message is already removed
+                return Result.FromSuccess();
+            }
+
+            if (!_messageSemaphores.TryRemove(trackedMessage, out var semaphore))
+            {
+                // The semaphore is already removed
+                return Result.FromSuccess();
+            }
+
+            await semaphore.WaitAsync(ct);
+            semaphore.Release();
+            semaphore.Dispose();
+
+            return Result.FromSuccess();
+        }
+
+        /// <summary>
+        /// Dispatches an added reaction to interested messages.
+        /// </summary>
+        /// <param name="id">The ID of the message.</param>
+        /// <param name="emoji">The emoji.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public async Task<Result> OnReactionAddedAsync
         (
-            IMessageChannel channel,
-            Func<IUserMessage, bool>? filter = null,
-            TimeSpan? timeout = null
+            Snowflake id,
+            IPartialEmoji emoji,
+            CancellationToken ct = default
         )
         {
-            filter ??= m => true;
-            timeout ??= TimeSpan.FromSeconds(15);
-
-            var messageTrigger = new TaskCompletionSource<IUserMessage>();
-
-            Task Handler(SocketMessage message)
+            if (!_trackedMessages.TryGetValue(id, out var message))
             {
-                if (!(message is IUserMessage userMessage))
+                return Result.FromSuccess();
+            }
+
+            if (!_messageSemaphores.TryGetValue(message, out var semaphore))
+            {
+                throw new InvalidOperationException("Failed to get a semaphore for a tracked message.");
+            }
+
+            await semaphore.WaitAsync(ct);
+            try
+            {
+                var result = await message.OnReactionAddedAsync(emoji, ct);
+                if (!result.IsSuccess)
                 {
-                    return Task.CompletedTask;
+                    return result;
                 }
+            }
+            finally
+            {
+                semaphore.Release();
+            }
 
-                if (userMessage.Channel.Id != channel.Id)
+            return Result.FromSuccess();
+        }
+
+        /// <summary>
+        /// Dispatches a removed reaction to interested messages.
+        /// </summary>
+        /// <param name="id">The ID of the message.</param>
+        /// <param name="emoji">The emoji.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public async Task<Result> OnReactionRemovedAsync(Snowflake id, IPartialEmoji emoji, CancellationToken ct = default)
+        {
+            if (!_trackedMessages.TryGetValue(id, out var message))
+            {
+                return Result.FromSuccess();
+            }
+
+            if (!_messageSemaphores.TryGetValue(message, out var semaphore))
+            {
+                throw new InvalidOperationException("Failed to get a semaphore for a tracked message.");
+            }
+
+            await semaphore.WaitAsync(ct);
+            try
+            {
+                var result = await message.OnReactionRemovedAsync(emoji, ct);
+                if (!result.IsSuccess)
                 {
-                    return Task.CompletedTask;
+                    return result;
                 }
+            }
+            finally
+            {
+                semaphore.Release();
+            }
 
-                if (filter!(userMessage))
+            return Result.FromSuccess();
+        }
+
+        /// <summary>
+        /// Dispatches a complete removal of all reactions to interested messages.
+        /// </summary>
+        /// <param name="id">The ID of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public async Task<Result> OnAllReactionsRemovedAsync(Snowflake id, CancellationToken ct = default)
+        {
+            if (!_trackedMessages.TryGetValue(id, out var message))
+            {
+                return Result.FromSuccess();
+            }
+
+            if (!_messageSemaphores.TryGetValue(message, out var semaphore))
+            {
+                throw new InvalidOperationException("Failed to get a semaphore for a tracked message.");
+            }
+
+            await semaphore.WaitAsync(ct);
+            try
+            {
+                var result = await message.OnAllReactionsRemovedAsync(ct);
+                if (!result.IsSuccess)
                 {
-                    messageTrigger!.SetResult(userMessage);
+                    return result;
                 }
-
-                return Task.CompletedTask;
             }
-
-            this.Client.MessageReceived += Handler;
-
-            var trigger = messageTrigger.Task;
-            var delay = Task.Delay(timeout.Value);
-
-            var task = await Task.WhenAny(trigger, delay);
-
-            this.Client.MessageReceived -= Handler;
-
-            if (task == trigger)
+            finally
             {
-                return RetrieveEntityResult<IUserMessage>.FromSuccess(await trigger);
+                semaphore.Release();
             }
 
-            return RetrieveEntityResult<IUserMessage>.FromError
-            (
-                "No accepted message received within the timeout period."
-            );
+            return Result.FromSuccess();
         }
 
         /// <summary>
-        /// Sends an interactive message to the given channel.
+        /// Ceases tracking the message with the given ID.
         /// </summary>
-        /// <param name="channel">The channel to send the message to.</param>
-        /// <param name="message">The message to send.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task SendInteractiveMessageAsync
-        (
-            IMessageChannel channel,
-            IInteractiveMessage message
-        )
-        {
-            _trackedMessages.Add(message);
-            await message.SendAsync(this, channel);
-
-            while (_trackedMessages.Contains(message))
-            {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-            }
-        }
-
-        /// <summary>
-        /// Sends an interactive message to the given channel and deletes it after a certain timeout.
-        /// </summary>
-        /// <param name="channel">The channel to send the message to.</param>
-        /// <param name="message">The message to send.</param>
-        /// <param name="timeout">The timeout after which the embed will be deleted. Defaults to 15 seconds.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task SendInteractiveMessageAndDeleteAsync
-        (
-            IMessageChannel channel,
-            IInteractiveMessage message,
-            TimeSpan? timeout = null
-        )
-        {
-            timeout ??= TimeSpan.FromSeconds(15.0);
-
-            _trackedMessages.Add(message);
-            await message.SendAsync(this, channel);
-
-            _delayedActions.DelayUntil(() => DeleteInteractiveMessageAsync(message), timeout.Value);
-        }
-
-        /// <summary>
-        /// Deletes an interactive message.
-        /// </summary>
-        /// <param name="message">The message to delete.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task<OperationResult> DeleteInteractiveMessageAsync(IInteractiveMessage message)
-        {
-            _trackedMessages.Remove(message);
-            return message.DeleteAsync();
-        }
-
-        /// <summary>
-        /// Handles the deletion of a message, removing it from the tracking list.
-        /// </summary>
-        /// <param name="message">The deleted message.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task<OperationResult> OnMessageDeletedAsync
-        (
-            Cacheable<IMessage, ulong> message
-        )
-        {
-            var userMessage = await message.GetOrDownloadAsync();
-            if (userMessage is null)
-            {
-                return OperationResult.FromError("Failed to get the message.");
-            }
-
-            var deletedMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
-            foreach (var deletedMessage in deletedMessages)
-            {
-                _trackedMessages.Remove(deletedMessage);
-            }
-
-            return OperationResult.FromSuccess();
-        }
-
-        /// <summary>
-        /// Handles reception of a message.
-        /// </summary>
-        /// <param name="message">The message.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal Task<OperationResult> OnMessageReceivedAsync(SocketMessage message)
-        {
-            return Task.FromResult(OperationResult.FromSuccess());
-        }
-
-        /// <summary>
-        /// Handles an removed reaction.
-        /// </summary>
-        /// <param name="message">The message the reaction was removed to.</param>
-        /// <param name="reaction">The removed reaction.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task<OperationResult> OnReactionRemovedAsync
-        (
-            Cacheable<IUserMessage, ulong> message,
-            SocketReaction reaction
-        )
-        {
-            if (reaction.User.IsSpecified && reaction.User.Value.IsMe(this.Client))
-            {
-                return OperationResult.FromSuccess();
-            }
-
-            var userMessage = await message.GetOrDownloadAsync();
-            if (userMessage is null)
-            {
-                return OperationResult.FromError("Failed to get the message.");
-            }
-
-            var relevantMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
-            var handlerTasks = relevantMessages
-                .Select(relevantMessage => relevantMessage.HandleRemovedInteractionAsync(reaction));
-
-            var handlerResults = await Task.WhenAll(handlerTasks);
-            var failedResult = handlerResults.FirstOrDefault(r => !r.IsSuccess);
-            if (failedResult is null)
-            {
-                return OperationResult.FromSuccess();
-            }
-
-            return OperationResult.FromError(failedResult);
-        }
-
-        /// <summary>
-        /// Handles an added reaction.
-        /// </summary>
-        /// <param name="message">The message the reaction was added to.</param>
-        /// <param name="reaction">The added reaction.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task<OperationResult> OnReactionAddedAsync
-        (
-            Cacheable<IUserMessage, ulong> message,
-            SocketReaction reaction
-        )
-        {
-            if (reaction.User.IsSpecified && reaction.User.Value.IsMe(this.Client))
-            {
-                return OperationResult.FromSuccess();
-            }
-
-            var userMessage = await message.GetOrDownloadAsync();
-            if (userMessage is null)
-            {
-                return OperationResult.FromError("Failed to get the message.");
-            }
-
-            var relevantMessages = _trackedMessages.Where(m => m.Message?.Id == userMessage.Id);
-            var handlerTasks = relevantMessages
-                .Select(relevantMessage => relevantMessage.HandleAddedInteractionAsync(reaction)).ToList();
-
-            var handlerResults = await Task.WhenAll(handlerTasks);
-            var failedResult = handlerResults.FirstOrDefault(r => !r.IsSuccess);
-            if (failedResult is null)
-            {
-                return OperationResult.FromSuccess();
-            }
-
-            return OperationResult.FromError(failedResult);
-        }
+        /// <param name="id">The ID of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public Task<Result> OnMessageDeletedAsync(Snowflake id, CancellationToken ct = default)
+            => UntrackMessageAsync(id, ct);
     }
 }

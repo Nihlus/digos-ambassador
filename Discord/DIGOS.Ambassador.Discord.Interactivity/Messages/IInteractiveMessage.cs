@@ -20,9 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Threading;
 using System.Threading.Tasks;
-using Discord;
-using Discord.WebSocket;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Interactivity.Messages
@@ -33,41 +34,43 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
     public interface IInteractiveMessage
     {
         /// <summary>
-        /// Gets the message that the interactive message wraps.
+        /// Gets the ID of the channel the message is in.
         /// </summary>
-        IUserMessage? Message { get; }
+        Snowflake ChannelID { get; }
 
         /// <summary>
-        /// Gets the user that caused the interactive message to be created.
+        /// Gets the ID of the message.
         /// </summary>
-        IUser SourceUser { get; }
+        Snowflake ID { get; }
 
         /// <summary>
-        /// Sends the interactive message to the given channel.
+        /// Handles an added reaction.
         /// </summary>
-        /// <param name="service">The interactivity service that manages this message.</param>
-        /// <param name="channel">The channel.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<OperationResult> SendAsync(InteractivityService service, IMessageChannel channel);
+        /// <param name="emoji">The emoji.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public Task<Result> OnReactionAddedAsync(IPartialEmoji emoji, CancellationToken ct = default);
 
         /// <summary>
-        /// Deletes the interactive message.
+        /// Handles a removed reaction.
         /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<OperationResult> DeleteAsync();
+        /// <param name="emoji">The emoji.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public Task<Result> OnReactionRemovedAsync(IPartialEmoji emoji, CancellationToken ct = default);
 
         /// <summary>
-        /// Handles an added interaction, performing tasks as needed.
+        /// Handles a complete removal of all reactions.
         /// </summary>
-        /// <param name="reaction">The added interaction.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<OperationResult> HandleAddedInteractionAsync(SocketReaction reaction);
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public Task<Result> OnAllReactionsRemovedAsync(CancellationToken ct = default);
 
         /// <summary>
-        /// Handles a removed interaction, performing tasks as needed.
+        /// Forces an update of the interactive message.
         /// </summary>
-        /// <param name="reaction">The removed interaction.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<OperationResult> HandleRemovedInteractionAsync(SocketReaction reaction);
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public Task<Result> UpdateAsync(CancellationToken ct = default);
     }
 }
