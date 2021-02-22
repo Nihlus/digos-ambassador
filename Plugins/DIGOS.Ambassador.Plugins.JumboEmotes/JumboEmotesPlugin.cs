@@ -20,11 +20,13 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.JumboEmotes;
 using DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Remora.Commands.Extensions;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 
@@ -48,6 +50,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
+                .AddParser<IEmoji, EmojiTypeReader>()
                 .AddCommandGroup<JumboCommands>();
         }
     }

@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules
             string emoteUrl;
             if (emoji.ID is not null)
             {
-                emoteUrl = $"https://cdn.discordapp.com/emojis/${emoji.ID}.png";
+                emoteUrl = $"https://cdn.discordapp.com/emojis/{emoji.ID}.png";
             }
             else
             {
