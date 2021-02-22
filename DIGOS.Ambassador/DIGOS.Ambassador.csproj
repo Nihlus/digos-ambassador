@@ -35,7 +35,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\DIGOS.Ambassador.Core\DIGOS.Ambassador.Core.csproj" />
-    <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.JumboEmotes\DIGOS.Ambassador.Plugins.JumboEmotes.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.JumboEmotes\DIGOS.Ambassador.Plugins.JumboEmotes.csproj">
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
