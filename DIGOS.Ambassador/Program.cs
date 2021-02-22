@@ -21,6 +21,7 @@
 //
 
 using System;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -89,13 +90,14 @@ namespace DIGOS.Ambassador
 
             var token = getBotToken.Entity.Trim();
 
+            var pluginService = new PluginService();
+            var plugins = pluginService.LoadAvailablePlugins().ToList();
+
             var hostBuilder = Host.CreateDefaultBuilder()
                 .AddDiscordService(_ => token)
                 .UseSystemd()
                 .ConfigureServices(services =>
                 {
-                    var pluginService = new PluginService();
-
                     services
                         .AddSingleton(pluginService)
                         .AddSingleton(contentService)
@@ -107,7 +109,6 @@ namespace DIGOS.Ambassador
                         .AddDiscordCommands(true)
                         .AddDiscordCaching();
 
-                    var plugins = pluginService.LoadAvailablePlugins();
                     foreach (var plugin in plugins)
                     {
                         plugin.ConfigureServices(services);
@@ -154,6 +155,19 @@ namespace DIGOS.Ambassador
                 {
                     log.LogWarning("Failed to update slash commands: {Reason}", updateSlash.Error.Message);
                 }
+            }
+
+            foreach (var plugin in plugins)
+            {
+                log.LogInformation($"Initializing plugin {plugin.Name}, version {plugin.Version}...");
+                var initializePlugin = await plugin.InitializeAsync(hostServices);
+                if (initializePlugin.IsSuccess)
+                {
+                    continue;
+                }
+
+                log.LogError(initializePlugin.Error.Message);
+                return;
             }
 
             await host.RunAsync(cancellationSource.Token);
