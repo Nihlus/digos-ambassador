@@ -236,7 +236,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             {
                 if (existingReactions.HasValue)
                 {
-                    if (existingReactions.Value.Any(r => GetPartialEmojiName(r.Emoji) == reaction))
+                    if (existingReactions.Value!.Any(r => GetPartialEmojiName(r.Emoji) == reaction))
                     {
                         // This one is already added; skip it
                         continue;
@@ -280,7 +280,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
                 throw new InvalidOperationException();
             }
 
-            return emoji.ID.Value.ToString();
+            return emoji.ID.Value.ToString()!;
         }
     }
 }

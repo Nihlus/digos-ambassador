@@ -23,6 +23,7 @@
 using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using DIGOS.Ambassador.Core.Services;
@@ -32,6 +33,12 @@ using log4net.Repository.Hierarchy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Remora.Commands.Extensions;
+using Remora.Commands.Services;
+using Remora.Discord.Caching.Extensions;
+using Remora.Discord.Commands.Extensions;
+using Remora.Discord.Commands.Services;
+using Remora.Discord.Core;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Plugins.Services;
 
@@ -48,6 +55,14 @@ namespace DIGOS.Ambassador
         /// <returns>A task.</returns>
         public static async Task Main()
         {
+            var cancellationSource = new CancellationTokenSource();
+
+            Console.CancelKeyPress += (_, eventArgs) =>
+            {
+                eventArgs.Cancel = true;
+                cancellationSource.Cancel();
+            };
+
             // Configure logging
             const string configurationName = "DIGOS.Ambassador.log4net.config";
             var logConfig = new XmlDocument();
@@ -88,6 +103,11 @@ namespace DIGOS.Ambassador
                         .AddSingleton(contentFileSystem)
                         .AddSingleton<Random>();
 
+                    services
+                        .AddCommands()
+                        .AddDiscordCommands(true)
+                        .AddDiscordCaching();
+
                     var plugins = pluginService.LoadAvailablePlugins();
                     foreach (var plugin in plugins)
                     {
@@ -105,11 +125,39 @@ namespace DIGOS.Ambassador
                 });
 
             var host = hostBuilder.Build();
+            var hostServices = host.Services;
 
-            var logger = host.Services.GetRequiredService<ILogger<Program>>();
-            logger.LogInformation($"Running on {RuntimeInformation.FrameworkDescription}");
+            var log = hostServices.GetRequiredService<ILogger<Program>>();
+            log.LogInformation($"Running on {RuntimeInformation.FrameworkDescription}");
 
-            await host.RunAsync();
+            Snowflake? debugServer = null;
+#if DEBUG
+            var debugServerString = Environment.GetEnvironmentVariable("REMORA_DEBUG_SERVER");
+            if (debugServerString is not null)
+            {
+                if (!Snowflake.TryParse(debugServerString, out debugServer))
+                {
+                    log.LogWarning("Failed to parse debug server from environment");
+                }
+            }
+#endif
+
+            var slashService = hostServices.GetRequiredService<SlashService>();
+
+            if (!slashService.SupportsSlashCommands())
+            {
+                log.LogWarning("The registered commands of the bot don't support slash commands");
+            }
+            else
+            {
+                var updateSlash = await slashService.UpdateSlashCommandsAsync(debugServer, cancellationSource.Token);
+                if (!updateSlash.IsSuccess)
+                {
+                    log.LogWarning("Failed to update slash commands: {Reason}", updateSlash.Error.Message);
+                }
+            }
+
+            await host.RunAsync(cancellationSource.Token);
         }
     }
 }
