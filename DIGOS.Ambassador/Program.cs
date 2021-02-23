@@ -129,10 +129,9 @@ namespace DIGOS.Ambassador
             var hostServices = host.Services;
 
             var log = hostServices.GetRequiredService<ILogger<Program>>();
-            log.LogInformation($"Running on {RuntimeInformation.FrameworkDescription}");
+            log.LogInformation("Running on {Framework}", RuntimeInformation.FrameworkDescription);
 
             Snowflake? debugServer = null;
-#if DEBUG
             var debugServerString = Environment.GetEnvironmentVariable("REMORA_DEBUG_SERVER");
             if (debugServerString is not null)
             {
@@ -141,7 +140,6 @@ namespace DIGOS.Ambassador
                     log.LogWarning("Failed to parse debug server from environment");
                 }
             }
-#endif
 
             var slashService = hostServices.GetRequiredService<SlashService>();
 
