@@ -82,7 +82,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <param name="emptyCollectionDescription">The description to use when the collection is empty.</param>
         /// <typeparam name="TItem">The type of the items in the collection.</typeparam>
         /// <returns>The paginated embed.</returns>
-        public static IReadOnlyList<IEmbed> SimpleFieldsFromCollection<TItem>
+        public static IReadOnlyList<Embed> SimpleFieldsFromCollection<TItem>
         (
             IReadOnlyList<TItem> items,
             Func<TItem, string> titleSelector,
@@ -90,7 +90,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             string emptyCollectionDescription = "There's nothing here."
         )
         {
-            List<IEmbed> pages = new();
+            List<Embed> pages = new();
             if (!items.Any())
             {
                 var eb = new Embed

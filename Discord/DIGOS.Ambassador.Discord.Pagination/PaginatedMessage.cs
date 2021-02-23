@@ -22,10 +22,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -41,7 +41,6 @@ namespace DIGOS.Ambassador.Discord.Pagination
     public class PaginatedMessage : InteractiveMessage
     {
         private readonly IDiscordRestChannelAPI _channelAPI;
-        private readonly UserFeedbackService _feedback;
 
         /// <summary>
         /// Holds the pages in the message.
@@ -74,23 +73,20 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <param name="channelID">The ID of the channel the message is in.</param>
         /// <param name="messageID">The ID of the message.</param>
         /// <param name="channelAPI">The channel API.</param>
-        /// <param name="feedbackService">The user feedback service.</param>
         /// <param name="sourceUserID">The ID of the source user.</param>
         /// <param name="pages">The pages in the paginated message.</param>
         /// <param name="appearance">The appearance options.</param>
-        protected PaginatedMessage
+        public PaginatedMessage
         (
             Snowflake channelID,
             Snowflake messageID,
             IDiscordRestChannelAPI channelAPI,
-            UserFeedbackService feedbackService,
             Snowflake sourceUserID,
             IReadOnlyList<Embed> pages,
             PaginatedAppearanceOptions appearance
         )
             : base(channelID, messageID)
         {
-            _feedback = feedbackService;
             _sourceUserID = sourceUserID;
             _pages = pages;
             _appearance = appearance;
@@ -131,11 +127,10 @@ namespace DIGOS.Ambassador.Discord.Pagination
 
             if (knownEmoji.Equals(_appearance.Help))
             {
-                var sendHelp = await _feedback.SendInfoAsync(this.ChannelID, userID, _appearance.HelpText);
-                var firstFail = sendHelp.FirstOrDefault(r => !r.IsSuccess);
-
-                return firstFail.Equals(default)
-                    ? Result.FromError(firstFail)
+                var embed = new Embed { Colour = Color.Blue, Description = _appearance.HelpText };
+                var sendHelp = await _channelAPI.CreateMessageAsync(this.ChannelID, embed: embed, ct: ct);
+                return !sendHelp.IsSuccess
+                    ? Result.FromError(sendHelp)
                     : Result.FromSuccess();
             }
 
@@ -157,7 +152,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
 
             if (knownEmoji.Equals(_appearance.Next))
             {
-                if (_currentPage >= _pages.Count)
+                if (_currentPage >= _pages.Count - 1)
                 {
                     return Result.FromSuccess();
                 }

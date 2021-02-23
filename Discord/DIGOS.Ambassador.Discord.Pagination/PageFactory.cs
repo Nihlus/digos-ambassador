@@ -41,7 +41,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// <param name="description">The description to display on each page.</param>
         /// <param name="pageBase">The base layout for the page.</param>
         /// <returns>The paginated embed.</returns>
-        public static IEnumerable<IEmbed> FromFields
+        public static IEnumerable<Embed> FromFields
         (
             IEnumerable<IEmbedField> fields,
             uint maxFieldsPerPage = 5,
@@ -71,7 +71,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
                 var fieldContentLength = field.Name.Length + field.Value.Length;
                 if (currentPageFields.Count >= maxFieldsPerPage || (pageBaseLength + fieldContentLength >= 1300))
                 {
-                    pages.Add(pageBase with { Fields = currentPageFields });
+                    pages.Add(pageBase with { Fields = new List<IEmbedField>(currentPageFields) });
                     currentPageFields.Clear();
                 }
 
@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Discord.Pagination
             // Stick the remaining ones on the end
             if (currentPageFields.Count > 0)
             {
-                pages.Add(pageBase with { Fields = currentPageFields });
+                pages.Add(pageBase with { Fields = new List<IEmbedField>(currentPageFields) });
                 currentPageFields.Clear();
             }
 
