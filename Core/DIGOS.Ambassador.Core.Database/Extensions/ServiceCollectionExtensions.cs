@@ -23,8 +23,10 @@
 using DIGOS.Ambassador.Core.Database.Services;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.EntityFrameworkCore.Modular;
 using Remora.EntityFrameworkCore.Modular.Extensions;
+using Remora.EntityFrameworkCore.Modular.Services;
 
 namespace DIGOS.Ambassador.Core.Database.Extensions
 {
@@ -47,6 +49,9 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
         )
             where TContext : SchemaAwareDbContext
         {
+            @this.TryAddSingleton<SchemaAwareDbContextService>();
+            @this.TryAddSingleton<ContextConfigurationService>();
+
             return @this.AddSchemaAwareDbContextPool<TContext>((provider, builder) =>
             {
                 var configurationService = provider.GetRequiredService<ContextConfigurationService>();
