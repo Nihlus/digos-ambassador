@@ -22,10 +22,13 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
 using Remora.Discord.Core;
 using Remora.Results;
 
@@ -45,6 +48,58 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// Holds a mapping of tracked messages to synchronization primitives.
         /// </summary>
         private readonly ConcurrentDictionary<IInteractiveMessage, SemaphoreSlim> _messageSemaphores = new();
+
+        /// <summary>
+        /// Holds the Discord channel API.
+        /// </summary>
+        private readonly IDiscordRestChannelAPI _channelAPI;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InteractivityService"/> class.
+        /// </summary>
+        /// <param name="channelAPI">The channel API.</param>
+        public InteractivityService(IDiscordRestChannelAPI channelAPI)
+        {
+            _channelAPI = channelAPI;
+        }
+
+        /// <summary>
+        /// Sends an interactive message.
+        /// </summary>
+        /// <param name="channelID">The channel to send the message in.</param>
+        /// <param name="messageFactory">A factory function that wraps a sent message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public async Task<Result> SendInteractiveMessageAsync
+        (
+            Snowflake channelID,
+            Func<Snowflake, Snowflake, IDiscordRestChannelAPI, IInteractiveMessage> messageFactory,
+            CancellationToken ct = default
+        )
+        {
+            var initialEmbed = new Embed
+            {
+                Colour = Color.Gray,
+                Description = "Loading..."
+            };
+
+            var sendMessage = await _channelAPI.CreateMessageAsync(channelID, embed: initialEmbed, ct: ct);
+            if (!sendMessage.IsSuccess)
+            {
+                return Result.FromError(sendMessage);
+            }
+
+            var message = sendMessage.Entity;
+            var interactiveMessage = messageFactory(channelID, message.ID, _channelAPI);
+
+            var updateMessage = await interactiveMessage.UpdateAsync(ct);
+            if (!updateMessage.IsSuccess)
+            {
+                return updateMessage;
+            }
+
+            return TrackMessage(message.ID, interactiveMessage);
+        }
 
         /// <summary>
         /// Begins tracking the given message.
