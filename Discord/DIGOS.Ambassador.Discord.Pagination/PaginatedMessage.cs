@@ -189,16 +189,16 @@ namespace DIGOS.Ambassador.Discord.Pagination
                 Footer = new EmbedFooter(string.Format(_appearance.FooterFormat, _currentPage + 1, _pages.Count))
             };
 
-            var modifyMessage = await _channelAPI.EditMessageAsync(this.ChannelID, this.MessageID, embed: page, ct: ct);
-            if (!modifyMessage.IsSuccess)
+            var updateButtons = await UpdateReactionButtonsAsync(ct);
+            if (!updateButtons.IsSuccess)
             {
-                return Result.FromError(modifyMessage);
+                return updateButtons;
             }
 
-            var updateButtons = await UpdateReactionButtonsAsync(ct);
-            return updateButtons.IsSuccess
+            var modifyMessage = await _channelAPI.EditMessageAsync(this.ChannelID, this.MessageID, embed: page, ct: ct);
+            return modifyMessage.IsSuccess
                 ? Result.FromSuccess()
-                : updateButtons;
+                : Result.FromError(modifyMessage);
         }
 
         /// <summary>
