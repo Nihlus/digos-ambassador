@@ -217,7 +217,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
             {
                 author = new EmbedAuthor
                 {
-                    Name = $"<@{message.Author.ID}>",
+                    Name = $"{message.Author.Username}#{message.Author.Discriminator}",
                     IconUrl = $"https://cdn.discordapp.com/avatars/{message.Author.ID}/{message.Author.Avatar.Value}.png"
                 };
             }
@@ -225,7 +225,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
             {
                 author = new EmbedAuthor
                 {
-                    Name = $"<@{message.Author.ID}>"
+                    Name = $"{message.Author.Username}#{message.Author.Discriminator}"
                 };
             }
 
@@ -265,8 +265,7 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
         private static string GetPostedTimeInfo(IMessage message)
         {
             return $"{message.Timestamp.DateTime.ToOrdinalWords()} " +
-                   $"at {message.Timestamp:HH:mm}, " +
-                   $"in <#{message.ChannelID}>";
+                   $"at {message.Timestamp:HH:mm}";
         }
     }
 }
