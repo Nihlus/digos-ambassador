@@ -40,6 +40,7 @@ using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Core;
 using Remora.Discord.Hosting.Extensions;
+using Remora.Plugins.Abstractions;
 using Remora.Plugins.Services;
 
 namespace DIGOS.Ambassador
@@ -146,7 +147,7 @@ namespace DIGOS.Ambassador
 
             if (!slashService.SupportsSlashCommands())
             {
-                log.LogWarning("The registered commands of the bot don't support slash commands");
+                log.LogWarning("The registered commands of the bot don't support slash commands: ");
             }
             else
             {
@@ -159,14 +160,40 @@ namespace DIGOS.Ambassador
 
             foreach (var plugin in plugins)
             {
-                log.LogInformation($"Initializing plugin {plugin.Name}, version {plugin.Version}...");
+                log.LogInformation("Initializing plugin {Name}, version {Version}...", plugin.Name, plugin.Version);
                 var initializePlugin = await plugin.InitializeAsync(hostServices);
-                if (initializePlugin.IsSuccess)
+                if (!initializePlugin.IsSuccess)
+                {
+                    log.LogError
+                    (
+                        "Failed to initialize plugin {Name}: {Error}",
+                        plugin.Name,
+                        initializePlugin.Error.Message
+                    );
+
+                    return;
+                }
+
+                if (plugin is not IMigratablePlugin migratablePlugin)
                 {
                     continue;
                 }
 
-                log.LogError(initializePlugin.Error.Message);
+                log.LogInformation("Applying plugin migrations...");
+
+                var migratePlugin = await migratablePlugin.MigratePluginAsync(hostServices);
+                if (migratePlugin.IsSuccess)
+                {
+                    continue;
+                }
+
+                log.LogError
+                (
+                    "Failed to migrate plugin {Name}: {Error}",
+                    plugin.Name,
+                    migratePlugin.Error.Message
+                );
+
                 return;
             }
 
