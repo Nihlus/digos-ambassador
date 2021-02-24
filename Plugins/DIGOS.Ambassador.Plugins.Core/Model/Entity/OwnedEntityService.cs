@@ -75,7 +75,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="newOwnerEntities">The entities that the user already owns.</param>
         /// <param name="entity">The entity to transfer.</param>
         /// <returns>An entity modification result, which may or may not have succeeded.</returns>
-        public ModifyEntityResult TransferEntityOwnership
+        public Result TransferEntityOwnership
         (
             User newOwner,
             IReadOnlyCollection<IOwnedNamedEntity> newOwnerEntities,
@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         {
             if (entity.IsOwner(newOwner))
             {
-                return ModifyEntityResult.FromError
+                return new GenericError
                 (
                     $"That person already owns the {entity.EntityTypeDisplayName}."
                         .Humanize().Transform(To.SentenceCase)
@@ -93,7 +93,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 
             if (newOwnerEntities.Any(e => string.Equals(e.Name.ToLower(), entity.Name.ToLower())))
             {
-                return ModifyEntityResult.FromError
+                return new GenericError
                 (
                     $"That user already owns a {entity.EntityTypeDisplayName} named {entity.Name}. Please rename it first."
                         .Humanize().Transform(To.SentenceCase)
@@ -102,7 +102,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 
             entity.Owner = newOwner;
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="entityName">The name of the entity.</param>
         /// <returns>true if the name is valid; otherwise, false.</returns>
         [Pure]
-        public DetermineConditionResult IsEntityNameValid
+        public Result IsEntityNameValid
         (
             IEnumerable<string> commandNames,
             string? entityName
@@ -120,12 +120,12 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         {
             if (entityName.IsNullOrWhitespace())
             {
-                return DetermineConditionResult.FromError("Names cannot be empty.");
+                return new GenericError("Names cannot be empty.");
             }
 
             if (entityName.Any(c => _reservedNameCharacters.Contains(c)))
             {
-                return DetermineConditionResult.FromError
+                return new GenericError
                 (
                     $"Names may not contain any of the following characters: {_reservedNameCharacters.Humanize()}"
                 );
@@ -133,7 +133,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 
             if (_reservedNames.Any(n => string.Equals(n, entityName, StringComparison.OrdinalIgnoreCase)))
             {
-                return DetermineConditionResult.FromError
+                return new GenericError
                 (
                     "That is a reserved name."
                 );
@@ -141,10 +141,10 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 
             if (commandNames.Any(entityName.Contains))
             {
-                return DetermineConditionResult.FromError("Names may not be the same as a command.");
+                return new GenericError("Names may not be the same as a command.");
             }
 
-            return DetermineConditionResult.FromSuccess();
+            return Result.FromSuccess();
         }
     }
 }

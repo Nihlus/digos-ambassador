@@ -21,59 +21,61 @@
 //
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Permissions;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using Humanizer;
 using Humanizer.Localisation;
 using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
+using User = DIGOS.Ambassador.Plugins.Core.Model.Users.User;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
+#pragma warning disable SA1118
 
 namespace DIGOS.Ambassador.Plugins.Core.CommandModules
 {
     /// <summary>
     /// User-related commands, such as viewing or editing info about a specific user.
     /// </summary>
-    [UsedImplicitly]
     [Group("user")]
-    [Summary("User-related commands, such as viewing or editing info about a specific user.")]
-    public class UserCommands : ModuleBase
+    [Description("User-related commands, such as viewing or editing info about a specific user.")]
+    public class UserCommands : CommandGroup
     {
         private readonly UserService _users;
-        private readonly UserFeedbackService _feedback;
+        private readonly ICommandContext _context;
+        private readonly IDiscordRestChannelAPI _channelAPI;
+        private readonly IDiscordRestGuildAPI _guildAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserCommands"/> class.
         /// </summary>
-        /// <param name="feedback">The user feedback service.</param>
         /// <param name="users">The user service.</param>
-        public UserCommands(UserFeedbackService feedback, UserService users)
+        /// <param name="context">The command context.</param>
+        /// <param name="channelAPI">The channel API.</param>
+        /// <param name="guildAPI">The guild API.</param>
+        public UserCommands(UserService users, ICommandContext context, IDiscordRestChannelAPI channelAPI, IDiscordRestGuildAPI guildAPI)
         {
-            _feedback = feedback;
             _users = users;
+            _context = context;
+            _channelAPI = channelAPI;
+            _guildAPI = guildAPI;
         }
-
-        /// <summary>
-        /// Shows known information about the invoking user.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("info")]
-        [Summary("Shows known information about the invoking user.")]
-        [RequirePermission(typeof(ShowUserInfo), PermissionTarget.Self)]
-        public async Task<RuntimeResult> ShowInfoAsync() => await ShowInfoAsync(this.Context.User);
 
         /// <summary>
         /// Shows known information about the mentioned user.
@@ -81,20 +83,18 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// <param name="discordUser">The Discord user to show the info of.</param>
         [UsedImplicitly]
         [Command("info")]
-        [Summary("Shows known information about the target user.")]
+        [Description("Shows known information about the target user.")]
         [RequirePermission(typeof(ShowUserInfo), PermissionTarget.Other)]
-        public async Task<RuntimeResult> ShowInfoAsync(IUser discordUser)
+        public async Task<IResult> ShowInfoAsync(IUser discordUser)
         {
-            var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
+            var getUserResult = await _users.GetOrRegisterUserAsync(discordUser.ID);
             if (!getUserResult.IsSuccess)
             {
-                return getUserResult.ToRuntimeResult();
+                return getUserResult;
             }
 
             var user = getUserResult.Entity;
-            await ShowUserInfoAsync(discordUser, user);
-
-            return RuntimeCommandResult.FromSuccess();
+            return await ShowUserInfoAsync(discordUser, user);
         }
 
         /// <summary>
@@ -102,27 +102,67 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         /// <param name="discordUser">The Discord user to show the info of.</param>
         /// <param name="user">The stored information about the user.</param>
-        private async Task ShowUserInfoAsync(IUser discordUser, User user)
+        private async Task<Result> ShowUserInfoAsync(IUser discordUser, User user)
         {
-            var eb = new EmbedBuilder();
-
-            eb.WithAuthor(discordUser);
-            eb.WithThumbnailUrl(discordUser.GetAvatarUrl());
-
-            if (discordUser is SocketGuildUser guildUser)
+            var embedFields = new List<IEmbedField>();
+            var eb = new Embed
             {
-                var primaryRole = guildUser.Roles.OrderByDescending(r => r.Position).FirstOrDefault();
-                if (!(primaryRole is null) && !primaryRole.IsEveryone)
+                Author = new EmbedAuthor
+                (
+                    $"{discordUser.Username}#{discordUser.Discriminator}",
+                    IconUrl: discordUser.Avatar is not null ?
+                        $"https://cdn.discordapp.com/avatars/{discordUser.ID}/{discordUser.Avatar.Value}.png"
+                        : default
+                ),
+                Thumbnail = new EmbedThumbnail
+                (
+                    discordUser.Avatar is not null ?
+                    $"https://cdn.discordapp.com/avatars/{discordUser.ID}/{discordUser.Avatar.Value}.png"
+                    : default
+                ),
+                Fields = embedFields
+            };
+
+            if (_context.GuildID.HasValue)
+            {
+                var getMember = await _guildAPI.GetGuildMemberAsync
+                (
+                    _context.GuildID.Value,
+                    discordUser.ID,
+                    this.CancellationToken
+                );
+
+                if (!getMember.IsSuccess)
                 {
-                    eb.WithColor(primaryRole.Color);
+                    return Result.FromError(getMember);
                 }
-                else
+
+                var member = getMember.Entity;
+                if (member.Roles.Count > 0)
                 {
-                    eb.WithColor(Color.LighterGrey);
+                    var getRoles = await _guildAPI.GetGuildRolesAsync(_context.GuildID.Value, this.CancellationToken);
+                    if (!getRoles.IsSuccess)
+                    {
+                        return Result.FromError(getRoles);
+                    }
+
+                    var roles = getRoles.Entity;
+                    var primaryRole = roles.OrderByDescending(r => r.Position).First(r => member.Roles.Contains(r.ID));
+                    eb = eb with
+                    {
+                        Colour = primaryRole.Colour
+                    };
                 }
             }
+            else
+            {
+                eb = eb with
+                {
+                    Colour = Color.LightSlateGray
+                };
+            }
 
-            eb.AddField("Name", discordUser.Username);
+            embedFields.Add(new EmbedField("Name", discordUser.Username));
 
             string timezoneValue;
             if (user.Timezone is null)
@@ -140,36 +180,37 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 timezoneValue += user.Timezone.Value;
             }
 
-            eb.AddField("Timezone", timezoneValue);
+            embedFields.Add(new EmbedField("Timezone", timezoneValue));
 
-            string bioValue;
-            if (string.IsNullOrEmpty(user.Bio))
-            {
-                bioValue = "No bio set.";
-            }
-            else
-            {
-                bioValue = user.Bio;
-            }
+            string bioValue = string.IsNullOrEmpty(user.Bio) ? "No bio set." : user.Bio;
 
-            eb.AddField("Bio", bioValue);
+            embedFields.Add(new EmbedField("Bio", bioValue));
 
             var technicalInfo = new StringBuilder();
-            technicalInfo.AppendLine($"ID: {discordUser.Id}");
+            technicalInfo.AppendLine($"ID: {discordUser.ID}");
 
-            var span = DateTime.UtcNow - discordUser.CreatedAt;
+            var span = DateTime.UtcNow - discordUser.ID.Timestamp;
 
             var humanizedTimeAgo = span > TimeSpan.FromSeconds(60)
                 ? span.Humanize(maxUnit: TimeUnit.Year, culture: CultureInfo.InvariantCulture)
                 : "a few seconds";
 
-            var created = $"{humanizedTimeAgo} ago ({discordUser.CreatedAt.UtcDateTime:yyyy-MM-ddTHH:mm:ssK})\n";
+            var created = $"{humanizedTimeAgo} ago ({discordUser.ID.Timestamp.UtcDateTime:yyyy-MM-ddTHH:mm:ssK})\n";
 
             technicalInfo.AppendLine($"Created: {created}");
 
-            eb.AddField("Technical Info", technicalInfo.ToString());
+            embedFields.Add(new EmbedField("Technical Info", technicalInfo.ToString()));
 
-            await _feedback.SendEmbedAsync(this.Context.Channel, eb.Build());
+            var sendEmbed = await _channelAPI.CreateMessageAsync
+            (
+                _context.ChannelID,
+                embed: eb,
+                ct: this.CancellationToken
+            );
+
+            return sendEmbed.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendEmbed);
         }
 
         /// <summary>
@@ -177,46 +218,38 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Group("set")]
-        public class SetCommands : ModuleBase
+        public class SetCommands : CommandGroup
         {
             private readonly UserService _users;
+            private readonly ICommandContext _context;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="SetCommands"/> class.
             /// </summary>
             /// <param name="users">The user service.</param>
-            public SetCommands(UserService users)
+            /// <param name="context">The command context.</param>
+            public SetCommands(UserService users, ICommandContext context)
             {
                 _users = users;
+                _context = context;
             }
-
-            /// <summary>
-            /// Sets the invoking user's bio.
-            /// </summary>
-            /// <param name="bio">The user's new bio.</param>
-            [UsedImplicitly]
-            [Command("bio")]
-            [Summary("Sets the invoking user's bio.")]
-            [RequirePermission(typeof(EditUserInfo), PermissionTarget.Self)]
-            public async Task<RuntimeResult> SetUserBioAsync(string bio) => await SetUserBioAsync(this.Context.User, bio);
 
             /// <summary>
             /// Sets the target user's bio.
             /// </summary>
             /// <param name="discordUser">The Discord user to change the bio of.</param>
             /// <param name="bio">The user's new bio.</param>
-            [UsedImplicitly]
             [Command("bio")]
-            [Summary("Sets the target user's bio.")]
-            [RequireContext(ContextType.Guild)]
+            [Description("Sets the target user's bio.")]
+            [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditUserInfo), PermissionTarget.Other)]
-            public async Task<RuntimeResult> SetUserBioAsync(IUser discordUser, string bio)
+            public async Task<IResult> SetUserBioAsync(IUser discordUser, string bio)
             {
                 // Add the user to the user database if they're not already in it
-                var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
+                var getUserResult = await _users.GetOrRegisterUserAsync(discordUser.ID);
                 if (!getUserResult.IsSuccess)
                 {
-                    return getUserResult.ToRuntimeResult();
+                    return getUserResult;
                 }
 
                 var user = getUserResult.Entity;
@@ -224,40 +257,28 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var setBioResult = await _users.SetUserBioAsync(user, bio);
                 if (!setBioResult.IsSuccess)
                 {
-                    return setBioResult.ToRuntimeResult();
+                    return setBioResult;
                 }
 
-                return RuntimeCommandResult.FromSuccess($"Bio of {discordUser.Mention} updated.");
+                return Result<string>.FromSuccess("Bio updated.");
             }
-
-            /// <summary>
-            /// Sets the invoking user's UTC timezone hour offset.
-            /// </summary>
-            /// <param name="timezone">The user's new timezone hour offset.</param>
-            [UsedImplicitly]
-            [Command("timezone")]
-            [Summary("Sets the invoking user's UTC timezone hour offset.")]
-            [RequirePermission(typeof(EditUserInfo), PermissionTarget.Self)]
-            public async Task<RuntimeResult> SetUserTimezoneAsync(int timezone)
-                => await SetUserTimezoneAsync(this.Context.User, timezone);
 
             /// <summary>
             /// Sets the target user's UTC timezone hour offset.
             /// </summary>
             /// <param name="discordUser">The Discord user to change the timezone of.</param>
             /// <param name="timezone">The user's new timezone hour offset.</param>
-            [UsedImplicitly]
             [Command("timezone")]
-            [Summary("Sets the target user's UTC timezone hour offset.")]
-            [RequireContext(ContextType.Guild)]
+            [Description("Sets the target user's UTC timezone hour offset.")]
+            [RequireContext(ChannelContext.Guild)]
             [RequirePermission(typeof(EditUserInfo), PermissionTarget.Other)]
-            public async Task<RuntimeResult> SetUserTimezoneAsync(IUser discordUser, int timezone)
+            public async Task<IResult> SetUserTimezoneAsync(IUser discordUser, int timezone)
             {
                 // Add the user to the user database if they're not already in it
-                var getUserResult = await _users.GetOrRegisterUserAsync(discordUser);
+                var getUserResult = await _users.GetOrRegisterUserAsync(discordUser.ID);
                 if (!getUserResult.IsSuccess)
                 {
-                    return getUserResult.ToRuntimeResult();
+                    return getUserResult;
                 }
 
                 var user = getUserResult.Entity;
@@ -265,10 +286,10 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 var setTimezoneResult = await _users.SetUserTimezoneAsync(user, timezone);
                 if (!setTimezoneResult.IsSuccess)
                 {
-                    return setTimezoneResult.ToRuntimeResult();
+                    return setTimezoneResult;
                 }
 
-                return RuntimeCommandResult.FromSuccess($"Timezone of {discordUser.Mention} updated.");
+                return Result<string>.FromSuccess("Timezone updated.");
             }
         }
     }

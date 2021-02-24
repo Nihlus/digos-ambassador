@@ -20,40 +20,16 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.Core.Model.Entity;
-using Discord.Commands;
 using JetBrains.Annotations;
+using Remora.Commands.Conditions;
 
 namespace DIGOS.Ambassador.Plugins.Core.Preconditions
 {
     /// <summary>
-    /// Acts as a precondition for owned entities, limiting their use to their owners.
+    /// Marks an entity parameter, limiting their use to their owner.
     /// </summary>
     [PublicAPI]
-    public class RequireEntityOwnerAttribute : ParameterPreconditionAttribute
+    public class RequireEntityOwnerAttribute : ConditionAttribute
     {
-        /// <inheritdoc />
-        public override Task<PreconditionResult> CheckPermissionsAsync
-        (
-            ICommandContext context,
-            ParameterInfo parameter,
-            object value,
-            IServiceProvider services
-        )
-        {
-            if (!(value is IOwnedNamedEntity entity))
-            {
-                return Task.FromResult(PreconditionResult.FromError("The value isn't an owned entity."));
-            }
-
-            if (entity.IsOwner(context.User))
-            {
-                return Task.FromResult(PreconditionResult.FromSuccess());
-            }
-
-            return Task.FromResult(PreconditionResult.FromError("You don't have permission to do that."));
-        }
     }
 }

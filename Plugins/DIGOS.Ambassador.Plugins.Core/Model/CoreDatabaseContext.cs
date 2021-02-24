@@ -23,6 +23,7 @@ using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.Core;
 using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -75,9 +76,17 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
                 .HasIndex(u => u.DiscordID)
                 .IsUnique();
 
+            modelBuilder.Entity<User>()
+                .Property(s => s.DiscordID)
+                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
+
             modelBuilder.Entity<Server>()
                 .HasIndex(s => s.DiscordID)
                 .IsUnique();
+
+            modelBuilder.Entity<Server>()
+                .Property(s => s.DiscordID)
+                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
         }
     }
 }

@@ -20,18 +20,19 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Services;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Attributes;
-using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using Discord.Commands;
-using Discord.WebSocket;
 using JetBrains.Annotations;
-using static Discord.Commands.ContextType;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 #pragma warning disable SA1118 // Parameter spans multiple lines, big strings
@@ -43,33 +44,33 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
     /// </summary>
     [UsedImplicitly]
     [Group("privacy")]
-    [Summary("Privacy-related commands (data storage, deleting requests, data protection, privacy contacts, etc).")]
-    public class PrivacyCommands : ModuleBase
+    [Description("Privacy-related commands (data storage, deleting requests, data protection, privacy contacts, etc).")]
+    public class PrivacyCommands : CommandGroup
     {
-        private readonly DiscordSocketClient _client;
         private readonly PrivacyService _privacy;
         private readonly UserFeedbackService _feedback;
+        private readonly ICommandContext _context;
+        private readonly IDiscordRestChannelAPI _channelAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PrivacyCommands"/> class.
         /// </summary>
         /// <param name="feedback">The user feedback service.</param>
-        /// <param name="client">The Discord client instance.</param>
-        /// <param name="database">The database.</param>
         /// <param name="privacy">The privacy service.</param>
-        /// <param name="content">The content service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="channelAPI">The channel API.</param>
         public PrivacyCommands
         (
             UserFeedbackService feedback,
-            DiscordSocketClient client,
-            CoreDatabaseContext database,
             PrivacyService privacy,
-            ContentService content
+            ICommandContext context,
+            IDiscordRestChannelAPI channelAPI
         )
         {
             _feedback = feedback;
-            _client = client;
             _privacy = privacy;
+            _context = context;
+            _channelAPI = channelAPI;
         }
 
         /// <summary>
@@ -77,13 +78,13 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Command("policy")]
-        [Summary("Requests a copy of the privacy policy.")]
-        [RequireContext(DM)]
+        [Description("Requests a copy of the privacy policy.")]
+        [RequireContext(ChannelContext.DM)]
         [PrivacyExempt]
-        public async Task<RuntimeResult> RequestPolicyAsync()
+        public async Task<IResult> RequestPolicyAsync()
         {
-            await _privacy.SendPrivacyPolicyAsync(this.Context.Channel);
-            return RuntimeCommandResult.FromSuccess();
+            await _privacy.SendPrivacyPolicyAsync(_context.ChannelID);
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -91,18 +92,18 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Command("grant-consent")]
-        [Summary("Grants consent to store user data.")]
-        [RequireContext(DM)]
+        [Description("Grants consent to store user data.")]
+        [RequireContext(ChannelContext.DM)]
         [PrivacyExempt]
-        public async Task<RuntimeResult> GrantConsentAsync()
+        public async Task<IResult> GrantConsentAsync()
         {
-            var grantResult = await _privacy.GrantUserConsentAsync(this.Context.User);
+            var grantResult = await _privacy.GrantUserConsentAsync(_context.User.ID);
             if (!grantResult.IsSuccess)
             {
-                return grantResult.ToRuntimeResult();
+                return grantResult;
             }
 
-            return RuntimeCommandResult.FromSuccess("Thank you! Enjoy using the bot :smiley:");
+            return Result<string>.FromSuccess("Thank you! Enjoy using the bot :smiley:");
         }
 
         /// <summary>
@@ -110,18 +111,18 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Command("revoke-consent")]
-        [Summary("Revokes consent to store user data.")]
-        [RequireContext(DM)]
+        [Description("Revokes consent to store user data.")]
+        [RequireContext(ChannelContext.DM)]
         [PrivacyExempt]
-        public async Task<RuntimeResult> RevokeConsentAsync()
+        public async Task<IResult> RevokeConsentAsync()
         {
-            var revokeResult = await _privacy.RevokeUserConsentAsync(this.Context.User);
+            var revokeResult = await _privacy.RevokeUserConsentAsync(_context.User.ID);
             if (!revokeResult.IsSuccess)
             {
-                return revokeResult.ToRuntimeResult();
+                return revokeResult;
             }
 
-            return RuntimeCommandResult.FromSuccess
+            return Result<string>.FromSuccess
             (
                 "Consent revoked - no more information will be stored about you from now on. If you would like to " +
                 "delete your existing data, or get a copy of it, please contact the privacy contact individual (use " +
@@ -134,29 +135,38 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Command("contact")]
-        [Summary("Displays contact information for the privacy contact person.")]
-        [RequireContext(DM)]
+        [Description("Displays contact information for the privacy contact person.")]
+        [RequireContext(ChannelContext.DM)]
         [PrivacyExempt]
-        public async Task<RuntimeResult> DisplayContactAsync()
+        public async Task<IResult> DisplayContactAsync()
         {
             const string avatarURL = "https://i.imgur.com/2E334jS.jpg";
-            var discordUser = _client.GetUser("Jax", "7487");
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Title = "Privacy Contact",
+                Author = new EmbedAuthor("Jarl Gullberg", IconUrl: avatarURL, Url: "https://github.com/Nihlus/"),
+                Thumbnail = new EmbedThumbnail(avatarURL),
+                Fields = new[]
+                {
+                    new EmbedField("Email", "jarl.gullberg@gmail.com", true),
+                    new EmbedField("Discord", "Jax#7487", true),
+                },
+                Footer = new EmbedFooter
+                (
+                    "Not your contact person? Edit the source of your instance with the correct information."
+                )
+            };
 
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithTitle("Privacy Contact");
-            eb.WithAuthor("Jarl Gullberg", avatarURL, "https://github.com/Nihlus/");
-            eb.WithThumbnailUrl(avatarURL);
+            var sendEmbed = await _channelAPI.CreateMessageAsync
+            (
+                _context.ChannelID,
+                embed: eb,
+                ct: this.CancellationToken
+            );
 
-            eb.AddField("Email", "jarl.gullberg@gmail.com");
-            eb.AddField("Discord", $"{discordUser.Mention} (Jax#7487)");
-
-            eb.WithFooter("Not your contact person? Edit the source of your instance with the correct information.");
-
-            var embed = eb.Build();
-
-            await this.Context.Channel.SendMessageAsync(string.Empty, embed: embed);
-
-            return RuntimeCommandResult.FromSuccess();
+            return sendEmbed.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendEmbed);
         }
     }
 }

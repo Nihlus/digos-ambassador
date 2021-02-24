@@ -28,9 +28,9 @@ using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Core.Services.Users
@@ -61,14 +61,14 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         [Pure]
         public async Task<bool> IsUserKnownAsync
         (
-            IUser discordUser,
+            Snowflake discordUser,
             CancellationToken ct = default
         )
         {
             var hasUser = await _database.Users.ServersideQueryAsync
             (
                 q => q
-                    .Where(u => u.DiscordID == (long)discordUser.Id)
+                    .Where(u => u.DiscordID == discordUser)
                     .AnyAsync(ct)
             );
 
@@ -81,9 +81,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="discordUser">The Discord user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>Stored information about the user.</returns>
-        public async Task<RetrieveEntityResult<User>> GetOrRegisterUserAsync
+        public async Task<Result<User>> GetOrRegisterUserAsync
         (
-            IUser discordUser,
+            Snowflake discordUser,
             CancellationToken ct = default
         )
         {
@@ -102,16 +102,16 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>Stored information about the user.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<User>> GetUserAsync
+        public async Task<Result<User>> GetUserAsync
         (
-            IUser discordUser,
+            Snowflake discordUser,
             CancellationToken ct = default
         )
         {
             var user = await _database.Users.ServersideQueryAsync
             (
                 q => q
-                    .Where(u => u.DiscordID == (long)discordUser.Id)
+                    .Where(u => u.DiscordID == discordUser)
                     .SingleOrDefaultAsync(ct)
             );
 
@@ -120,7 +120,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
                 return user;
             }
 
-            return RetrieveEntityResult<User>.FromError("Unknown user.");
+            return new GenericError("Unknown user.");
         }
 
         /// <summary>
@@ -130,29 +130,21 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>The freshly created information about the user.</returns>
         /// <exception cref="ArgumentException">Thrown if the user already exists in the database.</exception>
-        public async Task<RetrieveEntityResult<User>> AddUserAsync
+        public async Task<Result<User>> AddUserAsync
         (
-            IUser discordUser,
+            Snowflake discordUser,
             CancellationToken ct = default
         )
         {
-            if (discordUser.IsBot || discordUser.IsWebhook)
-            {
-                return RetrieveEntityResult<User>.FromError
-                (
-                    "Users cannot be viewed or created for bots or webhooks."
-                );
-            }
-
             if (await IsUserKnownAsync(discordUser, ct))
             {
-                return RetrieveEntityResult<User>.FromError
+                return new GenericError
                 (
-                    $"A user with the ID {discordUser.Id} has already been added to the database."
+                    $"A user with the ID {discordUser} has already been added to the database."
                 );
             }
 
-            var newUser = _database.CreateProxy<User>((long)discordUser.Id);
+            var newUser = _database.CreateProxy<User>(discordUser);
 
             _database.Users.Update(newUser);
             await _database.SaveChangesAsync(ct);
@@ -167,7 +159,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="timezoneOffset">The timezone.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<ModifyEntityResult> SetUserTimezoneAsync
+        public async Task<Result> SetUserTimezoneAsync
         (
             User user,
             int timezoneOffset,
@@ -176,18 +168,18 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         {
             if (timezoneOffset < -12 || timezoneOffset > 14)
             {
-                return ModifyEntityResult.FromError($"{timezoneOffset} is not a valid offset.");
+                return new GenericError($"{timezoneOffset} is not a valid offset.");
             }
 
             if (user.Timezone == timezoneOffset)
             {
-                return ModifyEntityResult.FromError("That's already your timezone.'");
+                return new GenericError("That's already your timezone.'");
             }
 
             user.Timezone = timezoneOffset;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -197,7 +189,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         /// <param name="bio">The bio.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<ModifyEntityResult> SetUserBioAsync
+        public async Task<Result> SetUserBioAsync
         (
             User user,
             string bio,
@@ -206,23 +198,23 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
         {
             if (bio.IsNullOrWhitespace())
             {
-                return ModifyEntityResult.FromError("You must provide a bio.");
+                return new GenericError("You must provide a bio.");
             }
 
             if (bio.Length > 1024)
             {
-                return ModifyEntityResult.FromError("Your bio may not be longer than 1024 characters.");
+                return new GenericError("Your bio may not be longer than 1024 characters.");
             }
 
             if (user.Bio == bio)
             {
-                return ModifyEntityResult.FromError("That's already your bio.");
+                return new GenericError("That's already your bio.");
             }
 
             user.Bio = bio;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
     }
 }

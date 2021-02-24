@@ -21,7 +21,6 @@
 //
 
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using Discord;
 using JetBrains.Annotations;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
@@ -50,14 +49,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <returns>true if the user is the owner; otherwise, false.</returns>
         [Pure]
         bool IsOwner(User user);
-
-        /// <summary>
-        /// Determines whether or not the given user is the owner of the entity.
-        /// </summary>
-        /// <param name="user">The user.</param>
-        /// <returns>true if the user is the owner; otherwise, false.</returns>
-        [Pure]
-        bool IsOwner(IUser user);
 
         /// <summary>
         /// Determines whether or not the given user ID is the owner of the entity.

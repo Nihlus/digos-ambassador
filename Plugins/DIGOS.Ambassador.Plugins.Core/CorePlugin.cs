@@ -33,12 +33,14 @@ using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
-using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: InternalsVisibleTo("DIGOS.Ambassador.Tests.Plugins.Core")]
 [assembly: RemoraPlugin(typeof(CorePlugin))]
@@ -60,46 +62,37 @@ namespace DIGOS.Ambassador.Plugins.Core
         /// <inheritdoc/>
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
+            serviceCollection.TryAddScoped<ServerService>();
+            serviceCollection.TryAddScoped<UserService>();
+            serviceCollection.TryAddScoped<PrivacyService>();
+            serviceCollection.TryAddScoped<OwnedEntityService>();
+            serviceCollection.AddConfiguredSchemaAwareDbContextPool<CoreDatabaseContext>();
+
             serviceCollection
-                .AddScoped<ServerService>()
-                .AddScoped<UserService>()
-                .AddScoped<PrivacyService>()
-                .AddScoped<OwnedEntityService>()
-                .AddConfiguredSchemaAwareDbContextPool<CoreDatabaseContext>();
+                .AddCommandGroup<PrivacyCommands>()
+                .AddCommandGroup<UserCommands>()
+                .AddCommandGroup<ServerCommands>();
         }
 
         /// <inheritdoc />
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
+        public override ValueTask<Result> InitializeAsync(IServiceProvider serviceProvider)
         {
             var permissionRegistry = serviceProvider.GetRequiredService<PermissionRegistryService>();
-            var registrationResult = permissionRegistry.RegisterPermissions
+            return new ValueTask<Result>(permissionRegistry.RegisterPermissions
             (
                 Assembly.GetExecutingAssembly(),
                 serviceProvider
-            );
-
-            if (!registrationResult.IsSuccess)
-            {
-                return false;
-            }
-
-            var commands = serviceProvider.GetRequiredService<CommandService>();
-
-            await commands.AddModuleAsync<PrivacyCommands>(serviceProvider);
-            await commands.AddModuleAsync<ServerCommands>(serviceProvider);
-            await commands.AddModuleAsync<UserCommands>(serviceProvider);
-
-            return true;
+            ));
         }
 
         /// <inheritdoc />
-        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<CoreDatabaseContext>();
 
             await context.Database.MigrateAsync();
 
-            return true;
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
