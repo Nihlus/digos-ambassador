@@ -27,7 +27,7 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="5.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="5.0.0" />
     <PackageReference Include="Remora.Discord.Caching" Version="1.0.5" />
-    <PackageReference Include="Remora.Discord.Commands" Version="3.1.0" />
+    <PackageReference Include="Remora.Discord.Commands" Version="3.1.1" />
     <PackageReference Include="Remora.Discord.Hosting" Version="3.0.6" />
     <PackageReference Include="Remora.Plugins" Version="2.0.0" />
   </ItemGroup>
@@ -65,6 +65,15 @@
       -->
     </ProjectReference>
     <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj">
+      <!--
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Content</OutputItemType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+      <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+      -->
+    </ProjectReference>
+    <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.JoinMessages\DIGOS.Ambassador.Plugins.JoinMessages.csproj">
       <!--
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <OutputItemType>Content</OutputItemType>
