@@ -20,17 +20,10 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
 using DIGOS.Ambassador.Plugins.Statistics;
-using DIGOS.Ambassador.Plugins.Statistics.CommandModules;
-using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
-using Remora.Behaviours;
-using Remora.Behaviours.Extensions;
-using Remora.Behaviours.Services;
+using Remora.Commands.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 
@@ -54,17 +47,7 @@ namespace DIGOS.Ambassador.Plugins.Statistics
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
             serviceCollection
-                .AddBehaviour<InteractivityBehaviour>()
-                .AddBehaviour<DelayedActionBehaviour>();
-        }
-
-        /// <inheritdoc />
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
-        {
-            var commands = serviceProvider.GetRequiredService<CommandService>();
-            await commands.AddModuleAsync<StatCommands>(serviceProvider);
-
-            return true;
+                .AddCommandGroup<StatCommands>();
         }
     }
 }
