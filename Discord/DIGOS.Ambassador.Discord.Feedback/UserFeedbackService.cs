@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Remora.Discord.API.Abstractions.Objects;
@@ -109,6 +110,23 @@ namespace DIGOS.Ambassador.Discord.Feedback
             string contents
         )
             => SendEmbedAsync(channel, target, Color.Blue, contents);
+
+        /// <summary>
+        /// Sends the given embed to the given channel.
+        /// </summary>
+        /// <param name="channel">The channel to send the embed to.</param>
+        /// <param name="embed">The embed.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<Result<IMessage>> SendEmbedAsync
+        (
+            Snowflake channel,
+            Embed embed,
+            CancellationToken ct = default
+        )
+        {
+            return _channelAPI.CreateMessageAsync(channel, embed: embed, ct: ct);
+        }
 
         /// <summary>
         /// Sends the given string as one or more sequential embeds, chunked into sets of 1024 characters.

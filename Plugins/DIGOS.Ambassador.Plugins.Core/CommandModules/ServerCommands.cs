@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
@@ -117,25 +118,24 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
                 Fields = fields
             };
 
-            if (guild.Splash is not null)
+            var getGuildSplash = CDN.GetGuildSplashUrl(guild);
+            if (getGuildSplash.IsSuccess)
             {
                 eb = eb with
                 {
-                    Thumbnail = new EmbedThumbnail
-                    (
-                        $"https://cdn.discordapp.com/splashes/{guild.ID}/{guild.Splash.Value}.png"
-                    )
+                    Thumbnail = new EmbedThumbnail(getGuildSplash.Entity.ToString())
                 };
             }
-            else if (guild.Icon is not null)
+            else
             {
-                eb = eb with
+                var getGuildIcon = CDN.GetGuildIconUrl(guild);
+                if (getGuildIcon.IsSuccess)
                 {
-                    Thumbnail = new EmbedThumbnail
-                    (
-                        $"https://cdn.discordapp.com/icons/{guild.ID}/{guild.Icon.Value}.png"
-                    )
-                };
+                    eb = eb with
+                    {
+                        Thumbnail = new EmbedThumbnail(getGuildIcon.Entity.ToString())
+                    };
+                }
             }
 
             var getDescription = _servers.GetDescription(server);

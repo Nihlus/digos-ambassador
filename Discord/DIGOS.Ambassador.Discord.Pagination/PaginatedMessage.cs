@@ -83,10 +83,12 @@ namespace DIGOS.Ambassador.Discord.Pagination
             IDiscordRestChannelAPI channelAPI,
             Snowflake sourceUserID,
             IReadOnlyList<Embed> pages,
-            PaginatedAppearanceOptions appearance
+            PaginatedAppearanceOptions? appearance = null
         )
             : base(channelID, messageID)
         {
+            appearance ??= PaginatedAppearanceOptions.Default;
+
             _sourceUserID = sourceUserID;
             _pages = pages;
             _appearance = appearance;

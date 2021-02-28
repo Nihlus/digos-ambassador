@@ -31,6 +31,7 @@ using DIGOS.Ambassador.Plugins.JumboEmotes.EmojiTools;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -81,7 +82,13 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules
             string emoteUrl;
             if (emoji.ID is not null)
             {
-                emoteUrl = $"https://cdn.discordapp.com/emojis/{emoji.ID}.png";
+                var getEmoteUrl = CDN.GetEmojiUrl(emoji);
+                if (!getEmoteUrl.IsSuccess)
+                {
+                    return getEmoteUrl;
+                }
+
+                emoteUrl = getEmoteUrl.Entity.ToString();
             }
             else
             {

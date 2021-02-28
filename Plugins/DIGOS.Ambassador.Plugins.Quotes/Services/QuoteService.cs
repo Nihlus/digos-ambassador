@@ -25,6 +25,7 @@ using System.Drawing;
 using System.Linq;
 using Humanizer;
 using Humanizer.Bytes;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Core;
@@ -212,22 +213,15 @@ namespace DIGOS.Ambassador.Plugins.Quotes.Services
             Embed embed
         )
         {
-            EmbedAuthor author;
-            if (message.Author.Avatar is not null)
+            var getUserAvatar = CDN.GetUserAvatarUrl(message.Author);
+
+            var author = new EmbedAuthor
             {
-                author = new EmbedAuthor
-                {
-                    Name = $"{message.Author.Username}#{message.Author.Discriminator}",
-                    IconUrl = $"https://cdn.discordapp.com/avatars/{message.Author.ID}/{message.Author.Avatar.Value}.png"
-                };
-            }
-            else
-            {
-                author = new EmbedAuthor
-                {
-                    Name = $"{message.Author.Username}#{message.Author.Discriminator}"
-                };
-            }
+                Name = $"{message.Author.Username}#{message.Author.Discriminator}",
+                IconUrl = getUserAvatar.IsSuccess
+                    ? getUserAvatar.Entity.ToString()
+                    : default
+            };
 
             return embed with
             {

@@ -36,6 +36,7 @@ using Humanizer.Localisation;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
+using Remora.Discord.API;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -105,20 +106,22 @@ namespace DIGOS.Ambassador.Plugins.Core.CommandModules
         private async Task<Result> ShowUserInfoAsync(IUser discordUser, User user)
         {
             var embedFields = new List<IEmbedField>();
+
+            var getUserAvatar = CDN.GetUserAvatarUrl(discordUser);
             var eb = new Embed
             {
                 Author = new EmbedAuthor
                 (
                     $"{discordUser.Username}#{discordUser.Discriminator}",
-                    IconUrl: discordUser.Avatar is not null ?
-                        $"https://cdn.discordapp.com/avatars/{discordUser.ID}/{discordUser.Avatar.Value}.png"
+                    IconUrl: getUserAvatar.IsSuccess
+                        ? getUserAvatar.Entity.ToString()
                         : default
                 ),
                 Thumbnail = new EmbedThumbnail
                 (
-                    discordUser.Avatar is not null ?
-                    $"https://cdn.discordapp.com/avatars/{discordUser.ID}/{discordUser.Avatar.Value}.png"
-                    : default
+                    getUserAvatar.IsSuccess
+                        ? getUserAvatar.Entity.ToString()
+                        : default
                 ),
                 Fields = embedFields
             };

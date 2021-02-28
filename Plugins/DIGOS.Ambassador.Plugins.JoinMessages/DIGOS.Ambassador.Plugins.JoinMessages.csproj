@@ -7,7 +7,7 @@
 
     <ItemGroup>
       <PackageReference Include="Remora.Behaviours" Version="6.0.1" />
-      <PackageReference Include="Remora.Discord.Gateway" Version="3.0.6" />
+      <PackageReference Include="Remora.Discord.Gateway" Version="3.0.7" />
     </ItemGroup>
 
     <ItemGroup>
