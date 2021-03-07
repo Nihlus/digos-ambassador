@@ -20,17 +20,18 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord;
-using Discord.Commands;
-using JetBrains.Annotations;
-using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
+using DIGOS.Ambassador.Plugins.Permissions.Model;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -38,90 +39,85 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
 {
     public partial class ModerationCommands
     {
-        public partial class ModerationServerCommands
+        /// <summary>
+        /// Server setter commands.
+        /// </summary>
+        [Group("server-set")]
+        public class ModerationServerSetCommands : CommandGroup
         {
+            private readonly ModerationService _moderation;
+            private readonly ICommandContext _context;
+
             /// <summary>
-            /// Server setter commands.
+            /// Initializes a new instance of the <see cref="ModerationServerSetCommands"/> class.
             /// </summary>
-            [PublicAPI]
-            [Group("set")]
-            public class ModerationServerSetCommands : ModuleBase
+            /// <param name="moderation">The moderation service.</param>
+            /// <param name="context">The command context.</param>
+            public ModerationServerSetCommands
+            (
+                ModerationService moderation,
+                ICommandContext context
+            )
             {
-                private readonly ModerationService _moderation;
+                _moderation = moderation;
+                _context = context;
+            }
 
-                private readonly UserFeedbackService _feedback;
-
-                /// <summary>
-                /// Initializes a new instance of the <see cref="ModerationServerSetCommands"/> class.
-                /// </summary>
-                /// <param name="moderation">The moderation service.</param>
-                /// <param name="feedback">The feedback service.</param>
-                public ModerationServerSetCommands
-                (
-                    ModerationService moderation,
-                    UserFeedbackService feedback
-                )
+            /// <summary>
+            /// Sets the moderation log channel.
+            /// </summary>
+            /// <param name="channel">The channel.</param>
+            [Command("moderation-log-channel")]
+            [Description("Sets the moderation log channel.")]
+            [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<IResult> SetModerationLogChannelAsync(IChannel channel)
+            {
+                var setChannel = await _moderation.SetModerationLogChannelAsync(_context.GuildID.Value, channel.ID);
+                if (!setChannel.IsSuccess)
                 {
-                    _moderation = moderation;
-                    _feedback = feedback;
+                    return setChannel;
                 }
 
-                /// <summary>
-                /// Sets the moderation log channel.
-                /// </summary>
-                /// <param name="channel">The channel.</param>
-                [Command("moderation-log-channel")]
-                [Summary("Sets the moderation log channel.")]
-                [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
-                [RequireContext(ContextType.Guild)]
-                public async Task<RuntimeResult> SetModerationLogChannelAsync(ITextChannel channel)
-                {
-                    var setChannel = await _moderation.SetModerationLogChannelAsync(this.Context.Guild, channel);
-                    if (!setChannel.IsSuccess)
-                    {
-                        return setChannel.ToRuntimeResult();
-                    }
+                return Result<string>.FromSuccess("Channel set.");
+            }
 
-                    return RuntimeCommandResult.FromSuccess("Channel set.");
+            /// <summary>
+            /// Sets the event monitoring channel.
+            /// </summary>
+            /// <param name="channel">The channel.</param>
+            [Command("event-monitoring-channel")]
+            [Description("Sets the event monitoring channel.")]
+            [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<IResult> SetMonitoringChannelAsync(IChannel channel)
+            {
+                var setChannel = await _moderation.SetMonitoringChannelAsync(_context.GuildID.Value, channel.ID);
+                if (!setChannel.IsSuccess)
+                {
+                    return setChannel;
                 }
 
-                /// <summary>
-                /// Sets the event monitoring channel.
-                /// </summary>
-                /// <param name="channel">The channel.</param>
-                [Command("event-monitoring-channel")]
-                [Summary("Sets the event monitoring channel.")]
-                [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
-                [RequireContext(ContextType.Guild)]
-                public async Task<RuntimeResult> SetMonitoringChannelAsync(ITextChannel channel)
-                {
-                    var setChannel = await _moderation.SetMonitoringChannelAsync(this.Context.Guild, channel);
-                    if (!setChannel.IsSuccess)
-                    {
-                        return setChannel.ToRuntimeResult();
-                    }
+                return Result<string>.FromSuccess("Channel set.");
+            }
 
-                    return RuntimeCommandResult.FromSuccess("Channel set.");
+            /// <summary>
+            /// Sets the warning threshold.
+            /// </summary>
+            /// <param name="threshold">The threshold.</param>
+            [Command("warning-threshold")]
+            [Description("Sets the warning threshold.")]
+            [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<IResult> SetWarningThresholdAsync(int threshold)
+            {
+                var setChannel = await _moderation.SetWarningThresholdAsync(_context.GuildID.Value, threshold);
+                if (!setChannel.IsSuccess)
+                {
+                    return setChannel;
                 }
 
-                /// <summary>
-                /// Sets the warning threshold.
-                /// </summary>
-                /// <param name="threshold">The threshold.</param>
-                [Command("warning-threshold")]
-                [Summary("Sets the warning threshold.")]
-                [RequirePermission(typeof(EditModerationServerSettings), PermissionTarget.Self)]
-                [RequireContext(ContextType.Guild)]
-                public async Task<RuntimeResult> SetWarningThresholdAsync(int threshold)
-                {
-                    var setChannel = await _moderation.SetWarningThresholdAsync(this.Context.Guild, threshold);
-                    if (!setChannel.IsSuccess)
-                    {
-                        return setChannel.ToRuntimeResult();
-                    }
-
-                    return RuntimeCommandResult.FromSuccess("Threshold set.");
-                }
+                return Result<string>.FromSuccess("Threshold set.");
             }
         }
     }

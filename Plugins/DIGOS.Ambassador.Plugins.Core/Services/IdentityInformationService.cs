@@ -1,5 +1,5 @@
 //
-//  ModerationCommands.cs
+//  IdentityInformationService.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,21 +20,18 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.ComponentModel;
-using JetBrains.Annotations;
-using Remora.Commands.Attributes;
-using Remora.Commands.Groups;
+using Remora.Discord.Core;
 
-#pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
-
-namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
+namespace DIGOS.Ambassador.Plugins.Core.Services
 {
     /// <summary>
-    /// Moderation-related commands for viewing, editing, and performing moderation actions on users.
+    /// Contains identity information about the bot itself.
     /// </summary>
-    [Group("moderation")]
-    [Description("Moderation-related commands for viewing, editing, and performing moderation actions on users.")]
-    public partial class ModerationCommands : CommandGroup
+    public class IdentityInformationService
     {
+        /// <summary>
+        /// Gets the ID of the bot.
+        /// </summary>
+        public Snowflake ID { get; internal set; }
     }
 }

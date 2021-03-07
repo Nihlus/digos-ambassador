@@ -20,13 +20,18 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Drawing;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Plugins.Core.Services;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
 using DIGOS.Ambassador.Plugins.Quotes.Services;
-using Discord;
-using Discord.WebSocket;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.Services
@@ -37,30 +42,34 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     public sealed class ChannelLoggingService
     {
         private readonly ModerationService _moderation;
-        private readonly DiscordSocketClient _client;
-
         private readonly QuoteService _quotes;
         private readonly UserFeedbackService _feedback;
+
+        private readonly IdentityInformationService _identityInformation;
+        private readonly IDiscordRestGuildAPI _guildAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ChannelLoggingService"/> class.
         /// </summary>
         /// <param name="moderation">The moderation service.</param>
-        /// <param name="client">The Discord client in use.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="quotes">The quote service.</param>
+        /// <param name="identityInformation">The identity information service.</param>
+        /// <param name="guildAPI">The guild API.</param>
         public ChannelLoggingService
         (
             ModerationService moderation,
-            DiscordSocketClient client,
             UserFeedbackService feedback,
-            QuoteService quotes
+            QuoteService quotes,
+            IdentityInformationService identityInformation,
+            IDiscordRestGuildAPI guildAPI
         )
         {
             _moderation = moderation;
-            _client = client;
             _feedback = feedback;
             _quotes = quotes;
+            _identityInformation = identityInformation;
+            _guildAPI = guildAPI;
         }
 
         /// <summary>
@@ -68,66 +77,62 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="ban">The ban.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<OperationResult> NotifyUserBannedAsync(UserBan ban)
+        public async Task<Result> NotifyUserBannedAsync(UserBan ban)
         {
-            var guild = _client.GetGuild((ulong)ban.Server.DiscordID);
-            var getChannel = await GetModerationLogChannelAsync(guild);
+            var getChannel = await GetModerationLogChannelAsync(ban.Server.DiscordID);
             if (!getChannel.IsSuccess)
             {
-                return OperationResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
-            var author = guild.GetUser((ulong)ban.Author.DiscordID);
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Title = $"User Banned (#{ban.ID})",
+                Colour = Color.Red,
+                Description = $"<@{ban.User.DiscordID}> (ID {ban.User.DiscordID}) was banned by " +
+                              $"<@{ban.Author.DiscordID}>.\n" +
+                              $"Reason: {ban.Reason}"
+            };
 
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithTitle($"User Banned (#{ban.ID})");
-            eb.WithColor(Color.Red);
-
-            var bannedUser = guild.GetUser((ulong)ban.User.DiscordID);
-            eb.WithDescription
-            (
-                $"{bannedUser.Mention} (ID {bannedUser.Id}) was banned by {author.Mention}.\n" +
-                $"Reason: {ban.Reason}"
-            );
-
-            await _feedback.SendEmbedAsync(channel, eb.Build());
-
-            return OperationResult.FromSuccess();
+            var sendResult = await _feedback.SendEmbedAsync(channel, eb);
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
         /// Posts a notification that a user was unbanned.
         /// </summary>
         /// <param name="ban">The ban.</param>
-        /// <param name="rescinder">The person who rescinded the ban.</param>
+        /// <param name="rescinderID">The person who rescinded the ban.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<OperationResult> NotifyUserUnbannedAsync(UserBan ban, IGuildUser rescinder)
+        public async Task<Result> NotifyUserUnbannedAsync(UserBan ban, Snowflake rescinderID)
         {
-            var guild = _client.GetGuild((ulong)ban.Server.DiscordID);
-            var getChannel = await GetModerationLogChannelAsync(guild);
+            var getChannel = await GetModerationLogChannelAsync(ban.Server.DiscordID);
             if (!getChannel.IsSuccess)
             {
-                return OperationResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithTitle($"User Unbanned (#{ban.ID})");
-            eb.WithColor(Color.Green);
-
-            var whoDidIt = rescinder.IsMe(_client)
+            var whoDidIt = rescinderID == _identityInformation.ID
                 ? "(expired)"
-                : $"by {rescinder.Mention}";
+                : $"by <@{rescinderID}>";
 
-            var bannedID = (ulong)ban.User.DiscordID;
-            eb.WithDescription($"{MentionUtils.MentionUser(bannedID)} (ID {bannedID}) was unbanned {whoDidIt}.");
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Title = $"User Unbanned (#{ban.ID})",
+                Colour = Color.Green,
+                Description = $"<@{ban.User.DiscordID}> (ID {ban.User.DiscordID}) was unbanned {whoDidIt}."
+            };
 
-            await _feedback.SendEmbedAsync(channel, eb.Build());
-
-            return OperationResult.FromSuccess();
+            var sendResult = await _feedback.SendEmbedAsync(channel, eb);
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
@@ -135,67 +140,63 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="warning">The warning.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<OperationResult> NotifyUserWarningAddedAsync(UserWarning warning)
+        public async Task<Result> NotifyUserWarningAddedAsync(UserWarning warning)
         {
-            var guild = _client.GetGuild((ulong)warning.Server.DiscordID);
-            var getChannel = await GetModerationLogChannelAsync(guild);
+            var getChannel = await GetModerationLogChannelAsync(warning.Server.DiscordID);
             if (!getChannel.IsSuccess)
             {
-                return OperationResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
-            var author = guild.GetUser((ulong)warning.Author.DiscordID);
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Title = $"User Warned (#{warning.ID})",
+                Colour = Color.Orange,
+                Description = $"<@{warning.User.DiscordID}> (ID {warning.User.DiscordID}) was warned by " +
+                              $"<@{warning.Author.DiscordID}>.\n" +
+                              $"Reason: {warning.Reason}"
+            };
 
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithTitle($"User Warned (#{warning.ID})");
-            eb.WithColor(Color.Orange);
-
-            var warnedUser = guild.GetUser((ulong)warning.User.DiscordID);
-            eb.WithDescription
-            (
-                $"{warnedUser.Mention} (ID {warnedUser.Id}) was warned by {author.Mention}.\n" +
-                $"Reason: {warning.Reason}"
-            );
-
-            await _feedback.SendEmbedAsync(channel, eb.Build());
-            return OperationResult.FromSuccess();
+            var sendResult = await _feedback.SendEmbedAsync(channel, eb);
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
         /// Posts a notification that a warning was rescinded.
         /// </summary>
         /// <param name="warning">The warning.</param>
-        /// <param name="rescinder">The person who rescinded the warning.</param>
+        /// <param name="rescinderID">The person who rescinded the warning.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<OperationResult> NotifyUserWarningRemovedAsync(UserWarning warning, IGuildUser rescinder)
+        public async Task<Result> NotifyUserWarningRemovedAsync(UserWarning warning, Snowflake rescinderID)
         {
-            var guild = _client.GetGuild((ulong)warning.Server.DiscordID);
-            var getChannel = await GetModerationLogChannelAsync(guild);
+            var getChannel = await GetModerationLogChannelAsync(warning.Server.DiscordID);
             if (!getChannel.IsSuccess)
             {
-                return OperationResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithTitle($"Warning Removed (#{warning.ID})");
-            eb.WithColor(Color.Green);
-
-            var whoDidIt = rescinder.IsMe(_client)
+            var whoDidIt = rescinderID == _identityInformation.ID
                 ? "(expired)"
-                : $"by {rescinder.Mention}";
+                : $"by <@{rescinderID}>";
 
-            eb.WithDescription
-            (
-                $"A warning was removed from {MentionUtils.MentionUser((ulong)warning.User.DiscordID)} " +
-                $"(ID {warning.User.DiscordID}) {whoDidIt}."
-            );
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Title = $"Warning Removed (#{warning.ID})",
+                Colour = Color.Green,
+                Description = $"A warning was removed from <@{warning.User.DiscordID}> (ID {warning.User.DiscordID}) " +
+                              $"{whoDidIt}."
+            };
 
-            await _feedback.SendEmbedAsync(channel, eb.Build());
-            return OperationResult.FromSuccess();
+            var sendResult = await _feedback.SendEmbedAsync(channel, eb);
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
@@ -203,278 +204,308 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// </summary>
         /// <param name="note">The note.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<OperationResult> NotifyUserNoteAddedAsync(UserNote note)
+        public async Task<Result> NotifyUserNoteAddedAsync(UserNote note)
         {
-            var guild = _client.GetGuild((ulong)note.Server.DiscordID);
-            var getChannel = await GetModerationLogChannelAsync(guild);
+            var getChannel = await GetModerationLogChannelAsync(note.Server.DiscordID);
             if (!getChannel.IsSuccess)
             {
-                return OperationResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
-            var author = guild.GetUser((ulong)note.Author.DiscordID);
-
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithTitle($"Note Added (#{note.ID})");
-            eb.WithColor(Color.Gold);
-
-            var notedUser = guild.GetUser((ulong)note.User.DiscordID);
-            eb.WithDescription
-            (
-                $"A note was added to {notedUser.Mention} (ID {notedUser.Id}) by {author.Mention}.\n" +
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Title = $"Note Added (#{note.ID})",
+                Colour = Color.Gold,
+                Description =
+                $"A note was added to <@{note.User.DiscordID}> (ID {note.User.DiscordID}) by " +
+                $"<@{note.Author.DiscordID}>.\n" +
                 $"Contents: {note.Content}"
-            );
+            };
 
-            await _feedback.SendEmbedAsync(channel, eb.Build());
-            return OperationResult.FromSuccess();
+            var sendResult = await _feedback.SendEmbedAsync(channel, eb);
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
         /// Posts a notification that a note was removed from a user.
         /// </summary>
         /// <param name="note">The note.</param>
-        /// <param name="remover">The person that removed the note.</param>
+        /// <param name="removerID">The person that removed the note.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<OperationResult> NotifyUserNoteRemovedAsync(UserNote note, IGuildUser remover)
+        public async Task<Result> NotifyUserNoteRemovedAsync(UserNote note, Snowflake removerID)
         {
-            var guild = _client.GetGuild((ulong)note.Server.DiscordID);
-            var getChannel = await GetModerationLogChannelAsync(guild);
+            var getChannel = await GetModerationLogChannelAsync(note.Server.DiscordID);
             if (!getChannel.IsSuccess)
             {
-                return OperationResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithTitle($"Note Removed (#{note.ID})");
-            eb.WithColor(Color.Green);
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Title = $"Note Removed (#{note.ID})",
+                Colour = Color.Green,
+                Description = $"A note was removed from <@{note.User.DiscordID}> (ID {note.User.DiscordID}) by " +
+                              $"<@{removerID}>."
+            };
 
-            var notedUser = guild.GetUser((ulong)note.User.DiscordID);
-            eb.WithDescription
-            (
-                $"A note was removed from {notedUser.Mention} (ID {notedUser.Id}) by {remover.Mention}."
-            );
-
-            await _feedback.SendEmbedAsync(channel, eb.Build());
-            return OperationResult.FromSuccess();
+            var sendResult = await _feedback.SendEmbedAsync(channel, eb);
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
         /// Posts a notification that a user left the server.
         /// </summary>
-        /// <param name="user">The user that left.</param>
+        /// <param name="guildID">The ID of guild the user left.</param>
+        /// <param name="userID">The ID of the user that left.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<OperationResult> NotifyUserLeftAsync(IGuildUser user)
+        public async Task<Result> NotifyUserLeftAsync(Snowflake guildID, Snowflake userID)
         {
-            var getChannel = await GetMonitoringChannelAsync(user.Guild);
+            var getChannel = await GetMonitoringChannelAsync(guildID);
             if (!getChannel.IsSuccess)
             {
-                return OperationResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithColor(Color.Blue);
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Colour = Color.Cyan,
+                Description = $"<@{userID}> left the server."
+            };
 
-            eb.WithDescription($"{user.Mention} left the server.");
-
-            await _feedback.SendEmbedAsync(channel, eb.Build());
-
-            return OperationResult.FromSuccess();
+            var sendResult = await _feedback.SendEmbedAsync(channel, eb);
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
-        /// Posts a notification that a user changed their username.
+        /// Posts a notification that a user changed their nickname.
         /// </summary>
-        /// <param name="user">The user.</param>
-        /// <param name="oldUsername">The old username.</param>
-        /// <param name="newUsername">The new username.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the user.</param>
+        /// <param name="oldNickname">The old nickname.</param>
+        /// <param name="newNickname">The new nickname.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<OperationResult> NotifyUserUsernameChangedAsync
+        public async Task<Result> NotifyUserNicknameChangedAsync
         (
-            IGuildUser user,
-            string oldUsername,
-            string newUsername
+            Snowflake guildID,
+            Snowflake userID,
+            Optional<string?> oldNickname,
+            Optional<string?> newNickname
         )
         {
-            var getChannel = await GetMonitoringChannelAsync(user.Guild);
+            var getChannel = await GetMonitoringChannelAsync(guildID);
             if (!getChannel.IsSuccess)
             {
-                return OperationResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithColor(Color.Blue);
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Colour = Color.Cyan,
+                Description = $"<@{userID}> changed their nickname from {oldNickname} to {newNickname}."
+            };
 
-            eb.WithDescription($"{user.Mention} changed their username from {oldUsername} to {newUsername}.");
-
-            await _feedback.SendEmbedAsync(channel, eb.Build());
-            return OperationResult.FromSuccess();
+            var sendResult = await _feedback.SendEmbedAsync(channel, eb);
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
         /// Posts a notification that a user changed their discriminator.
         /// </summary>
-        /// <param name="user">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the user.</param>
         /// <param name="oldDiscriminator">The old discriminator.</param>
         /// <param name="newDiscriminator">The new discriminator.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<OperationResult> NotifyUserDiscriminatorChangedAsync
+        public async Task<Result> NotifyUserDiscriminatorChangedAsync
         (
-            IGuildUser user,
-            string oldDiscriminator,
-            string newDiscriminator
+            Snowflake guildID,
+            Snowflake userID,
+            ushort oldDiscriminator,
+            ushort newDiscriminator,
+            CancellationToken ct = default
         )
         {
-            var getChannel = await GetMonitoringChannelAsync(user.Guild);
+            var getChannel = await GetMonitoringChannelAsync(guildID);
             if (!getChannel.IsSuccess)
             {
-                return OperationResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithColor(Color.Blue);
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Colour = Color.Cyan,
+                Description = $"<@{userID}> changed their discriminator from {oldDiscriminator:D4} to " +
+                              $"{newDiscriminator:D4}."
+            };
 
-            eb.WithDescription($"{user.Mention} changed their discriminator from {oldDiscriminator} to {newDiscriminator}.");
-
-            await _feedback.SendEmbedAsync(channel, eb.Build());
-            return OperationResult.FromSuccess();
+            var sendResult = await _feedback.SendEmbedAsync(channel, eb, ct);
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
         /// Posts a notification that a message was deleted.
         /// </summary>
         /// <param name="message">The deleted message.</param>
-        /// <param name="messageChannel">The channel the message was deleted from.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task<OperationResult> NotifyMessageDeletedAsync(IMessage message, ISocketMessageChannel messageChannel)
+        public async Task<Result> NotifyMessageDeletedAsync(IMessage message)
         {
-            if (!(messageChannel is ITextChannel textChannel))
-            {
-                return OperationResult.FromError("The channel was not a text channel.");
-            }
-
             // We don't care about bot messages
-            if (message.Author.IsBot | message.Author.IsWebhook)
+            var isNonUserMessage = (message.Author.IsBot.HasValue && message.Author.IsBot.Value) ||
+                                   (message.Author.IsSystem.HasValue && message.Author.IsSystem.Value);
+
+            if (isNonUserMessage)
             {
-                return OperationResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
-            var getChannel = await GetMonitoringChannelAsync(textChannel.Guild);
+            // We don't care about non-guild messages
+            if (!message.GuildID.HasValue)
+            {
+                return Result.FromSuccess();
+            }
+
+            var getChannel = await GetMonitoringChannelAsync(message.GuildID.Value);
             if (!getChannel.IsSuccess)
             {
-                return OperationResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
-            var eb = _feedback.CreateEmbedBase();
-            eb.WithTitle("Message Deleted");
-            eb.WithColor(Color.Orange);
+            var eb = _feedback.CreateEmbedBase() with
+            {
+                Title = "Message Deleted",
+                Colour = Color.Orange
+            };
+
+            var getGuildRoles = await _guildAPI.GetGuildRolesAsync(message.GuildID.Value);
+            if (!getGuildRoles.IsSuccess)
+            {
+                return Result.FromError(getGuildRoles);
+            }
+
+            var guildRoles = getGuildRoles.Entity;
+            var everyoneRole = guildRoles.First(r => r.ID == message.GuildID.Value);
+
+            var getGuildMember = await _guildAPI.GetGuildMemberAsync(message.GuildID.Value, _identityInformation.ID);
+            if (!getGuildMember.IsSuccess)
+            {
+                return Result.FromError(getGuildMember);
+            }
+
+            var botGuildMember = getGuildMember.Entity;
+            var botRoles = guildRoles.Where(r => botGuildMember.Roles.Contains(r.ID)).ToList();
+
+            var botPermissions = DiscordPermissionSet.ComputePermissions
+            (
+                _identityInformation.ID,
+                everyoneRole,
+                botRoles
+            );
 
             var extra = string.Empty;
-            if ((await textChannel.Guild.GetUserAsync(_client.CurrentUser.Id)).GuildPermissions.ViewAuditLog)
+            if (botPermissions.HasPermission(DiscordPermission.ViewAuditLog))
             {
-                var mostProbableDeleter = await FindMostProbableDeleterAsync(message, textChannel);
+                var mostProbableDeleter = await FindMostProbableDeleterAsync(message);
+
+                var isNonUserDeleter = (mostProbableDeleter.IsBot.HasValue && mostProbableDeleter.IsBot.Value) ||
+                                       (mostProbableDeleter.IsSystem.HasValue && mostProbableDeleter.IsSystem.Value);
 
                 // We don't care about bot deletions
-                if (!(mostProbableDeleter.IsBot || mostProbableDeleter.IsWebhook))
+                if (!isNonUserDeleter)
                 {
-                    extra = $"by {mostProbableDeleter.Mention}.";
+                    extra = $" by <@{mostProbableDeleter.ID}>";
                 }
             }
 
-            eb.WithDescription
-            (
-                $"A message was deleted from {MentionUtils.MentionChannel(textChannel.Id)} {extra}"
-            );
+            eb = eb with
+            {
+                Description = $"A message was deleted from <#{channel}>{extra}."
+            };
 
-            var quote = _quotes.CreateMessageQuote(message, _client.CurrentUser);
+            var quote = _quotes.CreateMessageQuote(message, _identityInformation.ID);
 
-            await _feedback.SendEmbedAsync(channel, eb.Build());
-            await _feedback.SendEmbedAsync(channel, quote.Build());
+            var sendResult = await _feedback.SendEmbedAsync(channel, eb);
+            if (!sendResult.IsSuccess)
+            {
+                return Result.FromError(sendResult);
+            }
 
-            return OperationResult.FromSuccess();
+            sendResult = await _feedback.SendEmbedAsync(channel, quote);
+            return sendResult.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(sendResult);
         }
 
         /// <summary>
         /// Retrieves the moderation log channel.
         /// </summary>
-        /// <param name="guild">The guild to grab the channel from.</param>
+        /// <param name="guildID">The guild to grab the channel from.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        private async Task<RetrieveEntityResult<ITextChannel>> GetModerationLogChannelAsync(IGuild guild)
+        private async Task<Result<Snowflake>> GetModerationLogChannelAsync(Snowflake guildID)
         {
-            var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guild);
+            var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guildID);
             if (!getSettings.IsSuccess)
             {
-                return RetrieveEntityResult<ITextChannel>.FromError(getSettings);
+                return Result<Snowflake>.FromError(getSettings);
             }
 
             var settings = getSettings.Entity;
 
             if (settings.ModerationLogChannel is null)
             {
-                return RetrieveEntityResult<ITextChannel>.FromError("No configured channel.");
+                return new GenericError("No configured channel.");
             }
 
-            var channel = await guild.GetChannelAsync((ulong)settings.ModerationLogChannel);
-            if (channel is null)
-            {
-                return RetrieveEntityResult<ITextChannel>.FromError("Channel not found. Deleted?");
-            }
-
-            if (!(channel is ITextChannel textChannel))
-            {
-                return RetrieveEntityResult<ITextChannel>.FromError("The configured channel isn't a text channel.");
-            }
-
-            return RetrieveEntityResult<ITextChannel>.FromSuccess(textChannel);
+            return settings.ModerationLogChannel.Value;
         }
 
         /// <summary>
         /// Retrieves the event monitoring channel.
         /// </summary>
-        /// <param name="guild">The guild to grab the channel from.</param>
+        /// <param name="guildID">The guild to grab the channel from.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        private async Task<RetrieveEntityResult<ITextChannel>> GetMonitoringChannelAsync(IGuild guild)
+        private async Task<Result<Snowflake>> GetMonitoringChannelAsync(Snowflake guildID)
         {
-            var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guild);
+            var getSettings = await _moderation.GetOrCreateServerSettingsAsync(guildID);
             if (!getSettings.IsSuccess)
             {
-                return RetrieveEntityResult<ITextChannel>.FromError(getSettings);
+                return Result<Snowflake>.FromError(getSettings);
             }
 
             var settings = getSettings.Entity;
 
             if (settings.MonitoringChannel is null)
             {
-                return RetrieveEntityResult<ITextChannel>.FromError("No configured channel.");
+                return new GenericError("No configured channel.");
             }
 
-            var channel = await guild.GetChannelAsync((ulong)settings.MonitoringChannel);
-            if (channel is null)
-            {
-                return RetrieveEntityResult<ITextChannel>.FromError("Channel not found. Deleted?");
-            }
-
-            if (!(channel is ITextChannel textChannel))
-            {
-                return RetrieveEntityResult<ITextChannel>.FromError("The configured channel isn't a text channel.");
-            }
-
-            return RetrieveEntityResult<ITextChannel>.FromSuccess(textChannel);
+            return settings.MonitoringChannel.Value;
         }
 
         // ReSharper disable once UnusedParameter.Local
-        private Task<IUser> FindMostProbableDeleterAsync(IMessage message, ITextChannel channel)
+        private Task<IUser> FindMostProbableDeleterAsync(IMessage message)
         {
             // TODO: Wait for a hotfix from Discord.NET
             /*

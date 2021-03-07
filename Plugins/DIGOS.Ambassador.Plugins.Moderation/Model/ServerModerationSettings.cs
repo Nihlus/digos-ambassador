@@ -26,6 +26,7 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Moderation.Model
@@ -46,13 +47,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         /// <summary>
         /// Gets the Discord ID of the channel where moderation actions are logged.
         /// </summary>
-        public long? ModerationLogChannel { get; internal set; }
+        public Snowflake? ModerationLogChannel { get; internal set; }
 
         /// <summary>
         /// Gets the Discord ID of the channel where events are logged, such as deleted messages, username changes, et
         /// cetera.
         /// </summary>
-        public long? MonitoringChannel { get; internal set; }
+        public Snowflake? MonitoringChannel { get; internal set; }
 
         /// <summary>
         /// Gets the number of warnings a user can have before any further warnings should prompt further action.

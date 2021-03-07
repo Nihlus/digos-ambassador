@@ -77,6 +77,40 @@ namespace DIGOS.Ambassador.Discord.Pagination
         /// Creates a simple paginated list from a collection of items.
         /// </summary>
         /// <param name="items">The items.</param>
+        /// <param name="pageBuilder">A function that builds a page for a single value in the collection.</param>
+        /// <param name="emptyCollectionDescription">The description to use when the collection is empty.</param>
+        /// <typeparam name="TItem">The type of the items in the collection.</typeparam>
+        /// <returns>The paginated embed.</returns>
+        public static async Task<IReadOnlyList<Result<Embed>>> PagesFromCollectionAsync<TItem>
+        (
+            IReadOnlyList<TItem> items,
+            Func<TItem, Task<Result<Embed>>> pageBuilder,
+            string emptyCollectionDescription = "There's nothing here."
+        )
+        {
+            List<Result<Embed>> pages = new();
+            if (!items.Any())
+            {
+                var eb = new Embed
+                {
+                    Colour = Color.Gray,
+                    Description = emptyCollectionDescription
+                };
+
+                pages.Add(eb);
+            }
+            else
+            {
+                pages.AddRange(await Task.WhenAll(items.Select(async i => await pageBuilder(i))));
+            }
+
+            return pages;
+        }
+
+        /// <summary>
+        /// Creates a simple paginated list from a collection of items.
+        /// </summary>
+        /// <param name="items">The items.</param>
         /// <param name="titleSelector">A function that selects the title for each field.</param>
         /// <param name="valueSelector">A function that selects the value for each field.</param>
         /// <param name="emptyCollectionDescription">The description to use when the collection is empty.</param>

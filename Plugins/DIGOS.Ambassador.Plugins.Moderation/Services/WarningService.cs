@@ -30,8 +30,8 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Model;
-using Discord;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Moderation.Services
@@ -66,16 +66,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <summary>
         /// Gets the warnings issued on the given guild.
         /// </summary>
-        /// <param name="guild">The guild.</param>
+        /// <param name="guildID">The ID of the guild.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>The warnings.</returns>
-        public Task<IReadOnlyList<UserWarning>> GetWarningsAsync(IGuild guild, CancellationToken ct = default)
+        public Task<IReadOnlyList<UserWarning>> GetWarningsAsync(Snowflake guildID, CancellationToken ct = default)
         {
             return _database.UserWarnings.ServersideQueryAsync
             (
                 q => q.Where
                 (
-                    n => n.Server.DiscordID == (long)guild.Id
+                    n => n.Server.DiscordID == guildID
                 ),
                 ct
             );
@@ -84,16 +84,40 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <summary>
         /// Gets the warnings attached to the given user.
         /// </summary>
-        /// <param name="user">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>The warnings.</returns>
-        public Task<IReadOnlyList<UserWarning>> GetWarningsAsync(IGuildUser user, CancellationToken ct = default)
+        public Task<IReadOnlyList<UserWarning>> GetWarningsAsync
+        (
+            Snowflake guildID,
+            Snowflake userID,
+            CancellationToken ct = default
+        )
         {
             return _database.UserWarnings.ServersideQueryAsync
             (
                 q => q.Where
                 (
-                    n => n.User.DiscordID == (long)user.Id && n.Server.DiscordID == (long)user.Guild.Id
+                    n => n.User.DiscordID == userID && n.Server.DiscordID == guildID
+                ),
+                ct
+            );
+        }
+
+        /// <summary>
+        /// Gets all expired warnings.
+        /// </summary>
+        /// <param name="ct">The cancellation token in use.</param>
+        /// <returns>The warnings.</returns>
+        public Task<IReadOnlyList<UserWarning>> GetExpiredWarningsAsync(CancellationToken ct = default)
+        {
+            var now = DateTimeOffset.UtcNow;
+            return _database.UserWarnings.ServersideQueryAsync
+            (
+                q => q.Where
+                (
+                    w => w.IsTemporary && w.ExpiresOn.HasValue && w.ExpiresOn.Value >= now
                 ),
                 ct
             );
@@ -102,13 +126,13 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <summary>
         /// Retrieves a warning with the given ID from the database.
         /// </summary>
-        /// <param name="server">The server the warning is on.</param>
+        /// <param name="guildID">The ID of the guild the warning is on.</param>
         /// <param name="warningID">The warning ID.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<UserWarning>> GetWarningAsync
+        public async Task<Result<UserWarning>> GetWarningAsync
         (
-            IGuild server,
+            Snowflake guildID,
             long warningID,
             CancellationToken ct = default
         )
@@ -118,14 +142,14 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             (
                 q => q.FirstOrDefaultAsync
                 (
-                    n => n.ID == warningID && n.Server.DiscordID == (long)server.Id,
+                    n => n.ID == warningID && n.Server.DiscordID == guildID,
                     ct
                 )
             );
 
             if (warning is null)
             {
-                return RetrieveEntityResult<UserWarning>.FromError("There's no warning with that ID in the database.");
+                return new GenericError("There's no warning with that ID in the database.");
             }
 
             return warning;
@@ -134,43 +158,45 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <summary>
         /// Creates a warning for the given user.
         /// </summary>
-        /// <param name="authorUser">The author of the warning.</param>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="authorID">The ID of the author of the warning.</param>
+        /// <param name="userID">The ID of the warned user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
         /// <param name="reason">The reason of the warning.</param>
         /// <param name="messageID">The message that caused the warning, if any.</param>
         /// <param name="expiresOn">The expiry date for the warning, if any.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<UserWarning>> CreateWarningAsync
+        public async Task<Result<UserWarning>> CreateWarningAsync
         (
-            IUser authorUser,
-            IGuildUser guildUser,
+            Snowflake authorID,
+            Snowflake userID,
+            Snowflake guildID,
             string reason,
-            long? messageID = null,
+            Snowflake? messageID = null,
             DateTime? expiresOn = null,
             CancellationToken ct = default
         )
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return CreateEntityResult<UserWarning>.FromError(getServer);
+                return Result<UserWarning>.FromError(getServer);
             }
 
             var server = getServer.Entity;
 
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return CreateEntityResult<UserWarning>.FromError(getUser);
+                return Result<UserWarning>.FromError(getUser);
             }
 
             var user = getUser.Entity;
 
-            var getAuthor = await _users.GetOrRegisterUserAsync(authorUser, ct);
+            var getAuthor = await _users.GetOrRegisterUserAsync(authorID, ct);
             if (!getAuthor.IsSuccess)
             {
-                return CreateEntityResult<UserWarning>.FromError(getAuthor);
+                return Result<UserWarning>.FromError(getAuthor);
             }
 
             var author = getAuthor.Entity;
@@ -181,7 +207,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             var setReason = await SetWarningReasonAsync(warning, reason, ct);
             if (!setReason.IsSuccess)
             {
-                return CreateEntityResult<UserWarning>.FromError(setReason);
+                return Result<UserWarning>.FromError(setReason);
             }
 
             if (!(messageID is null))
@@ -189,7 +215,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 var setMessage = await SetWarningContextMessageAsync(warning, messageID.Value, ct);
                 if (!setMessage.IsSuccess)
                 {
-                    return CreateEntityResult<UserWarning>.FromError(setMessage);
+                    return Result<UserWarning>.FromError(setMessage);
                 }
             }
 
@@ -198,7 +224,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
                 var setExpiry = await SetWarningExpiryDateAsync(warning, expiresOn.Value, ct);
                 if (!setExpiry.IsSuccess)
                 {
-                    return CreateEntityResult<UserWarning>.FromError(setExpiry);
+                    return Result<UserWarning>.FromError(setExpiry);
                 }
             }
 
@@ -214,7 +240,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="reason">The reason.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetWarningReasonAsync
+        public async Task<Result> SetWarningReasonAsync
         (
             UserWarning warning,
             string reason,
@@ -223,12 +249,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (reason.IsNullOrWhitespace())
             {
-                return ModifyEntityResult.FromError("You must provide some reason for the warning.");
+                return new GenericError("You must provide some reason for the warning.");
             }
 
             if (reason.Length > 1024)
             {
-                return ModifyEntityResult.FromError
+                return new GenericError
                 (
                     "The warning is too long. It can be at most 1024 characters."
                 );
@@ -236,7 +262,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             if (warning.Reason == reason)
             {
-                return ModifyEntityResult.FromError("That's already the warning's reason.");
+                return new GenericError("That's already the warning's reason.");
             }
 
             warning.Reason = reason;
@@ -244,7 +270,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -254,16 +280,16 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="messageID">The message.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetWarningContextMessageAsync
+        public async Task<Result> SetWarningContextMessageAsync
         (
             UserWarning warning,
-            long messageID,
+            Snowflake messageID,
             CancellationToken ct = default
         )
         {
             if (warning.MessageID == messageID)
             {
-                return ModifyEntityResult.FromError("That's already the warning's context message.");
+                return new GenericError("That's already the warning's context message.");
             }
 
             warning.MessageID = messageID;
@@ -271,7 +297,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -281,7 +307,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="expiresOn">The date and time at which the warning expires.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetWarningExpiryDateAsync
+        public async Task<Result> SetWarningExpiryDateAsync
         (
             UserWarning warning,
             DateTime expiresOn,
@@ -290,12 +316,12 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (warning.ExpiresOn == expiresOn)
             {
-                return ModifyEntityResult.FromError("That's already the warning's expiry date.");
+                return new GenericError("That's already the warning's expiry date.");
             }
 
             if (expiresOn < DateTime.UtcNow)
             {
-                return ModifyEntityResult.FromError("Warnings can't expire in the past.");
+                return new GenericError("Warnings can't expire in the past.");
             }
 
             warning.ExpiresOn = expiresOn;
@@ -303,7 +329,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
 
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -312,7 +338,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         /// <param name="warning">The warning to delete.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may warning have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteWarningAsync
+        public async Task<Result> DeleteWarningAsync
         (
             UserWarning warning,
             CancellationToken ct = default
@@ -320,7 +346,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
         {
             if (!_database.UserWarnings.Any(n => n.ID == warning.ID))
             {
-                return DeleteEntityResult.FromError
+                return new GenericError
                 (
                     "That warning isn't in the database. This is probably an error in the bot."
                 );
@@ -329,7 +355,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
             _database.UserWarnings.Remove(warning);
             await _database.SaveChangesAsync(ct);
 
-            return DeleteEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
     }
 }

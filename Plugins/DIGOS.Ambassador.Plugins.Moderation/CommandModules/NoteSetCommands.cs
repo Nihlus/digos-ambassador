@@ -20,16 +20,17 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Moderation.Permissions;
 using DIGOS.Ambassador.Plugins.Moderation.Services;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord.Commands;
-using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -40,27 +41,25 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// <summary>
         /// Note setter commands.
         /// </summary>
-        [PublicAPI]
         [Group("set")]
-        public class NoteSetCommands : ModuleBase
+        public class NoteSetCommands : CommandGroup
         {
             private readonly NoteService _notes;
-
-            private readonly UserFeedbackService _feedback;
+            private readonly ICommandContext _context;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="NoteSetCommands"/> class.
             /// </summary>
             /// <param name="notes">The moderation service.</param>
-            /// <param name="feedback">The feedback service.</param>
+            /// <param name="context">The command context.</param>
             public NoteSetCommands
             (
                 NoteService notes,
-                UserFeedbackService feedback
+                ICommandContext context
             )
             {
                 _notes = notes;
-                _feedback = feedback;
+                _context = context;
             }
 
             /// <summary>
@@ -69,15 +68,15 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             /// <param name="noteID">The ID of the note to delete.</param>
             /// <param name="newContents">The new contents of the note.</param>
             [Command("content")]
-            [Summary("Sets the contents of the note.")]
+            [Description("Sets the contents of the note.")]
             [RequirePermission(typeof(ManageNotes), PermissionTarget.All)]
-            [RequireContext(ContextType.Guild)]
-            public async Task<RuntimeResult> SetNoteContentsAsync(long noteID, string newContents)
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<IResult> SetNoteContentsAsync(long noteID, string newContents)
             {
-                var getNote = await _notes.GetNoteAsync(this.Context.Guild, noteID);
+                var getNote = await _notes.GetNoteAsync(_context.GuildID.Value, noteID);
                 if (!getNote.IsSuccess)
                 {
-                    return getNote.ToRuntimeResult();
+                    return getNote;
                 }
 
                 var note = getNote.Entity;
@@ -85,10 +84,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 var setContents = await _notes.SetNoteContentsAsync(note, newContents);
                 if (!setContents.IsSuccess)
                 {
-                    return setContents.ToRuntimeResult();
+                    return setContents;
                 }
 
-                return RuntimeCommandResult.FromSuccess("Note contents updated.");
+                return Result<string>.FromSuccess("Note contents updated.");
             }
         }
     }

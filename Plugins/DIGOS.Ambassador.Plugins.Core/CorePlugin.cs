@@ -30,6 +30,8 @@ using DIGOS.Ambassador.Plugins.Core;
 using DIGOS.Ambassador.Plugins.Core.CommandModules;
 using DIGOS.Ambassador.Plugins.Core.Model;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
+using DIGOS.Ambassador.Plugins.Core.Responders;
+using DIGOS.Ambassador.Plugins.Core.Services;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
@@ -38,6 +40,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Commands.Extensions;
+using Remora.Discord.Gateway.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
 using Remora.Results;
@@ -62,6 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Core
         /// <inheritdoc/>
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
+            serviceCollection.TryAddSingleton<IdentityInformationService>();
             serviceCollection.TryAddScoped<ServerService>();
             serviceCollection.TryAddScoped<UserService>();
             serviceCollection.TryAddScoped<PrivacyService>();
@@ -72,6 +76,8 @@ namespace DIGOS.Ambassador.Plugins.Core
                 .AddCommandGroup<PrivacyCommands>()
                 .AddCommandGroup<UserCommands>()
                 .AddCommandGroup<ServerCommands>();
+
+            serviceCollection.AddResponder<ReadyResponder>();
         }
 
         /// <inheritdoc />

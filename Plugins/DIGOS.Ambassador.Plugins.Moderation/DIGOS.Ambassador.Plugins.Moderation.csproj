@@ -7,12 +7,19 @@
 
     <!-- Workaround for a problem with EF Core -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Remora.Behaviours" Version="6.0.1" />
+        <PackageReference Include="Remora.Discord.Caching" Version="1.1.2" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
-        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />
         <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
         <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
@@ -27,7 +34,7 @@
       <Compile Update="CommandModules\BanCommands.cs" />
       <Compile Update="CommandModules\WarningCommands.cs" />
       <Compile Update="CommandModules\ModerationServerSetCommands.cs">
-        <DependentUpon>ModerationServerCommands.cs</DependentUpon>
+        <DependentUpon>ModerationCommands.cs</DependentUpon>
       </Compile>
       <Compile Update="CommandModules\BanSetCommands.cs">
         <DependentUpon>BanCommands.cs</DependentUpon>

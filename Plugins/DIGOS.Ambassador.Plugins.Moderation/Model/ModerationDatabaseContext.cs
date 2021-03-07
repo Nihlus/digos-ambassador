@@ -21,8 +21,11 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.Core;
 using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -64,6 +67,52 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         public ModerationDatabaseContext(DbContextOptions<ModerationDatabaseContext> contextOptions)
             : base(SchemaName, contextOptions)
         {
+        }
+
+        /// <inheritdoc />
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<ServerModerationSettings>()
+                .Property(s => s.MonitoringChannel)
+                .HasConversion<long?>
+                (
+                    v => v.HasValue ? (long)v.Value.Value : null,
+                    v => v.HasValue ? new Snowflake((ulong)v.Value) : null
+                );
+
+            modelBuilder.Entity<ServerModerationSettings>()
+                .Property(s => s.ModerationLogChannel)
+                .HasConversion<long?>
+                (
+                    v => v.HasValue ? (long)v.Value.Value : null,
+                    v => v.HasValue ? new Snowflake((ulong)v.Value) : null
+                );
+
+            modelBuilder.Entity<UserBan>()
+                .Property(b => b.MessageID)
+                .HasConversion<long?>
+                (
+                    v => v.HasValue ? (long)v.Value.Value : null,
+                    v => v.HasValue ? new Snowflake((ulong)v.Value) : null
+                );
+
+            modelBuilder.Entity<UserWarning>()
+                .Property(w => w.MessageID)
+                .HasConversion<long?>
+                (
+                    v => v.HasValue ? (long)v.Value.Value : null,
+                    v => v.HasValue ? new Snowflake((ulong)v.Value) : null
+                );
+
+            modelBuilder.Entity<Server>()
+                .Property(s => s.DiscordID)
+                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
+
+            modelBuilder.Entity<User>()
+                .Property(s => s.DiscordID)
+                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
         }
     }
 }
