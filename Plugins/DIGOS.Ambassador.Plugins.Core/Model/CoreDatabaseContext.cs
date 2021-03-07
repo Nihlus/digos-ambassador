@@ -19,6 +19,8 @@
 //  You should have received a copy of the GNU Affero General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+
+using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
@@ -69,6 +71,8 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.ConfigureCoreConversions();
+
             modelBuilder.Entity<ServerUser>().HasOne(su => su.Server).WithMany(s => s.KnownUsers);
             modelBuilder.Entity<ServerUser>().HasOne(su => su.User).WithMany();
 
@@ -76,17 +80,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
                 .HasIndex(u => u.DiscordID)
                 .IsUnique();
 
-            modelBuilder.Entity<User>()
-                .Property(s => s.DiscordID)
-                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
-
             modelBuilder.Entity<Server>()
                 .HasIndex(s => s.DiscordID)
                 .IsUnique();
-
-            modelBuilder.Entity<Server>()
-                .Property(s => s.DiscordID)
-                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
         }
     }
 }

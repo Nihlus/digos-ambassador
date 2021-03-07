@@ -21,8 +21,10 @@
 //
 
 using System.Diagnostics.CodeAnalysis;
+using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Plugins.Moderation.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Discord.Core;
@@ -74,45 +76,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<ServerModerationSettings>()
-                .Property(s => s.MonitoringChannel)
-                .HasConversion<long?>
-                (
-                    v => v.HasValue ? (long)v.Value.Value : null,
-                    v => v.HasValue ? new Snowflake((ulong)v.Value) : null
-                );
-
-            modelBuilder.Entity<ServerModerationSettings>()
-                .Property(s => s.ModerationLogChannel)
-                .HasConversion<long?>
-                (
-                    v => v.HasValue ? (long)v.Value.Value : null,
-                    v => v.HasValue ? new Snowflake((ulong)v.Value) : null
-                );
-
-            modelBuilder.Entity<UserBan>()
-                .Property(b => b.MessageID)
-                .HasConversion<long?>
-                (
-                    v => v.HasValue ? (long)v.Value.Value : null,
-                    v => v.HasValue ? new Snowflake((ulong)v.Value) : null
-                );
-
-            modelBuilder.Entity<UserWarning>()
-                .Property(w => w.MessageID)
-                .HasConversion<long?>
-                (
-                    v => v.HasValue ? (long)v.Value.Value : null,
-                    v => v.HasValue ? new Snowflake((ulong)v.Value) : null
-                );
-
-            modelBuilder.Entity<Server>()
-                .Property(s => s.DiscordID)
-                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
-
-            modelBuilder.Entity<User>()
-                .Property(s => s.DiscordID)
-                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
+            modelBuilder
+                .ConfigureCoreConversions()
+                .ConfigureModerationConversions();
         }
     }
 }
