@@ -25,6 +25,7 @@ using System.Drawing;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using JetBrains.Annotations;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -41,14 +42,17 @@ namespace DIGOS.Ambassador.Discord.Feedback
     public class UserFeedbackService
     {
         private IDiscordRestChannelAPI _channelAPI;
+        private IDiscordRestUserAPI _userAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserFeedbackService"/> class.
         /// </summary>
         /// <param name="channelAPI">The channel API.</param>
-        public UserFeedbackService(IDiscordRestChannelAPI channelAPI)
+        /// <param name="userAPI">The user API.</param>
+        public UserFeedbackService(IDiscordRestChannelAPI channelAPI, IDiscordRestUserAPI userAPI)
         {
             _channelAPI = channelAPI;
+            _userAPI = userAPI;
         }
 
         /// <summary>
@@ -57,14 +61,16 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="channel">The channel to send the message to.</param>
         /// <param name="target">The target user to mention, if any.</param>
         /// <param name="contents">The contents of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public Task<IReadOnlyList<Result<IMessage>>> SendConfirmationAsync
         (
             Snowflake channel,
             Snowflake? target,
-            string contents
+            string contents,
+            CancellationToken ct = default
         )
-            => SendEmbedAsync(channel, target, Color.Purple, contents);
+            => SendMessageAsync(channel, target, new ConfirmationMessage(contents), ct);
 
         /// <summary>
         /// Send a negative error message.
@@ -72,14 +78,16 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="channel">The channel to send the message to.</param>
         /// <param name="target">The target user to mention, if any.</param>
         /// <param name="contents">The contents of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public Task<IReadOnlyList<Result<IMessage>>> SendErrorAsync
         (
             Snowflake channel,
             Snowflake? target,
-            string contents
+            string contents,
+            CancellationToken ct = default
         )
-            => SendEmbedAsync(channel, target, Color.Red, contents);
+            => SendEmbedAsync(channel, target, Color.Red, contents, ct);
 
         /// <summary>
         /// Send an alerting warning message.
@@ -87,14 +95,16 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="channel">The channel to send the message to.</param>
         /// <param name="target">The target user to mention, if any.</param>
         /// <param name="contents">The contents of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public Task<IReadOnlyList<Result<IMessage>>> SendWarningAsync
         (
             Snowflake channel,
             Snowflake? target,
-            string contents
+            string contents,
+            CancellationToken ct = default
         )
-            => SendEmbedAsync(channel, target, Color.Orange, contents);
+            => SendMessageAsync(channel, target, new WarningMessage(contents), ct);
 
         /// <summary>
         /// Send an informational message.
@@ -102,14 +112,33 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="channel">The channel to send the message to.</param>
         /// <param name="target">The target user to mention, if any.</param>
         /// <param name="contents">The contents of the message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public Task<IReadOnlyList<Result<IMessage>>> SendInfoAsync
         (
             Snowflake channel,
             Snowflake? target,
-            string contents
+            string contents,
+            CancellationToken ct = default
         )
-            => SendEmbedAsync(channel, target, Color.Blue, contents);
+            => SendMessageAsync(channel, target, new InfoMessage(contents), ct);
+
+        /// <summary>
+        /// Send a message.
+        /// </summary>
+        /// <param name="channel">The channel to send the message to.</param>
+        /// <param name="target">The target user to mention, if any.</param>
+        /// <param name="message">The message to send.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task<IReadOnlyList<Result<IMessage>>> SendMessageAsync
+        (
+            Snowflake channel,
+            Snowflake? target,
+            UserMessage message,
+            CancellationToken ct = default
+        )
+            => SendEmbedAsync(channel, target, message.Colour, message.Message, ct);
 
         /// <summary>
         /// Sends the given embed to the given channel.
@@ -129,19 +158,46 @@ namespace DIGOS.Ambassador.Discord.Feedback
         }
 
         /// <summary>
+        /// Sends the given embed to the given user in their private DM channel.
+        /// </summary>
+        /// <param name="user">The ID of the user to send the embed to.</param>
+        /// <param name="embed">The embed.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task<Result<IMessage>> SendPrivateEmbedAsync
+        (
+            Snowflake user,
+            Embed embed,
+            CancellationToken ct = default
+        )
+        {
+            var getUserDM = await _userAPI.CreateDMAsync(user, ct);
+            if (!getUserDM.IsSuccess)
+            {
+                return Result<IMessage>.FromError(getUserDM);
+            }
+
+            var dm = getUserDM.Entity;
+
+            return await SendEmbedAsync(dm.ID, embed, ct);
+        }
+
+        /// <summary>
         /// Sends the given string as one or more sequential embeds, chunked into sets of 1024 characters.
         /// </summary>
         /// <param name="channel">The channel to send the embed to.</param>
         /// <param name="target">The target user to mention, if any.</param>
         /// <param name="color">The embed colour.</param>
         /// <param name="contents">The contents to send.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task<IReadOnlyList<Result<IMessage>>> SendEmbedAsync
         (
             Snowflake channel,
             Snowflake? target,
             Color color,
-            string contents
+            string contents,
+            CancellationToken ct = default
         )
         {
             var sendResults = new List<Result<IMessage>>();
@@ -150,7 +206,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
             if (contents.Length < 1024)
             {
                 var eb = CreateFeedbackEmbed(target, color, contents);
-                sendResults.Add(await _channelAPI.CreateMessageAsync(channel, embed: eb));
+                sendResults.Add(await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct));
 
                 return sendResults;
             }
@@ -162,7 +218,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
                 if (messageBuilder.Length >= 1024)
                 {
                     var eb = CreateFeedbackEmbed(target, color, messageBuilder.ToString());
-                    sendResults.Add(await _channelAPI.CreateMessageAsync(channel, embed: eb));
+                    sendResults.Add(await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct));
 
                     messageBuilder.Clear();
                 }
@@ -174,7 +230,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
             if (messageBuilder.Length > 0)
             {
                 var eb = CreateFeedbackEmbed(target, color, messageBuilder.ToString());
-                sendResults.Add(await _channelAPI.CreateMessageAsync(channel, embed: eb));
+                sendResults.Add(await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct));
             }
 
             return sendResults;

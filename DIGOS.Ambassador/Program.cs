@@ -28,17 +28,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Responders;
 using log4net;
 using log4net.Config;
 using log4net.Repository.Hierarchy;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Commands.Extensions;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
+using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Extensions;
+using Remora.Discord.Commands.Parsers;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Core;
+using Remora.Discord.Gateway.Extensions;
 using Remora.Discord.Hosting.Extensions;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Services;
@@ -107,8 +113,27 @@ namespace DIGOS.Ambassador
 
                     services
                         .AddCommands()
-                        .AddDiscordCommands(true)
                         .AddDiscordCaching();
+
+                    services.Configure<AmbassadorCommandResponderOptions>(o => o.Prefix = "!");
+
+                    // Custom responders & command services
+                    services.AddCondition<RequireContextCondition>();
+                    services.AddCondition<RequireOwnerCondition>();
+                    services.AddCondition<RequireUserGuildPermissionCondition>();
+
+                    services
+                        .AddParser<IChannel, ChannelParser>()
+                        .AddParser<IGuildMember, GuildMemberParser>()
+                        .AddParser<IRole, RoleParser>()
+                        .AddParser<IUser, UserParser>()
+                        .AddParser<Snowflake, SnowflakeParser>();
+
+                    services.TryAddScoped<ExecutionEventCollectorService>();
+                    services.TryAddSingleton<SlashService>();
+
+                    services.AddResponder<AmbassadorCommandResponder>();
+                    services.AddResponder<AmbassadorInteractionResponder>();
 
                     foreach (var plugin in plugins)
                     {
