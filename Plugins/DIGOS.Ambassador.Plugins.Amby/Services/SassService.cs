@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.Services
         /// <summary>
         /// Loads the sass from disk.
         /// </summary>
-        private async Task<DetermineConditionResult> LoadSassAsync()
+        private async Task<Result> LoadSassAsync()
         {
             var sassPath = UPath.Combine(UPath.Root, "Sass", "sass.txt");
             var sassNSFWPath = UPath.Combine(UPath.Root, "Sass", "sass-nsfw.txt");
@@ -74,7 +74,7 @@ namespace DIGOS.Ambassador.Plugins.Amby.Services
             }
             else
             {
-                return DetermineConditionResult.FromError(getSassStream);
+                return Result.FromError(getSassStream);
             }
 
             var getNSFWSassStream = _content.OpenLocalStream(sassNSFWPath);
@@ -85,11 +85,11 @@ namespace DIGOS.Ambassador.Plugins.Amby.Services
             }
             else
             {
-                return DetermineConditionResult.FromError(getNSFWSassStream);
+                return Result.FromError(getNSFWSassStream);
             }
 
             _isSassLoaded = true;
-            return DetermineConditionResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -98,37 +98,24 @@ namespace DIGOS.Ambassador.Plugins.Amby.Services
         /// <param name="includeNSFW">Whether or not to include NSFW sass.</param>
         /// <returns>A sassy comment.</returns>
         [Pure]
-        public async Task<RetrieveEntityResult<string>> GetSassAsync(bool includeNSFW = false)
+        public async Task<Result<string>> GetSassAsync(bool includeNSFW = false)
         {
             if (!_isSassLoaded)
             {
                 var loadSassAsync = await LoadSassAsync();
                 if (!loadSassAsync.IsSuccess)
                 {
-                    return RetrieveEntityResult<string>.FromError(loadSassAsync);
+                    return Result<string>.FromError(loadSassAsync);
                 }
             }
 
-            List<string> availableSass;
+            var availableSass = includeNSFW
+                ? _sass.Union(_sassNSFW).ToList()
+                : _sass;
 
-            if (includeNSFW)
-            {
-                availableSass = _sass.Union(_sassNSFW).ToList();
-            }
-            else
-            {
-                availableSass = _sass;
-            }
-
-            if (availableSass.Count == 0)
-            {
-                return RetrieveEntityResult<string>.FromError
-                (
-                    "There's no available sass. You'll just have to provide your own."
-                );
-            }
-
-            return RetrieveEntityResult<string>.FromSuccess(availableSass.PickRandom());
+            return availableSass.Count == 0
+                ? "There's no available sass. You'll just have to provide your own."
+                : Result<string>.FromSuccess(availableSass.PickRandom());
         }
     }
 }
