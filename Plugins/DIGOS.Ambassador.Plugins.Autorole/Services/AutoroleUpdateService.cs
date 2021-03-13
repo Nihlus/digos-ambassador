@@ -20,17 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Results;
-using Discord;
-using Discord.Net;
-using Discord.WebSocket;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.Core;
+using Remora.Results;
 using static DIGOS.Ambassador.Plugins.Autorole.Results.AutoroleUpdateStatus;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Services
@@ -40,56 +37,22 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
     /// </summary>
     public class AutoroleUpdateService
     {
-        private readonly DiscordSocketClient _discordClient;
         private readonly AutoroleService _autoroles;
+        private readonly IDiscordRestGuildAPI _guildAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleUpdateService"/> class.
         /// </summary>
-        /// <param name="discordClient">The Discord client.</param>
         /// <param name="autoroles">The autorole service.</param>
+        /// <param name="guildAPI">The guild API.</param>
         public AutoroleUpdateService
         (
-            DiscordSocketClient discordClient,
-            AutoroleService autoroles
+            AutoroleService autoroles,
+            IDiscordRestGuildAPI guildAPI
         )
         {
-            _discordClient = discordClient;
             _autoroles = autoroles;
-        }
-
-        /// <summary>
-        /// Checks the status of an autorole, applying it to any users which qualify. If any user no longer qualifies,
-        /// the autorole is removed from that user.
-        /// </summary>
-        /// <param name="autorole">The autorole.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>
-        /// A modification result which may or may not have succeeded. If any individual autorole update fails, this
-        /// result will also indicate failure. That does not mean that *all* updates failed, however.
-        /// </returns>
-        public async IAsyncEnumerable<AutoroleUpdateResult> UpdateAutoroleAsync
-        (
-            AutoroleConfiguration autorole,
-            [EnumeratorCancellation] CancellationToken ct = default
-        )
-        {
-            var guild = _discordClient.GetGuild((ulong)autorole.Server.DiscordID);
-            if (guild is null)
-            {
-                yield break;
-            }
-
-            // Ensure we have all users available to us
-            if (guild.MemberCount != guild.Users.Count)
-            {
-                await guild.DownloadUsersAsync();
-            }
-
-            foreach (var user in guild.Users)
-            {
-                yield return await UpdateAutoroleForUserAsync(autorole, user, ct);
-            }
+            _guildAPI = guildAPI;
         }
 
         /// <summary>
@@ -97,13 +60,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// the autorole is removed.
         /// </summary>
         /// <param name="autorole">The autorole.</param>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<AutoroleUpdateResult> UpdateAutoroleForUserAsync
+        public async Task<Result<AutoroleUpdateStatus>> UpdateAutoroleForUserAsync
         (
             AutoroleConfiguration autorole,
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
@@ -117,27 +82,43 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return Unconditional;
             }
 
-            var role = guildUser.Guild.GetRole((ulong)autorole.DiscordRoleID);
-            if (role is null)
+            var getRoles = await _guildAPI.GetGuildRolesAsync(guildID, ct);
+            if (!getRoles.IsSuccess)
+            {
+                return Result<AutoroleUpdateStatus>.FromError(getRoles);
+            }
+
+            var roles = getRoles.Entity;
+
+            if (roles.All(r => r.ID != autorole.DiscordRoleID))
             {
                 // If the role can't be found any longer, we disable it
                 var disableAutoroleAsync = await _autoroles.DisableAutoroleAsync(autorole, ct);
                 if (!disableAutoroleAsync.IsSuccess)
                 {
-                    return AutoroleUpdateResult.FromError(disableAutoroleAsync);
+                    return Result<AutoroleUpdateStatus>.FromError(disableAutoroleAsync);
                 }
 
                 return Disabled;
             }
 
-            var userHasRole = guildUser.RoleIds.Contains(role.Id);
-            var getIsUserQualified = await _autoroles.IsUserQualifiedForAutoroleAsync(autorole, guildUser, ct);
+            var getIsUserQualified = await _autoroles.IsUserQualifiedForAutoroleAsync(autorole, userID, ct);
             if (!getIsUserQualified.IsSuccess)
             {
-                return AutoroleUpdateResult.FromError(getIsUserQualified);
+                return Result<AutoroleUpdateStatus>.FromError(getIsUserQualified);
             }
 
             var isUserQualified = getIsUserQualified.Entity;
+
+            var getMember = await _guildAPI.GetGuildMemberAsync(guildID, userID, ct);
+            if (!getMember.IsSuccess)
+            {
+                return Result<AutoroleUpdateStatus>.FromError(getMember);
+            }
+
+            var member = getMember.Entity;
+
+            var userHasRole = member.Roles.Contains(autorole.DiscordRoleID);
 
             if (isUserQualified && userHasRole)
             {
@@ -146,36 +127,40 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             if (!isUserQualified && userHasRole)
             {
-                try
+                var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
+                (
+                    guildID,
+                    userID,
+                    autorole.DiscordRoleID,
+                    ct
+                );
+
+                if (!removeRole.IsSuccess)
                 {
-                    await guildUser.RemoveRoleAsync(role);
+                    return Result<AutoroleUpdateStatus>.FromError(removeRole);
+                }
 
-                    var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync
-                    (
-                        autorole,
-                        guildUser,
-                        ct
-                    );
+                var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync
+                (
+                    autorole,
+                    userID,
+                    ct
+                );
 
-                    if (!getConfirmation.IsSuccess)
-                    {
-                        return Removed;
-                    }
-
-                    // Remove any existing affirmation
-                    var confirmation = getConfirmation.Entity;
-                    var removeConfirmation = await _autoroles.RemoveAutoroleConfirmationAsync(confirmation, ct);
-                    if (!removeConfirmation.IsSuccess)
-                    {
-                        return AutoroleUpdateResult.FromError(removeConfirmation);
-                    }
-
+                if (!getConfirmation.IsSuccess)
+                {
                     return Removed;
                 }
-                catch (HttpException hex) when (hex.WasCausedByMissingPermission())
+
+                // Remove any existing affirmation
+                var confirmation = getConfirmation.Entity;
+                var removeConfirmation = await _autoroles.RemoveAutoroleConfirmationAsync(confirmation, ct);
+                if (!removeConfirmation.IsSuccess)
                 {
-                    return AutoroleUpdateResult.FromError("No permission to change the user's role.");
+                    return Result<AutoroleUpdateStatus>.FromError(removeConfirmation);
                 }
+
+                return Removed;
             }
 
             // At this point, the user doesn't have the role, and either is or is not qualified.
@@ -185,35 +170,32 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return Unqualified;
             }
 
-            try
+            if (autorole.RequiresConfirmation)
             {
-                if (autorole.RequiresConfirmation)
+                var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync
+                (
+                    autorole,
+                    userID,
+                    ct
+                );
+
+                if (!getConfirmation.IsSuccess)
                 {
-                    var getConfirmation = await _autoroles.GetOrCreateAutoroleConfirmationAsync
-                    (
-                        autorole,
-                        guildUser,
-                        ct
-                    );
-
-                    if (!getConfirmation.IsSuccess)
-                    {
-                        return AutoroleUpdateResult.FromError("Couldn't get a valid confirmation entry for the user.");
-                    }
-
-                    var confirmation = getConfirmation.Entity;
-                    if (!confirmation.IsConfirmed)
-                    {
-                        // We consider a no-op for an qualified but not affirmed user a success.
-                        return RequiresAffirmation;
-                    }
+                    return Result<AutoroleUpdateStatus>.FromError(getConfirmation);
                 }
 
-                await guildUser.AddRoleAsync(role);
+                var confirmation = getConfirmation.Entity;
+                if (!confirmation.IsConfirmed)
+                {
+                    // We consider a no-op for an qualified but not affirmed user a success.
+                    return RequiresAffirmation;
+                }
             }
-            catch (HttpException hex) when (hex.WasCausedByMissingPermission())
+
+            var addRole = await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, autorole.DiscordRoleID, ct);
+            if (!addRole.IsSuccess)
             {
-                return AutoroleUpdateResult.FromError("No permission to change the user's role.");
+                return Result<AutoroleUpdateStatus>.FromError(addRole);
             }
 
             return Applied;

@@ -25,8 +25,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Entities;
-using Discord;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
@@ -45,10 +45,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         public abstract bool HasSameConditionsAs(IAutoroleCondition autoroleCondition);
 
         /// <inheritdoc/>
-        public abstract Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
+        public abstract Task<Result<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         );
     }

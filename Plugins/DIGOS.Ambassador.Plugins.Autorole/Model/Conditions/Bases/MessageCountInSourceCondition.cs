@@ -21,6 +21,7 @@
 //
 
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
 {
@@ -36,7 +37,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         /// <summary>
         /// Gets the Discord ID of the message source.
         /// </summary>
-        public long SourceID { get; internal set; }
+        public Snowflake SourceID { get; internal set; }
 
         /// <summary>
         /// Gets the required number of messages.
@@ -48,7 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         /// </summary>
         /// <param name="sourceID">The source ID.</param>
         /// <param name="requiredCount">The required message count.</param>
-        protected MessageCountInSourceCondition(long sourceID, long requiredCount)
+        protected MessageCountInSourceCondition(Snowflake sourceID, long requiredCount)
         {
             this.SourceID = sourceID;
             this.RequiredCount = requiredCount;

@@ -6,20 +6,23 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="LazyCache.AspNetCore" Version="2.0.4" />
-        <PackageReference Include="Remora.Plugins.Abstractions" Version="2.1.3" />
+        <PackageReference Include="LazyCache.AspNetCore" Version="2.1.2" />
+        <PackageReference Include="Remora.Plugins.Abstractions" Version="3.0.1" />
     </ItemGroup>
-    
+
     <!-- Workaround for a problem with EF Core -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.3">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
-    
+
     <ItemGroup>
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
         <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Permissions\DIGOS.Ambassador.Plugins.Permissions.csproj" />
     </ItemGroup>
-    
+
     <ItemGroup>
       <Compile Update="CommandModules\AutoroleCommands.AutoroleSettingCommands.cs">
         <DependentUpon>AutoroleCommands.cs</DependentUpon>

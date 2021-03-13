@@ -20,18 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
-using DIGOS.Ambassador.Discord.TypeReaders;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord;
-using Discord.Commands;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -46,7 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             /// Contains commands for adding or modifying a condition based on a certain reaction to a message.
             /// </summary>
             [Group("reaction")]
-            public class ReactionConditionCommands : ModuleBase
+            public class ReactionConditionCommands : CommandGroup
             {
                 private readonly AutoroleService _autoroles;
 
@@ -66,36 +69,27 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// <param name="message">The message.</param>
                 /// <param name="emote">The emote.</param>
                 [UsedImplicitly]
-                [Command]
-                [Summary("Adds an instance of the condition to the role.")]
-                [RequireContext(ContextType.Guild)]
+                [Command("add")]
+                [Description("Adds an instance of the condition to the role.")]
+                [RequireContext(ChannelContext.Guild)]
                 [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> AddConditionAsync
+                public async Task<Result<UserMessage>> AddConditionAsync
                 (
                     AutoroleConfiguration autorole,
-                    [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
                     IMessage message,
-                    IEmote emote
+                    IEmoji emote
                 )
                 {
-                    var condition = _autoroles.CreateConditionProxy<ReactionCondition>
-                    (
-                        message,
-                        emote
-                    );
-
-                    if (condition is null)
-                    {
-                        return RuntimeCommandResult.FromError("Failed to create a condition object. Yikes!");
-                    }
+                    var condition = _autoroles.CreateConditionProxy<ReactionCondition>(message, emote)
+                        ?? throw new InvalidOperationException();
 
                     var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
                     if (!addCondition.IsSuccess)
                     {
-                        return addCondition.ToRuntimeResult();
+                        return Result<UserMessage>.FromError(addCondition);
                     }
 
-                    return RuntimeCommandResult.FromSuccess("Condition added.");
+                    return new ConfirmationMessage("Condition added.");
                 }
 
                 /// <summary>
@@ -106,17 +100,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// <param name="message">The message.</param>
                 /// <param name="emote">The emote.</param>
                 [UsedImplicitly]
-                [Command]
-                [Summary("Modifies an instance of the condition on the role.")]
-                [RequireContext(ContextType.Guild)]
+                [Command("set")]
+                [Description("Modifies an instance of the condition on the role.")]
+                [RequireContext(ChannelContext.Guild)]
                 [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> ModifyConditionAsync
+                public async Task<Result<UserMessage>> ModifyConditionAsync
                 (
                     AutoroleConfiguration autorole,
                     long conditionID,
-                    [OverrideTypeReader(typeof(UncachedMessageTypeReader<IMessage>))]
                     IMessage message,
-                    IEmote emote
+                    IEmoji emote
                 )
                 {
                     var getCondition = _autoroles.GetCondition<ReactionCondition>
@@ -127,7 +120,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
                     if (!getCondition.IsSuccess)
                     {
-                        return getCondition.ToRuntimeResult();
+                        return Result<UserMessage>.FromError(getCondition);
                     }
 
                     var condition = getCondition.Entity;
@@ -136,17 +129,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                         condition,
                         c =>
                         {
-                            condition.MessageID = (long)message.Id;
-                            condition.EmoteName = emote.Name;
+                            c.MessageID = message.ID;
+                            c.EmoteName = emote.Name ?? emote.ID.ToString() ?? throw new InvalidOperationException();
                         }
                     );
 
                     if (!modifyResult.IsSuccess)
                     {
-                        return modifyResult.ToRuntimeResult();
+                        return Result<UserMessage>.FromError(modifyResult);
                     }
 
-                    return RuntimeCommandResult.FromSuccess("Condition updated.");
+                    return new ConfirmationMessage("Condition updated.");
                 }
             }
         }

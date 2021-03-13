@@ -20,16 +20,22 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord;
-using Discord.Commands;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -45,19 +51,27 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             /// </summary>
             [UsedImplicitly]
             [Group("set")]
-            [Summary("Commands for editing server-wide autorole settings.")]
-            public class AutoroleSettingSetCommands : ModuleBase
+            [Description("Commands for editing server-wide autorole settings.")]
+            public class AutoroleSettingSetCommands : CommandGroup
             {
                 private readonly AutoroleService _autoroles;
+                private readonly ICommandContext _context;
 
                 /// <summary>
                 /// Initializes a new instance of the <see cref="AutoroleSettingSetCommands"/> class.
                 /// </summary>
                 /// <param name="autoroles">The autorole service.</param>
                 /// <param name="feedback">The feedback service.</param>
-                public AutoroleSettingSetCommands(AutoroleService autoroles, UserFeedbackService feedback)
+                /// <param name="context">The command context.</param>
+                public AutoroleSettingSetCommands
+                (
+                    AutoroleService autoroles,
+                    UserFeedbackService feedback,
+                    ICommandContext context
+                )
                 {
                     _autoroles = autoroles;
+                    _context = context;
                 }
 
                 /// <summary>
@@ -65,30 +79,29 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// </summary>
                 /// <param name="channel">The channel.</param>
                 [UsedImplicitly]
-                [Alias("confirmation-notification-channel")]
                 [Command("confirmation-notification-channel")]
-                [Summary("Sets the confirmation notification channel.")]
-                [RequireContext(ContextType.Guild)]
+                [Description("Sets the confirmation notification channel.")]
+                [RequireContext(ChannelContext.Guild)]
                 [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
-                public async Task<RuntimeResult> SetAffirmationNotificationChannel(IChannel channel)
+                public async Task<Result<UserMessage>> SetAffirmationNotificationChannel(IChannel channel)
                 {
-                    if (!(channel is ITextChannel textChannel))
+                    if (channel.Type is not ChannelType.GuildText)
                     {
-                        return RuntimeCommandResult.FromError("That's not a text channel.");
+                        return new UserError("That's not a text channel.");
                     }
 
                     var setResult = await _autoroles.SetAffirmationNotificationChannelAsync
                     (
-                        this.Context.Guild,
-                        textChannel
+                        _context.GuildID.Value,
+                        channel.ID
                     );
 
                     if (!setResult.IsSuccess)
                     {
-                        return setResult.ToRuntimeResult();
+                        return Result<UserMessage>.FromError(setResult);
                     }
 
-                    return RuntimeCommandResult.FromSuccess("Channel set.");
+                    return new ConfirmationMessage("Channel set.");
                 }
             }
         }

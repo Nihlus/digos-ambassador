@@ -22,20 +22,26 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord;
-using Discord.Commands;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -46,14 +52,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
     /// Commands for creating, using, and interacting with autoroles.
     /// </summary>
     [UsedImplicitly]
-    [Alias("autorole", "at")]
     [Group("autorole")]
-    [Summary("Commands for creating, editing, and interacting with automatic roles.")]
-    public partial class AutoroleCommands : ModuleBase
+    [Description("Commands for creating, editing, and interacting with automatic roles.")]
+    public partial class AutoroleCommands : CommandGroup
     {
         private readonly AutoroleService _autoroles;
         private readonly UserFeedbackService _feedback;
         private readonly InteractivityService _interactivity;
+        private readonly ICommandContext _context;
+        private readonly IDiscordRestGuildAPI _guildAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleCommands"/> class.
@@ -61,16 +68,22 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// <param name="autoroles">The autorole service.</param>
         /// <param name="feedback">The feedback service.</param>
         /// <param name="interactivity">The interactivity service.</param>
+        /// <param name="context">The command context.</param>
+        /// <param name="guildAPI">The guild API.</param>
         public AutoroleCommands
         (
             AutoroleService autoroles,
             UserFeedbackService feedback,
-            InteractivityService interactivity
+            InteractivityService interactivity,
+            ICommandContext context,
+            IDiscordRestGuildAPI guildAPI
         )
         {
             _autoroles = autoroles;
             _feedback = feedback;
             _interactivity = interactivity;
+            _context = context;
+            _guildAPI = guildAPI;
         }
 
         /// <summary>
@@ -78,20 +91,25 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// </summary>
         /// <param name="discordRole">The discord role.</param>
         [UsedImplicitly]
-        [Alias("create")]
         [Command("create")]
-        [Summary("Creates a new autorole configuration for the given Discord role.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Creates a new autorole configuration for the given Discord role.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(CreateAutorole), PermissionTarget.Self)]
-        public async Task<RuntimeResult> CreateAutoroleAsync(IRole discordRole)
+        public async Task<Result<UserMessage>> CreateAutoroleAsync(IRole discordRole)
         {
-            var create = await _autoroles.CreateAutoroleAsync(discordRole);
+            var create = await _autoroles.CreateAutoroleAsync
+            (
+                _context.GuildID.Value,
+                discordRole.ID,
+                this.CancellationToken
+            );
+
             if (!create.IsSuccess)
             {
-                return create.ToRuntimeResult();
+                return Result<UserMessage>.FromError(create);
             }
 
-            return RuntimeCommandResult.FromSuccess("Autorole configuration created.");
+            return new ConfirmationMessage("Autorole configuration created.");
         }
 
         /// <summary>
@@ -99,20 +117,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// </summary>
         /// <param name="autorole">The autorole.</param>
         [UsedImplicitly]
-        [Alias("delete")]
         [Command("delete")]
-        [Summary("Deletes an existing autorole configuration for the given Discord role.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Deletes an existing autorole configuration for the given Discord role.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(DeleteAutorole), PermissionTarget.Self)]
-        public async Task<RuntimeResult> DeleteAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<Result<UserMessage>> DeleteAutoroleAsync(AutoroleConfiguration autorole)
         {
             var deleteAutorole = await _autoroles.DeleteAutoroleAsync(autorole);
             if (!deleteAutorole.IsSuccess)
             {
-                return deleteAutorole.ToRuntimeResult();
+                return Result<UserMessage>.FromError(deleteAutorole);
             }
 
-            return RuntimeCommandResult.FromSuccess("Autorole configuration deleted.");
+            return new ConfirmationMessage("Autorole configuration deleted.");
         }
 
         /// <summary>
@@ -120,20 +137,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// </summary>
         /// <param name="autorole">The autorole.</param>
         [UsedImplicitly]
-        [Alias("enable")]
         [Command("enable")]
-        [Summary("Enables the given autorole, allowing it to be added to users.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Enables the given autorole, allowing it to be added to users.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-        public async Task<RuntimeResult> EnableAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<Result<UserMessage>> EnableAutoroleAsync(AutoroleConfiguration autorole)
         {
             var enableAutorole = await _autoroles.EnableAutoroleAsync(autorole);
             if (!enableAutorole.IsSuccess)
             {
-                return enableAutorole.ToRuntimeResult();
+                return Result<UserMessage>.FromError(enableAutorole);
             }
 
-            return RuntimeCommandResult.FromSuccess("Autorole enabled.");
+            return new ConfirmationMessage("Autorole enabled.");
         }
 
         /// <summary>
@@ -141,20 +157,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// </summary>
         /// <param name="autorole">The autorole.</param>
         [UsedImplicitly]
-        [Alias("disable")]
         [Command("disable")]
-        [Summary("Disables the given autorole, preventing it from being added to users.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Disables the given autorole, preventing it from being added to users.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-        public async Task<RuntimeResult> DisableAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<Result<UserMessage>> DisableAutoroleAsync(AutoroleConfiguration autorole)
         {
             var disableAutorole = await _autoroles.DisableAutoroleAsync(autorole);
             if (!disableAutorole.IsSuccess)
             {
-                return disableAutorole.ToRuntimeResult();
+                return Result<UserMessage>.FromError(disableAutorole);
             }
 
-            return RuntimeCommandResult.FromSuccess("Autorole disabled.");
+            return new ConfirmationMessage("Autorole disabled.");
         }
 
         /// <summary>
@@ -162,95 +177,90 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// </summary>
         /// <param name="autorole">The autorole.</param>
         [UsedImplicitly]
-        [Alias("show", "view")]
         [Command("show")]
-        [Summary("Show the settings for the given autorole.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Show the settings for the given autorole.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(ViewAutorole), PermissionTarget.Self)]
-        public async Task<RuntimeResult> ShowAutoroleAsync(AutoroleConfiguration autorole)
+        public async Task<Result> ShowAutoroleAsync(AutoroleConfiguration autorole)
         {
-            var paginatedEmbed = new PaginatedEmbed(_feedback, _interactivity, this.Context.User)
+            var embedFields = new List<IEmbedField>();
+            var embed = _feedback.CreateEmbedBase() with
             {
-                Appearance = PaginatedAppearanceOptions.Default
+                Title = "Autorole Configuration",
+                Description = $"<@&{autorole.DiscordRoleID}>",
+                Fields = embedFields
             };
 
-            var baseEmbed = paginatedEmbed.Appearance.CreateEmbedBase()
-                .WithTitle("Autorole Configuration")
-                .WithDescription(MentionUtils.MentionRole((ulong)autorole.DiscordRoleID))
-                .AddField("Requires confirmation", autorole.RequiresConfirmation, true)
-                .AddField("Is enabled", autorole.IsEnabled, true);
+            embedFields.Add(new EmbedField("Requires confirmation", autorole.RequiresConfirmation.ToString(), true));
+            embedFields.Add(new EmbedField("Is enabled", autorole.IsEnabled.ToString(), true));
 
             if (!autorole.Conditions.Any())
             {
-                baseEmbed.AddField("Conditions", "No conditions");
-                baseEmbed.Footer = null;
+                embedFields.Add(new EmbedField("Conditions", "No conditions"));
 
-                await _feedback.SendEmbedAsync(this.Context.Channel, baseEmbed.Build());
-                return RuntimeCommandResult.FromSuccess();
+                var send = await _feedback.SendEmbedAsync(_context.ChannelID, embed);
+                return send.IsSuccess
+                    ? Result.FromSuccess()
+                    : Result.FromError(send);
             }
 
             var conditionFields = autorole.Conditions.Select
             (
-                c => new EmbedFieldBuilder()
-                    .WithName($"Condition #{autorole.Conditions.IndexOf(c)} (ID {c.ID})")
-                    .WithValue(c.GetDescriptiveUIText())
+                c => new EmbedField
+                (
+                    $"Condition #{autorole.Conditions.IndexOf(c)} (ID {c.ID})",
+                    c.GetDescriptiveUIText()
+                )
             );
 
-            var pages = PageFactory.FromFields(conditionFields, pageBase: baseEmbed);
-            paginatedEmbed.WithPages(pages);
+            var pages = PageFactory.FromFields(conditionFields, pageBase: embed);
 
-            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            return await _interactivity.SendInteractiveMessageAsync
             (
-                this.Context.Channel,
-                paginatedEmbed,
-                TimeSpan.FromMinutes(5)
+                _context.ChannelID,
+                (channelID, messageID, channelAPI) => new PaginatedMessage
+                (
+                    channelID,
+                    messageID,
+                    channelAPI,
+                    _context.User.ID,
+                    pages
+                )
             );
-
-            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
         /// Lists configured autoroles.
         /// </summary>
         [UsedImplicitly]
-        [Alias("list")]
         [Command("list")]
-        [Summary("Lists configured autoroles.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Lists configured autoroles.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(ViewAutorole), PermissionTarget.Self)]
-        public async Task<RuntimeResult> ListAutorolesAsync()
+        public async Task<Result> ListAutorolesAsync()
         {
-            var autoroles = new List<AutoroleConfiguration>();
-            foreach (var role in this.Context.Guild.Roles)
-            {
-                var getAutorole = await _autoroles.GetAutoroleAsync(role);
-                if (!getAutorole.IsSuccess)
-                {
-                    continue;
-                }
+            var autoroles = await _autoroles.GetAutorolesAsync(_context.GuildID.Value, ct: this.CancellationToken);
 
-                autoroles.Add(getAutorole.Entity);
-            }
-
-            var pager = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                _feedback,
-                _interactivity,
-                this.Context.User,
                 autoroles,
-                at => $"@{this.Context.Guild.Roles.First(r => r.Id == (ulong)at.DiscordRoleID).Name}",
+                at => $"<@&{at.DiscordRoleID}>",
                 at => at.IsEnabled ? "Enabled" : "Disabled",
                 "There are no autoroles configured."
             );
 
-            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            return await _interactivity.SendInteractiveMessageAsync
             (
-                this.Context.Channel,
-                pager,
-                TimeSpan.FromMinutes(5)
+                _context.ChannelID,
+                (channelID, messageID, channelAPI) => new PaginatedMessage
+                (
+                    channelID,
+                    messageID,
+                    channelAPI,
+                    _context.User.ID,
+                    pages
+                )
             );
-
-            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -259,24 +269,23 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// <param name="autorole">The autorole.</param>
         /// <param name="user">The user.</param>
         [UsedImplicitly]
-        [Alias("affirm", "confirm")]
-        [Command("affirm")]
-        [Summary("Affirms a user's qualification for an autorole.")]
-        [RequireContext(ContextType.Guild)]
+        [Command("confirm")]
+        [Description("Affirms a user's qualification for an autorole.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
-        public async Task<RuntimeResult> AffirmAutoroleForUserAsync
+        public async Task<Result<UserMessage>> AffirmAutoroleForUserAsync
         (
             AutoroleConfiguration autorole,
             IUser user
         )
         {
-            var affirmResult = await _autoroles.AffirmAutoroleAsync(autorole, user);
-            if (!affirmResult.IsSuccess)
+            var confirmResult = await _autoroles.ConfirmAutoroleAsync(autorole, user.ID);
+            if (!confirmResult.IsSuccess)
             {
-                return affirmResult.ToRuntimeResult();
+                return Result<UserMessage>.FromError(confirmResult);
             }
 
-            return RuntimeCommandResult.FromSuccess("Qualification affirmed.");
+            return new ConfirmationMessage("Qualification affirmed.");
         }
 
         /// <summary>
@@ -284,20 +293,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// </summary>
         /// <param name="autorole">The autorole.</param>
         [UsedImplicitly]
-        [Alias("affirm-all", "confirm-all")]
-        [Command("affirm-all")]
-        [Summary("Affirms all currently qualifying users for the given autorole.")]
-        [RequireContext(ContextType.Guild)]
+        [Command("confirm-all")]
+        [Description("Confirms all currently qualifying users for the given autorole.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
-        public async Task<RuntimeResult> AffirmAutoroleForAllAsync(AutoroleConfiguration autorole)
+        public async Task<Result<UserMessage>> AffirmAutoroleForAllAsync(AutoroleConfiguration autorole)
         {
             var affirmResult = await _autoroles.AffirmAutoroleForAllAsync(autorole);
             if (!affirmResult.IsSuccess)
             {
-                return affirmResult.ToRuntimeResult();
+                return Result<UserMessage>.FromError(affirmResult);
             }
 
-            return RuntimeCommandResult.FromSuccess("Qualifications affirmed.");
+            return new ConfirmationMessage("Qualifications confirmed.");
         }
 
         /// <summary>
@@ -306,24 +314,23 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// <param name="autorole">The autorole.</param>
         /// <param name="user">The user.</param>
         [UsedImplicitly]
-        [Alias("deny")]
         [Command("deny")]
-        [Summary("Denies a user's qualification for an autorole.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Denies a user's qualification for an autorole.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.Self)]
-        public async Task<RuntimeResult> DenyAutoroleForUserAsync
+        public async Task<Result<UserMessage>> DenyAutoroleForUserAsync
         (
             AutoroleConfiguration autorole,
             IUser user
         )
         {
-            var denyResult = await _autoroles.DenyAutoroleAsync(autorole, user);
+            var denyResult = await _autoroles.DenyAutoroleAsync(autorole, user.ID);
             if (!denyResult.IsSuccess)
             {
-                return denyResult.ToRuntimeResult();
+                return Result<UserMessage>.FromError(denyResult);
             }
 
-            return RuntimeCommandResult.FromSuccess("Qualification denied.");
+            return new ConfirmationMessage("Qualification denied.");
         }
 
         /// <summary>
@@ -332,12 +339,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// <param name="autorole">The autorole.</param>
         /// <param name="requireAffirmation">Whether confirmation is required.</param>
         [UsedImplicitly]
-        [Alias("require-affirmation", "require-confirmation")]
         [Command("require-confirmation")]
-        [Summary("Sets whether the given autorole require confirmation for the assignment after a user has qualified.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Sets whether the given autorole require confirmation for the assignment after a user has qualified.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-        public async Task<RuntimeResult> SetAffirmationRequirementAsync
+        public async Task<Result<UserMessage>> SetAffirmationRequirementAsync
         (
             AutoroleConfiguration autorole,
             bool requireAffirmation = true
@@ -346,16 +352,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             var setRequirementResult = await _autoroles.SetAffirmationRequiredAsync(autorole, requireAffirmation);
             if (!setRequirementResult.IsSuccess)
             {
-                return setRequirementResult.ToRuntimeResult();
+                return Result<UserMessage>.FromError(setRequirementResult);
             }
 
-            await _feedback.SendConfirmationAsync
+            return new ConfirmationMessage
             (
-                this.Context,
-                requireAffirmation ? "Affirmation is now required." : "Affirmation is no longer required."
+                requireAffirmation
+                    ? "Affirmation is now required."
+                    : "Affirmation is no longer required."
             );
-
-            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -363,49 +368,52 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         /// </summary>
         /// <param name="autorole">The autorole.</param>
         [UsedImplicitly]
-        [Alias("unconfirmed")]
         [Command("unconfirmed")]
-        [Summary("Lists users that haven't been confirmed yet for the given autorole.")]
-        [RequireContext(ContextType.Guild)]
+        [Description("Lists users that haven't been confirmed yet for the given autorole.")]
+        [RequireContext(ChannelContext.Guild)]
         [RequirePermission(typeof(AffirmDenyAutorole), PermissionTarget.All)]
-        public async Task<RuntimeResult> ListUnconfirmedUsersAsync(AutoroleConfiguration autorole)
+        public async Task<Result> ListUnconfirmedUsersAsync(AutoroleConfiguration autorole)
         {
             var getUsers = await _autoroles.GetUnconfirmedUsersAsync(autorole);
             if (!getUsers.IsSuccess)
             {
-                return getUsers.ToRuntimeResult();
+                return Result.FromError(getUsers);
             }
 
             var users = getUsers.Entity.ToList();
-            var discordUsers = await Task.WhenAll
+            var getDiscordUsers = await Task.WhenAll
             (
-                users.Select(u => this.Context.Guild.GetUserAsync((ulong)u.DiscordID))
+                users.Select(u => _guildAPI.GetGuildMemberAsync(_context.GuildID.Value, u.DiscordID))
             );
 
-            // Filter out users that are no longer in the guild
-            discordUsers = discordUsers.Where(u => !(u is null)).ToArray();
+            var discordUsers = getDiscordUsers
+                .Where(r => r.IsSuccess)
+                .Select(r => r.Entity!)
+                .Where(u => u.User.HasValue)
+                .ToList();
 
-            var listMessage = PaginatedEmbedFactory.SimpleFieldsFromCollection
+            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
             (
-                _feedback,
-                _interactivity,
-                this.Context.User,
                 discordUsers,
-                u => u.Nickname is null
-                    ? $"({u.Username}#{u.Discriminator} | {u.Id})"
-                    : $"{u.Nickname} ({u.Username}#{u.Discriminator} | {u.Id})",
-                u => "Not confirmed",
+                u => !u.Nickname.HasValue
+                    ? $"{u.User.Value!.Username}#{u.User.Value!.Discriminator} | {u.User.Value!.ID}"
+                    : $"{u.Nickname} ({u.User.Value!.Username}#{u.User.Value!.Discriminator} | {u.User.Value!.ID})",
+                _ => "Not confirmed",
                 "There are no users that haven't been confirmed for that role."
             );
 
-            await _interactivity.SendInteractiveMessageAndDeleteAsync
+            return await _interactivity.SendInteractiveMessageAsync
             (
-                this.Context.Channel,
-                listMessage,
-                TimeSpan.FromMinutes(5)
+                _context.ChannelID,
+                (channelID, messageID, channelAPI) => new PaginatedMessage
+                (
+                    channelID,
+                    messageID,
+                    channelAPI,
+                    _context.User.ID,
+                    pages
+                )
             );
-
-            return RuntimeCommandResult.FromSuccess();
         }
     }
 }

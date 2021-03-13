@@ -26,8 +26,9 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
-using Discord;
 using JetBrains.Annotations;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model
 {
@@ -46,7 +47,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         /// <summary>
         /// Gets the ID of the Discord role.
         /// </summary>
-        public long DiscordRoleID { get; private set; }
+        public Snowflake DiscordRoleID { get; private set; }
 
         /// <summary>
         /// Gets the conditions for acquiring the role.
@@ -78,7 +79,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         /// </summary>
         /// <param name="server">The server.</param>
         /// <param name="discordRoleID">The ID of the discord role to assign.</param>
-        protected AutoroleConfiguration(Server server, long discordRoleID)
+        protected AutoroleConfiguration(Server server, Snowflake discordRoleID)
         {
             this.Server = server;
             this.DiscordRoleID = discordRoleID;
@@ -91,7 +92,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         /// <param name="server">The server.</param>
         /// <param name="discordRole">The Discord role.</param>
         public AutoroleConfiguration(Server server, IRole discordRole)
-            : this(server, (long)discordRole.Id)
+            : this(server, discordRole.ID)
         {
         }
     }

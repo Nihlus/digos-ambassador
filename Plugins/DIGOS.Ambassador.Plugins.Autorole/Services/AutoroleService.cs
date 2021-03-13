@@ -26,14 +26,16 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Services
@@ -73,19 +75,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <summary>
         /// Determines whether the given discord role has an autorole configuration.
         /// </summary>
-        /// <param name="discordRole">The discord role.</param>
+        /// <param name="discordRoleID">The ID of the discord role.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>true if the given role has an autorole; otherwise, false.</returns>
         public async ValueTask<bool> HasAutoroleAsync
         (
-            IRole discordRole,
+            Snowflake discordRoleID,
             CancellationToken ct = default
         )
         {
             return await _database.Autoroles.ServersideQueryAsync
             (
                 q => q
-                    .Where(ar => ar.DiscordRoleID == (long)discordRole.Id)
+                    .Where(ar => ar.DiscordRoleID == discordRoleID)
                     .AnyAsync(ct)
             );
         }
@@ -93,19 +95,19 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <summary>
         /// Retrieves an autorole configuration from the database.
         /// </summary>
-        /// <param name="discordRole">The discord role to get the matching autorole for.</param>
+        /// <param name="discordRoleID">The ID of the discord role to get the matching autorole for.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<AutoroleConfiguration>> GetAutoroleAsync
+        public async Task<Result<AutoroleConfiguration>> GetAutoroleAsync
         (
-            IRole discordRole,
+            Snowflake discordRoleID,
             CancellationToken ct = default
         )
         {
             var autorole = await _database.Autoroles.ServersideQueryAsync
             (
                 q => q
-                    .Where(ar => ar.DiscordRoleID == (long)discordRole.Id)
+                    .Where(ar => ar.DiscordRoleID == discordRoleID)
                     .SingleOrDefaultAsync(ct)
             );
 
@@ -114,7 +116,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return autorole;
             }
 
-            return RetrieveEntityResult<AutoroleConfiguration>.FromError
+            return new UserError
             (
                 "No existing autorole configuration could be found."
             );
@@ -123,32 +125,34 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <summary>
         /// Creates a new autorole configuration.
         /// </summary>
-        /// <param name="discordRole">The role to create the configuration for.</param>
+        /// <param name="guildID">The ID of the guild the role is on.</param>
+        /// <param name="discordRoleID">The role to create the configuration for.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<AutoroleConfiguration>> CreateAutoroleAsync
+        public async Task<Result<AutoroleConfiguration>> CreateAutoroleAsync
         (
-            IRole discordRole,
+            Snowflake guildID,
+            Snowflake discordRoleID,
             CancellationToken ct = default
         )
         {
-            if (await HasAutoroleAsync(discordRole, ct))
+            if (await HasAutoroleAsync(discordRoleID, ct))
             {
-                return CreateEntityResult<AutoroleConfiguration>.FromError
+                return new UserError
                 (
                     "That role already has an autorole configuration."
                 );
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(discordRole.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return CreateEntityResult<AutoroleConfiguration>.FromError(getServer);
+                return Result<AutoroleConfiguration>.FromError(getServer);
             }
 
             var server = getServer.Entity;
 
-            var autorole = _database.CreateProxy<AutoroleConfiguration>(server, discordRole);
+            var autorole = _database.CreateProxy<AutoroleConfiguration>(server, discordRoleID);
 
             _database.Autoroles.Update(autorole);
             await _database.SaveChangesAsync(ct);
@@ -162,7 +166,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="autorole">The role to delete the configuration for.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteAutoroleAsync
+        public async Task<Result> DeleteAutoroleAsync
         (
             AutoroleConfiguration autorole,
             CancellationToken ct = default
@@ -171,7 +175,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             _database.Autoroles.Remove(autorole);
             await _database.SaveChangesAsync(ct);
 
-            return DeleteEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -180,7 +184,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="autorole">The autorole.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> EnableAutoroleAsync
+        public async Task<Result> EnableAutoroleAsync
         (
             AutoroleConfiguration autorole,
             CancellationToken ct = default
@@ -188,18 +192,18 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         {
             if (autorole.IsEnabled)
             {
-                return ModifyEntityResult.FromError("The autorole is already enabled.");
+                return new UserError("The autorole is already enabled.");
             }
 
             if (!autorole.Conditions.Any())
             {
-                return ModifyEntityResult.FromError("The autorole doesn't have any configured conditions.");
+                return new UserError("The autorole doesn't have any configured conditions.");
             }
 
             autorole.IsEnabled = true;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -208,7 +212,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="autorole">The autorole.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> DisableAutoroleAsync
+        public async Task<Result> DisableAutoroleAsync
         (
             AutoroleConfiguration autorole,
             CancellationToken ct = default
@@ -216,13 +220,13 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         {
             if (!autorole.IsEnabled)
             {
-                return ModifyEntityResult.FromError("The autorole is already disabled.");
+                return new UserError("The autorole is already disabled.");
             }
 
             autorole.IsEnabled = false;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -232,7 +236,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="conditionID">The ID of the condition.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> RemoveConditionAsync
+        public async Task<Result> RemoveConditionAsync
         (
             AutoroleConfiguration autorole,
             long conditionID,
@@ -242,12 +246,12 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var condition = autorole.Conditions.FirstOrDefault(c => c.ID == conditionID);
             if (condition is null)
             {
-                return ModifyEntityResult.FromError("The autorole doesn't have any condition with that ID.");
+                return new UserError("The autorole doesn't have any condition with that ID.");
             }
 
             if (autorole.Conditions.Count == 1 && autorole.IsEnabled)
             {
-                return ModifyEntityResult.FromError
+                return new UserError
                 (
                     "The autorole is still enabled, so it requires at least one condition to be present. " +
                     "Either disable the role, or add more conditions."
@@ -257,7 +261,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             autorole.Conditions.Remove(condition);
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -267,7 +271,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="condition">The condition.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> AddConditionAsync
+        public async Task<Result> AddConditionAsync
         (
             AutoroleConfiguration autorole,
             AutoroleCondition condition,
@@ -276,7 +280,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         {
             if (autorole.Conditions.Any(c => c.HasSameConditionsAs(condition)))
             {
-                return ModifyEntityResult.FromError
+                return new UserError
                 (
                     "There's already a condition with the same settings in the autorole."
                 );
@@ -285,7 +289,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             autorole.Conditions.Add(condition);
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -295,7 +299,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="conditionID">The ID of the condition.</param>
         /// <typeparam name="TCondition">The type of the condition.</typeparam>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public RetrieveEntityResult<TCondition> GetCondition<TCondition>
+        public Result<TCondition> GetCondition<TCondition>
         (
             AutoroleConfiguration autorole,
             long conditionID
@@ -305,7 +309,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             var condition = autorole.Conditions.FirstOrDefault(c => c.ID == conditionID);
             if (condition is null)
             {
-                return RetrieveEntityResult<TCondition>.FromError
+                return new UserError
                 (
                     "The autorole doesn't have any condition with that ID."
                 );
@@ -313,7 +317,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             if (!(condition is TCondition))
             {
-                return RetrieveEntityResult<TCondition>.FromError
+                return new UserError
                 (
                     "The condition with that ID isn't this kind of condition."
                 );
@@ -328,7 +332,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="confirmation">The confirmation.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> RemoveAutoroleConfirmationAsync
+        public async Task<Result> RemoveAutoroleConfirmationAsync
         (
             AutoroleConfirmation confirmation,
             CancellationToken ct = default
@@ -337,26 +341,26 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             _database.AutoroleConfirmations.Remove(confirmation);
             await _database.SaveChangesAsync(ct);
 
-            return DeleteEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Gets or creates an autorole confirmation for a given user.
         /// </summary>
         /// <param name="autorole">The autorole.</param>
-        /// <param name="discordUser">The user.</param>
+        /// <param name="discordUserID">The user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<AutoroleConfirmation>> GetOrCreateAutoroleConfirmationAsync
+        public async Task<Result<AutoroleConfirmation>> GetOrCreateAutoroleConfirmationAsync
         (
             AutoroleConfiguration autorole,
-            IUser discordUser,
+            Snowflake discordUserID,
             CancellationToken ct = default
         )
         {
             if (!autorole.RequiresConfirmation)
             {
-                return RetrieveEntityResult<AutoroleConfirmation>.FromError
+                return new UserError
                 (
                     "The autorole does not require confirmation."
                 );
@@ -366,7 +370,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             (
                 q => q
                     .Where(ac => ac.Autorole == autorole)
-                    .Where(ac => ac.User.DiscordID == (long)discordUser.Id)
+                    .Where(ac => ac.User.DiscordID == discordUserID)
                     .SingleOrDefaultAsync(ct)
             );
 
@@ -375,10 +379,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return confirmation;
             }
 
-            var getUser = await _users.GetOrRegisterUserAsync(discordUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(discordUserID, ct);
             if (!getUser.IsSuccess)
             {
-                return RetrieveEntityResult<AutoroleConfirmation>.FromError(getUser);
+                return Result<AutoroleConfirmation>.FromError(getUser);
             }
 
             var user = getUser.Entity;
@@ -395,37 +399,37 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// Explicitly affirms an autorole assignment.
         /// </summary>
         /// <param name="autorole">The autorole.</param>
-        /// <param name="discordUser">The user.</param>
+        /// <param name="discordUserID">The user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> AffirmAutoroleAsync
+        public async Task<Result> ConfirmAutoroleAsync
         (
             AutoroleConfiguration autorole,
-            IUser discordUser,
+            Snowflake discordUserID,
             CancellationToken ct = default
         )
         {
             if (!autorole.RequiresConfirmation)
             {
-                return ModifyEntityResult.FromError("The autorole doesn't require explicit affirmation.");
+                return new UserError("The autorole doesn't require explicit affirmation.");
             }
 
-            var getCondition = await GetOrCreateAutoroleConfirmationAsync(autorole, discordUser, ct);
+            var getCondition = await GetOrCreateAutoroleConfirmationAsync(autorole, discordUserID, ct);
             if (!getCondition.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getCondition);
+                return Result.FromError(getCondition);
             }
 
             var condition = getCondition.Entity;
             if (condition.IsConfirmed)
             {
-                return ModifyEntityResult.FromError("The autorole assignment has already been affirmed.");
+                return new UserError("The autorole assignment has already been affirmed.");
             }
 
             condition.IsConfirmed = true;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -434,7 +438,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="autorole">The autorole.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> AffirmAutoroleForAllAsync
+        public async Task<Result> AffirmAutoroleForAllAsync
         (
             AutoroleConfiguration autorole,
             CancellationToken ct = default
@@ -442,7 +446,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         {
             if (!autorole.RequiresConfirmation)
             {
-                return ModifyEntityResult.FromError("The autorole doesn't require explicit affirmation.");
+                return new UserError("The autorole doesn't require explicit affirmation.");
             }
 
             var qualifyingUsers = await _database.AutoroleConfirmations.ServersideQueryAsync
@@ -460,38 +464,38 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
 
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Explicitly denies an autorole assignment.
         /// </summary>
         /// <param name="autorole">The autorole.</param>
-        /// <param name="discordUser">The user.</param>
+        /// <param name="discordUserID">The user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> DenyAutoroleAsync
+        public async Task<Result> DenyAutoroleAsync
         (
             AutoroleConfiguration autorole,
-            IUser discordUser,
+            Snowflake discordUserID,
             CancellationToken ct = default
         )
         {
             if (!autorole.RequiresConfirmation)
             {
-                return ModifyEntityResult.FromError("The autorole doesn't require explicit affirmation.");
+                return new UserError("The autorole doesn't require explicit affirmation.");
             }
 
-            var getCondition = await GetOrCreateAutoroleConfirmationAsync(autorole, discordUser, ct);
+            var getCondition = await GetOrCreateAutoroleConfirmationAsync(autorole, discordUserID, ct);
             if (!getCondition.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getCondition);
+                return Result.FromError(getCondition);
             }
 
             var condition = getCondition.Entity;
             if (!condition.IsConfirmed)
             {
-                return ModifyEntityResult.FromError
+                return new UserError
                 (
                     "The autorole assignment has already been denied, or has never been affirmed."
                 );
@@ -500,29 +504,36 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             condition.IsConfirmed = false;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Determines whether a given user is qualified for the given autorole.
         /// </summary>
         /// <param name="autorole">The autorole.</param>
-        /// <param name="user">The user.</param>
+        /// <param name="userID">The user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>true if the user qualifies; otherwise, false.</returns>
-        public async Task<RetrieveEntityResult<bool>> IsUserQualifiedForAutoroleAsync
+        public async Task<Result<bool>> IsUserQualifiedForAutoroleAsync
         (
             AutoroleConfiguration autorole,
-            IGuildUser user,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
             foreach (var condition in autorole.Conditions)
             {
-                var isFulfilledResult = await condition.IsConditionFulfilledForUserAsync(_serviceProvider, user, ct);
+                var isFulfilledResult = await condition.IsConditionFulfilledForUserAsync
+                (
+                    _serviceProvider,
+                    autorole.Server.DiscordID,
+                    userID,
+                    ct
+                );
+
                 if (!isFulfilledResult.IsSuccess)
                 {
-                    return RetrieveEntityResult<bool>.FromError("One or more conditions were indeterminate.");
+                    return new UserError("One or more conditions were indeterminate.");
                 }
 
                 var isFulfilled = isFulfilledResult.Entity;
@@ -551,22 +562,22 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <summary>
         /// Gets all autoroles in the database, scoped to the given server.
         /// </summary>
-        /// <param name="guild">The Discord guild.</param>
+        /// <param name="guildID">The Discord guild.</param>
         /// <param name="query">Additional query statements.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>The autoroles.</returns>
         public async Task<IReadOnlyList<AutoroleConfiguration>> GetAutorolesAsync
         (
-            IGuild? guild = null,
+            Snowflake? guildID = null,
             Func<IQueryable<AutoroleConfiguration>, IQueryable<AutoroleConfiguration>>? query = null,
             CancellationToken ct = default
         )
         {
             query ??= q => q;
 
-            if (!(guild is null))
+            if (!(guildID is null))
             {
-                query = q => q.Where(a => a.Server.DiscordID == (long)guild.Id);
+                query = q => q.Where(a => a.Server.DiscordID == guildID);
             }
 
             return await _database.Autoroles.ServersideQueryAsync(query, ct);
@@ -579,7 +590,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="requireAffirmation">Whether external affirmation is required.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetAffirmationRequiredAsync
+        public async Task<Result> SetAffirmationRequiredAsync
         (
             AutoroleConfiguration autorole,
             bool requireAffirmation,
@@ -588,36 +599,36 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         {
             if (autorole.RequiresConfirmation && requireAffirmation)
             {
-                return ModifyEntityResult.FromError("The autorole already requires affirmation.");
+                return new UserError("The autorole already requires affirmation.");
             }
 
             if (!autorole.RequiresConfirmation && !requireAffirmation)
             {
-                return ModifyEntityResult.FromError("The autorole already doesn't require affirmation.");
+                return new UserError("The autorole already doesn't require affirmation.");
             }
 
             autorole.RequiresConfirmation = requireAffirmation;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Gets or creates server settings for the given guild.
         /// </summary>
-        /// <param name="guild">The guild.</param>
+        /// <param name="guildID">The guild.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<AutoroleServerSettings>> GetOrCreateServerSettingsAsync
+        public async Task<Result<AutoroleServerSettings>> GetOrCreateServerSettingsAsync
         (
-            IGuild guild,
+            Snowflake guildID,
             CancellationToken ct = default
         )
         {
             var settings = await _database.AutoroleServerSettings.ServersideQueryAsync
             (
                 q => q
-                    .Where(s => s.Server.DiscordID == (long)guild.Id)
+                    .Where(s => s.Server.DiscordID == guildID)
                     .SingleOrDefaultAsync(ct)
             );
 
@@ -626,10 +637,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
                 return settings;
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return RetrieveEntityResult<AutoroleServerSettings>.FromError(getServer);
+                return Result<AutoroleServerSettings>.FromError(getServer);
             }
 
             var server = getServer.Entity;
@@ -645,65 +656,65 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <summary>
         /// Sets the affirmation notification channel for the given guild.
         /// </summary>
-        /// <param name="guild">The guild.</param>
-        /// <param name="textChannel">The channel.</param>
+        /// <param name="guildID">The guild.</param>
+        /// <param name="channelID">The channel.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetAffirmationNotificationChannelAsync
+        public async Task<Result> SetAffirmationNotificationChannelAsync
         (
-            IGuild guild,
-            ITextChannel textChannel,
+            Snowflake guildID,
+            Snowflake channelID,
             CancellationToken ct = default
         )
         {
-            var getSettings = await GetOrCreateServerSettingsAsync(guild, ct);
+            var getSettings = await GetOrCreateServerSettingsAsync(guildID, ct);
             if (!getSettings.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getSettings);
+                return Result.FromError(getSettings);
             }
 
             var settings = getSettings.Entity;
 
-            if (settings.AffirmationRequiredNotificationChannelID == (decimal?)textChannel.Id)
+            if (settings.AffirmationRequiredNotificationChannelID == channelID)
             {
-                return ModifyEntityResult.FromError("That's already the affirmation notification channel.");
+                return new UserError("That's already the affirmation notification channel.");
             }
 
-            settings.AffirmationRequiredNotificationChannelID = (long)textChannel.Id;
+            settings.AffirmationRequiredNotificationChannelID = channelID;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Clears the affirmation notification channel for the given guild.
         /// </summary>
-        /// <param name="guild">The guild.</param>
+        /// <param name="guildID">The guild.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ClearAffirmationNotificationChannelAsync
+        public async Task<Result> ClearAffirmationNotificationChannelAsync
         (
-            IGuild guild,
+            Snowflake guildID,
             CancellationToken ct = default
         )
         {
-            var getSettings = await GetOrCreateServerSettingsAsync(guild, ct);
+            var getSettings = await GetOrCreateServerSettingsAsync(guildID, ct);
             if (!getSettings.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getSettings);
+                return Result.FromError(getSettings);
             }
 
             var settings = getSettings.Entity;
 
             if (settings.AffirmationRequiredNotificationChannelID is null)
             {
-                return ModifyEntityResult.FromError("There's no affirmation notification channel set.");
+                return new UserError("There's no affirmation notification channel set.");
             }
 
             settings.AffirmationRequiredNotificationChannelID = null;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -713,7 +724,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="autoroleConfiguration">The autorole.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IReadOnlyList<User>>> GetUnconfirmedUsersAsync
+        public async Task<Result<IReadOnlyList<User>>> GetUnconfirmedUsersAsync
         (
             AutoroleConfiguration autoroleConfiguration,
             CancellationToken ct = default
@@ -721,10 +732,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         {
             if (!autoroleConfiguration.RequiresConfirmation)
             {
-                return RetrieveEntityResult<IReadOnlyList<User>>.FromError("The autorole doesn't require confirmation.");
+                return new UserError("The autorole doesn't require confirmation.");
             }
 
-            return RetrieveEntityResult<IReadOnlyList<User>>.FromSuccess
+            return Result<IReadOnlyList<User>>.FromSuccess
             (
                 await _database.AutoroleConfirmations.ServersideQueryAsync
                 (
@@ -745,7 +756,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="ct">The cancellation token in use.</param>
         /// <typeparam name="TCondition">The condition type.</typeparam>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ModifyConditionAsync<TCondition>
+        public async Task<Result> ModifyConditionAsync<TCondition>
         (
             TCondition condition,
             Action<TCondition> modificationAction,
@@ -756,7 +767,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             modificationAction(condition);
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -766,7 +777,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
         /// <param name="hasNotificationBeenSent">Whether the notification has been sent.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetHasNotificationBeenSentAsync
+        public async Task<Result> SetHasNotificationBeenSentAsync
         (
             AutoroleConfirmation autoroleConfirmation,
             bool hasNotificationBeenSent,
@@ -776,7 +787,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
             autoroleConfirmation.HasNotificationBeenSent = hasNotificationBeenSent;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
     }
 }

@@ -21,17 +21,20 @@
 //
 
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord.Commands;
 using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.Commands.Conditions;
+using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -46,7 +49,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             /// user's last activity.
             /// </summary>
             [Group("time-since-last-activity")]
-            public class TimeSinceLastActivityConditionCommands : ModuleBase
+            public class TimeSinceLastActivityConditionCommands : CommandGroup
             {
                 private readonly AutoroleService _autoroles;
 
@@ -65,29 +68,22 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// <param name="autorole">The autorole configuration.</param>
                 /// <param name="time">The required time.</param>
                 [UsedImplicitly]
-                [Command]
-                [Summary("Adds an instance of the condition to the role.")]
-                [RequireContext(ContextType.Guild)]
+                [Command("add")]
+                [Description("Adds an instance of the condition to the role.")]
+                [RequireContext(ChannelContext.Guild)]
                 [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> AddConditionAsync(AutoroleConfiguration autorole, TimeSpan time)
+                public async Task<Result<UserMessage>> AddConditionAsync(AutoroleConfiguration autorole, TimeSpan time)
                 {
-                    var condition = _autoroles.CreateConditionProxy<TimeSinceLastActivityCondition>
-                    (
-                        time
-                    );
-
-                    if (condition is null)
-                    {
-                        return RuntimeCommandResult.FromError("Failed to create a condition object. Yikes!");
-                    }
+                    var condition = _autoroles.CreateConditionProxy<TimeSinceLastActivityCondition>(time)
+                        ?? throw new InvalidOperationException();
 
                     var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
                     if (!addCondition.IsSuccess)
                     {
-                        return addCondition.ToRuntimeResult();
+                        return Result<UserMessage>.FromError(addCondition);
                     }
 
-                    return RuntimeCommandResult.FromSuccess("Condition added.");
+                    return new ConfirmationMessage("Condition added.");
                 }
 
                 /// <summary>
@@ -97,11 +93,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// <param name="conditionID">The ID of the condition.</param>
                 /// <param name="time">The required time.</param>
                 [UsedImplicitly]
-                [Command]
-                [Summary("Modifies an instance of the condition on the role.")]
-                [RequireContext(ContextType.Guild)]
+                [Command("set")]
+                [Description("Modifies an instance of the condition on the role.")]
+                [RequireContext(ChannelContext.Guild)]
                 [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> ModifyConditionAsync
+                public async Task<Result<UserMessage>> ModifyConditionAsync
                 (
                     AutoroleConfiguration autorole,
                     long conditionID,
@@ -116,7 +112,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
                     if (!getCondition.IsSuccess)
                     {
-                        return getCondition.ToRuntimeResult();
+                        return Result<UserMessage>.FromError(getCondition);
                     }
 
                     var condition = getCondition.Entity;
@@ -125,16 +121,16 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                         condition,
                         c =>
                         {
-                            condition.RequiredTime = time;
+                            c.RequiredTime = time;
                         }
                     );
 
                     if (!modifyResult.IsSuccess)
                     {
-                        return modifyResult.ToRuntimeResult();
+                        return Result<UserMessage>.FromError(modifyResult);
                     }
 
-                    return RuntimeCommandResult.FromSuccess("Condition updated.");
+                    return new ConfirmationMessage("Condition updated.");
                 }
             }
         }

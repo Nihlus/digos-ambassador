@@ -23,7 +23,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Discord;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
@@ -50,13 +50,15 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
         /// Determines whether the condition is fulfilled for the given Discord user.
         /// </summary>
         /// <param name="services">The service provider.</param>
-        /// <param name="discordUser">The Discord user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the user.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>true if the condition is fulfilled; otherwise, false.</returns>
-        Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
+        Task<Result<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         );
     }

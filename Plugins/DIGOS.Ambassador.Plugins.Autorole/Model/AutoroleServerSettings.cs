@@ -24,6 +24,7 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model
 {
@@ -41,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
         /// <summary>
         /// Gets the channel that notifications about users requiring affirmation are sent.
         /// </summary>
-        public long? AffirmationRequiredNotificationChannelID { get; internal set; }
+        public Snowflake? AffirmationRequiredNotificationChannelID { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoroleServerSettings"/> class.

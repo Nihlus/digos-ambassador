@@ -25,9 +25,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
-using Discord;
 using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
@@ -53,19 +53,20 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         }
 
         /// <inheritdoc />
-        public override async Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
+        public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
             var statistics = services.GetRequiredService<UserStatisticsService>();
 
-            var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(discordUser, ct);
+            var getUserStatistics = await statistics.GetOrCreateUserServerStatisticsAsync(guildID, userID, ct);
             if (!getUserStatistics.IsSuccess)
             {
-                return RetrieveEntityResult<bool>.FromError(getUserStatistics);
+                return Result<bool>.FromError(getUserStatistics);
             }
 
             var userStatistics = getUserStatistics.Entity;

@@ -20,16 +20,21 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
-using DIGOS.Ambassador.Plugins.Permissions.Preconditions;
-using Discord.Commands;
+using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -44,17 +49,20 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             /// Contains commands for adding or modifying a condition based on a certain number of messages in a guild.
             /// </summary>
             [Group("total-messages")]
-            public class MessageCountInGuildConditionCommands : ModuleBase
+            public class MessageCountInGuildConditionCommands : CommandGroup
             {
                 private readonly AutoroleService _autoroles;
+                private readonly ICommandContext _context;
 
                 /// <summary>
                 /// Initializes a new instance of the <see cref="MessageCountInGuildConditionCommands"/> class.
                 /// </summary>
                 /// <param name="autoroles">The autorole service.</param>
-                public MessageCountInGuildConditionCommands(AutoroleService autoroles)
+                /// <param name="context">The command context.</param>
+                public MessageCountInGuildConditionCommands(AutoroleService autoroles, ICommandContext context)
                 {
                     _autoroles = autoroles;
+                    _context = context;
                 }
 
                 /// <summary>
@@ -63,30 +71,26 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// <param name="autorole">The autorole configuration.</param>
                 /// <param name="count">The message count.</param>
                 [UsedImplicitly]
-                [Command]
-                [Summary("Adds an instance of the condition to the role.")]
-                [RequireContext(ContextType.Guild)]
+                [Command("add")]
+                [Description("Adds an instance of the condition to the role.")]
+                [RequireContext(ChannelContext.Guild)]
                 [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> AddConditionAsync(AutoroleConfiguration autorole, long count)
+                public async Task<Result<UserMessage>> AddConditionAsync(AutoroleConfiguration autorole, long count)
                 {
                     var condition = _autoroles.CreateConditionProxy<MessageCountInGuildCondition>
                     (
-                        this.Context.Guild,
+                        _context.GuildID.Value,
                         count
-                    );
-
-                    if (condition is null)
-                    {
-                        return RuntimeCommandResult.FromError("Failed to create a condition object. Yikes!");
-                    }
+                    )
+                    ?? throw new InvalidOperationException();
 
                     var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
                     if (!addCondition.IsSuccess)
                     {
-                        return addCondition.ToRuntimeResult();
+                        return Result<UserMessage>.FromError(addCondition);
                     }
 
-                    return RuntimeCommandResult.FromSuccess("Condition added.");
+                    return new ConfirmationMessage("Condition added.");
                 }
 
                 /// <summary>
@@ -96,11 +100,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 /// <param name="conditionID">The ID of the condition.</param>
                 /// <param name="count">The message count.</param>
                 [UsedImplicitly]
-                [Command]
-                [Summary("Modifies an instance of the condition on the role.")]
-                [RequireContext(ContextType.Guild)]
+                [Command("set")]
+                [Description("Modifies an instance of the condition on the role.")]
+                [RequireContext(ChannelContext.Guild)]
                 [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<RuntimeResult> ModifyConditionAsync
+                public async Task<Result<UserMessage>> ModifyConditionAsync
                 (
                     AutoroleConfiguration autorole,
                     long conditionID,
@@ -115,7 +119,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
 
                     if (!getCondition.IsSuccess)
                     {
-                        return getCondition.ToRuntimeResult();
+                        return Result<UserMessage>.FromError(getCondition);
                     }
 
                     var condition = getCondition.Entity;
@@ -124,17 +128,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                         condition,
                         c =>
                         {
-                            condition.RequiredCount = count;
-                            condition.SourceID = (long)this.Context.Guild.Id;
+                            c.RequiredCount = count;
+                            c.SourceID = _context.GuildID.Value;
                         }
                     );
 
                     if (!modifyResult.IsSuccess)
                     {
-                        return modifyResult.ToRuntimeResult();
+                        return Result<UserMessage>.FromError(modifyResult);
                     }
 
-                    return RuntimeCommandResult.FromSuccess("Condition updated.");
+                    return new ConfirmationMessage("Condition updated.");
                 }
             }
         }

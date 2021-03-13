@@ -25,9 +25,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
-using Discord;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
@@ -43,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// <param name="sourceID">The source ID.</param>
         /// <param name="requiredCount">The required message count.</param>
         [UsedImplicitly]
-        protected MessageCountInChannelCondition(long sourceID, long requiredCount)
+        protected MessageCountInChannelCondition(Snowflake sourceID, long requiredCount)
             : base(sourceID, requiredCount)
         {
         }
@@ -53,37 +54,39 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
         /// </summary>
         /// <param name="textChannel">The source guild.</param>
         /// <param name="requiredCount">The required number of messages.</param>
-        public MessageCountInChannelCondition(ITextChannel textChannel, long requiredCount)
-            : this((long)textChannel.Id, requiredCount)
+        public MessageCountInChannelCondition(IChannel textChannel, long requiredCount)
+            : this(textChannel.ID, requiredCount)
         {
         }
 
         /// <inheritdoc />
         public override string GetDescriptiveUIText()
         {
-            return $"{this.RequiredCount} messages in {MentionUtils.MentionChannel((ulong)this.SourceID)}";
+            return $"{this.RequiredCount} messages in <#{this.SourceID}>";
         }
 
         /// <inheritdoc/>
-        public override async Task<RetrieveEntityResult<bool>> IsConditionFulfilledForUserAsync
+        public override async Task<Result<bool>> IsConditionFulfilledForUserAsync
         (
             IServiceProvider services,
-            IGuildUser discordUser,
+            Snowflake guildID,
+            Snowflake userID,
             CancellationToken ct = default
         )
         {
             var statistics = services.GetRequiredService<UserStatisticsService>();
 
-            var channel = await discordUser.Guild.GetTextChannelAsync((ulong)this.SourceID);
-            if (channel is null)
-            {
-                return RetrieveEntityResult<bool>.FromError("Failed to retrieve the channel.");
-            }
+            var getUserStatistics = await statistics.GetOrCreateUserChannelStatisticsAsync
+            (
+                guildID,
+                userID,
+                this.SourceID,
+                ct
+            );
 
-            var getUserStatistics = await statistics.GetOrCreateUserChannelStatisticsAsync(discordUser, channel, ct);
             if (!getUserStatistics.IsSuccess)
             {
-                return RetrieveEntityResult<bool>.FromError(getUserStatistics);
+                return Result<bool>.FromError(getUserStatistics);
             }
 
             var userStatistics = getUserStatistics.Entity;
