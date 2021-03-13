@@ -1,5 +1,5 @@
 //
-//  RoleAccess.cs
+//  ModelBuilderExtensions.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,23 +20,29 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Remora.Discord.API.Abstractions.Objects;
+using DIGOS.Ambassador.Plugins.Characters.Model;
+using Microsoft.EntityFrameworkCore;
+using Remora.Discord.Core;
 
-namespace DIGOS.Ambassador.Plugins.Characters.Model
+namespace DIGOS.Ambassador.Plugins.Characters.Extensions
 {
     /// <summary>
-    /// Represents access conditions for character roles (who can apply them and when).
+    /// Contains extension methods for the <see cref="ModelBuilder"/> class.
     /// </summary>
-    public enum RoleAccess
+    public static class ModelBuilderExtensions
     {
         /// <summary>
-        /// The role can be applied by anyone to a character.
+        /// Configures value conversions for entities from the character schema.
         /// </summary>
-        Open,
+        /// <param name="modelBuilder">The model builder.</param>
+        /// <returns>The configured model builder.</returns>
+        public static ModelBuilder ConfigureCharacterConversions(this ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CharacterRole>()
+                .Property(s => s.DiscordID)
+                .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
 
-        /// <summary>
-        /// The role can only be applied by people with the <see cref="DiscordPermission.ManageRoles"/> permission.
-        /// </summary>
-        Restricted
+            return modelBuilder;
+        }
     }
 }

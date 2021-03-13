@@ -262,7 +262,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         [Pure]
         public Embed CreateEmbedBase(Color? color = null)
         {
-            color ??= Color.Purple;
+            color ??= Color.MediumPurple;
 
             var eb = new Embed { Colour = color.Value };
             return eb;

@@ -28,8 +28,8 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using Discord;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 using Image = DIGOS.Ambassador.Plugins.Characters.Model.Data.Image;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -95,7 +95,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         /// <summary>
         /// Gets the images associated with the character.
         /// </summary>
-        public virtual List<Image> Images { get; internal set; } = new List<Image>();
+        public virtual List<Image> Images { get; internal set; } = new();
 
         /// <summary>
         /// Gets the preferred pronoun family of the character.
@@ -167,13 +167,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
         }
 
         /// <inheritdoc />
-        public bool IsOwner(IUser user)
-        {
-            return IsOwner((long)user.Id);
-        }
-
-        /// <inheritdoc />
-        public bool IsOwner(long userID)
+        public bool IsOwner(Snowflake userID)
         {
             return this.Owner.DiscordID == userID;
         }

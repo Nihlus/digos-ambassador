@@ -22,6 +22,7 @@
 
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
 {
@@ -56,6 +57,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <param name="userID">The ID of the user.</param>
         /// <returns>true if the user is the owner; otherwise, false.</returns>
         [Pure]
-        bool IsOwner(long userID);
+        bool IsOwner(Snowflake userID);
     }
 }

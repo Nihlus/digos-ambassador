@@ -48,7 +48,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="pronounFamily">The pronoun family of the character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have been successful.</returns>
-        Task<CreateEntityResult<Character>> CreateCharacterAsync
+        Task<Result<Character>> CreateCharacterAsync
         (
             User user,
             Server server,
@@ -81,7 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="character">The character to delete.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        Task<DeleteEntityResult> DeleteCharacterAsync(Character character, CancellationToken ct = default);
+        Task<Result> DeleteCharacterAsync(Character character, CancellationToken ct = default);
 
         /// <summary>
         /// This method searches for the best matching character given an owner and a name. If no owner is provided, then
@@ -92,7 +92,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="name">The name of the character, if any.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
+        Task<Result<Character>> GetBestMatchingCharacterAsync
         (
             Server server,
             User? user,
@@ -107,7 +107,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="server">The server the user is on.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync
+        Task<Result<Character>> GetCurrentCharacterAsync
         (
             User user,
             Server server,
@@ -121,7 +121,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="name">The name of the character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        Task<RetrieveEntityResult<Character>> GetCharacterByNameAsync
+        Task<Result<Character>> GetCharacterByNameAsync
         (
             Server server,
             string name,
@@ -136,7 +136,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="name">The name of the character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        Task<RetrieveEntityResult<Character>> GetUserCharacterByNameAsync
+        Task<Result<Character>> GetUserCharacterByNameAsync
         (
             User user,
             Server server,
@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="character">The character to make current.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A task that must be awaited.</returns>
-        Task<ModifyEntityResult> MakeCharacterCurrentAsync
+        Task<Result> MakeCharacterCurrentAsync
         (
             User user,
             Server server,
@@ -167,7 +167,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="server">The server to clear the characters on.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A task that must be awaited.</returns>
-        Task<ModifyEntityResult> ClearCurrentCharacterAsync
+        Task<Result> ClearCurrentCharacterAsync
         (
             User user,
             Server server,
@@ -195,7 +195,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="server">The server the user is on.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        Task<RetrieveEntityResult<Character>> GetDefaultCharacterAsync
+        Task<Result<Character>> GetDefaultCharacterAsync
         (
             User user,
             Server server,
@@ -210,7 +210,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="character">The new default character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        Task<ModifyEntityResult> SetDefaultCharacterAsync
+        Task<Result> SetDefaultCharacterAsync
         (
             User user,
             Server server,
@@ -225,7 +225,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="server">The server the user is on.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        Task<ModifyEntityResult> ClearDefaultCharacterAsync
+        Task<Result> ClearDefaultCharacterAsync
         (
             User user,
             Server server,
@@ -240,7 +240,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Interfaces
         /// <param name="character">The character to transfer.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
-        Task<ModifyEntityResult> TransferCharacterOwnershipAsync
+        Task<Result> TransferCharacterOwnershipAsync
         (
             User newOwner,
             Server server,

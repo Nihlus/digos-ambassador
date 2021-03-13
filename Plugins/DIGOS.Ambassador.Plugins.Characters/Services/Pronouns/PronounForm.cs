@@ -46,7 +46,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         Object,
 
         /// <summary>
-        /// The possessive adjective form, that is, "my" or "yours"
+        /// The possessive adjective form, that is, "my" or "yours".
         /// </summary>
         PossessiveAdjective,
 

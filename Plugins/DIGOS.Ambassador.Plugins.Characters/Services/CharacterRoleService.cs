@@ -25,14 +25,17 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services.Interfaces;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
-using Discord;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Discord.API.Abstractions.Results;
+using Remora.Discord.Core;
+using Remora.Discord.Rest.Results;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Characters.Services
@@ -45,69 +48,67 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         private readonly CharactersDatabaseContext _database;
         private readonly UserService _users;
         private readonly ServerService _servers;
-        private readonly DiscordService _discord;
         private readonly ICharacterService _characters;
-        private readonly IDiscordClient _client;
+        private readonly IDiscordRestGuildAPI _guildAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CharacterRoleService"/> class.
         /// </summary>
         /// <param name="database">The database.</param>
         /// <param name="servers">The server service.</param>
-        /// <param name="discord">The Discord service.</param>
         /// <param name="characters">The character service.</param>
         /// <param name="users">The user service.</param>
-        /// <param name="client">The discord client.</param>
+        /// <param name="guildAPI">The guild API.</param>
         public CharacterRoleService
         (
             CharactersDatabaseContext database,
             ServerService servers,
-            DiscordService discord,
             ICharacterService characters,
             UserService users,
-            IDiscordClient client
+            IDiscordRestGuildAPI guildAPI
         )
         {
             _database = database;
             _servers = servers;
-            _discord = discord;
             _characters = characters;
             _users = users;
-            _client = client;
+            _guildAPI = guildAPI;
         }
 
         /// <summary>
         /// Creates a new character role from the given Discord role and access condition.
         /// </summary>
-        /// <param name="role">The discord role.</param>
+        /// <param name="guildID">The ID of the guild the role is on.</param>
+        /// <param name="roleID">The ID of the discord role.</param>
         /// <param name="access">The access conditions.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A creation result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<CharacterRole>> CreateCharacterRoleAsync
+        public async Task<Result<CharacterRole>> CreateCharacterRoleAsync
         (
-            IRole role,
+            Snowflake guildID,
+            Snowflake roleID,
             RoleAccess access,
             CancellationToken ct = default
         )
         {
-            var getExistingRoleResult = await GetCharacterRoleAsync(role, ct);
+            var getExistingRoleResult = await GetCharacterRoleAsync(guildID, roleID, ct);
             if (getExistingRoleResult.IsSuccess)
             {
-                return CreateEntityResult<CharacterRole>.FromError
+                return new UserError
                 (
                     "That role is already registered as a character role."
                 );
             }
 
-            var getServerResult = await _servers.GetOrRegisterServerAsync(role.Guild, ct);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServerResult.IsSuccess)
             {
-                return CreateEntityResult<CharacterRole>.FromError(getServerResult);
+                return Result<CharacterRole>.FromError(getServerResult);
             }
 
             var server = getServerResult.Entity;
 
-            var characterRole = _database.CreateProxy<CharacterRole>(server, (long)role.Id, access);
+            var characterRole = _database.CreateProxy<CharacterRole>(server, roleID, access);
 
             _database.CharacterRoles.Update(characterRole);
             await _database.SaveChangesAsync(ct);
@@ -121,7 +122,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="role">The character role.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A deletion result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteCharacterRoleAsync
+        public async Task<Result> DeleteCharacterRoleAsync
         (
             CharacterRole role,
             CancellationToken ct = default
@@ -140,50 +141,44 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             _database.CharacterRoles.Remove(role);
 
-            var guild = await _client.GetGuildAsync((ulong)role.Server.DiscordID);
-            if (guild is null)
-            {
-                return DeleteEntityResult.FromError("Could not retrieve the guild the role was on.");
-            }
-
             foreach (var characterOwner in currentOwnersWithRole)
             {
-                var owner = await guild.GetUserAsync((ulong)characterOwner.DiscordID);
-                var discordRole = guild.GetRole((ulong)role.DiscordID);
+                var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
+                (
+                    role.Server.DiscordID,
+                    characterOwner.DiscordID,
+                    role.DiscordID,
+                    ct
+                );
 
-                if (owner is null || discordRole is null)
-                {
-                    return DeleteEntityResult.FromError("Failed to get the owner or role.");
-                }
-
-                var removeRole = await _discord.RemoveUserRoleAsync(owner, discordRole);
                 if (!removeRole.IsSuccess)
                 {
-                    return DeleteEntityResult.FromError(removeRole);
+                    return removeRole;
                 }
             }
 
             await _database.SaveChangesAsync(ct);
-
-            return DeleteEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Gets an existing character role from the database.
         /// </summary>
-        /// <param name="role">The discord role.</param>
+        /// <param name="guildID">The ID of the guild the role is on.</param>
+        /// <param name="roleID">The ID of the discord role.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<CharacterRole>> GetCharacterRoleAsync
+        public async Task<Result<CharacterRole>> GetCharacterRoleAsync
         (
-            IRole role,
+            Snowflake guildID,
+            Snowflake roleID,
             CancellationToken ct = default
         )
         {
             var characterRole = await _database.CharacterRoles.ServersideQueryAsync
             (
                 q => q
-                    .Where(r => r.Server.DiscordID == (long)role.Guild.Id && r.DiscordID == (long)role.Id)
+                    .Where(r => r.Server.DiscordID == guildID && r.DiscordID == roleID)
                     .SingleOrDefaultAsync(ct)
             );
 
@@ -192,7 +187,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return characterRole;
             }
 
-            return RetrieveEntityResult<CharacterRole>.FromError
+            return new UserError
             (
                 "That role is not registered as a character role."
             );
@@ -201,19 +196,19 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <summary>
         /// Gets the roles available on the given server.
         /// </summary>
-        /// <param name="guild">The Discord guild.</param>
+        /// <param name="guildID">The Discord guild.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<IReadOnlyList<CharacterRole>>> GetCharacterRolesAsync
+        public async Task<Result<IReadOnlyList<CharacterRole>>> GetCharacterRolesAsync
         (
-            IGuild guild,
+            Snowflake guildID,
             CancellationToken ct = default
         )
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(guild, ct);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServerResult.IsSuccess)
             {
-                return RetrieveEntityResult<IReadOnlyList<CharacterRole>>.FromError(getServerResult);
+                return Result<IReadOnlyList<CharacterRole>>.FromError(getServerResult);
             }
 
             var server = getServerResult.Entity;
@@ -225,7 +220,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 ct
             );
 
-            return RetrieveEntityResult<IReadOnlyList<CharacterRole>>.FromSuccess(roles);
+            return Result<IReadOnlyList<CharacterRole>>.FromSuccess(roles);
         }
 
         /// <summary>
@@ -235,7 +230,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         /// <param name="access">The access conditions.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterRoleAccessAsync
+        public async Task<Result> SetCharacterRoleAccessAsync
         (
             CharacterRole role,
             RoleAccess access,
@@ -244,26 +239,28 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         {
             if (role.Access == access)
             {
-                return ModifyEntityResult.FromError("The role already has those access conditions.");
+                return new UserError("The role already has those access conditions.");
             }
 
             role.Access = access;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Sets the custom role of a character.
         /// </summary>
-        /// <param name="guildUser">The owner of the character.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="character">The character.</param>
         /// <param name="characterRole">The role to set.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetCharacterRoleAsync
+        public async Task<Result> SetCharacterRoleAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             Character character,
             CharacterRole characterRole,
             CancellationToken ct = default
@@ -271,31 +268,38 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         {
             if (character.Role == characterRole)
             {
-                return ModifyEntityResult.FromError("The character already has that role.");
+                return new UserError("The character already has that role.");
             }
 
             if (character.IsCurrent)
             {
                 if (!(character.Role is null))
                 {
-                    var oldRole = guildUser.Guild.GetRole((ulong)character.Role.DiscordID);
-                    if (!(oldRole is null))
+                    var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
+                    (
+                        guildID,
+                        userID,
+                        character.Role.DiscordID,
+                        ct
+                    );
+
+                    if (!removeRole.IsSuccess)
                     {
-                        var removeRole = await _discord.RemoveUserRoleAsync(guildUser, oldRole);
-                        if (!removeRole.IsSuccess)
+                        if (removeRole.Unwrap() is not DiscordRestResultError rre)
                         {
                             return removeRole;
                         }
+
+                        if (rre.DiscordError.Code is not DiscordError.UnknownRole)
+                        {
+                            return removeRole;
+                        }
+
+                        // It's probably already removed; that's fine
                     }
                 }
 
-                var newRole = guildUser.Guild.GetRole((ulong)characterRole.DiscordID);
-                if (newRole is null)
-                {
-                    return ModifyEntityResult.FromError("Failed to get the new role.");
-                }
-
-                var addRole = await _discord.AddUserRoleAsync(guildUser, newRole);
+                var addRole = await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, characterRole.DiscordID, ct);
                 if (!addRole.IsSuccess)
                 {
                     return addRole;
@@ -305,70 +309,85 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             character.Role = characterRole;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Clears the custom role of a character.
         /// </summary>
-        /// <param name="owner">The character's owner.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="character">The character.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ClearCharacterRoleAsync
+        public async Task<Result> ClearCharacterRoleAsync
         (
-            IGuildUser owner,
+            Snowflake guildID,
+            Snowflake userID,
             Character character,
             CancellationToken ct = default
         )
         {
             if (character.Role is null)
             {
-                return ModifyEntityResult.FromError("The character doesn't have a role set.");
+                return new UserError("The character doesn't have a role set.");
             }
 
-            var role = owner.Guild.GetRole((ulong)character.Role.DiscordID);
-            if (role is null)
-            {
-                return ModifyEntityResult.FromError("Could not get the role from Discord.");
-            }
+            var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
+            (
+                guildID,
+                userID,
+                character.Role.DiscordID,
+                ct
+            );
 
-            var removeRole = await _discord.RemoveUserRoleAsync(owner, role);
             if (!removeRole.IsSuccess)
             {
-                return removeRole;
+                if (removeRole.Unwrap() is not DiscordRestResultError rre)
+                {
+                    return removeRole;
+                }
+
+                if (rre.DiscordError.Code is not DiscordError.UnknownRole)
+                {
+                    return removeRole;
+                }
+
+                // It's probably already removed; that's fine
             }
 
             character.Role = null;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Updates the roles of the given user, removing old roles and applying new ones.
         /// </summary>
-        /// <param name="guildUser">The user.</param>
+        /// <param name="guildID">The ID of the guild the user is on.</param>
+        /// <param name="userID">The ID of the discord user.</param>
         /// <param name="previousCharacter">The character they previously were.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> UpdateUserRolesAsync
+        public async Task<Result> UpdateUserRolesAsync
         (
-            IGuildUser guildUser,
+            Snowflake guildID,
+            Snowflake userID,
             Character? previousCharacter = null,
             CancellationToken ct = default
         )
         {
-            var getUser = await _users.GetOrRegisterUserAsync(guildUser, ct);
+            var getUser = await _users.GetOrRegisterUserAsync(userID, ct);
             if (!getUser.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getUser);
+                return Result.FromError(getUser);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guildUser.Guild, ct);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID, ct);
             if (!getServer.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getServer);
+                return Result.FromError(getServer);
             }
 
             var user = getUser.Entity;
@@ -380,22 +399,34 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 // Clear any old role
                 if (previousCharacter?.Role is null)
                 {
-                    return ModifyEntityResult.FromSuccess();
+                    return Result.FromSuccess();
                 }
 
-                var oldRole = guildUser.Guild.GetRole((ulong)previousCharacter.Role.DiscordID);
-                if (oldRole is null)
+                var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
+                (
+                    guildID,
+                    userID,
+                    previousCharacter.Role.DiscordID,
+                    ct
+                );
+
+                if (removeRole.IsSuccess)
                 {
-                    return ModifyEntityResult.FromSuccess();
+                    return Result.FromSuccess();
                 }
 
-                var removeRole = await _discord.RemoveUserRoleAsync(guildUser, oldRole);
-                if (!removeRole.IsSuccess)
+                if (removeRole.Unwrap() is not DiscordRestResultError rre)
                 {
                     return removeRole;
                 }
 
-                return ModifyEntityResult.FromSuccess();
+                if (rre.DiscordError.Code is not DiscordError.UnknownRole)
+                {
+                    return removeRole;
+                }
+
+                // It's probably already removed; that's fine
+                return Result.FromSuccess();
             }
 
             var newCharacter = getNewCharacter.Entity;
@@ -403,42 +434,43 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             // First, quick sanity check - do we need to remove the role?
             if (!(previousCharacter?.Role is null) && newCharacter.Role == previousCharacter.Role)
             {
-                return ModifyEntityResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
             // Clear any old role
             if (!(previousCharacter?.Role is null))
             {
-                var oldRole = guildUser.Guild.GetRole((ulong)previousCharacter.Role.DiscordID);
-                if (!(oldRole is null))
+                var removeRole = await _guildAPI.RemoveGuildMemberRoleAsync
+                (
+                    guildID,
+                    userID,
+                    previousCharacter.Role.DiscordID,
+                    ct
+                );
+
+                if (!removeRole.IsSuccess)
                 {
-                    var removeRole = await _discord.RemoveUserRoleAsync(guildUser, oldRole);
-                    if (!removeRole.IsSuccess)
+                    if (removeRole.Unwrap() is not DiscordRestResultError rre)
                     {
                         return removeRole;
                     }
+
+                    if (rre.DiscordError.Code is not DiscordError.UnknownRole)
+                    {
+                        return removeRole;
+                    }
+
+                    // It's probably already removed; that's fine
                 }
             }
 
             if (newCharacter.Role is null)
             {
-                return ModifyEntityResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
             // Apply any new role
-            var newRole = guildUser.Guild.GetRole((ulong)newCharacter.Role.DiscordID);
-            if (newRole is null)
-            {
-                return ModifyEntityResult.FromSuccess();
-            }
-
-            var addRole = await _discord.AddUserRoleAsync(guildUser, newRole);
-            if (!addRole.IsSuccess)
-            {
-                return addRole;
-            }
-
-            return ModifyEntityResult.FromSuccess();
+            return await _guildAPI.AddGuildMemberRoleAsync(guildID, userID, newCharacter.Role.DiscordID, ct);
         }
     }
 }

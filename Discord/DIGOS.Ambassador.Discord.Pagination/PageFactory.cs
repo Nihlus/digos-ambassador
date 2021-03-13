@@ -23,6 +23,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 
@@ -52,10 +53,10 @@ namespace DIGOS.Ambassador.Discord.Pagination
             pageBase ??= new Embed
             {
                 Description = description,
-                Colour = Color.Purple
+                Colour = Color.MediumPurple
             };
 
-            var pageBaseLength = CalculatePageBaseLength(pageBase);
+            var pageBaseLength = pageBase.CalculateEmbedLength();
             var enumeratedFields = fields.ToList();
 
             // Build the pages
@@ -86,45 +87,6 @@ namespace DIGOS.Ambassador.Discord.Pagination
             }
 
             return pages;
-        }
-
-        private static int CalculatePageBaseLength(IEmbed pageBase)
-        {
-            var length = 0;
-
-            if (pageBase.Title.HasValue)
-            {
-                length += pageBase.Title.Value.Length;
-            }
-
-            if (pageBase.Description.HasValue)
-            {
-                length += pageBase.Description.Value.Length;
-            }
-
-            if (pageBase.Fields.HasValue)
-            {
-                foreach (var field in pageBase.Fields.Value)
-                {
-                    length += field.Name.Length;
-                    length += field.Value.Length;
-                }
-            }
-
-            if (pageBase.Author.HasValue)
-            {
-                if (pageBase.Author.Value.Name.HasValue)
-                {
-                    length += pageBase.Author.Value.Name.Value.Length;
-                }
-            }
-
-            if (pageBase.Footer.HasValue)
-            {
-                length += pageBase.Footer.Value.Text.Length;
-            }
-
-            return length;
         }
     }
 }

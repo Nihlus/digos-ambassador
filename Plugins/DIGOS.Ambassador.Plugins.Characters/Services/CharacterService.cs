@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Model.Data;
@@ -74,7 +75,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         }
 
         /// <inheritdoc />
-        public async Task<CreateEntityResult<Character>> CreateCharacterAsync
+        public async Task<Result<Character>> CreateCharacterAsync
         (
             User user,
             Server server,
@@ -111,40 +112,40 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             _database.Characters.Update(character);
 
-            var modifyEntityResult = await SetCharacterNameAsync(character, name, ct);
-            if (!modifyEntityResult.IsSuccess)
+            var result = await SetCharacterNameAsync(character, name, ct);
+            if (!result.IsSuccess)
             {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+                return Result<Character>.FromError(result);
             }
 
-            modifyEntityResult = await SetCharacterAvatarAsync(character, avatarUrl, ct);
-            if (!modifyEntityResult.IsSuccess)
+            result = await SetCharacterAvatarAsync(character, avatarUrl, ct);
+            if (!result.IsSuccess)
             {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+                return Result<Character>.FromError(result);
             }
 
-            modifyEntityResult = await SetCharacterNicknameAsync(character, nickname, ct);
-            if (!modifyEntityResult.IsSuccess)
+            result = await SetCharacterNicknameAsync(character, nickname, ct);
+            if (!result.IsSuccess)
             {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+                return Result<Character>.FromError(result);
             }
 
-            modifyEntityResult = await SetCharacterSummaryAsync(character, summary, ct);
-            if (!modifyEntityResult.IsSuccess)
+            result = await SetCharacterSummaryAsync(character, summary, ct);
+            if (!result.IsSuccess)
             {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+                return Result<Character>.FromError(result);
             }
 
-            modifyEntityResult = await SetCharacterDescriptionAsync(character, description, ct);
-            if (!modifyEntityResult.IsSuccess)
+            result = await SetCharacterDescriptionAsync(character, description, ct);
+            if (!result.IsSuccess)
             {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+                return Result<Character>.FromError(result);
             }
 
-            modifyEntityResult = await SetCharacterPronounsAsync(character, pronounFamily, ct);
-            if (!modifyEntityResult.IsSuccess)
+            result = await SetCharacterPronounsAsync(character, pronounFamily, ct);
+            if (!result.IsSuccess)
             {
-                return CreateEntityResult<Character>.FromError(modifyEntityResult);
+                return Result<Character>.FromError(result);
             }
 
             await _database.SaveChangesAsync(ct);
@@ -173,16 +174,16 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         }
 
         /// <inheritdoc />
-        public async Task<DeleteEntityResult> DeleteCharacterAsync(Character character, CancellationToken ct = default)
+        public async Task<Result> DeleteCharacterAsync(Character character, CancellationToken ct = default)
         {
             _database.Characters.Remove(character);
             await _database.SaveChangesAsync(ct);
 
-            return DeleteEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        public async Task<RetrieveEntityResult<Character>> GetBestMatchingCharacterAsync
+        public async Task<Result<Character>> GetBestMatchingCharacterAsync
         (
             Server server,
             User? user,
@@ -198,7 +199,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (user is null && name is null)
             {
-                return RetrieveEntityResult<Character>.FromError("No user and no name specified.");
+                return new UserError("No user and no name specified.");
             }
 
             if (user is null)
@@ -215,7 +216,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         }
 
         /// <inheritdoc />
-        public async Task<RetrieveEntityResult<Character>> GetCurrentCharacterAsync
+        public async Task<Result<Character>> GetCurrentCharacterAsync
         (
             User user,
             Server server,
@@ -227,7 +228,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (!await HasCurrentCharacterAsync(user, server, ct))
             {
-                return RetrieveEntityResult<Character>.FromError("The user hasn't assumed a character.");
+                return new UserError("The user hasn't assumed a character.");
             }
 
             var currentCharacter = await _database.Characters.UserScopedServersideQueryAsync
@@ -244,11 +245,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return currentCharacter;
             }
 
-            return RetrieveEntityResult<Character>.FromError("Failed to retrieve a current character.");
+            return new UserError("Failed to retrieve a current character.");
         }
 
         /// <inheritdoc />
-        public async Task<RetrieveEntityResult<Character>> GetCharacterByNameAsync
+        public async Task<Result<Character>> GetCharacterByNameAsync
         (
             Server server,
             string name,
@@ -266,7 +267,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (characters.Count > 1)
             {
-                return RetrieveEntityResult<Character>.FromError
+                return new UserError
                 (
                     "There's more than one character with that name. Please specify which user it belongs to."
                 );
@@ -279,11 +280,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return character;
             }
 
-            return RetrieveEntityResult<Character>.FromError("No character with that name found.");
+            return new UserError("No character with that name found.");
         }
 
         /// <inheritdoc />
-        public async Task<RetrieveEntityResult<Character>> GetUserCharacterByNameAsync
+        public async Task<Result<Character>> GetUserCharacterByNameAsync
         (
             User user,
             Server server,
@@ -308,11 +309,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return character;
             }
 
-            return RetrieveEntityResult<Character>.FromError("The user doesn't own a character with that name.");
+            return new UserError("The user doesn't own a character with that name.");
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> MakeCharacterCurrentAsync
+        public async Task<Result> MakeCharacterCurrentAsync
         (
             User user,
             Server server,
@@ -325,7 +326,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (character.IsCurrent)
             {
-                return ModifyEntityResult.FromError("The character is already current on the server.");
+                return new UserError("The character is already current on the server.");
             }
 
             await ClearCurrentCharacterAsync(user, server, ct);
@@ -333,11 +334,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             character.IsCurrent = true;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> ClearCurrentCharacterAsync
+        public async Task<Result> ClearCurrentCharacterAsync
         (
             User user,
             Server server,
@@ -350,7 +351,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var getCurrentCharacter = await GetCurrentCharacterAsync(user, server, ct);
             if (!getCurrentCharacter.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getCurrentCharacter);
+                return Result.FromError(getCurrentCharacter);
             }
 
             var currentCharacter = getCurrentCharacter.Entity;
@@ -358,7 +359,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
@@ -383,7 +384,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         }
 
         /// <inheritdoc />
-        public async Task<RetrieveEntityResult<Character>> GetDefaultCharacterAsync
+        public async Task<Result<Character>> GetDefaultCharacterAsync
         (
             User user,
             Server server,
@@ -407,11 +408,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return defaultCharacter;
             }
 
-            return RetrieveEntityResult<Character>.FromError("The user doesn't have a default character.");
+            return new UserError("The user doesn't have a default character.");
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> SetDefaultCharacterAsync
+        public async Task<Result> SetDefaultCharacterAsync
         (
             User user,
             Server server,
@@ -424,7 +425,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (character.Owner != user)
             {
-                return ModifyEntityResult.FromError("The user doesn't own that character.");
+                return new UserError("The user doesn't own that character.");
             }
 
             var getDefaultCharacterResult = await GetDefaultCharacterAsync(user, server, ct);
@@ -433,7 +434,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 var currentDefault = getDefaultCharacterResult.Entity;
                 if (currentDefault == character)
                 {
-                    return ModifyEntityResult.FromError("That's already the user's default character.");
+                    return new UserError("That's already the user's default character.");
                 }
 
                 currentDefault.IsDefault = false;
@@ -442,11 +443,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             character.IsDefault = true;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> ClearDefaultCharacterAsync
+        public async Task<Result> ClearDefaultCharacterAsync
         (
             User user,
             Server server,
@@ -459,17 +460,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var getDefaultCharacterResult = await GetDefaultCharacterAsync(user, server, ct);
             if (!getDefaultCharacterResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError("That user doesn't have a default character.");
+                return new UserError("That user doesn't have a default character.");
             }
 
             getDefaultCharacterResult.Entity.IsDefault = false;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> SetCharacterNameAsync
+        public async Task<Result> SetCharacterNameAsync
         (
             Character character,
             string name,
@@ -478,32 +479,32 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                return ModifyEntityResult.FromError("You need to provide a name.");
+                return new UserError("You need to provide a name.");
             }
 
             if (string.Equals(character.Name, name, StringComparison.OrdinalIgnoreCase))
             {
-                return ModifyEntityResult.FromError("The character already has that name.");
+                return new UserError("The character already has that name.");
             }
 
             if (name.Contains("\""))
             {
-                return ModifyEntityResult.FromError("The name may not contain double quotes.");
+                return new UserError("The name may not contain double quotes.");
             }
 
             if (!await IsNameUniqueForUserAsync(character.Owner, character.Server, name, ct))
             {
-                return ModifyEntityResult.FromError("The user already has a character with that name.");
+                return new UserError("The user already has a character with that name.");
             }
 
             character.Name = name;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> SetCharacterAvatarAsync
+        public async Task<Result> SetCharacterAvatarAsync
         (
             Character character,
             string avatarUrl,
@@ -514,27 +515,27 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (string.IsNullOrWhiteSpace(avatarUrl))
             {
-                return ModifyEntityResult.FromError("You need to provide a new avatar url.");
+                return new UserError("You need to provide a new avatar url.");
             }
 
             if (!Uri.TryCreate(avatarUrl, UriKind.Absolute, out _))
             {
-                return ModifyEntityResult.FromError("The given image URL wasn't valid.");
+                return new UserError("The given image URL wasn't valid.");
             }
 
             if (character.AvatarUrl == avatarUrl)
             {
-                return ModifyEntityResult.FromError("The character's avatar is already set to that URL.");
+                return new UserError("The character's avatar is already set to that URL.");
             }
 
             character.AvatarUrl = avatarUrl;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> SetCharacterNicknameAsync
+        public async Task<Result> SetCharacterNicknameAsync
         (
             Character character,
             string nickname,
@@ -543,27 +544,27 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         {
             if (string.IsNullOrWhiteSpace(nickname))
             {
-                return ModifyEntityResult.FromError("You need to provide a new nickname.");
+                return new UserError("You need to provide a new nickname.");
             }
 
             if (character.Nickname == nickname)
             {
-                return ModifyEntityResult.FromError("The character already has that nickname.");
+                return new UserError("The character already has that nickname.");
             }
 
             if (nickname.Length > 32)
             {
-                return ModifyEntityResult.FromError("The nickname is too long. It can be at most 32 characters.");
+                return new UserError("The nickname is too long. It can be at most 32 characters.");
             }
 
             character.Nickname = nickname;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> SetCharacterSummaryAsync
+        public async Task<Result> SetCharacterSummaryAsync
         (
             Character character,
             string summary,
@@ -572,27 +573,27 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         {
             if (string.IsNullOrWhiteSpace(summary))
             {
-                return ModifyEntityResult.FromError("You need to provide a new summary.");
+                return new UserError("You need to provide a new summary.");
             }
 
             if (character.Summary == summary)
             {
-                return ModifyEntityResult.FromError("That's already the character's summary.");
+                return new UserError("That's already the character's summary.");
             }
 
             if (summary.Length > 240)
             {
-                return ModifyEntityResult.FromError("The summary is too long. It can be at most 240 characters.");
+                return new UserError("The summary is too long. It can be at most 240 characters.");
             }
 
             character.Summary = summary;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> SetCharacterDescriptionAsync
+        public async Task<Result> SetCharacterDescriptionAsync
         (
             Character character,
             string description,
@@ -601,26 +602,26 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         {
             if (string.IsNullOrWhiteSpace(description))
             {
-                return ModifyEntityResult.FromError("You need to provide a new description.");
+                return new UserError("You need to provide a new description.");
             }
 
             if (character.Description == description)
             {
-                return ModifyEntityResult.FromError("The character already has that description.");
+                return new UserError("The character already has that description.");
             }
 
             if (description.Length > 1000)
             {
-                return ModifyEntityResult.FromError("The description is too long. It can be at most 1000 characters.");
+                return new UserError("The description is too long. It can be at most 1000 characters.");
             }
             character.Description = description;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> SetCharacterPronounsAsync
+        public async Task<Result> SetCharacterPronounsAsync
         (
             Character character,
             string pronounFamily,
@@ -629,29 +630,29 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         {
             if (pronounFamily.IsNullOrWhitespace())
             {
-                return ModifyEntityResult.FromError("You need to provide a pronoun family.");
+                return new UserError("You need to provide a pronoun family.");
             }
 
             if (character.PronounProviderFamily == pronounFamily)
             {
-                return ModifyEntityResult.FromError("The character is already using that pronoun set.");
+                return new UserError("The character is already using that pronoun set.");
             }
 
             var getPronounProviderResult = _pronouns.GetPronounProvider(pronounFamily);
             if (!getPronounProviderResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getPronounProviderResult);
+                return Result.FromError(getPronounProviderResult);
             }
 
             var pronounProvider = getPronounProviderResult.Entity;
             character.PronounProviderFamily = pronounProvider.Family;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> SetCharacterIsNSFWAsync
+        public async Task<Result> SetCharacterIsNSFWAsync
         (
             Character character,
             bool isNSFW,
@@ -664,17 +665,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                     ? "The character is already NSFW."
                     : "The character is already SFW.";
 
-                return ModifyEntityResult.FromError(message);
+                return new UserError(message);
             }
 
             character.IsNSFW = isNSFW;
             await _database.SaveChangesAsync(ct);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        public async Task<ModifyEntityResult> TransferCharacterOwnershipAsync
+        public async Task<Result> TransferCharacterOwnershipAsync
         (
             User newOwner,
             Server server,
@@ -725,7 +726,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         }
 
         /// <inheritdoc />
-        public async Task<CreateEntityResult<Image>> AddImageToCharacterAsync
+        public async Task<Result<Image>> AddImageToCharacterAsync
         (
             Character character,
             string imageName,
@@ -738,12 +739,12 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             var isImageNameUnique = !character.Images.Any(i => string.Equals(i.Name.ToLower(), imageName.ToLower()));
             if (!isImageNameUnique)
             {
-                return CreateEntityResult<Image>.FromError("The character already has an image with that name.");
+                return new UserError("The character already has an image with that name.");
             }
 
             if (imageName.IsNullOrWhitespace())
             {
-                return CreateEntityResult<Image>.FromError("You need to specify a name.");
+                return new UserError("You need to specify a name.");
             }
 
             if (imageCaption.IsNullOrWhitespace())
@@ -753,7 +754,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
 
             if (!Uri.IsWellFormedUriString(imageUrl, UriKind.RelativeOrAbsolute))
             {
-                return CreateEntityResult<Image>.FromError
+                return new UserError
                 (
                     $"That URL doesn't look valid. Please check \"{imageUrl}\" for errors."
                 );
@@ -771,7 +772,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         }
 
         /// <inheritdoc />
-        public async Task<DeleteEntityResult> RemoveImageFromCharacterAsync
+        public async Task<Result> RemoveImageFromCharacterAsync
         (
             Character character,
             Image image,
@@ -780,13 +781,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         {
             if (!character.Images.Contains(image))
             {
-                return DeleteEntityResult.FromError("The character has no image with that name.");
+                return new UserError("The character has no image with that name.");
             }
 
             character.Images.Remove(image);
             await _database.SaveChangesAsync(ct);
 
-            return DeleteEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
     }
 }

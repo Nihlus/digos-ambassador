@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Utility;
 using JetBrains.Annotations;
@@ -115,17 +116,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
         /// </summary>
         /// <param name="pronounFamily">The family.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public RetrieveEntityResult<IPronounProvider> GetPronounProvider(string pronounFamily)
+        public Result<IPronounProvider> GetPronounProvider(string pronounFamily)
         {
             if (!_pronounProviders.TryGetValue(pronounFamily, out var provider))
             {
-                return RetrieveEntityResult<IPronounProvider>.FromError
+                return new UserError
                 (
                     "Could not find a pronoun provider for that family."
                 );
             }
 
-            return RetrieveEntityResult<IPronounProvider>.FromSuccess(provider);
+            return Result<IPronounProvider>.FromSuccess(provider);
         }
     }
 }

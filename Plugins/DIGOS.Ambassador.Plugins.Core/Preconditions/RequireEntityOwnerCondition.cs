@@ -57,7 +57,7 @@ namespace DIGOS.Ambassador.Plugins.Core.Preconditions
             CancellationToken ct = default
         )
         {
-            return data.IsOwner((long)_context.User.ID.Value)
+            return data.IsOwner(_context.User.ID)
                 ? new ValueTask<Result>(Result.FromSuccess())
                 : new ValueTask<Result>(new GenericError("You don't have permission to do that."));
         }

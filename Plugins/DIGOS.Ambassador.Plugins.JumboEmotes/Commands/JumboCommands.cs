@@ -143,7 +143,7 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes.CommandModules
 
             var eb = new Embed
             {
-                Colour = Color.Purple,
+                Colour = Color.MediumPurple,
                 Image = new EmbedImage { Url = emoteUrl }
             };
 
