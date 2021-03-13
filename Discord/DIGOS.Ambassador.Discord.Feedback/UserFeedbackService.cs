@@ -87,7 +87,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
             string contents,
             CancellationToken ct = default
         )
-            => SendEmbedAsync(channel, target, Color.Red, contents, ct);
+            => SendEmbedAsync(channel, target, Color.OrangeRed, contents, ct);
 
         /// <summary>
         /// Send an alerting warning message.

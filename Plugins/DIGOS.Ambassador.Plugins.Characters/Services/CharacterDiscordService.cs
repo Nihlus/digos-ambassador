@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
@@ -777,7 +778,21 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             {
                 if (modifyNickname.Unwrap() is not DiscordRestResultError rre)
                 {
-                    return modifyNickname;
+                    if (modifyNickname.Unwrap() is not HttpResultError hre)
+                    {
+                        return modifyNickname;
+                    }
+
+                    if (hre.StatusCode is not HttpStatusCode.Forbidden)
+                    {
+                        return modifyNickname;
+                    }
+
+                    return new UserError
+                    (
+                        "I'm forbidden from setting the user's nickname - typically, this means the target was the " +
+                        "server owner. This is a Discord limitation, and can't be fixed."
+                    );
                 }
 
                 if (rre.DiscordError.Code is not DiscordError.MissingPermission)
