@@ -27,6 +27,7 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
@@ -34,14 +35,13 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// <summary>
     /// Represents a saved user message.
     /// </summary>
-    [PublicAPI]
     [Table("UserMessages", Schema = "RoleplayModule")]
     public class UserMessage : EFEntity
     {
         /// <summary>
         /// Gets the unique Discord message ID.
         /// </summary>
-        public long DiscordMessageID { get; private set; }
+        public Snowflake DiscordMessageID { get; private set; }
 
         /// <summary>
         /// Gets the author of the message.
@@ -84,7 +84,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         public UserMessage
         (
             User author,
-            long discordMessageID,
+            Snowflake discordMessageID,
             DateTimeOffset timestamp,
             string authorNickname,
             string contents

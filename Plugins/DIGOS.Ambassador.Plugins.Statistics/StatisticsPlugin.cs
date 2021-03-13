@@ -35,7 +35,6 @@ namespace DIGOS.Ambassador.Plugins.Statistics
     /// <summary>
     /// Describes the Statistics plugin.
     /// </summary>
-    [PublicAPI]
     public sealed class StatisticsPlugin : PluginDescriptor
     {
         /// <inheritdoc />

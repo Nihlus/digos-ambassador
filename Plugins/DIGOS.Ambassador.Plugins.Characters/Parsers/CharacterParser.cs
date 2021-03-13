@@ -36,7 +36,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Parsers
     /// <summary>
     /// Reads owned characters as command arguments.
     /// </summary>
-    [PublicAPI]
     public sealed class CharacterParser : AbstractTypeParser<Character>
     {
         private readonly CharacterDiscordService _characterService;

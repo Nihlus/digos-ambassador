@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides neuter pronouns.
     /// </summary>
-    [PublicAPI]
     public class NeuterPronounProvider : PronounProvider
     {
         /// <inheritdoc />

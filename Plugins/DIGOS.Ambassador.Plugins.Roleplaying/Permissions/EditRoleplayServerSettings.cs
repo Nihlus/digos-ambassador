@@ -29,7 +29,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
     /// <summary>
     /// Represents a permission that allows a user to edit the roleplay-related server settings.
     /// </summary>
-    [PublicAPI]
     public sealed class EditRoleplayServerSettings : Permission
     {
         /// <inheritdoc />

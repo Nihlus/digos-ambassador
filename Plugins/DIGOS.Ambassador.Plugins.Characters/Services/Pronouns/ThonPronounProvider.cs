@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides thon pronouns.
     /// </summary>
-    [PublicAPI]
     public class ThonPronounProvider : PronounProvider
     {
         /// <inheritdoc />

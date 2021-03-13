@@ -38,7 +38,6 @@ namespace DIGOS.Ambassador.Plugins.Drone
     /// <summary>
     /// Describes the Drone plugin.
     /// </summary>
-    [PublicAPI]
     public sealed class DronePlugin : PluginDescriptor
     {
         /// <inheritdoc />

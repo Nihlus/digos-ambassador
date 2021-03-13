@@ -29,7 +29,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Permissions
     /// <summary>
     /// Represents a permission that allows a user to edit server information.
     /// </summary>
-    [PublicAPI]
     public sealed class EditServerInfo : Permission
     {
         /// <inheritdoc />

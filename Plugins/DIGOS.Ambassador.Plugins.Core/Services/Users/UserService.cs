@@ -38,7 +38,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
     /// <summary>
     /// Handles user-related logic.
     /// </summary>
-    [PublicAPI]
     public sealed class UserService
     {
         private readonly CoreDatabaseContext _database;

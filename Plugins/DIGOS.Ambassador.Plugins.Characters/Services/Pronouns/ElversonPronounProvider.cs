@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides Elverson pronouns.
     /// </summary>
-    [PublicAPI]
     public class ElversonPronounProvider : PronounProvider
     {
         /// <inheritdoc />

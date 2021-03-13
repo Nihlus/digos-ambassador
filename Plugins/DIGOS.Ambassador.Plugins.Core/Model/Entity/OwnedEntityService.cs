@@ -34,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
     /// <summary>
     /// Acts as an interface for accessing and modifying named entities owned by users.
     /// </summary>
-    [PublicAPI]
     public sealed class OwnedEntityService
     {
         /// <summary>

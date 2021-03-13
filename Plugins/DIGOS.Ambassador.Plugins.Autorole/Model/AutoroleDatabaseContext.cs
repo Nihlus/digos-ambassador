@@ -35,7 +35,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
-    [PublicAPI]
     public class AutoroleDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "AutoroleModule";

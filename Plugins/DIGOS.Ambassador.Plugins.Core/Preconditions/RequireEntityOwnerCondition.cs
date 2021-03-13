@@ -34,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Preconditions
     /// Acts as a precondition for owned entities, limiting their use to their owners.
     /// </summary>
     /// <typeparam name="TEntity">The entity type.</typeparam>
-    [PublicAPI]
     public class RequireEntityOwnerCondition<TEntity> : ICondition<RequireEntityOwnerAttribute, TEntity>
         where TEntity : IOwnedNamedEntity
     {

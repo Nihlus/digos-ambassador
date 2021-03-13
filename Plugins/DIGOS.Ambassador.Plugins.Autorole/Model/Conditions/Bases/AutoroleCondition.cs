@@ -34,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
     /// <summary>
     /// Represents the base class for autorole conditions.
     /// </summary>
-    [PublicAPI]
     [Table("AutoroleConditions", Schema = "AutoroleModule")]
     public abstract class AutoroleCondition : EFEntity, IAutoroleCondition
     {

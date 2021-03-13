@@ -36,7 +36,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Services
     /// <summary>
     /// Acts as an interface for accessing and modifying moderation settings.
     /// </summary>
-    [PublicAPI]
     public sealed class ModerationService
     {
         private readonly ModerationDatabaseContext _database;

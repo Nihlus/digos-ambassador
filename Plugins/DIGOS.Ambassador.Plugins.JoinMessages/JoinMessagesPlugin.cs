@@ -35,7 +35,6 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages
     /// <summary>
     /// Describes the JoinMessages plugin.
     /// </summary>
-    [PublicAPI]
     public sealed class JoinMessagesPlugin : PluginDescriptor
     {
         /// <inheritdoc />

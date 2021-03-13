@@ -22,16 +22,14 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
 using Humanizer;
 using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Remora.Discord.Behaviours;
+using Remora.Discord.API.Abstractions.Gateway.Events;
+using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
@@ -40,36 +38,24 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     /// Acts on user messages, logging them into an active roleplay if relevant.
     /// </summary>
     [UsedImplicitly]
-    internal sealed class RoleplayLoggingBehaviour : ClientEventBehaviour<RoleplayLoggingBehaviour>
+    internal sealed class RoleplayLoggingResponder :
+        IResponder<IReady>,
+        IResponder<IMessageCreate>,
+        IResponder<IMessageUpdate>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleplayLoggingBehaviour"/> class.
-        /// </summary>
-        /// <param name="client">The discord client.</param>
-        /// <param name="services">The services.</param>
-        /// <param name="logger">The logging instance for this type.</param>
-        public RoleplayLoggingBehaviour
-        (
-            DiscordSocketClient client,
-            IServiceProvider services,
-            ILogger<RoleplayLoggingBehaviour> logger
-        )
-            : base(client, services, logger)
+        private readonly RoleplayDiscordService _roleplays;
+
+        public RoleplayLoggingResponder(RoleplayDiscordService roleplays)
         {
+            _roleplays = roleplays;
         }
 
-        /// <summary>
-        /// Ensures active roleplays are rescanned on startup in order to catch missed messages.
-        /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        protected override async Task<OperationResult> ConnectedAsync()
+        /// <inheritdoc />
+        public async Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
         {
-            using var connectionScope = this.Services.CreateScope();
-            var roleplayService = connectionScope.ServiceProvider.GetRequiredService<RoleplayDiscordService>();
-
             foreach (var guild in this.Client.Guilds)
             {
-                var getRoleplays = await roleplayService.GetRoleplaysAsync(guild);
+                var getRoleplays = await _roleplays.GetRoleplaysAsync(guild);
                 if (!getRoleplays.IsSuccess)
                 {
                     continue;
@@ -95,7 +81,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                         }
 
                         // We don't care about the results here.
-                        var updateResult = await roleplayService.ConsumeMessageAsync(userMessage);
+                        var updateResult = await _roleplays.ConsumeMessageAsync(userMessage);
                         if (updateResult.IsSuccess)
                         {
                             ++updatedMessages;
@@ -113,61 +99,53 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 }
             }
 
-            return OperationResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        protected override async Task<OperationResult> MessageReceivedAsync(SocketMessage arg)
+        public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
         {
             if (!(arg is SocketUserMessage message))
             {
-                return OperationResult.FromError("The message was not a user message.");
+                return new UserError("The message was not a user message.");
             }
 
             if (arg.Author.IsBot || arg.Author.IsWebhook)
             {
-                return OperationResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
             var discard = 0;
 
             if (message.HasCharPrefix('!', ref discard))
             {
-                return OperationResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
             if (message.HasMentionPrefix(this.Client.CurrentUser, ref discard))
             {
-                return OperationResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
-            using var messageScope = this.Services.CreateScope();
-            var roleplayService = messageScope.ServiceProvider.GetRequiredService<RoleplayDiscordService>();
-
-            var consumeResult = await roleplayService.ConsumeMessageAsync(message);
+            var consumeResult = await _roleplays.ConsumeMessageAsync(message);
             if (!consumeResult.IsSuccess)
             {
-                return OperationResult.FromError(consumeResult);
+                return Result.FromError(consumeResult);
             }
 
-            return OperationResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />
-        protected override async Task<OperationResult> MessageUpdatedAsync
-        (
-            Cacheable<IMessage, ulong> oldMessage,
-            SocketMessage updatedMessage,
-            ISocketMessageChannel messageChannel
-        )
+        public async Task<Result> RespondAsync(IMessageUpdate gatewayEvent, CancellationToken ct = default)
         {
             // Ignore all changes except text changes
             var isTextUpdate = updatedMessage.EditedTimestamp.HasValue &&
-                                updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
+                               updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
 
             if (!isTextUpdate)
             {
-                return OperationResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
             return await MessageReceivedAsync(updatedMessage);

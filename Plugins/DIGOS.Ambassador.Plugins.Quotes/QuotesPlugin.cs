@@ -36,7 +36,6 @@ namespace DIGOS.Ambassador.Plugins.Quotes
     /// <summary>
     /// Describes the Quotes plugin.
     /// </summary>
-    [PublicAPI]
     public sealed class QuotesPlugin : PluginDescriptor
     {
         /// <inheritdoc />

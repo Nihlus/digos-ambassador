@@ -30,7 +30,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
     /// given source location.
     /// </summary>
     /// <typeparam name="TActualCondition">The actual condition type.</typeparam>
-    [PublicAPI]
     public abstract class MessageCountInSourceCondition<TActualCondition> : AutoroleCondition
         where TActualCondition : MessageCountInSourceCondition<TActualCondition>
     {

@@ -29,7 +29,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
     /// <summary>
     /// Represents a permission that allows a user to kick roleplay members.
     /// </summary>
-    [PublicAPI]
     public sealed class KickRoleplayMember : Permission
     {
         /// <inheritdoc />

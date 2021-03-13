@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
     /// <summary>
     /// A format that roleplays can be exported to.
     /// </summary>
-    [PublicAPI]
     public enum ExportFormat
     {
         /// <summary>

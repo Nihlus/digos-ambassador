@@ -33,7 +33,6 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
     /// <summary>
     /// Contains extension methods for the <see cref="IServiceCollection"/> interface.
     /// </summary>
-    [PublicAPI]
     public static class ServiceCollectionExtensions
     {
         /// <summary>
@@ -42,8 +41,7 @@ namespace DIGOS.Ambassador.Core.Database.Extensions
         /// <param name="this">The service collection.</param>
         /// <typeparam name="TContext">The context type.</typeparam>
         /// <returns>The service collection, with the pool added.</returns>
-        [PublicAPI]
-        public static IServiceCollection AddConfiguredSchemaAwareDbContextPool<TContext>
+            public static IServiceCollection AddConfiguredSchemaAwareDbContextPool<TContext>
         (
             this IServiceCollection @this
         )

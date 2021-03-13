@@ -29,7 +29,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Permissions
     /// <summary>
     /// Represents a permission that allows a user to export roleplays.
     /// </summary>
-    [PublicAPI]
     public sealed class ExportRoleplay : Permission
     {
         /// <inheritdoc />

@@ -21,15 +21,15 @@
 //
 
 using System;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
+using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
-using Discord;
-using Discord.Net;
 using JetBrains.Annotations;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
@@ -37,30 +37,25 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// <summary>
     /// Business logic for managing dedicated roleplay channels.
     /// </summary>
-    [PublicAPI]
     public class DedicatedChannelService
     {
         private readonly RoleplayingDatabaseContext _database;
-        private readonly IDiscordClient _client;
         private readonly ServerService _servers;
         private readonly RoleplayServerSettingsService _serverSettings;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DedicatedChannelService"/> class.
         /// </summary>
-        /// <param name="client">The Discord client.</param>
         /// <param name="servers">The server service.</param>
         /// <param name="serverSettings">The server settings service.</param>
         /// <param name="database">The database context.</param>
         public DedicatedChannelService
         (
-            IDiscordClient client,
             ServerService servers,
             RoleplayServerSettingsService serverSettings,
             RoleplayingDatabaseContext database
         )
         {
-            _client = client;
             _servers = servers;
             _serverSettings = serverSettings;
             _database = database;
@@ -69,35 +64,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Creates a dedicated channel for the roleplay.
         /// </summary>
-        /// <param name="guild">The guild in which the request was made.</param>
         /// <param name="roleplay">The roleplay to create the channel for.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<CreateEntityResult<ITextChannel>> CreateDedicatedChannelAsync
-        (
-            IGuild guild,
-            Roleplay roleplay
-        )
+        public async Task<Result<IChannel>> CreateDedicatedChannelAsync(Roleplay roleplay)
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(guild);
-            if (!getServerResult.IsSuccess)
+            if (!(await guildID.GetUserAsync(_client.CurrentUser.Id)).GuildPermissions.ManageChannels)
             {
-                return CreateEntityResult<ITextChannel>.FromError(getServerResult);
-            }
-
-            var server = getServerResult.Entity;
-
-            if (!(await guild.GetUserAsync(_client.CurrentUser.Id)).GuildPermissions.ManageChannels)
-            {
-                return CreateEntityResult<ITextChannel>.FromError
+                return new UserError
                 (
                     "I don't have permission to manage channels, so I can't create dedicated RP channels."
                 );
             }
 
-            var getExistingChannelResult = await GetDedicatedChannelAsync(guild, roleplay);
+            var getExistingChannelResult = await GetDedicatedChannelAsync(roleplay);
             if (getExistingChannelResult.IsSuccess)
             {
-                return CreateEntityResult<ITextChannel>.FromError
+                return new UserError
                 (
                     "The roleplay already has a dedicated channel."
                 );
@@ -106,25 +88,25 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var getSettingsResult = await _serverSettings.GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettingsResult.IsSuccess)
             {
-                return CreateEntityResult<ITextChannel>.FromError(getSettingsResult);
+                return Result<IChannel>.FromError(getSettingsResult);
             }
 
             var settings = getSettingsResult.Entity;
 
             if (settings.DedicatedRoleplayChannelsCategory is null)
             {
-                return CreateEntityResult<ITextChannel>.FromError
+                return new UserError
                 (
                     "No dedicated channel category has been configured."
                 );
             }
 
-            var categoryChannelCount = (await guild.GetTextChannelsAsync())
+            var categoryChannelCount = (await guildID.GetTextChannelsAsync())
                 .Count(c => c.CategoryId == (ulong)settings.DedicatedRoleplayChannelsCategory);
 
             if (categoryChannelCount >= 50)
             {
-                return CreateEntityResult<ITextChannel>.FromError
+                return new UserError
                 (
                     "The server's roleplaying category has reached its maximum number of channels. Try " +
                     "contacting the server's owners and either removing some old roleplays or setting up " +
@@ -134,7 +116,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             Optional<ulong?> categoryId = (ulong?)settings.DedicatedRoleplayChannelsCategory;
 
-            var dedicatedChannel = await guild.CreateTextChannelAsync
+            var dedicatedChannel = await guildID.CreateTextChannelAsync
             (
                 $"{roleplay.Name}-rp",
                 properties =>
@@ -153,12 +135,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 var resetPermissions = await ResetChannelPermissionsAsync(dedicatedChannel, roleplay);
                 if (!resetPermissions.IsSuccess)
                 {
-                    return CreateEntityResult<ITextChannel>.FromError(resetPermissions);
+                    return Result<IChannel>.FromError(resetPermissions);
                 }
             }
             catch (HttpException hex) when (hex.HttpCode == HttpStatusCode.Forbidden)
             {
-                return CreateEntityResult<ITextChannel>.FromError
+                return new UserError
                 (
                     "Failed to update channel permissions. Does the bot have permissions to manage permissions on " +
                     "new channels?"
@@ -167,30 +149,30 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             catch (Exception ex)
             {
                 await dedicatedChannel.DeleteAsync();
-                return CreateEntityResult<ITextChannel>.FromError(ex);
+                return Result<IChannel>.FromError(ex);
             }
 
             await _database.SaveChangesAsync();
 
-            return CreateEntityResult<ITextChannel>.FromSuccess(dedicatedChannel);
+            return Result<IChannel>.FromSuccess(dedicatedChannel);
         }
 
         /// <summary>
         /// Sets the writability of the given dedicated channel for the given user.
         /// </summary>
-        /// <param name="dedicatedChannel">The roleplay's dedicated channel.</param>
-        /// <param name="participant">The participant to grant access to.</param>
+        /// <param name="channelID">The roleplay's dedicated channel.</param>
+        /// <param name="userID">The participant to grant access to.</param>
         /// <param name="isVisible">Whether or not the channel should be writable.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetChannelWritabilityForUserAsync
+        public async Task<Result> SetChannelWritabilityForUserAsync
         (
-            IGuildChannel dedicatedChannel,
-            IUser participant,
+            Snowflake channelID,
+            Snowflake userID,
             bool isVisible
         )
         {
             var permissions = OverwritePermissions.InheritAll;
-            var existingOverwrite = dedicatedChannel.GetPermissionOverwrite(participant);
+            var existingOverwrite = channelID.GetPermissionOverwrite(userID);
             if (!(existingOverwrite is null))
             {
                 permissions = existingOverwrite.Value;
@@ -202,30 +184,30 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 addReactions: isVisible ? PermValue.Allow : PermValue.Deny
             );
 
-            await dedicatedChannel.AddPermissionOverwriteAsync(participant, permissions);
+            await channelID.AddPermissionOverwriteAsync(userID, permissions);
 
             // Ugly hack - there seems to be some kind of race condition on Discord's end.
             await Task.Delay(20);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Sets the visibility of the given dedicated channel for the given user.
         /// </summary>
-        /// <param name="dedicatedChannel">The roleplay's dedicated channel.</param>
-        /// <param name="participant">The participant to grant access to.</param>
+        /// <param name="channelID">The roleplay's dedicated channel.</param>
+        /// <param name="userID">The participant to grant access to.</param>
         /// <param name="isVisible">Whether or not the channel should be visible.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetChannelVisibilityForUserAsync
+        public async Task<Result> SetChannelVisibilityForUserAsync
         (
-            IGuildChannel dedicatedChannel,
-            IUser participant,
+            Snowflake channelID,
+            Snowflake userID,
             bool isVisible
         )
         {
             var permissions = OverwritePermissions.InheritAll;
-            var existingOverwrite = dedicatedChannel.GetPermissionOverwrite(participant);
+            var existingOverwrite = channelID.GetPermissionOverwrite(userID);
             if (!(existingOverwrite is null))
             {
                 permissions = existingOverwrite.Value;
@@ -237,94 +219,71 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 viewChannel: isVisible ? PermValue.Allow : PermValue.Deny
             );
 
-            await dedicatedChannel.AddPermissionOverwriteAsync(participant, permissions);
+            await channelID.AddPermissionOverwriteAsync(userID, permissions);
 
             // Ugly hack - there seems to be some kind of race condition on Discord's end.
             await Task.Delay(20);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Deletes the dedicated channel for the roleplay.
         /// </summary>
-        /// <param name="guild">The context in which the request was made.</param>
         /// <param name="roleplay">The roleplay to delete the channel of.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<DeleteEntityResult> DeleteChannelAsync
-        (
-            IGuild guild,
-            Roleplay roleplay
-        )
+        public async Task<Result> DeleteChannelAsync(Roleplay roleplay)
         {
             if (roleplay.DedicatedChannelID is null)
             {
-                return DeleteEntityResult.FromError
+                return new UserError
                 (
                     "The roleplay doesn't have a dedicated channel."
                 );
             }
 
-            var getDedicatedChannelResult = await GetDedicatedChannelAsync(guild, roleplay);
-            if (getDedicatedChannelResult.IsSuccess)
-            {
-                await getDedicatedChannelResult.Entity.DeleteAsync();
-            }
+            // TODO: delete in discord
 
             roleplay.DedicatedChannelID = null;
             await _database.SaveChangesAsync();
 
-            return DeleteEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Gets the channel dedicated to the given roleplay.
         /// </summary>
-        /// <param name="guild">The guild that contains the channel.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<ITextChannel>> GetDedicatedChannelAsync
-        (
-            IGuild guild,
-            Roleplay roleplay
-        )
+        public async Task<Result<Snowflake>> GetDedicatedChannelAsync(Roleplay roleplay)
         {
             if (roleplay.DedicatedChannelID is null)
             {
-                return RetrieveEntityResult<ITextChannel>.FromError
+                return new UserError
                 (
                     "The roleplay doesn't have a dedicated channel."
                 );
             }
 
-            var guildChannel = await guild.GetTextChannelAsync((ulong)roleplay.DedicatedChannelID.Value);
-            if (!(guildChannel is null))
-            {
-                return RetrieveEntityResult<ITextChannel>.FromSuccess(guildChannel);
-            }
-
-            return RetrieveEntityResult<ITextChannel>.FromError
-            (
-                "Attempted to retrieve a channel, but it appears to have been deleted."
-            );
+            return roleplay.DedicatedChannelID.Value;
         }
 
         /// <summary>
         /// Sets the visibility of the given dedicated channel for the given user.
         /// </summary>
-        /// <param name="dedicatedChannel">The roleplay's dedicated channel.</param>
-        /// <param name="role">The role to grant access to.</param>
+        /// <param name="channelID">The roleplay's dedicated channel.</param>
+        /// <param name="roleID">The role to grant access to.</param>
         /// <param name="isVisible">Whether or not the channel should be visible.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetChannelVisibilityForRoleAsync
+        public async Task<Result> SetChannelVisibilityForRoleAsync
         (
-            IGuildChannel dedicatedChannel,
-            IRole role,
+            Snowflake channelID,
+            Snowflake roleID,
             bool isVisible
         )
         {
             var permissions = OverwritePermissions.InheritAll;
-            var existingOverwrite = dedicatedChannel.GetPermissionOverwrite(role);
+            var existingOverwrite = channelID.GetPermissionOverwrite(roleID);
             if (!(existingOverwrite is null))
             {
                 permissions = existingOverwrite.Value;
@@ -336,79 +295,72 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 viewChannel: isVisible ? PermValue.Allow : PermValue.Deny
             );
 
-            await dedicatedChannel.AddPermissionOverwriteAsync(role, permissions);
+            await channelID.AddPermissionOverwriteAsync(roleID, permissions);
 
             // Ugly hack - there seems to be some kind of race condition on Discord's end.
             await Task.Delay(20);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Revokes the given roleplay participant access to the given roleplay channel.
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
-        /// <param name="participant">The participant to grant access to.</param>
+        /// <param name="userID">The participant to grant access to.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> RevokeUserAccessAsync
-        (
-            Roleplay roleplay,
-            IGuildUser participant
-        )
+        public async Task<Result> RevokeUserAccessAsync(Roleplay roleplay, Snowflake userID)
         {
             var guild = participant.Guild;
 
             if (!(await guild.GetUserAsync(_client.CurrentUser.Id)).GuildPermissions.ManageChannels)
             {
-                return ModifyEntityResult.FromError
+                return new UserError
                 (
                     "I don't have permission to manage channels, so I can't change permissions on dedicated RP channels."
                 );
             }
 
-            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
+            var getChannel = await GetDedicatedChannelAsync(roleplay);
             if (!getChannel.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
             await channel.RemovePermissionOverwriteAsync(participant);
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Retrieves the channel category that's set for the given server as the roleplay category.
         /// </summary>
-        /// <param name="discordServer">The server.</param>
+        /// <param name="guildID">The server.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<ICategoryChannel>> GetDedicatedChannelCategoryAsync
-        (
-            IGuild discordServer
-        )
+        public async Task<Result<Snowflake>> GetDedicatedChannelCategoryAsync(Snowflake guildID)
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(discordServer);
+            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID);
             if (!getServerResult.IsSuccess)
             {
-                return RetrieveEntityResult<ICategoryChannel>.FromError(getServerResult);
+                return Result<IChannel>.FromError(getServerResult);
             }
 
             var server = getServerResult.Entity;
             var getSettingsResult = await _serverSettings.GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettingsResult.IsSuccess)
             {
-                return RetrieveEntityResult<ICategoryChannel>.FromError(getSettingsResult);
+                return Result<IChannel>.FromError(getSettingsResult);
             }
 
             var settings = getSettingsResult.Entity;
 
             if (!settings.DedicatedRoleplayChannelsCategory.HasValue)
             {
-                return RetrieveEntityResult<ICategoryChannel>.FromError("Failed to retrieve a valid category.");
+                return new UserError("Failed to retrieve a valid category.");
             }
 
-            var categories = await discordServer.GetCategoriesAsync();
+            var categories = await guildID.GetCategoriesAsync();
             var category = categories.FirstOrDefault
             (
                 c => c.Id == (ulong)settings.DedicatedRoleplayChannelsCategory.Value
@@ -416,24 +368,23 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             if (category is null)
             {
-                return RetrieveEntityResult<ICategoryChannel>.FromError("Failed to retrieve a valid category.");
+                return new UserError("Failed to retrieve a valid category.");
             }
 
-            return RetrieveEntityResult<ICategoryChannel>.FromSuccess(category);
+            return Result<IChannel>.FromSuccess(category);
         }
 
         /// <summary>
         /// Resets the channel permissions for the given roleplay to their default values.
         /// </summary>
-        /// <param name="channel">The channel.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ResetChannelPermissionsAsync(ITextChannel channel, Roleplay roleplay)
+        public async Task<Result> ResetChannelPermissionsAsync(Roleplay roleplay)
         {
-            var guild = channel.Guild;
+            var guild = channelID.Guild;
 
             // First, clear all overwrites from the channel
-            var clear = await ClearChannelPermissionOverwrites(channel);
+            var clear = await ClearChannelPermissionOverwrites(channelID);
             if (!clear.IsSuccess)
             {
                 return clear;
@@ -441,12 +392,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
             // Then, ensure the bot has full access to the channel
             var botDiscordUser = await guild.GetUserAsync(_client.CurrentUser.Id);
-            var allowAll = OverwritePermissions.AllowAll(channel);
+            var allowAll = OverwritePermissions.AllowAll(channelID);
 
-            await channel.AddPermissionOverwriteAsync(botDiscordUser, allowAll);
+            await channelID.AddPermissionOverwriteAsync(botDiscordUser, allowAll);
 
             // Next, apply default role settings
-            var configureDefault = await ConfigureDefaultUserRolePermissions(guild, channel);
+            var configureDefault = await ConfigureDefaultUserRolePermissions(guild, channelID);
             if (!configureDefault.IsSuccess)
             {
                 return configureDefault;
@@ -459,21 +410,21 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return updateParticipants;
             }
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Resets the channel permissions for the given roleplay to their default values.
         /// </summary>
-        /// <param name="guild">The guild.</param>
+        /// <param name="guildID">The guild.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> ResetChannelPermissionsAsync(IGuild guild, Roleplay roleplay)
+        public async Task<Result> ResetChannelPermissionsAsync(Roleplay roleplay)
         {
-            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
+            var getChannel = await GetDedicatedChannelAsync(roleplay);
             if (!getChannel.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -484,26 +435,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Updates the permissions for the participants of the roleplay.
         /// </summary>
-        /// <param name="guild">The guild the roleplay is in.</param>
+        /// <param name="guildID">The guild the roleplay is in.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> UpdateParticipantPermissionsAsync
-        (
-            IGuild guild,
-            Roleplay roleplay
-        )
+        public async Task<Result> UpdateParticipantPermissionsAsync(Roleplay roleplay)
         {
-            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
+            var getChannel = await GetDedicatedChannelAsync(roleplay);
             if (!getChannel.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
 
             foreach (var participant in roleplay.ParticipatingUsers)
             {
-                var discordUser = await guild.GetUserAsync((ulong)participant.User.DiscordID);
+                var discordUser = await guildID.GetUserAsync((ulong)participant.User.DiscordID);
                 if (discordUser is null)
                 {
                     continue;
@@ -513,10 +460,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 await SetChannelVisibilityForUserAsync(channel, discordUser, roleplay.IsActive);
             }
 
-            var getServer = await _servers.GetOrRegisterServerAsync(guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID);
             if (!getServer.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getServer);
+                return Result.FromError(getServer);
             }
 
             var server = getServer.Entity;
@@ -524,7 +471,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             var getSettings = await _serverSettings.GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettings.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getSettings);
+                return Result.FromError(getSettings);
             }
 
             var settings = getSettings.Entity;
@@ -533,12 +480,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             IRole everyoneRole;
             if (settings.DefaultUserRole.HasValue)
             {
-                var defaultRole = guild.GetRole((ulong)settings.DefaultUserRole!.Value);
-                everyoneRole = defaultRole ?? guild.EveryoneRole;
+                var defaultRole = guildID.GetRole((ulong)settings.DefaultUserRole!.Value);
+                everyoneRole = defaultRole ?? guildID.EveryoneRole;
             }
             else
             {
-                everyoneRole = guild.EveryoneRole;
+                everyoneRole = guildID.EveryoneRole;
             }
 
             return await SetChannelVisibilityForRoleAsync
@@ -554,24 +501,24 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> UpdateChannelNameAsync(Roleplay roleplay)
+        public async Task<Result> UpdateChannelNameAsync(Roleplay roleplay)
         {
             var guild = await _client.GetGuildAsync((ulong)roleplay.Server.DiscordID);
             if (guild is null)
             {
-                return ModifyEntityResult.FromError("Could not retrieve a valid guild.");
+                return new UserError("Could not retrieve a valid guild.");
             }
 
-            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
+            var getChannel = await GetDedicatedChannelAsync(roleplay);
             if (!getChannel.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
             await channel.ModifyAsync(m => m.Name = $"{roleplay.Name}-rp");
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -579,18 +526,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> UpdateChannelSummaryAsync(Roleplay roleplay)
+        public async Task<Result> UpdateChannelSummaryAsync(Roleplay roleplay)
         {
             var guild = await _client.GetGuildAsync((ulong)roleplay.Server.DiscordID);
             if (guild is null)
             {
-                return ModifyEntityResult.FromError("Could not retrieve a valid guild.");
+                return new UserError("Could not retrieve a valid guild.");
             }
 
-            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
+            var getChannel = await GetDedicatedChannelAsync(roleplay);
             if (!getChannel.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
@@ -599,7 +546,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 m => m.Topic = $"Dedicated roleplay channel for {roleplay.Name}. {roleplay.Summary}"
             );
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -607,36 +554,36 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> UpdateChannelNSFWStatus(Roleplay roleplay)
+        public async Task<Result> UpdateChannelNSFWStatus(Roleplay roleplay)
         {
             var guild = await _client.GetGuildAsync((ulong)roleplay.Server.DiscordID);
             if (guild is null)
             {
-                return ModifyEntityResult.FromError("Could not retrieve a valid guild.");
+                return new UserError("Could not retrieve a valid guild.");
             }
 
-            var getChannel = await GetDedicatedChannelAsync(guild, roleplay);
+            var getChannel = await GetDedicatedChannelAsync(roleplay);
             if (!getChannel.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getChannel);
+                return Result.FromError(getChannel);
             }
 
             var channel = getChannel.Entity;
             await channel.ModifyAsync(m => m.IsNsfw = roleplay.IsNSFW);
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Clears all channel permission overwrites from the given channel.
         /// </summary>
-        /// <param name="channel">The channel.</param>
+        /// <param name="channelID">The channel.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        private async Task<ModifyEntityResult> ClearChannelPermissionOverwrites(IGuildChannel channel)
+        private async Task<Result> ClearChannelPermissionOverwrites(Snowflake channelID)
         {
-            var guild = channel.Guild;
+            var guild = channelID.Guild;
 
-            foreach (var overwrite in channel.PermissionOverwrites)
+            foreach (var overwrite in channelID.PermissionOverwrites)
             {
                 switch (overwrite.TargetType)
                 {
@@ -650,11 +597,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
 
                         if (role.Id == guild.EveryoneRole.Id)
                         {
-                            await channel.AddPermissionOverwriteAsync(role, OverwritePermissions.InheritAll);
+                            await channelID.AddPermissionOverwriteAsync(role, OverwritePermissions.InheritAll);
                         }
                         else
                         {
-                            await channel.RemovePermissionOverwriteAsync(role);
+                            await channelID.RemovePermissionOverwriteAsync(role);
                         }
 
                         break;
@@ -672,7 +619,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                             continue;
                         }
 
-                        await channel.RemovePermissionOverwriteAsync(user);
+                        await channelID.RemovePermissionOverwriteAsync(user);
                         break;
                     }
                     default:
@@ -682,26 +629,26 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 }
             }
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
-        private async Task<ModifyEntityResult> ConfigureDefaultUserRolePermissions
+        private async Task<Result> ConfigureDefaultUserRolePermissions
         (
-            IGuild guild,
-            IGuildChannel dedicatedChannel
+            Snowflake guildID,
+            Snowflake channelID
         )
         {
-            var getServer = await _servers.GetOrRegisterServerAsync(guild);
+            var getServer = await _servers.GetOrRegisterServerAsync(guildID);
             if (!getServer.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getServer);
+                return Result.FromError(getServer);
             }
 
             var server = getServer.Entity;
             var getSettings = await _serverSettings.GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettings.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getSettings);
+                return Result.FromError(getSettings);
             }
 
             var settings = getSettings.Entity;
@@ -718,23 +665,23 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             IRole defaultUserRole;
             if (settings.DefaultUserRole.HasValue)
             {
-                var defaultRole = guild.GetRole((ulong)settings.DefaultUserRole.Value);
-                defaultUserRole = defaultRole ?? guild.EveryoneRole;
+                var defaultRole = guildID.GetRole((ulong)settings.DefaultUserRole.Value);
+                defaultUserRole = defaultRole ?? guildID.EveryoneRole;
             }
             else
             {
-                defaultUserRole = guild.EveryoneRole;
+                defaultUserRole = guildID.EveryoneRole;
             }
 
-            await dedicatedChannel.AddPermissionOverwriteAsync(defaultUserRole, denyView);
+            await channelID.AddPermissionOverwriteAsync(defaultUserRole, denyView);
 
-            if (defaultUserRole != guild.EveryoneRole)
+            if (defaultUserRole != guildID.EveryoneRole)
             {
                 // Also override @everyone so it can't see anything
-                await dedicatedChannel.AddPermissionOverwriteAsync(guild.EveryoneRole, denyView);
+                await channelID.AddPermissionOverwriteAsync(guildID.EveryoneRole, denyView);
             }
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
     }
 }

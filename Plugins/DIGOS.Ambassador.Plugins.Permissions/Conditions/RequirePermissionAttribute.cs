@@ -31,7 +31,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Conditions
     /// This attribute can be attached to Discord.Net.Commands module commands to restrict them to certain predefined
     /// permissions.
     /// </summary>
-    [PublicAPI]
     [AttributeUsage(AttributeTargets.Method)]
     public class RequirePermissionAttribute : ConditionAttribute
     {

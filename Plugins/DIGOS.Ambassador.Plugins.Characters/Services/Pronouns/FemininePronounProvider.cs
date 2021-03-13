@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides feminine pronouns.
     /// </summary>
-    [PublicAPI]
     public class FemininePronounProvider : PronounProvider
     {
         /// <inheritdoc />

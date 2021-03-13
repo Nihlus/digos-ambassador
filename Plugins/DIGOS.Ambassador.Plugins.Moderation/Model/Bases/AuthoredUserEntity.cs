@@ -33,7 +33,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model.Bases
     /// <summary>
     /// Represents an entity authored by a user at a specific time.
     /// </summary>
-    [PublicAPI]
     public abstract class AuthoredUserEntity : EFEntity
     {
         /// <summary>

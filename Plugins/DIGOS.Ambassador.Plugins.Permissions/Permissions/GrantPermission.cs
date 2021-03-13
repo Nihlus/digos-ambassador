@@ -28,7 +28,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions
     /// <summary>
     /// Represents a permission that allows a user to grant permissions.
     /// </summary>
-    [PublicAPI]
     public sealed class GrantPermission : Permission
     {
         /// <inheritdoc />

@@ -27,10 +27,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
-using Discord;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using MoreLinq.Extensions;
+using Remora.Discord.API.Abstractions.Objects;
 using Document = iTextSharp.text.Document;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters

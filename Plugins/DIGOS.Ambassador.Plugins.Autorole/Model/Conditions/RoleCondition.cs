@@ -37,7 +37,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
     /// <summary>
     /// Represents a required role.
     /// </summary>
-    [PublicAPI]
     public class RoleCondition : AutoroleCondition
     {
         /// <summary>

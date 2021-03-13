@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
     /// <summary>
     /// Enumerates the various message source types that are supported.
     /// </summary>
-    [PublicAPI]
     public enum MessageSourceType
     {
         /// <summary>

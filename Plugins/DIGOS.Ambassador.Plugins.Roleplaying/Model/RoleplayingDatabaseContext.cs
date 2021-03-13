@@ -19,6 +19,9 @@
 //  You should have received a copy of the GNU Affero General Public License
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
+
+using DIGOS.Ambassador.Plugins.Core.Extensions;
+using DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
@@ -29,7 +32,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
-    [PublicAPI]
     public class RoleplayingDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "RoleplayModule";
@@ -57,6 +59,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder
+                .ConfigureCoreConversions()
+                .ConfigureRoleplayConversions();
 
             modelBuilder.Entity<Roleplay>().HasMany(r => r.ParticipatingUsers).WithOne(pu => pu.Roleplay);
             modelBuilder.Entity<RoleplayParticipant>().HasOne(rp => rp.User).WithMany();

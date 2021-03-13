@@ -29,7 +29,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Permissions
     /// <summary>
     /// Represents a permission that allows a user to delete characters.
     /// </summary>
-    [PublicAPI]
     public sealed class DeleteCharacter : Permission
     {
         /// <inheritdoc />

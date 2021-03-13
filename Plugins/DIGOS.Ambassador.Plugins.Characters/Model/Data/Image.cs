@@ -30,7 +30,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model.Data
     /// <summary>
     /// Represents an image.
     /// </summary>
-    [PublicAPI]
     [Table("Images", Schema = "CharacterModule")]
     public class Image : EFEntity
     {

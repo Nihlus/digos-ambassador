@@ -25,17 +25,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
-using Discord;
-using Discord.Net;
-using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Remora.Discord.Behaviours;
+using Remora.Behaviours.Bases;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
@@ -44,7 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     /// Times out roleplays, stopping them if they've been inactive for more than a set time.
     /// </summary>
     [UsedImplicitly]
-    internal sealed class RoleplayTimeoutBehaviour : ContinuousDiscordBehaviour<RoleplayTimeoutBehaviour>
+    internal sealed class RoleplayTimeoutBehaviour : ContinuousBehaviour<RoleplayTimeoutBehaviour>
     {
         /// <summary>
         /// Gets the feedback service.
@@ -60,24 +57,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayTimeoutBehaviour"/> class.
         /// </summary>
-        /// <param name="client">The discord client.</param>
         /// <param name="services">The services.</param>
         /// <param name="logger">The logging instance for this type.</param>
         /// <param name="feedback">The feedback service.</param>
         public RoleplayTimeoutBehaviour
         (
-            DiscordSocketClient client,
             IServiceProvider services,
             ILogger<RoleplayTimeoutBehaviour> logger,
             UserFeedbackService feedback
         )
-            : base(client, services, logger)
+            : base(services, logger)
         {
             this.Feedback = feedback;
         }
 
         /// <inheritdoc/>
-        protected override async Task<OperationResult> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
+        protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
             var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
 
@@ -85,7 +80,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             {
                 if (ct.IsCancellationRequested)
                 {
-                    return OperationResult.FromError("Operation was cancelled.");
+                    return new UserError("Operation was cancelled.");
                 }
 
                 var getRoleplays = await roleplayService.GetRoleplaysAsync(guild);
@@ -102,10 +97,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
                 foreach (var roleplay in timedOutRoleplays)
                 {
-                    if (ct.IsCancellationRequested)
-                    {
-                        return OperationResult.FromError("Operation was cancelled.");
-                    }
+                    ct.ThrowIfCancellationRequested();
 
                     // We'll use a transaction per warning to avoid timeouts
                     using var timeoutTransaction = new TransactionScope
@@ -118,20 +110,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                     var stopRoleplay = await roleplayService.StopRoleplayAsync(roleplay);
                     if (!stopRoleplay.IsSuccess)
                     {
-                        return OperationResult.FromError(stopRoleplay);
+                        return Result.FromError(stopRoleplay);
                     }
 
                     var notifyResult = await NotifyOwnerAsync(roleplay);
                     if (!notifyResult.IsSuccess)
                     {
-                        return OperationResult.FromError(notifyResult);
+                        return Result.FromError(notifyResult);
                     }
 
                     timeoutTransaction.Complete();
                 }
             }
 
-            return OperationResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -139,12 +131,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task<OperationResult> NotifyOwnerAsync(Roleplay roleplay)
+        private async Task<Result> NotifyOwnerAsync(Roleplay roleplay)
         {
             var owner = this.Client.GetUser((ulong)roleplay.Owner.DiscordID);
             if (owner is null)
             {
-                return OperationResult.FromError("Failed to get the owner.");
+                return new UserError("Failed to get the owner.");
             }
 
             var notification = this.Feedback.CreateEmbedBase();
@@ -167,7 +159,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 // Nom nom nom
             }
 
-            return OperationResult.FromSuccess();
+            return Result.FromSuccess();
         }
     }
 }

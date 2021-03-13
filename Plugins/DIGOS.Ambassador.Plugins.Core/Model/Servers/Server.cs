@@ -34,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
     /// <summary>
     /// Represents stored settings for a Discord server.
     /// </summary>
-    [PublicAPI]
     [Table("Servers", Schema = "Core")]
     public class Server : EFEntity
     {

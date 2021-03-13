@@ -31,7 +31,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
     /// <summary>
     /// Represents an externally initiated confirmation of a user's qualification for an autorole.
     /// </summary>
-    [PublicAPI]
     [Table("AutoroleConfirmations", Schema = "AutoroleModule")]
     public class AutoroleConfirmation : EFEntity
     {

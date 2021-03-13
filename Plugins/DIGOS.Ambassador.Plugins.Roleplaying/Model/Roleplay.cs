@@ -30,8 +30,9 @@ using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
-using Discord;
 using JetBrains.Annotations;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Core;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
@@ -39,7 +40,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// <summary>
     /// Represents a saved roleplay.
     /// </summary>
-    [PublicAPI]
     [Table("Roleplays", Schema = "RoleplayModule")]
     public class Roleplay : EFEntity, IOwnedNamedEntity, IServerEntity
     {
@@ -68,18 +68,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the ID of the channel that the roleplay is active in.
         /// </summary>
-        public long? ActiveChannelID { get; internal set; }
+        public Snowflake? ActiveChannelID { get; internal set; }
 
         /// <summary>
         /// Gets the ID of the roleplay's dedicated channel.
         /// </summary>
-        public long? DedicatedChannelID { get; internal set; }
+        public Snowflake? DedicatedChannelID { get; internal set; }
 
         /// <summary>
         /// Gets the users that are participating in the roleplay in any way.
         /// </summary>
-        public virtual List<RoleplayParticipant> ParticipatingUsers { get; private set; }
-            = new List<RoleplayParticipant>();
+        public virtual List<RoleplayParticipant> ParticipatingUsers { get; private set; } = new();
 
         /// <inheritdoc />
         [Required]
@@ -94,7 +93,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the saved messages in the roleplay.
         /// </summary>
-        public virtual List<UserMessage> Messages { get; private set; } = new List<UserMessage>();
+        public virtual List<UserMessage> Messages { get; private set; } = new();
 
         /// <summary>
         /// Gets the last time the roleplay was updated.
@@ -159,11 +158,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <inheritdoc />
         public bool IsOwner(IUser user)
         {
-            return IsOwner((long)user.Id);
+            return IsOwner(user.ID);
         }
 
         /// <inheritdoc />
-        public bool IsOwner(long userID)
+        public bool IsOwner(Snowflake userID)
         {
             return this.Owner.DiscordID == userID;
         }
@@ -187,7 +186,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         [Pure]
         public bool HasJoined(IUser user)
         {
-            return HasJoined((long)user.Id);
+            return HasJoined(user.ID);
         }
 
         /// <summary>
@@ -196,7 +195,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="userID">The ID of the user.</param>
         /// <returns>true if the user is a participant; otherwise, false.</returns>
         [Pure]
-        public bool HasJoined(long userID)
+        public bool HasJoined(Snowflake userID)
         {
             return this.JoinedUsers.Any(p => p.User.DiscordID == userID);
         }
@@ -220,7 +219,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         [Pure]
         public bool IsInvited(IUser user)
         {
-            return IsInvited((long)user.Id);
+            return IsInvited(user.ID);
         }
 
         /// <summary>
@@ -229,7 +228,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="userID">The ID of the user.</param>
         /// <returns>true if the user is invited; otherwise, false.</returns>
         [Pure]
-        public bool IsInvited(long userID)
+        public bool IsInvited(Snowflake userID)
         {
             return this.InvitedUsers.Any(iu => iu.User.DiscordID == userID);
         }
@@ -253,7 +252,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         [Pure]
         public bool IsKicked(IUser user)
         {
-            return IsKicked((long)user.Id);
+            return IsKicked(user.ID);
         }
 
         /// <summary>
@@ -262,7 +261,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <param name="userID">The ID of the user.</param>
         /// <returns>true if the user is kicked; otherwise, false.</returns>
         [Pure]
-        public bool IsKicked(long userID)
+        public bool IsKicked(Snowflake userID)
         {
             return this.KickedUsers.Any(ku => ku.User.DiscordID == userID);
         }

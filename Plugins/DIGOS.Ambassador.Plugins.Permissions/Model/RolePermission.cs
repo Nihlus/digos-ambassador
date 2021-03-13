@@ -30,7 +30,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
     /// <summary>
     /// Represents a record of a permission associated with a role.
     /// </summary>
-    [PublicAPI]
     [Table("RolePermissions", Schema = "PermissionModule")]
     public class RolePermission : EFEntity
     {

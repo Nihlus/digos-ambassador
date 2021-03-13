@@ -34,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
     /// <summary>
     /// Represents the database model of the core plugin.
     /// </summary>
-    [PublicAPI]
     public class CoreDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "Core";

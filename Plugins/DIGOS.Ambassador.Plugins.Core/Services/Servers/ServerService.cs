@@ -38,7 +38,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
     /// <summary>
     /// Handles modification of server settings.
     /// </summary>
-    [PublicAPI]
     public sealed class ServerService
     {
         private readonly CoreDatabaseContext _database;

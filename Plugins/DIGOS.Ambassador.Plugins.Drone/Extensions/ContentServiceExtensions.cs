@@ -30,7 +30,6 @@ namespace DIGOS.Ambassador.Plugins.Drone.Extensions
     /// <summary>
     /// Extension methods for the <see cref="ContentService"/> class.
     /// </summary>
-    [PublicAPI]
     public static class ContentServiceExtensions
     {
         /// <summary>

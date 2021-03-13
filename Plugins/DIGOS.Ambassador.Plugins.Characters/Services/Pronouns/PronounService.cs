@@ -35,7 +35,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides access to pronouns.
     /// </summary>
-    [PublicAPI]
     public sealed class PronounService
     {
         private readonly Dictionary<string, IPronounProvider> _pronounProviders;

@@ -28,7 +28,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Servers
     /// <summary>
     /// Represents an EF entity unique to a server.
     /// </summary>
-    [PublicAPI]
     public interface IServerEntity : IEFEntity
     {
         /// <summary>

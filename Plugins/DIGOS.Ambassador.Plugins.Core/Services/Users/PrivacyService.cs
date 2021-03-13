@@ -42,7 +42,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Users
     /// <summary>
     /// Handles privacy-related logic.
     /// </summary>
-    [PublicAPI]
     public sealed class PrivacyService
     {
         private readonly CoreDatabaseContext _database;

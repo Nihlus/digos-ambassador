@@ -8,7 +8,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Humanizer.Core" Version="2.8.26" />
         <PackageReference Include="iTextSharp.LGPLv2.Core" Version="1.6.8" />
+        <PackageReference Include="Remora.Behaviours" Version="6.0.1" />
     </ItemGroup>
 
     <!-- Workaround for a problem with EF Core -->

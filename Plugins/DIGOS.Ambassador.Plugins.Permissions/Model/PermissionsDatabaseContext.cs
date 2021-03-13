@@ -31,7 +31,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
-    [PublicAPI]
     public class PermissionsDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "PermissionModule";

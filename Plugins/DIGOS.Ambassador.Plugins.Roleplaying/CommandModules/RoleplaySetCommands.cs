@@ -20,16 +20,18 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.ComponentModel;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
-using DIGOS.Ambassador.Plugins.Roleplaying.Permissions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
-using Discord.Commands;
 using JetBrains.Annotations;
-using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.Commands.Conditions;
+using Remora.Results;
+using UserMessage = DIGOS.Ambassador.Discord.Feedback.Results.UserMessage;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -42,7 +44,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Group("set")]
-        public class SetCommands : ModuleBase
+        public class SetCommands : CommandGroup
         {
             private readonly RoleplayDiscordService _discordRoleplays;
             private readonly DedicatedChannelService _dedicatedChannels;
@@ -69,12 +71,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
             [Command("name")]
-            [Summary("Sets the new name of the named roleplay.")]
-            [RequireContext(ContextType.Guild)]
-            public async Task<RuntimeResult> SetRoleplayNameAsync
+            [Description("Sets the new name of the named roleplay.")]
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<Result<UserMessage>> SetRoleplayNameAsync
             (
                 string newRoleplayName,
-                [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
+                [RequireEntityOwner]
                 Roleplay roleplay
             )
             {
@@ -86,24 +88,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 if (!result.IsSuccess)
                 {
-                    return result.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(result);
                 }
 
                 var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync
-                (
-                    this.Context.Guild,
-                    roleplay
+                (roleplay
                 );
 
                 if (!getDedicatedChannelResult.IsSuccess)
                 {
-                    return RuntimeCommandResult.FromSuccess("Roleplay name set.");
+                    return new ConfirmationMessage("Roleplay name set.");
                 }
 
                 var dedicatedChannel = getDedicatedChannelResult.Entity;
                 await dedicatedChannel.ModifyAsync(p => p.Name = $"{roleplay.Name}-rp");
 
-                return RuntimeCommandResult.FromSuccess("Roleplay name set.");
+                return new ConfirmationMessage("Roleplay name set.");
             }
 
             /// <summary>
@@ -113,22 +113,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
             [Command("summary")]
-            [Summary("Sets the summary of the named roleplay.")]
-            [RequireContext(ContextType.Guild)]
-            public async Task<RuntimeResult> SetRoleplaySummaryAsync
+            [Description("Sets the summary of the named roleplay.")]
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<Result<UserMessage>> SetRoleplaySummaryAsync
             (
                 string newRoleplaySummary,
-                [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
+                [RequireEntityOwner]
                 Roleplay roleplay
             )
             {
                 var result = await _discordRoleplays.SetRoleplaySummaryAsync(roleplay, newRoleplaySummary);
                 if (!result.IsSuccess)
                 {
-                    return result.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(result);
                 }
 
-                return RuntimeCommandResult.FromSuccess("Roleplay summary set.");
+                return new ConfirmationMessage("Roleplay summary set.");
             }
 
             /// <summary>
@@ -139,22 +139,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
             [Command("nsfw")]
-            [Summary("Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.")]
-            [RequireContext(ContextType.Guild)]
-            public async Task<RuntimeResult> SetRoleplayIsNSFW
+            [Description("Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.")]
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<Result<UserMessage>> SetRoleplayIsNSFW
             (
                 bool isNSFW,
-                [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
+                [RequireEntityOwner]
                 Roleplay roleplay
             )
             {
                 var result = await _discordRoleplays.SetRoleplayIsNSFWAsync(roleplay, isNSFW);
                 if (!result.IsSuccess)
                 {
-                    return result.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(result);
                 }
 
-                return RuntimeCommandResult.FromSuccess($"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}");
+                return new ConfirmationMessage($"Roleplay set to {(isNSFW ? "NSFW" : "SFW")}");
             }
 
             /// <summary>
@@ -164,12 +164,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
             [Command("private")]
-            [Summary("Sets a value indicating whether or not the named roleplay is private. This restricts replays to participants.")]
-            [RequireContext(ContextType.Guild)]
-            public Task<RuntimeResult> SetRoleplayIsPrivate
+            [Description("Sets a value indicating whether or not the named roleplay is private. This restricts replays to participants.")]
+            [RequireContext(ChannelContext.Guild)]
+            public Task<Result<UserMessage>> SetRoleplayIsPrivate
             (
                 bool isPrivate,
-                [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
+                [RequireEntityOwner]
                 Roleplay roleplay
             )
                 => SetRoleplayIsPublic(!isPrivate, roleplay);
@@ -182,37 +182,35 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
             [Command("public")]
-            [Summary("Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.")]
-            [RequireContext(ContextType.Guild)]
-            public async Task<RuntimeResult> SetRoleplayIsPublic
+            [Description("Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.")]
+            [RequireContext(ChannelContext.Guild)]
+            public async Task<Result<UserMessage>> SetRoleplayIsPublic
             (
                 bool isPublic,
-                [RequireEntityOwnerOrPermission(typeof(EditRoleplay), PermissionTarget.Other)]
+                [RequireEntityOwner]
                 Roleplay roleplay
             )
             {
                 var result = await _discordRoleplays.SetRoleplayIsPublicAsync(roleplay, isPublic);
                 if (!result.IsSuccess)
                 {
-                    return result.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(result);
                 }
 
                 var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync
-                (
-                    this.Context.Guild,
-                    roleplay
+                (roleplay
                 );
 
                 if (!getDedicatedChannelResult.IsSuccess)
                 {
-                    return RuntimeCommandResult.FromSuccess
+                    return new ConfirmationMessage
                     (
                         $"Roleplay set to {(isPublic ? "public" : "private")}"
                     );
                 }
 
                 var dedicatedChannel = getDedicatedChannelResult.Entity;
-                var everyoneRole = this.Context.Guild.EveryoneRole;
+                var everyoneRole = _context.Guild.EveryoneRole;
 
                 var setVisibility = await _dedicatedChannels.SetChannelVisibilityForRoleAsync
                 (
@@ -223,10 +221,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 if (!setVisibility.IsSuccess)
                 {
-                    return setVisibility.ToRuntimeResult();
+                    return Result<UserMessage>.FromError(setVisibility);
                 }
 
-                return RuntimeCommandResult.FromSuccess
+                return new ConfirmationMessage
                 (
                     $"Roleplay set to {(isPublic ? "public" : "private")}"
                 );

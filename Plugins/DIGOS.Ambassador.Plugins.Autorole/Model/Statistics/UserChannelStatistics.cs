@@ -30,7 +30,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics
     /// <summary>
     /// Represents a set of per-channel statistics for a user in a server.
     /// </summary>
-    [PublicAPI]
     [Table("UserChannelStatistics", Schema = "AutoroleModule")]
     public class UserChannelStatistics : EFEntity
     {

@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides shi and hir pronouns.
     /// </summary>
-    [PublicAPI]
     public class ShiHirPronounProvider : PronounProvider
     {
         /// <inheritdoc />

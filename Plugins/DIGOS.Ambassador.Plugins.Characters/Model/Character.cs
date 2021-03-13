@@ -38,7 +38,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
     /// <summary>
     /// Represents a user's character.
     /// </summary>
-    [PublicAPI]
     [Table("Characters", Schema = "CharacterModule")]
     public class Character : EFEntity, IOwnedNamedEntity, IServerEntity
     {

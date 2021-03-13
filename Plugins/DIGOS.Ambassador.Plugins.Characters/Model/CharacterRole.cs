@@ -33,7 +33,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
     /// <summary>
     /// Represents a role associated with a character, similar to a nickname.
     /// </summary>
-    [PublicAPI]
     [Table("CharacterRoles", Schema = "CharacterModule")]
     public class CharacterRole : EFEntity, IServerEntity
     {

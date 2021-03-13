@@ -25,20 +25,16 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
-using DIGOS.Ambassador.Discord.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
-using Discord;
-using Discord.Net;
-using Discord.WebSocket;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Remora.Discord.Behaviours;
+using Remora.Behaviours.Bases;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
@@ -47,7 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     /// Continuously archives old roleplays.
     /// </summary>
     [UsedImplicitly]
-    public class RoleplayArchivalBehaviour : ContinuousDiscordBehaviour<RoleplayArchivalBehaviour>
+    public class RoleplayArchivalBehaviour : ContinuousBehaviour<RoleplayArchivalBehaviour>
     {
         private readonly UserFeedbackService _feedback;
 
@@ -66,18 +62,17 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <param name="feedback">The feedback service.</param>
         public RoleplayArchivalBehaviour
         (
-            DiscordSocketClient client,
             IServiceProvider services,
             ILogger<RoleplayArchivalBehaviour> logger,
             UserFeedbackService feedback
         )
-            : base(client, services, logger)
+            : base(services, logger)
         {
             _feedback = feedback;
         }
 
         /// <inheritdoc />
-        protected override async Task<OperationResult> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
+        protected override async Task<Result> OnTickAsync(CancellationToken ct, IServiceProvider tickServices)
         {
             var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
             var serverService = tickServices.GetRequiredService<ServerService>();
@@ -88,7 +83,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             {
                 if (ct.IsCancellationRequested)
                 {
-                    return OperationResult.FromError("Operation was cancelled.");
+                    return new UserError("Operation was cancelled.");
                 }
 
                 var getGuildRoleplays = await roleplayService.GetRoleplaysAsync(guild);
@@ -109,7 +104,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 {
                     if (ct.IsCancellationRequested)
                     {
-                        return OperationResult.FromError("Operation was cancelled.");
+                        return new UserError("Operation was cancelled.");
                     }
 
                     // We'll use a transaction per warning to avoid timeouts
@@ -132,23 +127,23 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
 
                     if (!archiveResult.IsSuccess)
                     {
-                        return OperationResult.FromError(archiveResult);
+                        return Result.FromError(archiveResult);
                     }
 
                     var notifyResult = await NotifyOwnerAsync(roleplay);
                     if (!notifyResult.IsSuccess)
                     {
-                        return OperationResult.FromError(notifyResult);
+                        return Result.FromError(notifyResult);
                     }
 
                     archivalTransaction.Complete();
                 }
             }
 
-            return OperationResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
-        private async Task<OperationResult> ArchiveRoleplayAsync
+        private async Task<Result> ArchiveRoleplayAsync
         (
             SocketGuild guild,
             ServerService serverService,
@@ -160,7 +155,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         {
             if (roleplay.DedicatedChannelID is null)
             {
-                return OperationResult.FromError("The roleplay doesn't have a dedicated channel.");
+                return new UserError("The roleplay doesn't have a dedicated channel.");
             }
 
             if (roleplay.IsPublic)
@@ -168,7 +163,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 var postResult = await PostArchivedRoleplayAsync(guild, serverService, serverSettings, roleplay);
                 if (!postResult.IsSuccess)
                 {
-                    return OperationResult.FromError(postResult);
+                    return Result.FromError(postResult);
                 }
             }
 
@@ -179,7 +174,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 // on the safe side.
                 await dedicatedChannels.DeleteChannelAsync(guild, roleplay);
 
-                return OperationResult.FromSuccess();
+                return Result.FromSuccess();
             }
 
             // Ensure the messages are all caught up
@@ -195,7 +190,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             }
 
             await dedicatedChannels.DeleteChannelAsync(guild, roleplay);
-            return OperationResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -206,7 +201,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <param name="serverSettings">The server settings service.</param>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task<OperationResult> PostArchivedRoleplayAsync
+        private async Task<Result> PostArchivedRoleplayAsync
         (
             SocketGuild guild,
             ServerService serverService,
@@ -217,7 +212,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             var getServer = await serverService.GetOrRegisterServerAsync(guild);
             if (!getServer.IsSuccess)
             {
-                return OperationResult.FromError(getServer);
+                return Result.FromError(getServer);
             }
 
             var server = getServer.Entity;
@@ -225,20 +220,20 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             var getSettings = await serverSettings.GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettings.IsSuccess)
             {
-                return OperationResult.FromError(getSettings);
+                return Result.FromError(getSettings);
             }
 
             var settings = getSettings.Entity;
 
             if (settings.ArchiveChannel is null)
             {
-                return OperationResult.FromError("No archive channel has been set.");
+                return new UserError("No archive channel has been set.");
             }
 
             var archiveChannel = guild.GetTextChannel((ulong)settings.ArchiveChannel);
             if (archiveChannel is null)
             {
-                return OperationResult.FromError("Failed to get the archive channel. Deleted?");
+                return new UserError("Failed to get the archive channel. Deleted?");
             }
 
             var exporter = new PDFRoleplayExporter(guild);
@@ -257,7 +252,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 embed: eb.Build()
             );
 
-            return OperationResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -265,12 +260,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// </summary>
         /// <param name="roleplay">The roleplay.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task<OperationResult> NotifyOwnerAsync(Roleplay roleplay)
+        private async Task<Result> NotifyOwnerAsync(Roleplay roleplay)
         {
             var owner = this.Client.GetUser((ulong)roleplay.Owner.DiscordID);
             if (owner is null)
             {
-                return OperationResult.FromError("Could not retrieve the owner of the roleplay.");
+                return new UserError("Could not retrieve the owner of the roleplay.");
             }
 
             var notification = _feedback.CreateEmbedBase();
@@ -297,7 +292,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
                 // Nom nom nom
             }
 
-            return OperationResult.FromSuccess();
+            return Result.FromSuccess();
         }
     }
 }

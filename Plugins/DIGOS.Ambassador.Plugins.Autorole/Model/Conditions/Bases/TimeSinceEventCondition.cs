@@ -29,7 +29,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases
     /// Represents an abstract condition requiring a set amount of time to have passed since an event.
     /// </summary>
     /// <typeparam name="TActualCondition">The actual condition.</typeparam>
-    [PublicAPI]
     public abstract class TimeSinceEventCondition<TActualCondition> : AutoroleCondition
         where TActualCondition : TimeSinceEventCondition<TActualCondition>
     {

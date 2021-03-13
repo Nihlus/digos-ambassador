@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides singular they pronouns.
     /// </summary>
-    [PublicAPI]
     public class TheyPronounProvider : PronounProvider
     {
         /// <inheritdoc />

@@ -36,7 +36,6 @@ namespace DIGOS.Ambassador.Plugins.Amby
     /// <summary>
     /// Describes the Amby plugin.
     /// </summary>
-    [PublicAPI]
     public sealed class AmbyPlugin : PluginDescriptor
     {
         /// <inheritdoc />

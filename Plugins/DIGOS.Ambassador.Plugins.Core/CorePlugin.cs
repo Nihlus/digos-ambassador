@@ -54,7 +54,6 @@ namespace DIGOS.Ambassador.Plugins.Core
     /// <summary>
     /// Describes the plugin containing core functionality.
     /// </summary>
-    [PublicAPI]
     public sealed class CorePlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />

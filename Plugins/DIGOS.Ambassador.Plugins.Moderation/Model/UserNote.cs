@@ -35,7 +35,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
     /// <summary>
     /// Represents a short note about a user.
     /// </summary>
-    [PublicAPI]
     [Table("UserNotes", Schema = "ModerationModule")]
     public class UserNote : AuthoredUserEntity
     {

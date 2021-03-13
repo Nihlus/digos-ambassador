@@ -36,7 +36,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
     /// <summary>
     /// Represents the database model of the dossier plugin.
     /// </summary>
-    [PublicAPI]
     public class ModerationDatabaseContext : SchemaAwareDbContext
     {
         private const string SchemaName = "ModerationModule";

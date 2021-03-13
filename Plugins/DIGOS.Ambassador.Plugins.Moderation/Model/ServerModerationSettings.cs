@@ -34,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
     /// <summary>
     /// Represents settings for a Discord server.
     /// </summary>
-    [PublicAPI]
     [Table("ServerModerationSettings", Schema = "ModerationModule")]
     public class ServerModerationSettings : EFEntity
     {

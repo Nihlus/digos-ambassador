@@ -28,29 +28,25 @@ namespace DIGOS.Ambassador.Doc.Abstractions
     /// <summary>
     /// Tags an assembly with placeholder data for a given data type.
     /// </summary>
-    [PublicAPI]
     [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
     public class PlaceholderDataAttribute : Attribute
     {
         /// <summary>
         /// Gets the data type that the placeholder data is for.
         /// </summary>
-        [PublicAPI]
-        public Type DataType { get; }
+            public Type DataType { get; }
 
         /// <summary>
         /// Gets the placeholder data.
         /// </summary>
-        [PublicAPI]
-        public string[] Placeholders { get; }
+            public string[] Placeholders { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlaceholderDataAttribute"/> class.
         /// </summary>
         /// <param name="dataType">The data type the placeholder data is for.</param>
         /// <param name="placeholders">The placeholder data.</param>
-        [PublicAPI]
-        public PlaceholderDataAttribute(Type dataType, params string[] placeholders)
+            public PlaceholderDataAttribute(Type dataType, params string[] placeholders)
         {
             this.DataType = dataType;
             this.Placeholders = placeholders;

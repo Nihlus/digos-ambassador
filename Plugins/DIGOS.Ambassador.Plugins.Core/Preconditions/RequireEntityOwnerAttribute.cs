@@ -28,7 +28,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Preconditions
     /// <summary>
     /// Marks an entity parameter, limiting their use to their owner.
     /// </summary>
-    [PublicAPI]
     public class RequireEntityOwnerAttribute : ConditionAttribute
     {
     }

@@ -36,7 +36,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
     /// <summary>
     /// Represents a warning attached to a user.
     /// </summary>
-    [PublicAPI]
     [Table("UserWarnings", Schema = "ModerationModule")]
     public class UserWarning : AuthoredUserEntity
     {

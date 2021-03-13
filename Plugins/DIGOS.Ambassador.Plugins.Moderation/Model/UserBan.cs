@@ -36,7 +36,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
     /// <summary>
     /// Represents a ban of a user.
     /// </summary>
-    [PublicAPI]
     [Table("UserBans", Schema = "ModerationModule")]
     public class UserBan : AuthoredUserEntity
     {

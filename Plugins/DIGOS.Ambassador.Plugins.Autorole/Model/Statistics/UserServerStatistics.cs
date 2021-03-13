@@ -33,7 +33,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Statistics
     /// <summary>
     /// Represents a set of per-server statistics for a user.
     /// </summary>
-    [PublicAPI]
     [Table("UserServerStatistics", Schema = "AutoroleModule")]
     public class UserServerStatistics : EFEntity
     {

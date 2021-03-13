@@ -30,7 +30,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
     /// Represents an entity that is owned by a user, and has a unique name within the context of that user. The name
     /// is case-insensitive.
     /// </summary>
-    [PublicAPI]
     public interface IOwnedNamedEntity : IOwnedEntity
     {
         /// <summary>

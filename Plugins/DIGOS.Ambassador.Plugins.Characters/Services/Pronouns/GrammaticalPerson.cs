@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// The grammatical person of a form.
     /// </summary>
-    [PublicAPI]
     public enum GrammaticalPerson
     {
         /// <summary>

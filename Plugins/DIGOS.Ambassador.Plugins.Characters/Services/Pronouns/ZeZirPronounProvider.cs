@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides ze and zir pronouns.
     /// </summary>
-    [PublicAPI]
     public class ZeZirPronounProvider : PronounProvider
     {
         /// <inheritdoc />

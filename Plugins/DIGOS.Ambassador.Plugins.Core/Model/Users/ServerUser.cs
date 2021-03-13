@@ -32,7 +32,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
     /// <summary>
     /// Represents a join table entry for a server-user mapping.
     /// </summary>
-    [PublicAPI]
     [Table("ServerUser", Schema = "Core")]
     public class ServerUser : EFEntity
     {

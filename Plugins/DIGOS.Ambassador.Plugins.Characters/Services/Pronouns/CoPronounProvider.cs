@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides co pronouns.
     /// </summary>
-    [PublicAPI]
     public class CoPronounProvider : PronounProvider
     {
         /// <inheritdoc />

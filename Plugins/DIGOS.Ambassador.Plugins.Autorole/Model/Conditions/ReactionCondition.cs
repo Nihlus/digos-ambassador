@@ -37,7 +37,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model.Conditions
     /// <summary>
     /// Represents a required reaction to a message.
     /// </summary>
-    [PublicAPI]
     public class ReactionCondition : AutoroleCondition
     {
         /// <summary>

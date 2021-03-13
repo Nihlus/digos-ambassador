@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Holds different forms that a pronoun can have.
     /// </summary>
-    [PublicAPI]
     public enum PronounForm
     {
         /// <summary>

@@ -38,7 +38,6 @@ namespace DIGOS.Ambassador.Discord.Feedback
     /// <summary>
     /// Handles sending formatted messages to the users.
     /// </summary>
-    [PublicAPI]
     public class UserFeedbackService
     {
         private IDiscordRestChannelAPI _channelAPI;

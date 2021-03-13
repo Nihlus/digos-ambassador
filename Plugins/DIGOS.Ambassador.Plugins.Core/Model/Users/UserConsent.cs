@@ -29,7 +29,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Users
     /// <summary>
     /// Holds information about whether or not a user has granted consent to store user data.
     /// </summary>
-    [PublicAPI]
     [Table("UserConsents", Schema = "Core")]
     public class UserConsent : EFEntity
     {

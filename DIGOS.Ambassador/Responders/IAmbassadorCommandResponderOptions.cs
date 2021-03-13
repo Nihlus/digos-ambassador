@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Responders
     /// <summary>
     /// Represents a read-only view of command responder options.
     /// </summary>
-    [PublicAPI]
     public interface IAmbassadorCommandResponderOptions
     {
         /// <summary>

@@ -29,7 +29,6 @@ namespace DIGOS.Ambassador.Plugins.Core.Permissions
     /// <summary>
     /// Represents a permission that allows a user to view user information.
     /// </summary>
-    [PublicAPI]
     public sealed class ShowUserInfo : Permission
     {
         /// <inheritdoc />

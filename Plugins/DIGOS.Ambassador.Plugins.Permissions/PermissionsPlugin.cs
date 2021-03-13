@@ -50,7 +50,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions
     /// <summary>
     /// Describes the permission plugin.
     /// </summary>
-    [PublicAPI]
     public sealed class PermissionsPlugin : PluginDescriptor, IMigratablePlugin
     {
         /// <inheritdoc />

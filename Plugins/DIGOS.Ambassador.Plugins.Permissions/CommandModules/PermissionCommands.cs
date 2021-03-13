@@ -47,7 +47,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
     /// <summary>
     /// Permission-related commands for granting, revoking and checking user permissions.
     /// </summary>
-    [PublicAPI]
     [Group("permission")]
     [Description("Permission-related commands for granting, revoking and checking user permissions.")]
     public class PermissionCommands : CommandGroup

@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Provides variant Spivak pronouns.
     /// </summary>
-    [PublicAPI]
     public class SpivakVariantPronounProvider : ElversonPronounProvider
     {
         /// <inheritdoc />

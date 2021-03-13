@@ -27,7 +27,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services.Pronouns
     /// <summary>
     /// Represents a pronoun in its different forms.
     /// </summary>
-    [PublicAPI]
     public interface IPronounProvider
     {
         /// <summary>

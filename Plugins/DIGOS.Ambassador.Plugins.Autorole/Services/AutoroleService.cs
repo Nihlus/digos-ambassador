@@ -43,7 +43,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Services
     /// <summary>
     /// Handles business logic for autoroles.
     /// </summary>
-    [PublicAPI]
     public sealed class AutoroleService
     {
         private readonly AutoroleDatabaseContext _database;

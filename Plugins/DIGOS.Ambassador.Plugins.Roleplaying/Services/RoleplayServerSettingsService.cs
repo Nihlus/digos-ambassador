@@ -23,11 +23,12 @@
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
-using Discord;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
@@ -35,7 +36,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// <summary>
     /// Business logic for server-specific roleplay settings.
     /// </summary>
-    [PublicAPI]
     public class RoleplayServerSettingsService
     {
         private readonly RoleplayingDatabaseContext _database;
@@ -54,10 +54,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// </summary>
         /// <param name="server">The server.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<ServerRoleplaySettings>> GetOrCreateServerRoleplaySettingsAsync
-        (
-            Server server
-        )
+        public async Task<Result<ServerRoleplaySettings>> GetOrCreateServerRoleplaySettingsAsync(Server server)
         {
             var settings = await _database.ServerSettings.ServersideQueryAsync
             (
@@ -83,113 +80,83 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// Sets the channel to use for archived roleplays.
         /// </summary>
         /// <param name="server">The server.</param>
-        /// <param name="channel">The channel to use.</param>
+        /// <param name="channelID">The channel to use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetArchiveChannelAsync
+        public async Task<Result> SetArchiveChannelAsync
         (
             Server server,
-            ITextChannel? channel
+            Snowflake? channelID
         )
         {
             var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettingsResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getSettingsResult);
+                return Result.FromError(getSettingsResult);
             }
 
             var settings = getSettingsResult.Entity;
+            settings.ArchiveChannel = channelID;
 
-            long? channelId;
-            if (channel?.Id is null)
-            {
-                channelId = null;
-            }
-            else
-            {
-                channelId = (long)channel.Id;
-            }
-
-            settings.ArchiveChannel = channelId;
             await _database.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Sets the role to use as a default @everyone role.
         /// </summary>
         /// <param name="server">The server.</param>
-        /// <param name="role">The role to use.</param>
+        /// <param name="roleID">The role to use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetDefaultUserRoleAsync
+        public async Task<Result> SetDefaultUserRoleAsync
         (
             Server server,
-            IRole? role
+            Snowflake? roleID
         )
         {
             var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettingsResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getSettingsResult);
+                return Result.FromError(getSettingsResult);
             }
 
             var settings = getSettingsResult.Entity;
 
-            long? roleId;
-            if (role?.Id is null)
+            if (settings.DefaultUserRole == roleID)
             {
-                roleId = null;
-            }
-            else
-            {
-                roleId = (long)role.Id;
+                return new UserError("That's already the default user role.");
             }
 
-            if (settings.DefaultUserRole == roleId)
-            {
-                return ModifyEntityResult.FromError("That's already the default user role.");
-            }
-
-            settings.DefaultUserRole = roleId;
+            settings.DefaultUserRole = roleID;
             await _database.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Sets the channel category to use for dedicated roleplay channels.
         /// </summary>
         /// <param name="server">The server.</param>
-        /// <param name="category">The category to use.</param>
+        /// <param name="categoryID">The category to use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
-        public async Task<ModifyEntityResult> SetDedicatedChannelCategoryAsync
+        public async Task<Result> SetDedicatedChannelCategoryAsync
         (
             Server server,
-            ICategoryChannel? category
+            Snowflake? categoryID
         )
         {
             var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
             if (!getSettingsResult.IsSuccess)
             {
-                return ModifyEntityResult.FromError(getSettingsResult);
+                return Result.FromError(getSettingsResult);
             }
 
             var settings = getSettingsResult.Entity;
+            settings.DedicatedRoleplayChannelsCategory = categoryID;
 
-            long? categoryId;
-            if (category?.Id is null)
-            {
-                categoryId = null;
-            }
-            else
-            {
-                categoryId = (long)category.Id;
-            }
-
-            settings.DedicatedRoleplayChannelsCategory = categoryId;
             await _database.SaveChangesAsync();
 
-            return ModifyEntityResult.FromSuccess();
+            return Result.FromSuccess();
         }
     }
 }

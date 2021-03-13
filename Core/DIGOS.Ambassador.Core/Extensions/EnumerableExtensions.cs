@@ -33,7 +33,6 @@ namespace DIGOS.Ambassador.Core.Extensions
     /// <summary>
     /// Extensions for enumerables.
     /// </summary>
-    [PublicAPI]
     public static class EnumerableExtensions
     {
         /// <summary>

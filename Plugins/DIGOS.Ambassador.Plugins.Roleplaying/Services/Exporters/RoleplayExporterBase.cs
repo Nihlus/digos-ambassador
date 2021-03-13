@@ -22,7 +22,7 @@
 
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
-using Discord;
+using Remora.Discord.API.Abstractions.Objects;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
 {

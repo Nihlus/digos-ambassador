@@ -26,6 +26,7 @@ using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Core.Database.Entities;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
@@ -33,7 +34,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
     /// <summary>
     /// Represents server-specific settings related to the roleplaying module.
     /// </summary>
-    [PublicAPI]
     [Table("ServerSettings", Schema = "RoleplayModule")]
     public class ServerRoleplaySettings : EFEntity
     {
@@ -46,12 +46,12 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// <summary>
         /// Gets the channel category generated roleplay channels should be created under.
         /// </summary>
-        public long? DedicatedRoleplayChannelsCategory { get; internal set; }
+        public Snowflake? DedicatedRoleplayChannelsCategory { get; internal set; }
 
         /// <summary>
         /// Gets the channel that archived roleplays are exported to.
         /// </summary>
-        public long? ArchiveChannel { get; internal set; }
+        public Snowflake? ArchiveChannel { get; internal set; }
 
         /// <summary>
         /// Gets the default user role; that is, the role that all valid users on the server should have. Typically,
@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         /// default role after some condition is met. This allows those servers to override the standard @everyone role
         /// used for dynamic roleplay channels.
         /// </summary>
-        public long? DefaultUserRole { get; internal set; }
+        public Snowflake? DefaultUserRole { get; internal set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ServerRoleplaySettings"/> class.

@@ -31,7 +31,6 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
     /// <summary>
     /// Represents a set of server-specific autorole settings.
     /// </summary>
-    [PublicAPI]
     public class AutoroleServerSettings : EFEntity
     {
         /// <summary>

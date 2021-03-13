@@ -23,10 +23,9 @@
 using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
-using Discord;
-using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Discord.Commands.Contexts;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
 {
@@ -34,7 +33,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
     /// Restricts the usage of a command to the owner of the currently active roleplay. Furthermore, it also requires a
     /// roleplay to be current.
     /// </summary>
-    [PublicAPI]
     public class RequireActiveRoleplayAttribute : PreconditionAttribute
     {
         private readonly bool _requireOwner;
@@ -56,9 +54,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
             IServiceProvider services
         )
         {
-            if (!(context.Channel is ITextChannel textChannel))
+            if (!(context.Channel is IChannel textChannel))
             {
-                return PreconditionResult.FromError("The channel was not a text channel.");
+                return Preconditionnew UserError("The channel was not a text channel.");
             }
 
             var roleplayService = services.GetRequiredService<RoleplayDiscordService>();
@@ -77,7 +75,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
             var roleplay = result.Entity;
             if (roleplay.Owner.DiscordID != (long)context.User.Id)
             {
-                return PreconditionResult.FromError("Only the roleplay owner can do that.");
+                return Preconditionnew UserError("Only the roleplay owner can do that.");
             }
 
             return PreconditionResult.FromSuccess();

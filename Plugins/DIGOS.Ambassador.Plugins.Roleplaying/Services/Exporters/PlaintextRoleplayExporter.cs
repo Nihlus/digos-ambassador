@@ -24,8 +24,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
-using Discord;
 using MoreLinq.Extensions;
+using Remora.Discord.API.Abstractions.Objects;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
 {

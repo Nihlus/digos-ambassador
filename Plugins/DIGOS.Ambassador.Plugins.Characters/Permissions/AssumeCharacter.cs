@@ -29,7 +29,6 @@ namespace DIGOS.Ambassador.Plugins.Characters.Permissions
     /// <summary>
     /// Represents a permission that allows a user to assume characters.
     /// </summary>
-    [PublicAPI]
     public sealed class AssumeCharacter : Permission
     {
         /// <inheritdoc />

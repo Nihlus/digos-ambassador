@@ -21,15 +21,16 @@
 //
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Plugins.Core.TypeReaders;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
-using Discord;
-using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Remora.Commands.Parsers;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
@@ -38,36 +39,36 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
     /// Reads owned roleplays as command arguments. The name "current" is reserved, and will retrieve the current
     /// roleplay.
     /// </summary>
-    [PublicAPI]
-    public sealed class RoleplayTypeReader : OwnedEntityTypeReader<Roleplay>
+    public sealed class RoleplayParser : AbstractTypeParser<Roleplay>
     {
-        /// <inheritdoc />
-        protected override async Task<RetrieveEntityResult<Roleplay>> RetrieveEntityAsync
-        (
-            IUser? entityOwner,
-            string? entityName,
-            ICommandContext context,
-            IServiceProvider services
-        )
+        private readonly RoleplayDiscordService _roleplays;
+        private readonly ICommandContext _context;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleplayParser"/> class.
+        /// </summary>
+        /// <param name="roleplays"></param>
+        /// <param name="context">The command context.</param>
+        public RoleplayParser(RoleplayDiscordService roleplays, ICommandContext context)
         {
-            var roleplayService = services.GetRequiredService<RoleplayDiscordService>();
+            _roleplays = roleplays;
+            _context = context;
+        }
 
-            if (!(context.Channel is ITextChannel textChannel))
+        /// <inheritdoc />
+        public override async ValueTask<Result<Roleplay>> TryParse(string value, CancellationToken ct)
+        {
+            if (!value.IsNullOrWhitespace() && string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
             {
-                return RetrieveEntityResult<Roleplay>.FromError("The channel was not a text channel.");
+                return await _roleplays.GetActiveRoleplayAsync(_context.ChannelID);
             }
 
-            if (!entityName.IsNullOrWhitespace() && string.Equals(entityName, "current", StringComparison.OrdinalIgnoreCase))
-            {
-                return await roleplayService.GetActiveRoleplayAsync(textChannel);
-            }
-
-            return await roleplayService.GetBestMatchingRoleplayAsync
+            return await _roleplays.GetBestMatchingRoleplayAsync
             (
-                (ITextChannel)context.Channel,
-                context.Guild,
-                entityOwner,
-                entityName
+                _context.ChannelID,
+                _context.GuildID.Value,
+                _context.User.ID,
+                value
             );
         }
     }

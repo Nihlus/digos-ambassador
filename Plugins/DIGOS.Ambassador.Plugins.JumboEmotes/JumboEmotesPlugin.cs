@@ -37,7 +37,6 @@ namespace DIGOS.Ambassador.Plugins.JumboEmotes
     /// <summary>
     /// Describes the JumboEmotes plugin.
     /// </summary>
-    [PublicAPI]
     public sealed class JumboEmotesPlugin : PluginDescriptor
     {
         /// <inheritdoc />
