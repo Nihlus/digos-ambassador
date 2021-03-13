@@ -33,5 +33,15 @@ namespace DIGOS.Ambassador.Plugins.Core.Services
         /// Gets the ID of the bot.
         /// </summary>
         public Snowflake ID { get; internal set; }
+
+        /// <summary>
+        /// Gets the application ID of the bot.
+        /// </summary>
+        public Snowflake ApplicationID { get; internal set; }
+
+        /// <summary>
+        /// Gets the ID of the bot's owner.
+        /// </summary>
+        public Snowflake OwnerID { get; internal set; }
     }
 }
