@@ -27,14 +27,11 @@ using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
-using DIGOS.Ambassador.Plugins.Autorole.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
-using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
-using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -47,105 +44,83 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public partial class AutoroleConditionCommands
         {
             /// <summary>
-            /// Contains commands for adding or modifying a condition based on a certain number of messages in a
-            /// channel.
+            /// Adds an instance of the condition to the role.
             /// </summary>
-            [Group("total-messages-in")]
-            public class MessageCountInChannelConditionCommands : CommandGroup
+            /// <param name="autorole">The autorole configuration.</param>
+            /// <param name="channel">The Discord channel.</param>
+            /// <param name="count">The message count.</param>
+            [UsedImplicitly]
+            [Command("add-total-messages-in")]
+            [Description("Adds an instance of the condition to the role.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> AddConditionAsync
+            (
+                AutoroleConfiguration autorole,
+                IChannel channel,
+                long count
+            )
             {
-                private readonly AutoroleService _autoroles;
-                private readonly ICommandContext _context;
+                var condition = _autoroles.CreateConditionProxy<MessageCountInChannelCondition>(channel, count)
+                                ?? throw new InvalidOperationException();
 
-                /// <summary>
-                /// Initializes a new instance of the <see cref="MessageCountInChannelConditionCommands"/> class.
-                /// </summary>
-                /// <param name="autoroles">The autorole service.</param>
-                /// <param name="context">The command context.</param>
-                public MessageCountInChannelConditionCommands(AutoroleService autoroles, ICommandContext context)
+                var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
+                if (!addCondition.IsSuccess)
                 {
-                    _autoroles = autoroles;
-                    _context = context;
+                    return Result<UserMessage>.FromError(addCondition);
                 }
 
-                /// <summary>
-                /// Adds an instance of the condition to the role.
-                /// </summary>
-                /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="channel">The Discord channel.</param>
-                /// <param name="count">The message count.</param>
-                [UsedImplicitly]
-                [Command("set")]
-                [Description("Adds an instance of the condition to the role.")]
-                [RequireContext(ChannelContext.Guild)]
-                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<Result<UserMessage>> AddConditionAsync
+                return new ConfirmationMessage("Condition added.");
+            }
+
+            /// <summary>
+            /// Modifies an instance of the condition on the role.
+            /// </summary>
+            /// <param name="autorole">The autorole configuration.</param>
+            /// <param name="conditionID">The ID of the condition.</param>
+            /// <param name="channel">The Discord channel.</param>
+            /// <param name="count">The message count.</param>
+            [UsedImplicitly]
+            [Command("set-total-messages-in")]
+            [Description("Modifies an instance of the condition on the role.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> ModifyConditionAsync
+            (
+                AutoroleConfiguration autorole,
+                long conditionID,
+                IChannel channel,
+                long count
+            )
+            {
+                var getCondition = _autoroles.GetCondition<MessageCountInChannelCondition>
                 (
-                    AutoroleConfiguration autorole,
-                    IChannel channel,
-                    long count
-                )
+                    autorole,
+                    conditionID
+                );
+
+                if (!getCondition.IsSuccess)
                 {
-                    var condition = _autoroles.CreateConditionProxy<MessageCountInChannelCondition>(channel, count)
-                        ?? throw new InvalidOperationException();
-
-                    var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
-                    if (!addCondition.IsSuccess)
-                    {
-                        return Result<UserMessage>.FromError(addCondition);
-                    }
-
-                    return new ConfirmationMessage("Condition added.");
+                    return Result<UserMessage>.FromError(getCondition);
                 }
 
-                /// <summary>
-                /// Modifies an instance of the condition on the role.
-                /// </summary>
-                /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="conditionID">The ID of the condition.</param>
-                /// <param name="channel">The Discord channel.</param>
-                /// <param name="count">The message count.</param>
-                [UsedImplicitly]
-                [Command("set")]
-                [Description("Modifies an instance of the condition on the role.")]
-                [RequireContext(ChannelContext.Guild)]
-                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<Result<UserMessage>> ModifyConditionAsync
+                var condition = getCondition.Entity;
+                var modifyResult = await _autoroles.ModifyConditionAsync
                 (
-                    AutoroleConfiguration autorole,
-                    long conditionID,
-                    IChannel channel,
-                    long count
-                )
+                    condition,
+                    c =>
+                    {
+                        c.RequiredCount = count;
+                        c.SourceID = channel.ID;
+                    }
+                );
+
+                if (!modifyResult.IsSuccess)
                 {
-                    var getCondition = _autoroles.GetCondition<MessageCountInChannelCondition>
-                    (
-                        autorole,
-                        conditionID
-                    );
-
-                    if (!getCondition.IsSuccess)
-                    {
-                        return Result<UserMessage>.FromError(getCondition);
-                    }
-
-                    var condition = getCondition.Entity;
-                    var modifyResult = await _autoroles.ModifyConditionAsync
-                    (
-                        condition,
-                        c =>
-                        {
-                            c.RequiredCount = count;
-                            c.SourceID = channel.ID;
-                        }
-                    );
-
-                    if (!modifyResult.IsSuccess)
-                    {
-                        return Result<UserMessage>.FromError(modifyResult);
-                    }
-
-                    return new ConfirmationMessage("Condition updated.");
+                    return Result<UserMessage>.FromError(modifyResult);
                 }
+
+                return new ConfirmationMessage("Condition updated.");
             }
         }
     }

@@ -22,6 +22,7 @@
 
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
+using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -42,11 +43,11 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Extensions
         /// <returns>The configured model builder.</returns>
         public static ModelBuilder ConfigureAutoroleConversions(this ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<MessageCountInChannelCondition>()
+            modelBuilder.Entity<MessageCountInSourceCondition<MessageCountInChannelCondition>>()
                 .Property(s => s.SourceID)
                 .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
 
-            modelBuilder.Entity<MessageCountInGuildCondition>()
+            modelBuilder.Entity<MessageCountInSourceCondition<MessageCountInGuildCondition>>()
                 .Property(s => s.SourceID)
                 .HasConversion(v => (long)v.Value, v => new Snowflake((ulong)v));
 

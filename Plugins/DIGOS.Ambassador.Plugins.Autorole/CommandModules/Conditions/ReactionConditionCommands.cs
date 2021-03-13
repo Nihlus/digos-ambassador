@@ -27,11 +27,9 @@ using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
-using DIGOS.Ambassador.Plugins.Autorole.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
-using Remora.Commands.Groups;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Results;
@@ -46,101 +44,83 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public partial class AutoroleConditionCommands
         {
             /// <summary>
-            /// Contains commands for adding or modifying a condition based on a certain reaction to a message.
+            /// Adds an instance of the condition to the role.
             /// </summary>
-            [Group("reaction")]
-            public class ReactionConditionCommands : CommandGroup
+            /// <param name="autorole">The autorole configuration.</param>
+            /// <param name="message">The message.</param>
+            /// <param name="emote">The emote.</param>
+            [UsedImplicitly]
+            [Command("add-reaction")]
+            [Description("Adds an instance of the condition to the role.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> AddConditionAsync
+            (
+                AutoroleConfiguration autorole,
+                IMessage message,
+                IEmoji emote
+            )
             {
-                private readonly AutoroleService _autoroles;
+                var condition = _autoroles.CreateConditionProxy<ReactionCondition>(message, emote)
+                                ?? throw new InvalidOperationException();
 
-                /// <summary>
-                /// Initializes a new instance of the <see cref="ReactionConditionCommands"/> class.
-                /// </summary>
-                /// <param name="autoroles">The autorole service.</param>
-                public ReactionConditionCommands(AutoroleService autoroles)
+                var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
+                if (!addCondition.IsSuccess)
                 {
-                    _autoroles = autoroles;
+                    return Result<UserMessage>.FromError(addCondition);
                 }
 
-                /// <summary>
-                /// Adds an instance of the condition to the role.
-                /// </summary>
-                /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="message">The message.</param>
-                /// <param name="emote">The emote.</param>
-                [UsedImplicitly]
-                [Command("add")]
-                [Description("Adds an instance of the condition to the role.")]
-                [RequireContext(ChannelContext.Guild)]
-                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<Result<UserMessage>> AddConditionAsync
+                return new ConfirmationMessage("Condition added.");
+            }
+
+            /// <summary>
+            /// Modifies an instance of the condition on the role.
+            /// </summary>
+            /// <param name="autorole">The autorole configuration.</param>
+            /// <param name="conditionID">The ID of the condition.</param>
+            /// <param name="message">The message.</param>
+            /// <param name="emote">The emote.</param>
+            [UsedImplicitly]
+            [Command("set-reaction")]
+            [Description("Modifies an instance of the condition on the role.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> ModifyConditionAsync
+            (
+                AutoroleConfiguration autorole,
+                long conditionID,
+                IMessage message,
+                IEmoji emote
+            )
+            {
+                var getCondition = _autoroles.GetCondition<ReactionCondition>
                 (
-                    AutoroleConfiguration autorole,
-                    IMessage message,
-                    IEmoji emote
-                )
+                    autorole,
+                    conditionID
+                );
+
+                if (!getCondition.IsSuccess)
                 {
-                    var condition = _autoroles.CreateConditionProxy<ReactionCondition>(message, emote)
-                        ?? throw new InvalidOperationException();
-
-                    var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
-                    if (!addCondition.IsSuccess)
-                    {
-                        return Result<UserMessage>.FromError(addCondition);
-                    }
-
-                    return new ConfirmationMessage("Condition added.");
+                    return Result<UserMessage>.FromError(getCondition);
                 }
 
-                /// <summary>
-                /// Modifies an instance of the condition on the role.
-                /// </summary>
-                /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="conditionID">The ID of the condition.</param>
-                /// <param name="message">The message.</param>
-                /// <param name="emote">The emote.</param>
-                [UsedImplicitly]
-                [Command("set")]
-                [Description("Modifies an instance of the condition on the role.")]
-                [RequireContext(ChannelContext.Guild)]
-                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<Result<UserMessage>> ModifyConditionAsync
+                var condition = getCondition.Entity;
+                var modifyResult = await _autoroles.ModifyConditionAsync
                 (
-                    AutoroleConfiguration autorole,
-                    long conditionID,
-                    IMessage message,
-                    IEmoji emote
-                )
+                    condition,
+                    c =>
+                    {
+                        c.MessageID = message.ID;
+                        c.EmoteName = emote.Name ?? emote.ID.ToString() ?? throw new InvalidOperationException();
+                    }
+                );
+
+                if (!modifyResult.IsSuccess)
                 {
-                    var getCondition = _autoroles.GetCondition<ReactionCondition>
-                    (
-                        autorole,
-                        conditionID
-                    );
-
-                    if (!getCondition.IsSuccess)
-                    {
-                        return Result<UserMessage>.FromError(getCondition);
-                    }
-
-                    var condition = getCondition.Entity;
-                    var modifyResult = await _autoroles.ModifyConditionAsync
-                    (
-                        condition,
-                        c =>
-                        {
-                            c.MessageID = message.ID;
-                            c.EmoteName = emote.Name ?? emote.ID.ToString() ?? throw new InvalidOperationException();
-                        }
-                    );
-
-                    if (!modifyResult.IsSuccess)
-                    {
-                        return Result<UserMessage>.FromError(modifyResult);
-                    }
-
-                    return new ConfirmationMessage("Condition updated.");
+                    return Result<UserMessage>.FromError(modifyResult);
                 }
+
+                return new ConfirmationMessage("Condition updated.");
             }
         }
     }

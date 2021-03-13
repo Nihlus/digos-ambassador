@@ -32,6 +32,7 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.API.Objects;
+using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -47,14 +48,17 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public partial class AutoroleConditionCommands : CommandGroup
         {
             private readonly AutoroleService _autoroles;
+            private readonly ICommandContext _context;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="AutoroleConditionCommands"/> class.
             /// </summary>
             /// <param name="autoroles">The autorole service.</param>
-            public AutoroleConditionCommands(AutoroleService autoroles)
+            /// <param name="context">The command context.</param>
+            public AutoroleConditionCommands(AutoroleService autoroles, ICommandContext context)
             {
                 _autoroles = autoroles;
+                _context = context;
             }
 
             /// <summary>

@@ -27,9 +27,6 @@
       <Compile Update="CommandModules\AutoroleCommands.AutoroleSettingCommands.cs">
         <DependentUpon>AutoroleCommands.cs</DependentUpon>
       </Compile>
-      <Compile Update="CommandModules\AutoroleCommands.AutoroleSettingCommands.AutoroleSettingSetCommands.cs">
-        <DependentUpon>AutoroleCommands.AutoroleSettingCommands.cs</DependentUpon>
-      </Compile>
       <Compile Update="CommandModules\AutoroleCommands.AutoroleConditionCommands.cs">
         <DependentUpon>AutoroleCommands.cs</DependentUpon>
       </Compile>

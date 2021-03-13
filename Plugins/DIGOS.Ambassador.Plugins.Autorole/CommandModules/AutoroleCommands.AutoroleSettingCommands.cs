@@ -23,6 +23,7 @@
 using System.ComponentModel;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
 using DIGOS.Ambassador.Plugins.Autorole.Services;
@@ -30,6 +31,7 @@ using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Contexts;
@@ -127,6 +129,36 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
                 }
 
                 return new ConfirmationMessage("Channel cleared.");
+            }
+
+            /// <summary>
+            /// Sets the confirmation notification channel.
+            /// </summary>
+            /// <param name="channel">The channel.</param>
+            [UsedImplicitly]
+            [Command("set-notification-channel")]
+            [Description("Sets the confirmation notification channel.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditAutoroleServerSettings), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> SetAffirmationNotificationChannel(IChannel channel)
+            {
+                if (channel.Type is not ChannelType.GuildText)
+                {
+                    return new UserError("That's not a text channel.");
+                }
+
+                var setResult = await _autoroles.SetAffirmationNotificationChannelAsync
+                (
+                    _context.GuildID.Value,
+                    channel.ID
+                );
+
+                if (!setResult.IsSuccess)
+                {
+                    return Result<UserMessage>.FromError(setResult);
+                }
+
+                return new ConfirmationMessage("Channel set.");
             }
         }
     }

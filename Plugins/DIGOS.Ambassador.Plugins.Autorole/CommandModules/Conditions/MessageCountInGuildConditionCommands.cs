@@ -27,13 +27,10 @@ using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Permissions;
-using DIGOS.Ambassador.Plugins.Autorole.Services;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
-using Remora.Commands.Groups;
 using Remora.Discord.Commands.Conditions;
-using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 using PermissionTarget = DIGOS.Ambassador.Plugins.Permissions.Model.PermissionTarget;
 
@@ -46,100 +43,79 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         public partial class AutoroleConditionCommands
         {
             /// <summary>
-            /// Contains commands for adding or modifying a condition based on a certain number of messages in a guild.
+            /// Adds an instance of the condition to the role.
             /// </summary>
-            [Group("total-messages")]
-            public class MessageCountInGuildConditionCommands : CommandGroup
+            /// <param name="autorole">The autorole configuration.</param>
+            /// <param name="count">The message count.</param>
+            [UsedImplicitly]
+            [Command("add-total-messages")]
+            [Description("Adds an instance of the condition to the role.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> AddConditionAsync(AutoroleConfiguration autorole, long count)
             {
-                private readonly AutoroleService _autoroles;
-                private readonly ICommandContext _context;
-
-                /// <summary>
-                /// Initializes a new instance of the <see cref="MessageCountInGuildConditionCommands"/> class.
-                /// </summary>
-                /// <param name="autoroles">The autorole service.</param>
-                /// <param name="context">The command context.</param>
-                public MessageCountInGuildConditionCommands(AutoroleService autoroles, ICommandContext context)
-                {
-                    _autoroles = autoroles;
-                    _context = context;
-                }
-
-                /// <summary>
-                /// Adds an instance of the condition to the role.
-                /// </summary>
-                /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="count">The message count.</param>
-                [UsedImplicitly]
-                [Command("add")]
-                [Description("Adds an instance of the condition to the role.")]
-                [RequireContext(ChannelContext.Guild)]
-                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<Result<UserMessage>> AddConditionAsync(AutoroleConfiguration autorole, long count)
-                {
-                    var condition = _autoroles.CreateConditionProxy<MessageCountInGuildCondition>
-                    (
-                        _context.GuildID.Value,
-                        count
-                    )
-                    ?? throw new InvalidOperationException();
-
-                    var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
-                    if (!addCondition.IsSuccess)
-                    {
-                        return Result<UserMessage>.FromError(addCondition);
-                    }
-
-                    return new ConfirmationMessage("Condition added.");
-                }
-
-                /// <summary>
-                /// Modifies an instance of the condition on the role.
-                /// </summary>
-                /// <param name="autorole">The autorole configuration.</param>
-                /// <param name="conditionID">The ID of the condition.</param>
-                /// <param name="count">The message count.</param>
-                [UsedImplicitly]
-                [Command("set")]
-                [Description("Modifies an instance of the condition on the role.")]
-                [RequireContext(ChannelContext.Guild)]
-                [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
-                public async Task<Result<UserMessage>> ModifyConditionAsync
+                var condition = _autoroles.CreateConditionProxy<MessageCountInGuildCondition>
                 (
-                    AutoroleConfiguration autorole,
-                    long conditionID,
-                    long count
+                    _context.GuildID.Value,
+                    count
                 )
+                ?? throw new InvalidOperationException();
+
+                var addCondition = await _autoroles.AddConditionAsync(autorole, condition);
+                if (!addCondition.IsSuccess)
                 {
-                    var getCondition = _autoroles.GetCondition<MessageCountInGuildCondition>
-                    (
-                        autorole,
-                        conditionID
-                    );
-
-                    if (!getCondition.IsSuccess)
-                    {
-                        return Result<UserMessage>.FromError(getCondition);
-                    }
-
-                    var condition = getCondition.Entity;
-                    var modifyResult = await _autoroles.ModifyConditionAsync
-                    (
-                        condition,
-                        c =>
-                        {
-                            c.RequiredCount = count;
-                            c.SourceID = _context.GuildID.Value;
-                        }
-                    );
-
-                    if (!modifyResult.IsSuccess)
-                    {
-                        return Result<UserMessage>.FromError(modifyResult);
-                    }
-
-                    return new ConfirmationMessage("Condition updated.");
+                    return Result<UserMessage>.FromError(addCondition);
                 }
+
+                return new ConfirmationMessage("Condition added.");
+            }
+
+            /// <summary>
+            /// Modifies an instance of the condition on the role.
+            /// </summary>
+            /// <param name="autorole">The autorole configuration.</param>
+            /// <param name="conditionID">The ID of the condition.</param>
+            /// <param name="count">The message count.</param>
+            [UsedImplicitly]
+            [Command("set-total-messages")]
+            [Description("Modifies an instance of the condition on the role.")]
+            [RequireContext(ChannelContext.Guild)]
+            [RequirePermission(typeof(EditAutorole), PermissionTarget.Self)]
+            public async Task<Result<UserMessage>> ModifyConditionAsync
+            (
+                AutoroleConfiguration autorole,
+                long conditionID,
+                long count
+            )
+            {
+                var getCondition = _autoroles.GetCondition<MessageCountInGuildCondition>
+                (
+                    autorole,
+                    conditionID
+                );
+
+                if (!getCondition.IsSuccess)
+                {
+                    return Result<UserMessage>.FromError(getCondition);
+                }
+
+                var condition = getCondition.Entity;
+                var modifyResult = await _autoroles.ModifyConditionAsync
+                (
+                    condition,
+                    c =>
+                    {
+                        c.RequiredCount = count;
+                        c.SourceID = _context.GuildID.Value;
+                    }
+                );
+
+                if (!modifyResult.IsSuccess)
+                {
+                    return Result<UserMessage>.FromError(modifyResult);
+                }
+
+                return new ConfirmationMessage("Condition updated.");
             }
         }
     }
