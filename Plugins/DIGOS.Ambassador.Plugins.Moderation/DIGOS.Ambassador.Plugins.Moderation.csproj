@@ -14,37 +14,37 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Remora.Behaviours" Version="6.0.1" />
-        <PackageReference Include="Remora.Discord.Caching" Version="1.1.4" />
+        <PackageReference Include="Remora.Behaviours" Version="6.0.1"/>
+        <PackageReference Include="Remora.Discord.Caching" Version="1.1.4"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
-        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj" />
-        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
-        <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
-        <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Quotes\DIGOS.Ambassador.Plugins.Quotes.csproj" />
+        <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj"/>
+        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Feedback\DIGOS.Ambassador.Discord.Feedback.csproj"/>
+        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj"/>
+        <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj"/>
+        <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Quotes\DIGOS.Ambassador.Plugins.Quotes.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="CommandModules\ModerationServerCommands.cs">
-        <DependentUpon>ModerationCommands.cs</DependentUpon>
-      </Compile>
-      <Compile Update="CommandModules\NoteCommands.cs" />
-      <Compile Update="CommandModules\BanCommands.cs" />
-      <Compile Update="CommandModules\WarningCommands.cs" />
-      <Compile Update="CommandModules\ModerationServerSetCommands.cs">
-        <DependentUpon>ModerationCommands.cs</DependentUpon>
-      </Compile>
-      <Compile Update="CommandModules\BanSetCommands.cs">
-        <DependentUpon>BanCommands.cs</DependentUpon>
-      </Compile>
-      <Compile Update="CommandModules\NoteSetCommands.cs">
-        <DependentUpon>NoteCommands.cs</DependentUpon>
-      </Compile>
-      <Compile Update="CommandModules\WarningSetCommands.cs">
-        <DependentUpon>WarningCommands.cs</DependentUpon>
-      </Compile>
+        <Compile Update="CommandModules\ModerationServerCommands.cs">
+            <DependentUpon>ModerationCommands.cs</DependentUpon>
+        </Compile>
+        <Compile Update="CommandModules\NoteCommands.cs"/>
+        <Compile Update="CommandModules\BanCommands.cs"/>
+        <Compile Update="CommandModules\WarningCommands.cs"/>
+        <Compile Update="CommandModules\ModerationServerSetCommands.cs">
+            <DependentUpon>ModerationCommands.cs</DependentUpon>
+        </Compile>
+        <Compile Update="CommandModules\BanSetCommands.cs">
+            <DependentUpon>BanCommands.cs</DependentUpon>
+        </Compile>
+        <Compile Update="CommandModules\NoteSetCommands.cs">
+            <DependentUpon>NoteCommands.cs</DependentUpon>
+        </Compile>
+        <Compile Update="CommandModules\WarningSetCommands.cs">
+            <DependentUpon>WarningCommands.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
 
 </Project>
