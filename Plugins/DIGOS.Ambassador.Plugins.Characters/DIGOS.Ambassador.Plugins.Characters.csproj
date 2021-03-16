@@ -7,7 +7,7 @@
 
     <!-- Workaround for a problem with EF Core -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.3">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -20,13 +20,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj"/>
-        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj"/>
+        <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
+        <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Pagination\DIGOS.Ambassador.Discord.Pagination.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj"/>
-        <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Permissions\DIGOS.Ambassador.Plugins.Permissions.csproj"/>
+        <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Core\DIGOS.Ambassador.Plugins.Core.csproj" />
+        <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Permissions\DIGOS.Ambassador.Plugins.Permissions.csproj" />
     </ItemGroup>
 
     <ItemGroup>

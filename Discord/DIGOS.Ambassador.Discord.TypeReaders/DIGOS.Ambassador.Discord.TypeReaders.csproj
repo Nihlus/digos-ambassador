@@ -7,7 +7,7 @@
 
     <ItemGroup>
         <PackageReference Include="Humanizer.Core" Version="2.8.26" />
-        <PackageReference Include="Remora.Discord.Commands" Version="3.4.1" />
+        <PackageReference Include="Remora.Discord.Commands" Version="3.5.0" />
     </ItemGroup>
 
 </Project>
