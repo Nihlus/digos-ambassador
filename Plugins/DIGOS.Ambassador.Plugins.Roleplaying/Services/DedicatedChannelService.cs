@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Numerics;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Core.Services;
@@ -149,6 +150,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             }
 
             var dedicatedChannel = createChannel.Entity;
+            roleplay.DedicatedChannelID = dedicatedChannel.ID;
 
             // This can fail in all manner of ways because of Discord.NET. Try, catch, etc...
             var resetPermissions = await ResetChannelPermissionsAsync(roleplay);
@@ -168,7 +170,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 );
             }
 
-            roleplay.DedicatedChannelID = dedicatedChannel.ID;
             await _database.SaveChangesAsync();
 
             return Result<IChannel>.FromSuccess(dedicatedChannel);
@@ -358,28 +359,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return clear;
             }
 
-            // Then, ensure the bot has full access to the channel
-            var botPermissions = new DiscordPermissionSet
-            (
-                ViewChannel,
-                ReadMessageHistory,
-                AddReactions,
-                ManageRoles,
-                SendMessages
-            );
-
-            var addBotPermissions = await _channelAPI.EditChannelPermissionsAsync
-            (
-                channel,
-                _identityInformation.ID,
-                botPermissions
-            );
-
-            if (!addBotPermissions.IsSuccess)
-            {
-                return addBotPermissions;
-            }
-
             // Next, apply default role settings
             var configureDefault = await ConfigureDefaultUserRolePermissions
             (
@@ -444,12 +423,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 }
             }
 
-            // Finally, configure visibility for everyone
-            return await ConfigureDefaultUserRolePermissions
-            (
-                roleplay.Server.DiscordID,
-                channel
-            );
+            return Result.FromSuccess();
         }
 
         /// <summary>
@@ -528,7 +502,29 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>A modification result which may or may not have succeeded.</returns>
         private async Task<Result> ClearChannelPermissionOverwrites(Snowflake channelID)
         {
-            var deleteOverwrites = await _channelAPI.ModifyChannelAsync(channelID, permissionOverwrites: null);
+            var botPermissions = new DiscordPermissionSet
+            (
+                ViewChannel,
+                ReadMessageHistory,
+                AddReactions,
+                ManageRoles,
+                SendMessages
+            );
+
+            var botOverwrite = new PermissionOverwrite
+            (
+                _identityInformation.ID,
+                PermissionOverwriteType.Member,
+                botPermissions,
+                new DiscordPermissionSet(BigInteger.Zero)
+            );
+
+            var deleteOverwrites = await _channelAPI.ModifyChannelAsync
+            (
+                channelID,
+                permissionOverwrites: new[] { botOverwrite }
+            );
+
             return deleteOverwrites.IsSuccess
                 ? Result.FromSuccess()
                 : Result.FromError(deleteOverwrites);

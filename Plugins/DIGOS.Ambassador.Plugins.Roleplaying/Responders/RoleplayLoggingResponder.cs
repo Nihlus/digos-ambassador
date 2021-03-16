@@ -104,7 +104,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Responders
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
         {
-            if (gatewayEvent.Author.IsBot.Value || gatewayEvent.Author.IsSystem.Value)
+            var isBot = gatewayEvent.Author.IsBot.HasValue && gatewayEvent.Author.IsBot.Value;
+            var isSystem = gatewayEvent.Author.IsSystem.HasValue && gatewayEvent.Author.IsSystem.Value;
+            if (isBot || isSystem)
             {
                 return Result.FromSuccess();
             }
