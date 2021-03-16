@@ -40,8 +40,8 @@ namespace DIGOS.Ambassador.Discord.Feedback
     /// </summary>
     public class UserFeedbackService
     {
-        private IDiscordRestChannelAPI _channelAPI;
-        private IDiscordRestUserAPI _userAPI;
+        private readonly IDiscordRestChannelAPI _channelAPI;
+        private readonly IDiscordRestUserAPI _userAPI;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UserFeedbackService"/> class.

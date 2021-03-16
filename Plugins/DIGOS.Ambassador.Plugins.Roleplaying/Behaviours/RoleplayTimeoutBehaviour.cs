@@ -26,13 +26,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Transactions;
 using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Bases;
+using Remora.Discord.API.Objects;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
@@ -43,10 +43,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
     [UsedImplicitly]
     internal sealed class RoleplayTimeoutBehaviour : ContinuousBehaviour<RoleplayTimeoutBehaviour>
     {
-        /// <summary>
-        /// Gets the feedback service.
-        /// </summary>
-        private UserFeedbackService Feedback { get; }
+        private readonly UserFeedbackService _feedback;
 
         /// <inheritdoc/>
         protected override TimeSpan TickDelay => TimeSpan.FromMinutes(1);
@@ -68,7 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         )
             : base(services, logger)
         {
-            this.Feedback = feedback;
+            this._feedback = feedback;
         }
 
         /// <inheritdoc/>
@@ -76,51 +73,39 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         {
             var roleplayService = tickServices.GetRequiredService<RoleplayDiscordService>();
 
-            foreach (var guild in this.Client.Guilds)
-            {
-                if (ct.IsCancellationRequested)
-                {
-                    return new UserError("Operation was cancelled.");
-                }
-
-                var getRoleplays = await roleplayService.GetRoleplaysAsync(guild);
-                if (!getRoleplays.IsSuccess)
-                {
-                    continue;
-                }
-
-                var timedOutRoleplays = getRoleplays.Entity
+            var timedOutRoleplays = await roleplayService.QueryRoleplaysAsync
+            (
+                q => q
                     .Where(r => r.IsActive)
                     .Where(r => r.LastUpdated.HasValue)
                     .Where(r => DateTime.Now - r.LastUpdated > TimeSpan.FromHours(72))
-                    .ToList();
+            );
 
-                foreach (var roleplay in timedOutRoleplays)
+            foreach (var roleplay in timedOutRoleplays)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                // We'll use a transaction per warning to avoid timeouts
+                using var timeoutTransaction = new TransactionScope
+                (
+                    TransactionScopeOption.Required,
+                    this.TransactionOptions,
+                    TransactionScopeAsyncFlowOption.Enabled
+                );
+
+                var stopRoleplay = await roleplayService.StopRoleplayAsync(roleplay);
+                if (!stopRoleplay.IsSuccess)
                 {
-                    ct.ThrowIfCancellationRequested();
-
-                    // We'll use a transaction per warning to avoid timeouts
-                    using var timeoutTransaction = new TransactionScope
-                    (
-                        TransactionScopeOption.Required,
-                        this.TransactionOptions,
-                        TransactionScopeAsyncFlowOption.Enabled
-                    );
-
-                    var stopRoleplay = await roleplayService.StopRoleplayAsync(roleplay);
-                    if (!stopRoleplay.IsSuccess)
-                    {
-                        return Result.FromError(stopRoleplay);
-                    }
-
-                    var notifyResult = await NotifyOwnerAsync(roleplay);
-                    if (!notifyResult.IsSuccess)
-                    {
-                        return Result.FromError(notifyResult);
-                    }
-
-                    timeoutTransaction.Complete();
+                    return stopRoleplay;
                 }
+
+                var notifyResult = await NotifyOwnerAsync(roleplay);
+                if (!notifyResult.IsSuccess)
+                {
+                    return notifyResult;
+                }
+
+                timeoutTransaction.Complete();
             }
 
             return Result.FromSuccess();
@@ -133,33 +118,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         private async Task<Result> NotifyOwnerAsync(Roleplay roleplay)
         {
-            var owner = this.Client.GetUser((ulong)roleplay.Owner.DiscordID);
-            if (owner is null)
+            var notification = _feedback.CreateEmbedBase() with
             {
-                return new UserError("Failed to get the owner.");
-            }
+                Description = $"Due to inactivity, your roleplay \"{roleplay.Name}\" has been stopped.",
+                Footer = new EmbedFooter($"You can restart it by running !rp start \"{roleplay.Name}\".")
+            };
 
-            var notification = this.Feedback.CreateEmbedBase();
-            notification.WithDescription
-            (
-                $"Due to inactivity, your roleplay \"{roleplay.Name}\" has been stopped."
-            );
-
-            notification.WithFooter
-            (
-                $"You can restart it by running !rp start \"{roleplay.Name}\"."
-            );
-
-            try
-            {
-                await owner.SendMessageAsync(string.Empty, embed: notification.Build());
-            }
-            catch (HttpException hex) when (hex.WasCausedByDMsNotAccepted())
-            {
-                // Nom nom nom
-            }
-
-            return Result.FromSuccess();
+            var send = await _feedback.SendPrivateEmbedAsync(roleplay.Owner.DiscordID, notification);
+            return send.IsSuccess
+                ? Result.FromSuccess()
+                : Result.FromError(send);
         }
     }
 }

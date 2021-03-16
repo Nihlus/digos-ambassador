@@ -29,8 +29,11 @@ using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
+using Microsoft.Extensions.DependencyInjection;
 using MoreLinq.Extensions;
 using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
+using Remora.Results;
 using Document = iTextSharp.text.Document;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
@@ -41,22 +44,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
     internal sealed class PDFRoleplayExporter : RoleplayExporterBase
     {
         private const float DefaultParagraphSpacing = 8.0f;
-        private static readonly Font StandardFont = new Font(Font.HELVETICA, 11.0f);
-        private static readonly Font ItalicFont = new Font(Font.HELVETICA, 11.0f, Font.ITALIC);
-        private static readonly Font TitleFont = new Font(Font.HELVETICA, 48.0f, Font.BOLD);
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PDFRoleplayExporter"/> class.
-        /// </summary>
-        /// <param name="guild">The context of the export operation.</param>
-        public PDFRoleplayExporter(IGuild guild)
-            : base(guild)
-        {
-        }
+        private static readonly Font StandardFont = new(Font.HELVETICA, 11.0f);
+        private static readonly Font ItalicFont = new(Font.HELVETICA, 11.0f, Font.ITALIC);
+        private static readonly Font TitleFont = new(Font.HELVETICA, 48.0f, Font.BOLD);
 
         /// <inheritdoc />
-        public override async Task<ExportedRoleplay> ExportAsync(Roleplay roleplay)
+        public override async Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay)
         {
+            var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
+
             // Create our document
             var pdfDoc = new Document();
 
@@ -69,12 +65,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
 
                 var ownerNickname = $"Unknown user ({roleplay.Owner.DiscordID})";
 
-                var owner = await this.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
-                if (!(owner is null))
-                {
-                    ownerNickname = owner.Nickname ?? owner.Username;
-                }
-                else
+                var getOwner = await guildAPI.GetGuildMemberAsync(roleplay.Server.DiscordID, roleplay.Owner.DiscordID);
+                if (!getOwner.IsSuccess)
                 {
                     var messageByUser = roleplay.Messages.FirstOrDefault
                     (
@@ -85,6 +77,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                     {
                         ownerNickname = messageByUser.AuthorNickname;
                     }
+                }
+                else
+                {
+                    var owner = getOwner.Entity;
+                    ownerNickname = owner.Nickname.HasValue
+                        ? owner.Nickname.Value
+                        : owner.User.HasValue
+                            ? owner.User.Value.Username
+                            : throw new InvalidOperationException();
                 }
 
                 pdfDoc.AddAuthor(ownerNickname);
@@ -98,23 +99,33 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                     (
                         async p =>
                         {
-                            var guildUser = await this.Guild.GetUserAsync((ulong)p.User.DiscordID);
-                            if (!(guildUser is null))
-                            {
-                                return guildUser.Username;
-                            }
-
-                            var messageByUser = roleplay.Messages.FirstOrDefault
+                            var getParticipant = await guildAPI.GetGuildMemberAsync
                             (
-                                m => m.Author == p.User
+                                roleplay.Server.DiscordID,
+                                p.User.DiscordID
                             );
 
-                            if (messageByUser is null)
+                            if (!getParticipant.IsSuccess)
                             {
-                                return $"Unknown user ({p.User.DiscordID})";
+                                var messageByUser = roleplay.Messages.FirstOrDefault
+                                (
+                                    m => m.Author == p.User
+                                );
+
+                                if (messageByUser is null)
+                                {
+                                    return $"Unknown user ({p.User.DiscordID})";
+                                }
+
+                                return messageByUser.AuthorNickname;
                             }
 
-                            return messageByUser.AuthorNickname;
+                            var participant = getParticipant.Entity;
+                            return participant.Nickname.HasValue
+                                ? participant.Nickname.Value
+                                : participant.User.HasValue
+                                    ? participant.User.Value.Username
+                                    : throw new InvalidOperationException();
                         }
                     )
                 );

@@ -164,11 +164,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             server = _database.NormalizeReference(server);
             user = _database.NormalizeReference(user);
 
-            return _database.Characters.UserScopedServersideQueryAsync
+            return _database.Characters.ServersideQueryAsync
             (
-                user,
-                server,
-                c => c,
+                q => q
+                    .Where(ch => ch.Owner == user)
+                    .Where(ch => ch.Server == server),
                 ct
             );
         }
@@ -231,11 +231,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
                 return new UserError("The user hasn't assumed a character.");
             }
 
-            var currentCharacter = await _database.Characters.UserScopedServersideQueryAsync
+            var currentCharacter = await _database.Characters.ServersideQueryAsync
             (
-                user,
-                server,
                 q => q
+                    .Where(ch => ch.Owner == user)
+                    .Where(ch => ch.Server == server)
                     .Where(ch => ch.IsCurrent)
                     .SingleOrDefaultAsync(ct)
             );
@@ -258,10 +258,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
         {
             server = _database.NormalizeReference(server);
 
-            var characters = await _database.Characters.ServerScopedServersideQueryAsync
+            var characters = await _database.Characters.ServersideQueryAsync
             (
-                server,
-                q => q.Where(ch => string.Equals(ch.Name.ToLower(), name.ToLower())),
+                q => q
+                    .Where(ch => ch.Server == server)
+                    .Where(ch => string.Equals(ch.Name.ToLower(), name.ToLower())),
                 ct
             );
 
@@ -295,11 +296,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            var character = await _database.Characters.UserScopedServersideQueryAsync
+            var character = await _database.Characters.ServersideQueryAsync
             (
-                user,
-                server,
                 q => q
+                    .Where(ch => ch.Owner == user)
+                    .Where(ch => ch.Server == server)
                     .Where(ch => string.Equals(ch.Name.ToLower(), name.ToLower()))
                     .SingleOrDefaultAsync(ct)
             );
@@ -373,11 +374,13 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            var hasCurrent = await _database.Characters.UserScopedServersideQueryAsync
+            var hasCurrent = await _database.Characters.ServersideQueryAsync
             (
-                user,
-                server,
-                q => q.Where(c => c.IsCurrent).AnyAsync(ct)
+                q => q
+                    .Where(ch => ch.Owner == user)
+                    .Where(ch => ch.Server == server)
+                    .Where(c => c.IsCurrent)
+                    .AnyAsync(ct)
             );
 
             return hasCurrent;
@@ -394,11 +397,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            var defaultCharacter = await _database.Characters.UserScopedServersideQueryAsync
+            var defaultCharacter = await _database.Characters.ServersideQueryAsync
             (
-                user,
-                server,
                 q => q
+                    .Where(ch => ch.Owner == user)
+                    .Where(ch => ch.Server == server)
                     .Where(ch => ch.IsDefault)
                     .SingleOrDefaultAsync(ct)
             );
@@ -686,17 +689,17 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             newOwner = _database.NormalizeReference(newOwner);
             server = _database.NormalizeReference(server);
 
-            var newOwnerCharacters = await _database.Characters.UserScopedServersideQueryAsync
+            var newOwnerCharacters = await _database.Characters.ServersideQueryAsync
             (
-                newOwner,
-                server,
-                c => c,
+                c => c
+                    .Where(ch => ch.Owner == newOwner)
+                    .Where(ch => ch.Server == server),
                 ct
             );
 
-            return _ownedEntities.TransferEntityOwnership
+            return await _ownedEntities.TransferEntityOwnershipAsync
             (
-                newOwner,
+                newOwner.DiscordID,
                 newOwnerCharacters,
                 character
             );
@@ -714,11 +717,11 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             user = _database.NormalizeReference(user);
             server = _database.NormalizeReference(server);
 
-            var userCharacters = await _database.Characters.UserScopedServersideQueryAsync
+            var userCharacters = await _database.Characters.ServersideQueryAsync
             (
-                user,
-                server,
-                c => c,
+                c => c
+                    .Where(ch => ch.Owner == user)
+                    .Where(ch => ch.Server == server),
                 ct
             );
 

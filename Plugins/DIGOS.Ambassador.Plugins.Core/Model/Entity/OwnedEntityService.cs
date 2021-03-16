@@ -23,10 +23,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using Humanizer;
 using JetBrains.Annotations;
+using Remora.Discord.Core;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
@@ -45,6 +48,17 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// Holds reserved names which entities may not have.
         /// </summary>
         private readonly string[] _reservedNames = { "current" };
+
+        private readonly UserService _users;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OwnedEntityService"/> class.
+        /// </summary>
+        /// <param name="users">The user service.</param>
+        public OwnedEntityService(UserService users)
+        {
+            _users = users;
+        }
 
         /// <summary>
         /// Determines whether or not the given entity name is unique for a given set of user entities.
@@ -70,17 +84,25 @@ namespace DIGOS.Ambassador.Plugins.Core.Model.Entity
         /// <summary>
         /// Transfers ownership of the given entity to the specified user.
         /// </summary>
-        /// <param name="newOwner">The new owner.</param>
+        /// <param name="newOwnerID">The ID of the new owner.</param>
         /// <param name="newOwnerEntities">The entities that the user already owns.</param>
         /// <param name="entity">The entity to transfer.</param>
         /// <returns>An entity modification result, which may or may not have succeeded.</returns>
-        public Result TransferEntityOwnership
+        public async Task<Result> TransferEntityOwnershipAsync
         (
-            User newOwner,
-            IReadOnlyCollection<IOwnedNamedEntity> newOwnerEntities,
+            Snowflake newOwnerID,
+            IEnumerable<IOwnedNamedEntity> newOwnerEntities,
             IOwnedNamedEntity entity
         )
         {
+            var getNewOwner = await _users.GetOrRegisterUserAsync(newOwnerID);
+            if (!getNewOwner.IsSuccess)
+            {
+                return Result.FromError(getNewOwner);
+            }
+
+            var newOwner = getNewOwner.Entity;
+
             if (entity.IsOwner(newOwner))
             {
                 return new GenericError

@@ -20,22 +20,20 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
-using System.Threading.Tasks;
-using DIGOS.Ambassador.Plugins.Roleplaying.Services;
-using JetBrains.Annotations;
-using Microsoft.Extensions.DependencyInjection;
-using Remora.Discord.Commands.Contexts;
+using Remora.Commands.Conditions;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
 {
     /// <summary>
-    /// Restricts the usage of a command to the owner of the currently active roleplay. Furthermore, it also requires a
-    /// roleplay to be current.
+    /// Restricts the usage of a command to a channel where a roleplay is currently active. Optionally, it may also
+    /// restrict the usage to the owner of that roleplay.
     /// </summary>
-    public class RequireActiveRoleplayAttribute : PreconditionAttribute
+    public class RequireActiveRoleplayAttribute : ConditionAttribute
     {
-        private readonly bool _requireOwner;
+        /// <summary>
+        /// Gets a value indicating whether the invoker is also required to be the owner of the roleplay.
+        /// </summary>
+        public bool RequireOwner { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RequireActiveRoleplayAttribute"/> class.
@@ -43,42 +41,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Preconditions
         /// <param name="requireOwner">Whether or not it is required that the current roleplay is owned by the invoker.</param>
         public RequireActiveRoleplayAttribute(bool requireOwner = false)
         {
-            _requireOwner = requireOwner;
-        }
-
-        /// <inheritdoc />
-        public override async Task<PreconditionResult> CheckPermissionsAsync
-        (
-            ICommandContext context,
-            CommandInfo command,
-            IServiceProvider services
-        )
-        {
-            if (!(context.Channel is IChannel textChannel))
-            {
-                return Preconditionnew UserError("The channel was not a text channel.");
-            }
-
-            var roleplayService = services.GetRequiredService<RoleplayDiscordService>();
-
-            var result = await roleplayService.GetActiveRoleplayAsync(textChannel);
-            if (!result.IsSuccess)
-            {
-                return PreconditionResult.FromError(result.ErrorReason);
-            }
-
-            if (!_requireOwner)
-            {
-                return PreconditionResult.FromSuccess();
-            }
-
-            var roleplay = result.Entity;
-            if (roleplay.Owner.DiscordID != (long)context.User.Id)
-            {
-                return Preconditionnew UserError("Only the roleplay owner can do that.");
-            }
-
-            return PreconditionResult.FromSuccess();
+            this.RequireOwner = requireOwner;
         }
     }
 }

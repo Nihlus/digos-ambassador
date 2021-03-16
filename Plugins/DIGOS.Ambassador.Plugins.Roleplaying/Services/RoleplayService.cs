@@ -27,7 +27,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
-using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
@@ -217,22 +216,21 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// Gets a roleplay by its given name.
         /// </summary>
         /// <param name="roleplayName">The name of the roleplay.</param>
-        /// <param name="server">The server that the search is scoped to.</param>
+        /// <param name="serverID">The server that the search is scoped to.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<Result<Roleplay>> GetNamedRoleplayAsync
         (
             string roleplayName,
-            Server server,
+            Snowflake serverID,
             CancellationToken ct = default
         )
         {
-            server = _database.NormalizeReference(server);
-
-            var roleplays = await _database.Roleplays.ServerScopedServersideQueryAsync
+            var roleplays = await _database.Roleplays.ServersideQueryAsync
             (
-                server,
-                q => q.Where(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower())),
+                q => q
+                    .Where(rp => rp.Server.DiscordID == serverID)
+                    .Where(rp => string.Equals(rp.Name.ToLower(), roleplayName.ToLower())),
                 ct
             );
 
@@ -259,95 +257,88 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Determines whether or not the given roleplay name is unique for a given user.
         /// </summary>
-        /// <param name="user">The user to check.</param>
+        /// <param name="userID">The user to check.</param>
         /// <param name="roleplayName">The roleplay name to check.</param>
-        /// <param name="server">The server to scope the roleplays to.</param>
+        /// <param name="serverID">The server to scope the roleplays to.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>true if the name is unique; otherwise, false.</returns>
         [Pure]
         public async Task<bool> IsRoleplayNameUniqueForUserAsync
         (
-            User user,
+            Snowflake userID,
             string roleplayName,
-            Server server,
+            Snowflake serverID,
             CancellationToken ct = default
         )
         {
-            user = _database.NormalizeReference(user);
-            server = _database.NormalizeReference(server);
+            var userRoleplays = await QueryRoleplaysAsync
+            (
+                q => q
+                    .Where(rp => rp.Owner.DiscordID == userID)
+                    .Where(rp => rp.Server.DiscordID == serverID),
+                ct
+            );
 
-            var userRoleplays = await GetUserRoleplaysAsync(user, server, ct);
             return _ownedEntities.IsEntityNameUniqueForUser(userRoleplays.ToList(), roleplayName);
         }
 
         /// <summary>
-        /// Gets the roleplays on the given server.
+        /// Performs a multi-entity query against the roleplay database.
         /// </summary>
-        /// <param name="server">The server to scope the search to.</param>
+        /// <param name="query">Additional query statements.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A queryable list of roleplays on the given server.</returns>
         [Pure]
-        public async Task<IReadOnlyList<Roleplay>> GetRoleplaysAsync
+        public async Task<IReadOnlyList<Roleplay>> QueryRoleplaysAsync
         (
-            Server server,
+            Func<IQueryable<Roleplay>, IQueryable<Roleplay>>? query = default,
             CancellationToken ct = default
         )
         {
-            server = _database.NormalizeReference(server);
-
-            return await _database.Roleplays.ServerScopedServersideQueryAsync(server, q => q, ct);
+            query ??= q => q;
+            return await _database.Roleplays.ServersideQueryAsync(query, ct);
         }
 
         /// <summary>
-        /// Get the roleplays owned by the given user.
+        /// Performs a single-entity query against the roleplay database.
         /// </summary>
-        /// <param name="user">The user to get the roleplays of.</param>
-        /// <param name="server">The server that the search is scoped to.</param>
-        /// <param name="ct">The cancellation token in use.</param>
-        /// <returns>A queryable list of roleplays belonging to the user.</returns>
+        /// <typeparam name="TOut">The output type.</typeparam>
+        /// <param name="query">Additional query statements.</param>
+        /// <returns>A queryable list of roleplays on the given server.</returns>
         [Pure]
-        public Task<IReadOnlyList<Roleplay>> GetUserRoleplaysAsync
+        public async Task<TOut> QueryRoleplaysAsync<TOut>
         (
-            User user,
-            Server server,
-            CancellationToken ct = default
+            Func<IQueryable<Roleplay>, Task<TOut>> query
         )
         {
-            user = _database.NormalizeReference(user);
-            server = _database.NormalizeReference(server);
-
-            return _database.Roleplays.UserScopedServersideQueryAsync(user, server, q => q, ct);
+            return await _database.Roleplays.ServersideQueryAsync(query);
         }
 
         /// <summary>
         /// Gets a roleplay belonging to a given user by a given name.
         /// </summary>
-        /// <param name="server">The server of the user.</param>
-        /// <param name="roleplayOwner">The user to get the roleplay from.</param>
+        /// <param name="serverID">The server of the user.</param>
+        /// <param name="ownerID">The user to get the roleplay from.</param>
         /// <param name="roleplayName">The name of the roleplay.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
         public async Task<Result<Roleplay>> GetUserRoleplayByNameAsync
         (
-            Server server,
-            User roleplayOwner,
+            Snowflake serverID,
+            Snowflake ownerID,
             string roleplayName,
             CancellationToken ct = default
         )
         {
-            roleplayOwner = _database.NormalizeReference(roleplayOwner);
-            server = _database.NormalizeReference(server);
-
-            var userRoleplays = await _database.Roleplays.UserScopedServersideQueryAsync
+            var roleplay = await _database.Roleplays.ServersideQueryAsync
             (
-                roleplayOwner,
-                server,
-                q => q.Where(rp => rp.Name.ToLower().Equals(roleplayName.ToLower())),
-                ct
+                q => q
+                    .Where(rp => rp.Server.DiscordID == serverID)
+                    .Where(rp => rp.Owner.DiscordID == ownerID)
+                    .Where(rp => rp.Name.ToLower().Equals(roleplayName.ToLower()))
+                    .SingleOrDefaultAsync(ct)
             );
-
-            var roleplay = userRoleplays.SingleOrDefault();
 
             if (!(roleplay is null))
             {
@@ -533,23 +524,28 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Transfers ownership of the named roleplay to the specified user.
         /// </summary>
-        /// <param name="newOwner">The new owner.</param>
+        /// <param name="newOwnerID">The new owner.</param>
         /// <param name="roleplay">The roleplay to transfer.</param>
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>An execution result which may or may not have succeeded.</returns>
         public async Task<Result> TransferRoleplayOwnershipAsync
         (
-            User newOwner,
+            Snowflake newOwnerID,
             Roleplay roleplay,
             CancellationToken ct = default
         )
         {
-            newOwner = _database.NormalizeReference(newOwner);
-
-            var newOwnerRoleplays = await GetUserRoleplaysAsync(newOwner, roleplay.Server, ct);
-            var transferResult = _ownedEntities.TransferEntityOwnership
+            var newOwnerRoleplays = await QueryRoleplaysAsync
             (
-                newOwner,
+                q => q
+                    .Where(rp => rp.Owner.DiscordID == newOwnerID)
+                    .Where(rp => rp.Server == roleplay.Server),
+                ct
+            );
+
+            var transferResult = await _ownedEntities.TransferEntityOwnershipAsync
+            (
+                newOwnerID,
                 newOwnerRoleplays.ToList(),
                 roleplay
             );
@@ -586,7 +582,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 return new UserError("The name may not contain double quotes.");
             }
 
-            if (!await IsRoleplayNameUniqueForUserAsync(roleplay.Owner, newRoleplayName, roleplay.Server, ct))
+            if (!await IsRoleplayNameUniqueForUserAsync(roleplay.Owner.DiscordID, newRoleplayName, roleplay.Server.DiscordID, ct))
             {
                 return new UserError("You already have a roleplay with that name.");
             }

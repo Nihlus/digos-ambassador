@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
 using JetBrains.Annotations;
@@ -34,9 +35,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
         /// <summary>
         /// Exports the given roleplay, handing back an object that wraps the exported data.
         /// </summary>
+        /// <param name="services">The available services.</param>
         /// <param name="roleplay">The roleplay to export.</param>
         /// <returns>An exported roleplay.</returns>
         [Pure]
-        Task<ExportedRoleplay> ExportAsync(Roleplay roleplay);
+        Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay);
     }
 }

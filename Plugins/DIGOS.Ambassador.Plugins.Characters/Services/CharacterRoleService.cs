@@ -128,10 +128,10 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var currentOwnersWithRole = await _database.Characters.ServerScopedServersideQueryAsync
+            var currentOwnersWithRole = await _database.Characters.ServersideQueryAsync
             (
-                role.Server,
                 q => q
+                    .Where(c => c.Server == role.Server)
                     .Where(c => c.Role == role)
                     .Where(c => c.IsCurrent)
                     .Select(c => c.Owner)
@@ -205,18 +205,9 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             CancellationToken ct = default
         )
         {
-            var getServerResult = await _servers.GetOrRegisterServerAsync(guildID, ct);
-            if (!getServerResult.IsSuccess)
-            {
-                return Result<IReadOnlyList<CharacterRole>>.FromError(getServerResult);
-            }
-
-            var server = getServerResult.Entity;
-
-            var roles = await _database.CharacterRoles.ServerScopedServersideQueryAsync
+            var roles = await _database.CharacterRoles.ServersideQueryAsync
             (
-                server,
-                q => q,
+                q => q.Where(c => c.Server.DiscordID == guildID),
                 ct
             );
 

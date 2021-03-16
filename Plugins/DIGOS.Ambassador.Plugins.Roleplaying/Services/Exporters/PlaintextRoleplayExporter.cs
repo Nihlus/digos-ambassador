@@ -20,12 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
+using Microsoft.Extensions.DependencyInjection;
 using MoreLinq.Extensions;
-using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Abstractions.Rest;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
 {
@@ -34,26 +36,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
     /// </summary>
     internal sealed class PlaintextRoleplayExporter : RoleplayExporterBase
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PlaintextRoleplayExporter"/> class.
-        /// </summary>
-        /// <param name="guild">The command context for this export operation.</param>
-        public PlaintextRoleplayExporter(IGuild guild)
-            : base(guild)
-        {
-        }
-
         /// <inheritdoc />
-        public override async Task<ExportedRoleplay> ExportAsync(Roleplay roleplay)
+        public override async Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay)
         {
+            var guildAPI = services.GetRequiredService<IDiscordRestGuildAPI>();
+
             var ownerNickname = $"Unknown user ({roleplay.Owner.DiscordID})";
 
-            var owner = await this.Guild.GetUserAsync((ulong)roleplay.Owner.DiscordID);
-            if (!(owner is null))
-            {
-                ownerNickname = owner.Nickname ?? owner.Username;
-            }
-            else
+            var getOwner = await guildAPI.GetGuildMemberAsync(roleplay.Server.DiscordID, roleplay.Owner.DiscordID);
+            if (!getOwner.IsSuccess)
             {
                 var messageByUser = roleplay.Messages.FirstOrDefault
                 (
@@ -64,6 +55,15 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                 {
                     ownerNickname = messageByUser.AuthorNickname;
                 }
+            }
+            else
+            {
+                var owner = getOwner.Entity;
+                ownerNickname = owner.Nickname.HasValue
+                    ? owner.Nickname.Value
+                    : owner.User.HasValue
+                        ? owner.User.Value.Username
+                        : throw new InvalidOperationException();
             }
 
             var filePath = Path.GetTempFileName();
@@ -79,23 +79,33 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
                     (
                         async p =>
                         {
-                            var guildUser = await this.Guild.GetUserAsync((ulong)p.User.DiscordID);
-                            if (!(guildUser is null))
-                            {
-                                return guildUser.Username;
-                            }
-
-                            var messageByUser = roleplay.Messages.FirstOrDefault
+                            var getParticipant = await guildAPI.GetGuildMemberAsync
                             (
-                                m => m.Author == p.User
+                                roleplay.Server.DiscordID,
+                                p.User.DiscordID
                             );
 
-                            if (messageByUser is null)
+                            if (!getParticipant.IsSuccess)
                             {
-                                return $"Unknown user ({p.User.DiscordID})";
+                                var messageByUser = roleplay.Messages.FirstOrDefault
+                                (
+                                    m => m.Author == p.User
+                                );
+
+                                if (messageByUser is null)
+                                {
+                                    return $"Unknown user ({p.User.DiscordID})";
+                                }
+
+                                return messageByUser.AuthorNickname;
                             }
 
-                            return messageByUser.AuthorNickname;
+                            var participant = getParticipant.Entity;
+                            return participant.Nickname.HasValue
+                                ? participant.Nickname.Value
+                                : participant.User.HasValue
+                                    ? participant.User.Value.Username
+                                    : throw new InvalidOperationException();
                         }
                     )
                 );

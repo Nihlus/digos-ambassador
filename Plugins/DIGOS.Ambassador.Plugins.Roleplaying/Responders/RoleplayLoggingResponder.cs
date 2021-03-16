@@ -1,5 +1,5 @@
 //
-//  RoleplayLoggingBehaviour.cs
+//  RoleplayLoggingResponder.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -24,15 +24,16 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using Humanizer;
 using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 using Remora.Discord.API.Abstractions.Gateway.Events;
+using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
-namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
+namespace DIGOS.Ambassador.Plugins.Roleplaying.Responders
 {
     /// <summary>
     /// Acts on user messages, logging them into an active roleplay if relevant.
@@ -44,58 +45,56 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         IResponder<IMessageUpdate>
     {
         private readonly RoleplayDiscordService _roleplays;
+        private readonly IDiscordRestChannelAPI _channelAPI;
+        private readonly ILogger<RoleplayLoggingResponder> _log;
 
-        public RoleplayLoggingResponder(RoleplayDiscordService roleplays)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RoleplayLoggingResponder"/> class.
+        /// </summary>
+        /// <param name="roleplays">The roleplay service.</param>
+        /// <param name="channelAPI">The channel API.</param>
+        /// <param name="log">The logging instance.</param>
+        public RoleplayLoggingResponder
+        (
+            RoleplayDiscordService roleplays,
+            IDiscordRestChannelAPI channelAPI,
+            ILogger<RoleplayLoggingResponder> log
+        )
         {
             _roleplays = roleplays;
+            _channelAPI = channelAPI;
+            _log = log;
         }
 
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IReady gatewayEvent, CancellationToken ct = default)
         {
-            foreach (var guild in this.Client.Guilds)
+            var activeRoleplays = await _roleplays.QueryRoleplaysAsync
+            (
+                q => q
+                    .Where(rp => rp.IsActive)
+                    .Where(rp => rp.DedicatedChannelID.HasValue)
+            );
+
+            foreach (var activeRoleplay in activeRoleplays)
             {
-                var getRoleplays = await _roleplays.GetRoleplaysAsync(guild);
-                if (!getRoleplays.IsSuccess)
+                var ensureLogged = await _roleplays.EnsureAllMessagesAreLoggedAsync(activeRoleplay);
+                if (!ensureLogged.IsSuccess)
                 {
-                    continue;
+                    return Result.FromError(ensureLogged);
                 }
 
-                var guildRoleplays = getRoleplays.Entity;
+                var updatedMessages = ensureLogged.Entity;
 
-                var activeRoleplays = guildRoleplays.Where(r => r.DedicatedChannelID.HasValue).ToList();
-                foreach (var activeRoleplay in activeRoleplays)
+                if (updatedMessages > 0)
                 {
-                    var channel = guild.GetTextChannel((ulong)activeRoleplay.DedicatedChannelID!.Value);
-                    if (channel is null)
-                    {
-                        continue;
-                    }
-
-                    var updatedMessages = 0;
-                    foreach (var message in await channel.GetMessagesAsync().FlattenAsync())
-                    {
-                        if (!(message is IUserMessage userMessage))
-                        {
-                            continue;
-                        }
-
-                        // We don't care about the results here.
-                        var updateResult = await _roleplays.ConsumeMessageAsync(userMessage);
-                        if (updateResult.IsSuccess)
-                        {
-                            ++updatedMessages;
-                        }
-                    }
-
-                    if (updatedMessages > 0)
-                    {
-                        this.Log.LogInformation
-                        (
-                            $"Added or updated {updatedMessages} missed {(updatedMessages > 1 ? "messages" : "message")} " +
-                            $"in \"{activeRoleplay.Name}\"."
-                        );
-                    }
+                    _log.LogInformation
+                    (
+                        "Added or updated {UpdateCount} missed {Pluralized} in \"{RoleplayName}\"",
+                        updatedMessages,
+                        updatedMessages > 1 ? "messages" : "message",
+                        activeRoleplay.Name
+                    );
                 }
             }
 
@@ -105,50 +104,37 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageCreate gatewayEvent, CancellationToken ct = default)
         {
-            if (!(arg is SocketUserMessage message))
-            {
-                return new UserError("The message was not a user message.");
-            }
-
-            if (arg.Author.IsBot || arg.Author.IsWebhook)
+            if (gatewayEvent.Author.IsBot.Value || gatewayEvent.Author.IsSystem.Value)
             {
                 return Result.FromSuccess();
             }
 
-            var discard = 0;
-
-            if (message.HasCharPrefix('!', ref discard))
-            {
-                return Result.FromSuccess();
-            }
-
-            if (message.HasMentionPrefix(this.Client.CurrentUser, ref discard))
-            {
-                return Result.FromSuccess();
-            }
-
-            var consumeResult = await _roleplays.ConsumeMessageAsync(message);
-            if (!consumeResult.IsSuccess)
-            {
-                return Result.FromError(consumeResult);
-            }
-
-            return Result.FromSuccess();
+            return await _roleplays.ConsumeMessageAsync(gatewayEvent);
         }
 
         /// <inheritdoc />
         public async Task<Result> RespondAsync(IMessageUpdate gatewayEvent, CancellationToken ct = default)
         {
+            if (!gatewayEvent.Author.HasValue)
+            {
+                return Result.FromSuccess();
+            }
+
+            if (gatewayEvent.Author.Value.IsBot.Value || gatewayEvent.Author.Value.IsSystem.Value)
+            {
+                return Result.FromSuccess();
+            }
+
             // Ignore all changes except text changes
-            var isTextUpdate = updatedMessage.EditedTimestamp.HasValue &&
-                               updatedMessage.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
+            var isTextUpdate = gatewayEvent.EditedTimestamp.HasValue &&
+                               gatewayEvent.EditedTimestamp.Value > DateTimeOffset.Now - 1.Minutes();
 
             if (!isTextUpdate)
             {
                 return Result.FromSuccess();
             }
 
-            return await MessageReceivedAsync(updatedMessage);
+            return await _roleplays.ConsumeMessageAsync(gatewayEvent);
         }
     }
 }

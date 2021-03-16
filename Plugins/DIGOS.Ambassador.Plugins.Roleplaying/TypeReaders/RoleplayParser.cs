@@ -1,5 +1,5 @@
 ﻿//
-//  RoleplayTypeReader.cs
+//  RoleplayParser.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -47,7 +47,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayParser"/> class.
         /// </summary>
-        /// <param name="roleplays"></param>
+        /// <param name="roleplays">The roleplaying service.</param>
         /// <param name="context">The command context.</param>
         public RoleplayParser(RoleplayDiscordService roleplays, ICommandContext context)
         {
@@ -58,6 +58,11 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders
         /// <inheritdoc />
         public override async ValueTask<Result<Roleplay>> TryParse(string value, CancellationToken ct)
         {
+            if (!_context.GuildID.HasValue)
+            {
+                throw new InvalidOperationException();
+            }
+
             if (!value.IsNullOrWhitespace() && string.Equals(value, "current", StringComparison.OrdinalIgnoreCase))
             {
                 return await _roleplays.GetActiveRoleplayAsync(_context.ChannelID);

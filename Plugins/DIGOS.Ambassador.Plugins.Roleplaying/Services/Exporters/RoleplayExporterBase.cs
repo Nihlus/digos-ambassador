@@ -20,9 +20,9 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
-using Remora.Discord.API.Abstractions.Objects;
 
 namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
 {
@@ -31,21 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
     /// </summary>
     internal abstract class RoleplayExporterBase : IRoleplayExporter
     {
-        /// <summary>
-        /// Gets the guild that the exporter is scoped to.
-        /// </summary>
-        protected IGuild Guild { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleplayExporterBase"/> class.
-        /// </summary>
-        /// <param name="guild">The context of the export operation.</param>
-        protected RoleplayExporterBase(IGuild guild)
-        {
-            this.Guild = guild;
-        }
-
         /// <inheritdoc />
-        public abstract Task<ExportedRoleplay> ExportAsync(Roleplay roleplay);
+        public abstract Task<ExportedRoleplay> ExportAsync(IServiceProvider services, Roleplay roleplay);
     }
 }

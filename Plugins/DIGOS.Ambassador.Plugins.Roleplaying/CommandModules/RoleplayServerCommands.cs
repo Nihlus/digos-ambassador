@@ -32,6 +32,7 @@ using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
 using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
 using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
@@ -48,21 +49,22 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
         [Description("Server-related commands, such as viewing or editing info about a specific server.")]
         public partial class RoleplayServerCommands : CommandGroup
         {
-            private readonly ServerService _servers;
             private readonly RoleplayServerSettingsService _serverSettings;
+            private readonly ICommandContext _context;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="RoleplayServerCommands"/> class.
             /// </summary>
             /// <param name="serverSettings">The roleplaying server settings service.</param>
-            /// <param name="servers">The server service.</param>
+            /// <param name="context">The command context.</param>
             public RoleplayServerCommands
             (
                 RoleplayServerSettingsService serverSettings,
-                ServerService servers)
+                ICommandContext context
+            )
             {
                 _serverSettings = serverSettings;
-                _servers = servers;
+                _context = context;
             }
 
             /// <summary>
@@ -75,15 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
             public async Task<Result<UserMessage>> ClearDedicatedRoleplayChannelCategory()
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.Guild);
-                if (!getServerResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(getServerResult);
-                }
-
-                var server = getServerResult.Entity;
-
-                var result = await _serverSettings.SetDedicatedChannelCategoryAsync(server, null);
+                var result = await _serverSettings.SetDedicatedChannelCategoryAsync(_context.GuildID.Value, null);
 
                 if (!result.IsSuccess)
                 {
@@ -103,17 +97,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
             public async Task<Result<UserMessage>> SetDefaultUserRole()
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.Guild);
-                if (!getServerResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(getServerResult);
-                }
-
-                var server = getServerResult.Entity;
-
                 var result = await _serverSettings.SetDefaultUserRoleAsync
                 (
-                    server,
+                    _context.GuildID.Value,
                     null
                 );
 

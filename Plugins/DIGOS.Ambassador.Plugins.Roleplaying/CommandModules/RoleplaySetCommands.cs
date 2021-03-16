@@ -91,18 +91,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     return Result<UserMessage>.FromError(result);
                 }
 
-                var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync
-                (roleplay
-                );
-
-                if (!getDedicatedChannelResult.IsSuccess)
-                {
-                    return new ConfirmationMessage("Roleplay name set.");
-                }
-
-                var dedicatedChannel = getDedicatedChannelResult.Entity;
-                await dedicatedChannel.ModifyAsync(p => p.Name = $"{roleplay.Name}-rp");
-
                 return new ConfirmationMessage("Roleplay name set.");
             }
 
@@ -139,7 +127,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
             [Command("nsfw")]
-            [Description("Sets a value indicating whether or not the named roleplay is NSFW. This restricts which channels it can be made active in.")]
+            [Description("Sets a value indicating whether or not the named roleplay is NSFW.")]
             [RequireContext(ChannelContext.Guild)]
             public async Task<Result<UserMessage>> SetRoleplayIsNSFW
             (
@@ -164,7 +152,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
             [Command("private")]
-            [Description("Sets a value indicating whether or not the named roleplay is private. This restricts replays to participants.")]
+            [Description("Sets a value indicating whether or not the named roleplay is private.")]
             [RequireContext(ChannelContext.Guild)]
             public Task<Result<UserMessage>> SetRoleplayIsPrivate
             (
@@ -182,7 +170,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             /// <param name="roleplay">The roleplay.</param>
             [UsedImplicitly]
             [Command("public")]
-            [Description("Sets a value indicating whether or not the named roleplay is public. This restricts replays to participants.")]
+            [Description("Sets a value indicating whether or not the named roleplay is public.")]
             [RequireContext(ChannelContext.Guild)]
             public async Task<Result<UserMessage>> SetRoleplayIsPublic
             (
@@ -195,33 +183,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 if (!result.IsSuccess)
                 {
                     return Result<UserMessage>.FromError(result);
-                }
-
-                var getDedicatedChannelResult = await _dedicatedChannels.GetDedicatedChannelAsync
-                (roleplay
-                );
-
-                if (!getDedicatedChannelResult.IsSuccess)
-                {
-                    return new ConfirmationMessage
-                    (
-                        $"Roleplay set to {(isPublic ? "public" : "private")}"
-                    );
-                }
-
-                var dedicatedChannel = getDedicatedChannelResult.Entity;
-                var everyoneRole = _context.Guild.EveryoneRole;
-
-                var setVisibility = await _dedicatedChannels.SetChannelVisibilityForRoleAsync
-                (
-                    dedicatedChannel,
-                    everyoneRole,
-                    isPublic
-                );
-
-                if (!setVisibility.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(setVisibility);
                 }
 
                 return new ConfirmationMessage

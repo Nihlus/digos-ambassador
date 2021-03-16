@@ -156,12 +156,6 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
         }
 
         /// <inheritdoc />
-        public bool IsOwner(IUser user)
-        {
-            return IsOwner(user.ID);
-        }
-
-        /// <inheritdoc />
         public bool IsOwner(Snowflake userID)
         {
             return this.Owner.DiscordID == userID;

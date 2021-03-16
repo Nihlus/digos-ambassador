@@ -31,6 +31,8 @@ using DIGOS.Ambassador.Plugins.Roleplaying;
 using DIGOS.Ambassador.Plugins.Roleplaying.Behaviours;
 using DIGOS.Ambassador.Plugins.Roleplaying.CommandModules;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
+using DIGOS.Ambassador.Plugins.Roleplaying.Preconditions;
+using DIGOS.Ambassador.Plugins.Roleplaying.Responders;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters;
 using DIGOS.Ambassador.Plugins.Roleplaying.TypeReaders;
@@ -72,6 +74,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
 
             serviceCollection.AddParser<Roleplay, RoleplayParser>();
             serviceCollection.AddParser<ExportFormat, HumanizerEnumTypeReader<ExportFormat>>();
+
+            serviceCollection.AddCondition<RequireActiveRoleplayCondition>();
 
             serviceCollection
                 .AddBehaviour<RoleplayArchivalBehaviour>()

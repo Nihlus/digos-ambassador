@@ -24,9 +24,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
-using DIGOS.Ambassador.Plugins.Core.Model.Servers;
+using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.Discord.Core;
 using Remora.Results;
@@ -39,23 +38,34 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     public class RoleplayServerSettingsService
     {
         private readonly RoleplayingDatabaseContext _database;
+        private readonly ServerService _servers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RoleplayServerSettingsService"/> class.
         /// </summary>
         /// <param name="database">The database context.</param>
-        public RoleplayServerSettingsService(RoleplayingDatabaseContext database)
+        /// <param name="servers">The server service.</param>
+        public RoleplayServerSettingsService(RoleplayingDatabaseContext database, ServerService servers)
         {
             _database = database;
+            _servers = servers;
         }
 
         /// <summary>
         /// Gets or creates a set of server-specific roleplaying settings for the given server.
         /// </summary>
-        /// <param name="server">The server.</param>
+        /// <param name="serverID">The ID of the server.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<Result<ServerRoleplaySettings>> GetOrCreateServerRoleplaySettingsAsync(Server server)
+        public async Task<Result<ServerRoleplaySettings>> GetOrCreateServerRoleplaySettingsAsync(Snowflake serverID)
         {
+            var getServer = await _servers.GetOrRegisterServerAsync(serverID);
+            if (!getServer.IsSuccess)
+            {
+                return Result<ServerRoleplaySettings>.FromError(getServer);
+            }
+
+            var server = getServer.Entity;
+
             var settings = await _database.ServerSettings.ServersideQueryAsync
             (
                 q => q
@@ -79,16 +89,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Sets the channel to use for archived roleplays.
         /// </summary>
-        /// <param name="server">The server.</param>
+        /// <param name="serverID">The server.</param>
         /// <param name="channelID">The channel to use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<Result> SetArchiveChannelAsync
         (
-            Server server,
+            Snowflake serverID,
             Snowflake? channelID
         )
         {
-            var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
+            var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(serverID);
             if (!getSettingsResult.IsSuccess)
             {
                 return Result.FromError(getSettingsResult);
@@ -105,16 +115,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Sets the role to use as a default @everyone role.
         /// </summary>
-        /// <param name="server">The server.</param>
+        /// <param name="serverID">The server.</param>
         /// <param name="roleID">The role to use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<Result> SetDefaultUserRoleAsync
         (
-            Server server,
+            Snowflake serverID,
             Snowflake? roleID
         )
         {
-            var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
+            var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(serverID);
             if (!getSettingsResult.IsSuccess)
             {
                 return Result.FromError(getSettingsResult);
@@ -136,16 +146,16 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <summary>
         /// Sets the channel category to use for dedicated roleplay channels.
         /// </summary>
-        /// <param name="server">The server.</param>
+        /// <param name="serverID">The server.</param>
         /// <param name="categoryID">The category to use.</param>
         /// <returns>A modification result which may or may not have succeeded.</returns>
         public async Task<Result> SetDedicatedChannelCategoryAsync
         (
-            Server server,
+            Snowflake serverID,
             Snowflake? categoryID
         )
         {
-            var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(server);
+            var getSettingsResult = await GetOrCreateServerRoleplaySettingsAsync(serverID);
             if (!getSettingsResult.IsSuccess)
             {
                 return Result.FromError(getSettingsResult);

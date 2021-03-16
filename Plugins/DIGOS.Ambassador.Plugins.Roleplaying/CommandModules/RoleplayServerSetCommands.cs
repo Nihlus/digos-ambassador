@@ -54,17 +54,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
             public async Task<Result<UserMessage>> SetDedicatedRoleplayChannelCategory(IChannel category)
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.Guild);
-                if (!getServerResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(getServerResult);
-                }
-
-                var server = getServerResult.Entity;
-
                 var result = await _serverSettings.SetDedicatedChannelCategoryAsync
                 (
-                    server,
+                    _context.GuildID.Value,
                     category.ID
                 );
 
@@ -87,17 +79,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
             public async Task<Result<UserMessage>> SetArchiveChannelAsync(IChannel channel)
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.Guild);
-                if (!getServerResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(getServerResult);
-                }
-
-                var server = getServerResult.Entity;
-
                 var result = await _serverSettings.SetArchiveChannelAsync
                 (
-                    server,
+                    _context.GuildID.Value,
                     channel.ID
                 );
 
@@ -120,17 +104,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             [RequirePermission(typeof(EditRoleplayServerSettings), PermissionTarget.Self)]
             public async Task<Result<UserMessage>> SetDefaultUserRole(IRole role)
             {
-                var getServerResult = await _servers.GetOrRegisterServerAsync(_context.Guild);
-                if (!getServerResult.IsSuccess)
-                {
-                    return Result<UserMessage>.FromError(getServerResult);
-                }
-
-                var server = getServerResult.Entity;
-
                 var result = await _serverSettings.SetDefaultUserRoleAsync
                 (
-                    server,
+                    _context.GuildID.Value,
                     role.ID
                 );
 
