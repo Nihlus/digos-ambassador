@@ -61,11 +61,6 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
         public DateTime? ExpiresOn { get; internal set; }
 
         /// <summary>
-        /// Gets a value indicating whether the ban is temporary.
-        /// </summary>
-        public bool IsTemporary => this.ExpiresOn.HasValue;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="UserBan"/> class.
         /// </summary>
         /// <remarks>

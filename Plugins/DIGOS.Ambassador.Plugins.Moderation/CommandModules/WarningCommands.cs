@@ -141,7 +141,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                         embedFields.Add(new EmbedField("Last Updated", warning.UpdatedAt.Humanize()));
                     }
 
-                    if (warning.IsTemporary)
+                    if (warning.ExpiresOn.HasValue)
                     {
                         embedFields.Add(new EmbedField("Expires On", warning.ExpiresOn.Humanize()));
                     }

@@ -190,7 +190,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                         embedFields.Add(new EmbedField("Last Updated", ban.UpdatedAt.Humanize()));
                     }
 
-                    if (ban.IsTemporary)
+                    if (ban.ExpiresOn.HasValue)
                     {
                         embedFields.Add(new EmbedField("Expires On", ban.ExpiresOn.Humanize()));
                     }

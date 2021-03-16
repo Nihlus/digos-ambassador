@@ -36,6 +36,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Remora.Behaviours.Services;
 using Remora.Commands.Extensions;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
@@ -105,6 +106,8 @@ namespace DIGOS.Ambassador
                 .UseSystemd()
                 .ConfigureServices(services =>
                 {
+                    services.AddSingleton<BehaviourService>();
+
                     services
                         .AddSingleton(pluginService)
                         .AddSingleton(contentService)
@@ -225,7 +228,11 @@ namespace DIGOS.Ambassador
                 return;
             }
 
+            var behaviourService = hostServices.GetRequiredService<BehaviourService>();
+            await behaviourService.StartBehavioursAsync();
+
             await host.RunAsync(cancellationSource.Token);
+            await behaviourService.StopBehavioursAsync();
         }
     }
 }
