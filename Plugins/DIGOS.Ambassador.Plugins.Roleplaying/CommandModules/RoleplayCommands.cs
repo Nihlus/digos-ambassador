@@ -525,26 +525,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                 return Result<UserMessage>.FromError(startRoleplayResult);
             }
 
-            var joinedUsers = roleplay.JoinedUsers.Select
-            (
-                u => $"<@{u.ID}>"
-            );
-
-            var participantList = joinedUsers.Humanize();
-
-            var send = await _channelAPI.CreateMessageAsync
-            (
-                roleplay.ActiveChannelID!.Value,
-                $"Calling {participantList}!"
-            );
-
-            if (!send.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(send);
-            }
-
             var activationMessage = $"The roleplay \"{roleplay.Name}\" is now active in " +
-                                    $"<#{roleplay.ActiveChannelID.Value}>.";
+                                    $"<#{roleplay.ActiveChannelID!.Value}>.";
 
             return new ConfirmationMessage(activationMessage);
         }

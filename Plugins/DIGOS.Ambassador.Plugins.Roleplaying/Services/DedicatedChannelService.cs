@@ -195,7 +195,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 channelID,
                 userID,
                 isVisible ? userPermissions : default,
-                isVisible ? default : userPermissions
+                isVisible ? default : userPermissions,
+                PermissionOverwriteType.Member
             );
         }
 
@@ -219,7 +220,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 channelID,
                 userID,
                 isVisible ? userPermissions : default,
-                isVisible ? default : userPermissions
+                isVisible ? default : userPermissions,
+                PermissionOverwriteType.Member
             );
         }
 
@@ -291,7 +293,8 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
                 channelID,
                 roleID,
                 isVisible ? userPermissions : default,
-                isVisible ? default : userPermissions
+                isVisible ? default : userPermissions,
+                PermissionOverwriteType.Role
             );
         }
 

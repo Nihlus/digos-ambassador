@@ -26,6 +26,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.TypeReaders;
+using DIGOS.Ambassador.Plugins.Core.Preconditions;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using DIGOS.Ambassador.Plugins.Roleplaying;
 using DIGOS.Ambassador.Plugins.Roleplaying.Behaviours;
@@ -76,6 +77,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying
             serviceCollection.AddParser<ExportFormat, HumanizerEnumTypeReader<ExportFormat>>();
 
             serviceCollection.AddCondition<RequireActiveRoleplayCondition>();
+            serviceCollection.AddCondition<RequireEntityOwnerCondition<Roleplay>>();
 
             serviceCollection
                 .AddBehaviour<RoleplayArchivalBehaviour>()

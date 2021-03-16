@@ -29,6 +29,7 @@ using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Core.Services.Servers;
 using DIGOS.Ambassador.Plugins.Core.Services.Users;
 using DIGOS.Ambassador.Plugins.Roleplaying.Model;
+using Humanizer;
 using Microsoft.EntityFrameworkCore;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
@@ -371,6 +372,24 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             if (!enableChannel.IsSuccess)
             {
                 return enableChannel;
+            }
+
+            var joinedUsers = roleplay.JoinedUsers.Select
+            (
+                u => $"<@{u.User.DiscordID}>"
+            );
+
+            var participantList = joinedUsers.Humanize();
+
+            var send = await _channelAPI.CreateMessageAsync
+            (
+                roleplay.ActiveChannelID!.Value,
+                $"Calling {participantList}!"
+            );
+
+            if (!send.IsSuccess)
+            {
+                return Result.FromError(send);
             }
 
             return Result.FromSuccess();
