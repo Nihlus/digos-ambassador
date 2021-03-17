@@ -201,7 +201,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// <param name="snippet">The snippet to execute.</param>
         /// <param name="variables">Any variables to pass to the snippet as globals.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public Task<RetrieveEntityResult<string>> ExecuteSnippetAsync
+        public Task<Result<string>> ExecuteSnippetAsync
         (
             string snippet,
             params (string Name, object? Value)[] variables
@@ -220,12 +220,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
                     var ranSuccessfully = lua["status"] is bool b && b;
                     if (!(result is null) && ranSuccessfully)
                     {
-                        return RetrieveEntityResult<string>.FromSuccess(result);
+                        return Result<string>.FromSuccess(result);
                     }
 
                     if (!(result is null) && result.EndsWith("timeout!"))
                     {
-                        return RetrieveEntityResult<string>.FromError
+                        return new GenericError
                         (
                             "Timed out while waiting for the script to complete."
                         );
@@ -234,13 +234,13 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
                     var erroringFunction = _getErroringFunctionRegex.Match(result ?? string.Empty).Value;
                     if (!_functionWhitelist.Contains(erroringFunction))
                     {
-                        return RetrieveEntityResult<string>.FromError
+                        return new GenericError
                         (
                             $"Usage of {erroringFunction} is prohibited."
                         );
                     }
 
-                    return RetrieveEntityResult<string>.FromError
+                    return new GenericError
                     (
                         $"Lua error: {result}"
                     );
@@ -254,7 +254,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
         /// <param name="scriptPath">The path to the file which should be executed.</param>
         /// <param name="variables">Any variables to pass to the script as globals.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
-        public async Task<RetrieveEntityResult<string>> ExecuteScriptAsync
+        public async Task<Result<string>> ExecuteScriptAsync
         (
             [PathReference] UPath scriptPath,
             params (string Name, object? Value)[] variables
@@ -263,7 +263,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
             var getScriptResult = _contentService.OpenLocalStream(scriptPath);
             if (!getScriptResult.IsSuccess)
             {
-                return RetrieveEntityResult<string>.FromError(getScriptResult);
+                return Result<string>.FromError(getScriptResult);
             }
 
             string script;

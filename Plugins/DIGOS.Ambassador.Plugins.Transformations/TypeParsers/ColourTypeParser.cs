@@ -1,5 +1,5 @@
 ﻿//
-//  ColourTypeReader.cs
+//  ColourTypeParser.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,27 +20,26 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
-using Discord.Commands;
+using Remora.Commands.Parsers;
+using Remora.Commands.Results;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.TypeReaders
 {
     /// <summary>
     /// Reads colours as command arguments.
     /// </summary>
-    public sealed class ColourTypeReader : TypeReader
+    public sealed class ColourTypeParser : AbstractTypeParser<Colour>
     {
         /// <inheritdoc />
-        public override Task<TypeReaderResult> ReadAsync(ICommandContext context, string input, IServiceProvider services)
+        public override ValueTask<Result<Colour>> TryParse(string value, CancellationToken ct)
         {
-            if (!Colour.TryParse(input, out var colour))
-            {
-                return Task.FromResult(TypeReaderResult.FromError(CommandError.Unsuccessful, "Failed to parse a valid colour."));
-            }
-
-            return Task.FromResult(TypeReaderResult.FromSuccess(colour));
+            return Colour.TryParse(value, out var colour)
+                ? new ValueTask<Result<Colour>>(colour)
+                : new ValueTask<Result<Colour>>(new ParsingError<Colour>(value));
         }
     }
 }

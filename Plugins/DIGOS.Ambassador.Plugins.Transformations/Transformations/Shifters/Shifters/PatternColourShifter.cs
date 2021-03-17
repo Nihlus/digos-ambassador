@@ -22,9 +22,11 @@
 
 using System;
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
 using Humanizer;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
@@ -56,29 +58,33 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         }
 
         /// <inheritdoc />
-        protected override async Task<ShiftBodypartResult> ShiftBodypartAsync(Bodypart bodypart, Chirality chirality)
+        protected override async Task<Result<ShiftBodypartResult>> ShiftBodypartAsync
+        (
+            Bodypart bodypart,
+            Chirality chirality
+        )
         {
             if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
             {
-                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
+                return new UserError("The character doesn't have that bodypart.");
             }
 
             if (currentComponent.Pattern is null)
             {
-                return ShiftBodypartResult.FromError("That bodypart doesn't have a pattern.");
+                return new UserError("That bodypart doesn't have a pattern.");
             }
 
             // ReSharper disable once PossibleNullReferenceException
             // Having a pattern implies having a pattern colour
             if (currentComponent.PatternColour!.IsSameColourAs(_colour))
             {
-                return ShiftBodypartResult.FromError("The pattern is already that colour.");
+                return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
             }
 
             currentComponent.PatternColour = _colour.Clone();
 
             var shiftMessage = await GetShiftMessageAsync(bodypart, chirality);
-            return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Shift);
+            return new ShiftBodypartResult(shiftMessage, ShiftBodypartAction.Shift);
         }
 
         /// <inheritdoc />
@@ -119,7 +125,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
             if (bodypart == Bodypart.Full)
             {
-                var fullMessage = $"{character.Nickname} is already that colour.";
+                var fullMessage = $"{character.Nickname}'s patterns are already that colour.";
                 fullMessage = fullMessage.Transform(To.LowerCase, To.SentenceCase);
 
                 return Task.FromResult(fullMessage);

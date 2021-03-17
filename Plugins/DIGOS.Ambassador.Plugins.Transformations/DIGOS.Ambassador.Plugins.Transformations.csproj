@@ -12,7 +12,10 @@
 
     <!-- Workaround for a problem with EF Core -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.6" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.4">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
     <ItemGroup>
@@ -23,8 +26,49 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Core\DIGOS.Ambassador.Core.Database\DIGOS.Ambassador.Core.Database.csproj" />
-      <ProjectReference Include="..\..\Discord\DIGOS.Ambassador.Discord.Extensions\DIGOS.Ambassador.Discord.Extensions.csproj" />
       <ProjectReference Include="..\DIGOS.Ambassador.Plugins.Characters\DIGOS.Ambassador.Plugins.Characters.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Transformations\Messages\TransformationText.DescriptionMessages.cs">
+        <DependentUpon>TransformationText.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.TransformationMessages.cs">
+        <DependentUpon>TransformationText.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.TransformationMessages.AddingMessages.cs">
+        <DependentUpon>TransformationText.TransformationMessages.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.TransformationMessages.RemovalMessages.cs">
+        <DependentUpon>TransformationText.TransformationMessages.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.TransformationMessages.ShiftingMessages.cs">
+        <DependentUpon>TransformationText.TransformationMessages.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.TransformationMessages.ShiftingMessages.SingleMessages.cs">
+        <DependentUpon>TransformationText.TransformationMessages.ShiftingMessages.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.TransformationMessages.ShiftingMessages.UniformMessages.cs">
+        <DependentUpon>TransformationText.TransformationMessages.ShiftingMessages.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.TransformationMessages.AddingMessages.SingleMessages.cs">
+        <DependentUpon>TransformationText.TransformationMessages.AddingMessages.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.TransformationMessages.AddingMessages.UniformMessages.cs">
+        <DependentUpon>TransformationText.TransformationMessages.AddingMessages.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.TransformationMessages.RemovalMessages.SingleMessages.cs">
+        <DependentUpon>TransformationText.TransformationMessages.RemovalMessages.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.TransformationMessages.RemovalMessages.UniformMessages.cs">
+        <DependentUpon>TransformationText.TransformationMessages.RemovalMessages.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.DescriptionMessages.SingleDescriptions.cs">
+        <DependentUpon>TransformationText.DescriptionMessages.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Transformations\Messages\TransformationText.DescriptionMessages.UniformDescriptions.cs">
+        <DependentUpon>TransformationText.DescriptionMessages.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>

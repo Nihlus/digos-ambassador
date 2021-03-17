@@ -21,9 +21,11 @@
 //
 
 using System.Threading.Tasks;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
 using Humanizer;
+using Remora.Results;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 {
@@ -50,23 +52,23 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
         }
 
         /// <inheritdoc />
-        protected override async Task<ShiftBodypartResult> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
+        protected override async Task<Result<ShiftBodypartResult>> RemoveBodypartAsync(Bodypart bodypart, Chirality chirality)
         {
             if (!this.Appearance.TryGetAppearanceComponent(bodypart, chirality, out var currentComponent))
             {
-                return ShiftBodypartResult.FromError("The character doesn't have that bodypart.");
+                return new UserError("The character doesn't have that bodypart.");
             }
 
             if (currentComponent.Pattern is null)
             {
-                return ShiftBodypartResult.FromError("The character doesn't have a pattern on that part.");
+                return new ShiftBodypartResult(await GetNoChangeMessageAsync(bodypart), ShiftBodypartAction.Nothing);
             }
 
             currentComponent.Pattern = null;
             currentComponent.PatternColour = null;
 
             var shiftMessage = await GetRemoveMessageAsync(bodypart, chirality);
-            return ShiftBodypartResult.FromSuccess(shiftMessage, ShiftBodypartAction.Remove);
+            return new ShiftBodypartResult(shiftMessage, ShiftBodypartAction.Remove);
         }
 
         /// <inheritdoc />
@@ -92,15 +94,14 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
             if (bodypart == Bodypart.Full)
             {
-                var fullMessage = $"{character.Nickname} is already that colour.";
+                var fullMessage = $"{character.Nickname} doesn't have any patterns.";
                 fullMessage = fullMessage.Transform(To.LowerCase, To.SentenceCase);
 
                 return Task.FromResult(fullMessage);
             }
 
             var message =
-                $"{character.Name}'s {bodypartHumanized} " +
-                $"{(bodypartHumanized.EndsWith("s") ? "are" : "is")} already that colour.";
+                $"{character.Name}'s {bodypartHumanized} doesn't have any pattern.";
 
             message = message.Transform(To.LowerCase, To.SentenceCase);
             return Task.FromResult(message);

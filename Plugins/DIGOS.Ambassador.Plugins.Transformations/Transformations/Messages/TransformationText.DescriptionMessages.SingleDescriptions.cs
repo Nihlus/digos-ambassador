@@ -1,5 +1,5 @@
-﻿//
-//  ProtectionType.cs
+//
+//  TransformationText.DescriptionMessages.SingleDescriptions.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,24 +20,24 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using JetBrains.Annotations;
+using System.Collections.Generic;
 
-namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
+namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
 {
-    /// <summary>
-    /// Represents protection types for interactions between users.
-    /// </summary>
-    [PublicAPI]
-    public enum ProtectionType
+    public sealed partial class TransformationText
     {
-        /// <summary>
-        /// Blacklist-based protection.
-        /// </summary>
-        Blacklist,
-
-        /// <summary>
-        /// Whitelist-based protection.
-        /// </summary>
-        Whitelist
+        public sealed partial class DescriptionMessages
+        {
+            /// <summary>
+            /// Holds singular descriptions.
+            /// </summary>
+            public sealed class SingleDescriptions
+            {
+                /// <summary>
+                /// Gets a list of pattern descriptions. These are used when describing patterns on bodyparts.
+                /// </summary>
+                public IReadOnlyList<string> Pattern { get; init; } = new List<string>();
+            }
+        }
     }
 }

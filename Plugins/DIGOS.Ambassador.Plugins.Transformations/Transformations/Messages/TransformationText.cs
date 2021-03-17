@@ -20,29 +20,26 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
 {
     /// <summary>
     /// Database class for various data-driven transformation messages.
     /// </summary>
-    public sealed class TransformationText
+    public sealed partial class TransformationText
     {
         /// <summary>
         /// Gets a set of description messages.
         /// </summary>
-        [JsonProperty("descriptions", Required = Required.Always)]
-        public DescriptionMessages Descriptions { get; private set; } = new DescriptionMessages();
+        public DescriptionMessages Descriptions { get; init; } = new();
 
         /// <summary>
         /// Gets a set of transformation messages.
         /// </summary>
-        [JsonProperty("messages", Required = Required.Always)]
-        public TransformationMessages Messages { get; private set; } = new TransformationMessages();
+        public TransformationMessages Messages { get; init; } = new();
 
         /// <summary>
         /// Attempts to deserialize a <see cref="TransformationText"/> instance from the given JSON text.
@@ -56,345 +53,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Messages
             text = null;
             try
             {
-                text = JsonConvert.DeserializeObject<TransformationText>(json);
+                text = JsonSerializer.Deserialize<TransformationText>(json) ?? throw new JsonException();
                 return true;
             }
             catch
             {
                 return false;
-            }
-        }
-
-        /// <summary>
-        /// Holds description messages.
-        /// </summary>
-        public sealed class DescriptionMessages
-        {
-            /// <summary>
-            /// Gets a list of sex and species descriptions. These are used in the beginning of appearance descriptions.
-            /// </summary>
-            [JsonProperty("sexSpecies", Required = Required.Always)]
-            public IReadOnlyList<string> SexSpecies { get; private set; } = new List<string>();
-
-            /// <summary>
-            /// Gets a set of singular descriptions.
-            /// </summary>
-            [JsonProperty("single", Required = Required.Always)]
-            public SingleDescriptions Single { get; private set; } = new SingleDescriptions();
-
-            /// <summary>
-            /// Gets a set of uniform descriptions.
-            /// </summary>
-            [JsonProperty("uniform", Required = Required.Always)]
-            public UniformDescriptions Uniform { get; private set; } = new UniformDescriptions();
-
-            /// <summary>
-            /// Holds singular descriptions.
-            /// </summary>
-            public sealed class SingleDescriptions
-            {
-                /// <summary>
-                /// Gets a list of pattern descriptions. These are used when describing patterns on bodyparts.
-                /// </summary>
-                [JsonProperty("pattern", Required = Required.Always)]
-                public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
-            }
-
-            /// <summary>
-            /// Holds uniform descriptions.
-            /// </summary>
-            public sealed class UniformDescriptions
-            {
-                /// <summary>
-                /// Gets a list of pattern descriptions. These are used when describing patterns on bodyparts.
-                /// </summary>
-                [JsonProperty("pattern", Required = Required.Always)]
-                public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
-            }
-        }
-
-        /// <summary>
-        /// Holds transformation messages.
-        /// </summary>
-        public sealed class TransformationMessages
-        {
-            /// <summary>
-            /// Gets a set of addition messages. These are used when something that did not previously exist is added to
-            /// an appearance.
-            /// </summary>
-            [JsonProperty("adding", Required = Required.Always)]
-            public AddingMessages Adding { get; private set; } = new AddingMessages();
-
-            /// <summary>
-            /// Gets a set of removal messages. These are used when something that exists is removed from an appearance.
-            /// </summary>
-            [JsonProperty("removal", Required = Required.Always)]
-            public RemovalMessages Removal { get; private set; } = new RemovalMessages();
-
-            /// <summary>
-            /// Gets a set of shifting messages. These are used when something that exists is transformed into something
-            /// else.
-            /// </summary>
-            [JsonProperty("shifting", Required = Required.Always)]
-            public ShiftingMessages Shifting { get; private set; } = new ShiftingMessages();
-
-            /// <summary>
-            /// Holds addition messages.
-            /// </summary>
-            public sealed class AddingMessages
-            {
-                /// <summary>
-                /// Gets a set of singular messages. These are used when a single part is added.
-                /// </summary>
-                [JsonProperty("single", Required = Required.Always)]
-                public SingleMessages Single { get; private set; } = new SingleMessages();
-
-                /// <summary>
-                /// Gets a set of uniform messages. These are used when two or more matching parts are added.
-                /// </summary>
-                [JsonProperty("uniform", Required = Required.Always)]
-                public UniformMessages Uniform { get; private set; } = new UniformMessages();
-
-                /// <summary>
-                /// Holds singular messages.
-                /// </summary>
-                public sealed class SingleMessages
-                {
-                    /// <summary>
-                    /// Gets a list of pattern addition messages.
-                    /// </summary>
-                    [JsonProperty("pattern", Required = Required.Always)]
-                    public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
-                }
-
-                /// <summary>
-                /// Holds uniform messages.
-                /// </summary>
-                public sealed class UniformMessages
-                {
-                    /// <summary>
-                    /// Gets a list of pattern addition messages.
-                    /// </summary>
-                    [JsonProperty("pattern", Required = Required.Always)]
-                    public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
-                }
-            }
-
-            /// <summary>
-            /// Holds removal messages.
-            /// </summary>
-            public sealed class RemovalMessages
-            {
-                /// <summary>
-                /// Gets a set of singular messages. These are used when a single part is removed.
-                /// </summary>
-                [JsonProperty("single", Required = Required.Always)]
-                public SingleMessages Single { get; private set; } = new SingleMessages();
-
-                /// <summary>
-                /// Gets a set of uniform messages. These are used when two or more matching parts are added.
-                /// </summary>
-                [JsonProperty("uniform", Required = Required.Always)]
-                public UniformMessages Uniform { get; private set; } = new UniformMessages();
-
-                /// <summary>
-                /// Holds singular messages.
-                /// </summary>
-                public sealed class SingleMessages
-                {
-                    /// <summary>
-                    /// Gets a list of hair removal messages.
-                    /// </summary>
-                    [JsonProperty("hair", Required = Required.Always)]
-                    public IReadOnlyList<string> Hair { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of face removal messages.
-                    /// </summary>
-                    [JsonProperty("face", Required = Required.Always)]
-                    public IReadOnlyList<string> Face { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of ear removal messages.
-                    /// </summary>
-                    [JsonProperty("ear", Required = Required.Always)]
-                    public IReadOnlyList<string> Ear { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of eye removal messages.
-                    /// </summary>
-                    [JsonProperty("eye", Required = Required.Always)]
-                    public IReadOnlyList<string> Eye { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of teeth removal messages.
-                    /// </summary>
-                    [JsonProperty("teeth", Required = Required.Always)]
-                    public IReadOnlyList<string> Teeth { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of leg removal messages.
-                    /// </summary>
-                    [JsonProperty("leg", Required = Required.Always)]
-                    public IReadOnlyList<string> Leg { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of arm removal messages.
-                    /// </summary>
-                    [JsonProperty("arm", Required = Required.Always)]
-                    public IReadOnlyList<string> Arm { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of tail removal messages.
-                    /// </summary>
-                    [JsonProperty("tail", Required = Required.Always)]
-                    public IReadOnlyList<string> Tail { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of wing removal messages.
-                    /// </summary>
-                    [JsonProperty("wing", Required = Required.Always)]
-                    public IReadOnlyList<string> Wing { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of penile removal messages.
-                    /// </summary>
-                    [JsonProperty("penis", Required = Required.Always)]
-                    public IReadOnlyList<string> Penis { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of vaginal removal messages.
-                    /// </summary>
-                    [JsonProperty("vagina", Required = Required.Always)]
-                    public IReadOnlyList<string> Vagina { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of head removal messages.
-                    /// </summary>
-                    [JsonProperty("head", Required = Required.Always)]
-                    public IReadOnlyList<string> Head { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of body removal messages.
-                    /// </summary>
-                    [JsonProperty("body", Required = Required.Always)]
-                    public IReadOnlyList<string> Body { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of pattern removal messages.
-                    /// </summary>
-                    [JsonProperty("pattern", Required = Required.Always)]
-                    public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
-                }
-
-                /// <summary>
-                /// Holds uniform messages.
-                /// </summary>
-                public sealed class UniformMessages
-                {
-                    /// <summary>
-                    /// Gets a list of uniform ear removal messages.
-                    /// </summary>
-                    [JsonProperty("ears", Required = Required.Always)]
-                    public IReadOnlyList<string> Ears { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of uniform eye removal messages.
-                    /// </summary>
-                    [JsonProperty("eyes", Required = Required.Always)]
-                    public IReadOnlyList<string> Eyes { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of uniform leg removal messages.
-                    /// </summary>
-                    [JsonProperty("legs", Required = Required.Always)]
-                    public IReadOnlyList<string> Legs { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of uniform arm removal messages.
-                    /// </summary>
-                    [JsonProperty("arms", Required = Required.Always)]
-                    public IReadOnlyList<string> Arms { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of uniform wing removal messages.
-                    /// </summary>
-                    [JsonProperty("wings", Required = Required.Always)]
-                    public IReadOnlyList<string> Wings { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of uniform pattern removal messages.
-                    /// </summary>
-                    [JsonProperty("pattern", Required = Required.Always)]
-                    public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
-                }
-            }
-
-            /// <summary>
-            /// Holds shifting messages.
-            /// </summary>
-            public sealed class ShiftingMessages
-            {
-                /// <summary>
-                /// Gets a set of singular shifting messages. These are used when single parts are transformed.
-                /// </summary>
-                [JsonProperty("single", Required = Required.Always)]
-                public SingleMessages Single { get; private set; } = new SingleMessages();
-
-                /// <summary>
-                /// Gets a set of uniform shifting messages. These are used when two or more matching parts are
-                /// transformed.
-                /// </summary>
-                [JsonProperty("uniform", Required = Required.Always)]
-                public UniformMessages Uniform { get; private set; } = new UniformMessages();
-
-                /// <summary>
-                /// Holds singular messages.
-                /// </summary>
-                public sealed class SingleMessages
-                {
-                    /// <summary>
-                    /// Gets a list of colour shifting messages.
-                    /// </summary>
-                    [JsonProperty("colour", Required = Required.Always)]
-                    public IReadOnlyList<string> Colour { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of pattern shifting messages.
-                    /// </summary>
-                    [JsonProperty("pattern", Required = Required.Always)]
-                    public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of pattern colour shifting messages.
-                    /// </summary>
-                    [JsonProperty("patternColour", Required = Required.Always)]
-                    public IReadOnlyList<string> PatternColour { get; private set; } = new List<string>();
-                }
-
-                /// <summary>
-                /// Holds uniform messages.
-                /// </summary>
-                public sealed class UniformMessages
-                {
-                    /// <summary>
-                    /// Gets a list of uniform colour shifting messages.
-                    /// </summary>
-                    [JsonProperty("colour", Required = Required.Always)]
-                    public IReadOnlyList<string> Colour { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of uniform pattern shifting messages.
-                    /// </summary>
-                    [JsonProperty("pattern", Required = Required.Always)]
-                    public IReadOnlyList<string> Pattern { get; private set; } = new List<string>();
-
-                    /// <summary>
-                    /// Gets a list of uniform pattern colour shifting messages.
-                    /// </summary>
-                    [JsonProperty("patternColour", Required = Required.Always)]
-                    public IReadOnlyList<string> PatternColour { get; private set; } = new List<string>();
-                }
             }
         }
     }

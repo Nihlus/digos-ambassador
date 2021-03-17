@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             var getSpeciesResult = this.Transformation.GetSpeciesByName(speciesName.Value);
             if (!getSpeciesResult.IsSuccess)
             {
-                throw new InvalidOperationException(getSpeciesResult.ErrorReason);
+                throw new InvalidOperationException(getSpeciesResult.Unwrap().Message);
             }
 
             return getSpeciesResult.Entity;

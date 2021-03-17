@@ -70,7 +70,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
 
             if (!result.IsSuccess)
             {
-                return $"[{result.ErrorReason}]";
+                return $"[{result.Unwrap().Message}]";
             }
 
             return result.Entity;

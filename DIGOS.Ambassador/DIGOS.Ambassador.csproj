@@ -145,6 +145,15 @@
       <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
       -->
     </ProjectReference>
+    <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Transformations\DIGOS.Ambassador.Plugins.Transformations.csproj">
+      <!--
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Content</OutputItemType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+      <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+      -->
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
