@@ -24,6 +24,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -38,11 +39,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Remora.Behaviours.Services;
 using Remora.Commands.Extensions;
+using Remora.Commands.Trees.Nodes;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.Caching.Extensions;
 using Remora.Discord.Commands.Conditions;
 using Remora.Discord.Commands.Extensions;
 using Remora.Discord.Commands.Parsers;
+using Remora.Discord.Commands.Results;
 using Remora.Discord.Commands.Services;
 using Remora.Discord.Core;
 using Remora.Discord.Gateway.Extensions;
@@ -174,11 +177,25 @@ namespace DIGOS.Ambassador
             var checkSlashSupport = slashService.SupportsSlashCommands();
             if (!checkSlashSupport.IsSuccess)
             {
-                log.LogWarning
-                (
-                    "The registered commands of the bot don't support slash commands: {Reason}",
-                    checkSlashSupport.Unwrap().Message
-                );
+                var error = checkSlashSupport.Unwrap();
+                if (error is UnsupportedFeatureError ufe)
+                {
+                    var location = ufe.Node is not null
+                        ? GetCommandLocation(ufe.Node)
+                        : "unknown";
+
+                    log.LogWarning
+                    (
+                        "The registered commands of the bot don't support slash commands: {Reason} ({Location})",
+                        error.Message,
+                        location
+                    );
+                }
+                else
+                {
+                    log.LogError("Failed to check slash command compatibility: {Reason}", error.Message);
+                    return;
+                }
             }
             else
             {
@@ -233,6 +250,35 @@ namespace DIGOS.Ambassador
 
             await host.RunAsync(cancellationSource.Token);
             await behaviourService.StopBehavioursAsync();
+        }
+
+        private static string GetCommandLocation(IChildNode node)
+        {
+            var sb = new StringBuilder();
+
+            switch (node)
+            {
+                case GroupNode group:
+                {
+                    IParentNode current = group;
+                    while (current is IChildNode child)
+                    {
+                        sb.Insert(0, "::");
+                        sb.Insert(0, child.Key);
+                        current = child.Parent;
+                    }
+                    break;
+                }
+                case CommandNode command:
+                {
+                    sb.Append(command.GroupType.FullName);
+                    sb.Append("::");
+                    sb.Append(command.CommandMethod.Name);
+                    break;
+                }
+            }
+
+            return sb.ToString();
         }
     }
 }
