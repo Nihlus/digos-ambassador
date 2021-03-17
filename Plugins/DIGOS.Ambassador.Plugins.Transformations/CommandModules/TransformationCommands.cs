@@ -21,7 +21,6 @@
 //
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
@@ -316,7 +315,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
         [Command("pattern")]
-        [Description("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
+        [Description("Transforms the pattern on the given bodypart on yourself into the given pattern and colour.")]
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<UserMessage>> ShiftPatternAsync
         (
@@ -335,7 +334,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
         [Command("pattern")]
-        [Description("Transforms the pattern on the given bodypart on yourself into the given pattern and secondary colour.")]
+        [Description("Transforms the pattern on the given bodypart on yourself into the given pattern and colour.")]
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<UserMessage>> ShiftPatternAsync
         (
@@ -355,7 +354,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
         [Command("pattern")]
-        [Description("Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.")]
+        [Description("Transforms the pattern on the given bodypart on the target user into the given pattern and colour.")]
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<UserMessage>> ShiftPatternAsync
         (
@@ -376,7 +375,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <param name="colour">The colour to transform it into.</param>
         [UsedImplicitly]
         [Command("pattern")]
-        [Description("Transforms the pattern on the given bodypart on the target user into the given pattern and secondary colour.")]
+        [Description("Transforms the pattern on the given bodypart on the target user into the given pattern and colour.")]
         [RequireContext(ChannelContext.Guild)]
         public async Task<Result<UserMessage>> ShiftPatternAsync
         (
