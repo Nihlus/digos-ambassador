@@ -69,6 +69,12 @@
       <Compile Update="Transformations\Messages\TransformationText.DescriptionMessages.UniformDescriptions.cs">
         <DependentUpon>TransformationText.DescriptionMessages.cs</DependentUpon>
       </Compile>
+      <Compile Update="CommandModules\TransformationListCommands.cs">
+        <DependentUpon>TransformationCommands.cs</DependentUpon>
+      </Compile>
+      <Compile Update="CommandModules\TransformationSetCommands.cs">
+        <DependentUpon>TransformationCommands.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
 </Project>
