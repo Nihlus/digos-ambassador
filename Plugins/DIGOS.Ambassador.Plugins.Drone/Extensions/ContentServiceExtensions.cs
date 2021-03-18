@@ -132,8 +132,8 @@ namespace DIGOS.Ambassador.Plugins.Drone.Extensions
             " suave sway, gently pulsing her dome at you. Won't you come in for a closer look?~",
 
             "Fresh out of the pod, this drone is eager to serve both her sisters and her Mistress. Shards of her " +
-            "former personality seep through every now and then, but she's an expert at calming them back down with a" +
-            "few rubs and tweaks. So much of an expert, in fact, that she's quite good at doing it to others... " +
+            "former personality seep through every now and then, but she's an expert at calming them back down with " +
+            "a few rubs and tweaks. So much of an expert, in fact, that she's quite good at doing it to others... " +
             "want to find out for yourself?~"
         };
 
