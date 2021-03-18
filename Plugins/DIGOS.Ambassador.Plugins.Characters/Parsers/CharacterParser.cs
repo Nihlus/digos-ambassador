@@ -66,7 +66,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Parsers
                 return await _characterService.GetBestMatchingCharacterAsync
                 (
                     _context.GuildID.Value,
-                    _context.User.ID,
+                    null,
                     value,
                     ct
                 );
