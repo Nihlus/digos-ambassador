@@ -623,6 +623,18 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task<Result> ConsumeMessageAsync(IMessage message)
         {
+            var checkForActive = await HasActiveRoleplayAsync(message.ChannelID);
+            if (!checkForActive.IsSuccess)
+            {
+                return Result.FromError(checkForActive);
+            }
+
+            if (!checkForActive.Entity)
+            {
+                // There's no roleplay in that channel, so it's fine
+                return Result.FromSuccess();
+            }
+
             var result = await GetActiveRoleplayAsync(message.ChannelID);
             if (!result.IsSuccess)
             {
