@@ -22,25 +22,18 @@
 
 using System;
 using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Extensions;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Feedback.Results;
-using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model;
 using DIGOS.Ambassador.Plugins.Characters.Services;
-using DIGOS.Ambassador.Plugins.Transformations.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using DIGOS.Ambassador.Plugins.Transformations.Results;
 using DIGOS.Ambassador.Plugins.Transformations.Services;
 using DIGOS.Ambassador.Plugins.Transformations.Transformations;
-using Humanizer;
 using JetBrains.Annotations;
 using Remora.Commands.Attributes;
 using Remora.Commands.Groups;
@@ -59,13 +52,12 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
     /// </summary>
     [Group("tf")]
     [Description("Transformation-related commands, such as transforming certain body parts or saving transforms as characters.")]
-    public class TransformationCommands : CommandGroup
+    public partial class TransformationCommands : CommandGroup
     {
         private readonly UserFeedbackService _feedback;
         private readonly ContentService _content;
         private readonly CharacterDiscordService _characters;
         private readonly TransformationService _transformation;
-        private readonly InteractivityService _interactivity;
         private readonly ICommandContext _context;
 
         /// <summary>
@@ -74,7 +66,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         /// <param name="feedback">The feedback service.</param>
         /// <param name="characters">The character service.</param>
         /// <param name="transformation">The transformation service.</param>
-        /// <param name="interactivity">The interactivity service.</param>
         /// <param name="content">The content service.</param>
         /// <param name="context">The command context.</param>
         public TransformationCommands
@@ -82,7 +73,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             UserFeedbackService feedback,
             CharacterDiscordService characters,
             TransformationService transformation,
-            InteractivityService interactivity,
             ContentService content,
             ICommandContext context
         )
@@ -90,7 +80,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             _feedback = feedback;
             _characters = characters;
             _transformation = transformation;
-            _interactivity = interactivity;
             _content = content;
             _context = context;
         }
@@ -519,243 +508,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         }
 
         /// <summary>
-        /// Lists the available transformation species.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("list-species")]
-        [Description("Lists the available transformation species.")]
-        public async Task<Result> ListAvailableTransformationsAsync()
-        {
-            var availableSpecies = await _transformation.GetAvailableSpeciesAsync();
-
-            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
-            (
-                availableSpecies,
-                s => $"{s.Name.Humanize(LetterCasing.Title)} ({s.Name})",
-                s => $"{s.Description}\nWritten by {s.Author}.",
-                "There are no species available."
-            );
-
-            pages = pages.Select
-            (
-                p =>
-                    p with
-                    {
-                        Title = "Available species",
-                        Colour = Color.MediumPurple
-                    }
-            )
-            .ToList();
-
-            if (availableSpecies.Any())
-            {
-                pages = pages.Select
-                (
-                    p =>
-                        p with
-                        {
-                            Description = "Use the name inside the parens when transforming body parts."
-                        }
-                )
-                .ToList();
-            }
-
-            return await _interactivity.SendInteractiveMessageAsync
-            (
-                _context.ChannelID,
-                _context.User.ID,
-                pages
-            );
-        }
-
-        /// <summary>
-        /// Lists the available bodyparts.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("list-bodyparts")]
-        [Description("Lists the available bodyparts.")]
-        public async Task<Result> ListAvailableBodypartsAsync()
-        {
-            var parts = Enum.GetValues(typeof(Bodypart))
-                .Cast<Bodypart>()
-                .OrderBy(b => b)
-                .ToList();
-
-            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
-            (
-                parts,
-                b => b.Humanize(),
-                b =>
-                {
-                    if (b.IsChiral())
-                    {
-                        return "This part is available in both left and right versions.";
-                    }
-
-                    if (!b.IsGenderNeutral())
-                    {
-                        return "This part is considered NSFW.";
-                    }
-
-                    if (b.IsComposite())
-                    {
-                        return "This part is composed of smaller parts.";
-                    }
-
-                    return "This is a normal bodypart.";
-                }
-            );
-
-            pages = pages.Select
-            (
-                p =>
-                    p with
-                    {
-                        Title = "Available bodyparts",
-                        Colour = Color.MediumPurple
-                    }
-            )
-            .ToList();
-
-            return await _interactivity.SendInteractiveMessageAsync(_context.ChannelID, _context.User.ID, pages);
-        }
-
-        /// <summary>
-        /// Lists the available shades.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("list-colours")]
-        [Description("Lists the available colours.")]
-        public async Task<Result> ListAvailableShadesAsync()
-        {
-            var parts = Enum.GetValues(typeof(Shade))
-                .Cast<Shade>()
-                .OrderBy(s => s)
-                .ToList();
-
-            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
-            (
-                parts,
-                b => b.Humanize(),
-                _ => "\u200B"
-            );
-
-            pages = pages.Select
-            (
-                p =>
-                    p with
-                    {
-                        Title = "Available colours",
-                        Colour = Color.MediumPurple
-                    }
-            )
-            .ToList();
-
-            return await _interactivity.SendInteractiveMessageAsync(_context.ChannelID, _context.User.ID, pages);
-        }
-
-        /// <summary>
-        /// Lists the available shade modifiers.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("list-colour-modifiers")]
-        [Description("Lists the available colour modifiers.")]
-        public async Task<Result> ListAvailableShadeModifiersAsync()
-        {
-            var parts = Enum.GetValues(typeof(ShadeModifier))
-                .Cast<ShadeModifier>()
-                .OrderBy(sm => sm)
-                .ToList();
-
-            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
-            (
-                parts,
-                b => b.Humanize(),
-                _ => "\u200B"
-            );
-
-            pages = pages.Select
-            (
-                p =>
-                    p with
-                    {
-                        Title = "Available colour modifiers",
-                        Colour = Color.MediumPurple
-                    }
-            )
-            .ToList();
-
-            return await _interactivity.SendInteractiveMessageAsync(_context.ChannelID, _context.User.ID, pages);
-        }
-
-        /// <summary>
-        /// Lists the available patterns.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("list-patterns")]
-        [Description("Lists the available patterns.")]
-        public async Task<Result> ListAvailablePatternsAsync()
-        {
-            var parts = Enum.GetValues(typeof(Pattern))
-                .Cast<Pattern>()
-                .OrderBy(c => c)
-                .ToList();
-
-            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
-            (
-                parts,
-                b => b.Humanize(),
-                _ => "\u200B"
-            );
-
-            pages = pages.Select
-            (
-                p =>
-                    p with
-                    {
-                        Title = "Available patterns",
-                        Colour = Color.MediumPurple
-                    }
-            )
-            .ToList();
-
-            return await _interactivity.SendInteractiveMessageAsync(_context.ChannelID, _context.User.ID, pages);
-        }
-
-        /// <summary>
-        /// Lists the available transformations for a given bodypart.
-        /// </summary>
-        /// <param name="bodyPart">The part to list available transformations for. Optional.</param>
-        [UsedImplicitly]
-        [Command("list-transformations-for-part")]
-        [Description("Lists the available transformations for a given bodypart.")]
-        public async Task<Result> ListAvailableTransformationsAsync(Bodypart bodyPart)
-        {
-            var transformations = await _transformation.GetAvailableTransformationsAsync(bodyPart);
-
-            var pages = PaginatedEmbedFactory.SimpleFieldsFromCollection
-            (
-                transformations,
-                tf => $"{tf.Species.Name.Humanize(LetterCasing.Title)} ({tf.Species.Name})",
-                tf => tf.Description
-            );
-
-            pages = pages.Select
-            (
-                p =>
-                    p with
-                    {
-                        Title = "Available transformations",
-                        Description = "Use the name inside the parens when transforming body parts.",
-                        Colour = Color.MediumPurple
-                    }
-            )
-            .ToList();
-
-            return await _interactivity.SendInteractiveMessageAsync(_context.ChannelID, _context.User.ID, pages);
-        }
-
-        /// <summary>
         /// Describes the current physical appearance of the current character.
         /// </summary>
         [UsedImplicitly]
@@ -858,62 +610,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
         }
 
         /// <summary>
-        /// Sets your current appearance as your current character's default one.
-        /// </summary>
-        [UsedImplicitly]
-        [Command("save-default")]
-        [Description("Saves your current appearance as your current character's default one.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> SetCurrentAppearanceAsDefaultAsync()
-        {
-            var getCurrentCharacterResult = await _characters.GetCurrentCharacterAsync
-            (
-                _context.GuildID.Value,
-                _context.User.ID
-            );
-
-            if (!getCurrentCharacterResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(getCurrentCharacterResult);
-            }
-
-            var character = getCurrentCharacterResult.Entity;
-
-            var setDefaultAppearanceResult = await _transformation.SetCurrentAppearanceAsDefaultForCharacterAsync(character);
-            if (!setDefaultAppearanceResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(setDefaultAppearanceResult);
-            }
-
-            return new ConfirmationMessage
-            (
-                "Current appearance saved as the default one of this character."
-            );
-        }
-
-        /// <summary>
-        /// Sets your default setting for opting in or out of transformations on servers you join.
-        /// </summary>
-        /// <param name="shouldOptIn">Whether or not to opt in by default.</param>
-        [UsedImplicitly]
-        [Command("set-default-opt-in")]
-        [Description("Sets your default setting for opting in or out of transformations on servers you join.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> SetDefaultOptInOrOutOfTransformationsAsync(bool shouldOptIn = true)
-        {
-            var setDefaultOptInResult = await _transformation.SetDefaultOptInAsync(_context.User.ID, shouldOptIn);
-            if (!setDefaultOptInResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(setDefaultOptInResult);
-            }
-
-            return new ConfirmationMessage
-            (
-                $"You're now opted {(shouldOptIn ? "in" : "out")} by default on new servers."
-            );
-        }
-
-        /// <summary>
         /// Opts into the transformation module on this server.
         /// </summary>
         [UsedImplicitly]
@@ -947,60 +643,6 @@ namespace DIGOS.Ambassador.Plugins.Transformations.CommandModules
             }
 
             return new ConfirmationMessage("Opted out of transformations.");
-        }
-
-        /// <summary>
-        /// Sets your default protection type for transformations on servers you join.
-        /// </summary>
-        /// <param name="protectionType">The protection type to use.</param>
-        [UsedImplicitly]
-        [Command("set-default-protection")]
-        [Description("Sets your default protection type for transformations on servers you join.")]
-        public async Task<Result<UserMessage>> SetDefaultProtectionTypeAsync(ProtectionType protectionType)
-        {
-            var setProtectionTypeResult = await _transformation.SetDefaultProtectionTypeAsync
-            (
-                _context.User.ID,
-                protectionType
-            );
-
-            if (!setProtectionTypeResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(setProtectionTypeResult);
-            }
-
-            return new ConfirmationMessage
-            (
-                $"Default protection type set to \"{protectionType.Humanize()}\""
-            );
-        }
-
-        /// <summary>
-        /// Sets your protection type for transformations. Available types are Whitelist and Blacklist.
-        /// </summary>
-        /// <param name="protectionType">The protection type to use.</param>
-        [UsedImplicitly]
-        [Command("set-protection")]
-        [Description("Sets your protection type for transformations.")]
-        [RequireContext(ChannelContext.Guild)]
-        public async Task<Result<UserMessage>> SetProtectionTypeAsync(ProtectionType protectionType)
-        {
-            var setProtectionTypeResult = await _transformation.SetServerProtectionTypeAsync
-            (
-                _context.User.ID,
-                _context.GuildID.Value,
-                protectionType
-            );
-
-            if (!setProtectionTypeResult.IsSuccess)
-            {
-                return Result<UserMessage>.FromError(setProtectionTypeResult);
-            }
-
-            return new ConfirmationMessage
-            (
-                $"Protection type set to \"{protectionType.Humanize()}\""
-            );
         }
 
         /// <summary>
