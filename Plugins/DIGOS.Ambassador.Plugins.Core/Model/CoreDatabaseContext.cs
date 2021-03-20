@@ -23,9 +23,9 @@
 using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
+using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Remora.Discord.Core;
 using Remora.EntityFrameworkCore.Modular;
 
 // ReSharper disable RedundantDefaultMemberInitializer - suppressions for indirectly initialized properties.
@@ -70,7 +70,9 @@ namespace DIGOS.Ambassador.Plugins.Core.Model
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.ConfigureCoreConversions();
+            modelBuilder
+                .ConfigurePermissionConversions()
+                .ConfigureCoreConversions();
 
             modelBuilder.Entity<ServerUser>().HasOne(su => su.Server).WithMany(s => s.KnownUsers);
             modelBuilder.Entity<ServerUser>().HasOne(su => su.User).WithMany();

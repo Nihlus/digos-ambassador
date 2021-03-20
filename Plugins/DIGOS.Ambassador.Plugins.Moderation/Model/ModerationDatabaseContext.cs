@@ -25,7 +25,7 @@ using DIGOS.Ambassador.Plugins.Core.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
 using DIGOS.Ambassador.Plugins.Core.Model.Users;
 using DIGOS.Ambassador.Plugins.Moderation.Extensions;
-using JetBrains.Annotations;
+using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Remora.Discord.Core;
 using Remora.EntityFrameworkCore.Modular;
@@ -76,6 +76,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.Model
             base.OnModelCreating(modelBuilder);
 
             modelBuilder
+                .ConfigurePermissionConversions()
                 .ConfigureCoreConversions()
                 .ConfigureModerationConversions();
         }

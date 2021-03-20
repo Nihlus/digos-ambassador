@@ -60,7 +60,9 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.ConfigureCoreConversions();
+            modelBuilder
+                .ConfigurePermissionConversions()
+                .ConfigureCoreConversions();
         }
     }
 }

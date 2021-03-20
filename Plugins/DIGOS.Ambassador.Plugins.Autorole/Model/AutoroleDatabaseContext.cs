@@ -25,6 +25,7 @@ using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Conditions.Bases;
 using DIGOS.Ambassador.Plugins.Autorole.Model.Statistics;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
+using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
@@ -74,6 +75,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.Model
             base.OnModelCreating(modelBuilder);
 
             modelBuilder
+                .ConfigurePermissionConversions()
                 .ConfigureCoreConversions()
                 .ConfigureAutoroleConversions();
 

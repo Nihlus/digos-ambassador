@@ -23,6 +23,7 @@
 using System.Diagnostics.CodeAnalysis;
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
+using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using DIGOS.Ambassador.Plugins.Transformations.Model.Appearances;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -83,6 +84,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Model
             base.OnModelCreating(modelBuilder);
 
             modelBuilder
+                .ConfigurePermissionConversions()
                 .ConfigureCoreConversions()
                 .ConfigureCharacterConversions();
 

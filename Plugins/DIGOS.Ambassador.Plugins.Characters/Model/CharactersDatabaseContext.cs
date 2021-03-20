@@ -23,6 +23,7 @@
 using DIGOS.Ambassador.Plugins.Characters.Extensions;
 using DIGOS.Ambassador.Plugins.Characters.Model.Data;
 using DIGOS.Ambassador.Plugins.Core.Extensions;
+using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Remora.EntityFrameworkCore.Modular;
@@ -67,6 +68,7 @@ namespace DIGOS.Ambassador.Plugins.Characters.Model
             base.OnModelCreating(modelBuilder);
 
             modelBuilder
+                .ConfigurePermissionConversions()
                 .ConfigureCoreConversions()
                 .ConfigureCharacterConversions();
         }

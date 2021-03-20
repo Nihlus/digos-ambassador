@@ -23,7 +23,7 @@
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using DIGOS.Ambassador.Core.Database.Entities;
-using JetBrains.Annotations;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Permissions.Model
 {
@@ -36,7 +36,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// <summary>
         /// Gets the role's Discord ID.
         /// </summary>
-        public long RoleID { get; private set; }
+        public Snowflake RoleID { get; private set; }
 
         /// <summary>
         /// Gets the permission's unique identifier.
@@ -59,7 +59,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Model
         /// <param name="roleID">The ID of the role that the permission applies to.</param>
         /// <param name="permission">The unique identifier of the permission.</param>
         /// <param name="target">The allowed targets for the permission.</param>
-        public RolePermission(long roleID, Guid permission, PermissionTarget target)
+        public RolePermission(Snowflake roleID, Guid permission, PermissionTarget target)
         {
             this.RoleID = roleID;
             this.Permission = permission;

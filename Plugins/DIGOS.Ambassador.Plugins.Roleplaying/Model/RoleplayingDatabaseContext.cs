@@ -21,6 +21,7 @@
 //
 
 using DIGOS.Ambassador.Plugins.Core.Extensions;
+using DIGOS.Ambassador.Plugins.Permissions.Extensions;
 using DIGOS.Ambassador.Plugins.Roleplaying.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Model
             base.OnModelCreating(modelBuilder);
 
             modelBuilder
+                .ConfigurePermissionConversions()
                 .ConfigureCoreConversions()
                 .ConfigureRoleplayConversions();
 

@@ -29,7 +29,6 @@ using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Plugins.Permissions.Model;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
-using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.Core;
 using Remora.Results;
@@ -359,15 +358,23 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
         [Pure]
         public async Task<Result> HasPermissionAsync
         (
-            IGuild discordServer,
+            Snowflake discordServer,
             Snowflake discordUser,
             IPermission requiredPermission,
             PermissionTarget target,
             CancellationToken ct = default
         )
         {
+            var getDiscordServer = await _guildAPI.GetGuildAsync(discordServer, ct: ct);
+            if (!getDiscordServer.IsSuccess)
+            {
+                return Result.FromError(getDiscordServer);
+            }
+
+            var guild = getDiscordServer.Entity;
+
             // The server owner always has all permissions by default
-            if (discordServer.OwnerID == discordUser)
+            if (guild.OwnerID == discordUser)
             {
                 return Result.FromSuccess();
             }
@@ -403,7 +410,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
 
             var hasPermission = false;
 
-            var getGuildMember = await _guildAPI.GetGuildMemberAsync(discordServer.ID, discordUser, ct);
+            var getGuildMember = await _guildAPI.GetGuildMemberAsync(discordServer, discordUser, ct);
             if (!getGuildMember.IsSuccess)
             {
                 return Result.FromError(getGuildMember);
@@ -429,8 +436,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             var userPermission = await _database.UserPermissions.ServersideQueryAsync
             (
                 q => q
-                    .Where(p => p.ServerID == (long)discordServer.ID.Value)
-                    .Where(p => p.UserID == (long)discordUser.Value)
+                    .Where(p => p.ServerID == discordServer)
+                    .Where(p => p.UserID == discordUser)
                     .Where(p => p.Permission == requiredPermission.UniqueIdentifier)
                     .Where(p => p.Target == target)
                     .SingleOrDefaultAsync(ct)
@@ -472,8 +479,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             return await _database.UserPermissions.ServersideQueryAsync
             (
                 q => q
-                    .Where(p => p.ServerID == (long)discordServer.Value)
-                    .Where(p => p.UserID == (long)discordUser.Value),
+                    .Where(p => p.ServerID == discordServer)
+                    .Where(p => p.UserID == discordUser),
                 ct
             );
         }
@@ -490,11 +497,11 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             CancellationToken ct = default
         )
         {
-            var userRoles = discordUserRoles.Select(r => (long)r.Value).ToList();
+            var userRoles = discordUserRoles.ToList();
 
             var permissions = await _database.RolePermissions.ServersideQueryAsync
             (
-                q => q.Where(p => userRoles.Contains(p.RoleID)),
+                q => q.Where(p => discordUserRoles.Contains(p.RoleID)),
                 ct
             );
 
@@ -525,7 +532,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
             var rolePermissions = await _database.RolePermissions.ServersideQueryAsync
             (
                 q => q
-                    .Where(p => p.RoleID == (long)discordRole.Value)
+                    .Where(p => p.RoleID == discordRole)
                     .Where(p => p.Permission == permission.UniqueIdentifier)
                     .Where(p => p.Target == target),
                 ct
@@ -581,8 +588,8 @@ namespace DIGOS.Ambassador.Plugins.Permissions.Services
                 q => q.Where
                 (
                     p =>
-                        p.ServerID == (long)discordGuild.Value &&
-                        p.UserID == (long)discordUser.Value &&
+                        p.ServerID == discordGuild &&
+                        p.UserID == discordUser &&
                         p.Permission == permission.UniqueIdentifier &&
                         p.Target == target
                 ),
