@@ -609,21 +609,6 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
             var message = getMessage.Entity;
             var existingReactions = message.Reactions;
 
-            if (existingReactions.HasValue)
-            {
-                var removeReactions = await _channelAPI.DeleteAllReactionsAsync
-                (
-                    wizard.ChannelID,
-                    wizard.MessageID,
-                    ct
-                );
-
-                if (!removeReactions.IsSuccess)
-                {
-                    return removeReactions;
-                }
-            }
-
             foreach (var reaction in wizard.GetCurrentPageEmotes().Select(e => e.GetEmojiName()))
             {
                 if (existingReactions.HasValue)
@@ -646,6 +631,31 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                 if (!addReaction.IsSuccess)
                 {
                     return addReaction;
+                }
+            }
+
+            // Remove other reactions
+            if (existingReactions.HasValue)
+            {
+                foreach (var reaction in existingReactions.Value)
+                {
+                    if (wizard.GetCurrentPageEmotes().Any(e => e.GetEmojiName() == reaction.Emoji.GetEmojiName()))
+                    {
+                        continue;
+                    }
+
+                    var removeReaction = await _channelAPI.DeleteOwnReactionAsync
+                    (
+                        wizard.ChannelID,
+                        wizard.MessageID,
+                        reaction.Emoji.GetEmojiName(),
+                        ct
+                    );
+
+                    if (!removeReaction.IsSuccess)
+                    {
+                        return removeReaction;
+                    }
                 }
             }
 
