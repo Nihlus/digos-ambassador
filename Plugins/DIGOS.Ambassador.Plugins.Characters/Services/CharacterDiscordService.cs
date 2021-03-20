@@ -757,33 +757,33 @@ namespace DIGOS.Ambassador.Plugins.Characters.Services
             }
 
             var modifyNickname = await _guildAPI.ModifyGuildMemberAsync(guildID, userID, newNick, ct: ct);
-            if (!modifyNickname.IsSuccess)
+            if (modifyNickname.IsSuccess)
             {
-                if (modifyNickname.Unwrap() is not DiscordRestResultError rre)
-                {
-                    if (modifyNickname.Unwrap() is not HttpResultError hre)
-                    {
-                        return modifyNickname;
-                    }
+                return modifyNickname;
+            }
 
-                    if (hre.StatusCode is not HttpStatusCode.Forbidden)
-                    {
-                        return modifyNickname;
-                    }
-
-                    return new UserError
-                    (
-                        "I'm forbidden from setting the user's nickname - typically, this means the target was the " +
-                        "server owner. This is a Discord limitation, and can't be fixed."
-                    );
-                }
-
+            if (modifyNickname.Unwrap() is DiscordRestResultError rre)
+            {
                 return rre.DiscordError.Code is not DiscordError.MissingPermission
                     ? modifyNickname
                     : new UserError("I don't have permission to set the user's nickname.");
             }
 
-            return modifyNickname;
+            if (modifyNickname.Unwrap() is not HttpResultError hre)
+            {
+                return modifyNickname;
+            }
+
+            if (hre.StatusCode is not HttpStatusCode.Forbidden)
+            {
+                return modifyNickname;
+            }
+
+            return new UserError
+            (
+                "I'm forbidden from setting the user's nickname - typically, this means the target was the " +
+                "server owner. This is a Discord limitation, and can't be fixed."
+            );
         }
 
         /// <summary>

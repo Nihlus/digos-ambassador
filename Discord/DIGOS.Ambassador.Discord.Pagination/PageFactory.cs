@@ -79,12 +79,14 @@ namespace DIGOS.Ambassador.Discord.Pagination
                 currentPageFields.Add(field);
             }
 
-            // Stick the remaining ones on the end
-            if (currentPageFields.Count > 0)
+            if (currentPageFields.Count <= 0)
             {
-                pages.Add(pageBase with { Fields = new List<IEmbedField>(currentPageFields) });
-                currentPageFields.Clear();
+                return pages;
             }
+
+            // Stick the remaining ones on the end
+            pages.Add(pageBase with { Fields = new List<IEmbedField>(currentPageFields) });
+            currentPageFields.Clear();
 
             return pages;
         }

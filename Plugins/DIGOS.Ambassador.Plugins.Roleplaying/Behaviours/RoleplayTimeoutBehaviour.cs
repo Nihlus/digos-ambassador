@@ -65,7 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
         )
             : base(services, logger)
         {
-            this._feedback = feedback;
+            _feedback = feedback;
         }
 
         /// <inheritdoc/>

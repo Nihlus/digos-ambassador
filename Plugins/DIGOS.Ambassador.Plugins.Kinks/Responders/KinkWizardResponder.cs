@@ -634,28 +634,30 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Responders
                 }
             }
 
-            // Remove other reactions
-            if (existingReactions.HasValue)
+            if (!existingReactions.HasValue)
             {
-                foreach (var reaction in existingReactions.Value)
+                return Result.FromSuccess();
+            }
+
+            // Remove other reactions
+            foreach (var reaction in existingReactions.Value)
+            {
+                if (wizard.GetCurrentPageEmotes().Any(e => e.GetEmojiName() == reaction.Emoji.GetEmojiName()))
                 {
-                    if (wizard.GetCurrentPageEmotes().Any(e => e.GetEmojiName() == reaction.Emoji.GetEmojiName()))
-                    {
-                        continue;
-                    }
+                    continue;
+                }
 
-                    var removeReaction = await _channelAPI.DeleteOwnReactionAsync
-                    (
-                        wizard.ChannelID,
-                        wizard.MessageID,
-                        reaction.Emoji.GetEmojiName(),
-                        ct
-                    );
+                var removeReaction = await _channelAPI.DeleteOwnReactionAsync
+                (
+                    wizard.ChannelID,
+                    wizard.MessageID,
+                    reaction.Emoji.GetEmojiName(),
+                    ct
+                );
 
-                    if (!removeReaction.IsSuccess)
-                    {
-                        return removeReaction;
-                    }
+                if (!removeReaction.IsSuccess)
+                {
+                    return removeReaction;
                 }
             }
 

@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -53,19 +52,6 @@ namespace DIGOS.Ambassador.Core.Extensions
         public static bool IsNullOrEmpty([NotNullWhen(false)] this string? source)
         {
             return string.IsNullOrEmpty(source);
-        }
-
-        /// <summary>
-        /// Determines whether or not a string contains another string using the given string comparer.
-        /// </summary>
-        /// <param name="this">The string to search.</param>
-        /// <param name="search">The string to search for.</param>
-        /// <param name="comparer">The string comparer to use.</param>
-        /// <returns>true if the string contains the other string; otherwise, false.</returns>
-        [Pure]
-        public static bool Contains([NotNullWhen(true)] this string? @this, string? search, StringComparison comparer)
-        {
-            return @this != null && @this != null && search != null && @this.IndexOf(search, comparer) >= 0;
         }
 
         /// <summary>
