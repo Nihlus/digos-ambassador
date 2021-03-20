@@ -26,6 +26,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Core.Database.Interfaces;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Plugins.Core.Model.Entity;
 using DIGOS.Ambassador.Plugins.Core.Model.Servers;
@@ -41,7 +42,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
     /// <summary>
     /// Acts as an interface for accessing, enabling, and disabling ongoing roleplays.
     /// </summary>
-    public sealed class RoleplayService
+    public sealed class RoleplayService : IQueryService<Roleplay>
     {
         private readonly RoleplayingDatabaseContext _database;
         private readonly OwnedEntityService _ownedEntities;
@@ -271,7 +272,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             CancellationToken ct = default
         )
         {
-            var userRoleplays = await QueryRoleplaysAsync
+            var userRoleplays = await QueryDatabaseAsync
             (
                 q => q
                     .Where(rp => rp.Owner.DiscordID == userID)
@@ -289,7 +290,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A queryable list of roleplays on the given server.</returns>
         [Pure]
-        public async Task<IReadOnlyList<Roleplay>> QueryRoleplaysAsync
+        public async Task<IReadOnlyList<Roleplay>> QueryDatabaseAsync
         (
             Func<IQueryable<Roleplay>, IQueryable<Roleplay>>? query = default,
             CancellationToken ct = default
@@ -306,7 +307,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <param name="query">Additional query statements.</param>
         /// <returns>A queryable list of roleplays on the given server.</returns>
         [Pure]
-        public async Task<TOut> QueryRoleplaysAsync<TOut>
+        public async Task<TOut> QueryDatabaseAsync<TOut>
         (
             Func<IQueryable<Roleplay>, Task<TOut>> query
         )
@@ -535,7 +536,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
             CancellationToken ct = default
         )
         {
-            var newOwnerRoleplays = await QueryRoleplaysAsync
+            var newOwnerRoleplays = await QueryDatabaseAsync
             (
                 q => q
                     .Where(rp => rp.Owner.DiscordID == newOwnerID)

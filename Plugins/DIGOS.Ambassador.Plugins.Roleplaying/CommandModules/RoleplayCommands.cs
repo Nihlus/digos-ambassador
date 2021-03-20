@@ -866,9 +866,9 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
                     message
                 );
 
-                if (sendWarning.Any(r => !r.IsSuccess))
+                if (!sendWarning.IsSuccess)
                 {
-                    return Result.FromError(sendWarning.First(r => !r.IsSuccess));
+                    return Result.FromError(sendWarning);
                 }
             }
 

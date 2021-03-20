@@ -26,6 +26,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Discord.Interactivity.Extensions;
+using DIGOS.Ambassador.Discord.Pagination.Responders;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Autorole;
 using DIGOS.Ambassador.Plugins.Autorole.Model;
@@ -61,6 +63,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole
         /// <inheritdoc />
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
+            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
             serviceCollection.TryAddScoped<AutoroleService>();
             serviceCollection.TryAddScoped<AutoroleUpdateService>();
             serviceCollection.TryAddScoped<UserStatisticsService>();

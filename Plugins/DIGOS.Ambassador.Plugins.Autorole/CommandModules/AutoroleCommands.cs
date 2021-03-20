@@ -20,7 +20,6 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -218,11 +217,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             return await _interactivity.SendInteractiveMessageAsync
             (
                 _context.ChannelID,
-                (channelID, messageID, channelAPI) => new PaginatedMessage
+                (channelID, messageID) => new PaginatedMessage
                 (
                     channelID,
                     messageID,
-                    channelAPI,
                     _context.User.ID,
                     pages
                 )
@@ -252,11 +250,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             return await _interactivity.SendInteractiveMessageAsync
             (
                 _context.ChannelID,
-                (channelID, messageID, channelAPI) => new PaginatedMessage
+                (channelID, messageID) => new PaginatedMessage
                 (
                     channelID,
                     messageID,
-                    channelAPI,
                     _context.User.ID,
                     pages
                 )
@@ -405,11 +402,10 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
             return await _interactivity.SendInteractiveMessageAsync
             (
                 _context.ChannelID,
-                (channelID, messageID, channelAPI) => new PaginatedMessage
+                (channelID, messageID) => new PaginatedMessage
                 (
                     channelID,
                     messageID,
-                    channelAPI,
                     _context.User.ID,
                     pages
                 )

@@ -266,31 +266,31 @@ namespace DIGOS.Ambassador.Responders
                     ct
                 );
 
-                if (sendMessage.Any(r => !r.IsSuccess))
+                if (!sendMessage.IsSuccess)
                 {
-                    return Result.FromError(sendMessage.First(r => !r.IsSuccess));
+                    return Result.FromError(sendMessage);
                 }
             }
 
             if (!executeResult.Entity.IsSuccess)
             {
-                if (executeResult.Entity.Unwrap() is UserError userError)
+                if (executeResult.Entity.Unwrap() is not UserError userError)
                 {
-                    // Alert the user, and don't complete the transaction
-                    var sendError = await _userFeedback.SendErrorAsync
-                    (
-                        commandContext.ChannelID,
-                        commandContext.User.ID,
-                        userError.Message,
-                        ct
-                    );
-
-                    return sendError.Any(r => !r.IsSuccess)
-                        ? Result.FromError(sendError.First(r => !r.IsSuccess))
-                        : Result.FromSuccess();
+                    return Result.FromError(executeResult.Entity.Unwrap());
                 }
 
-                return Result.FromError(executeResult.Entity.Unwrap());
+                // Alert the user, and don't complete the transaction
+                var sendError = await _userFeedback.SendErrorAsync
+                (
+                    commandContext.ChannelID,
+                    commandContext.User.ID,
+                    userError.Message,
+                    ct
+                );
+
+                return sendError.IsSuccess
+                    ? Result.FromSuccess()
+                    : Result.FromError(sendError);
             }
 
             transaction.Complete();

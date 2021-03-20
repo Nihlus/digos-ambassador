@@ -20,12 +20,14 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System.Linq;
 using DIGOS.Ambassador.Discord.Interactivity.Responders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Remora.Discord.API.Abstractions.Gateway.Commands;
 using Remora.Discord.Gateway;
 using Remora.Discord.Gateway.Extensions;
+using Remora.Discord.Gateway.Responders;
 
 namespace DIGOS.Ambassador.Discord.Interactivity.Extensions
 {
@@ -48,7 +50,30 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Extensions
             });
 
             serviceCollection.TryAddSingleton<InteractivityService>();
-            serviceCollection.AddResponder<InteractivityResponder>();
+            serviceCollection.AddResponder<MessageDeletionResponder>();
+
+            return serviceCollection;
+        }
+
+        /// <summary>
+        /// Adds a responder as an interactivity responder, if it is not already registered.
+        /// </summary>
+        /// <param name="serviceCollection">The service collection.</param>
+        /// <typeparam name="TResponder">The responder type.</typeparam>
+        /// <returns>The collection, with the added services.</returns>
+        public static IServiceCollection TryAddInteractivityResponder<TResponder>
+        (
+            this IServiceCollection serviceCollection
+        )
+            where TResponder : InteractivityResponder, IResponder
+        {
+            if (serviceCollection.Any(s => s.ImplementationType == typeof(TResponder)))
+            {
+                return serviceCollection;
+            }
+
+            serviceCollection.AddResponder<TResponder>();
+            serviceCollection.AddScoped<InteractivityResponder, TResponder>();
 
             return serviceCollection;
         }

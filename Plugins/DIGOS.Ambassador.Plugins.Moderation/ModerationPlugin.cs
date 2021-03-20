@@ -25,6 +25,8 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
+using DIGOS.Ambassador.Discord.Interactivity.Extensions;
+using DIGOS.Ambassador.Discord.Pagination.Responders;
 using DIGOS.Ambassador.Plugins.Moderation;
 using DIGOS.Ambassador.Plugins.Moderation.Behaviours;
 using DIGOS.Ambassador.Plugins.Moderation.CommandModules;
@@ -59,6 +61,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation
         /// <inheritdoc />
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
+            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
             serviceCollection
                 .AddConfiguredSchemaAwareDbContextPool<ModerationDatabaseContext>();
 

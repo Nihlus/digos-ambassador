@@ -1,5 +1,5 @@
 //
-//  IInteractiveMessage.cs
+//  IInteractiveEntity.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,26 +20,24 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Remora.Discord.Core;
+using System;
+using System.Threading;
 
-namespace DIGOS.Ambassador.Discord.Interactivity.Messages
+namespace DIGOS.Ambassador.Discord.Interactivity
 {
     /// <summary>
-    /// Represents the public interface of an interactive message.
+    /// Represents an interactive entity in Discord.
     /// </summary>
-    public interface IInteractiveMessage : IInteractiveEntity
+    public interface IInteractiveEntity : IDisposable
     {
-        /// <inheritdoc/>
-        string IInteractiveEntity.Nonce => this.MessageID.ToString();
+        /// <summary>
+        /// Gets a unique nonce that identifies this entity.
+        /// </summary>
+        string Nonce { get; }
 
         /// <summary>
-        /// Gets the ID of the channel the message is in.
+        /// Gets a semaphore used to synchronized access to the entity.
         /// </summary>
-        Snowflake ChannelID { get; }
-
-        /// <summary>
-        /// Gets the ID of the message.
-        /// </summary>
-        Snowflake MessageID { get; }
+        SemaphoreSlim Semaphore { get; }
     }
 }

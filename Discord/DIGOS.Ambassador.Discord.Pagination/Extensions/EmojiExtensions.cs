@@ -1,5 +1,5 @@
-﻿//
-//  FListKinkCategory.cs
+//
+//  EmojiExtensions.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -20,35 +20,37 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Text.Json.Serialization;
+using System;
+using Remora.Discord.API.Abstractions.Objects;
 
-namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
+namespace DIGOS.Ambassador.Discord.Pagination.Extensions
 {
     /// <summary>
-    /// Represents a JSON kink category from the F-list API.
+    /// Defines extension methods for the <see cref="IEmoji"/> interface.
     /// </summary>
-    internal class FListKinkCategory
+    public static class EmojiExtensions
     {
         /// <summary>
-        /// Gets the category name.
+        /// Gets the canonical name of the emoji.
         /// </summary>
-        public string Group { get; }
-
-        /// <summary>
-        /// Gets the kinks in the category.
-        /// </summary>
-        [JsonPropertyName("items")]
-        public FListKink[] Kinks { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FListKinkCategory"/> class.
-        /// </summary>
-        /// <param name="group">The category name.</param>
-        /// <param name="kinks">The retrieved kinks.</param>
-        public FListKinkCategory(string group, FListKink[] kinks)
+        /// <param name="emoji">The emoji.</param>
+        /// <returns>The name.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if the emoji has neither an ID nor a name set.
+        /// </exception>
+        public static string GetEmojiName(this IEmoji emoji)
         {
-            this.Group = group;
-            this.Kinks = kinks;
+            if (emoji.Name is not null)
+            {
+                return emoji.Name;
+            }
+
+            if (!emoji.ID.HasValue)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return emoji.ID.Value.ToString();
         }
     }
 }

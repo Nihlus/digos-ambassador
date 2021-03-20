@@ -22,11 +22,14 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
+using DIGOS.Ambassador.Discord.Interactivity.Responders;
+using Microsoft.Extensions.DependencyInjection;
 using Remora.Discord.API.Abstractions.Objects;
 using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
@@ -43,12 +46,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <summary>
         /// Holds a mapping of message IDs to tracked messages.
         /// </summary>
-        private readonly ConcurrentDictionary<Snowflake, IInteractiveMessage> _trackedMessages = new();
-
-        /// <summary>
-        /// Holds a mapping of tracked messages to synchronization primitives.
-        /// </summary>
-        private readonly ConcurrentDictionary<IInteractiveMessage, SemaphoreSlim> _messageSemaphores = new();
+        private readonly ConcurrentDictionary<string, IInteractiveMessage> _trackedMessages = new();
 
         /// <summary>
         /// Holds the Discord channel API.
@@ -56,12 +54,56 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         private readonly IDiscordRestChannelAPI _channelAPI;
 
         /// <summary>
+        /// Holds the Discord user API.
+        /// </summary>
+        private readonly IDiscordRestUserAPI _userAPI;
+
+        /// <summary>
+        /// Holds the available services.
+        /// </summary>
+        private readonly IServiceProvider _services;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="InteractivityService"/> class.
         /// </summary>
+        /// <param name="services">The available services.</param>
         /// <param name="channelAPI">The channel API.</param>
-        public InteractivityService(IDiscordRestChannelAPI channelAPI)
+        /// <param name="userAPI">The user API.</param>
+        public InteractivityService
+        (
+            IServiceProvider services,
+            IDiscordRestChannelAPI channelAPI,
+            IDiscordRestUserAPI userAPI
+        )
         {
             _channelAPI = channelAPI;
+            _userAPI = userAPI;
+            _services = services;
+        }
+
+        /// <summary>
+        /// Sends an interactive message.
+        /// </summary>
+        /// <param name="userID">The user to send the message to.</param>
+        /// <param name="messageFactory">A factory function that wraps a sent message.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public async Task<Result> SendPrivateInteractiveMessageAsync
+        (
+            Snowflake userID,
+            Func<Snowflake, Snowflake, IInteractiveMessage> messageFactory,
+            CancellationToken ct = default
+        )
+        {
+            var createDM = await _userAPI.CreateDMAsync(userID, ct);
+            if (!createDM.IsSuccess)
+            {
+                return Result.FromError(createDM);
+            }
+
+            var dm = createDM.Entity;
+
+            return await SendInteractiveMessageAsync(dm.ID, messageFactory, ct);
         }
 
         /// <summary>
@@ -74,7 +116,7 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         public async Task<Result> SendInteractiveMessageAsync
         (
             Snowflake channelID,
-            Func<Snowflake, Snowflake, IDiscordRestChannelAPI, IInteractiveMessage> messageFactory,
+            Func<Snowflake, Snowflake, IInteractiveMessage> messageFactory,
             CancellationToken ct = default
         )
         {
@@ -91,33 +133,36 @@ namespace DIGOS.Ambassador.Discord.Interactivity
             }
 
             var message = sendMessage.Entity;
-            var interactiveMessage = messageFactory(channelID, message.ID, _channelAPI);
-
-            var updateMessage = await interactiveMessage.UpdateAsync(ct);
-            if (!updateMessage.IsSuccess)
+            var interactiveMessage = messageFactory(channelID, message.ID);
+            var trackMessage = TrackMessage(interactiveMessage);
+            if (!trackMessage.IsSuccess)
             {
-                return updateMessage;
+                return trackMessage;
             }
 
-            return TrackMessage(message.ID, interactiveMessage);
+            var interestedResponders = _services.GetServices<InteractivityResponder>();
+            foreach (var responder in interestedResponders)
+            {
+                var updateMessage = await responder.OnCreateAsync(interactiveMessage.Nonce, ct);
+                if (!updateMessage.IsSuccess)
+                {
+                    return updateMessage;
+                }
+            }
+
+            return Result.FromSuccess();
         }
 
         /// <summary>
         /// Begins tracking the given message.
         /// </summary>
-        /// <param name="id">The ID of the sent message.</param>
         /// <param name="message">The interactive message.</param>
         /// <returns>A result which may or may not have succeeded.</returns>
-        public Result TrackMessage(Snowflake id, IInteractiveMessage message)
+        public Result TrackMessage(IInteractiveMessage message)
         {
-            if (!_trackedMessages.TryAdd(id, message))
+            if (!_trackedMessages.TryAdd(message.Nonce, message))
             {
                 return new GenericError("A message with that ID is already tracked.");
-            }
-
-            if (!_messageSemaphores.TryAdd(message, new SemaphoreSlim(1, 1)))
-            {
-                return new GenericError("A semaphore is already registered for that message.");
             }
 
             return Result.FromSuccess();
@@ -131,144 +176,88 @@ namespace DIGOS.Ambassador.Discord.Interactivity
         /// <returns>A result which may or may not have succeeded.</returns>
         public async Task<Result> UntrackMessageAsync(Snowflake id, CancellationToken ct = default)
         {
-            if (!_trackedMessages.TryRemove(id, out var trackedMessage))
+            if (!_trackedMessages.TryRemove(id.ToString(), out var trackedMessage))
             {
                 // The message is already removed
                 return Result.FromSuccess();
             }
 
-            if (!_messageSemaphores.TryRemove(trackedMessage, out var semaphore))
-            {
-                // The semaphore is already removed
-                return Result.FromSuccess();
-            }
-
-            await semaphore.WaitAsync(ct);
-            semaphore.Release();
-            semaphore.Dispose();
+            await trackedMessage.Semaphore.WaitAsync(ct);
+            trackedMessage.Dispose();
 
             return Result.FromSuccess();
         }
 
         /// <summary>
-        /// Dispatches an added reaction to interested messages.
+        /// Gets a registered interactive entity that matches the given nonce.
         /// </summary>
-        /// <param name="userID">The ID of the user who added the reaction.</param>
-        /// <param name="messageID">The ID of the message.</param>
-        /// <param name="emoji">The emoji.</param>
+        /// <param name="nonce">The entity's unique identifier.</param>
+        /// <param name="entity">The entity, or null if none exists.</param>
+        /// <typeparam name="TEntity">The concrete entity type.</typeparam>
+        /// <returns>true if a matching entity was successfully found; otherwise, false.</returns>
+        public bool TryGetInteractiveEntity<TEntity>(string nonce, [NotNullWhen(true)] out TEntity? entity)
+            where TEntity : IInteractiveEntity
+        {
+            entity = default;
+
+            if (!_trackedMessages.TryGetValue(nonce, out var untypedEntity))
+            {
+                return false;
+            }
+
+            if (untypedEntity is not TEntity typedEntity)
+            {
+                return false;
+            }
+
+            entity = typedEntity;
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the next message sent in the given channel.
+        /// </summary>
+        /// <param name="channelID">The channel to watch.</param>
+        /// <param name="timeout">The timeout, after which the method gives up.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public async Task<Result> OnReactionAddedAsync
+        /// <returns>The message, or null if no message was sent within the given timespan.</returns>
+        public async Task<Result<IMessage?>> GetNextMessageAsync
         (
-            Snowflake userID,
-            Snowflake messageID,
-            IPartialEmoji emoji,
+            Snowflake channelID,
+            TimeSpan timeout,
             CancellationToken ct = default
         )
         {
-            if (!_trackedMessages.TryGetValue(messageID, out var message))
-            {
-                return Result.FromSuccess();
-            }
+            var now = DateTimeOffset.UtcNow;
+            var timeoutTime = now + timeout;
+            var after = Snowflake.CreateTimestampSnowflake(now);
 
-            if (!_messageSemaphores.TryGetValue(message, out var semaphore))
+            while (now <= timeoutTime)
             {
-                throw new InvalidOperationException("Failed to get a semaphore for a tracked message.");
-            }
+                now = DateTimeOffset.UtcNow;
+                var getMessage = await _channelAPI.GetChannelMessagesAsync
+                (
+                    channelID,
+                    after: after,
+                    limit: 1,
+                    ct: ct
+                );
 
-            await semaphore.WaitAsync(ct);
-            try
-            {
-                var result = await message.OnReactionAddedAsync(userID, emoji, ct);
-                if (!result.IsSuccess)
+                if (!getMessage.IsSuccess)
                 {
-                    return result;
+                    return Result<IMessage?>.FromError(getMessage);
                 }
-            }
-            finally
-            {
-                semaphore.Release();
-            }
 
-            return Result.FromSuccess();
-        }
-
-        /// <summary>
-        /// Dispatches a removed reaction to interested messages.
-        /// </summary>
-        /// <param name="userID">The ID of the user who removed the reaction.</param>
-        /// <param name="messageID">The ID of the message.</param>
-        /// <param name="emoji">The emoji.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public async Task<Result> OnReactionRemovedAsync
-        (
-            Snowflake userID,
-            Snowflake messageID,
-            IPartialEmoji emoji,
-            CancellationToken ct = default
-        )
-        {
-            if (!_trackedMessages.TryGetValue(messageID, out var message))
-            {
-                return Result.FromSuccess();
-            }
-
-            if (!_messageSemaphores.TryGetValue(message, out var semaphore))
-            {
-                throw new InvalidOperationException("Failed to get a semaphore for a tracked message.");
-            }
-
-            await semaphore.WaitAsync(ct);
-            try
-            {
-                var result = await message.OnReactionRemovedAsync(userID, emoji, ct);
-                if (!result.IsSuccess)
+                var message = getMessage.Entity.FirstOrDefault();
+                if (message is not null)
                 {
-                    return result;
+                    return Result<IMessage?>.FromSuccess(message);
                 }
-            }
-            finally
-            {
-                semaphore.Release();
+
+                await Task.Delay(TimeSpan.FromMilliseconds(500), ct);
             }
 
-            return Result.FromSuccess();
-        }
-
-        /// <summary>
-        /// Dispatches a complete removal of all reactions to interested messages.
-        /// </summary>
-        /// <param name="id">The ID of the message.</param>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        public async Task<Result> OnAllReactionsRemovedAsync(Snowflake id, CancellationToken ct = default)
-        {
-            if (!_trackedMessages.TryGetValue(id, out var message))
-            {
-                return Result.FromSuccess();
-            }
-
-            if (!_messageSemaphores.TryGetValue(message, out var semaphore))
-            {
-                throw new InvalidOperationException("Failed to get a semaphore for a tracked message.");
-            }
-
-            await semaphore.WaitAsync(ct);
-            try
-            {
-                var result = await message.OnAllReactionsRemovedAsync(ct);
-                if (!result.IsSuccess)
-                {
-                    return result;
-                }
-            }
-            finally
-            {
-                semaphore.Release();
-            }
-
-            return Result.FromSuccess();
+            return Result<IMessage?>.FromSuccess(null);
         }
 
         /// <summary>

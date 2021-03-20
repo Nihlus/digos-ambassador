@@ -22,7 +22,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Services;
 using DIGOS.Ambassador.Discord.Feedback;
@@ -92,7 +91,7 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
                 ? _content.GetRandomSelfDroneMessage()
                 : _content.GetRandomTurnTheTablesMessage();
 
-            var sendMessages = await _feedback.SendConfirmationAsync
+            var sendMessage = await _feedback.SendConfirmationAsync
             (
                 _context.ChannelID,
                 _context.User.ID,
@@ -100,9 +99,9 @@ namespace DIGOS.Ambassador.Plugins.Drone.CommandModules
                 this.CancellationToken
             );
 
-            if (sendMessages.Any(r => !r.IsSuccess))
+            if (!sendMessage.IsSuccess)
             {
-                return Result<UserMessage>.FromError(sendMessages.First(r => !r.IsSuccess));
+                return Result<UserMessage>.FromError(sendMessage);
             }
 
             var droneResult = await _drone.DroneUserAsync

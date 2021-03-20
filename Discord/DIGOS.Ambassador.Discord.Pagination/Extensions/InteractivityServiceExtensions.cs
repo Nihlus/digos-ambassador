@@ -39,6 +39,32 @@ namespace DIGOS.Ambassador.Discord.Pagination.Extensions
         /// Sends an interactive message.
         /// </summary>
         /// <param name="interactivityService">The interactivity service.</param>
+        /// <param name="userID">The user to send the message to.</param>
+        /// <param name="pages">The pages to send.</param>
+        /// <param name="appearanceOptions">Custom appearance options, if any.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public static Task<Result> SendPrivateInteractiveMessageAsync
+        (
+            this InteractivityService interactivityService,
+            Snowflake userID,
+            IReadOnlyList<Embed> pages,
+            PaginatedAppearanceOptions? appearanceOptions = default,
+            CancellationToken ct = default
+        )
+        {
+            return interactivityService.SendPrivateInteractiveMessageAsync
+            (
+                userID,
+                (c, m) => new PaginatedMessage(c, m, userID, pages, appearanceOptions),
+                ct
+            );
+        }
+
+        /// <summary>
+        /// Sends an interactive message.
+        /// </summary>
+        /// <param name="interactivityService">The interactivity service.</param>
         /// <param name="channelID">The channel to send the message in.</param>
         /// <param name="sourceUser">The source user.</param>
         /// <param name="pages">The pages to send.</param>
@@ -58,7 +84,7 @@ namespace DIGOS.Ambassador.Discord.Pagination.Extensions
             return interactivityService.SendInteractiveMessageAsync
             (
                 channelID,
-                (c, m, a) => new PaginatedMessage(c, m, a, sourceUser, pages, appearanceOptions),
+                (c, m) => new PaginatedMessage(c, m, sourceUser, pages, appearanceOptions),
                 ct
             );
         }

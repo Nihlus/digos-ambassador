@@ -24,21 +24,22 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Core.Database.Extensions;
-using DIGOS.Ambassador.Discord.Interactivity.Behaviours;
-using DIGOS.Ambassador.Discord.TypeReaders.Extensions;
+using DIGOS.Ambassador.Discord.Interactivity.Extensions;
+using DIGOS.Ambassador.Discord.Pagination.Responders;
 using DIGOS.Ambassador.Plugins.Kinks;
 using DIGOS.Ambassador.Plugins.Kinks.CommandModules;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
+using DIGOS.Ambassador.Plugins.Kinks.Responders;
 using DIGOS.Ambassador.Plugins.Kinks.Services;
-using Discord.Commands;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Remora.Behaviours;
-using Remora.Behaviours.Extensions;
-using Remora.Behaviours.Services;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Remora.Commands.Extensions;
+using Remora.Commands.Parsers;
 using Remora.Plugins.Abstractions;
 using Remora.Plugins.Abstractions.Attributes;
+using Remora.Results;
 
 [assembly: RemoraPlugin(typeof(KinksPlugin))]
 
@@ -59,31 +60,24 @@ namespace DIGOS.Ambassador.Plugins.Kinks
         /// <inheritdoc />
         public override void ConfigureServices(IServiceCollection serviceCollection)
         {
-            serviceCollection
-                .AddScoped<KinkService>()
-                .AddConfiguredSchemaAwareDbContextPool<KinksDatabaseContext>()
-                .AddBehaviour<InteractivityBehaviour>()
-                .AddBehaviour<DelayedActionBehaviour>();
+            serviceCollection.TryAddScoped<KinkService>();
+            serviceCollection.AddConfiguredSchemaAwareDbContextPool<KinksDatabaseContext>();
+            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
+            serviceCollection.TryAddInteractivityResponder<KinkWizardResponder>();
+
+            serviceCollection.AddCommandGroup<KinkCommands>();
+
+            serviceCollection.AddParser<KinkPreference, EnumParser<KinkPreference>>();
         }
 
         /// <inheritdoc />
-        public override async Task<bool> InitializeAsync(IServiceProvider serviceProvider)
-        {
-            var commands = serviceProvider.GetRequiredService<CommandService>();
-            commands.AddEnumReader<KinkPreference>();
-            await commands.AddModuleAsync<KinkCommands>(serviceProvider);
-
-            return true;
-        }
-
-        /// <inheritdoc />
-        public async Task<bool> MigratePluginAsync(IServiceProvider serviceProvider)
+        public async Task<Result> MigratePluginAsync(IServiceProvider serviceProvider)
         {
             var context = serviceProvider.GetRequiredService<KinksDatabaseContext>();
 
             await context.Database.MigrateAsync();
 
-            return true;
+            return Result.FromSuccess();
         }
 
         /// <inheritdoc />

@@ -21,8 +21,7 @@
 //
 
 using System.Collections.Generic;
-using JetBrains.Annotations;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
 {
@@ -34,30 +33,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
         /// <summary>
         /// Gets or sets the error that the API returned, if any.
         /// </summary>
-        [JsonProperty("error")]
         public string? Error { get; set; }
 
         /// <summary>
         /// Gets or sets the kink categories.
         /// </summary>
-        [JsonProperty("kinks")]
+        [JsonPropertyName("kinks")]
         public Dictionary<string, FListKinkCategory>? KinkCategories { get; set; }
-
-        /// <summary>
-        /// Creates a new <see cref="KinkCollection"/> from the given JSON string.
-        /// </summary>
-        /// <param name="json">The serialized kink collection.</param>
-        /// <returns>A deserialized kink collection.</returns>
-        [Pure]
-        public static KinkCollection FromJson(string json)
-        {
-            var settings = new JsonSerializerSettings
-            {
-                MetadataPropertyHandling = MetadataPropertyHandling.Ignore,
-                DateParseHandling = DateParseHandling.None,
-            };
-
-            return JsonConvert.DeserializeObject<KinkCollection>(json, settings);
-        }
     }
 }

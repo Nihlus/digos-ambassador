@@ -132,11 +132,10 @@ namespace DIGOS.Ambassador.Plugins.Statistics.CommandGroups
             return await _interactivity.SendInteractiveMessageAsync
             (
                 _context.ChannelID,
-                (channelID, messageID, channelAPI) => new PaginatedMessage
+                (channelID, messageID) => new PaginatedMessage
                 (
                     channelID,
                     messageID,
-                    channelAPI,
                     _context.User.ID,
                     pages
                 ),

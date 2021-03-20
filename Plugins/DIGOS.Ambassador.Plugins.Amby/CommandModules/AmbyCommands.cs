@@ -22,7 +22,6 @@
 
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
 using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
@@ -240,9 +239,9 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
                 this.CancellationToken
             );
 
-            return sendAnnoyed.Any(r => !r.IsSuccess)
-                ? Result<UserMessage>.FromError(sendAnnoyed.First(r => !r.IsSuccess))
-                : new ConfirmationMessage($"*boops <@{_context.User.ID}>*");
+            return sendAnnoyed.IsSuccess
+                ? new ConfirmationMessage($"*boops <@{_context.User.ID}>*")
+                : Result<UserMessage>.FromError(sendAnnoyed);
         }
 
         /// <summary>
@@ -267,9 +266,9 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
                 this.CancellationToken
             );
 
-            return sendAnnoyed.Any(r => !r.IsSuccess)
-                ? Result<UserMessage>.FromError(sendAnnoyed.First(r => !r.IsSuccess))
-                : new ConfirmationMessage($"**baps <@{_context.User.ID}>**");
+            return sendAnnoyed.IsSuccess
+                ? new ConfirmationMessage($"**baps <@{_context.User.ID}>**")
+                : Result<UserMessage>.FromError(sendAnnoyed);
         }
 
         /// <summary>

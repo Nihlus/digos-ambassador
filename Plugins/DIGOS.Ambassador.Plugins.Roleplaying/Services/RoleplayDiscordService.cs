@@ -88,7 +88,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         (
             Func<IQueryable<Roleplay>, IQueryable<Roleplay>>? query = default
         )
-         => _roleplays.QueryRoleplaysAsync(query);
+         => _roleplays.QueryDatabaseAsync(query);
 
         /// <summary>
         /// Gets the roleplays that match the given query.
@@ -100,7 +100,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         (
             Func<IQueryable<Roleplay>, Task<TOut>> query
         )
-            => _roleplays.QueryRoleplaysAsync(query);
+            => _roleplays.QueryDatabaseAsync(query);
 
         /// <summary>
         /// Creates a new roleplay with the given owner and parameters.
@@ -542,7 +542,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         public async Task<Result<Roleplay>> GetActiveRoleplayAsync(Snowflake channelID)
         {
-            var roleplays = await _roleplays.QueryRoleplaysAsync
+            var roleplays = await _roleplays.QueryDatabaseAsync
             (
                 q => q
                     .Where(rp => rp.IsActive)

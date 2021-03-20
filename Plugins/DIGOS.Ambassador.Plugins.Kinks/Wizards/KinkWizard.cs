@@ -22,544 +22,239 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Threading.Tasks;
-using DIGOS.Ambassador.Core.Extensions;
-using DIGOS.Ambassador.Discord.Feedback;
-using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
-using DIGOS.Ambassador.Discord.Pagination;
+using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
-using DIGOS.Ambassador.Plugins.Kinks.Services;
-using Discord;
-using Discord.WebSocket;
-using Humanizer;
-using Remora.Results;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.API.Objects;
+using Remora.Discord.Core;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.Wizards
 {
     /// <summary>
     /// Acts as an interactive wizard for interactively setting the kink preferences of users.
     /// </summary>
-    internal sealed class KinkWizard : InteractiveMessage, IWizard
+    internal sealed class KinkWizard : InteractiveMessage
     {
-        private readonly UserFeedbackService _feedback;
-        private readonly KinkService _kinks;
-
-        private readonly IUser _targetUser;
-
-        private static readonly Emoji Next = new Emoji("\x25B6");
-        private static readonly Emoji Previous = new Emoji("\x25C0");
-        private static readonly Emoji First = new Emoji("\x23EE");
-        private static readonly Emoji Last = new Emoji("\x23ED");
-        private static readonly Emoji EnterCategory = new Emoji("\xD83D\xDD22");
-
-        private static readonly Emoji Fave = new Emoji("\x2764");
-        private static readonly Emoji Like = new Emoji("\x2705");
-        private static readonly Emoji Maybe = new Emoji("\x26A0");
-        private static readonly Emoji Never = new Emoji("\x26D4");
-        private static readonly Emoji NoPreference = new Emoji("🤷");
-
-        private static readonly Emoji Back = new Emoji("\x23EB");
-        private static readonly Emoji Exit = new Emoji("\x23F9");
-        private static readonly Emoji Info = new Emoji("\x2139");
+        /// <summary>
+        /// Gets the emoji used to move the wizard to the next page.
+        /// </summary>
+        public Emoji Next { get; } = new(default, "\x25B6");
 
         /// <summary>
-        /// Gets the currently accepted emotes.
+        /// Gets the emoji used to move the wizard to the previous page.
         /// </summary>
-        private IReadOnlyCollection<IEmote> AcceptedEmotes => GetCurrentPageEmotes().ToList();
+        public Emoji Previous { get; } = new(default, "\x25C0");
 
         /// <summary>
-        /// Gets the emotes that are currently rejected by the wizard.
+        /// Gets the emoji used to move the wizard to the first page.
         /// </summary>
-        private IReadOnlyCollection<IEmote> CurrrentlyRejectedEmotes => GetCurrentPageRejectedEmotes().ToList();
+        public Emoji First { get; } = new(default, "\x23EE");
 
-        private readonly Embed _loadingEmbed;
+        /// <summary>
+        /// Gets the emoji used to move the wizard to the last page.
+        /// </summary>
+        public Emoji Last { get; } = new(default, "\x23ED");
 
-        private int _currentFListKinkID;
+        /// <summary>
+        /// Gets the emoji used to enter a kink category.
+        /// </summary>
+        public Emoji EnterCategory { get; } = new(default, "\xD83D\xDD22");
 
-        private KinkWizardState _state;
+        /// <summary>
+        /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.Favourite"/>.
+        /// </summary>
+        public Emoji Fave { get; } = new(default, "\x2764");
 
-        private IReadOnlyList<KinkCategory> _categories = new List<KinkCategory>();
+        /// <summary>
+        /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.Like"/>.
+        /// </summary>
+        public Emoji Like { get; } = new(default, "\x2705");
 
-        private int _currentCategoryOffset;
+        /// <summary>
+        /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.Maybe"/>.
+        /// </summary>
+        public Emoji Maybe { get; } = new(default, "\x26A0");
+
+        /// <summary>
+        /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.No"/>.
+        /// </summary>
+        public Emoji Never { get; } = new(default, "\x26D4");
+
+        /// <summary>
+        /// Gets the emoji used to set a kink's preference to <see cref="KinkPreference.NoPreference"/>.
+        /// </summary>
+        public Emoji NoPreference { get; } = new(default, "🤷");
+
+        /// <summary>
+        /// Gets the emoji used to move the wizard back out of a category.
+        /// </summary>
+        public Emoji Back { get; } = new(default, "\x23EB");
+
+        /// <summary>
+        /// Gets the emoji used to exit the wizard.
+        /// </summary>
+        public Emoji Exit { get; } = new(default, "\x23F9");
+
+        /// <summary>
+        /// Gets the emoji used to print a help message.
+        /// </summary>
+        public Emoji Info { get; } = new(default, "\x2139");
+
+        /// <summary>
+        /// Gets the names of the reactions, mapped to their emoji.
+        /// </summary>
+        public IReadOnlyDictionary<string, IEmoji> ReactionNames { get; }
+
+        /// <summary>
+        /// Gets the ID of the source user.
+        /// </summary>
+        public Snowflake SourceUserID { get; }
+
+        /// <summary>
+        /// Gets or sets the available categories.
+        /// </summary>
+        public IReadOnlyList<KinkCategory> Categories { get; internal set; } = new List<KinkCategory>();
+
+        /// <summary>
+        /// Gets or sets the internal state of the wizard.
+        /// </summary>
+        public KinkWizardState State { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the ID of the current kink that's displayed.
+        /// </summary>
+        public long? CurrentFListKinkID { get; internal set; }
+
+        /// <summary>
+        /// Gets the current category offset.
+        /// </summary>
+        public int CurrentCategoryOffset { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KinkWizard"/> class.
         /// </summary>
-        /// <param name="feedback">The user feedback service.</param>
-        /// <param name="interactivityService">The interactivity service.</param>
-        /// <param name="kinkService">The kink service.</param>
-        /// <param name="targetUser">The target user.</param>
+        /// <param name="channelID">The ID of the channel the message is in.</param>
+        /// <param name="messageID">The ID of the message.</param>
+        /// <param name="sourceUserID">The ID of the source user.</param>
         public KinkWizard
         (
-            UserFeedbackService feedback,
-            InteractivityService interactivityService,
-            KinkService kinkService,
-            IUser targetUser
+            Snowflake channelID,
+            Snowflake messageID,
+            Snowflake sourceUserID
         )
-            : base(targetUser, interactivityService)
+            : base(channelID, messageID)
         {
-            _feedback = feedback;
-            _kinks = kinkService;
+            this.SourceUserID = sourceUserID;
 
-            _targetUser = targetUser;
+            this.State = KinkWizardState.CategorySelection;
 
-            _state = KinkWizardState.CategorySelection;
-
-            var eb = new EmbedBuilder();
-            eb.WithTitle("Kink Wizard");
-            eb.WithDescription("Loading...");
-
-            _loadingEmbed = eb.Build();
+            this.ReactionNames = new Dictionary<string, IEmoji>
+            {
+                { this.Next.GetEmojiName(), this.Next },
+                { this.Previous.GetEmojiName(), this.Previous },
+                { this.First.GetEmojiName(), this.First },
+                { this.Last.GetEmojiName(), this.Last },
+                { this.EnterCategory.GetEmojiName(), this.EnterCategory },
+                { this.Fave.GetEmojiName(), this.Fave },
+                { this.Like.GetEmojiName(), this.Like },
+                { this.Maybe.GetEmojiName(), this.Maybe },
+                { this.Never.GetEmojiName(), this.Never },
+                { this.NoPreference.GetEmojiName(), this.NoPreference },
+                { this.Back.GetEmojiName(), this.Back },
+                { this.Exit.GetEmojiName(), this.Exit },
+                { this.Info.GetEmojiName(), this.Info }
+            };
         }
 
-        /// <inheritdoc />
-        protected override async Task<CreateEntityResult<IUserMessage>> OnDisplayAsync(IMessageChannel channel)
+        /// <summary>
+        /// Gets the emojis that are associated with the current page.
+        /// </summary>
+        /// <returns>A set of emojis.</returns>
+        public IEnumerable<IEmoji> GetCurrentPageEmotes()
         {
-            if (!(this.Message is null))
+            return this.State switch
             {
-                return CreateEntityResult<IUserMessage>.FromError("The wizard is already active in a channel.");
-            }
-
-            _categories = (await _kinks.GetKinkCategoriesAsync()).ToList();
-            _state = KinkWizardState.CategorySelection;
-
-            var message = await channel.SendMessageAsync(string.Empty, embed: _loadingEmbed);
-            return CreateEntityResult<IUserMessage>.FromSuccess(message);
-        }
-
-        /// <inheritdoc />
-        protected override async Task<OperationResult> OnUpdateAsync()
-        {
-            if (this.Message is null)
-            {
-                return OperationResult.FromError("The message hasn't been sent yet.");
-            }
-
-            await this.Message.ModifyAsync(m => m.Embed = _loadingEmbed);
-
-            foreach (var emote in this.CurrrentlyRejectedEmotes)
-            {
-                if (!this.Message.Reactions.ContainsKey(emote) || !this.Message.Reactions[emote].IsMe)
-                {
-                    continue;
-                }
-
-                await this.Message.RemoveReactionAsync(emote, this.Interactivity.Client.CurrentUser);
-            }
-
-            foreach (var emote in this.AcceptedEmotes)
-            {
-                if (this.Message.Reactions.ContainsKey(emote) && this.Message.Reactions[emote].IsMe)
-                {
-                    continue;
-                }
-
-                await this.Message.AddReactionAsync(emote);
-            }
-
-            var newEmbed = await GetCurrentPageAsync();
-            var userMessage = this.Message;
-            if (userMessage != null)
-            {
-                await userMessage.ModifyAsync(m => m.Embed = newEmbed);
-            }
-
-            return OperationResult.FromSuccess();
-        }
-
-        /// <remarks>
-        /// This override forwards to the added handler, letting removed reactions act the same as added reactions.
-        /// </remarks>
-        /// <inheritdoc/>
-        protected override Task<OperationResult> OnInteractionRemovedAsync(SocketReaction reaction) =>
-            OnInteractionAddedAsync(reaction);
-
-        /// <inheritdoc/>
-        protected override async Task<OperationResult> OnInteractionAddedAsync(SocketReaction reaction)
-        {
-            if (reaction.Emote.Equals(Exit))
-            {
-                return await this.Interactivity.DeleteInteractiveMessageAsync(this);
-            }
-
-            if (reaction.Emote.Equals(Info))
-            {
-                return await DisplayHelpTextAsync();
-            }
-
-            return _state switch
-            {
-                KinkWizardState.CategorySelection => await ConsumeCategoryInteractionAsync(reaction),
-                KinkWizardState.KinkPreference => await ConsumePreferenceInteractionAsync(reaction),
+                KinkWizardState.CategorySelection => new[] { this.Exit, this.Info, this.First, this.Previous, this.Next, this.Last, this.EnterCategory },
+                KinkWizardState.KinkPreference => new[] { this.Exit, this.Info, this.Back, this.Fave, this.Like, this.Maybe, this.Never, this.NoPreference },
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
 
-        private async Task<OperationResult> ConsumePreferenceInteractionAsync(SocketReaction reaction)
+        /// <summary>
+        /// Moves the wizard to the next page.
+        /// </summary>
+        /// <returns>True if the page changed.</returns>
+        public bool MoveNext()
         {
-            var emote = reaction.Emote;
-
-            if (emote.Equals(Back))
+            if (this.CurrentCategoryOffset + 3 >= this.Categories.Count)
             {
-                _state = KinkWizardState.CategorySelection;
-                return await UpdateAsync();
+                return false;
             }
 
-            KinkPreference? preference = null;
-            if (emote.Equals(Fave))
-            {
-                preference = KinkPreference.Favourite;
-            }
-
-            if (emote.Equals(Like))
-            {
-                preference = KinkPreference.Like;
-            }
-
-            if (emote.Equals(Maybe))
-            {
-                preference = KinkPreference.Maybe;
-            }
-
-            if (emote.Equals(Never))
-            {
-                preference = KinkPreference.No;
-            }
-
-            if (emote.Equals(NoPreference))
-            {
-                preference = KinkPreference.NoPreference;
-            }
-
-            if (preference is null)
-            {
-                return OperationResult.FromError("Unknown preference.");
-            }
-
-            await SetCurrentKinkPreference(preference.Value);
-
-            var getNextKinkResult = await _kinks.GetNextKinkByCurrentFListIDAsync(_currentFListKinkID);
-            if (!getNextKinkResult.IsSuccess)
-            {
-                _currentFListKinkID = -1;
-                _state = KinkWizardState.CategorySelection;
-                await _feedback.SendConfirmationAndDeleteAsync(this.MessageContext, "All done in that category!");
-            }
-            else
-            {
-                _currentFListKinkID = (int)getNextKinkResult.Entity.FListID;
-            }
-
-            return await UpdateAsync();
-        }
-
-        private async Task<OperationResult> ConsumeCategoryInteractionAsync(SocketReaction reaction)
-        {
-            if (this.Message is null || this.Channel is null)
-            {
-                return OperationResult.FromError("The message hasn't been sent yet.");
-            }
-
-            var emote = reaction.Emote;
-
-            if (emote.Equals(Next))
-            {
-                if (_currentCategoryOffset + 3 >= _categories.Count)
-                {
-                    return OperationResult.FromError("We're at the end of the pages.");
-                }
-
-                _currentCategoryOffset += 3;
-            }
-            else if (emote.Equals(Previous))
-            {
-                if (_currentCategoryOffset - 3 < 0)
-                {
-                    _currentCategoryOffset = 0;
-                    return OperationResult.FromSuccess();
-                }
-
-                _currentCategoryOffset -= 3;
-            }
-            else if (emote.Equals(First))
-            {
-                if (_currentCategoryOffset == 0)
-                {
-                    return OperationResult.FromError("We're at the end of the pages.");
-                }
-
-                _currentCategoryOffset = 0;
-            }
-            else if (emote.Equals(Last))
-            {
-                int newOffset;
-                if (_categories.Count % 3 == 0)
-                {
-                    newOffset = _categories.Count - 3;
-                }
-                else
-                {
-                    newOffset = _categories.Count - (_categories.Count % 3);
-                }
-
-                if (newOffset <= _currentCategoryOffset)
-                {
-                    return OperationResult.FromError("We're at the end of the pages.");
-                }
-
-                _currentCategoryOffset = newOffset;
-            }
-            else if (emote.Equals(EnterCategory))
-            {
-                bool Filter(IUserMessage m) => m.Author.Id == reaction.UserId;
-
-                if (!_categories.Any())
-                {
-                    await _feedback.SendWarningAndDeleteAsync
-                    (
-                        this.MessageContext,
-                        "There aren't any categories in the database.",
-                        TimeSpan.FromSeconds(10)
-                    );
-
-                    return OperationResult.FromSuccess();
-                }
-
-                await _feedback.SendConfirmationAndDeleteAsync
-                (
-                    this.MessageContext,
-                    "Please enter a category name.",
-                    TimeSpan.FromSeconds(45)
-                );
-
-                var messageResult = await this.Interactivity.GetNextMessageAsync
-                (
-                    this.Channel,
-                    Filter,
-                    TimeSpan.FromSeconds(45)
-                );
-
-                if (!messageResult.IsSuccess)
-                {
-                    return await UpdateAsync();
-                }
-
-                var tryStartCategoryResult = await OpenCategory(messageResult.Entity.Content);
-                if (tryStartCategoryResult.IsSuccess)
-                {
-                    return await UpdateAsync();
-                }
-
-                await _feedback.SendWarningAndDeleteAsync
-                (
-                    this.MessageContext,
-                    tryStartCategoryResult.ErrorReason,
-                    TimeSpan.FromSeconds(10)
-                );
-
-                return OperationResult.FromError(tryStartCategoryResult);
-            }
-
-            return await UpdateAsync();
-        }
-
-        private async Task<ModifyEntityResult> OpenCategory(string categoryName)
-        {
-            var getCategoryResult = _categories.Select(c => c.ToString()).BestLevenshteinMatch(categoryName, 0.75);
-            if (!getCategoryResult.IsSuccess)
-            {
-                return ModifyEntityResult.FromError(getCategoryResult);
-            }
-
-            if (!Enum.TryParse<KinkCategory>(getCategoryResult.Entity, true, out var category))
-            {
-                return ModifyEntityResult.FromError("Could not parse kink category.");
-            }
-
-            var getKinkResult = await _kinks.GetFirstKinkWithoutPreferenceInCategoryAsync(_targetUser, category);
-            if (!getKinkResult.IsSuccess)
-            {
-                getKinkResult = await _kinks.GetFirstKinkInCategoryAsync(category);
-            }
-
-            if (!getKinkResult.IsSuccess)
-            {
-                return ModifyEntityResult.FromError(getKinkResult);
-            }
-
-            var kink = getKinkResult.Entity;
-            _currentFListKinkID = (int)kink.FListID;
-
-            _state = KinkWizardState.KinkPreference;
-
-            return ModifyEntityResult.FromSuccess();
-        }
-
-        [SuppressMessage("Style", "SA1118", Justification = "Large text blocks.")]
-        private async Task<OperationResult> DisplayHelpTextAsync()
-        {
-            if (this.Message is null || this.Channel is null)
-            {
-                return OperationResult.FromError("The message hasn't been sent yet.");
-            }
-
-            var eb = new EmbedBuilder();
-            eb.WithColor(Color.DarkPurple);
-
-            switch (_state)
-            {
-                case KinkWizardState.CategorySelection:
-                {
-                    eb.WithTitle("Help: Category selection");
-                    eb.AddField
-                    (
-                        "Usage",
-                        "Use the navigation buttons to scroll through the available categories. Select a category by " +
-                        $"pressing {EnterCategory} and typing in the name. The search algorithm is quite lenient, so " +
-                        "you may find that things work fine even with typos.\n" +
-                        "\n" +
-                        $"You can quit at any point by pressing {Exit}."
-                    );
-                    break;
-                }
-                case KinkWizardState.KinkPreference:
-                {
-                    eb.WithTitle("Help: Kink preference");
-                    eb.AddField
-                    (
-                        "Usage",
-                        "Set your preference for this kink by pressing one of the following buttons:" +
-                        $"\n{Fave} : Favourite" +
-                        $"\n{Like} : Like" +
-                        $"\n{Maybe} : Maybe" +
-                        $"\n{Never} : Never" +
-                        $"\n{NoPreference} : No preference\n" +
-                        "\n" +
-                        $"\nPress {Back} to go back to the categories." +
-                        $"\nYou can quit at any point by pressing {Exit}."
-                    );
-                    break;
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
-            }
-
-            await _feedback.SendEmbedAndDeleteAsync(this.Channel, eb.Build(), TimeSpan.FromSeconds(30));
-            return OperationResult.FromSuccess();
-        }
-
-        private async Task SetCurrentKinkPreference(KinkPreference preference)
-        {
-            var getUserKinkResult = await _kinks.GetUserKinkByFListIDAsync(_targetUser, _currentFListKinkID);
-            if (!getUserKinkResult.IsSuccess)
-            {
-                await _feedback.SendErrorAndDeleteAsync(this.MessageContext, getUserKinkResult.ErrorReason);
-                return;
-            }
-
-            var userKink = getUserKinkResult.Entity;
-            var setPreferenceResult = await _kinks.SetKinkPreferenceAsync(userKink, preference);
-            if (!setPreferenceResult.IsSuccess)
-            {
-                await _feedback.SendErrorAndDeleteAsync(this.MessageContext, setPreferenceResult.ErrorReason);
-            }
+            this.CurrentCategoryOffset += 3;
+            return true;
         }
 
         /// <summary>
-        /// Gets the emotes that are associated with the current page.
+        /// Moves the wizard to the previous page.
         /// </summary>
-        /// <returns>A set of emotes.</returns>
-        public IEnumerable<IEmote> GetCurrentPageEmotes()
+        /// <returns>True if the page changed.</returns>
+        public bool MovePrevious()
         {
-            switch (_state)
+            if (this.CurrentCategoryOffset == 0)
             {
-                case KinkWizardState.CategorySelection:
-                {
-                    return new[] { Exit, Info, First, Previous, Next, Last, EnterCategory };
-                }
-                case KinkWizardState.KinkPreference:
-                {
-                    return new[] { Exit, Info, Back, Fave, Like, Maybe, Never, NoPreference };
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
+                return false;
             }
+
+            if (this.CurrentCategoryOffset - 3 < 0)
+            {
+                this.CurrentCategoryOffset = 0;
+                return true;
+            }
+
+            this.CurrentCategoryOffset -= 3;
+            return true;
         }
 
-        private IEnumerable<IEmote> GetCurrentPageRejectedEmotes()
+        /// <summary>
+        /// Moves the wizard to the last page.
+        /// </summary>
+        /// <returns>True if the page changed.</returns>
+        public bool MoveLast()
         {
-            switch (_state)
+            int newOffset;
+            if (this.Categories.Count % 3 == 0)
             {
-                case KinkWizardState.CategorySelection:
-                {
-                    return new[] { Back, Fave, Like, Maybe, Never, NoPreference };
-                }
-                case KinkWizardState.KinkPreference:
-                {
-                    return new[] { Next, Previous, First, Last, EnterCategory };
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
+                newOffset = this.Categories.Count - 3;
             }
+            else
+            {
+                newOffset = this.Categories.Count - (this.Categories.Count % 3);
+            }
+
+            if (newOffset <= this.CurrentCategoryOffset)
+            {
+                return false;
+            }
+
+            this.CurrentCategoryOffset = newOffset;
+            return true;
         }
 
-        /// <inheritdoc />
-        public async Task<Embed> GetCurrentPageAsync()
+        /// <summary>
+        /// Moves the wizard to the first page.
+        /// </summary>
+        /// <returns>True if the page changed.</returns>
+        public bool MoveFirst()
         {
-            switch (_state)
+            if (this.CurrentCategoryOffset == 0)
             {
-                case KinkWizardState.CategorySelection:
-                {
-                    var eb = _feedback.CreateEmbedBase();
-                    eb.WithTitle("Category selection");
-
-                    if (_categories.Any())
-                    {
-                        eb.WithDescription("Select from one of the categories below.");
-                        var categories = _categories.Skip(_currentCategoryOffset).Take(3).ToList();
-                        foreach (var category in categories)
-                        {
-                            eb.AddField(category.ToString().Humanize().Transform(To.TitleCase), category.Humanize());
-                        }
-
-                        eb.WithFooter($"Categories {_currentCategoryOffset}-{_currentCategoryOffset + categories.Count} / {_categories.Count}");
-                    }
-                    else
-                    {
-                        eb.WithDescription("There aren't any categories in the database.");
-                    }
-
-                    return eb.Build();
-                }
-                case KinkWizardState.KinkPreference:
-                {
-                    var getUserKinkResult = await _kinks.GetUserKinkByFListIDAsync(_targetUser, _currentFListKinkID);
-                    if (!getUserKinkResult.IsSuccess)
-                    {
-                        await _feedback.SendErrorAndDeleteAsync(this.MessageContext, "Failed to get the user kink.", TimeSpan.FromSeconds(10));
-                        _state = KinkWizardState.CategorySelection;
-
-                        // Recursively calling at this point is safe, since we will get the emotes from the category page.
-                        return await GetCurrentPageAsync();
-                    }
-
-                    var userKink = getUserKinkResult.Entity;
-                    return _kinks.BuildUserKinkInfoEmbedBase(userKink).Build();
-                }
-                default:
-                {
-                    throw new ArgumentOutOfRangeException();
-                }
+                return false;
             }
+
+            this.CurrentCategoryOffset = 0;
+            return true;
         }
     }
 }

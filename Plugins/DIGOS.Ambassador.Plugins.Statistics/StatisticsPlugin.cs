@@ -20,6 +20,8 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using DIGOS.Ambassador.Discord.Interactivity.Extensions;
+using DIGOS.Ambassador.Discord.Pagination.Responders;
 using DIGOS.Ambassador.Plugins.Statistics;
 using DIGOS.Ambassador.Plugins.Statistics.CommandGroups;
 using JetBrains.Annotations;
@@ -48,6 +50,8 @@ namespace DIGOS.Ambassador.Plugins.Statistics
         {
             serviceCollection
                 .AddCommandGroup<StatCommands>();
+
+            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
         }
     }
 }

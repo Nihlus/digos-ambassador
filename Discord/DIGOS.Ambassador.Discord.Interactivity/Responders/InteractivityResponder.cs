@@ -20,68 +20,37 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Remora.Discord.API.Abstractions.Gateway.Events;
-using Remora.Discord.Gateway.Responders;
 using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Interactivity.Responders
 {
     /// <summary>
-    /// Responds to events required for interactivity.
+    /// Acts as a base class for interactivity responders.
     /// </summary>
-    public class InteractivityResponder :
-        IResponder<IMessageReactionAdd>,
-        IResponder<IMessageReactionRemove>,
-        IResponder<IMessageReactionRemoveAll>,
-        IResponder<IMessageDelete>,
-        IResponder<IMessageDeleteBulk>
+    public abstract class InteractivityResponder
     {
-        private readonly InteractivityService _interactivity;
+        /// <summary>
+        /// Gets the interactivity service.
+        /// </summary>
+        protected InteractivityService Interactivity { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InteractivityResponder"/> class.
         /// </summary>
         /// <param name="interactivity">The interactivity service.</param>
-        public InteractivityResponder(InteractivityService interactivity)
+        protected InteractivityResponder(InteractivityService interactivity)
         {
-            _interactivity = interactivity;
+            this.Interactivity = interactivity;
         }
 
-        /// <inheritdoc />
-        public Task<Result> RespondAsync(IMessageReactionAdd gatewayEvent, CancellationToken ct = default)
-            => _interactivity.OnReactionAddedAsync(gatewayEvent.UserID, gatewayEvent.MessageID, gatewayEvent.Emoji, ct);
-
-        /// <inheritdoc />
-        public Task<Result> RespondAsync(IMessageReactionRemove gatewayEvent, CancellationToken ct = default)
-            => _interactivity.OnReactionRemovedAsync
-            (
-                gatewayEvent.UserID,
-                gatewayEvent.MessageID,
-                gatewayEvent.Emoji,
-                ct
-            );
-
-        /// <inheritdoc />
-        public Task<Result> RespondAsync(IMessageReactionRemoveAll gatewayEvent, CancellationToken ct = default)
-            => _interactivity.OnAllReactionsRemovedAsync(gatewayEvent.MessageID, ct);
-
-        /// <inheritdoc />
-        public Task<Result> RespondAsync(IMessageDelete gatewayEvent, CancellationToken ct = default)
-            => _interactivity.OnMessageDeletedAsync(gatewayEvent.ID, ct);
-
-        /// <inheritdoc />
-        public async Task<Result> RespondAsync(IMessageDeleteBulk gatewayEvent, CancellationToken ct = default)
-        {
-            var deletions = gatewayEvent.MessageIDs.Select(id => _interactivity.OnMessageDeletedAsync(id, ct));
-            var results = await Task.WhenAll(deletions);
-
-            var firstFail = results.FirstOrDefault(r => !r.IsSuccess);
-            return firstFail.Equals(default)
-                ? Result.FromSuccess()
-                : firstFail;
-        }
+        /// <summary>
+        /// Called by the interactivity service when a new interactive entity is created.
+        /// </summary>
+        /// <param name="nonce">The nonce that identifies the entity.</param>
+        /// <param name="ct">The cancellation token for this operation.</param>
+        /// <returns>A result which may or may not have succeeded.</returns>
+        public abstract Task<Result> OnCreateAsync(string nonce, CancellationToken ct = default);
     }
 }

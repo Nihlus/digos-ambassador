@@ -160,11 +160,10 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
             await _interactivity.SendInteractiveMessageAsync
             (
                 _context.ChannelID,
-                (channelID, messageID, channelAPI) => new PaginatedMessage
+                (channelID, messageID) => new PaginatedMessage
                 (
                     channelID,
                     messageID,
-                    channelAPI,
                     _context.User.ID,
                     pages
                 )
@@ -273,9 +272,9 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
                 $"The warned user now has {warnings.Count} warnings. Consider further action."
             );
 
-            if (sendAlert.Any(r => !r.IsSuccess))
+            if (!sendAlert.IsSuccess)
             {
-                return sendAlert.First(r => !r.IsSuccess);
+                return Result<string>.FromError(sendAlert);
             }
 
             return Result<string>.FromSuccess($"Warning added (ID {warning.ID}).");

@@ -20,18 +20,12 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using DIGOS.Ambassador.Discord.Interactivity.Messages;
+using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using Remora.Discord.API.Abstractions.Objects;
-using Remora.Discord.API.Abstractions.Rest;
 using Remora.Discord.API.Objects;
 using Remora.Discord.Core;
-using Remora.Results;
 
 namespace DIGOS.Ambassador.Discord.Pagination
 {
@@ -40,39 +34,36 @@ namespace DIGOS.Ambassador.Discord.Pagination
     /// </summary>
     public class PaginatedMessage : InteractiveMessage
     {
-        private readonly IDiscordRestChannelAPI _channelAPI;
+        /// <summary>
+        /// Gets the names of the reactions, mapped to their emoji.
+        /// </summary>
+        public IReadOnlyDictionary<string, IEmoji> ReactionNames { get; }
 
         /// <summary>
-        /// Holds the pages in the message.
+        /// Gets the pages in the message.
         /// </summary>
-        private readonly IReadOnlyList<Embed> _pages;
+        public IReadOnlyList<Embed> Pages { get; }
 
         /// <summary>
-        /// Holds the appearance options.
+        /// Gets the appearance options for the message.
         /// </summary>
-        private readonly PaginatedAppearanceOptions _appearance;
+        public PaginatedAppearanceOptions Appearance { get; }
 
         /// <summary>
-        /// Holds the ID of the source user.
+        /// Gets the ID of the source user.
         /// </summary>
-        private readonly Snowflake _sourceUserID;
+        public Snowflake SourceUserID { get; }
 
         /// <summary>
-        /// Holds the names of the reactions, mapped to their emoji.
+        /// Gets or sets the current page index.
         /// </summary>
-        private readonly IReadOnlyDictionary<string, IEmoji> _reactionNames;
-
-        /// <summary>
-        /// Holds the current page index.
-        /// </summary>
-        private int _currentPage;
+        public int CurrentPage { get; set;  }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PaginatedMessage"/> class.
         /// </summary>
         /// <param name="channelID">The ID of the channel the message is in.</param>
         /// <param name="messageID">The ID of the message.</param>
-        /// <param name="channelAPI">The channel API.</param>
         /// <param name="sourceUserID">The ID of the source user.</param>
         /// <param name="pages">The pages in the paginated message.</param>
         /// <param name="appearance">The appearance options.</param>
@@ -80,7 +71,6 @@ namespace DIGOS.Ambassador.Discord.Pagination
         (
             Snowflake channelID,
             Snowflake messageID,
-            IDiscordRestChannelAPI channelAPI,
             Snowflake sourceUserID,
             IReadOnlyList<Embed> pages,
             PaginatedAppearanceOptions? appearance = null
@@ -89,195 +79,91 @@ namespace DIGOS.Ambassador.Discord.Pagination
         {
             appearance ??= PaginatedAppearanceOptions.Default;
 
-            _sourceUserID = sourceUserID;
-            _pages = pages;
-            _appearance = appearance;
-            _channelAPI = channelAPI;
+            this.SourceUserID = sourceUserID;
+            this.Pages = pages;
+            this.Appearance = appearance;
 
-            _reactionNames = new Dictionary<string, IEmoji>
+            this.ReactionNames = new Dictionary<string, IEmoji>
             {
-                { GetEmojiName(_appearance.First), _appearance.First },
-                { GetEmojiName(_appearance.Back), _appearance.Back },
-                { GetEmojiName(_appearance.Next), _appearance.Next },
-                { GetEmojiName(_appearance.Last), _appearance.Last },
-                { GetEmojiName(_appearance.Close), _appearance.Close },
-                { GetEmojiName(_appearance.Help), _appearance.Help }
+                { appearance.First.GetEmojiName(), appearance.First },
+                { appearance.Back.GetEmojiName(), appearance.Back },
+                { appearance.Next.GetEmojiName(), appearance.Next },
+                { appearance.Last.GetEmojiName(), appearance.Last },
+                { appearance.Close.GetEmojiName(), appearance.Close },
+                { appearance.Help.GetEmojiName(), appearance.Help }
             };
-        }
-
-        /// <inheritdoc />
-        public override async Task<Result> OnReactionAddedAsync(Snowflake userID, IPartialEmoji emoji, CancellationToken ct = default)
-        {
-            if (userID != _sourceUserID)
-            {
-                // We handled it, but we won't react
-                return Result.FromSuccess();
-            }
-
-            var reactionName = GetPartialEmojiName(emoji);
-            if (!_reactionNames.TryGetValue(reactionName, out var knownEmoji))
-            {
-                // This isn't an emoji we react to
-                return Result.FromSuccess();
-            }
-
-            // Special actions
-            if (knownEmoji.Equals(_appearance.Close))
-            {
-                return await _channelAPI.DeleteMessageAsync(this.ChannelID, this.MessageID, ct);
-            }
-
-            if (knownEmoji.Equals(_appearance.Help))
-            {
-                var embed = new Embed { Colour = Color.Blue, Description = _appearance.HelpText };
-                var sendHelp = await _channelAPI.CreateMessageAsync(this.ChannelID, embed: embed, ct: ct);
-                return !sendHelp.IsSuccess
-                    ? Result.FromError(sendHelp)
-                    : Result.FromSuccess();
-            }
-
-            // Page movement actions
-            if (knownEmoji.Equals(_appearance.First))
-            {
-                _currentPage = 0;
-            }
-
-            if (knownEmoji.Equals(_appearance.Back))
-            {
-                if (_currentPage <= 0)
-                {
-                    return Result.FromSuccess();
-                }
-
-                --_currentPage;
-            }
-
-            if (knownEmoji.Equals(_appearance.Next))
-            {
-                if (_currentPage >= _pages.Count - 1)
-                {
-                    return Result.FromSuccess();
-                }
-
-                ++_currentPage;
-            }
-
-            if (knownEmoji.Equals(_appearance.Last))
-            {
-                _currentPage = _pages.Count - 1;
-            }
-
-            return await UpdateAsync(ct);
-        }
-
-        /// <inheritdoc />
-        public override Task<Result> OnReactionRemovedAsync
-        (
-            Snowflake userID,
-            IPartialEmoji emoji,
-            CancellationToken ct = default
-        )
-            => OnReactionAddedAsync(userID, emoji, ct);
-
-        /// <inheritdoc />
-        public override Task<Result> OnAllReactionsRemovedAsync(CancellationToken ct = default)
-            => UpdateAsync(ct);
-
-        /// <inheritdoc/>
-        public override async Task<Result> UpdateAsync(CancellationToken ct = default)
-        {
-            var page = _pages[_currentPage] with
-            {
-                Footer = new EmbedFooter(string.Format(_appearance.FooterFormat, _currentPage + 1, _pages.Count))
-            };
-
-            var updateButtons = await UpdateReactionButtonsAsync(ct);
-            if (!updateButtons.IsSuccess)
-            {
-                return updateButtons;
-            }
-
-            var modifyMessage = await _channelAPI.EditMessageAsync(this.ChannelID, this.MessageID, embed: page, ct: ct);
-            return modifyMessage.IsSuccess
-                ? Result.FromSuccess()
-                : Result.FromError(modifyMessage);
         }
 
         /// <summary>
-        /// Updates the displayed buttons.
+        /// Moves the paginated message to the next page.
         /// </summary>
-        /// <param name="ct">The cancellation token for this operation.</param>
-        /// <returns>A result which may or may not have succeeded.</returns>
-        private async Task<Result> UpdateReactionButtonsAsync(CancellationToken ct = default)
+        /// <returns>True if the page changed.</returns>
+        public bool MoveNext()
         {
-            var getMessage = await _channelAPI.GetChannelMessageAsync(this.ChannelID, this.MessageID, ct);
-            if (!getMessage.IsSuccess)
+            if (this.CurrentPage >= this.Pages.Count - 1)
             {
-                return Result.FromError(getMessage);
+                return false;
             }
 
-            var message = getMessage.Entity;
-            var existingReactions = message.Reactions;
+            this.CurrentPage += 1;
+            return true;
+        }
 
-            var reactions = new[]
+        /// <summary>
+        /// Moves the paginated message to the previous page.
+        /// </summary>
+        /// <returns>True if the page changed.</returns>
+        public bool MovePrevious()
+        {
+            if (this.CurrentPage <= 0)
             {
-                GetEmojiName(_appearance.First),
-                GetEmojiName(_appearance.Back),
-                GetEmojiName(_appearance.Next),
-                GetEmojiName(_appearance.Last),
-                GetEmojiName(_appearance.Close),
-                GetEmojiName(_appearance.Help)
+                return false;
+            }
+
+            this.CurrentPage -= 1;
+            return true;
+        }
+
+        /// <summary>
+        /// Moves the paginated message to the first page.
+        /// </summary>
+        /// <returns>True if the page changed.</returns>
+        public bool MoveFirst()
+        {
+            if (this.CurrentPage == 0)
+            {
+                return false;
+            }
+
+            this.CurrentPage = 0;
+            return true;
+        }
+
+        /// <summary>
+        /// Moves the paginated message to the last page.
+        /// </summary>
+        /// <returns>True if the page changed.</returns>
+        public bool MoveLast()
+        {
+            if (this.CurrentPage == this.Pages.Count - 1)
+            {
+                return false;
+            }
+
+            this.CurrentPage = this.Pages.Count - 1;
+            return true;
+        }
+
+        /// <summary>
+        /// Gets the current page.
+        /// </summary>
+        /// <returns>The page.</returns>
+        public Embed GetCurrentPage()
+        {
+            return this.Pages[this.CurrentPage] with
+            {
+                Footer = new EmbedFooter(string.Format(this.Appearance.FooterFormat, this.CurrentPage + 1, this.Pages.Count))
             };
-
-            foreach (var reaction in reactions)
-            {
-                if (existingReactions.HasValue)
-                {
-                    if (existingReactions.Value!.Any(r => GetPartialEmojiName(r.Emoji) == reaction))
-                    {
-                        // This one is already added; skip it
-                        continue;
-                    }
-                }
-
-                var addReaction = await _channelAPI.CreateReactionAsync(this.ChannelID, this.MessageID, reaction, ct);
-                if (!addReaction.IsSuccess)
-                {
-                    return addReaction;
-                }
-            }
-
-            return Result.FromSuccess();
-        }
-
-        private string GetEmojiName(IEmoji emoji)
-        {
-            if (emoji.Name is not null)
-            {
-                return emoji.Name;
-            }
-
-            if (!emoji.ID.HasValue)
-            {
-                throw new InvalidOperationException();
-            }
-
-            return emoji.ID.Value.ToString();
-        }
-
-        private string GetPartialEmojiName(IPartialEmoji emoji)
-        {
-            if (emoji.Name.HasValue && emoji.Name.Value is not null)
-            {
-                return emoji.Name.Value;
-            }
-
-            if (!emoji.ID.HasValue)
-            {
-                throw new InvalidOperationException();
-            }
-
-            return emoji.ID.Value.ToString()!;
         }
     }
 }

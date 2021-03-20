@@ -20,7 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
 {
@@ -32,19 +32,17 @@ namespace DIGOS.Ambassador.Plugins.Kinks.FList.Kinks
         /// <summary>
         /// Gets the description of the kink.
         /// </summary>
-        [JsonProperty("description")]
         public string Description { get; }
 
         /// <summary>
         /// Gets the ID of the kink.
         /// </summary>
-        [JsonProperty("kink_id")]
+        [JsonPropertyName("kink_id")]
         public uint KinkId { get; }
 
         /// <summary>
         /// Gets the name of the kink.
         /// </summary>
-        [JsonProperty("name")]
         public string Name { get; }
 
         /// <summary>

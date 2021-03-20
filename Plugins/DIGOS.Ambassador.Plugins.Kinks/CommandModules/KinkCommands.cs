@@ -21,24 +21,28 @@
 //
 
 using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Extensions;
-using DIGOS.Ambassador.Discord.Extensions.Results;
 using DIGOS.Ambassador.Discord.Feedback;
+using DIGOS.Ambassador.Discord.Feedback.Errors;
+using DIGOS.Ambassador.Discord.Feedback.Results;
 using DIGOS.Ambassador.Discord.Interactivity;
-using DIGOS.Ambassador.Discord.Pagination;
-using DIGOS.Ambassador.Discord.TypeReaders;
+using DIGOS.Ambassador.Discord.Pagination.Extensions;
 using DIGOS.Ambassador.Plugins.Kinks.FList.Kinks;
 using DIGOS.Ambassador.Plugins.Kinks.Model;
 using DIGOS.Ambassador.Plugins.Kinks.Services;
 using DIGOS.Ambassador.Plugins.Kinks.Wizards;
-using Discord;
-using Discord.Commands;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
+using Remora.Commands.Attributes;
+using Remora.Commands.Groups;
+using Remora.Discord.API.Abstractions.Objects;
+using Remora.Discord.Commands.Conditions;
+using Remora.Discord.Commands.Contexts;
+using Remora.Results;
 
 #pragma warning disable SA1615 // Disable "Element return value should be documented" due to TPL tasks
 
@@ -48,13 +52,14 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
     /// Commands for viewing and configuring user kinks.
     /// </summary>
     [Group("kink")]
-    [Summary("Commands for viewing and configuring user kinks.")]
-    public class KinkCommands : ModuleBase
+    [Description("Commands for viewing and configuring user kinks.")]
+    public class KinkCommands : CommandGroup
     {
         private readonly KinkService _kinks;
         private readonly UserFeedbackService _feedback;
 
         private readonly InteractivityService _interactivity;
+        private readonly ICommandContext _context;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KinkCommands"/> class.
@@ -62,16 +67,19 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// <param name="kinks">The application's kink service.</param>
         /// <param name="feedback">The application's feedback service.</param>
         /// <param name="interactivity">The interactivity service.</param>
+        /// <param name="context">The command context.</param>
         public KinkCommands
         (
             KinkService kinks,
             UserFeedbackService feedback,
-            InteractivityService interactivity
+            InteractivityService interactivity,
+            ICommandContext context
         )
         {
             _kinks = kinks;
             _feedback = feedback;
             _interactivity = interactivity;
+            _context = context;
         }
 
         /// <summary>
@@ -80,20 +88,19 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// <param name="kinkName">The name of the kink.</param>
         [UsedImplicitly]
         [Command("info")]
-        [Summary("Shows information about the named kink.")]
-        public async Task<RuntimeResult> ShowKinkAsync(string kinkName)
+        [Description("Shows information about the named kink.")]
+        public async Task<IResult> ShowKinkAsync(string kinkName)
         {
             var getKinkInfoResult = await _kinks.GetKinkByNameAsync(kinkName);
             if (!getKinkInfoResult.IsSuccess)
             {
-                return getKinkInfoResult.ToRuntimeResult();
+                return getKinkInfoResult;
             }
 
             var kink = getKinkInfoResult.Entity;
             var display = _kinks.BuildKinkInfoEmbed(kink);
 
-            await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display);
-            return RuntimeCommandResult.FromSuccess();
+            return await _feedback.SendPrivateEmbedAsync(_context.ChannelID, display);
         }
 
         /// <summary>
@@ -101,11 +108,10 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// </summary>
         /// <param name="kinkName">The name of the kink.</param>
         [UsedImplicitly]
-        [Alias("show", "preference")]
         [Command("show")]
-        [Summary("Shows your preference for the named kink.")]
-        public async Task<RuntimeResult> ShowKinkPreferenceAsync(string kinkName)
-            => await ShowKinkPreferenceAsync(this.Context.User, kinkName);
+        [Description("Shows your preference for the named kink.")]
+        public async Task<IResult> ShowKinkPreferenceAsync(string kinkName)
+            => await ShowKinkPreferenceAsync(_context.User, kinkName);
 
         /// <summary>
         /// Shows the user's preference for the named kink.
@@ -113,22 +119,20 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// <param name="user">The user.</param>
         /// <param name="kinkName">The name of the kink.</param>
         [UsedImplicitly]
-        [Alias("show", "preference")]
         [Command("show")]
-        [Summary("Shows the user's preference for the named kink.")]
-        public async Task<RuntimeResult> ShowKinkPreferenceAsync(IUser user, string kinkName)
+        [Description("Shows the user's preference for the named kink.")]
+        public async Task<IResult> ShowKinkPreferenceAsync(IUser user, string kinkName)
         {
-            var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(user, kinkName);
+            var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(user.ID, kinkName);
             if (!getUserKinkResult.IsSuccess)
             {
-                return getUserKinkResult.ToRuntimeResult();
+                return getUserKinkResult;
             }
 
             var userKink = getUserKinkResult.Entity;
             var display = _kinks.BuildUserKinkInfoEmbedBase(userKink);
 
-            await _feedback.SendPrivateEmbedAsync(this.Context, this.Context.User, display.Build());
-            return RuntimeCommandResult.FromSuccess();
+            return await _feedback.SendPrivateEmbedAsync(_context.ChannelID, display);
         }
 
         /// <summary>
@@ -137,90 +141,72 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// <param name="otherUser">The other user.</param>
         [UsedImplicitly]
         [Command("overlap")]
-        [Summary("Shows the kinks which overlap between you and the given user.")]
-        public async Task<RuntimeResult> ShowKinkOverlap(IUser otherUser)
+        [Description("Shows the kinks which overlap between you and the given user.")]
+        public async Task<IResult> ShowKinkOverlap(IUser otherUser)
         {
-            var getUserKinksResult = await _kinks.GetUserKinksAsync(this.Context.User);
-            if (!getUserKinksResult.IsSuccess)
+            var overlappingKinks = await _kinks.QueryDatabaseAsync
+            (
+                q =>
+                {
+                    var otherUserKinks = q
+                        .Where(k => k.User.DiscordID == otherUser.ID);
+
+                    return q
+                        .Where(k => k.User.DiscordID == _context.User.ID)
+                        .Where
+                        (
+                            k => otherUserKinks
+                                .Any(ok => ok.Preference == k.Preference && ok.Kink.FListID == k.Kink.FListID)
+                        );
+                }
+            );
+
+            if (!overlappingKinks.Any())
             {
-                return getUserKinksResult.ToRuntimeResult();
+                return Result<UserMessage>.FromSuccess(new ConfirmationMessage("You don't overlap anywhere."));
             }
 
-            var userKinks = getUserKinksResult.Entity;
-
-            var getOtherUserKinksResult = await _kinks.GetUserKinksAsync(otherUser);
-            if (!getOtherUserKinksResult.IsSuccess)
-            {
-                return getOtherUserKinksResult.ToRuntimeResult();
-            }
-
-            var otherUserKinks = getOtherUserKinksResult.Entity;
-
-            var overlap = userKinks.Intersect(otherUserKinks, new UserKinkOverlapEqualityComparer()).ToList();
-
-            if (!overlap.Any())
-            {
-                return RuntimeCommandResult.FromSuccess("You don't overlap anywhere.");
-            }
-
-            var kinkOverlapPages = _kinks.BuildKinkOverlapEmbeds(this.Context.User, otherUser, overlap);
-            var paginatedMessage = new PaginatedEmbed(_feedback, _interactivity, this.Context.User)
-                .WithPages(kinkOverlapPages);
-
-            await _interactivity.SendPrivateInteractiveMessageAsync(this.Context, _feedback, paginatedMessage);
-            return RuntimeCommandResult.FromSuccess();
+            var pages = _kinks.BuildKinkOverlapEmbeds(_context.User.ID, otherUser.ID, overlappingKinks);
+            return await _interactivity.SendPrivateInteractiveMessageAsync(_context.User.ID, pages);
         }
 
         /// <summary>
-        /// Shows your kinks with the given preference.
+        /// Shows the given user's kinks with the given preference. Defaults to yourself.
         /// </summary>
         /// <param name="preference">The preference.</param>
+        /// <param name="user">The user.</param>
         [UsedImplicitly]
         [Command("by-preference")]
-        [Summary("Shows your kinks with the given preference.")]
-        public async Task<RuntimeResult> ShowKinksByPreferenceAsync
+        [Description("Shows the given user's kinks with the given preference. Defaults to yourself.")]
+        public async Task<IResult> ShowKinksByPreferenceAsync
         (
-            [OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
-            KinkPreference preference
-        )
-        => await ShowKinksByPreferenceAsync(this.Context.User, preference);
-
-        /// <summary>
-        /// Shows the given user's kinks with the given preference.
-        /// </summary>
-        /// <param name="otherUser">The user.</param>
-        /// <param name="preference">The preference.</param>
-        [UsedImplicitly]
-        [Command("by-preference")]
-        [Summary("Shows the given user's kinks with the given preference.")]
-        public async Task<RuntimeResult> ShowKinksByPreferenceAsync
-        (
-            IUser otherUser,
-            [OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
-            KinkPreference preference
+            KinkPreference preference,
+            IUser? user = null
         )
         {
-            var getUserKinksResult = await _kinks.GetUserKinksAsync(otherUser);
-            if (!getUserKinksResult.IsSuccess)
+            user ??= _context.User;
+
+            var kinksWithPreference = await _kinks.QueryDatabaseAsync
+            (
+                q => q
+                    .Where(k => k.User.DiscordID == user.ID)
+                    .Where(k => k.Preference == preference)
+            );
+
+            if (!kinksWithPreference.Any())
             {
-                return getUserKinksResult.ToRuntimeResult();
+                return Result<UserMessage>.FromSuccess
+                (
+                    new WarningMessage("The user doesn't have any kinks with that preference.")
+                );
             }
 
-            var userKinks = getUserKinksResult.Entity;
-
-            var withPreference = userKinks.Where(k => k.Preference == preference).ToList();
-
-            if (!withPreference.Any())
-            {
-                return RuntimeCommandResult.FromError("The user doesn't have any kinks with that preference.");
-            }
-
-            var paginatedKinkPages = _kinks.BuildPaginatedUserKinkEmbeds(withPreference);
-            var paginatedMessage = new PaginatedEmbed(_feedback, _interactivity, this.Context.User)
-                .WithPages(paginatedKinkPages);
-
-            await _interactivity.SendPrivateInteractiveMessageAsync(this.Context, _feedback, paginatedMessage);
-            return RuntimeCommandResult.FromSuccess();
+            var pages = _kinks.BuildPaginatedUserKinkEmbeds(kinksWithPreference);
+            return await _interactivity.SendPrivateInteractiveMessageAsync
+            (
+                _context.User.ID,
+                pages
+            );
         }
 
         /// <summary>
@@ -230,28 +216,27 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// <param name="preference">The preference for the kink.</param>
         [UsedImplicitly]
         [Command("preference")]
-        [Summary("Sets your preference for the given kink.")]
-        public async Task<RuntimeResult> SetKinkPreferenceAsync
+        [Description("Sets your preference for the given kink.")]
+        public async Task<Result<UserMessage>> SetKinkPreferenceAsync
         (
             string kinkName,
-            [OverrideTypeReader(typeof(HumanizerEnumTypeReader<KinkPreference>))]
             KinkPreference preference
         )
         {
-            var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(this.Context.User, kinkName);
+            var getUserKinkResult = await _kinks.GetUserKinkByNameAsync(_context.User.ID, kinkName);
             if (!getUserKinkResult.IsSuccess)
             {
-                return getUserKinkResult.ToRuntimeResult();
+                return Result<UserMessage>.FromError(getUserKinkResult);
             }
 
             var userKink = getUserKinkResult.Entity;
             var setKinkPreferenceResult = await _kinks.SetKinkPreferenceAsync(userKink, preference);
             if (!setKinkPreferenceResult.IsSuccess)
             {
-                return setKinkPreferenceResult.ToRuntimeResult();
+                return Result<UserMessage>.FromError(setKinkPreferenceResult);
             }
 
-            return RuntimeCommandResult.FromSuccess("Preference set.");
+            return new ConfirmationMessage("Preference set.");
         }
 
         /// <summary>
@@ -259,19 +244,14 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Command("wizard")]
-        [Summary("Runs an interactive wizard for setting kink preferences.")]
-        public async Task<RuntimeResult> RunKinkWizardAsync()
+        [Description("Runs an interactive wizard for setting kink preferences.")]
+        public async Task<Result> RunKinkWizardAsync()
         {
-            var wizard = new KinkWizard
+            return await _interactivity.SendPrivateInteractiveMessageAsync
             (
-                _feedback,
-                _interactivity,
-                _kinks,
-                this.Context.User
+                _context.User.ID,
+                (c, m) => new KinkWizard(c, m, _context.User.ID)
             );
-
-            await _interactivity.SendPrivateInteractiveMessageAsync(this.Context, _feedback, wizard);
-            return RuntimeCommandResult.FromSuccess();
         }
 
         /// <summary>
@@ -280,12 +260,16 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// <returns>A task wrapping the update action.</returns>
         [UsedImplicitly]
         [Command("update-db")]
-        [Summary("Updates the kink database with data from F-list.")]
-        [RequireContext(ContextType.DM)]
+        [Description("Updates the kink database with data from F-list.")]
+        [RequireContext(ChannelContext.DM)]
         [RequireOwner]
-        public async Task<RuntimeResult> UpdateKinkDatabaseAsync()
+        public async Task<Result<UserMessage>> UpdateKinkDatabaseAsync()
         {
-            await _feedback.SendConfirmationAsync(this.Context, "Updating kinks...");
+            var send = await _feedback.SendConfirmationAsync(_context.ChannelID, _context.User.ID, "Updating kinks...");
+            if (!send.IsSuccess)
+            {
+                return Result<UserMessage>.FromError(send);
+            }
 
             var updatedKinkCount = 0;
 
@@ -310,21 +294,23 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
                 }
                 catch (OperationCanceledException)
                 {
-                    return RuntimeCommandResult.FromError("Could not connect to F-list: Operation timed out.");
+                    return new UserError("Could not connect to F-list: Operation timed out.");
                 }
             }
 
-            var kinkCollection = JsonConvert.DeserializeObject<KinkCollection>(json);
+            var kinkCollection = JsonSerializer.Deserialize<KinkCollection>(json)
+                                 ?? throw new InvalidOperationException();
+
             if (kinkCollection.KinkCategories is null)
             {
-                return RuntimeCommandResult.FromError($"Received an error from F-List: {kinkCollection.Error}");
+                return new UserError($"Received an error from F-List: {kinkCollection.Error}");
             }
 
             foreach (var kinkSection in kinkCollection.KinkCategories)
             {
                 if (!Enum.TryParse<KinkCategory>(kinkSection.Key, out var kinkCategory))
                 {
-                    return RuntimeCommandResult.FromError("Failed to parse kink category.");
+                    return new UserError("Failed to parse kink category.");
                 }
 
                 updatedKinkCount += await _kinks.UpdateKinksAsync(kinkSection.Value.Kinks.Select
@@ -333,7 +319,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
                 ));
             }
 
-            return RuntimeCommandResult.FromSuccess($"Done. {updatedKinkCount} kinks updated.");
+            return new ConfirmationMessage($"Done. {updatedKinkCount} kinks updated.");
         }
 
         /// <summary>
@@ -341,16 +327,16 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
         /// </summary>
         [UsedImplicitly]
         [Command("reset")]
-        [Summary("Resets all your kink preferences.")]
-        public async Task<RuntimeResult> ResetKinksAsync()
+        [Description("Resets all your kink preferences.")]
+        public async Task<Result<UserMessage>> ResetKinksAsync()
         {
-            var resetResult = await _kinks.ResetUserKinksAsync(this.Context.User);
+            var resetResult = await _kinks.ResetUserKinksAsync(_context.User.ID);
             if (!resetResult.IsSuccess)
             {
-                return resetResult.ToRuntimeResult();
+                return Result<UserMessage>.FromError(resetResult);
             }
 
-            return RuntimeCommandResult.FromSuccess("Preferences reset.");
+            return new ConfirmationMessage("Preferences reset.");
         }
     }
 }

@@ -20,6 +20,7 @@
 //  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Remora.Discord.API.Abstractions.Objects;
@@ -39,6 +40,9 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         /// <inheritdoc />
         public Snowflake MessageID { get; }
 
+        /// <inheritdoc />
+        public SemaphoreSlim Semaphore { get; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="InteractiveMessage"/> class.
         /// </summary>
@@ -48,28 +52,14 @@ namespace DIGOS.Ambassador.Discord.Interactivity.Messages
         {
             this.ChannelID = channelID;
             this.MessageID = messageID;
+            this.Semaphore = new SemaphoreSlim(1);
         }
 
-        /// <inheritdoc/>
-        public abstract Task<Result> OnReactionAddedAsync
-        (
-            Snowflake userID,
-            IPartialEmoji emoji,
-            CancellationToken ct = default
-        );
-
-        /// <inheritdoc/>
-        public abstract Task<Result> OnReactionRemovedAsync
-        (
-            Snowflake userID,
-            IPartialEmoji emoji,
-            CancellationToken ct = default
-        );
-
         /// <inheritdoc />
-        public abstract Task<Result> OnAllReactionsRemovedAsync(CancellationToken ct = default);
-
-        /// <inheritdoc />
-        public abstract Task<Result> UpdateAsync(CancellationToken ct = default);
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+            this.Semaphore.Dispose();
+        }
     }
 }

@@ -154,6 +154,15 @@
       <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
       -->
     </ProjectReference>
+    <ProjectReference Include="..\Plugins\DIGOS.Ambassador.Plugins.Kinks\DIGOS.Ambassador.Plugins.Kinks.csproj">
+      <!--
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <OutputItemType>Content</OutputItemType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Targets>Build;DebugSymbolsProjectOutputGroup</Targets>
+      <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+      -->
+    </ProjectReference>
   </ItemGroup>
 
 </Project>

@@ -28,6 +28,7 @@ using DIGOS.Ambassador.Core.Database.Extensions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Interactivity.Extensions;
+using DIGOS.Ambassador.Discord.Pagination.Responders;
 using DIGOS.Ambassador.Discord.TypeReaders;
 using DIGOS.Ambassador.Plugins.Permissions;
 using DIGOS.Ambassador.Plugins.Permissions.CommandModules;
@@ -64,6 +65,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions
             // Dependencies
             serviceCollection.TryAddSingleton<UserFeedbackService>();
             serviceCollection.AddInteractivity();
+            serviceCollection.TryAddInteractivityResponder<PaginatedMessageResponder>();
 
             // Our stuff
             serviceCollection.TryAddSingleton<PermissionRegistryService>();

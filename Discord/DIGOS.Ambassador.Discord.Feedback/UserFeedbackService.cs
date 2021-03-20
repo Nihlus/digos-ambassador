@@ -62,7 +62,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="contents">The contents of the message.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task<IReadOnlyList<Result<IMessage>>> SendConfirmationAsync
+        public Task<Result<IReadOnlyList<IMessage>>> SendConfirmationAsync
         (
             Snowflake channel,
             Snowflake? target,
@@ -79,7 +79,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="contents">The contents of the message.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task<IReadOnlyList<Result<IMessage>>> SendErrorAsync
+        public Task<Result<IReadOnlyList<IMessage>>> SendErrorAsync
         (
             Snowflake channel,
             Snowflake? target,
@@ -96,7 +96,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="contents">The contents of the message.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task<IReadOnlyList<Result<IMessage>>> SendWarningAsync
+        public Task<Result<IReadOnlyList<IMessage>>> SendWarningAsync
         (
             Snowflake channel,
             Snowflake? target,
@@ -113,7 +113,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="contents">The contents of the message.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task<IReadOnlyList<Result<IMessage>>> SendInfoAsync
+        public Task<Result<IReadOnlyList<IMessage>>> SendInfoAsync
         (
             Snowflake channel,
             Snowflake? target,
@@ -130,7 +130,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="message">The message to send.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task<IReadOnlyList<Result<IMessage>>> SendMessageAsync
+        public Task<Result<IReadOnlyList<IMessage>>> SendMessageAsync
         (
             Snowflake channel,
             Snowflake? target,
@@ -190,7 +190,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
         /// <param name="contents">The contents to send.</param>
         /// <param name="ct">The cancellation token for this operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        private async Task<IReadOnlyList<Result<IMessage>>> SendEmbedAsync
+        private async Task<Result<IReadOnlyList<IMessage>>> SendEmbedAsync
         (
             Snowflake channel,
             Snowflake? target,
@@ -199,14 +199,19 @@ namespace DIGOS.Ambassador.Discord.Feedback
             CancellationToken ct = default
         )
         {
-            var sendResults = new List<Result<IMessage>>();
+            var sendResults = new List<IMessage>();
 
             // Sometimes the content is > 2048 in length. We'll chunk it into embeds of 1024 here.
             if (contents.Length < 1024)
             {
                 var eb = CreateFeedbackEmbed(target, color, contents);
-                sendResults.Add(await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct));
+                var send = await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct);
+                if (!send.IsSuccess)
+                {
+                    return Result<IReadOnlyList<IMessage>>.FromError(send);
+                }
 
+                sendResults.Add(send.Entity);
                 return sendResults;
             }
 
@@ -217,7 +222,13 @@ namespace DIGOS.Ambassador.Discord.Feedback
                 if (messageBuilder.Length >= 1024)
                 {
                     var eb = CreateFeedbackEmbed(target, color, messageBuilder.ToString());
-                    sendResults.Add(await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct));
+                    var send = await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct);
+                    if (!send.IsSuccess)
+                    {
+                        return Result<IReadOnlyList<IMessage>>.FromError(send);
+                    }
+
+                    sendResults.Add(send.Entity);
 
                     messageBuilder.Clear();
                 }
@@ -229,7 +240,13 @@ namespace DIGOS.Ambassador.Discord.Feedback
             if (messageBuilder.Length > 0)
             {
                 var eb = CreateFeedbackEmbed(target, color, messageBuilder.ToString());
-                sendResults.Add(await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct));
+                var send = await _channelAPI.CreateMessageAsync(channel, embed: eb, ct: ct);
+                if (!send.IsSuccess)
+                {
+                    return Result<IReadOnlyList<IMessage>>.FromError(send);
+                }
+
+                sendResults.Add(send.Entity);
             }
 
             return sendResults;
