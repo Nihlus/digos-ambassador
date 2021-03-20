@@ -310,14 +310,14 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
                 return new UserError($"Received an error from F-List: {kinkCollection.Error}");
             }
 
-            foreach (var kinkSection in kinkCollection.KinkCategories)
+            foreach (var (categoryName, category) in kinkCollection.KinkCategories)
             {
-                if (!Enum.TryParse<KinkCategory>(kinkSection.Key, out var kinkCategory))
+                if (!Enum.TryParse<KinkCategory>(categoryName, out var kinkCategory))
                 {
                     return new UserError("Failed to parse kink category.");
                 }
 
-                updatedKinkCount += await _kinks.UpdateKinksAsync(kinkSection.Value.Kinks.Select
+                updatedKinkCount += await _kinks.UpdateKinksAsync(category.Kinks.Select
                 (
                     k => new Kink(k.Name, k.Description, k.KinkId, kinkCategory)
                 ));

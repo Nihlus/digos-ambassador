@@ -129,10 +129,10 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Services.Lua
 
             var envBuilder = new MetaTableBuilder();
 
-            foreach (var variable in variables)
+            foreach (var (name, value) in variables)
             {
-                state[variable.Name] = variable.Value;
-                envBuilder.WithEntry(variable.Name);
+                state[name] = value;
+                envBuilder.WithEntry(name);
             }
 
             foreach (var function in _functionWhitelist)
