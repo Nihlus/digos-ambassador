@@ -363,8 +363,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             var kinks = await _database.Kinks.ServersideQueryAsync
             (
                 q => q
-                    .Where(k => k.Category == category)
-                    .OrderBy(g => g.Category.ToString()),
+                    .Where(k => k.Category == category),
                 ct
             );
 
