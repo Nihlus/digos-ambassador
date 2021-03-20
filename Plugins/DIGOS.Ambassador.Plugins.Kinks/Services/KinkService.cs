@@ -452,6 +452,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
                 q => q
                     .Where(k => k.User.DiscordID == user)
                     .Where(k => k.Kink.Category == category)
+                    .OrderBy(k => k.Kink.FListID)
                     .LastOrDefaultAsync(ct)
             );
 
