@@ -42,7 +42,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             }
 
             [Fact]
-            public void ReturnsUnsuccesfulResultForNonexistantName()
+            public void ReturnsUnsuccessfulResultForNonexistentName()
             {
                 var result = this.Transformations.GetSpeciesByName("aasddduaiii");
 

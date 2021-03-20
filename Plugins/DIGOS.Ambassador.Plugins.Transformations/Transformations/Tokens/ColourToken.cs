@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("colour", "c")]
-    public sealed class ColourToken : ReplacableTextToken<ColourToken>
+    public sealed class ColourToken : ReplaceableTextToken<ColourToken>
     {
         /// <summary>
         /// Gets a value indicating whether the pattern colour should be retrieved instead of the base colour.

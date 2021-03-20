@@ -113,7 +113,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
         {
             const string speciesFilename = "Species.yml";
 
-            var deser = new DeserializerBuilder()
+            var deserializer = new DeserializerBuilder()
                 .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
                 .WithNamingConvention(UnderscoredNamingConvention.Instance)
                 .Build();
@@ -143,7 +143,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
 
                 try
                 {
-                    species.Add(deser.Deserialize<Species>(content));
+                    species.Add(deserializer.Deserialize<Species>(content));
                 }
                 catch (YamlException yex)
                 {
@@ -182,7 +182,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
                 .Where(p => !p.ToString().EndsWith(speciesFilename));
 
             var transformations = new List<Transformation>();
-            var deser = new DeserializerBuilder()
+            var deserializer = new DeserializerBuilder()
                 .WithTypeConverter(new ColourYamlConverter())
                 .WithTypeConverter(new SpeciesYamlConverter(transformation))
                 .WithNodeDeserializer(i => new ValidatingNodeDeserializer(i), s => s.InsteadOf<ObjectNodeDeserializer>())
@@ -205,7 +205,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Extensions
 
                 try
                 {
-                    transformations.Add(deser.Deserialize<Transformation>(content));
+                    transformations.Add(deserializer.Deserialize<Transformation>(content));
                 }
                 catch (YamlException yex)
                 {

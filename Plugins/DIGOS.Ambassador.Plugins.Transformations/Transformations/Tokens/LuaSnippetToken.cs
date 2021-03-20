@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("snippet", "lua", "sn")]
-    public sealed class LuaSnippetToken : ReplacableTextToken<LuaSnippetToken>
+    public sealed class LuaSnippetToken : ReplaceableTextToken<LuaSnippetToken>
     {
         private readonly LuaService _lua;
 

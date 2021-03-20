@@ -34,7 +34,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("script", "sc")]
-    public sealed class LuaScriptToken : ReplacableTextToken<LuaScriptToken>
+    public sealed class LuaScriptToken : ReplaceableTextToken<LuaScriptToken>
     {
         private readonly LuaService _lua;
 

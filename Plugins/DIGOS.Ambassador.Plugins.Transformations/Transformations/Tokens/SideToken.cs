@@ -31,7 +31,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("side", "chirality")]
-    public sealed class SideToken : ReplacableTextToken<SideToken>
+    public sealed class SideToken : ReplaceableTextToken<SideToken>
     {
         /// <inheritdoc />
         public override string GetText(Appearance appearance, AppearanceComponent? component)

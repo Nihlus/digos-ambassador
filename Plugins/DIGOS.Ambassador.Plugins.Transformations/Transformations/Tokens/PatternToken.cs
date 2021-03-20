@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("pattern", "p")]
-    public sealed class PatternToken : ReplacableTextToken<PatternToken>
+    public sealed class PatternToken : ReplaceableTextToken<PatternToken>
     {
         /// <inheritdoc />
         public override string GetText(Appearance appearance, AppearanceComponent? component)

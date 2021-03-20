@@ -33,7 +33,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("bodypart", "b")]
-    public sealed class BodypartToken : ReplacableTextToken<BodypartToken>
+    public sealed class BodypartToken : ReplaceableTextToken<BodypartToken>
     {
         /// <summary>
         /// Gets or sets a value indicating whether to pluralize the bodypart.

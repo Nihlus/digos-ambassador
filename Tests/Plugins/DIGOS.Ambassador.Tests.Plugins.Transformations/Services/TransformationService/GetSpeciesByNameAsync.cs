@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             }
 
             [Fact]
-            public async Task ReturnsUnsuccesfulResultForNonexistantName()
+            public async Task ReturnsUnsuccessfulResultForNonexistentName()
             {
                 var result = await this.Transformations.GetSpeciesByNameAsync("aasddduaiii");
 

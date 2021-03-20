@@ -43,7 +43,7 @@ namespace DIGOS.Ambassador.Tests.Plugins.Transformations
             }
 
             [Fact]
-            public async Task ReturnsEmptySetForNonExistantTransformation()
+            public async Task ReturnsEmptySetForNonExistentTransformation()
             {
                 var result = await this.Transformations.GetAvailableTransformationsAsync(Bodypart.Wings);
 

@@ -32,7 +32,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Tokens
     /// </summary>
     [PublicAPI]
     [TokenIdentifier("species", "s")]
-    public sealed class SpeciesToken : ReplacableTextToken<SpeciesToken>
+    public sealed class SpeciesToken : ReplaceableTextToken<SpeciesToken>
     {
         /// <inheritdoc />
         public override string GetText(Appearance appearance, AppearanceComponent? component)

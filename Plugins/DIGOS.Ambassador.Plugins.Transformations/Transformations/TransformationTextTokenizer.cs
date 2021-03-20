@@ -62,8 +62,8 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
                     && !(t.BaseType is null)
                     && t.BaseType.IsGenericType
                     &&
-                        (t.BaseType.GetGenericTypeDefinition() == typeof(ReplacableTextToken<>)
-                        || t.BaseType.GetGenericTypeDefinition().IsSubclassOf(typeof(ReplacableTextToken<>)))
+                        (t.BaseType.GetGenericTypeDefinition() == typeof(ReplaceableTextToken<>)
+                        || t.BaseType.GetGenericTypeDefinition().IsSubclassOf(typeof(ReplaceableTextToken<>)))
             );
 
             foreach (var tokenType in tokenTypes)
@@ -72,7 +72,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             }
         }
 
-        private void AddAvailableTokenType<T>() where T : ReplacableTextToken<T>
+        private void AddAvailableTokenType<T>() where T : ReplaceableTextToken<T>
         {
             AddAvailableTokenType(typeof(T));
         }
@@ -101,7 +101,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// </summary>
         /// <typeparam name="T">A valid token type.</typeparam>
         /// <returns>The tokenizer.</returns>
-        public TransformationTextTokenizer WithTokenType<T>() where T : ReplacableTextToken<T>
+        public TransformationTextTokenizer WithTokenType<T>() where T : ReplaceableTextToken<T>
         {
             AddAvailableTokenType<T>();
             return this;
@@ -194,7 +194,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
             // TargetToken is only used here for compile-time resolution of the CreateFrom method name.
             var creationMethod = tokenType.GetMethod
             (
-                nameof(ReplacableTextToken<TargetToken>.CreateFrom),
+                nameof(ReplaceableTextToken<TargetToken>.CreateFrom),
                 BindingFlags.Static | BindingFlags.FlattenHierarchy | BindingFlags.Public
             );
 

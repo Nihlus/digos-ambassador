@@ -123,7 +123,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Model
         DressUpAndMaterials = 41,
 
         /// <summary>
-        /// Kinks that relate to the psychologial relationship between characters.
+        /// Kinks that relate to the psychological relationship between characters.
         /// </summary>
         [Description("Kinks that relate to the psychologial relationship between characters.")]
         DomSubAndPsyche = 42,

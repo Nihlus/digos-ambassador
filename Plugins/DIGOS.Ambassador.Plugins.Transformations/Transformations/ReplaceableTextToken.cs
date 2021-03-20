@@ -1,5 +1,5 @@
 ﻿//
-//  ReplacableTextToken.cs
+//  ReplaceableTextToken.cs
 //
 //  Author:
 //       Jarl Gullberg <jarl.gullberg@gmail.com>
@@ -29,11 +29,11 @@ using Microsoft.Extensions.DependencyInjection;
 namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
 {
     /// <summary>
-    /// Base implementation of replacable text tokens, allowing static initialization.
+    /// Base implementation of replaceable text tokens, allowing static initialization.
     /// </summary>
     /// <typeparam name="T">A class inheriting from this class.</typeparam>
     [PublicAPI]
-    public abstract class ReplacableTextToken<T> : IReplaceableTextToken where T : ReplacableTextToken<T>
+    public abstract class ReplaceableTextToken<T> : IReplaceableTextToken where T : ReplaceableTextToken<T>
     {
         /// <inheritdoc />
         public int Start { get; set; }
@@ -67,7 +67,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations
         /// <returns>An initialized instance of a token.</returns>
         public static T CreateFrom(int start, int length, string? data, IServiceProvider services)
         {
-            var token = (ReplacableTextToken<T>)ActivatorUtilities.CreateInstance(services, typeof(T));
+            var token = (ReplaceableTextToken<T>)ActivatorUtilities.CreateInstance(services, typeof(T));
             token.Start = start;
             token.Length = length;
 
