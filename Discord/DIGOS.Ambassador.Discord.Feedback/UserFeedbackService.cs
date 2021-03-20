@@ -234,7 +234,7 @@ namespace DIGOS.Ambassador.Discord.Feedback
                 }
 
                 messageBuilder.Append(word);
-                messageBuilder.Append(" ");
+                messageBuilder.Append(' ');
             }
 
             if (messageBuilder.Length > 0)

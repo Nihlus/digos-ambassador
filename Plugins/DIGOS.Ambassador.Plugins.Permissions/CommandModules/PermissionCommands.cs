@@ -152,7 +152,7 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
                 );
 
                 titleBuilder.Append(grants.Humanize(",").Transform(To.SentenceCase));
-                titleBuilder.Append(")");
+                titleBuilder.Append(')');
 
                 permissionInfos.Add((titleBuilder.ToString(), permission.Description));
             }

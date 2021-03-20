@@ -128,7 +128,7 @@ namespace DIGOS.Ambassador.Plugins.Transformations.Transformations.Shifters
 
                 if (!message.EndsWith(" "))
                 {
-                    messageBuilder.Append(" ");
+                    messageBuilder.Append(' ');
                 }
 
                 if (currentParagraphLength > 240)
