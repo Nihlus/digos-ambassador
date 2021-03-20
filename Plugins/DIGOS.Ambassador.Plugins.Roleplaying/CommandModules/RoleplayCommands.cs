@@ -472,8 +472,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
             {
                 return new ConfirmationMessage
                 (
-                    $"All done! Your roleplay now has a dedicated channel at " +
-                    $"<#{dedicatedChannel}>."
+                    $"All done! Your roleplay now has a dedicated channel at <#{dedicatedChannel}>."
                 );
             }
 
@@ -491,8 +490,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
             return new ConfirmationMessage
             (
-                $"All done! Your roleplay now has a dedicated channel at " +
-                $"<#{dedicatedChannel}>."
+                $"All done! Your roleplay now has a dedicated channel at <#{dedicatedChannel}>."
             );
         }
 
@@ -853,7 +851,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
                 var message =
                     $"I couldn't add <@{participant.ID}> to the roleplay ({addParticipantAsync.Unwrap().Message}. " +
-                    $"Please try to invite them manually.";
+                    "Please try to invite them manually.";
 
                 var sendWarning = await _feedback.SendWarningAsync
                 (
@@ -900,7 +898,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.CommandModules
 
             foreach (var participantMessage in participantMessages.OrderByDescending(m => m.Timestamp))
             {
-                var messageLink = $"https://discord.com/channels/" +
+                var messageLink = "https://discord.com/channels/" +
                                   $"{_context.GuildID.Value}/{_context.ChannelID}/{participantMessage.ID}";
 
                 var send = await _channelAPI.CreateMessageAsync(dedicatedChannel, messageLink);

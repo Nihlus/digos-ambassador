@@ -299,7 +299,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
                 }
             }
 
-            var jsonOptions = new JsonSerializerOptions()
+            var jsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = new SnakeCaseNamingPolicy()
             };

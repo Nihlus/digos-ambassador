@@ -214,10 +214,10 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Behaviours
             {
                 Description =
                 $"Your roleplay \"{roleplay.Name}\" has been inactive for more than 28 days, and has been " +
-                $"archived.\n" +
-                $"\n" +
-                $"This means that the dedicated channel that the roleplay had has been deleted. All messages in the " +
-                $"roleplay have been saved, and can be exported or replayed as normal.",
+                "archived.\n" +
+                "\n" +
+                "This means that the dedicated channel that the roleplay had has been deleted. All messages in the " +
+                "roleplay have been saved, and can be exported or replayed as normal.",
                 Footer = new EmbedFooter($"You can export it by running !rp export \"{roleplay.Name}\".")
             };
 

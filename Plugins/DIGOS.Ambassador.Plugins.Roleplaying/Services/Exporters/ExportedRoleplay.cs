@@ -61,7 +61,7 @@ namespace DIGOS.Ambassador.Plugins.Roleplaying.Services.Exporters
         /// <inheritdoc />
         public void Dispose()
         {
-            this.Data?.Dispose();
+            this.Data.Dispose();
         }
     }
 }

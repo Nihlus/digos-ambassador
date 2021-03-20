@@ -117,8 +117,8 @@ namespace DIGOS.Ambassador.Plugins.Amby.CommandModules
             }
 
             var contactMessage = $"Hello there, <@{discordUser.ID}>. I've been instructed to initiate... " +
-                                 $"negotiations... with you. \nA good place to start would be the \"!help <topic>\" " +
-                                 $"command.";
+                                 "negotiations... with you. \nA good place to start would be the \"!help <topic>\" " +
+                                 "command.";
 
             var eb = _feedback.CreateFeedbackEmbed
             (

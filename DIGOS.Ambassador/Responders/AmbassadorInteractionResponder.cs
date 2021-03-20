@@ -27,7 +27,6 @@ using System.Transactions;
 using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Feedback.Errors;
 using DIGOS.Ambassador.Discord.Feedback.Results;
-using DIGOS.Ambassador.Plugins.Core.Services;
 using JetBrains.Annotations;
 using Remora.Commands.Services;
 using Remora.Commands.Trees;
@@ -51,11 +50,9 @@ namespace DIGOS.Ambassador.Responders
     {
         private readonly CommandService _commandService;
         private readonly IDiscordRestInteractionAPI _interactionAPI;
-        private readonly IDiscordRestWebhookAPI _webhookAPI;
         private readonly ExecutionEventCollectorService _eventCollector;
         private readonly IServiceProvider _services;
         private readonly UserFeedbackService _userFeedback;
-        private readonly IdentityInformationService _identityInformation;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbassadorInteractionResponder"/> class.
@@ -65,26 +62,20 @@ namespace DIGOS.Ambassador.Responders
         /// <param name="eventCollector">The event collector.</param>
         /// <param name="services">The available services.</param>
         /// <param name="userFeedback">The user feedback service.</param>
-        /// <param name="webhookAPI">The webhook API.</param>
-        /// <param name="identityInformation">The identity service.</param>
         public AmbassadorInteractionResponder
         (
             CommandService commandService,
             IDiscordRestInteractionAPI interactionAPI,
             ExecutionEventCollectorService eventCollector,
             IServiceProvider services,
-            UserFeedbackService userFeedback,
-            IDiscordRestWebhookAPI webhookAPI,
-            IdentityInformationService identityInformation
+            UserFeedbackService userFeedback
         )
         {
             _commandService = commandService;
+            _interactionAPI = interactionAPI;
             _eventCollector = eventCollector;
             _services = services;
             _userFeedback = userFeedback;
-            _webhookAPI = webhookAPI;
-            _identityInformation = identityInformation;
-            _interactionAPI = interactionAPI;
         }
 
         /// <inheritdoc />
