@@ -298,7 +298,12 @@ namespace DIGOS.Ambassador.Plugins.Kinks.CommandModules
                 }
             }
 
-            var kinkCollection = JsonSerializer.Deserialize<KinkCollection>(json)
+            var jsonOptions = new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = new SnakeCaseNamingPolicy()
+            };
+
+            var kinkCollection = JsonSerializer.Deserialize<KinkCollection>(json, jsonOptions)
                                  ?? throw new InvalidOperationException();
 
             if (kinkCollection.KinkCategories is null)
