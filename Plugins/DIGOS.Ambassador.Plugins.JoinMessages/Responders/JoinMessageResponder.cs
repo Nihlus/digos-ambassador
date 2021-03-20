@@ -91,7 +91,7 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
                 return Result.FromSuccess();
             }
 
-            var getJoinMessageResult = _servers.GetJoinMessage(server, ct);
+            var getJoinMessageResult = _servers.GetJoinMessage(server);
             if (!getJoinMessageResult.IsSuccess)
             {
                 return Result.FromError(getJoinMessageResult);
@@ -151,7 +151,13 @@ namespace DIGOS.Ambassador.Plugins.JoinMessages.Responders
                 return Result.FromSuccess();
             }
 
-            var sendNotification = await _channelAPI.CreateMessageAsync(guild.SystemChannelID.Value, embed: eb, ct: ct);
+            var sendNotification = await _channelAPI.CreateMessageAsync
+            (
+                guild.SystemChannelID.Value,
+                embed: welcomeMessage,
+                ct: ct
+            );
+
             return sendNotification.IsSuccess
                 ? Result.FromSuccess()
                 : Result.FromError(sendNotification);

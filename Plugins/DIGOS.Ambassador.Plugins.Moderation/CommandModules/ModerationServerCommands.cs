@@ -45,7 +45,7 @@ namespace DIGOS.Ambassador.Plugins.Moderation.CommandModules
         /// </summary>
         [Group("server")]
         [Description("Server-related commands, such as viewing or editing info about a specific server.")]
-        public partial class ModerationServerCommands : CommandGroup
+        public class ModerationServerCommands : CommandGroup
         {
             private readonly ModerationService _moderation;
             private readonly UserFeedbackService _feedback;

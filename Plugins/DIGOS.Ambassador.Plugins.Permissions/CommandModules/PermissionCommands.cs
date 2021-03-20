@@ -25,12 +25,10 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DIGOS.Ambassador.Discord.Feedback;
 using DIGOS.Ambassador.Discord.Interactivity;
 using DIGOS.Ambassador.Discord.Pagination;
 using DIGOS.Ambassador.Plugins.Permissions.Conditions;
 using DIGOS.Ambassador.Plugins.Permissions.Extensions;
-using DIGOS.Ambassador.Plugins.Permissions.Model;
 using DIGOS.Ambassador.Plugins.Permissions.Services;
 using Humanizer;
 using Remora.Commands.Attributes;
@@ -50,7 +48,6 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
     [Description("Permission-related commands for granting, revoking and checking user permissions.")]
     public class PermissionCommands : CommandGroup
     {
-        private readonly UserFeedbackService _feedback;
         private readonly InteractivityService _interactivity;
         private readonly PermissionService _permissions;
         private readonly PermissionRegistryService _permissionRegistry;
@@ -60,23 +57,18 @@ namespace DIGOS.Ambassador.Plugins.Permissions.CommandModules
         /// <summary>
         /// Initializes a new instance of the <see cref="PermissionCommands"/> class.
         /// </summary>
-        /// <param name="database">A database context from the context pool.</param>
-        /// <param name="feedback">The user feedback service.</param>
         /// <param name="permissions">The permission service.</param>
         /// <param name="interactivity">The interactivity service.</param>
         /// <param name="permissionRegistry">The permission registry service.</param>
         /// <param name="context">The command context.</param>
         public PermissionCommands
         (
-            PermissionsDatabaseContext database,
-            UserFeedbackService feedback,
             PermissionService permissions,
             InteractivityService interactivity,
             PermissionRegistryService permissionRegistry,
             ICommandContext context
         )
         {
-            _feedback = feedback;
             _permissions = permissions;
             _interactivity = interactivity;
             _permissionRegistry = permissionRegistry;

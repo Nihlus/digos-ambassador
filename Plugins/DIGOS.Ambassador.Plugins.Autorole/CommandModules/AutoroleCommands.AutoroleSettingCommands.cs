@@ -50,7 +50,7 @@ namespace DIGOS.Ambassador.Plugins.Autorole.CommandModules
         [UsedImplicitly]
         [Group("settings")]
         [Description("Commands for server-wide autorole settings.")]
-        public partial class AutoroleSettingCommands : CommandGroup
+        public class AutoroleSettingCommands : CommandGroup
         {
             private readonly AutoroleService _autoroles;
             private readonly UserFeedbackService _feedback;

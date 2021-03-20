@@ -157,13 +157,11 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// Gets the description of the server.
         /// </summary>
         /// <param name="server">The server.</param>
-        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
         public Result<string> GetDescription
         (
-            Server server,
-            CancellationToken ct = default
+            Server server
         )
         {
             if (server.Description.IsNullOrWhitespace())
@@ -222,13 +220,11 @@ namespace DIGOS.Ambassador.Plugins.Core.Services.Servers
         /// Gets the server's join message.
         /// </summary>
         /// <param name="server">The server.</param>
-        /// <param name="ct">The cancellation token in use.</param>
         /// <returns>A retrieval result which may or may not have succeeded.</returns>
         [Pure]
         public Result<string> GetJoinMessage
         (
-            Server server,
-            CancellationToken ct = default
+            Server server
         )
         {
             if (server.JoinMessage.IsNullOrWhitespace())
