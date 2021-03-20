@@ -425,14 +425,7 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
             CancellationToken ct = default
         )
         {
-            var getKinksResult = await GetKinksByCategoryAsync(category, ct);
-            if (!getKinksResult.IsSuccess)
-            {
-                return Result<Kink>.FromError(getKinksResult);
-            }
-
-            var kinks = getKinksResult.Entity;
-
+            // First, look for something that's already registered, but doesn't have a preference
             var kinkWithoutPreference = await QueryDatabaseAsync
             (
                 q => q
@@ -455,6 +448,14 @@ namespace DIGOS.Ambassador.Plugins.Kinks.Services
                     .OrderBy(k => k.Kink.FListID)
                     .LastOrDefaultAsync(ct)
             );
+
+            var getKinksResult = await GetKinksByCategoryAsync(category, ct);
+            if (!getKinksResult.IsSuccess)
+            {
+                return Result<Kink>.FromError(getKinksResult);
+            }
+
+            var kinks = getKinksResult.Entity;
 
             // The user doesn't have any set kinks in this category; grab the first one
             if (lastKink is null)
